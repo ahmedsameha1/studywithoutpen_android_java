@@ -55,4 +55,6 @@
     <string name="where_the_answer">Where is the answer?!</string>
     <string name="wrong_answers">Wrong Answers</string>
     <string name="delete_entry">This entry will be deleted?</string>
+    <string name="hour">Enter the number of hours</string>
+    <string name="day">Enter the number of days</string>
 </resources>

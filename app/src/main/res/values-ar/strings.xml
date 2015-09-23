@@ -55,4 +55,6 @@
     <string name="where_the_answer">أين الإجابة؟!</string>
     <string name="delete_entry">سوف يتم حذف هذا المُدخل؟</string>
     <string name="wrong_answers">الإجابات الخاطئة</string>
+    <string name="hour">أدخل عدد الساعات</string>
+    <string name="day">أدخل عدد الأيام</string>
 </resources>
