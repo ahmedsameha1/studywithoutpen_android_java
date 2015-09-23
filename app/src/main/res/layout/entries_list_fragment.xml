@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+        <EditText
+            android:id="@+id/search_for"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="3dp"
+            android:hint="@string/search_for"
+            android:imeOptions="flagNoExtractUi"/>
+
+        <ImageButton
+            android:id="@+id/clear_search"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="0"
+            android:layout_gravity="bottom"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_clear_black_24dp" />
+    </LinearLayout>
+
+
+
+        <ListView
+            android:id="@+id/field_entries_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="15dp"
+            android:cacheColorHint="#00000000"
+            android:choiceMode="singleChoice"
+            android:divider="#FF0000"
+            android:dividerHeight="1dp"
+            android:drawSelectorOnTop="false"
+            android:focusable="true"
+            android:listSelector="#00FF00"
+            android:orientation="vertical" />
+
+
+</LinearLayout>
