@@ -57,4 +57,5 @@
     <string name="delete_entry">This entry will be deleted?</string>
     <string name="hour">Enter the number of hours</string>
     <string name="day">Enter the number of days</string>
+    <string name="please_enter_at_least_one_value">Please enter at least one value</string>
 </resources>

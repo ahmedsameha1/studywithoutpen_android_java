@@ -2,6 +2,7 @@ package com.ahmedsameha1.studyvocabularyfive;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -12,11 +13,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.Date;
+
 /**
  * Created by ahmed on 9/23/2015.
  */
 public class StudyEntriesFromDialogFragment extends DialogFragment {
-
+    public static final int MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
+    public static final int MILLISECONDS_IN_HOUR = 60 * 60 * 1000;
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -37,12 +41,24 @@ public class StudyEntriesFromDialogFragment extends DialogFragment {
                     public void onClick(View view) {
                         EditText enterDay = (EditText) alertDialog.findViewById(R.id.enter_day);
                         EditText enterHour = (EditText) alertDialog.findViewById(R.id.enter_hour);
-                        if ( enterDay.length() > 0 && enterHour.length() > 0 ) {
-                            int day = Integer.parseInt(enterDay.getText().toString());
-                            int hour = Integer.parseInt(enterHour.getText().toString());
-                            if ( day <= 0 && hour <= 0)
+                        int day = 0;
+                        int hour = 0;
+                        if ( enterDay.getText().toString().length() > 0 || enterHour.getText().toString().length() > 0 ) {
+                            if ( enterDay.getText().toString().length() > 0) {
+                                day = Integer.parseInt(enterDay.getText().toString());
+                            }
+                            if ( enterHour.getText().toString().length() > 0) {
+                                hour = Integer.parseInt(enterHour.getText().toString());
+                            }
+                            long duration = ( day * MILLISECONDS_IN_DAY ) + ( hour * MILLISECONDS_IN_HOUR );
+                            Date now = new Date();
+                            long nowInMilliseconds = now.getTime();
+                            long limit = nowInMilliseconds - duration;
+                            Intent intent = new Intent(getActivity(),StudyEntriesFromActivity.class);
+                            intent.putExtra(StudyEntriesFromActivity.LIMIT,limit);
+                            startActivity(intent);
                         } else {
-                            Toast.makeText(getActivity(),)
+                            Toast.makeText(getActivity(),getString(R.string.please_enter_at_least_one_value),Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
