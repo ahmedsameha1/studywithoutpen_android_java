@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -18,7 +17,8 @@ import java.util.Date;
 /**
  * Created by ahmed on 9/23/2015.
  */
-public class StudyEntriesFromDialogFragment extends DialogFragment {
+public class StudyDuringDialogFragment extends DialogFragment {
+    public static final String SHOW_STUDY_DURING_DIALOG_FRAGMENT = "showStudyDuringDialogFragment";
     public static final int MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
     public static final int MILLISECONDS_IN_HOUR = 60 * 60 * 1000;
     @Override
@@ -26,7 +26,7 @@ public class StudyEntriesFromDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
-                builder.setView(inflater.inflate(R.layout.study_entries_from_dialog_fragment,null))
+                builder.setView(inflater.inflate(R.layout.study_during_dialog_fragment,null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -54,8 +54,9 @@ public class StudyEntriesFromDialogFragment extends DialogFragment {
                             Date now = new Date();
                             long nowInMilliseconds = now.getTime();
                             long limit = nowInMilliseconds - duration;
-                            Intent intent = new Intent(getActivity(),StudyEntriesFromActivity.class);
-                            intent.putExtra(StudyEntriesFromActivity.LIMIT,limit);
+                            Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
+                            intent.putExtra(StudyDuringActivity.CURRENT_FIELD,((FieldActivity) getActivity()).getCurrentField());
+                            intent.putExtra(StudyDuringActivity.LIMIT,limit);
                             startActivity(intent);
                         } else {
                             Toast.makeText(getActivity(),getString(R.string.please_enter_at_least_one_value),Toast.LENGTH_SHORT).show();

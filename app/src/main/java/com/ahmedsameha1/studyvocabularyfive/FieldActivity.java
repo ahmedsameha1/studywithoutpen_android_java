@@ -1,5 +1,6 @@
 package com.ahmedsameha1.studyvocabularyfive;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -180,6 +181,10 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                 } else {
                     Toast.makeText(this,getString(R.string.no_entries_in_field),Toast.LENGTH_SHORT).show();
                 }
+                return true;
+            case R.id.study_during:
+                StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                fragment2.show(getSupportFragmentManager(),fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

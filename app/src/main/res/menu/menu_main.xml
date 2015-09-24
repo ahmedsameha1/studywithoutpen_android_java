@@ -18,8 +18,9 @@
         android:title="@string/delete_field"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/study_entries_from"
-        android:title=""/>
+        android:id="@+id/study_during"
+        android:title="@string/study_during"
+        app:showAsAction="ifRoom"/>
 <!--    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
