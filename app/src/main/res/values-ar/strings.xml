@@ -57,5 +57,5 @@
     <string name="wrong_answers">الإجابات الخاطئة</string>
     <string name="hour">أدخل عدد الساعات</string>
     <string name="day">أدخل عدد الأيام</string>
-    <string name="please_enter_at_least_one_value">لطفا، أدخل على الأقل قيمة واحدة</string>
+    <string name="please_enter_at_least_one_value">لطفا، أدخل على الأقل قيمة لليوم أول للساعة</string>
 </resources>

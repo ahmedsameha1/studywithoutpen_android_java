@@ -17,6 +17,9 @@
         android:icon="@drawable/ic_delete_white_24dp"
         android:title="@string/delete_field"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/study_entries_from"
+        android:title=""/>
 <!--    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
