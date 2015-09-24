@@ -53,10 +53,10 @@ public class StudyDuringDialogFragment extends DialogFragment {
                             long duration = ( day * MILLISECONDS_IN_DAY ) + ( hour * MILLISECONDS_IN_HOUR );
                             Date now = new Date();
                             long nowInMilliseconds = now.getTime();
-                            long limit = nowInMilliseconds - duration;
+                            long startingTime = nowInMilliseconds - duration;
                             Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
                             intent.putExtra(StudyDuringActivity.CURRENT_FIELD,((FieldActivity) getActivity()).getCurrentField());
-                            intent.putExtra(StudyDuringActivity.LIMIT,limit);
+                            intent.putExtra(StudyDuringActivity.STARTING_TIME,startingTime);
                             startActivity(intent);
                         } else {
                             Toast.makeText(getActivity(),getString(R.string.please_enter_at_least_one_value),Toast.LENGTH_SHORT).show();
