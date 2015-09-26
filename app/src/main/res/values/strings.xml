@@ -60,4 +60,5 @@
     <string name="please_enter_at_least_one_value">Please enter at least one value for day or hour</string>
     <string name="enter_study_duration">Enter study duration</string>
     <string name="study_during">Study During</string>
+    <string name="check">Check</string>
 </resources>

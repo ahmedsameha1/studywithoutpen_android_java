@@ -1,7 +1,6 @@
 package com.ahmedsameha1.studyvocabularyfive;
 
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -57,7 +56,6 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     private Button start, next;
     private ImageView imageResult;
     private ImageButton nextHint;
-    private DatabaseHelper databaseHelper;
 //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
@@ -72,7 +70,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
             retainedFragment = new RetainedFragment();
             getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
         }
-        listForTest = retainedFragment.getListForTest();
+        listForTest = retainedFragment.getListForTest_StudyActivity();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         currentField = getIntent().getStringExtra(CURRENT_FIELD);
         enterPercent = (EditText) findViewById(R.id.enter_percent);
@@ -210,7 +208,6 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onResume() {
         super.onResume();
-        databaseHelper = new DatabaseHelper(this);
 //        sqLiteDatabase = databaseHelper.getWritableDatabase();
         databaseOperations = new DatabaseOperations(getContentResolver());
 //        fieldEntriesCursor = databaseOperations.getFieldEntries(currentField);
@@ -286,27 +283,18 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         }
         return result;
     }
-    @Override
-    public void onPause() {
-        super.onPause();
-//        databaseHelper.close();
-    }
 
     @Override
     protected void onStop() {
         super.onStop();
-        fieldEntriesCursor.close();
-        retainedFragment.setListForTest(listForTest);
+        retainedFragment.setListForTest_StudyActivity(listForTest);
 //        sqLiteDatabase.close();
-        databaseHelper.close();
     }
 
     @Override
     public void onDestroy() {
-        fieldEntriesCursor.close();
-        retainedFragment.setListForTest(listForTest);
+        retainedFragment.setListForTest_StudyActivity(listForTest);
 //        sqLiteDatabase.close();
-        databaseHelper.close();
         super.onDestroy();
     }
     @Override

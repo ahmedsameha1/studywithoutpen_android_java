@@ -60,4 +60,5 @@
     <string name="please_enter_at_least_one_value">لطفا، أدخل على الأقل قيمة لليوم أول للساعة</string>
     <string name="enter_study_duration"> أدخل الفترة التي تريد استذكارها</string>
     <string name="study_during">استذكر فترة</string>
+    <string name="check">تَحَقق</string>
 </resources>
