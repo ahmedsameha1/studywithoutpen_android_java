@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by ahmed_000 on 9/23/2015.
@@ -28,7 +29,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     private String currentField;
     private long startingTime;
     private Cursor cursor;
-    private ArrayList<String> questions, answers;
+    private ArrayList<String> questions = new ArrayList<String>(), answers = new ArrayList<String>();
     private ArrayList<Integer> repeatedEntries = new ArrayList<Integer>();
 
 
@@ -86,11 +87,11 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             retainedFragment = new RetainedFragment();
             getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
         }
-        listForTest = retainedFragment.getListForTest_StudyDuringActivity();
+        /*listForTest = retainedFragment.getListForTest_StudyDuringActivity();
         if ( listForTest == null ) {
             listForTest = prepareListForStudyFirstTime();
-        }
-        questionsNumber = listForTest.length;
+        }*/
+//        questionsNumber = listForTest.length;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         enterAnswer = (EditText) findViewById(R.id.enter_answer);
@@ -114,22 +115,22 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 } else {
                     i
                 }*/
-                if ( enterAnswer.getText().toString().length() > 0 ) {
+                if (enterAnswer.getText().toString().length() > 0) {
                     result = checkAnAnswer();
-                    if ( triesCounter < permitedTriesNumber && !result) {
+                    if (triesCounter < permitedTriesNumber && !result) {
                         showQuestion.setText(listForTest[currentQuestionCounter][0]);
                         showTries.setText(Integer.toString(triesCounter + 1));
-                    }
-                    else {
+                    } else {
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                         currentQuestionCounter++;
-                        if ( currentQuestionCounter >= questionsNumber) {
+                        if (currentQuestionCounter >= questionsNumber) {
                             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
                             questionsNumber = 0;
                             hintIfMoreThanOneAnswer.setText("");
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                            if ( repeatedEntries.size() > 0 ) {
+                            if (repeatedEntries.size() > 0) {
                                 listForTest = prepareListForStudySecondAndMore(repeatedEntries);
+                                questionsNumber = listForTest.length;
                             } else {
                                 finish();
                             }
@@ -146,7 +147,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
                             showTries.setText(Integer.toString(triesCounter + 1));
-                            ifMoreThanOnce(listForTest [currentQuestionCounter][0],listForTest [currentQuestionCounter][1]);
+                            ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                             hintIfMoreThanOneAnswer.setText("");
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
@@ -154,21 +155,24 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                         }
                     }
                 } else {
-                    Toast.makeText(StudyDuringActivity.this,R.string.where_the_answer,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(StudyDuringActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT).show();
                 }
             }
         });
         nextHint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( hints != null ) {
+                if (hints != null) {
                     hintIfMoreThanOneAnswer.setText(hints.get(hintCounter++));
-                    hintCounter = hintCounter > (hints.size() - 1)  ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
                 }
             }
         });
-        showQuestion.setText(listForTest [currentQuestionCounter][0]);
+       /* showQuestion.setText(listForTest [currentQuestionCounter][0]);
         ifMoreThanOnce(listForTest [currentQuestionCounter][0],listForTest [currentQuestionCounter][1]);
+   */
+        databaseOperations = new DatabaseOperations(getContentResolver());
+        getSupportLoaderManager().initLoader(0,null,this);
     }
     private String [][] prepareListForStudyFirstTime() {
         for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
@@ -184,6 +188,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             listForTest [i][0] = questions.get(i);
             listForTest [i][0] = answers.get(i);
         }
+        shuffleArray(listForTest);
         return listForTest;
     }
     private String [][] prepareListForStudySecondAndMore( ArrayList<Integer> indices ) {
@@ -192,6 +197,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             temp [i][0] = listForTest [indices.get(i)][0];
             temp [i][1] = listForTest [indices.get(i)][1];
         }
+        shuffleArray(temp);
         return temp;
     }
     private void ifMoreThanOnce( String currentQuestion, String currentAnswer) {
@@ -234,6 +240,21 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         }
         return result;
     }
+    private void shuffleArray( String [][] array )
+    {
+        Random rnd = new Random();
+        for (int i = array.length - 1; i > 0; i--)
+        {
+            int index = rnd.nextInt(i + 1);
+            // Simple swap
+            String question = array[index][0];
+            String answer = array [index][1];
+            array[index][0] = array[i][0];
+            array[index][1] = array[i][1];
+            array[i][0] = question;
+            array[i][1] = answer;
+        }
+    }
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
@@ -248,6 +269,18 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         this.cursor = cursor;
+        listForTest = retainedFragment.getListForTest_StudyDuringActivity();
+        if ( listForTest == null ) {
+            listForTest = prepareListForStudyFirstTime();
+        }
+        questionsNumber = listForTest.length;
+        if ( questionsNumber > 0 ) {
+            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+            ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+        } else {
+            Toast.makeText(this,getString(R.string.no_entries_in_this_time_range),Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
     @Override

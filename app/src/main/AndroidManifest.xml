@@ -23,6 +23,7 @@
         <activity android:name="com.ahmedsameha1.studyvocabularyfive.TestActivity" android:label="@string/app_name"/>
         <activity android:name="com.ahmedsameha1.studyvocabularyfive.EntriesListActivity" android:label="@string/app_name"/>
         <activity android:name="com.ahmedsameha1.studyvocabularyfive.WrongAnswersActivity" android:label="@string/app_name"/>
+        <activity android:name="com.ahmedsameha1.studyvocabularyfive.StudyDuringActivity" android:label="@string/app_name"/>
         <provider android:name=".DataProvider"
             android:authorities="com.ahmedsameha1.studyvocabularyfive.contentprovider" />
     </application>

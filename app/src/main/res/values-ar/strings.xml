@@ -61,4 +61,5 @@
     <string name="enter_study_duration"> أدخل الفترة التي تريد استذكارها</string>
     <string name="study_during">استذكر فترة</string>
     <string name="check">تَحَقق</string>
+    <string name="no_entries_in_this_time_range">لا توجد مُدخلات خلال هذا المدى الزمني!</string>
 </resources>
