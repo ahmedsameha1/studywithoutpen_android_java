@@ -400,15 +400,15 @@ public class DatabaseOperations {
                         Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? " +  " AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                 new String[] {question,answer,fieldName});
         deleteQuestionAfterCount(0,question);
-        deleteAnswerAfterCount(0,answer);
+        deleteAnswerAfterCount(0, answer);
     }
 
     public void deleteOnlyFieldEntry(String fieldName, String question, String answer) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
         contentResolver.delete(uri,
-                Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? " +  " AND " +
-                        Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? " +  " AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                new String[] {question,answer,fieldName});
+                Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? " + " AND " +
+                        Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? " + " AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[]{question, answer, fieldName});
 
     }
     public void deleteThisFieldQuestion(String fieldName, String question) {
@@ -461,7 +461,18 @@ public class DatabaseOperations {
                 Contract.Linker.COLUMN_NAME_QUESTION_LINK + " LIKE ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? "
                         + " OR " +
                         Contract.Linker.COLUMN_NAME_ANSWER_LINK + " LIKE ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                new String[] {searchString + "%",fieldName,searchString + "%",fieldName},
+                new String[] {"%" + searchString + "%",fieldName,"%" + searchString + "%",fieldName},
+                null);
+    }
+    public Cursor searchExactlyFor( String fieldName, String searchString ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        return contentResolver.query(uri,
+                new String[]{ "rowid _id" , Contract.Linker.COLUMN_NAME_QUESTION_LINK,
+                        Contract.Linker.COLUMN_NAME_ANSWER_LINK},
+                Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? "
+                        + " OR " +
+                        Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[] {searchString, fieldName, searchString, fieldName},
                 null);
     }
 }

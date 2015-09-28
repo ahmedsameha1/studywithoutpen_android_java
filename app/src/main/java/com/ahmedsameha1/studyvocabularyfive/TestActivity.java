@@ -248,7 +248,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         if ( searchForCursor != null ) {
             searchForCursor.close();
         }
-        searchForCursor = databaseOperations.searchFor(currentField, listForTest[currentQuestionCounter][0]);
+        searchForCursor = databaseOperations.searchExactlyFor(currentField, listForTest[currentQuestionCounter][0]);
         if ( searchForCursor.getCount() > 1 ) {
             hints = new ArrayList<String>(3);
             hints.add( getString(R.string.first_character) + listForTest[currentQuestionCounter][1].charAt(0));

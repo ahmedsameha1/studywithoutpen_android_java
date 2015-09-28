@@ -204,7 +204,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         if ( searchForCursor != null ) {
             searchForCursor.close();
         }
-        searchForCursor = databaseOperations.searchFor(currentField, currentQuestion);
+        searchForCursor = databaseOperations.searchExactlyFor(currentField, currentQuestion);
         if ( searchForCursor.getCount() > 1 ) {
             hints = new ArrayList<String>(3);
             hints.add(getString(R.string.first_character) + currentAnswer.charAt(0));
