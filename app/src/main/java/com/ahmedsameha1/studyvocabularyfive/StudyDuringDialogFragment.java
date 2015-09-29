@@ -50,7 +50,7 @@ public class StudyDuringDialogFragment extends DialogFragment {
                             if ( enterHour.getText().toString().length() > 0) {
                                 hour = Integer.parseInt(enterHour.getText().toString());
                             }
-                            long duration = ( day * MILLISECONDS_IN_DAY ) + ( hour * MILLISECONDS_IN_HOUR );
+                            long duration = ( day * ( (long) MILLISECONDS_IN_DAY) ) + ( hour * ( (long) MILLISECONDS_IN_HOUR) );
                             Date now = new Date();
                             long nowInMilliseconds = now.getTime();
                             long startingTime = nowInMilliseconds - duration;

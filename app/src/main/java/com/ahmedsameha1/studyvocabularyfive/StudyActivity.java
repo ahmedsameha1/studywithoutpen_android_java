@@ -451,7 +451,7 @@ public class StudyActivity extends AppCompatActivity {
                                     Contract.Linker.COLUMN_NAME_ANSWER_LINK
                                     + " LIKE ? AND "
                                     + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[] {searchString + "%",currentField,searchString + "%",currentField},
+                            new String[] {"%" + searchString + "%",currentField,"%" + searchString + "%",currentField},
                             null);
             }
             @Override

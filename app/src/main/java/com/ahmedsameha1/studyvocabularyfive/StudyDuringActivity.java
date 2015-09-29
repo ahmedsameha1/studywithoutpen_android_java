@@ -116,6 +116,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                     i
                 }*/
                 if (enterAnswer.getText().toString().length() > 0) {
+                    numberOfTries.setEnabled(false);
                     result = checkAnAnswer();
                     if (triesCounter < permitedTriesNumber && !result) {
                         showQuestion.setText(listForTest[currentQuestionCounter][0]);

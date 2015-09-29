@@ -69,7 +69,7 @@ public class EntriesListFragment extends Fragment {
                                     Contract.Linker.COLUMN_NAME_ANSWER_LINK
                                     + " LIKE ? AND "
                                     + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[] {searchString + "%",currentField,searchString + "%",currentField},
+                            new String[] {"%" + searchString + "%",currentField,"%" + searchString + "%",currentField},
                             null);
                 } else {
                     String currentField = null;
@@ -305,7 +305,7 @@ public class EntriesListFragment extends Fragment {
                     }
                     /*fieldEntriesCursor = databaseOperations.getFieldEntries(getCurrentField());
                     CustomCursorAdapter.this.changeCursor(fieldEntriesCursor);*/
-                    searchFor.setText("");
+//                    searchFor.setText("");
                 }
             });
           /*  editQuestion.setOnFocusChangeListener(new View.OnFocusChangeListener() {
