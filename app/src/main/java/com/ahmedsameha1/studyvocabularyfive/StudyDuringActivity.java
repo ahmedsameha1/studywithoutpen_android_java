@@ -8,6 +8,8 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -172,6 +174,25 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
        /* showQuestion.setText(listForTest [currentQuestionCounter][0]);
         ifMoreThanOnce(listForTest [currentQuestionCounter][0],listForTest [currentQuestionCounter][1]);
    */
+        numberOfTries.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if ( numberOfTries.getText().toString().length() > 0 ) {
+                    permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
+                }
+            }
+        });
+        permitedTriesNumber = 3;
         databaseOperations = new DatabaseOperations(getContentResolver());
         getSupportLoaderManager().initLoader(0,null,this);
     }
@@ -187,7 +208,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         String [][] listForTest = new String [questions.size()][2];
         for ( int i = 0; i < questions.size(); i++ ) {
             listForTest [i][0] = questions.get(i);
-            listForTest [i][0] = answers.get(i);
+            listForTest [i][1] = answers.get(i);
         }
         shuffleArray(listForTest);
         return listForTest;
