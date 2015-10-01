@@ -134,6 +134,8 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                             if (repeatedEntries.size() > 0) {
                                 listForTest = prepareListForStudySecondAndMore(repeatedEntries);
                                 questionsNumber = listForTest.length;
+                                repeatedEntries.clear();
+                                showQuestion.setText(listForTest[currentQuestionCounter][0]);
                             } else {
                                 finish();
                             }
