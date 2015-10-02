@@ -212,6 +212,12 @@
             android:layout_marginRight="10dp"
             android:enabled="true"
             android:text="@string/check" />
+        <Button
+            android:id="@+id/_continue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_continue"
+            android:enabled="false"/>
 <!--        <ImageView
             android:id="@+id/image_result"
             android:layout_width="45dp"

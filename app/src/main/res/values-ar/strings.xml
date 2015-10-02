@@ -62,4 +62,5 @@
     <string name="study_during">استذكر فترة</string>
     <string name="check">تَحَقق</string>
     <string name="no_entries_in_this_time_range">لا توجد مُدخلات خلال هذا المدى الزمني!</string>
+    <string name="_continue">استمر</string>
 </resources>

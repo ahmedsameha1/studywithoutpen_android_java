@@ -61,6 +61,7 @@ public class StudyDuringDialogFragment extends DialogFragment {
                         } else {
                             Toast.makeText(getActivity(),getString(R.string.please_enter_at_least_one_value),Toast.LENGTH_SHORT).show();
                         }
+                        dismiss();
                     }
                 });
             }

@@ -62,4 +62,5 @@
     <string name="study_during">Study During</string>
     <string name="check">Check</string>
     <string name="no_entries_in_this_time_range">There is no entries in this time range!</string>
+    <string name="_continue">Continue</string>
 </resources>

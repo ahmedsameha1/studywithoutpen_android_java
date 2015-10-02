@@ -65,7 +65,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     private Toolbar toolbar;
     private EditText enterPercent, enterAnswer, numberOfTries;
     private TextView showQuestion, remainingQuestionCounter, hintIfMoreThanOneAnswer,showTries, showNumberOfQuetions;
-    private Button start, check;
+    private Button start, check, _continue;
     private ImageView imageResult;
     private ImageButton nextHint;
     //    private SQLiteDatabase sqLiteDatabase;
@@ -100,7 +100,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         showQuestion = (TextView) findViewById(R.id.display_question);
         check = (Button) findViewById(R.id.check);
         remainingQuestionCounter = (TextView) findViewById(R.id.remaining_question_counter);
-
+        _continue = (Button) findViewById(R.id._continue);
         hintIfMoreThanOneAnswer = (TextView) findViewById(R.id.hint_if_there_is_more_than_one_answer);
         nextHint = (ImageButton) findViewById(R.id.next_hint);
         showTries = (TextView) findViewById(R.id.trys);
@@ -123,6 +123,11 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                     if (triesCounter < permitedTriesNumber && !result) {
                         showQuestion.setText(listForTest[currentQuestionCounter][0]);
                         showTries.setText(Integer.toString(triesCounter + 1));
+                    } else if (!result) {
+                        enterAnswer.setText(listForTest[currentQuestionCounter][1]);
+                        triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                        check.setEnabled(false);
+                        _continue.setEnabled(true);
                     } else {
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                         currentQuestionCounter++;
@@ -189,9 +194,17 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 
             @Override
             public void afterTextChanged(Editable s) {
-                if ( numberOfTries.getText().toString().length() > 0 ) {
+                if (numberOfTries.getText().toString().length() > 0) {
                     permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
                 }
+            }
+        });
+        _continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                check.setEnabled(true);
+                enterAnswer.setText("");
+                _continue.setEnabled(false);
             }
         });
         permitedTriesNumber = 3;
@@ -260,7 +273,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 //            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
 //            wrongItems.add(wrongItem);
 //            wrongAnswers = null;
-           repeatedEntries.add(currentQuestionCounter);
+           if ( ! repeatedEntries.contains(Integer.valueOf(currentQuestionCounter)) ) {
+               repeatedEntries.add(currentQuestionCounter);
+           }
         }
         return result;
     }
