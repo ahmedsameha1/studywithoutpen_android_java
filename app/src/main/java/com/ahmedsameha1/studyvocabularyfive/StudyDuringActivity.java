@@ -126,10 +126,12 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                     } else if (!result) {
                         enterAnswer.setText(listForTest[currentQuestionCounter][1]);
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                        showTries.setText(Integer.toString(triesCounter + 1));
                         check.setEnabled(false);
                         _continue.setEnabled(true);
                     } else {
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                        showTries.setText(Integer.toString(triesCounter + 1));
                         currentQuestionCounter++;
                         if (currentQuestionCounter >= questionsNumber) {
                             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
@@ -208,6 +210,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             }
         });
         permitedTriesNumber = 3;
+        showTries.setText(Integer.toString(triesCounter + 1));
         databaseOperations = new DatabaseOperations(getContentResolver());
         getSupportLoaderManager().initLoader(0,null,this);
     }
@@ -247,9 +250,11 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             hints.add(getString(R.string.first_character) + currentAnswer.charAt(0));
             hints.add( getString(R.string.number_of_characters) + Integer.toString(currentAnswer.length()));
             hints.add(getString(R.string.last_character) + currentAnswer.charAt(currentAnswer.length() - 1));
+            nextHint.setEnabled(true);
         }
         else {
             hints = null;
+            nextHint.setEnabled(false);
         }
         searchForCursor.close();
     }
@@ -294,6 +299,49 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             array[i][1] = answer;
         }
     }
+    public void onSaveInstanceState ( Bundle savedInsatanceState ) {
+        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
+        savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
+        savedInsatanceState.putBoolean(RESULT, result);
+        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
+        savedInsatanceState.putBoolean(NEXT_BUTTON_STATE, next.isEnabled());
+        savedInsatanceState.putBoolean(TESTING_NOW, testingNow);
+        savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
+        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
+        savedInsatanceState.putInt(HINT_COUNTER,hintCounter);
+        savedInsatanceState.putStringArrayList(HINTS, hints);
+        savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
+        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
+        super.onSaveInstanceState(savedInsatanceState);
+    }
+    public void onRestoreInstanceState( Bundle savedInstanceState ) {
+        super.onRestoreInstanceState(savedInstanceState);
+        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
+        triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
+        result = savedInstanceState.getBoolean(RESULT);
+        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
+        testingNow = savedInstanceState.getBoolean(TESTING_NOW);
+        boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
+        questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
+        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
+        hints = savedInstanceState.getStringArrayList(HINTS);
+        hintCounter = savedInstanceState.getInt(HINT_COUNTER);
+        wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
+        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
+        if ( testingNow ) {
+            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+            showTries.setText(Integer.toString(triesCounter + 1));
+            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+            showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+            next.setEnabled(nextState);
+            enterPercent.setEnabled(false);
+            numberOfTries.setEnabled(false);
+            enterAnswer.setEnabled(true);
+        }
+        if ( hintCounter > 0 ) {
+            hintIfMoreThanOneAnswer.setText(hints.get(hintCounter - 1));
+        }
+    }
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
@@ -316,6 +364,8 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         if ( questionsNumber > 0 ) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+            showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
         } else {
             Toast.makeText(this,getString(R.string.no_entries_in_this_time_range),Toast.LENGTH_LONG).show();
             finish();

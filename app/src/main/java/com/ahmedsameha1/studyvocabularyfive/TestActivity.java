@@ -70,7 +70,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
             retainedFragment = new RetainedFragment();
             getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
         }
-        listForTest = retainedFragment.getListForTest_StudyActivity();
+        listForTest = retainedFragment.getListForTest_TestActivity();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         currentField = getIntent().getStringExtra(CURRENT_FIELD);
         enterPercent = (EditText) findViewById(R.id.enter_percent);
@@ -253,10 +253,13 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
             hints = new ArrayList<String>(3);
             hints.add( getString(R.string.first_character) + listForTest[currentQuestionCounter][1].charAt(0));
             hints.add( getString(R.string.number_of_characters) + Integer.toString(listForTest[currentQuestionCounter][1].length()));
-            hints.add(getString(R.string.last_character) + listForTest[currentQuestionCounter][1].charAt(listForTest[currentQuestionCounter][1].length() - 1));
+            hints.add(getString(R.string.last_character) + listForTest[currentQuestionCounter][1]
+                    .charAt(listForTest[currentQuestionCounter][1].length() - 1));
+            nextHint.setEnabled(true);
         }
         else {
             hints = null;
+            nextHint.setEnabled(false);
         }
         searchForCursor.close();
     }
@@ -287,13 +290,13 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onStop() {
         super.onStop();
-        retainedFragment.setListForTest_StudyActivity(listForTest);
+        retainedFragment.setListForTest_TestActivity(listForTest);
 //        sqLiteDatabase.close();
     }
 
     @Override
     public void onDestroy() {
-        retainedFragment.setListForTest_StudyActivity(listForTest);
+        retainedFragment.setListForTest_TestActivity(listForTest);
 //        sqLiteDatabase.close();
         super.onDestroy();
     }
