@@ -339,6 +339,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
             enterPercent.setEnabled(false);
             numberOfTries.setEnabled(false);
             enterAnswer.setEnabled(true);
+            ifMoreThanOnce();
         }
         if ( hintCounter > 0 ) {
             hintIfMoreThanOneAnswer.setText(hints.get(hintCounter - 1));

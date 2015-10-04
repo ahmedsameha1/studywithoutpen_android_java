@@ -45,7 +45,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public static final String LIST_FOR_TEST = "listForTest";
     public static final String CURRENT_QUESTION_COUNTER = "currentQuestionCounter";
     public static final String TRIES_COUNTER = "triesCounter";
-    public static final String NEXT_BUTTON_STATE = "newtButtonState";
+    public static final String CHECK_BUTTON_STATE = "checkButtonState";
     public static final String RESULT = "result";
     public static final String PERMITED_TRIES_NUMBER = "permitedTriesNumber";
     public static final String TESTING_NOW = "testingNow";
@@ -55,6 +55,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public static final String HINTS = "hints";
     public static final String WRONG_ANSWERS = "wrongAnswers";
     public static final String WRONG_ITEMS = "wrongItems";
+    public static final String _CONTINUE_BUTTON_STATE = "_continueButtonState";
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
     private ArrayList<WrongItem> wrongItems;
@@ -75,6 +76,8 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 
     @Override
@@ -106,6 +109,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         showTries = (TextView) findViewById(R.id.trys);
         numberOfTries = (EditText) findViewById(R.id.enter_tries);
         showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
+        imageResult = (ImageView) findViewById(R.id.image_result);
         setSupportActionBar(toolbar);
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         check.setOnClickListener(new View.OnClickListener() {
@@ -117,6 +121,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 } else {
                     i
                 }*/
+                testingNow = true;
                 if (enterAnswer.getText().toString().length() > 0) {
                     numberOfTries.setEnabled(false);
                     result = checkAnAnswer();
@@ -143,6 +148,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                                 questionsNumber = listForTest.length;
                                 repeatedEntries.clear();
                                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                                showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+                                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+
                             } else {
                                 finish();
                             }
@@ -201,6 +209,24 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 }
             }
         });
+        enterAnswer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().length() > 0) {
+                    imageResult.setImageResource(R.drawable.ic_question_marks);
+                }
+            }
+        });
         _continue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -213,6 +239,11 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         showTries.setText(Integer.toString(triesCounter + 1));
         databaseOperations = new DatabaseOperations(getContentResolver());
         getSupportLoaderManager().initLoader(0,null,this);
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        retainedFragment.setListForTest_StudyDuringActivity(listForTest);
     }
     private String [][] prepareListForStudyFirstTime() {
         for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
@@ -261,12 +292,12 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     private boolean checkAnAnswer() {
         boolean result = false;
         if ( enterAnswer.getText().toString().equals(listForTest [currentQuestionCounter][1]) ){
-//            imageResult.setImageResource(R.drawable.ic_correct_sign);
+            imageResult.setImageResource(R.drawable.ic_correct_sign);
             Toast.makeText(StudyDuringActivity.this,"Correct",Toast.LENGTH_SHORT).show();
             result = true;
         }
         else {
-//            imageResult.setImageResource(R.drawable.ic_wrong_sign);
+            imageResult.setImageResource(R.drawable.ic_wrong_sign);
             Toast.makeText(StudyDuringActivity.this,"Wrong",Toast.LENGTH_SHORT).show();
             result = false;
 //            wrongAnswers.add(enterAnswer.getText().toString());
@@ -303,15 +334,16 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInsatanceState.putBoolean(RESULT, result);
-        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
-        savedInsatanceState.putBoolean(NEXT_BUTTON_STATE, next.isEnabled());
+//        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
+        savedInsatanceState.putBoolean(CHECK_BUTTON_STATE, check.isEnabled());
+        savedInsatanceState.putBoolean(_CONTINUE_BUTTON_STATE, _continue.isEnabled());
         savedInsatanceState.putBoolean(TESTING_NOW, testingNow);
         savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
-        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
-        savedInsatanceState.putInt(HINT_COUNTER,hintCounter);
+//        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
+        savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
-        savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
-        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
+//        savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
+//        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         super.onSaveInstanceState(savedInsatanceState);
     }
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
@@ -319,24 +351,27 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);
-        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
+//        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
         testingNow = savedInstanceState.getBoolean(TESTING_NOW);
-        boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
+        boolean checkState = savedInstanceState.getBoolean(CHECK_BUTTON_STATE);
+        boolean _continueState = savedInstanceState.getBoolean(_CONTINUE_BUTTON_STATE);
         questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
-        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
+//        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
-        wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
-        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
+//        wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
+//        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
         if ( testingNow ) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             showTries.setText(Integer.toString(triesCounter + 1));
             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
             showNumberOfQuetions.setText(Integer.toString(questionsNumber));
-            next.setEnabled(nextState);
-            enterPercent.setEnabled(false);
+            check.setEnabled(checkState);
+            _continue.setEnabled(_continueState);
+//            enterPercent.setEnabled(false);
             numberOfTries.setEnabled(false);
             enterAnswer.setEnabled(true);
+            ifMoreThanOnce(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
         }
         if ( hintCounter > 0 ) {
             hintIfMoreThanOneAnswer.setText(hints.get(hintCounter - 1));

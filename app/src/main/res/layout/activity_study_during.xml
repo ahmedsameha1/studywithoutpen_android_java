@@ -10,6 +10,13 @@
         android:minHeight="?attr/actionBarSize">
 
     </android.support.v7.widget.Toolbar>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -212,18 +219,20 @@
             android:layout_marginRight="10dp"
             android:enabled="true"
             android:text="@string/check" />
+        <ImageView
+            android:id="@+id/image_result"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_question_marks" />
         <Button
             android:id="@+id/_continue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/_continue"
             android:enabled="false"/>
-<!--        <ImageView
-            android:id="@+id/image_result"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_question_marks" />-->
+<!--        -->
     </LinearLayout>
-
+    </LinearLayout>
+    </ScrollView>
 </LinearLayout>
