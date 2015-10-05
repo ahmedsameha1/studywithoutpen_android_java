@@ -28,7 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Field.TABLE_NAME
             + " ( "
             + Contract.Field.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY, "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP );";
+            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
     
     public static final String CREATE_QUESTION_TABLE = "CREATE TABLE " + Question.TABLE_NAME
             + " ( " + Question.COLUMN_NAME_QUESTION_ENTRY
@@ -524,6 +524,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String dropQuestion = "DROP TABLE IF EXISTS " + fieldName + OldField.TABLE_NAME_QUESTION_SUFFIX + ";";
             sqLiteDatabase.execSQL(dropQuestion);
         }
-        Log.d("from peninbin","tables deleted");
+        Log.d("from peninbin", "tables deleted");
     }
+    private void onUpgradeForFieldTableV3(SQLiteDatabase sqLiteDatabase) {
+        String tempTable = "CREATE TABLE " + "tempTable"
+                + " ( "
+                + Contract.Field.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY, "
+                + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP );";
+        sqLiteDatabase.execSQL(tempTable);
+        String copy =  "INSERT INTO " + "tempTable" + " ( " + Contract.Field.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                + "SELECT " + Contract.Field.COLUMN_NAME_FIELD_NAME + ","
+                + Contract.COLUMN_NAME_CREATED_AT
+                + " FROM " + Contract.Field.TABLE_NAME
+                +  ";";
+        sqLiteDatabase.execSQL(copy);
+        String drop = "DROP TABLE IF EXISTS " + Contract.Field.TABLE_NAME + ";";
+        sqLiteDatabase.execSQL(drop);
+        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
+        copy =  "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.Field.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                + "SELECT " + Contract.Field.COLUMN_NAME_FIELD_NAME + ","
+                + Contract.COLUMN_NAME_CREATED_AT
+                + " FROM " + "tempTable"
+                +  ";";
+        sqLiteDatabase.execSQL(copy);
+        drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+        sqLiteDatabase.execSQL(drop);
+    }
+    private void onUpgradeForQuestionTableV3(SQLiteDatabase sqLiteDatabase) {
+
+    }
+    private void onUpgradeForAnswerTableV3(SQLiteDatabase sqLiteDatabase) {
+
+    }
+    private void onUpgradeForLinkerTableV3(SQLiteDatabase sqLiteDatabase) {
+
+    }
+
 }

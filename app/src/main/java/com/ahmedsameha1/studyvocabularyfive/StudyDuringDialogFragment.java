@@ -52,7 +52,8 @@ public class StudyDuringDialogFragment extends DialogFragment {
                             }
                             long duration = ( day * ( (long) MILLISECONDS_IN_DAY) ) + ( hour * ( (long) MILLISECONDS_IN_HOUR) );
                             Date now = new Date();
-                            long nowInMilliseconds = now.getTime();
+//                            long nowInMilliseconds = now.getTime();
+                            long nowInMilliseconds = System.currentTimeMillis();
                             long startingTime = nowInMilliseconds - duration;
                             Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
                             intent.putExtra(StudyDuringActivity.CURRENT_FIELD,((FieldActivity) getActivity()).getCurrentField());
