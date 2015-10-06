@@ -72,10 +72,12 @@ public class WrongAnswersActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     String question = ((WrongItem) getItem(position)).getQuestion();
                     String answer = ( (WrongItem) getItem(position)).getAnswer();
-                    Intent intent = new Intent(WrongAnswersActivity.this, StudyActivity.class);
-                    intent.putExtra(StudyActivity.CURRENT_FIELD, currentField);
-                    intent.putExtra(StudyActivity.CURRENT_QUESTION, question);
-                    intent.putExtra(StudyActivity.CURRENT_ANSWER, answer);
+                    Intent intent = new Intent(WrongAnswersActivity.this, StudyWrongAnswersActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(StudyWrongAnswersActivity.CURRENT_QUESTION,question);
+                    bundle.putString(StudyWrongAnswersActivity.CURRENT_ANSWER, answer);
+                    bundle.putSerializable(StudyWrongAnswersActivity.WRONG_ITEM_LIST, ((ArrayList<WrongItem>) wrongItemList));
+                    intent.putExtra(StudyWrongAnswersActivity.WRONG_ITEM_LIST,bundle);
                     startActivity(intent);
                 }
             });

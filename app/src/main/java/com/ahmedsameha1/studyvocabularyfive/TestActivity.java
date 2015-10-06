@@ -93,7 +93,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                         || Double.parseDouble(enterPercent.getText().toString()) <= 0 ||
                         Double.parseDouble(enterPercent.getText().toString()) > 100) {
                     Toast.makeText(TestActivity.this, getString(R.string.percentage_between), Toast.LENGTH_LONG).show();
-                } else if ( Integer.parseInt(numberOfTries.getText().toString()) <= 0 ){
+                } else if (Integer.parseInt(numberOfTries.getText().toString()) <= 0) {
                     numberOfTries.setText(Integer.toString(1));
                     Toast.makeText(TestActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
 
@@ -197,20 +197,14 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         nextHint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( hints != null ) {
+                if (hints != null) {
                     hintIfMoreThanOneAnswer.setText(hints.get(hintCounter++));
-                    hintCounter = hintCounter > (hints.size() - 1)  ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
                 }
             }
         });
-        getSupportLoaderManager().initLoader(0,null,this);
-    }
-    @Override
-    public void onResume() {
-        super.onResume();
-//        sqLiteDatabase = databaseHelper.getWritableDatabase();
+        getSupportLoaderManager().initLoader(0, null, this);
         databaseOperations = new DatabaseOperations(getContentResolver());
-//        fieldEntriesCursor = databaseOperations.getFieldEntries(currentField);
     }
 
     private String [][] getListForTest ( double percent ) {

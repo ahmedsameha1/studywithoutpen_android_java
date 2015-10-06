@@ -19,7 +19,7 @@ import java.util.ArrayList;
  * Created by ahmed on 7/4/2015.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "data";
     /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + OldField.TABLE_NAME +
             " ( " + OldField._ID + " INTEGER PRIMARY KEY , "
@@ -33,18 +33,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String CREATE_QUESTION_TABLE = "CREATE TABLE " + Question.TABLE_NAME
             + " ( " + Question.COLUMN_NAME_QUESTION_ENTRY
             + " TEXT PRIMARY KEY NOT NULL, "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP );";
+            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
 
     public static final String CREATE_ANSWER_TABLE = "CREATE TABLE " + Answer.TABLE_NAME
             + " ( " + Answer.COLUMN_NAME_ANSWER_ENTRY
             + " TEXT PRIMARY KEY NOT NULL, "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP );";
+            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
 
     public static final String CREATE_LINKER_TABLE = "CREATE TABLE " + Linker.TABLE_NAME
             + " ( " + Linker.COLUMN_NAME_QUESTION_LINK + " TEXT , "
             + Linker.COLUMN_NAME_ANSWER_LINK + " TEXT , "
             + Linker.COLUMN_NAME_FIELD_LINK + " TEXT , "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP ,"
+            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) ,"
             + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_QUESTION_LINK + ")" + " REFERENCES "
             + Question.TABLE_NAME + "(" + Question.COLUMN_NAME_QUESTION_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
             + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_ANSWER_LINK + ")" + " REFERENCES "
@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Log.d("from Peninbin","onUpgrade");
-        if ( oldVersion == 1 ) {
+        if ( oldVersion < 2 ) {
             fieldTableMigration(sqLiteDatabase);
             sqLiteDatabase.execSQL(CREATE_QUESTION_TABLE);
             sqLiteDatabase.execSQL(CREATE_ANSWER_TABLE);
@@ -79,6 +79,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             answerMigration(sqLiteDatabase);
             linkerMigration(sqLiteDatabase);
             tablesDeletion(sqLiteDatabase);
+        }
+        if ( oldVersion < 3 ) {
+            onUpgradeForFieldTableV3(sqLiteDatabase);
+            onUpgradeForQuestionTableV3(sqLiteDatabase);
+            onUpgradeForAnswerTableV3(sqLiteDatabase);
+            onUpgradeForLinkerTableV3(sqLiteDatabase);
         }
     }
     @Override
@@ -553,13 +559,49 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(drop);
     }
     private void onUpgradeForQuestionTableV3(SQLiteDatabase sqLiteDatabase) {
-
+        String rename = "ALTER TABLE " + Question.TABLE_NAME + " RENAME TO " + "tempTable";
+        sqLiteDatabase.execSQL(rename);
+        sqLiteDatabase.execSQL(CREATE_QUESTION_TABLE);
+        String copy =  "INSERT INTO " + Question.TABLE_NAME + " ( " + Question.COLUMN_NAME_QUESTION_ENTRY
+                + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                + "SELECT " + Question.COLUMN_NAME_QUESTION_ENTRY + ","
+                + Contract.COLUMN_NAME_CREATED_AT
+                + " FROM " + "tempTable"
+                +  ";";
+        sqLiteDatabase.execSQL(copy);
+        String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+        sqLiteDatabase.execSQL(drop);
     }
     private void onUpgradeForAnswerTableV3(SQLiteDatabase sqLiteDatabase) {
-
+        String rename = "ALTER TABLE " + Answer.TABLE_NAME + " RENAME TO " + "tempTable";
+        sqLiteDatabase.execSQL(rename);
+        sqLiteDatabase.execSQL(CREATE_ANSWER_TABLE);
+        String copy =  "INSERT INTO " + Answer.TABLE_NAME + " ( " + Answer.COLUMN_NAME_ANSWER_ENTRY
+                + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                + "SELECT " + Answer.COLUMN_NAME_ANSWER_ENTRY + ","
+                + Contract.COLUMN_NAME_CREATED_AT
+                + " FROM " + "tempTable"
+                +  ";";
+        sqLiteDatabase.execSQL(copy);
+        String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+        sqLiteDatabase.execSQL(drop);
     }
     private void onUpgradeForLinkerTableV3(SQLiteDatabase sqLiteDatabase) {
-
+        String rename = "ALTER TABLE " + Linker.TABLE_NAME + " RENAME TO " + "tempTable";
+        sqLiteDatabase.execSQL(rename);
+        sqLiteDatabase.execSQL(CREATE_LINKER_TABLE);
+        String copy =  "INSERT INTO " + Linker.TABLE_NAME + " ( " + Linker.COLUMN_NAME_QUESTION_LINK
+                + "," + Linker.COLUMN_NAME_ANSWER_LINK + ","
+                + Linker.COLUMN_NAME_FIELD_LINK + ","
+                + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                + "SELECT " + Linker.COLUMN_NAME_QUESTION_LINK
+                + "," + Linker.COLUMN_NAME_ANSWER_LINK + ","
+                + Linker.COLUMN_NAME_FIELD_LINK + ","
+                + Contract.COLUMN_NAME_CREATED_AT
+                + " FROM " + "tempTable"
+                +  ";";
+        sqLiteDatabase.execSQL(copy);
+        String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+        sqLiteDatabase.execSQL(drop);
     }
-
 }

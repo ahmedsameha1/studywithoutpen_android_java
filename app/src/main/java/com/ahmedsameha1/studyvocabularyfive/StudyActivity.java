@@ -307,6 +307,7 @@ public class StudyActivity extends AppCompatActivity {
                 for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount(); fieldEntriesCursor.moveToNext()) {
                     if (fieldEntriesCursor.getString(1).equals(currentQuestion) && fieldEntriesCursor.getString(2).equals(currentAnswer)) {
                         position = fieldEntriesCursor.getPosition();
+                        break;
                     }
                 }
                 if (--position >= 0) {
@@ -330,6 +331,10 @@ public class StudyActivity extends AppCompatActivity {
                         enterAnswer.setText(currentAnswer);
                         enterAnswer.setEnabled(false);
                     }
+                    if ( showCurrentEntry.isChecked() ) {
+                        viewQuestion.setText(currentQuestion);
+                        viewAnswer.setText(currentAnswer);
+                    }
                 }
             }
         });
@@ -344,6 +349,7 @@ public class StudyActivity extends AppCompatActivity {
                 for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount(); fieldEntriesCursor.moveToNext()) {
                     if (fieldEntriesCursor.getString(1).equals(currentQuestion) && fieldEntriesCursor.getString(2).equals(currentAnswer)) {
                         position = fieldEntriesCursor.getPosition();
+                        break;
                     }
                 }
                 if (++position < fieldEntriesCursor.getCount()) {
@@ -366,6 +372,10 @@ public class StudyActivity extends AppCompatActivity {
                     } else {
                         enterAnswer.setText(currentAnswer);
                         enterAnswer.setEnabled(false);
+                    }
+                    if ( showCurrentEntry.isChecked() ) {
+                        viewQuestion.setText(currentQuestion);
+                        viewAnswer.setText(currentAnswer);
                     }
                 }
             }
@@ -503,7 +513,9 @@ public class StudyActivity extends AppCompatActivity {
             searchForCursor.close()
         };*/
 //        sqLiteDatabase.close();
-        databaseHelper.close();
+        if ( databaseHelper != null) {
+            databaseHelper.close();
+        }
         super.onDestroy();
     }
     @Override
