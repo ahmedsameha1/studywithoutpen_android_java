@@ -1,6 +1,6 @@
 package com.ahmedsameha1.studyvocabularyfive;
 
-import android.app.Fragment;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -145,7 +145,7 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.field_activity_menu, menu);
         return true;
     }
 
@@ -185,6 +185,15 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
             case R.id.study_during:
                 StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
                 fragment2.show(getSupportFragmentManager(),fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+                return true;
+            case R.id.rate_the_app:
+                Uri uri = Uri.parse("market://details?id=" + getPackageName());
+                Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                try {
+                    startActivity(myAppLinkToMarket);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

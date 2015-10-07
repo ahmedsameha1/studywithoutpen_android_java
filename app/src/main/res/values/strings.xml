@@ -59,8 +59,10 @@
     <string name="day">Enter the number of days</string>
     <string name="please_enter_at_least_one_value">Please enter at least one value for day or hour</string>
     <string name="enter_study_duration">Enter study duration</string>
-    <string name="study_during">Study During</string>
+    <string name="study_during">Study During Period</string>
     <string name="check">Check</string>
     <string name="no_entries_in_this_time_range">There is no entries in this time range!</string>
     <string name="_continue">Continue</string>
+    <string name="enter_the_period">Enter the period that you want to study (the entries that you have entered during it)</string>
+    <string name="rate">Rate and Review this app</string>
 </resources>

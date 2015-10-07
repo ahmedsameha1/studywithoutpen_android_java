@@ -26,7 +26,8 @@ public class StudyDuringDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
-                builder.setView(inflater.inflate(R.layout.study_during_dialog_fragment,null))
+                builder.setTitle(R.string.enter_the_period)
+                        .setView(inflater.inflate(R.layout.study_during_dialog_fragment,null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {

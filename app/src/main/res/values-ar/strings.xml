@@ -59,8 +59,10 @@
     <string name="day">أدخل عدد الأيام</string>
     <string name="please_enter_at_least_one_value">لطفا، أدخل على الأقل قيمة لليوم أول للساعة</string>
     <string name="enter_study_duration"> أدخل الفترة التي تريد استذكارها</string>
-    <string name="study_during">استذكر فترة</string>
+    <string name="study_during">استذكر خلال فترة</string>
     <string name="check">تَحَقق</string>
     <string name="no_entries_in_this_time_range">لا توجد مُدخلات خلال هذا المدى الزمني!</string>
     <string name="_continue">استمر</string>
+    <string name="enter_the_period">أدخل الفترة التي تريد أن تستذكر ما أدخلته من مُدخلات خلالها</string>
+    <string name="rate">قيِّم واكتب مراجعة لهذا البرنامج</string>
 </resources>
