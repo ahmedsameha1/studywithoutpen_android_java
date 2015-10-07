@@ -139,7 +139,9 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
             fieldEntriesCursor.close();
         }*/
 //        sqLiteDatabase.close();
-        databaseHelper.close();
+        if ( databaseHelper != null ) {
+            databaseHelper.close();
+        }
         super.onDestroy();
     }
     @Override

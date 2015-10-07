@@ -112,7 +112,9 @@ public class EntriesListFragment extends Fragment {
     @Override
     public void onDestroy() {
 //        sqLiteDatabase.close();
-        databaseHelper.close();
+        if ( databaseHelper != null ) {
+            databaseHelper.close();
+        }
         super.onDestroy();
     }
 
