@@ -154,7 +154,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
                                 showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-
+                                ifMoreThanOnce(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                             } else {
                                 finish();
                             }
