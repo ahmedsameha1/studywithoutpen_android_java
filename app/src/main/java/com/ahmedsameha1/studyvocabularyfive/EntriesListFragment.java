@@ -32,7 +32,7 @@ public class EntriesListFragment extends Fragment {
     public static final String SEARCH_VALUE = "searchValue";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int SEARCH_ENTRIES_LOADER_ID = 1;
-    private EditText searchFor;
+    protected EditText searchFor;
     private ImageButton clearSearch;
     private ListView fieldEntriesListView;
     private CustomCursorAdapter customCursorAdapterForFieldEntriesListView;

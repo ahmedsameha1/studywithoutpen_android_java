@@ -84,6 +84,7 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                     Bundle bundle = new Bundle();
                     bundle.putString(FieldActivity.CURRENT_FIELD,getCurrentField());
                     entriesListFragment.getLoaderManager().restartLoader(0,bundle,entriesListFragment.getFieldEntries);
+                    entriesListFragment.searchFor.setText("");
                 }
 
             }

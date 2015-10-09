@@ -32,6 +32,7 @@ import java.util.Random;
 public class StudyDuringActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String CURRENT_FIELD = "currentField";
     public static final String STARTING_TIME = "startingTime";
+    public static final String REPEATED_ENTRIES = "repeatedEntries";
     private String currentField;
     private long startingTime;
     private Cursor cursor;
@@ -377,6 +378,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 //        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
+        savedInsatanceState.putIntegerArrayList(REPEATED_ENTRIES,repeatedEntries);
 //        savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         super.onSaveInstanceState(savedInsatanceState);
@@ -394,6 +396,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 //        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
+        repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
 //        wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
 //        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
         if ( testingNow ) {
