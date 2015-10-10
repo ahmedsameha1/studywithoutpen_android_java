@@ -107,11 +107,13 @@ public class StudyActivity extends AppCompatActivity {
                         enterQuestion.setText("");
                     } else {
                         enterQuestion.setText(currentQuestion);
+                        enterQuestion.setEnabled(false);
                     }
                     if (studyAnswer.isChecked()) {
                         enterAnswer.setText("");
                     } else {
                         enterAnswer.setText(currentAnswer);
+                        enterAnswer.setEnabled(false);
                     }
                 }
             }
