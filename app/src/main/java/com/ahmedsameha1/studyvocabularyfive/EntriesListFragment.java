@@ -49,7 +49,6 @@ public class EntriesListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         databaseHelper = new DatabaseHelper(getActivity());
-//        sqLiteDatabase = databaseHelper.getWritableDatabase();
         databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
