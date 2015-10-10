@@ -54,7 +54,8 @@ public class EntriesListFragment extends Fragment {
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if ( id == 1) {
+                if ( id == SEARCH_ENTRIES_LOADER_ID) {
+                    customCursorAdapterForFieldEntriesListView.changeCursor(null);
                     String currentField = getCurrentField();
                     String searchString = args.getString(EntriesListFragment.SEARCH_VALUE);
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
