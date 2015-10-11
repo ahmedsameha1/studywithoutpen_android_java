@@ -19,7 +19,7 @@ import java.util.ArrayList;
  * Created by ahmed on 7/4/2015.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 4;
     public static final String DATABASE_NAME = "data";
     /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + OldField.TABLE_NAME +
             " ( " + OldField._ID + " INTEGER PRIMARY KEY , "
@@ -55,6 +55,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Linker.COLUMN_NAME_ANSWER_LINK + ","
             + Linker.COLUMN_NAME_FIELD_LINK + ")" + ");";
 
+    public static final String CREATE_STUDY_DURING_TEMP_TABLE = "CREATE TABLE " + Contract.Study_During_Temp.TABLE_NAME
+            + " ( " + Contract.Study_During_Temp.COLUMN_NAME_QUESTION + " TEXT NOT NULL, "
+            + Contract.Study_During_Temp.COLUMN_NAME_ANSWER + " TEXT NOT NULL, "
+            + Contract.Study_During_Temp.COLUMN_NAME_FIELD + " TEXT NOT NULL );";
+
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -64,12 +69,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_QUESTION_TABLE);
         sqLiteDatabase.execSQL(CREATE_ANSWER_TABLE);
         sqLiteDatabase.execSQL(CREATE_LINKER_TABLE);
+        sqLiteDatabase.execSQL(CREATE_STUDY_DURING_TEMP_TABLE);
         Log.d("from APP to Ahmed", "table have been written");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        Log.d("from Peninbin","onUpgrade");
+        Log.d("from Peninbin", "onUpgrade");
         if ( oldVersion < 2 ) {
             fieldTableMigration(sqLiteDatabase);
             sqLiteDatabase.execSQL(CREATE_QUESTION_TABLE);
@@ -85,6 +91,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             onUpgradeForQuestionTableV3(sqLiteDatabase);
             onUpgradeForAnswerTableV3(sqLiteDatabase);
             onUpgradeForLinkerTableV3(sqLiteDatabase);
+        }
+        if ( oldVersion < 4 ) {
+            sqLiteDatabase.execSQL(CREATE_STUDY_DURING_TEMP_TABLE);
         }
     }
     @Override

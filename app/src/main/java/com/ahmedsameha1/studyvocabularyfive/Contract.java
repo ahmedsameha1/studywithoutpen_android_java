@@ -30,6 +30,12 @@ public final class Contract {
         public static final String COLUMN_NAME_ANSWER_LINK = "answer_link";
         public static final String COLUMN_NAME_FIELD_LINK = "field_link";
     }
+    public static abstract class Study_During_Temp implements BaseColumns {
+        public static final String TABLE_NAME = "study_during_temp_table";
+        public static final String COLUMN_NAME_QUESTION = "question";
+        public static final String COLUMN_NAME_ANSWER = "answer";
+        public static final String COLUMN_NAME_FIELD = "field";
+    }
     public static abstract class OldField implements BaseColumns {
         // This constant represents the name of the table which contains the data of the names of the fields that the user will create.
         public static final String TABLE_NAME = "field";

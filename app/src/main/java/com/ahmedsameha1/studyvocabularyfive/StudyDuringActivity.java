@@ -2,9 +2,11 @@ package com.ahmedsameha1.studyvocabularyfive;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -33,6 +35,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public static final String CURRENT_FIELD = "currentField";
     public static final String STARTING_TIME = "startingTime";
     public static final String REPEATED_ENTRIES = "repeatedEntries";
+    public static final String WRONG_ANSWERS_NUMBERS_STRING = "wrongAnswersNumbersString";
+    public static final int GET_FROM_TEMP_TABLE = 0;
+    public static final int GET_FROM_LINKER_TABLE = 1;
     private String currentField;
     private long startingTime;
     private Cursor cursor;
@@ -415,20 +420,60 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             hintIfMoreThanOneAnswer.setText(hints.get(hintCounter - 1));
         }
     }
+    private void setWrongAnwersNumbersString ( String wrongAnwersNumbersString ) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(WRONG_ANSWERS_NUMBERS_STRING, wrongAnwersNumbersString);
+        editor.commit();
+    }
+    private String getWrongAnswersNumbersString () {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return sharedPreferences.getString(WRONG_ANSWERS_NUMBERS_STRING,null);
+    }
+    private String [][] prepareListForStudyFromTempTable () {
+        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
+            questions.add(cursor.getString(0));
+            answers.add(cursor.getString(1));
+        }
+        String [][] listForTest = new String [questions.size()][2];
+        for ( int i = 0; i < questions.size(); i++ ) {
+            listForTest [i][0] = questions.get(i);
+            listForTest [i][1] = answers.get(i);
+        }
+        return listForTest;
+    }
     @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
-        return new CursorLoader(this,
-                uri,
-                new String [] {Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK, Contract.COLUMN_NAME_CREATED_AT},
-                Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                new String[] {currentField},
-                null);
+    public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+        if ( id == GET_FROM_TEMP_TABLE ) {
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
+            return new CursorLoader(this,
+                    uri,
+                    new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION, Contract.Study_During_Temp.COLUMN_NAME_ANSWER},
+                    Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ? ",
+                    new String[] {currentField},
+                    null);
+        } else {
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+            return new CursorLoader(this,
+                    uri,
+                    new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK, Contract.COLUMN_NAME_CREATED_AT},
+                    Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[]{currentField},
+                    null);
+        }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        this.cursor = cursor;
+        listForTest = retainedFragment.getListForTest_StudyDuringActivity();
+        if ( listForTest == null ) {
+            listForTest = prepareListForStudyFirstTime();
+        } else if ( cursor.getCount() > 0 ) {
+            this.cursor = cursor;
+            listForTest = prepareListForStudyFromTempTable();
+            repeatedEntries =
+        }
+        /*this.cursor = cursor;
         listForTest = retainedFragment.getListForTest_StudyDuringActivity();
         if ( listForTest == null ) {
             listForTest = prepareListForStudyFirstTime();
@@ -442,7 +487,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         } else {
             Toast.makeText(this,getString(R.string.no_entries_in_this_time_range),Toast.LENGTH_LONG).show();
             finish();
-        }
+        }*/
     }
 
     @Override
