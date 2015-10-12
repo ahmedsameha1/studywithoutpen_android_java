@@ -475,4 +475,28 @@ public class DatabaseOperations {
                 new String[] {searchString, fieldName, searchString, fieldName},
                 null);
     }
+    public void writeToStudyDuringTempTable( String [][] listForTest, String fieldName ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
+        for ( int i = 0; i < listForTest.length; i++ ) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Study_During_Temp.COLUMN_NAME_QUESTION,listForTest[i][0]);
+            contentValues.put(Contract.Study_During_Temp.COLUMN_NAME_ANSWER,listForTest[i][1]);
+            contentValues.put(Contract.Study_During_Temp.COLUMN_NAME_FIELD,fieldName);
+            contentResolver.insert(uri,contentValues);
+        }
+    }
+    public String [][] readFromStudyDuringTempTable( String fieldName ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
+        Cursor cursor = contentResolver.query(uri,
+                new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION, Contract.Study_During_Temp.COLUMN_NAME_ANSWER},
+                Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ?",
+                new String[] {fieldName},
+                null);
+        String array [][] = new String [cursor.getCount()][2];
+        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
+            array [cursor.getPosition()][0] = cursor.getString(0);
+            array [cursor.getPosition()][1] = cursor.getString(1);
+        }
+        return array;
+    }
 }

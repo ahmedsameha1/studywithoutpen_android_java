@@ -65,4 +65,5 @@
     <string name="_continue">استمر</string>
     <string name="enter_the_period">أدخل الفترة التي تريد أن تستذكر ما أدخلته من مُدخلات خلالها</string>
     <string name="rate">قيِّم واكتب مراجعة لهذا البرنامج</string>
+    <string name="stop_studying_now">أوقف الاستذكار الآن!</string>
 </resources>

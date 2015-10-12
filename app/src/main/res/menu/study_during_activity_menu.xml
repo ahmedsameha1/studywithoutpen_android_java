@@ -3,9 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity">
     <item
+        android:id="@+id/stop"
+        android:icon="@drawable/ic_stop_black_24dp"
+        android:title="@string/stop_studying_now"
+        app:showAsAction="ifRoom"
+        />
+    <item
         android:id="@+id/rate_the_app"
         android:icon="@drawable/ic_rate_review_white_24dp"
         android:title="@string/rate"
-        app:showAsAction="ifRoom"
+        app:showAsAction="never"
         />
 </menu>

@@ -1,6 +1,7 @@
 package com.ahmedsameha1.studyvocabularyfive;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 /**
  * Created by ahmed_000 on 9/23/2015.
@@ -35,9 +37,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public static final String CURRENT_FIELD = "currentField";
     public static final String STARTING_TIME = "startingTime";
     public static final String REPEATED_ENTRIES = "repeatedEntries";
-    public static final String WRONG_ANSWERS_NUMBERS_STRING = "wrongAnswersNumbersString";
-    public static final int GET_FROM_TEMP_TABLE = 0;
-    public static final int GET_FROM_LINKER_TABLE = 1;
+    public static final String STRING_REPRESENTING_REPEATED_ENTRIES = "strigRepresentingRepeatedEntries";
     private String currentField;
     private long startingTime;
     private Cursor cursor;
@@ -250,6 +250,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         databaseOperations = new DatabaseOperations(getContentResolver());
         getSupportLoaderManager().initLoader(0,null,this);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -275,6 +276,14 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                     Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
                 }
                 return true;
+            case R.id.stop:
+                DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
+                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES, convertRepeatedEntriesArrayListToString());
+                editor.putInt(CURRENT_QUESTION_COUNTER,currentQuestionCounter);
+                editor.commit();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -420,60 +429,39 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             hintIfMoreThanOneAnswer.setText(hints.get(hintCounter - 1));
         }
     }
-    private void setWrongAnwersNumbersString ( String wrongAnwersNumbersString ) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(WRONG_ANSWERS_NUMBERS_STRING, wrongAnwersNumbersString);
-        editor.commit();
-    }
-    private String getWrongAnswersNumbersString () {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        return sharedPreferences.getString(WRONG_ANSWERS_NUMBERS_STRING,null);
-    }
-    private String [][] prepareListForStudyFromTempTable () {
-        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
-            questions.add(cursor.getString(0));
-            answers.add(cursor.getString(1));
+    private String convertRepeatedEntriesArrayListToString() {
+//        StringBuilder stringBuilder = new StringBuilder();
+        String s = "";
+        for ( int i = 0; i < repeatedEntries.size(); i++ ) {
+            s += Integer.toString(repeatedEntries.get(i));
+            if ( i < repeatedEntries.size() - 1) {
+                s += "-";
+            }
         }
-        String [][] listForTest = new String [questions.size()][2];
-        for ( int i = 0; i < questions.size(); i++ ) {
-            listForTest [i][0] = questions.get(i);
-            listForTest [i][1] = answers.get(i);
+        return s;
+    }
+    private ArrayList<Integer> convertStringToRepeatedEntriesArrayList( String s ) {
+        StringTokenizer stringTokenizer = new StringTokenizer(s,"-");
+        ArrayList<Integer> arrayList = new ArrayList<Integer>();
+        while ( stringTokenizer.hasMoreTokens() ) {
+            arrayList.add(Integer.parseInt(stringTokenizer.nextToken()));
         }
-        return listForTest;
+        return arrayList;
     }
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-        if ( id == GET_FROM_TEMP_TABLE ) {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
-            return new CursorLoader(this,
-                    uri,
-                    new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION, Contract.Study_During_Temp.COLUMN_NAME_ANSWER},
-                    Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ? ",
-                    new String[] {currentField},
-                    null);
-        } else {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
-            return new CursorLoader(this,
-                    uri,
-                    new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK, Contract.COLUMN_NAME_CREATED_AT},
-                    Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                    new String[]{currentField},
-                    null);
-        }
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        return new CursorLoader(this,
+                uri,
+                new String [] {Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK, Contract.COLUMN_NAME_CREATED_AT},
+                Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[] {currentField},
+                null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        listForTest = retainedFragment.getListForTest_StudyDuringActivity();
-        if ( listForTest == null ) {
-            listForTest = prepareListForStudyFirstTime();
-        } else if ( cursor.getCount() > 0 ) {
-            this.cursor = cursor;
-            listForTest = prepareListForStudyFromTempTable();
-            repeatedEntries =
-        }
-        /*this.cursor = cursor;
+        this.cursor = cursor;
         listForTest = retainedFragment.getListForTest_StudyDuringActivity();
         if ( listForTest == null ) {
             listForTest = prepareListForStudyFirstTime();
@@ -487,7 +475,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         } else {
             Toast.makeText(this,getString(R.string.no_entries_in_this_time_range),Toast.LENGTH_LONG).show();
             finish();
-        }*/
+        }
     }
 
     @Override
