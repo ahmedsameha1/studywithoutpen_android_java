@@ -485,18 +485,20 @@ public class DatabaseOperations {
             contentResolver.insert(uri,contentValues);
         }
     }
-    public String [][] readFromStudyDuringTempTable( String fieldName ) {
+
+    public boolean checkStudyDuringTemp( String fieldName ) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
         Cursor cursor = contentResolver.query(uri,
-                new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION, Contract.Study_During_Temp.COLUMN_NAME_ANSWER},
+                new String[]{Contract.Study_During_Temp.COLUMN_NAME_QUESTION, Contract.Study_During_Temp.COLUMN_NAME_ANSWER},
                 Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ?",
-                new String[] {fieldName},
+                new String[]{fieldName},
                 null);
-        String array [][] = new String [cursor.getCount()][2];
-        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
-            array [cursor.getPosition()][0] = cursor.getString(0);
-            array [cursor.getPosition()][1] = cursor.getString(1);
-        }
-        return array;
+        return cursor.getCount() > 0 ? true : false;
+    }
+    public void clearStudyDuringTempTable ( String fieldName ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
+        contentResolver.delete(uri,
+                Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ? ",
+                new String[] {fieldName});
     }
 }

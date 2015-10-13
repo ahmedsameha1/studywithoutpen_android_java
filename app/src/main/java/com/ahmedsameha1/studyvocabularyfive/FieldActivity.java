@@ -24,12 +24,14 @@ import android.widget.Toast;
 
 public class FieldActivity extends AppCompatActivity implements CreateFieldDialogFragment.Contact,
         DeleteFieldDialogFragment.Contact,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>,
+        AskAboutContinuePreviousStudyDuringDialogFragment.Contact {
 
     public static final String INITIAL_FIELD = "intial_field";
     public static final String GET_NEW_FIELD_NAME = "getNewFieldName";
     public static final String GET_CONFIRMATION = "getConfirmation";
     public static final String CURRENT_FIELD = "currentField";
+    public static final String CHECK_IF_CONTINUE_STUDY_DURING_SESSION = "checkIfContinueStudyDuringSession";
     public static final int FIELD_LIST_LOADER_ID = 0;
     public static final int FIELD_ENTRIES_LOADER_ID = 1;
     private String[] deleteEntryData = {null, null, null};
@@ -45,10 +47,8 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
     private SimpleCursorAdapter simpleCursorAdapterForFieldSpinner;
 
     private DatabaseHelper databaseHelper;
-//    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
 
-    public String currentField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,8 +186,13 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                 }
                 return true;
             case R.id.study_during:
-                StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
-                fragment2.show(getSupportFragmentManager(),fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+                if ( databaseOperations.checkStudyDuringTemp(getCurrentField()) ) {
+                    AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
+                    fragment2.show(getSupportFragmentManager(),CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
+                } else {
+                    StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                    fragment2.show(getSupportFragmentManager(),fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+                }
                 return true;
             case R.id.rate_the_app:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());
@@ -292,6 +297,17 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
         // to be sure that the last used position in this spinner is still avilable ( may be the this position has been deleted )
         if ( simpleCursorAdapterForFieldSpinner.getCount() >= (lastUsedPosition + 1) ) {
             fieldsListSpinner.setSelection(lastUsedPosition);
+        }
+    }
+    public void continueStudyDuring( boolean decision ) {
+        if ( decision ) {
+            Intent intent = new Intent(this,StudyDuringActivity.class);
+            intent.putExtra(StudyDuringActivity.CURRENT_FIELD,getCurrentField());
+            intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,true);
+            startActivity(intent);
+        } else {
+            StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+            fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
         }
     }
     @Override

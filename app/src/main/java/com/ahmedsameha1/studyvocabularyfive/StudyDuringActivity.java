@@ -38,8 +38,12 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public static final String STARTING_TIME = "startingTime";
     public static final String REPEATED_ENTRIES = "repeatedEntries";
     public static final String STRING_REPRESENTING_REPEATED_ENTRIES = "strigRepresentingRepeatedEntries";
+    public static final String LAST_SESSION_OR_NEW_ONE = "lastSessionOrNewOne";
+    public static final int CONTINUE_PREVIOUS_SESSION = 1;
+    public static final int START_NEW_SESSION = 2;
     private String currentField;
     private long startingTime;
+    boolean boolean_continue;
     private Cursor cursor;
     private ArrayList<String> questions = new ArrayList<String>(), answers = new ArrayList<String>();
     private ArrayList<Integer> repeatedEntries = new ArrayList<Integer>();
@@ -248,7 +252,17 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         permitedTriesNumber = 3;
         showTries.setText(Integer.toString(triesCounter + 1));
         databaseOperations = new DatabaseOperations(getContentResolver());
-        getSupportLoaderManager().initLoader(0,null,this);
+        boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE,false);
+        if ( boolean_continue ) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            String string = sharedPreferences.getString(STRING_REPRESENTING_REPEATED_ENTRIES,null);
+            repeatedEntries = convertStringToRepeatedEntriesArrayList(string);
+            currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER,0);
+            getSupportLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION,null,this);
+        } else {
+            getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
+        }
+
     }
 
     @Override
@@ -282,8 +296,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES, convertRepeatedEntriesArrayListToString());
-                editor.putInt(CURRENT_QUESTION_COUNTER,currentQuestionCounter);
+                editor.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
                 editor.commit();
+                finish();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -441,22 +456,42 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         return s;
     }
     private ArrayList<Integer> convertStringToRepeatedEntriesArrayList( String s ) {
-        StringTokenizer stringTokenizer = new StringTokenizer(s,"-");
         ArrayList<Integer> arrayList = new ArrayList<Integer>();
+        if ( s == null) {
+            return arrayList;
+        }
+        StringTokenizer stringTokenizer = new StringTokenizer(s,"-");
         while ( stringTokenizer.hasMoreTokens() ) {
             arrayList.add(Integer.parseInt(stringTokenizer.nextToken()));
         }
         return arrayList;
     }
+    private String [][] readFromStudyDuringTempTable() {
+        String array [][] = new String [cursor.getCount()][2];
+        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
+            array [cursor.getPosition()][0] = cursor.getString(0);
+            array [cursor.getPosition()][1] = cursor.getString(1);
+        }
+        return array;
+    }
     @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
-        return new CursorLoader(this,
-                uri,
-                new String [] {Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK, Contract.COLUMN_NAME_CREATED_AT},
-                Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                new String[] {currentField},
-                null);
+    public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+        if ( id == CONTINUE_PREVIOUS_SESSION ) {
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
+            return new CursorLoader(this,uri,
+                    new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION, Contract.Study_During_Temp.COLUMN_NAME_ANSWER},
+                    Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ?",
+                    new String[] {currentField},
+                    null);
+        } else {
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+            return new CursorLoader(this,
+                    uri,
+                    new String [] {Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK, Contract.COLUMN_NAME_CREATED_AT},
+                    Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[] {currentField},
+                    null);
+        }
     }
 
     @Override
@@ -464,7 +499,11 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         this.cursor = cursor;
         listForTest = retainedFragment.getListForTest_StudyDuringActivity();
         if ( listForTest == null ) {
-            listForTest = prepareListForStudyFirstTime();
+            if ( boolean_continue ) {
+                listForTest = readFromStudyDuringTempTable();
+            } else {
+                listForTest = prepareListForStudyFirstTime();
+            }
         }
         questionsNumber = listForTest.length;
         if ( questionsNumber > 0 ) {

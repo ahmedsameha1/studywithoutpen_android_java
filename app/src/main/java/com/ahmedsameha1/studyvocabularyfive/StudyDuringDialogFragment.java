@@ -59,6 +59,7 @@ public class StudyDuringDialogFragment extends DialogFragment {
                             Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
                             intent.putExtra(StudyDuringActivity.CURRENT_FIELD,((FieldActivity) getActivity()).getCurrentField());
                             intent.putExtra(StudyDuringActivity.STARTING_TIME,startingTime);
+                            intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,false);
                             startActivity(intent);
                         } else {
                             Toast.makeText(getActivity(),getString(R.string.please_enter_at_least_one_value),Toast.LENGTH_SHORT).show();

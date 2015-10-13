@@ -66,4 +66,7 @@
     <string name="enter_the_period">Enter the period that you want to study (the entries that you have entered during it)</string>
     <string name="rate">Rate and Review this app</string>
     <string name="stop_studying_now">Stop studying now!</string>
+    <string name="ask_for_continue_previous_study_during">Do you want to continue the previous studying session?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

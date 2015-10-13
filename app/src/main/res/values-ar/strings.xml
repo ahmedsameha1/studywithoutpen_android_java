@@ -66,4 +66,7 @@
     <string name="enter_the_period">أدخل الفترة التي تريد أن تستذكر ما أدخلته من مُدخلات خلالها</string>
     <string name="rate">قيِّم واكتب مراجعة لهذا البرنامج</string>
     <string name="stop_studying_now">أوقف الاستذكار الآن!</string>
+    <string name="ask_for_continue_previous_study_during">هل تريد استكمال جلسة الاستذكار السابقة؟</string>
+    <string name="no">لا</string>
+    <string name="yes">نعم</string>
 </resources>
