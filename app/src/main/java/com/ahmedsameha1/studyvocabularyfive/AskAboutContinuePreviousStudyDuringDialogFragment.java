@@ -2,7 +2,9 @@ package com.ahmedsameha1.studyvocabularyfive;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
@@ -30,6 +32,11 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                                 ((Contact) getActivity()).continueStudyDuring(false);
                                 DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
                                 databaseOperations.clearStudyDuringTempTable( ((FieldActivity) getActivity() ).getCurrentField());
+                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity()); // getting the preferences
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString(StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES, null);
+                                editor.putInt(StudyDuringActivity.CURRENT_QUESTION_COUNTER, 0);
+                                editor.commit();
                                 dismiss();
                             }
                         }

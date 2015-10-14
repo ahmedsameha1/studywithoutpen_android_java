@@ -166,6 +166,12 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                                 ifMoreThanOnce(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                             } else {
+                                databaseOperations.clearStudyDuringTempTable(currentField);
+                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyDuringActivity.this); // getting the preferences
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES, null);
+                                editor.putInt(CURRENT_QUESTION_COUNTER, 0);
+                                editor.commit();
                                 finish();
                             }
 //                            testingNow = false;
@@ -292,6 +298,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 return true;
             case R.id.stop:
                 DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
+                databaseOperations.clearStudyDuringTempTable(currentField);
                 databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
                 SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -510,7 +517,12 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
             showNumberOfQuetions.setText(Integer.toString(questionsNumber));
-            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
+            if ( boolean_continue ) {
+                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+            } else {
+                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
+            }
+
         } else {
             Toast.makeText(this,getString(R.string.no_entries_in_this_time_range),Toast.LENGTH_LONG).show();
             finish();
