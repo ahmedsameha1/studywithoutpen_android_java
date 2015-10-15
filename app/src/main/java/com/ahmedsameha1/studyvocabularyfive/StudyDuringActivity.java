@@ -39,6 +39,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public static final String REPEATED_ENTRIES = "repeatedEntries";
     public static final String STRING_REPRESENTING_REPEATED_ENTRIES = "strigRepresentingRepeatedEntries";
     public static final String LAST_SESSION_OR_NEW_ONE = "lastSessionOrNewOne";
+    public static final String DASH = "-";
     public static final int CONTINUE_PREVIOUS_SESSION = 1;
     public static final int START_NEW_SESSION = 2;
     private String currentField;
@@ -136,7 +137,16 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                     i
                 }*/
                 testingNow = true;
-                if (enterAnswer.getText().toString().length() > 0) {
+                int j = 0;
+                try {
+                    j = Integer.parseInt(numberOfTries.getText().toString());
+                } catch ( NumberFormatException nfe ) {
+                    numberOfTries.setText(Integer.toString(1));
+                }
+                if ( j <= 0) {
+                    numberOfTries.setText(Integer.toString(1));
+                    Toast.makeText(StudyDuringActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
+                } else if (enterAnswer.getText().toString().length() > 0) {
                     numberOfTries.setEnabled(false);
                     result = checkAnAnswer();
                     if (triesCounter < permitedTriesNumber && !result) {
@@ -169,8 +179,10 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                                 databaseOperations.clearStudyDuringTempTable(currentField);
                                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyDuringActivity.this); // getting the preferences
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                                editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES, null);
-                                editor.putInt(CURRENT_QUESTION_COUNTER, 0);
+                                /*editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES, null);
+                                editor.putInt(CURRENT_QUESTION_COUNTER, 0);*/
+                                editor.remove(STRING_REPRESENTING_REPEATED_ENTRIES + DASH + currentField);
+                                editor.remove(CURRENT_QUESTION_COUNTER + DASH + currentField);
                                 editor.commit();
                                 finish();
                             }
@@ -211,7 +223,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
        /* showQuestion.setText(listForTest [currentQuestionCounter][0]);
         ifMoreThanOnce(listForTest [currentQuestionCounter][0],listForTest [currentQuestionCounter][1]);
    */
-        numberOfTries.addTextChangedListener(new TextWatcher() {
+        /*numberOfTries.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -226,9 +238,14 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             public void afterTextChanged(Editable s) {
                 if (numberOfTries.getText().toString().length() > 0) {
                     permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
+                } else if ( numberOfTries.getText().toString().length() <= 0){
+                    Toast.makeText(StudyDuringActivity.this,R.string.enter_tries_number,Toast.LENGTH_SHORT).show();
+                } else if ( Integer.parseInt(numberOfTries.getText().toString()) <= 0 ) {
+                    numberOfTries.setText(Integer.toString(1));
+                    Toast.makeText(StudyDuringActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
                 }
             }
-        });
+        });*/
         enterAnswer.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -261,9 +278,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE,false);
         if ( boolean_continue ) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            String string = sharedPreferences.getString(STRING_REPRESENTING_REPEATED_ENTRIES,null);
+            String string = sharedPreferences.getString(STRING_REPRESENTING_REPEATED_ENTRIES + DASH + currentField,null);
+            currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER + DASH + currentField,0);
             repeatedEntries = convertStringToRepeatedEntriesArrayList(string);
-            currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER,0);
             getSupportLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION,null,this);
         } else {
             getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
@@ -302,10 +319,15 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES, convertRepeatedEntriesArrayListToString());
-                editor.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
+                editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES + DASH + currentField, convertRepeatedEntriesArrayListToString());
+                editor.putInt(CURRENT_QUESTION_COUNTER + DASH + currentField, currentQuestionCounter);
                 editor.commit();
                 finish();
+                return true;
+            case R.id.open_facebook_page:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
+                startActivity(browserIntent);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -403,7 +425,11 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         }
     }
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
-        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(CURRENT_QUESTION_COUNTER + DASH + currentField, currentQuestionCounter);
+        editor.commit();
+//        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInsatanceState.putBoolean(RESULT, result);
 //        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
@@ -421,7 +447,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     }
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         super.onRestoreInstanceState(savedInstanceState);
-        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER + DASH + currentField,0);
+//        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);
 //        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);

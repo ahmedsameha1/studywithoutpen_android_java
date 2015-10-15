@@ -14,4 +14,7 @@
         android:title="@string/rate"
         app:showAsAction="never"
         />
+    <item android:id="@+id/open_facebook_page"
+        android:title="@string/open_facebook_page"
+        app:showAsAction="never"/>
 </menu>

@@ -38,7 +38,7 @@
     <string name="questions">question(s)</string>
     <string name="another_try">Another Try</string>
     <string name="check_answer">Check</string>
-    <string name="default_number_of_tries">3</string>
+    <string name="default_number_of_tries">2</string>
     <string name="enter_tries_number">Enter number of tries</string>
     <string name="end_of_test">Test has been ended</string>
     <string name="show_entries">Show Entries</string>
@@ -69,4 +69,5 @@
     <string name="ask_for_continue_previous_study_during">Do you want to continue the previous studying session?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="open_facebook_page">Open facebook page</string>
 </resources>

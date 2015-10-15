@@ -93,6 +93,7 @@ public class AddEntryFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 enterQuestion.setText("");
+                enterQuestion.requestFocus();
             }
         });
 
@@ -100,6 +101,7 @@ public class AddEntryFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 enterAnswer.setText("");
+                enterAnswer.requestFocus();
             }
         });
         return view;

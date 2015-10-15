@@ -34,8 +34,12 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                                 databaseOperations.clearStudyDuringTempTable( ((FieldActivity) getActivity() ).getCurrentField());
                                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity()); // getting the preferences
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                                editor.putString(StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES, null);
-                                editor.putInt(StudyDuringActivity.CURRENT_QUESTION_COUNTER, 0);
+                                /*editor.putString(StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES, null);
+                                editor.putInt(StudyDuringActivity.CURRENT_QUESTION_COUNTER, 0);*/
+                                editor.remove(StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES
+                                        + StudyDuringActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
+                                editor.remove(StudyDuringActivity.CURRENT_QUESTION_COUNTER
+                                        + StudyDuringActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
                                 editor.commit();
                                 dismiss();
                             }

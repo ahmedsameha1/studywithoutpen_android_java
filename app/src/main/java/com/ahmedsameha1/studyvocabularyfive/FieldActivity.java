@@ -203,6 +203,10 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                     Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
                 }
                 return true;
+            case R.id.open_facebook_page:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
+                startActivity(browserIntent);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

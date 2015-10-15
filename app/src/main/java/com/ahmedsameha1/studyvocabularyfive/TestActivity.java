@@ -93,11 +93,17 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int j = 0;
+                try {
+                    j = Integer.parseInt(numberOfTries.getText().toString());
+                } catch ( NumberFormatException nfe ) {
+                    numberOfTries.setText(Integer.toString(1));
+                }
                 if (enterPercent.getText().toString().equals("")
                         || Double.parseDouble(enterPercent.getText().toString()) <= 0 ||
                         Double.parseDouble(enterPercent.getText().toString()) > 100) {
                     Toast.makeText(TestActivity.this, getString(R.string.percentage_between), Toast.LENGTH_LONG).show();
-                } else if (Integer.parseInt(numberOfTries.getText().toString()) <= 0) {
+                } else if (j <= 0) {
                     numberOfTries.setText(Integer.toString(1));
                     Toast.makeText(TestActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
 
@@ -234,6 +240,10 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                 } catch (ActivityNotFoundException e) {
                     Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
                 }
+                return true;
+            case R.id.open_facebook_page:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
+                startActivity(browserIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
