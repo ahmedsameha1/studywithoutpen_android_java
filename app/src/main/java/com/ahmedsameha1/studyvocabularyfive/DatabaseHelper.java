@@ -19,7 +19,7 @@ import java.util.ArrayList;
  * Created by ahmed on 7/4/2015.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 4;
+    public static final int DATABASE_VERSION = 5;
     public static final String DATABASE_NAME = "data";
     /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + OldField.TABLE_NAME +
             " ( " + OldField._ID + " INTEGER PRIMARY KEY , "
@@ -27,8 +27,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              OldField.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP );";*/
     public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Field.TABLE_NAME
             + " ( "
-            + Contract.Field.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY, "
+            + Contract.Field.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY NOT NULL, "
             + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
+
+    /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Field.TABLE_NAME
+            + " ( "
+            + Contract.Field.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY, "
+            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";*/
     
     public static final String CREATE_QUESTION_TABLE = "CREATE TABLE " + Question.TABLE_NAME
             + " ( " + Question.COLUMN_NAME_QUESTION_ENTRY
@@ -41,6 +46,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
 
     public static final String CREATE_LINKER_TABLE = "CREATE TABLE " + Linker.TABLE_NAME
+            + " ( " + Linker.COLUMN_NAME_QUESTION_LINK + " TEXT NOT NULL, "
+            + Linker.COLUMN_NAME_ANSWER_LINK + " TEXT NOT NULL, "
+            + Linker.COLUMN_NAME_FIELD_LINK + " TEXT NOT NULL, "
+            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
+            + Linker.COLUMN_NAME_STUDY_DURING_FLAG + " INTEGER NOT NULL DEFAULT 0" + " ) ,"
+            + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_QUESTION_LINK + ")" + " REFERENCES "
+            + Question.TABLE_NAME + "(" + Question.COLUMN_NAME_QUESTION_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
+            + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_ANSWER_LINK + ")" + " REFERENCES "
+            + Answer.TABLE_NAME + "(" + Answer.COLUMN_NAME_ANSWER_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
+            + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_FIELD_LINK + ")" + " REFERENCES "
+            + Contract.Field.TABLE_NAME + "(" + Contract.Field.COLUMN_NAME_FIELD_NAME + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
+            + " PRIMARY KEY ( " + Linker.COLUMN_NAME_QUESTION_LINK + ","
+            + Linker.COLUMN_NAME_ANSWER_LINK + ","
+            + Linker.COLUMN_NAME_FIELD_LINK + ")" + ");";
+
+    /*public static final String CREATE_LINKER_TABLE = "CREATE TABLE " + Linker.TABLE_NAME
             + " ( " + Linker.COLUMN_NAME_QUESTION_LINK + " TEXT , "
             + Linker.COLUMN_NAME_ANSWER_LINK + " TEXT , "
             + Linker.COLUMN_NAME_FIELD_LINK + " TEXT , "
@@ -53,7 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.Field.TABLE_NAME + "(" + Contract.Field.COLUMN_NAME_FIELD_NAME + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
             + " PRIMARY KEY ( " + Linker.COLUMN_NAME_QUESTION_LINK + ","
             + Linker.COLUMN_NAME_ANSWER_LINK + ","
-            + Linker.COLUMN_NAME_FIELD_LINK + ")" + ");";
+            + Linker.COLUMN_NAME_FIELD_LINK + ")" + ");";*/
 
     public static final String CREATE_STUDY_DURING_TEMP_TABLE = "CREATE TABLE " + Contract.Study_During_Temp.TABLE_NAME
             + " ( " + Contract.Study_During_Temp.COLUMN_NAME_QUESTION + " TEXT NOT NULL, "
@@ -69,7 +90,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_QUESTION_TABLE);
         sqLiteDatabase.execSQL(CREATE_ANSWER_TABLE);
         sqLiteDatabase.execSQL(CREATE_LINKER_TABLE);
-        sqLiteDatabase.execSQL(CREATE_STUDY_DURING_TEMP_TABLE);
         Log.d("from APP to Ahmed", "table have been written");
     }
 
@@ -94,6 +114,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         if ( oldVersion < 4 ) {
             sqLiteDatabase.execSQL(CREATE_STUDY_DURING_TEMP_TABLE);
+        }
+        if ( oldVersion < 5 ) {
+            onUpgradeForFieldTableV5(sqLiteDatabase);
+            onUpgradeForLinkerTableV5(sqLiteDatabase);
+            migrateDataFromStudyDuringTempTableToLinkerStudyDuringFlagColumnV5(sqLiteDatabase);
         }
     }
     @Override
@@ -611,6 +636,59 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 +  ";";
         sqLiteDatabase.execSQL(copy);
         String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+        sqLiteDatabase.execSQL(drop);
+    }
+    private void onUpgradeForFieldTableV5 ( SQLiteDatabase sqLiteDatabase ) {
+        String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+        sqLiteDatabase.execSQL(rename);
+        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
+        String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.Field.COLUMN_NAME_FIELD_NAME
+                + " , " + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                + "SELECT " + Contract.Field.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.COLUMN_NAME_CREATED_AT
+                + " FROM " + "tempTable"
+                + ";";
+        sqLiteDatabase.execSQL(copy);
+        String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+        sqLiteDatabase.execSQL(drop);
+    }
+    private void onUpgradeForLinkerTableV5 ( SQLiteDatabase sqLiteDatabase ) {
+        String rename = "ALTER TABLE " + Linker.TABLE_NAME + " RENAME TO " + "tempTable";
+        sqLiteDatabase.execSQL(rename);
+        sqLiteDatabase.execSQL(CREATE_LINKER_TABLE);
+        String copy = "INSERT INTO " + Linker.TABLE_NAME + " ( " + Linker.COLUMN_NAME_QUESTION_LINK
+                + " , " + Linker.COLUMN_NAME_ANSWER_LINK
+                + " , " + Linker.COLUMN_NAME_FIELD_LINK
+                + " , " + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                + "SELECT " + Linker.COLUMN_NAME_QUESTION_LINK
+                + "," + Linker.COLUMN_NAME_ANSWER_LINK
+                + "," + Linker.COLUMN_NAME_FIELD_LINK
+                + "," + Contract.COLUMN_NAME_CREATED_AT
+                + " FROM " + "tempTable"
+                + ";";
+        sqLiteDatabase.execSQL(copy);
+        String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+        sqLiteDatabase.execSQL(drop);
+    }
+    private void migrateDataFromStudyDuringTempTableToLinkerStudyDuringFlagColumnV5 ( SQLiteDatabase sqLiteDatabase ) {
+        Cursor studyDuringTempCursor = sqLiteDatabase.query(Contract.Study_During_Temp.TABLE_NAME,
+                new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION,
+                        Contract.Study_During_Temp.COLUMN_NAME_ANSWER,
+                        Contract.Study_During_Temp.COLUMN_NAME_FIELD},
+                null,null,null,null,null);
+        for ( studyDuringTempCursor.moveToFirst(); studyDuringTempCursor.getPosition() < studyDuringTempCursor.getCount();
+              studyDuringTempCursor.moveToNext() ) {
+            String question = studyDuringTempCursor.getString(0);
+            String answer = studyDuringTempCursor.getString(1);
+            String fieldName = studyDuringTempCursor.getString(2);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Linker.COLUMN_NAME_STUDY_DURING_FLAG,1);
+            sqLiteDatabase.update(Linker.TABLE_NAME, contentValues,
+                    Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                            + Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[]{question, answer, fieldName});
+        }
+        String drop = "DROP TABLE IF EXISTS " + Contract.Study_During_Temp.TABLE_NAME + ";";
         sqLiteDatabase.execSQL(drop);
     }
 }
