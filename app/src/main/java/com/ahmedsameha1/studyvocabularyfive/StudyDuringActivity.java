@@ -140,11 +140,13 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 int j = 0;
                 try {
                     j = Integer.parseInt(numberOfTries.getText().toString());
+                    permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
                 } catch ( NumberFormatException nfe ) {
                     numberOfTries.setText(Integer.toString(1));
                 }
                 if ( j <= 0) {
                     numberOfTries.setText(Integer.toString(1));
+                    permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
                     Toast.makeText(StudyDuringActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
                 } else if (enterAnswer.getText().toString().length() > 0) {
                     numberOfTries.setEnabled(false);
