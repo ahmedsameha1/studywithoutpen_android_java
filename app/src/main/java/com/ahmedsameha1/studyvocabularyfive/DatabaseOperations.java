@@ -501,4 +501,35 @@ public class DatabaseOperations {
                 Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ? ",
                 new String[] {fieldName});
     }
+    public void clearStudyDuringDataFromLinkerTable( String fieldName ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG,0);
+        contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER,-1);
+        contentResolver.update(uri, contentValues,
+                Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[]{fieldName});
+    }
+    public void writeDataToLinkerTableStudyDuringColumns( String [][] listForTest, String fieldName ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        for ( int i = 0; i < listForTest.length; i++ ) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG,1);
+            contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER,i);
+            contentResolver.update(uri,
+                    contentValues,
+                    Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                            + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[]{listForTest[i][0], listForTest[i][1], fieldName});
+        }
+    }
+    public boolean checkLinkerStudyDuring( String fieldName ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        Cursor cursor = contentResolver.query(uri,
+                new String[]{Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG},
+                Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG + " = ?",
+                new String[]{"1"},
+                null);
+        return cursor.getCount() > 0 ? true : false;
+    }
 }

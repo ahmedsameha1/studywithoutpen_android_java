@@ -315,8 +315,10 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 return true;
             case R.id.stop:
                 DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
-                databaseOperations.clearStudyDuringTempTable(currentField);
-                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
+//                databaseOperations.clearStudyDuringTempTable(currentField);
+                databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
+//                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
+                databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest,currentField);
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES + DASH + currentField, convertRepeatedEntriesArrayListToString());
@@ -501,23 +503,40 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         }
         return arrayList;
     }
-    private String [][] readFromStudyDuringTempTable() {
+/*    private String [][] readFromStudyDuringTempTable() {
         String array [][] = new String [cursor.getCount()][2];
         for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
             array [cursor.getPosition()][0] = cursor.getString(0);
             array [cursor.getPosition()][1] = cursor.getString(1);
         }
         return array;
+    }*/
+    private String [][] readFromStudyDuringTempTable() {
+        String array [][] = new String [cursor.getCount()][2];
+        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
+            int order = cursor.getInt(2);
+            array [order][0] = cursor.getString(0);
+            array [order][1] = cursor.getString(1);
+        }
+        return array;
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
         if ( id == CONTINUE_PREVIOUS_SESSION ) {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+            return new CursorLoader(this,uri,
+                    new String[] {Contract.Linker.COLUMN_NAME_QUESTION_LINK,
+                            Contract.Linker.COLUMN_NAME_ANSWER_LINK,
+                            Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER},
+                    Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG + " = ? ",
+                    new String[] {"1"},
+                    null);
+            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
             return new CursorLoader(this,uri,
                     new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION, Contract.Study_During_Temp.COLUMN_NAME_ANSWER},
                     Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ?",
                     new String[] {currentField},
-                    null);
+                    null);*/
         } else {
             Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
             return new CursorLoader(this,

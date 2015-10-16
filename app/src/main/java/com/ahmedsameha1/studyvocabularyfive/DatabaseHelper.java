@@ -49,8 +49,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " ( " + Linker.COLUMN_NAME_QUESTION_LINK + " TEXT NOT NULL, "
             + Linker.COLUMN_NAME_ANSWER_LINK + " TEXT NOT NULL, "
             + Linker.COLUMN_NAME_FIELD_LINK + " TEXT NOT NULL, "
+            + Linker.COLUMN_NAME_STUDY_DURING_FLAG + " INTEGER NOT NULL DEFAULT 0 , "
+            + Linker.COLUMN_NAME_STUDY_DURING_ORDER + " INTEGER NOT NULL DEFAULT -1 , "
             + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
-            + Linker.COLUMN_NAME_STUDY_DURING_FLAG + " INTEGER NOT NULL DEFAULT 0" + " ) ,"
             + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_QUESTION_LINK + ")" + " REFERENCES "
             + Question.TABLE_NAME + "(" + Question.COLUMN_NAME_QUESTION_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
             + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_ANSWER_LINK + ")" + " REFERENCES "
@@ -683,6 +684,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String fieldName = studyDuringTempCursor.getString(2);
             ContentValues contentValues = new ContentValues();
             contentValues.put(Linker.COLUMN_NAME_STUDY_DURING_FLAG,1);
+            contentValues.put(Linker.COLUMN_NAME_STUDY_DURING_ORDER,studyDuringTempCursor.getPosition());
             sqLiteDatabase.update(Linker.TABLE_NAME, contentValues,
                     Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
                             + Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
