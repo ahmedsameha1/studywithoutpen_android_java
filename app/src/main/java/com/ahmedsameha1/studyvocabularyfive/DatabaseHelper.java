@@ -364,13 +364,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
         String s = fieldName + OldField.COLUMN_NAME_QUESTION_LINK_SUFFIX + " = ? " +  " AND " +
                 fieldName + OldField.COLUMN_NAME_ANSWER_LINK_SUFFIX + " = ? " ;
-        sqLiteDatabase.delete(fieldName + OldField.TABLE_NAME_LINK_SUFFIX,s,new String[] {question,answer});
+        sqLiteDatabase.delete(fieldName + OldField.TABLE_NAME_LINK_SUFFIX, s, new String[]{question, answer});
         sqLiteDatabase.close();
     }
     public void deleteThisFieldQuestion(String fieldName, String question) {
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
         String s = fieldName + OldField.COLUMN_NAME_QUESTION_SUFFIX + " = ?";
-        sqLiteDatabase.delete(fieldName + OldField.TABLE_NAME_QUESTION_SUFFIX,s,new String[] {question});
+        sqLiteDatabase.delete(fieldName + OldField.TABLE_NAME_QUESTION_SUFFIX, s, new String[]{question});
         sqLiteDatabase.close();
     }
     public void deleteThisFieldAnswer(String fieldName, String answer) {
@@ -692,5 +692,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         String drop = "DROP TABLE IF EXISTS " + Contract.Study_During_Temp.TABLE_NAME + ";";
         sqLiteDatabase.execSQL(drop);
+    }
+    public void tryf ( SQLiteDatabase sqLiteDatabase ) {
+        Cursor fieldCursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                new String[]{Contract.Field.COLUMN_NAME_FIELD_NAME},
+                null, null, null, null, null);
     }
 }
