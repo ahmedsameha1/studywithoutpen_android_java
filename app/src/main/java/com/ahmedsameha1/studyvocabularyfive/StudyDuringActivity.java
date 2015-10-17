@@ -140,11 +140,13 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 int j = 0;
                 try {
                     j = Integer.parseInt(numberOfTries.getText().toString());
+                    permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
                 } catch ( NumberFormatException nfe ) {
                     numberOfTries.setText(Integer.toString(1));
                 }
                 if ( j <= 0) {
                     numberOfTries.setText(Integer.toString(1));
+                    permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
                     Toast.makeText(StudyDuringActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
                 } else if (enterAnswer.getText().toString().length() > 0) {
                     numberOfTries.setEnabled(false);
@@ -176,7 +178,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                                 ifMoreThanOnce(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                             } else {
-                                databaseOperations.clearStudyDuringTempTable(currentField);
+                                databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
                                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyDuringActivity.this); // getting the preferences
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                 /*editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES, null);
@@ -528,8 +530,8 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                     new String[] {Contract.Linker.COLUMN_NAME_QUESTION_LINK,
                             Contract.Linker.COLUMN_NAME_ANSWER_LINK,
                             Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER},
-                    Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG + " = ? ",
-                    new String[] {"1"},
+                    Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[] {"0", currentField},
                     null);
             /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
             return new CursorLoader(this,uri,

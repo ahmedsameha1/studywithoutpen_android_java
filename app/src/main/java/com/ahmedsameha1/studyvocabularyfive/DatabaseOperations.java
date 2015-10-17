@@ -504,7 +504,6 @@ public class DatabaseOperations {
     public void clearStudyDuringDataFromLinkerTable( String fieldName ) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG,0);
         contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER,-1);
         contentResolver.update(uri, contentValues,
                 Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
@@ -514,7 +513,6 @@ public class DatabaseOperations {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
         for ( int i = 0; i < listForTest.length; i++ ) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG,1);
             contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER,i);
             contentResolver.update(uri,
                     contentValues,
@@ -526,9 +524,9 @@ public class DatabaseOperations {
     public boolean checkLinkerStudyDuring( String fieldName ) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
         Cursor cursor = contentResolver.query(uri,
-                new String[]{Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG},
-                Contract.Linker.COLUMN_NAME_STUDY_DURING_FLAG + " = ?",
-                new String[]{"1"},
+                new String[]{Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER},
+                Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[]{"0", fieldName},
                 null);
         return cursor.getCount() > 0 ? true : false;
     }

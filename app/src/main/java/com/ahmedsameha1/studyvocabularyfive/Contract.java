@@ -31,6 +31,8 @@ public final class Contract {
         public static final String COLUMN_NAME_FIELD_LINK = "field_link";
         public static final String COLUMN_NAME_STUDY_DURING_FLAG = "study_during_flag";
         public static final String COLUMN_NAME_STUDY_DURING_ORDER = "study_during_order";
+        public static final String COLUMN_NAME_TEST_ORDER = "test_order";
+        public static final String COLUMN_NAME_TEST_WRONG_ANSWERS = "test_wrong_answers";
     }
     public static abstract class Study_During_Temp implements BaseColumns {
         public static final String TABLE_NAME = "study_during_temp_table";
