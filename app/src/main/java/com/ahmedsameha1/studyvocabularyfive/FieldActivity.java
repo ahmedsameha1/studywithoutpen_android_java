@@ -186,7 +186,7 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                 }
                 return true;
             case R.id.study_during:
-                if ( databaseOperations.checkStudyDuringTemp(getCurrentField()) ) {
+                if ( databaseOperations.checkLinkerStudyDuring(getCurrentField()) ) {
                     AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
                     fragment2.show(getSupportFragmentManager(),CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
                 } else {

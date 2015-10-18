@@ -31,7 +31,7 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                             public void onClick(DialogInterface dialog, int which) {
                                 ((Contact) getActivity()).continueStudyDuring(false);
                                 DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
-                                databaseOperations.clearStudyDuringTempTable( ((FieldActivity) getActivity() ).getCurrentField());
+                                databaseOperations.clearStudyDuringDataFromLinkerTable( ((FieldActivity) getActivity() ).getCurrentField());
                                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity()); // getting the preferences
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                 /*editor.putString(StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES, null);
