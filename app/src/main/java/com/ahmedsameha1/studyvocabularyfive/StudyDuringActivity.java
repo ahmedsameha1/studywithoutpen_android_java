@@ -1,7 +1,6 @@
 package com.ahmedsameha1.studyvocabularyfive;
 
 import android.content.ActivityNotFoundException;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -503,7 +502,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         }
         return arrayList;
     }
-/*    private String [][] readFromStudyDuringTempTable() {
+/*    private String [][] readFromLinkerTableStudyDuringColumn() {
         String array [][] = new String [cursor.getCount()][2];
         for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
             array [cursor.getPosition()][0] = cursor.getString(0);
@@ -511,7 +510,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         }
         return array;
     }*/
-    private String [][] readFromStudyDuringTempTable() {
+    private String [][] readFromLinkerTableStudyDuringColumn() {
         String array [][] = new String [cursor.getCount()][2];
         for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
             int order = cursor.getInt(2);
@@ -554,7 +553,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         listForTest = retainedFragment.getListForTest_StudyDuringActivity();
         if ( listForTest == null ) {
             if ( boolean_continue ) {
-                listForTest = readFromStudyDuringTempTable();
+                listForTest = readFromLinkerTableStudyDuringColumn();
             } else {
                 listForTest = prepareListForStudyFirstTime();
             }
