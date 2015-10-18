@@ -672,7 +672,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
         sqLiteDatabase.execSQL(drop);
     }
-    private void migrateDataFromStudyDuringTempTableToLinkerStudyDuringFlagColumnV5 ( SQLiteDatabase sqLiteDatabase ) {
+/*    private void migrateDataFromStudyDuringTempTableToLinkerStudyDuringFlagColumnV5 ( SQLiteDatabase sqLiteDatabase ) {
         Cursor studyDuringTempCursor = sqLiteDatabase.query(Contract.Study_During_Temp.TABLE_NAME,
                 new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION,
                         Contract.Study_During_Temp.COLUMN_NAME_ANSWER,
@@ -692,10 +692,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         String drop = "DROP TABLE IF EXISTS " + Contract.Study_During_Temp.TABLE_NAME + ";";
         sqLiteDatabase.execSQL(drop);
-    }
-    public void tryf ( SQLiteDatabase sqLiteDatabase ) {
+    }*/
+    public void migrateDataFromStudyDuringTempTableToLinkerStudyDuringFlagColumnV5 ( SQLiteDatabase sqLiteDatabase ) {
         Cursor fieldCursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
                 new String[]{Contract.Field.COLUMN_NAME_FIELD_NAME},
                 null, null, null, null, null);
+        for ( fieldCursor.moveToFirst(); fieldCursor.getPosition() < fieldCursor.getCount();
+              fieldCursor.moveToNext() ){
+            Cursor studyDuringTempCursor = sqLiteDatabase.query(Contract.Study_During_Temp.TABLE_NAME,
+                    new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION,
+                            Contract.Study_During_Temp.COLUMN_NAME_ANSWER,
+                            Contract.Study_During_Temp.COLUMN_NAME_FIELD},
+                    Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ? ",
+                    new String[] {fieldCursor.getString(0)},
+                    null,null,null);
+            for ( studyDuringTempCursor.moveToFirst(); studyDuringTempCursor.getPosition() < studyDuringTempCursor.getCount();
+                  studyDuringTempCursor.moveToNext() ) {
+                String question = studyDuringTempCursor.getString(0);
+                String answer = studyDuringTempCursor.getString(1);
+                String fieldName = studyDuringTempCursor.getString(2);
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Linker.COLUMN_NAME_STUDY_DURING_ORDER,studyDuringTempCursor.getPosition());
+                sqLiteDatabase.update(Linker.TABLE_NAME, contentValues,
+                        Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                                + Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                        new String[]{question, answer, fieldName});
+            }
+        }
+        String drop = "DROP TABLE IF EXISTS " + Contract.Study_During_Temp.TABLE_NAME + ";";
+        sqLiteDatabase.execSQL(drop);
     }
 }
