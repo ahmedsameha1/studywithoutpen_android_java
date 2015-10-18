@@ -320,7 +320,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 //                databaseOperations.clearStudyDuringTempTable(currentField);
                 databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
 //                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
-                databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest,currentField);
+                databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest, currentField);
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES + DASH + currentField, convertRepeatedEntriesArrayListToString());
@@ -391,12 +391,10 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         boolean result = false;
         if ( enterAnswer.getText().toString().equals(listForTest [currentQuestionCounter][1]) ){
             imageResult.setImageResource(R.drawable.ic_correct_sign);
-            Toast.makeText(StudyDuringActivity.this,"Correct",Toast.LENGTH_SHORT).show();
             result = true;
         }
         else {
             imageResult.setImageResource(R.drawable.ic_wrong_sign);
-            Toast.makeText(StudyDuringActivity.this,"Wrong",Toast.LENGTH_SHORT).show();
             result = false;
 //            wrongAnswers.add(enterAnswer.getText().toString());
         }
@@ -572,7 +570,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
             }
 
-        } else {
+        } else if ( questionsNumber > 0 && loader.getId() == START_NEW_SESSION){
             Toast.makeText(this,getString(R.string.no_entries_in_this_time_range),Toast.LENGTH_LONG).show();
             finish();
         }
