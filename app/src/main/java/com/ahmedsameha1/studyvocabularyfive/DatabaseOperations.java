@@ -530,4 +530,14 @@ public class DatabaseOperations {
                 null);
         return cursor.getCount() > 0 ? true : false;
     }
+    public void writeTestActivityWrongAnswers( String question, String answer, String fieldName, String wrongAnswersString ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Linker.COLUMN_NAME_TEST_WRONG_ANSWERS,wrongAnswersString);
+        contentResolver.update(uri,
+                contentValues,
+                Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                        + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[] {question,answer,fieldName});
+    }
 }

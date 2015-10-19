@@ -318,11 +318,22 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         triesCounter++;
         if ( triesCounter == permitedTriesNumber && !result ) {
             wrongAnswersCounter++;
-            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
-            wrongItems.add(wrongItem);
+/*            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
+            wrongItems.add(wrongItem);*/
+
             wrongAnswers = null;
         }
         return result;
+    }
+    private String convertWrongAnswersArrayListToString( ArrayList<String> arrayList ) {
+        String s = "";
+        for ( int i = 0; i < arrayList.size(); i++ ) {
+            s += arrayList.get(i);
+            if ( i < arrayList.size() - 1) {
+                s += "\t";
+            }
+        }
+        return s;
     }
 
     @Override
