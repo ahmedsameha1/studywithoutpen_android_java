@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
@@ -315,11 +316,16 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 }
                 return true;
             case R.id.stop:
-                DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
+                final DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
+                        databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest, currentField);
+                    }
+                });
 //                databaseOperations.clearStudyDuringTempTable(currentField);
-                databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
 //                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
-                databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest, currentField);
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES + DASH + currentField, convertRepeatedEntriesArrayListToString());
