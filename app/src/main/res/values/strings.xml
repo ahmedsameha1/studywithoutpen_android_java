@@ -70,4 +70,5 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="open_facebook_page">Open facebook page</string>
+    <string name="complete_or_cancel_last_study_session">Please complete or cancel the last studying session before doing this action!</string>
 </resources>

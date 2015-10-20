@@ -70,4 +70,5 @@
     <string name="no">لا</string>
     <string name="yes">نعم</string>
     <string name="open_facebook_page">افتح صفحة الـ facebook.</string>
+    <string name="complete_or_cancel_last_study_session">لطفا أكمل جلسة الاستذكار الأخيرة أو ألغها قبل عمل هذا الإجراء!</string>
 </resources>

@@ -23,6 +23,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 /**
@@ -253,17 +254,21 @@ public class EntriesListFragment extends Fragment {
             editEntry.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        editQuestion.setEnabled(true);
-                        editAnswer.setEnabled(true);
-                        saveEditedEntry.setEnabled(true);
-                        studyEntry.setEnabled(false);
+                    if ( ! databaseOperations.checkLinkerStudyDuring(getCurrentField()) ) {
+                        if (isChecked) {
+                            editQuestion.setEnabled(true);
+                            editAnswer.setEnabled(true);
+                            saveEditedEntry.setEnabled(true);
+                            studyEntry.setEnabled(false);
 
+                        } else {
+                            editQuestion.setEnabled(false);
+                            editAnswer.setEnabled(false);
+                            saveEditedEntry.setEnabled(false);
+                            studyEntry.setEnabled(true);
+                        }
                     } else {
-                        editQuestion.setEnabled(false);
-                        editAnswer.setEnabled(false);
-                        saveEditedEntry.setEnabled(false);
-                        studyEntry.setEnabled(true);
+                        Toast.makeText(getActivity(),R.string.complete_or_cancel_last_study_session,Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -280,16 +285,20 @@ public class EntriesListFragment extends Fragment {
             deleteEntry.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    deleteEntryData[0] = getCurrentField();
-                    deleteEntryData[1] = editQuestion.getText().toString();
-                    deleteEntryData[2] = editAnswer.getText().toString();
-                    DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
-                    if ( getActivity() instanceof FieldActivity ) {
-                        FragmentManager fragmentManager = ((FieldActivity) getActivity()).getSupportFragmentManager();
-                        fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
+                    if ( ! databaseOperations.checkLinkerStudyDuring(getCurrentField()) ) {
+                        deleteEntryData[0] = getCurrentField();
+                        deleteEntryData[1] = editQuestion.getText().toString();
+                        deleteEntryData[2] = editAnswer.getText().toString();
+                        DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
+                        if ( getActivity() instanceof FieldActivity ) {
+                            FragmentManager fragmentManager = ((FieldActivity) getActivity()).getSupportFragmentManager();
+                            fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
+                        } else {
+                            fragment.show(getActivity().getSupportFragmentManager(),
+                                    DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
+                        }
                     } else {
-                        fragment.show(getActivity().getSupportFragmentManager(),
-                                DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
+                        Toast.makeText(getActivity(),R.string.complete_or_cancel_last_study_session,Toast.LENGTH_LONG).show();
                     }
                 }
             });

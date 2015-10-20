@@ -22,6 +22,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -83,6 +85,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     private TextView showQuestion, remainingQuestionCounter, hintIfMoreThanOneAnswer,showTries, showNumberOfQuetions;
     private Button start, check, _continue;
     private ImageView imageResult;
+    private ProgressBar progressBar;
     private ImageButton nextHint;
     //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
@@ -114,6 +117,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 //        questionsNumber = listForTest.length;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         enterAnswer = (EditText) findViewById(R.id.enter_answer);
         showQuestion = (TextView) findViewById(R.id.display_question);
         check = (Button) findViewById(R.id.check);
@@ -317,13 +321,10 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 return true;
             case R.id.stop:
                 final DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
-                        databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest, currentField);
-                    }
-                });
+                progressBar.setVisibility(View.VISIBLE);
+                databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
+                databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest, currentField);
+
 //                databaseOperations.clearStudyDuringTempTable(currentField);
 //                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
