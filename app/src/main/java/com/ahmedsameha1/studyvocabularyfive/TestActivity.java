@@ -49,7 +49,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     private String currentField;
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
-    private ArrayList<WrongItem> wrongItems;
+//    private ArrayList<WrongItem> wrongItems;
     private boolean result, testingNow = false;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber,wrongAnswersCounter;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
@@ -127,7 +127,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                     numberOfTries.setEnabled(false);
                     enterPercent.setEnabled(false);
                     wrongAnswers = new ArrayList<String>(permitedTriesNumber);
-                    wrongItems = new ArrayList<WrongItem>();
+//                    wrongItems = new ArrayList<WrongItem>();
                 }
             }
         });
@@ -154,9 +154,9 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                             Bundle bundle = new Bundle();
                             bundle.putInt(NUMBER_OF_QUESTIONS,questionsNumber);
                             bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
-                            bundle.putString(CURRENT_FIELD,currentField);
-                            wrongItems.trimToSize();
-                            bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItems);
+                            bundle.putString(CURRENT_FIELD, currentField);
+//                            wrongItems.trimToSize();
+//                            bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItems);
                             fragment.setArguments(bundle);
                             fragment.show(getSupportFragmentManager(), ShowResultDialogFragment.SHOW_RESULT_DIALOG_FRAGMENT);
                             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
@@ -232,6 +232,9 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
 
         //noinspection SimplifiableIfStatement
         switch (id) {
+            case R.id.stop:
+                databaseOperations.writeLinkerTableTestOrder(listForTest,currentField);
+
             case R.id.rate_the_app:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());
                 Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
@@ -318,6 +321,8 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         triesCounter++;
         if ( triesCounter == permitedTriesNumber && !result ) {
             wrongAnswersCounter++;
+            databaseOperations.writeTestActivityWrongAnswers(listForTest [currentQuestionCounter][0],
+                    listForTest[currentQuestionCounter][1],currentField,convertWrongAnswersArrayListToString(wrongAnswers));
 /*            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
             wrongItems.add(wrongItem);*/
 
@@ -362,7 +367,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         savedInsatanceState.putInt(HINT_COUNTER,hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
         savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
-        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
+//        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         super.onSaveInstanceState(savedInsatanceState);
     }
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
@@ -378,7 +383,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
-        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
+//        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
         if ( testingNow ) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             showTries.setText(Integer.toString(triesCounter + 1));

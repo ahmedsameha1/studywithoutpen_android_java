@@ -34,21 +34,23 @@ import java.util.StringTokenizer;
 public class WrongAnswersActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
     public static final String WRONG_ITEM_LIST = "wrongItemList";
     private String currentField;
-    private ArrayList<WrongItem> ttt;
+    private ArrayList<WrongItem> wrongItemList;
     private Cursor cursor;
+    private ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wrong_answers);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main_activity);
-        ListView listView = (ListView) findViewById(R.id.wrong_answer_list);
+        listView = (ListView) findViewById(R.id.wrong_answer_list);
         setSupportActionBar(toolbar);
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
         currentField = bundle.getString(TestActivity.CURRENT_FIELD);
-        ArrayList<WrongItem> wrongItemList = (ArrayList<WrongItem>) bundle.getSerializable(WRONG_ITEM_LIST);
-        ttt = new ArrayList<WrongItem>();
-        WrongItemAdapter wrongItemAdapter = new WrongItemAdapter(this,wrongItemList);
-        listView.setAdapter(wrongItemAdapter);
+//        ArrayList<WrongItem> wrongItemList = (ArrayList<WrongItem>) bundle.getSerializable(WRONG_ITEM_LIST);
+        wrongItemList = new ArrayList<WrongItem>();
+//        WrongItemAdapter wrongItemAdapter = new WrongItemAdapter(this,wrongItemList);
+//        listView.setAdapter(wrongItemAdapter);
+        getSupportLoaderManager().initLoader(0,null,this);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -169,6 +171,11 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         return wrongItemsList;
     }
     @Override
+    public void onBackPressed() {
+        DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
+        databaseOperations.clearLinkerTableWrongAnswers(currentField);
+    }
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
         return new CursorLoader(this,uri,
@@ -183,7 +190,9 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.cursor = data;
-        ttt = readWrongAnswersFromLinkerTable();
+        wrongItemList = readWrongAnswersFromLinkerTable();
+        WrongItemAdapter wrongItemAdapter = new WrongItemAdapter(this, wrongItemList);
+        listView.setAdapter(wrongItemAdapter);
     }
 
     @Override

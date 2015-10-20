@@ -540,4 +540,25 @@ public class DatabaseOperations {
                         + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                 new String[] {question,answer,fieldName});
     }
+    public void clearLinkerTableWrongAnswers(String fieldName) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Linker.COLUMN_NAME_TEST_WRONG_ANSWERS,"");
+        contentResolver.update(uri,
+                contentValues,
+                Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[]{fieldName});
+    }
+    public void writeLinkerTableTestOrder( String[][] listForTest, String fieldName ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        for ( int i = 0; i < listForTest.length; i++ ) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Linker.COLUMN_NAME_TEST_ORDER,i);
+            contentResolver.update(uri,
+                    contentValues,
+                    Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                            + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[]{listForTest [i][0],listForTest [i][1],fieldName});
+        }
+    }
 }
