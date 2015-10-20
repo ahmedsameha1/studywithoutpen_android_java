@@ -25,13 +25,15 @@ import android.widget.Toast;
 public class FieldActivity extends AppCompatActivity implements CreateFieldDialogFragment.Contact,
         DeleteFieldDialogFragment.Contact,
         LoaderManager.LoaderCallbacks<Cursor>,
-        AskAboutContinuePreviousStudyDuringDialogFragment.Contact {
+        AskAboutContinuePreviousStudyDuringDialogFragment.Contact,
+        AskAboutContinuePreviousTestDialogFragment.Contact {
 
     public static final String INITIAL_FIELD = "intial_field";
     public static final String GET_NEW_FIELD_NAME = "getNewFieldName";
     public static final String GET_CONFIRMATION = "getConfirmation";
     public static final String CURRENT_FIELD = "currentField";
     public static final String CHECK_IF_CONTINUE_STUDY_DURING_SESSION = "checkIfContinueStudyDuringSession";
+    public static final String CHECK_IF_CONTINUE_TEST_SESSION = "checkIfContinueTestSession";
     public static final int FIELD_LIST_LOADER_ID = 0;
     public static final int FIELD_ENTRIES_LOADER_ID = 1;
     private String[] deleteEntryData = {null, null, null};
@@ -178,9 +180,14 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                 }*/
 //                fieldEntriesCursor = databaseOperations.getFieldEntries(getCurrentField());
                 if ( fieldEntriesCursor.getCount() > 0 ) {
-                    Intent intent = new Intent(this, TestActivity.class);
-                    intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
-                    startActivity(intent);
+                    if ( databaseOperations.checkLinkerTest(getCurrentField()) ) {
+                        AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
+                        fragment3.show(getSupportFragmentManager(),CHECK_IF_CONTINUE_TEST_SESSION);
+                    } else {
+                        Intent intent = new Intent(this, TestActivity.class);
+                        intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
+                        startActivity(intent);
+                    }
                 } else {
                     Toast.makeText(this,getString(R.string.no_entries_in_field),Toast.LENGTH_SHORT).show();
                 }
@@ -312,6 +319,19 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
         } else {
             StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
             fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+        }
+    }
+    public void continueTest( boolean decision ) {
+        if ( decision ) {
+            Intent intent = new Intent(this, TestActivity.class);
+            intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
+            intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,true);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(this, TestActivity.class);
+            intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
+            intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,false);
+            startActivity(intent);
         }
     }
     @Override

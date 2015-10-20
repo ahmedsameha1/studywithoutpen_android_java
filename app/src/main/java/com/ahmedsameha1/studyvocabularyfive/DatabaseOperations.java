@@ -561,4 +561,22 @@ public class DatabaseOperations {
                     new String[]{listForTest [i][0],listForTest [i][1],fieldName});
         }
     }
+    public boolean checkLinkerTest( String fieldName ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        Cursor cursor = contentResolver.query(uri,
+                new String[]{Contract.Linker.COLUMN_NAME_TEST_ORDER},
+                Contract.Linker.COLUMN_NAME_TEST_ORDER + " >= ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[]{"0", fieldName},
+                null);
+        return cursor.getCount() > 0 ? true : false;
+    }
+    public void clearLinkerTableTestOrder ( String fieldName ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Linker.COLUMN_NAME_TEST_ORDER,-1);
+        contentResolver.update(uri,
+                contentValues,
+                Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[] {fieldName});
+    }
 }

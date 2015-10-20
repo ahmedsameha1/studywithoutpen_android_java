@@ -2,9 +2,11 @@ package com.ahmedsameha1.studyvocabularyfive;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -33,6 +35,9 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
+    public static final int CONTINUE_PREVIOUS_SESSION = 1;
+    public static final String DASH = "-";
+    public static final int START_NEW_SESSION = 2;
     public static final String LIST_FOR_TEST = "listForTest";
     public static final String CURRENT_QUESTION_COUNTER = "currentQuestionCounter";
     public static final String TRIES_COUNTER = "triesCounter";
@@ -46,9 +51,11 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     public static final String HINTS = "hints";
     public static final String WRONG_ANSWERS = "wrongAnswers";
     public static final String WRONG_ITEMS = "wrongItems";
+    public static final String LAST_SESSION_OR_NEW_ONE = "lastSessionOrNewOne";
     private String currentField;
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
+    private boolean boolean_continue = false;
 //    private ArrayList<WrongItem> wrongItems;
     private boolean result, testingNow = false;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber,wrongAnswersCounter;
@@ -90,6 +97,15 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         nextHint = (ImageButton) findViewById(R.id.next_hint);
         showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
         setSupportActionBar(toolbar);
+        boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE,false);
+        if ( boolean_continue ) {
+            getSupportLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION,null,this);
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER + DASH + currentField,0);
+            wrongAnswersCounter = sharedPreferences.getInt(NUMBER_OF_WRONG_ANSWERS + DASH + currentField,0);
+        } else {
+            getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
+        }
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -234,7 +250,11 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         switch (id) {
             case R.id.stop:
                 databaseOperations.writeLinkerTableTestOrder(listForTest,currentField);
-
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(CURRENT_QUESTION_COUNTER + DASH + currentField,currentQuestionCounter);
+                editor.putInt(NUMBER_OF_WRONG_ANSWERS + DASH + currentField,wrongAnswersCounter);
+                editor.commit();
             case R.id.rate_the_app:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());
                 Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
@@ -340,7 +360,16 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         }
         return s;
     }
-
+    private String [][] readTestDataFromLinkerTable() {
+        String [][] listForTest = new String[fieldEntriesCursor.getCount()][2];
+        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+              fieldEntriesCursor.moveToNext() ) {
+            int order = fieldEntriesCursor.getInt(2);
+            listForTest [order][0] = fieldEntriesCursor.getString(0);
+            listForTest [order][1] = fieldEntriesCursor.getString(1);
+        }
+        return listForTest;
+    }
     @Override
     protected void onStop() {
         super.onStop();
@@ -356,14 +385,19 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     }
     @Override
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
-        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(CURRENT_QUESTION_COUNTER + DASH + currentField,currentQuestionCounter);
+        editor.putInt(NUMBER_OF_WRONG_ANSWERS + DASH + currentField,wrongAnswersCounter);
+        editor.commit();
+//        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInsatanceState.putBoolean(RESULT, result);
         savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInsatanceState.putBoolean(NEXT_BUTTON_STATE, next.isEnabled());
         savedInsatanceState.putBoolean(TESTING_NOW, testingNow);
         savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
-        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
+//        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
         savedInsatanceState.putInt(HINT_COUNTER,hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
         savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
@@ -372,14 +406,17 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     }
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         super.onRestoreInstanceState(savedInstanceState);
-        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER + DASH + currentField,0);
+        wrongAnswersCounter = sharedPreferences.getInt(NUMBER_OF_WRONG_ANSWERS + DASH + currentField,0);
+//        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);
         permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
         testingNow = savedInstanceState.getBoolean(TESTING_NOW);
         boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
         questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
-        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
+//        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
@@ -401,17 +438,33 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
-        return new CursorLoader(this,
-                uri,
-                new String[] {"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                new String[] {currentField},
-                null);
+        if ( id == CONTINUE_PREVIOUS_SESSION ) {
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+            return new CursorLoader(this,uri,
+                    new String[] {Contract.Linker.COLUMN_NAME_QUESTION_LINK,
+                            Contract.Linker.COLUMN_NAME_ANSWER_LINK,
+                            Contract.Linker.COLUMN_NAME_TEST_ORDER},
+                    Contract.Linker.COLUMN_NAME_TEST_ORDER + " >= ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[] {"0", currentField},
+                    null);
+        } else {
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+            return new CursorLoader(this,
+                    uri,
+                    new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
+                    Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[]{currentField},
+                    null);
+        }
     }
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         fieldEntriesCursor = data;
+        if ( boolean_continue ) {
+            if ( listForTest == null ) {
+                readTestDataFromLinkerTable();
+            }
+        }
     }
 
     @Override
