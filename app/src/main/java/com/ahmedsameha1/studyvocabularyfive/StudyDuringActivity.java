@@ -34,6 +34,7 @@ import java.util.StringTokenizer;
  * Created by ahmed_000 on 9/23/2015.
  */
 public class StudyDuringActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+    public static final String ACTIVITY_NAME = "StudyDuringActivity";
     public static final String CURRENT_FIELD = "currentField";
     public static final String STARTING_TIME = "startingTime";
     public static final String REPEATED_ENTRIES = "repeatedEntries";
@@ -183,8 +184,10 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                 /*editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES, null);
                                 editor.putInt(CURRENT_QUESTION_COUNTER, 0);*/
-                                editor.remove(STRING_REPRESENTING_REPEATED_ENTRIES + DASH + currentField);
-                                editor.remove(CURRENT_QUESTION_COUNTER + DASH + currentField);
+                                editor.remove(ACTIVITY_NAME + DASH + STRING_REPRESENTING_REPEATED_ENTRIES
+                                        + DASH + currentField);
+                                editor.remove(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
+                                        + DASH + currentField);
                                 editor.commit();
                                 finish();
                             }
@@ -280,8 +283,10 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE,false);
         if ( boolean_continue ) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            String string = sharedPreferences.getString(STRING_REPRESENTING_REPEATED_ENTRIES + DASH + currentField,null);
-            currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER + DASH + currentField,0);
+            String string = sharedPreferences.getString(ACTIVITY_NAME + DASH + STRING_REPRESENTING_REPEATED_ENTRIES
+                    + DASH + currentField,null);
+            currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
+                    + DASH + currentField,0);
             repeatedEntries = convertStringToRepeatedEntriesArrayList(string);
             getSupportLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION,null,this);
         } else {
@@ -328,8 +333,10 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 //                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES + DASH + currentField, convertRepeatedEntriesArrayListToString());
-                editor.putInt(CURRENT_QUESTION_COUNTER + DASH + currentField, currentQuestionCounter);
+                editor.putString(ACTIVITY_NAME + DASH + STRING_REPRESENTING_REPEATED_ENTRIES
+                        + DASH + currentField, convertRepeatedEntriesArrayListToString());
+                editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
+                        + DASH + currentField, currentQuestionCounter);
                 editor.commit();
                 finish();
                 return true;
@@ -434,7 +441,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(CURRENT_QUESTION_COUNTER + DASH + currentField, currentQuestionCounter);
+        editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField, currentQuestionCounter);
         editor.commit();
 //        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
@@ -455,7 +462,8 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         super.onRestoreInstanceState(savedInstanceState);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER + DASH + currentField,0);
+        currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
+                + DASH + currentField,0);
 //        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);

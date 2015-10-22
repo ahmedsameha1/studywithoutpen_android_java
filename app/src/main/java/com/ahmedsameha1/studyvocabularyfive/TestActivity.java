@@ -31,6 +31,7 @@ import java.util.Arrays;
  * Created by ahmed on 8/3/2015.
  */
 public class TestActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+    public static final String ACTIVITY_NAME = "TestActivity";
     public static final String CURRENT_FIELD = "currentField";
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
@@ -63,7 +64,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     private Cursor fieldEntriesCursor, searchForCursor;
     private Toolbar toolbar;
     private EditText enterPercent, enterAnswer, numberOfTries;
-    private TextView showQuestion, remainingQuestionCounter, hintIfMoreThanOneAnswer,showTries, showNumberOfQuetions;
+    private TextView showQuestion, remainingQuestionCounter, hintIfMoreThanOneAnswer,showTries, showNumberOfQuestions;
     private Button start, next;
     private ImageView imageResult;
     private ImageButton nextHint;
@@ -95,14 +96,16 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         showTries = (TextView) findViewById(R.id.trys);
         numberOfTries = (EditText) findViewById(R.id.enter_tries);
         nextHint = (ImageButton) findViewById(R.id.next_hint);
-        showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
+        showNumberOfQuestions = (TextView) findViewById(R.id.number_of_questions);
         setSupportActionBar(toolbar);
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE,false);
         if ( boolean_continue ) {
             getSupportLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION,null,this);
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER + DASH + currentField,0);
-            wrongAnswersCounter = sharedPreferences.getInt(NUMBER_OF_WRONG_ANSWERS + DASH + currentField,0);
+            currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
+                    + DASH + currentField,0);
+            wrongAnswersCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS
+                    + DASH + currentField,0);
         } else {
             getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
         }
@@ -128,7 +131,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                     permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
                     listForTest = getListForTest(Double.parseDouble(enterPercent.getText().toString()));
                     questionsNumber = listForTest.length;
-                    showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+                    showNumberOfQuestions.setText(Integer.toString(questionsNumber));
                     enterAnswer.setEnabled(true);
                     enterAnswer.requestFocus();
                     next.setEnabled(true);
@@ -180,12 +183,18 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                             wrongAnswersCounter = 0;
                             testingNow = false;
                             enterAnswer.setEnabled(false);
-                            showNumberOfQuetions.setText("");
+                            showNumberOfQuestions.setText("");
                             remainingQuestionCounter.setText("");
                             showTries.setText("");
                             hintIfMoreThanOneAnswer.setText("");
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
                             imageResult.setImageResource(R.drawable.ic_question_marks);
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TestActivity.this); // getting the preferences
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.CURRENT_QUESTION_COUNTER
+                                    + TestActivity.DASH + currentField);
+                            editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.NUMBER_OF_WRONG_ANSWERS
+                                    + TestActivity.DASH + currentField);
                         }
                         else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -252,9 +261,11 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                 databaseOperations.writeLinkerTableTestOrder(listForTest,currentField);
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putInt(CURRENT_QUESTION_COUNTER + DASH + currentField,currentQuestionCounter);
-                editor.putInt(NUMBER_OF_WRONG_ANSWERS + DASH + currentField,wrongAnswersCounter);
+                editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField,currentQuestionCounter);
+                editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS + DASH + currentField, wrongAnswersCounter);
                 editor.commit();
+                finish();
+                return true;
             case R.id.rate_the_app:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());
                 Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
@@ -387,8 +398,8 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(CURRENT_QUESTION_COUNTER + DASH + currentField,currentQuestionCounter);
-        editor.putInt(NUMBER_OF_WRONG_ANSWERS + DASH + currentField,wrongAnswersCounter);
+        editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField,currentQuestionCounter);
+        editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS + DASH + currentField,wrongAnswersCounter);
         editor.commit();
 //        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
@@ -404,11 +415,12 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         super.onSaveInstanceState(savedInsatanceState);
     }
+    @Override
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         super.onRestoreInstanceState(savedInstanceState);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        currentQuestionCounter = sharedPreferences.getInt(CURRENT_QUESTION_COUNTER + DASH + currentField,0);
-        wrongAnswersCounter = sharedPreferences.getInt(NUMBER_OF_WRONG_ANSWERS + DASH + currentField,0);
+        currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField,0);
+        wrongAnswersCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS + DASH + currentField,0);
 //        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);
@@ -425,7 +437,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             showTries.setText(Integer.toString(triesCounter + 1));
             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-            showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
             next.setEnabled(nextState);
             enterPercent.setEnabled(false);
             numberOfTries.setEnabled(false);
@@ -462,7 +474,17 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         fieldEntriesCursor = data;
         if ( boolean_continue ) {
             if ( listForTest == null ) {
-                readTestDataFromLinkerTable();
+                listForTest = readTestDataFromLinkerTable();
+                questionsNumber = listForTest.length;
+                showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                showTries.setText(Integer.toString(triesCounter + 1));
+                showQuestion.setText(listForTest [currentQuestionCounter][0]);
+                start.setEnabled(false);
+                next.setEnabled(true);
+                enterPercent.setEnabled(false);
+                numberOfTries.setEnabled(false);
+                enterAnswer.setEnabled(true);
             }
         }
     }

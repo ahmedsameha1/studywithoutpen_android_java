@@ -46,6 +46,12 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                 DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
                                 databaseOperations.clearLinkerTableWrongAnswers(((FieldActivity) getActivity() ).getCurrentField());
                                 databaseOperations.clearLinkerTableTestOrder(((FieldActivity) getActivity() ).getCurrentField());
+                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity()); // getting the preferences
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.CURRENT_QUESTION_COUNTER
+                                + TestActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
+                                editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.NUMBER_OF_WRONG_ANSWERS
+                                + TestActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
                             }
                         }
 

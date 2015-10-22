@@ -170,10 +170,18 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         }
         return wrongItemsList;
     }
-    @Override
-    public void onBackPressed() {
+    public void onDestroy() {
         DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
         databaseOperations.clearLinkerTableWrongAnswers(currentField);
+        super.onDestroy();
+    }
+    @Override
+    public void onSaveInstanceState ( Bundle savedInsatanceState ) {
+        savedInsatanceState.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+    }
+    @Override
+    public void onRestoreInstanceState( Bundle savedInstanceState ) {
+        wrongItemList = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEM_LIST);
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
