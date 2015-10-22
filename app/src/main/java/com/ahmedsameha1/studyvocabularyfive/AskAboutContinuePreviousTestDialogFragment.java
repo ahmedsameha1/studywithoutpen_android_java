@@ -2,6 +2,7 @@ package com.ahmedsameha1.studyvocabularyfive;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -21,10 +22,13 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
-                                ((Contact) getActivity()).continueTest(true);
+//                                ((Contact) getActivity()).continueTest(true);
+                                Intent intent = new Intent(getActivity(), TestActivity.class);
+                                intent.putExtra(TestActivity.CURRENT_FIELD, ((FieldActivity) getActivity() ).getCurrentField());
+                                intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,true);
+                                startActivity(intent);
                             }
                         }
-
                 )
                 .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                             @Override
@@ -42,7 +46,11 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                         + StudyDuringActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
                                 editor.commit();
                                 dismiss();*/
-                                ((Contact) getActivity()).continueTest(false);
+//                                ((Contact) getActivity()).continueTest(false);
+                                Intent intent = new Intent(getActivity(), TestActivity.class);
+                                intent.putExtra(TestActivity.CURRENT_FIELD, ((FieldActivity) getActivity() ).getCurrentField());
+                                intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE, false);
+                                startActivity(intent);
                                 DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
                                 databaseOperations.clearLinkerTableWrongAnswers(((FieldActivity) getActivity() ).getCurrentField());
                                 databaseOperations.clearLinkerTableTestOrder(((FieldActivity) getActivity() ).getCurrentField());
@@ -52,6 +60,9 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                 + TestActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
                                 editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.NUMBER_OF_WRONG_ANSWERS
                                 + TestActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
+                                editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.PERMITED_TRIES_NUMBER
+                                + TestActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
+                                editor.commit();
                             }
                         }
 

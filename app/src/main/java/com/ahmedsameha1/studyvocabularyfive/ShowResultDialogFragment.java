@@ -50,7 +50,13 @@ public class ShowResultDialogFragment extends DialogFragment {
                         startActivity(intent);
                     }
                 }*/)
-                .setNegativeButton(R.string.cancel, null)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
+                        databaseOperations.clearLinkerTableWrongAnswers(currentField);
+                    }
+                })
                 .create();
         alertDialog.setCanceledOnTouchOutside(false);
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {

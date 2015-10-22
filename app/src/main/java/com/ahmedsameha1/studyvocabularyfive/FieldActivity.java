@@ -186,6 +186,7 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                     } else {
                         Intent intent = new Intent(this, TestActivity.class);
                         intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
+                        intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,false);
                         startActivity(intent);
                     }
                 } else {
