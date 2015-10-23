@@ -22,7 +22,7 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
-//                                ((Contact) getActivity()).continueTest(true);
+//
                                 Intent intent = new Intent(getActivity(), TestActivity.class);
                                 intent.putExtra(TestActivity.CURRENT_FIELD, ((FieldActivity) getActivity() ).getCurrentField());
                                 intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,true);
@@ -69,7 +69,5 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                 );
         return builder.create();
     }
-    public interface Contact {
-        public void continueTest( boolean decision );
-    }
+
 }

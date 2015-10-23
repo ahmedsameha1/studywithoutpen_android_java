@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,6 +54,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     public static final String WRONG_ANSWERS = "wrongAnswers";
     public static final String WRONG_ITEMS = "wrongItems";
     public static final String LAST_SESSION_OR_NEW_ONE = "lastSessionOrNewOne";
+    public static final String BOOLEAN_CONTINUE = "booleanContinue";
     private String currentField;
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
@@ -102,41 +104,45 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int j = 0;
-                try {
-                    j = Integer.parseInt(numberOfTries.getText().toString());
-                } catch ( NumberFormatException nfe ) {
-                    numberOfTries.setText(Integer.toString(1));
-                }
-                if (enterPercent.getText().toString().equals("")
-                        || Double.parseDouble(enterPercent.getText().toString()) <= 0 ||
-                        Double.parseDouble(enterPercent.getText().toString()) > 100) {
-                    Toast.makeText(TestActivity.this, getString(R.string.percentage_between), Toast.LENGTH_LONG).show();
-                } else if (j <= 0) {
-                    numberOfTries.setText(Integer.toString(1));
-                    Toast.makeText(TestActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
+                if ( fieldEntriesCursor != null && fieldEntriesCursor.getCount() > 0 ) {
+                    int j = 0;
+                    try {
+                        j = Integer.parseInt(numberOfTries.getText().toString());
+                    } catch ( NumberFormatException nfe ) {
+                        numberOfTries.setText(Integer.toString(1));
+                    }
+                    if (enterPercent.getText().toString().equals("")
+                            || Double.parseDouble(enterPercent.getText().toString()) <= 0 ||
+                            Double.parseDouble(enterPercent.getText().toString()) > 100) {
+                        Toast.makeText(TestActivity.this, getString(R.string.percentage_between), Toast.LENGTH_LONG).show();
+                    } else if (j <= 0) {
+                        numberOfTries.setText(Integer.toString(1));
+                        Toast.makeText(TestActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
 
+                    } else {
+                        start.setEnabled(false);
+                        permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
+                        listForTest = getListForTest(Double.parseDouble(enterPercent.getText().toString()));
+                        questionsNumber = listForTest.length;
+                        showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                        enterAnswer.setEnabled(true);
+                        enterAnswer.requestFocus();
+                        next.setEnabled(true);
+                        enterPercent.setText("");
+                        currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                        triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        ifMoreThanOnce();
+                        showTries.setText(Integer.toString(triesCounter + 1));
+                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
+                        testingNow = true;
+                        numberOfTries.setEnabled(false);
+                        enterPercent.setEnabled(false);
+                        wrongAnswers = new ArrayList<String>(permitedTriesNumber);
+    //                    wrongItems = new ArrayList<WrongItem>();
+                    }
                 } else {
-                    start.setEnabled(false);
-                    permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
-                    listForTest = getListForTest(Double.parseDouble(enterPercent.getText().toString()));
-                    questionsNumber = listForTest.length;
-                    showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                    enterAnswer.setEnabled(true);
-                    enterAnswer.requestFocus();
-                    next.setEnabled(true);
-                    enterPercent.setText("");
-                    currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                    triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                    ifMoreThanOnce();
-                    showTries.setText(Integer.toString(triesCounter + 1));
-                    remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
-                    testingNow = true;
-                    numberOfTries.setEnabled(false);
-                    enterPercent.setEnabled(false);
-                    wrongAnswers = new ArrayList<String>(permitedTriesNumber);
-//                    wrongItems = new ArrayList<WrongItem>();
+                    Toast.makeText(TestActivity.this,R.string.wait_for_data_loading,Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -152,12 +158,11 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                         currentQuestionCounter++;
                         if (currentQuestionCounter >= questionsNumber) {
-                            showQuestion.setText(getString(R.string.end_of_test));
+                            showQuestion.setText(getString(R.string.test_has_completed));
                             next.setEnabled(false);
                             start.setEnabled(true);
                             numberOfTries.setEnabled(true);
                             enterPercent.setEnabled(true);
-                            Toast.makeText(TestActivity.this, "Test Completed!", Toast.LENGTH_SHORT).show();
                             ShowResultDialogFragment fragment = new ShowResultDialogFragment();
                             Bundle bundle = new Bundle();
                             bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
@@ -178,8 +183,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                             hintIfMoreThanOneAnswer.setText("");
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
                             imageResult.setImageResource(R.drawable.ic_question_marks);
-                            fieldEntriesCursor = null;
-                            getSupportLoaderManager().restartLoader(START_NEW_SESSION,null,TestActivity.this);
+//                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, TestActivity.this);
                             databaseOperations.clearLinkerTableTestOrder(currentField);
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TestActivity.this); // getting the preferences
                             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -247,6 +251,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
             getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
         }
         databaseOperations = new DatabaseOperations(getContentResolver());
+        Log.d("fff", "onCreate()");
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -351,12 +356,10 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         boolean result = false;
         if ( enterAnswer.getText().toString().equals(listForTest [currentQuestionCounter][1]) ){
             imageResult.setImageResource(R.drawable.ic_correct_sign);
-            Toast.makeText(TestActivity.this,"Correct",Toast.LENGTH_SHORT).show();
             result = true;
         }
         else {
             imageResult.setImageResource(R.drawable.ic_wrong_sign);
-            Toast.makeText(TestActivity.this,"Wrong",Toast.LENGTH_SHORT).show();
             result = false;
             wrongAnswers.add(enterAnswer.getText().toString());
         }
@@ -411,7 +414,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField,currentQuestionCounter);
-        editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS + DASH + currentField,wrongAnswersCounter);
+        editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS + DASH + currentField, wrongAnswersCounter);
         editor.putInt(ACTIVITY_NAME + DASH + PERMITED_TRIES_NUMBER + DASH + currentField, permitedTriesNumber);
         editor.commit();
 //        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
@@ -426,6 +429,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         savedInsatanceState.putStringArrayList(HINTS, hints);
         savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
+        savedInsatanceState.putBoolean(BOOLEAN_CONTINUE,boolean_continue);
         super.onSaveInstanceState(savedInsatanceState);
     }
     @Override
@@ -438,7 +442,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
 //        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);
-        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
+//        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
         testingNow = savedInstanceState.getBoolean(TESTING_NOW);
         boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
         questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
@@ -447,11 +451,13 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
 //        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
+        boolean_continue = savedInstanceState.getBoolean(BOOLEAN_CONTINUE);
         if ( testingNow ) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             showTries.setText(Integer.toString(triesCounter + 1));
             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
             showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+            start.setEnabled(false);
             next.setEnabled(nextState);
             enterPercent.setEnabled(false);
             numberOfTries.setEnabled(false);
@@ -493,15 +499,18 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                 showNumberOfQuestions.setText(Integer.toString(questionsNumber));
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                 showTries.setText(Integer.toString(triesCounter + 1));
-                showQuestion.setText(listForTest [currentQuestionCounter][0]);
+                showQuestion.setText(listForTest[currentQuestionCounter][0]);
                 start.setEnabled(false);
                 next.setEnabled(true);
                 enterPercent.setEnabled(false);
                 numberOfTries.setEnabled(false);
                 enterAnswer.setEnabled(true);
+                enterAnswer.requestFocus();
                 testingNow = true;
                 wrongAnswers = new ArrayList<String>(permitedTriesNumber);
                 boolean_continue = false;
+                getSupportLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
+                getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
             }
         }
     }

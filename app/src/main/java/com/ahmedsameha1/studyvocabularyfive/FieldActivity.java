@@ -24,9 +24,7 @@ import android.widget.Toast;
 
 public class FieldActivity extends AppCompatActivity implements CreateFieldDialogFragment.Contact,
         DeleteFieldDialogFragment.Contact,
-        LoaderManager.LoaderCallbacks<Cursor>,
-        AskAboutContinuePreviousStudyDuringDialogFragment.Contact,
-        AskAboutContinuePreviousTestDialogFragment.Contact {
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String INITIAL_FIELD = "intial_field";
     public static final String GET_NEW_FIELD_NAME = "getNewFieldName";
@@ -311,30 +309,8 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
             fieldsListSpinner.setSelection(lastUsedPosition);
         }
     }
-    public void continueStudyDuring( boolean decision ) {
-        if ( decision ) {
-            Intent intent = new Intent(this,StudyDuringActivity.class);
-            intent.putExtra(StudyDuringActivity.CURRENT_FIELD,getCurrentField());
-            intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,true);
-            startActivity(intent);
-        } else {
-            StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
-            fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
-        }
-    }
-    public void continueTest( boolean decision ) {
-        if ( decision ) {
-            Intent intent = new Intent(this, TestActivity.class);
-            intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
-            intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,true);
-            startActivity(intent);
-        } else {
-            Intent intent = new Intent(this, TestActivity.class);
-            intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
-            intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,false);
-            startActivity(intent);
-        }
-    }
+
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);

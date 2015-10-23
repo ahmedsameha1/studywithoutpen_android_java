@@ -2,6 +2,7 @@ package com.ahmedsameha1.studyvocabularyfive;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -21,7 +22,11 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
-                        ((Contact) getActivity()).continueStudyDuring(true);
+//                        ((Contact) getActivity()).continueStudyDuring(true);
+                                Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
+                                intent.putExtra(StudyDuringActivity.CURRENT_FIELD,((FieldActivity) getActivity() ).getCurrentField());
+                                intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,true);
+                                startActivity(intent);
                             }
                         }
 
@@ -29,7 +34,9 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                 .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ((Contact) getActivity()).continueStudyDuring(false);
+//                                ((Contact) getActivity()).continueStudyDuring(false);
+                                StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                                fragment2.show(getActivity().getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
                                 DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
                                 databaseOperations.clearStudyDuringDataFromLinkerTable( ((FieldActivity) getActivity() ).getCurrentField());
                                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity()); // getting the preferences
@@ -50,7 +57,8 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                 );
         return builder.create();
     }
-    public interface Contact {
+/*    public interface Contact {
         public void continueStudyDuring( boolean decision );
-    }
+    }*/
 }
+

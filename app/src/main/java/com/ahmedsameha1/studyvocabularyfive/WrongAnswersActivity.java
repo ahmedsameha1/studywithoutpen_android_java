@@ -47,7 +47,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
         currentField = bundle.getString(TestActivity.CURRENT_FIELD);
 //        ArrayList<WrongItem> wrongItemList = (ArrayList<WrongItem>) bundle.getSerializable(WRONG_ITEM_LIST);
-        wrongItemList = new ArrayList<WrongItem>();
+//        wrongItemList = new ArrayList<WrongItem>();
 //        WrongItemAdapter wrongItemAdapter = new WrongItemAdapter(this,wrongItemList);
 //        listView.setAdapter(wrongItemAdapter);
         getSupportLoaderManager().initLoader(0,null,this);
@@ -198,7 +198,9 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.cursor = data;
-        wrongItemList = readWrongAnswersFromLinkerTable();
+        if ( wrongItemList == null ) {
+            wrongItemList = readWrongAnswersFromLinkerTable();
+        }
         WrongItemAdapter wrongItemAdapter = new WrongItemAdapter(this, wrongItemList);
         listView.setAdapter(wrongItemAdapter);
     }

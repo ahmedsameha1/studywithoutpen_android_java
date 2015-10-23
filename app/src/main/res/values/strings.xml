@@ -40,7 +40,7 @@
     <string name="check_answer">Check</string>
     <string name="default_number_of_tries">2</string>
     <string name="enter_tries_number">Enter number of tries</string>
-    <string name="end_of_test">Test has been ended</string>
+    <string name="test_has_completed">Test has completed</string>
     <string name="show_entries">Show Entries</string>
     <string name="Your_correct_answers_was">"Your correct answers was: "</string>
     <string name="of_questions">" of questions."</string>
@@ -70,4 +70,5 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="open_facebook_page">Open facebook page</string>
+    <string name="wait_for_data_loading">Please wait, data is being loaded</string>
 </resources>
