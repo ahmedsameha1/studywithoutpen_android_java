@@ -254,7 +254,7 @@ public class EntriesListFragment extends Fragment {
             editEntry.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if ( ! databaseOperations.checkLinkerStudyDuring(getCurrentField()) ) {
+//                    if ( ! databaseOperations.checkLinkerStudyDuring(getCurrentField()) ) {
                         if (isChecked) {
                             editQuestion.setEnabled(true);
                             editAnswer.setEnabled(true);
@@ -267,9 +267,9 @@ public class EntriesListFragment extends Fragment {
                             saveEditedEntry.setEnabled(false);
                             studyEntry.setEnabled(true);
                         }
-                    } else {
+                    /*} else {
                         Toast.makeText(getActivity(),R.string.complete_or_cancel_last_study_session,Toast.LENGTH_LONG).show();
-                    }
+                    }*/
                 }
             });
             studyEntry.setOnClickListener(new View.OnClickListener() {
@@ -311,8 +311,11 @@ public class EntriesListFragment extends Fragment {
                     editEntry.setChecked(false);
 //                    DatabaseHelper databaseHelper = new DatabaseHelper(FieldActivity.this);
                     if (!editQuestion.getText().toString().equals(question) || !editAnswer.getText().toString().equals(answer)) {
-                        databaseOperations.editFieldEntry(getCurrentField(), question, editQuestion.getText().toString(),
+                        boolean b = databaseOperations.editFieldEntry(getCurrentField(), question, editQuestion.getText().toString(),
                                 answer, editAnswer.getText().toString());
+                        if ( ! b ) {
+                            Toast.makeText(getActivity(),R.string.repeated_entry,Toast.LENGTH_LONG).show();
+                        }
                     }
                     /*fieldEntriesCursor = databaseOperations.getFieldEntries(getCurrentField());
                     CustomCursorAdapter.this.changeCursor(fieldEntriesCursor);*/

@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -115,6 +116,28 @@ public class DatabaseOperations {
             contentValues.put(Contract.Linker.COLUMN_NAME_ANSWER_LINK, answer);
             contentValues.put(Contract.Linker.COLUMN_NAME_FIELD_LINK,fieldName);
             contentResolver.insert(uri, contentValues);
+        }
+        cursor.close();
+    }
+    public void updateQuestionAnswerLink(String fieldName,String currentQuestion,String newQuestion,
+                                        String currentAnswer,String newAnswer) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        Cursor cursor = contentResolver.query( uri,
+                new String[] {Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
+                Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                        + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[] { newQuestion, newAnswer ,fieldName },
+                null);
+        if ( cursor.getCount() <= 0 ){
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Linker.COLUMN_NAME_QUESTION_LINK, newQuestion);
+            contentValues.put(Contract.Linker.COLUMN_NAME_ANSWER_LINK, newAnswer);
+            long i = contentResolver.update(uri,
+                    contentValues,
+                    Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                            + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[] { currentQuestion, currentAnswer ,fieldName });
+            Log.d("i", Long.toString(i));
         }
         cursor.close();
     }
@@ -295,7 +318,7 @@ public class DatabaseOperations {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
         Cursor cursor = contentResolver.query(uri,
                 new String[]{Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? " ,
+                Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? ",
                 new String[]{answer},
                 null);
         if (cursor.getCount() <= 1) {
@@ -307,18 +330,38 @@ public class DatabaseOperations {
         }
         cursor.close();
     }
-    public void editFieldEntry(String fieldName,String currentQuestion,String newQuestion,String currentAnswer,String newAnswer) {
-        if ( !currentQuestion.equals(newQuestion) ) {
-                insertQuestion(newQuestion);
-                deleteQuestionAfterCount(1, currentQuestion);
+    public boolean editFieldEntry(String fieldName,String currentQuestion,String newQuestion,String currentAnswer,String newAnswer) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        Cursor cursor = contentResolver.query( uri,
+                new String[] {Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
+                Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                        + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[] { newQuestion, newAnswer ,fieldName },
+                null);
+        if ( cursor.getCount() <= 0 ) {
+            if (!currentQuestion.equals(newQuestion)) {
+                updateQuestion(currentQuestion, newQuestion);
 //                deleteOnlyFieldEntry(fieldName,currentQuestion,currentAnswer);
-        }
-        if ( !currentAnswer.equals(newAnswer) ) {
-                insertAnswer(newAnswer);
-                deleteAnswerAfterCount(1, currentAnswer);
+            }
+            if (!currentAnswer.equals(newAnswer)) {
+                updateAnswer(currentAnswer, newAnswer);
 //                deleteOnlyFieldEntry(fieldName, currentQuestion, currentAnswer);
+            }
+//            updateQuestionAnswerLink(fieldName, currentQuestion, newQuestion, currentAnswer, newAnswer);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Linker.COLUMN_NAME_QUESTION_LINK, newQuestion);
+            contentValues.put(Contract.Linker.COLUMN_NAME_ANSWER_LINK, newAnswer);
+            long i = contentResolver.update(uri,
+                    contentValues,
+                    Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                            + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[] { currentQuestion, currentAnswer ,fieldName });
+            Log.d("i", Long.toString(i));
+            return true;
+        } else {
+            return false;
         }
-        if ( !currentQuestion.equals(newQuestion) && !currentAnswer.equals(newAnswer) ) {
+        /*if ( !currentQuestion.equals(newQuestion) && !currentAnswer.equals(newAnswer) ) {
             insertQuestionAnswerLink(fieldName, newQuestion, newAnswer);
         }
         else if ( !currentQuestion.equals(newQuestion) ) {
@@ -327,7 +370,7 @@ public class DatabaseOperations {
         else if ( !currentAnswer.equals(newAnswer) ) {
             insertQuestionAnswerLink(fieldName,currentQuestion,newAnswer);
         }
-        deleteFieldEntry(currentQuestion, currentAnswer, fieldName);
+        deleteFieldEntry(currentQuestion, currentAnswer, fieldName);*/
 
 
     /*if ( !currentQuestion.equals(newQuestion) ) {
@@ -376,6 +419,44 @@ public class DatabaseOperations {
             Log.d("deleted question", Integer.toString(d));
         }
         cursor.close();
+    }
+    public void updateQuestion( String currentQuestion,String newQuestion ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        Cursor cursor = contentResolver.query(uri,
+                new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
+                Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? " ,
+                new String[]{currentQuestion},
+                null);
+        if ( cursor.getCount() <= 1 ) {
+            Uri uri1 = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Question.TABLE_NAME);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Question.COLUMN_NAME_QUESTION_ENTRY,newQuestion);
+            contentResolver.update(uri1,
+                    contentValues,
+                    Contract.Question.COLUMN_NAME_QUESTION_ENTRY + " = ? ",
+                    new String[]{currentQuestion});
+        } else {
+            insertQuestion(newQuestion);
+        }
+    }
+    public void updateAnswer( String currentAnswer,String newAnswer ) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        Cursor cursor = contentResolver.query(uri,
+                new String[]{Contract.Linker.COLUMN_NAME_ANSWER_LINK},
+                Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? " ,
+                new String[]{currentAnswer},
+                null);
+        if ( cursor.getCount() <= 1 ) {
+            Uri uri1 = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Answer.TABLE_NAME);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Answer.COLUMN_NAME_ANSWER_ENTRY,newAnswer);
+            contentResolver.update(uri1,
+                    contentValues,
+                    Contract.Answer.COLUMN_NAME_ANSWER_ENTRY + " = ? ",
+                    new String[]{currentAnswer});
+        } else {
+            insertAnswer(newAnswer);
+        }
     }
     private void deleteAnswerAfterCount( int count, String answer ) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
@@ -450,7 +531,7 @@ public class DatabaseOperations {
 
     public void deleteThisEntryAndItsRoots(String fieldName, String question, String answer ) {
         deleteThisFieldQuestion(fieldName,question);
-        deleteThisFieldAnswer(fieldName,answer);
+        deleteThisFieldAnswer(fieldName, answer);
     }
 
     public Cursor searchFor ( String fieldName, String searchString ) {
@@ -499,7 +580,7 @@ public class DatabaseOperations {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
         contentResolver.delete(uri,
                 Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ? ",
-                new String[] {fieldName});
+                new String[]{fieldName});
     }
     public void clearStudyDuringDataFromLinkerTable( String fieldName ) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
