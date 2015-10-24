@@ -26,8 +26,8 @@ public class ShowResultDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        wrongItemList = (ArrayList<WrongItem>) getArguments()
-                .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);
+/*        wrongItemList = (ArrayList<WrongItem>) getArguments()
+                .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);*/
         questionsNumber = getArguments().getInt(TestActivity.NUMBER_OF_QUESTIONS);
         wrongAnswersNumber = getArguments().getInt(TestActivity.NUMBER_OF_WRONG_ANSWERS);
         currentField = getArguments().getString(TestActivity.CURRENT_FIELD);
@@ -50,7 +50,13 @@ public class ShowResultDialogFragment extends DialogFragment {
                         startActivity(intent);
                     }
                 }*/)
-                .setNegativeButton(R.string.cancel, null)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
+                        databaseOperations.clearLinkerTableWrongAnswers(currentField);
+                    }
+                })
                 .create();
         alertDialog.setCanceledOnTouchOutside(false);
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -67,9 +73,10 @@ public class ShowResultDialogFragment extends DialogFragment {
                         Intent intent = new Intent(getActivity(),WrongAnswersActivity.class);
                         intent.putExtra(WrongAnswersActivity.WRONG_ITEM_LIST,bundle);
                         startActivity(intent);
+                        dismiss();
                     }
                 });
-                if ( wrongItemList.size() <= 0 ) {
+                if ( wrongAnswersNumber <= 0 ) {
                     b.setEnabled(false);
                 }
             }
