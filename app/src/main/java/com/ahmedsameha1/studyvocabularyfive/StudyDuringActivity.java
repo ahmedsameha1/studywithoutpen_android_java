@@ -24,6 +24,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,6 +88,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     private ImageView imageResult;
     private ProgressBar progressBar;
     private ImageButton nextHint;
+    private TableRow hintTableRow;
     //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
@@ -129,6 +131,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         numberOfTries = (EditText) findViewById(R.id.enter_tries);
         showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
         imageResult = (ImageView) findViewById(R.id.image_result);
+        hintTableRow = (TableRow) findViewById(R.id.hint_table_row);
         setSupportActionBar(toolbar);
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         check.setOnClickListener(new View.OnClickListener() {
@@ -386,10 +389,12 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             hints.add( getString(R.string.number_of_characters) + Integer.toString(currentAnswer.length()));
             hints.add(getString(R.string.last_character) + currentAnswer.charAt(currentAnswer.length() - 1));
             nextHint.setEnabled(true);
+            hintTableRow.setBackgroundResource(R.color.enabled_color);
         }
         else {
             hints = null;
             nextHint.setEnabled(false);
+            hintTableRow.setBackgroundResource(R.color.default_background_color);
         }
         searchForCursor.close();
     }

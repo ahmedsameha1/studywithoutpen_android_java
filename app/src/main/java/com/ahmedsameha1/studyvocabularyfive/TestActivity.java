@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,6 +61,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
     private Button start, next;
     private ImageView imageResult;
     private ImageButton nextHint;
+    private TableRow hintTableRow;
 //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
@@ -89,6 +91,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         numberOfTries = (EditText) findViewById(R.id.enter_tries);
         nextHint = (ImageButton) findViewById(R.id.next_hint);
         showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
+        hintTableRow = (TableRow) findViewById(R.id.hint_table_row);
         setSupportActionBar(toolbar);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -294,10 +297,12 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
             hints.add(getString(R.string.last_character) + listForTest[currentQuestionCounter][1]
                     .charAt(listForTest[currentQuestionCounter][1].length() - 1));
             nextHint.setEnabled(true);
+            hintTableRow.setBackgroundResource(R.color.enabled_color);
         }
         else {
             hints = null;
             nextHint.setEnabled(false);
+            hintTableRow.setBackgroundResource(R.color.default_background_color);
         }
         searchForCursor.close();
     }

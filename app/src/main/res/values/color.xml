@@ -2,4 +2,5 @@
 <resources>
     <color name="enabled_color">#00DD00</color>
     <color name="disabled_color">#0000FF</color>
+    <color name="default_background_color">#74AFAD</color>
 </resources>

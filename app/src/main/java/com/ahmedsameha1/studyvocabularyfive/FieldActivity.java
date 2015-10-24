@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -97,7 +98,7 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
 /*
 
 
-//        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
 
         */
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -121,6 +122,7 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                 fieldEntriesCursor = null;
             }
         };
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
     /*
     Because the database related objects should close as soon as the activity does not use it, I put all database work on onResume()
