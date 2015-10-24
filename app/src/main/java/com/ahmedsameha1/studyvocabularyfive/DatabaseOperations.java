@@ -340,11 +340,13 @@ public class DatabaseOperations {
                 null);
         if ( cursor.getCount() <= 0 ) {
             if (!currentQuestion.equals(newQuestion)) {
-                updateQuestion(currentQuestion, newQuestion);
+                insertQuestion(newQuestion);
+
 //                deleteOnlyFieldEntry(fieldName,currentQuestion,currentAnswer);
             }
             if (!currentAnswer.equals(newAnswer)) {
-                updateAnswer(currentAnswer, newAnswer);
+                insertAnswer(newAnswer);
+
 //                deleteOnlyFieldEntry(fieldName, currentQuestion, currentAnswer);
             }
 //            updateQuestionAnswerLink(fieldName, currentQuestion, newQuestion, currentAnswer, newAnswer);
@@ -357,6 +359,8 @@ public class DatabaseOperations {
                             + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                     new String[] { currentQuestion, currentAnswer ,fieldName });
             Log.d("i", Long.toString(i));
+            deleteQuestionAfterCount(0, currentQuestion);
+            deleteAnswerAfterCount(0, currentAnswer);
             return true;
         } else {
             return false;
