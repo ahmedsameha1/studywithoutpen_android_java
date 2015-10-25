@@ -101,7 +101,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
         showTries = (TextView) findViewById(R.id.trys);
         numberOfTries = (EditText) findViewById(R.id.enter_tries);
         nextHint = (ImageButton) findViewById(R.id.next_hint);
-        showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
+        showNumberOfQuestions = (TextView) findViewById(R.id.number_of_questions);
         hintTableRow = (TableRow) findViewById(R.id.hint_table_row);
         setSupportActionBar(toolbar);
         start.setOnClickListener(new View.OnClickListener() {
@@ -514,6 +514,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                 testingNow = true;
                 wrongAnswers = new ArrayList<String>(permitedTriesNumber);
                 boolean_continue = false;
+                ifMoreThanOnce();
                 getSupportLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
                 getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
             }

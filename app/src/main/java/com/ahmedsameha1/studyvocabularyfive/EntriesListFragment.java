@@ -141,15 +141,15 @@ public class EntriesListFragment extends Fragment {
             public void afterTextChanged(Editable s) {
                 if (s.toString().length() > 0) {
                     Bundle bundle = new Bundle();
-                    bundle.putString(SEARCH_VALUE,s.toString());
-                    getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID,bundle, getFieldEntries);
+                    bundle.putString(SEARCH_VALUE, s.toString());
+                    getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
                     /*searchForCursor = databaseOperations.searchFor(getCurrentField(), s.toString());
                     customCursorAdapterForFieldEntriesListView.
                             changeCursor(searchForCursor);*/
                 } else {
                     customCursorAdapterForFieldEntriesListView.changeCursor(null);
                     Bundle bundle = new Bundle();
-                    bundle.putString(FieldActivity.CURRENT_FIELD,getCurrentField());
+                    bundle.putString(FieldActivity.CURRENT_FIELD, getCurrentField());
                     getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
                     /*fieldEntriesCursor = databaseOperations.getFieldEntries(getCurrentField());
                     customCursorAdapterForFieldEntriesListView.changeCursor(fieldEntriesCursor);*/
@@ -162,7 +162,7 @@ public class EntriesListFragment extends Fragment {
                 searchFor.setText("");
                 customCursorAdapterForFieldEntriesListView.changeCursor(null);
                 Bundle bundle = new Bundle();
-                bundle.putString(FieldActivity.CURRENT_FIELD,getCurrentField());
+                bundle.putString(FieldActivity.CURRENT_FIELD, getCurrentField());
                 getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
             }
         });
@@ -237,7 +237,7 @@ public class EntriesListFragment extends Fragment {
         }
 
         @Override
-        public void bindView(View view, Context context, Cursor cursor) {
+        public void bindView(View view, Context context, final Cursor cursor) {
             final EditText editQuestion, editAnswer;
             final ImageButton studyEntry, saveEditedEntry, deleteEntry;
             final ToggleButton editEntry;
@@ -285,7 +285,24 @@ public class EntriesListFragment extends Fragment {
             deleteEntry.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if ( ! databaseOperations.checkLinkerStudyDuring(getCurrentField()) ) {
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Cursor studyDuringCursor = getActivity().getContentResolver().query(uri,
+                            new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
+                            Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? ",
+                            new String[]{editQuestion.getText().toString(), editAnswer.getText().toString(),getCurrentField(), "0"},
+                            null);
+                    Cursor testCursor = getActivity().getContentResolver().query(uri,
+                            new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
+                            Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_TEST_ORDER + " >= ? ",
+                            new String[]{editQuestion.getText().toString(), editAnswer.getText().toString(),getCurrentField(), "0"},
+                            null);
+                    if ( studyDuringCursor.getCount() <= 0 && testCursor.getCount() <= 0 ) {
                         deleteEntryData[0] = getCurrentField();
                         deleteEntryData[1] = editQuestion.getText().toString();
                         deleteEntryData[2] = editAnswer.getText().toString();
@@ -300,6 +317,8 @@ public class EntriesListFragment extends Fragment {
                     } else {
                         Toast.makeText(getActivity(),R.string.complete_or_cancel_last_study_session,Toast.LENGTH_LONG).show();
                     }
+                    studyDuringCursor.close();
+                    testCursor.close();
                 }
             });
             saveEditedEntry.setOnClickListener(new View.OnClickListener() {

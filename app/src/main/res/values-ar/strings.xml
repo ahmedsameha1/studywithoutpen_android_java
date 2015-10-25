@@ -71,6 +71,7 @@
     <string name="yes">نعم</string>
     <string name="open_facebook_page">افتح صفحة الـ facebook.</string>
     <string name="wait_for_data_loading">برجاء الانتظار،  يجري تحميل البيانات</string>
-    <string name="complete_or_cancel_last_study_session">لطفا أكمل جلسة الاستذكار الأخيرة أو ألغها قبل عمل هذا الإجراء!</string>
+    <string name="complete_or_cancel_last_study_session">لطفا أكمل أو ألغ أي جلسات استذكار أو اختبار خاصة بهذا المجال كنت قد أوقفتهاأولا!</string>
     <string name="repeated_entry">يوجد مُدخل يحتوي على نفس السؤال ونفس الإجابة، احذف هذا المُدخل إن أردت!</string>
+    <string name="ask_for_continue_previous_test">هل تريد استكمال جلسة الاختبار السابقة؟</string>
 </resources>
