@@ -205,7 +205,8 @@
             android:minLines="1"
             android:enabled="true"
             android:scrollbarAlwaysDrawVerticalTrack="true"
-            android:imeOptions="flagNoExtractUi"/>
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="textNoSuggestions"/>
 
         <!--<ImageView
             android:id="@+id/image_result"

@@ -168,7 +168,8 @@
                     android:scrollbarAlwaysDrawVerticalTrack="true"
                     android:imeOptions="flagNoExtractUi"
                     android:enabled="false"
-                    android:textColor="@drawable/study_edit_text_selector"/>
+                    android:textColor="@drawable/study_edit_text_selector"
+                    android:inputType="textNoSuggestions"/>
 
                 <EditText
                     android:id="@+id/answer"
@@ -179,7 +180,8 @@
                     android:minLines="1"
                     android:scrollbarAlwaysDrawVerticalTrack="true"
                     android:imeOptions="flagNoExtractUi"
-                    android:textColor="@drawable/study_edit_text_selector"/>
+                    android:textColor="@drawable/study_edit_text_selector"
+                    android:inputType="textNoSuggestions"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"

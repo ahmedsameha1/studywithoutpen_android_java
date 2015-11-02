@@ -33,7 +33,8 @@ public class ShowResultDialogFragment extends DialogFragment {
         currentField = getArguments().getString(TestActivity.CURRENT_FIELD);
         correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) /questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();
-        message = "Your correct answers was: " + numberFormat.format(correctAnswersPercent)+ " of questions.";
+        message = getString(R.string.Your_correct_answers_was) + " " + numberFormat.format(correctAnswersPercent)+ " " +
+                getString(R.string.of_questions);
     }
 
     @Override

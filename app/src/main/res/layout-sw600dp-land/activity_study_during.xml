@@ -231,7 +231,8 @@
                         android:hint="@string/enter_an_answer"
                         android:imeOptions="flagNoExtractUi"
                         android:minLines="1"
-                        android:scrollbarAlwaysDrawVerticalTrack="true" />
+                        android:scrollbarAlwaysDrawVerticalTrack="true"
+                        android:inputType="textNoSuggestions"/>
 
                     <!--<ImageView
                         android:id="@+id/image_result"

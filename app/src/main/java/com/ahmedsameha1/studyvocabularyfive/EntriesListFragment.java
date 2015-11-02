@@ -71,7 +71,7 @@ public class EntriesListFragment extends Fragment {
                                     + " LIKE ? AND "
                                     + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[] {"%" + searchString + "%",currentField,"%" + searchString + "%",currentField},
-                            null);
+                            "datetime(" + Contract.COLUMN_NAME_CREATED_AT +") DESC");
                 } else {
                     String currentField = null;
                     if ( args != null ) {
@@ -83,7 +83,7 @@ public class EntriesListFragment extends Fragment {
                             new String[] {"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[] {currentField},
-                            null);
+                            "datetime(" + Contract.COLUMN_NAME_CREATED_AT +") DESC" );
                 }
             }
 
@@ -255,18 +255,18 @@ public class EntriesListFragment extends Fragment {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 //                    if ( ! databaseOperations.checkLinkerStudyDuring(getCurrentField()) ) {
-                        if (isChecked) {
-                            editQuestion.setEnabled(true);
-                            editAnswer.setEnabled(true);
-                            saveEditedEntry.setEnabled(true);
-                            studyEntry.setEnabled(false);
+                    if (isChecked) {
+                        editQuestion.setEnabled(true);
+                        editAnswer.setEnabled(true);
+                        saveEditedEntry.setEnabled(true);
+                        studyEntry.setEnabled(false);
 
-                        } else {
-                            editQuestion.setEnabled(false);
-                            editAnswer.setEnabled(false);
-                            saveEditedEntry.setEnabled(false);
-                            studyEntry.setEnabled(true);
-                        }
+                    } else {
+                        editQuestion.setEnabled(false);
+                        editAnswer.setEnabled(false);
+                        saveEditedEntry.setEnabled(false);
+                        studyEntry.setEnabled(true);
+                    }
                     /*} else {
                         Toast.makeText(getActivity(),R.string.complete_or_cancel_last_study_session,Toast.LENGTH_LONG).show();
                     }*/
@@ -332,8 +332,8 @@ public class EntriesListFragment extends Fragment {
                     if (!editQuestion.getText().toString().equals(question) || !editAnswer.getText().toString().equals(answer)) {
                         boolean b = databaseOperations.editFieldEntry(getCurrentField(), question, editQuestion.getText().toString(),
                                 answer, editAnswer.getText().toString());
-                        if ( ! b ) {
-                            Toast.makeText(getActivity(),R.string.repeated_entry,Toast.LENGTH_LONG).show();
+                        if (!b) {
+                            Toast.makeText(getActivity(), R.string.repeated_entry, Toast.LENGTH_LONG).show();
                         }
                     }
                     /*fieldEntriesCursor = databaseOperations.getFieldEntries(getCurrentField());
