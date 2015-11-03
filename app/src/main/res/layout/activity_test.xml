@@ -182,7 +182,7 @@
                     <ImageButton
                         android:id="@+id/next_hint"
                         android:layout_width="50dp"
-                        android:layout_height="30dp"
+                        android:layout_height="50dp"
                         android:src="@drawable/ic_navigate_next_black_24dp"
                         android:enabled="false"/>
                 </TableRow>
