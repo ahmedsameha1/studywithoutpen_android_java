@@ -274,17 +274,16 @@
 
             <EditText
                 android:id="@+id/enter_answer"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginRight="10dp"
-                android:layout_weight="1"
                 android:hint="@string/enter_an_answer"
                 android:enabled="false"
                 android:minLines="1"
                 android:scrollbarAlwaysDrawVerticalTrack="true"
                 android:imeOptions="flagNoExtractUi"
-                android:inputType="textNoSuggestions"/>
+                android:inputType="textNoSuggestions|textMultiLine"/>
 
             <!--<ImageView
                 android:id="@+id/image_result"

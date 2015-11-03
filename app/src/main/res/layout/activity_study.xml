@@ -169,7 +169,7 @@
                     android:imeOptions="flagNoExtractUi"
                     android:enabled="false"
                     android:textColor="@drawable/study_edit_text_selector"
-                    android:inputType="textNoSuggestions"/>
+                    android:inputType="textNoSuggestions|textMultiLine"/>
 
                 <EditText
                     android:id="@+id/answer"
@@ -181,7 +181,8 @@
                     android:scrollbarAlwaysDrawVerticalTrack="true"
                     android:imeOptions="flagNoExtractUi"
                     android:textColor="@drawable/study_edit_text_selector"
-                    android:inputType="textNoSuggestions"/>
+                    android:inputType="textNoSuggestions|textMultiLine"
+                    />
 
                 <LinearLayout
                     android:layout_width="wrap_content"

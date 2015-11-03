@@ -222,17 +222,16 @@
 
                     <EditText
                         android:id="@+id/enter_answer"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginRight="10dp"
-                        android:layout_weight="1"
                         android:enabled="true"
                         android:hint="@string/enter_an_answer"
                         android:imeOptions="flagNoExtractUi"
                         android:minLines="1"
                         android:scrollbarAlwaysDrawVerticalTrack="true"
-                        android:inputType="textNoSuggestions"/>
+                        android:inputType="textNoSuggestions|textMultiLine"/>
 
                     <!--<ImageView
                         android:id="@+id/image_result"
