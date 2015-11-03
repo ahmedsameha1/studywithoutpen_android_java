@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Created by ahmed on 8/3/2015.
@@ -305,7 +306,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
 
 
     }
-    private String [][] getListForTest ( double percent ) {
+/*    private String [][] getListForTest ( double percent ) {
         int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
         String[][] listForTest = new String[numberOfQuestions][2];
         for (int i = 0; i < listForTest.length; i++) {
@@ -335,6 +336,37 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
             counter++;
         }
         return listForTest;
+    }*/
+    private String [][] getListForTest ( double percent ) {
+        int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
+        String[][] listForTest = new String[numberOfQuestions][2];
+        String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
+        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+              fieldEntriesCursor.moveToNext() ) {
+            listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
+            listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+        }
+        shuffleArray(listOfEntries);
+        for ( int n = 0; n < listForTest.length; n++ ) {
+            listForTest [n][0] = listOfEntries [n][0];
+            listForTest [n][1] = listOfEntries [n][1];
+        }
+        return listForTest;
+    }
+    private void shuffleArray( String [][] array )
+    {
+        Random rnd = new Random();
+        for (int i = array.length - 1; i > 0; i--)
+        {
+            int index = rnd.nextInt(i + 1);
+            // Simple swap
+            String question = array[index][0];
+            String answer = array [index][1];
+            array[index][0] = array[i][0];
+            array[index][1] = array[i][1];
+            array[i][0] = question;
+            array[i][1] = answer;
+        }
     }
     private void ifMoreThanOnce() {
         if ( searchForCursor != null ) {
