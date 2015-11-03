@@ -137,7 +137,8 @@
                     android:minLines="1"
                     android:scrollbarAlwaysDrawVerticalTrack="true"
                     android:imeOptions="flagNoExtractUi"
-                    android:enabled="false"/>
+                    android:enabled="false"
+                    android:inputType="textNoSuggestions|textMultiLine"/>
 
                 <EditText
                     android:id="@+id/answer"
@@ -147,7 +148,8 @@
                     android:hint="@string/answer"
                     android:minLines="1"
                     android:scrollbarAlwaysDrawVerticalTrack="true"
-                    android:imeOptions="flagNoExtractUi"/>
+                    android:imeOptions="flagNoExtractUi"
+                    android:inputType="textNoSuggestions|textMultiLine"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
