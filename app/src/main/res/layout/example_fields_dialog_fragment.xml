@@ -18,6 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="left"
         android:text="@string/dont_display_again"
-        android:checked="true"/>
+        android:checked="true"
+        android:layout_marginLeft="15dp"/>
 
 </LinearLayout>
