@@ -15,6 +15,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -37,7 +38,8 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
     public static final String CURRENT_FIELD = "currentField";
     public static final String CHECK_IF_CONTINUE_STUDY_DURING_SESSION = "checkIfContinueStudyDuringSession";
     public static final String CHECK_IF_CONTINUE_TEST_SESSION = "checkIfContinueTestSession";
-    public static final String RUN_FIRST_TIME = "runFirstTime";
+    public static final String RUN_FIRST_TIME_DIALOG = "runFirstTimeDialog";
+    public static final String RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS = "runFirstTimeCreateExample_Fields";
     public static final int FIELD_LIST_LOADER_ID = 0;
     public static final int FIELD_ENTRIES_LOADER_ID = 1;
     private String[] deleteEntryData = {null, null, null};
@@ -137,20 +139,29 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
         };
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         PackageManager manager = getPackageManager();
-
         try {
             PackageInfo info = manager.getPackageInfo(getPackageName(), 0);
             int versionCode = info.versionCode;
-            if ( ! sharedPreferences.contains(RUN_FIRST_TIME + versionCode) ) {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(FieldActivity.RUN_FIRST_TIME + versionCode,true);
+            if ( ! sharedPreferences.contains(RUN_FIRST_TIME_DIALOG + versionCode) ) {
+                editor.putBoolean(FieldActivity.RUN_FIRST_TIME_DIALOG + versionCode,true);
                 editor.commit();
             }
-            boolean runFirstTime = sharedPreferences.getBoolean(RUN_FIRST_TIME + versionCode,false);
-            if ( runFirstTime ) {
+            if ( ! sharedPreferences.contains(RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS + versionCode) ) {
+                editor.putBoolean(FieldActivity.RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS + versionCode,true);
+                editor.commit();
+            }
+            boolean runFirstTimeDialog = sharedPreferences.getBoolean(RUN_FIRST_TIME_DIALOG + versionCode,false);
+            if ( runFirstTimeDialog ) {
                 ExampleFieldsDailogFragment exampleFieldsDailogFragment = new ExampleFieldsDailogFragment();
                 exampleFieldsDailogFragment.show(getSupportFragmentManager(),"exampleFieldsDialogFragment");
+            }
+            boolean runFirstTimeCreateExampleFields = sharedPreferences.getBoolean(RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS + versionCode,false);
+            if ( runFirstTimeCreateExampleFields ) {
+                databaseOperations.createExampleField(this);
+                editor.putBoolean(FieldActivity.RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS + versionCode, false);
+                editor.commit();
             }
         } catch (PackageManager.NameNotFoundException e) {
 

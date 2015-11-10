@@ -11,11 +11,8 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.Toast;
 
 /**
  * Created by ahmed_000 on 11/8/2015.
@@ -44,7 +41,7 @@ public class ExampleFieldsDailogFragment extends DialogFragment {
                                 int versionCode = info.versionCode;
                                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity()); // getting the preferences
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                                editor.putBoolean(FieldActivity.RUN_FIRST_TIME + versionCode,false);
+                                editor.putBoolean(FieldActivity.RUN_FIRST_TIME_DIALOG + versionCode,false);
                                 editor.commit();
                             } catch (PackageManager.NameNotFoundException e) {
 
