@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -137,6 +138,7 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         PackageManager manager = getPackageManager();
+
         try {
             PackageInfo info = manager.getPackageInfo(getPackageName(), 0);
             int versionCode = info.versionCode;
@@ -266,8 +268,11 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
 //        simpleCursorAdapterForFieldSpinner.changeCursor(fieldListCursor);
 //        fieldsListSpinner.setSelection(fieldListCursor.getCount());
         setLastUsedField(fieldListCursor.getCount());
-        EntriesListFragment entriesListFragment = new EntriesListFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.entries_list_fragment,entriesListFragment);
+        EntriesListFragment entriesListFragment = (EntriesListFragment) getSupportFragmentManager().findFragmentById(R.id.entries_list_fragment);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.detach(entriesListFragment);
+        transaction.attach(entriesListFragment);
+        transaction.commit();
     }
 
     private SimpleCursorAdapter initializeSimpleCursorAdapterForFieldSpinner() {

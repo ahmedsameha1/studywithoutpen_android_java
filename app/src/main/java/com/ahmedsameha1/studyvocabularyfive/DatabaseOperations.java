@@ -668,11 +668,15 @@ public class DatabaseOperations {
                 new String[] {fieldName});
     }
     public void createExampleField(Context context) {
-        createNewField(context.getString(R.string.example_field), Contract.Field.DEFAULT_TYPE);
-        ExampleFields exampleFields = new ExampleFields();
-        String [][] array = exampleFields.basicExampleField;
-        for ( int i = 0; i < array.length; i++ ) {
-            insertFieldEntry(context.getString(R.string.example_field),array [i][0], array[i][1]);
+        if ( ! checkFieldDuplication(context.getString(R.string.example_field)) ) {
+            createNewField(context.getString(R.string.example_field), Contract.Field.DEFAULT_TYPE);
+            ExampleFields exampleFields = new ExampleFields();
+            String [][] array = exampleFields.basicExampleField;
+            for ( int i = 0; i < array.length; i++ ) {
+                insertFieldEntry(context.getString(R.string.example_field),array [i][0], array[i][1]);
+            }
+        } else {
+            Toast.makeText(context,R.string.cannot_create_example_field,Toast.LENGTH_LONG).show();
         }
     }
     public int getFieldType(String fieldName) {

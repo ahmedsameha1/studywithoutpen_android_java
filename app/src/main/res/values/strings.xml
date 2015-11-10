@@ -79,4 +79,5 @@
     <string name="dont_display_again">Do not display again</string>
     <string name="example_field_message">Hello all, to use this app, you will create your own fields and you will fill it with your own data. But because you may find the app useless without any data, I will provide you with a field with some data. So you will find a field which have been created for you. You can delete it anytime.</string>
     <string name="example_fields_dialog_title">Example Fields!</string>
+    <string name="cannot_create_example_field">The app cannot create the example field, you have a field with the same name!</string>
 </resources>
