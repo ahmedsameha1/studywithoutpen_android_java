@@ -1,7 +1,9 @@
 package com.ahmedsameha1.studyvocabularyfive;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
@@ -27,10 +29,11 @@ public class DatabaseOperations {
     }
 
 
-    public void CreateNewField( String fieldName ) {
+    public void createNewField(String fieldName, int fieldType) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_NAME_FIELD_NAME,fieldName);
+        contentValues.put(Contract.Field.COLUMN_NAME_FIELD_TYPE,fieldType);
         contentResolver.insert(uri, contentValues);
         /*String tableQuestion = "CREATE TABLE " + fieldName + Contract.OldField.TABLE_NAME_QUESTION_SUFFIX + " "
                 + " ( " + Contract.OldField._ID + " INTEGER , " + fieldName + Contract.OldField.COLUMN_NAME_QUESTION_SUFFIX + " "
@@ -434,7 +437,7 @@ public class DatabaseOperations {
         if ( cursor.getCount() <= 1 ) {
             Uri uri1 = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Question.TABLE_NAME);
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Question.COLUMN_NAME_QUESTION_ENTRY,newQuestion);
+            contentValues.put(Contract.Question.COLUMN_NAME_QUESTION_ENTRY, newQuestion);
             contentResolver.update(uri1,
                     contentValues,
                     Contract.Question.COLUMN_NAME_QUESTION_ENTRY + " = ? ",
@@ -663,5 +666,25 @@ public class DatabaseOperations {
                 contentValues,
                 Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                 new String[] {fieldName});
+    }
+    public void createExampleField(Context context) {
+        createNewField(context.getString(R.string.example_field), Contract.Field.DEFAULT_TYPE);
+        ExampleFields exampleFields = new ExampleFields();
+        String [][] array = exampleFields.basicExampleField;
+        for ( int i = 0; i < array.length; i++ ) {
+            insertFieldEntry(context.getString(R.string.example_field),array [i][0], array[i][1]);
+        }
+    }
+    public int getFieldType(String fieldName) {
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);
+        Cursor cursor = contentResolver.query(uri,
+                new String[]{Contract.Field.COLUMN_NAME_FIELD_TYPE},
+                Contract.Field.COLUMN_NAME_FIELD_NAME + " = ? ",
+                new String[]{fieldName},
+                null);
+        cursor.moveToFirst();
+        int n = cursor.getInt(0);
+        cursor.close();
+        return n;
     }
 }

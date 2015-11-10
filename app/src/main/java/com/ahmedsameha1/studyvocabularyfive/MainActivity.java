@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -166,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         } else if (databaseOperations.checkFieldDuplication(fieldName)) {
             Toast.makeText(MainActivity.this, "There is an field with the same name!", Toast.LENGTH_SHORT).show();
         } else {
-            databaseOperations.CreateNewField(fieldName);
+//            databaseOperations.createNewField(fieldName);
             setLastUsedField(fieldListCursor.getCount());
             Intent intent = new Intent(MainActivity.this, FieldActivity.class); // Creating Intent object according to open field activity
 //            intent.putExtra(FieldActivity.INITIAL_FIELD, fieldName);

@@ -11,10 +11,13 @@ public final class Contract {
 
 
     public static abstract class Field implements BaseColumns {
+        public static final int DEFAULT_TYPE = 0;
+        public static final int NOTEBOOK_TYPE = 1;
         // This constant represents the name of the table which contains the data of the names of the fields that the user will create.
         public static final String TABLE_NAME = "field";
         // This constant represents the name of the column which will contain the names of the fields that the user will create in the field table.
         public static final String COLUMN_NAME_FIELD_NAME = "field_name";
+        public static final String COLUMN_NAME_FIELD_TYPE = "field_type";
     }
     public static abstract class Question implements BaseColumns {
         public static final String TABLE_NAME = "question";
@@ -29,7 +32,6 @@ public final class Contract {
         public static final String COLUMN_NAME_QUESTION_LINK = "question_link";
         public static final String COLUMN_NAME_ANSWER_LINK = "answer_link";
         public static final String COLUMN_NAME_FIELD_LINK = "field_link";
-        public static final String COLUMN_NAME_STUDY_DURING_FLAG = "study_during_flag";
         public static final String COLUMN_NAME_STUDY_DURING_ORDER = "study_during_order";
         public static final String COLUMN_NAME_TEST_ORDER = "test_order";
         public static final String COLUMN_NAME_TEST_WRONG_ANSWERS = "test_wrong_answers";

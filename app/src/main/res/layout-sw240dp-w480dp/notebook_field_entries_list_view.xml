@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <ImageButton
+        android:id="@+id/save_edited_entry"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_weight="0"
+        android:background="@drawable/ic_save_black_24dp"
+        android:layout_gravity="center"
+        android:focusable="false"
+        android:enabled="false"
+        />
+    <ImageButton
+        android:id="@+id/delete_entry"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_weight="0"
+        android:src="@drawable/ic_delete_black_24dp"
+        android:layout_gravity="center"
+        android:focusable="false"/>
+
+    <EditText
+        android:id="@+id/question_field"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.57"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:minLines="1"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:enabled="false"
+        android:layout_marginRight="5dp"
+        android:textColor="@drawable/edit_text_selector"
+        android:imeOptions="flagNoExtractUi"/>
+    <EditText
+        android:id="@+id/answer_field"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:minLines="1"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:enabled="false"
+        android:layout_marginLeft="5dp"
+        android:textColor="@drawable/edit_text_selector"
+        android:imeOptions="flagNoExtractUi"/>
+
+    <ToggleButton
+        android:id="@+id/edit_entry"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:text="New ToggleButton"
+        android:layout_weight="0"
+        android:background="@drawable/ic_edit_black_24dp"
+        android:focusable="false"
+        android:layout_gravity="center"
+        android:textOff="ON"
+        android:textOn="OFF"
+        android:textStyle="bold"
+        android:textColor="#00FF00"/>
+
+
+    <ImageButton
+        android:id="@+id/study_entry"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_weight="0"
+        android:background="@drawable/ic_launcher512"
+        android:layout_gravity="center"
+        android:focusable="false"
+        android:scaleType="fitCenter"
+        />
+</LinearLayout>

@@ -19,8 +19,9 @@ import java.util.ArrayList;
  * Created by ahmed on 7/4/2015.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 6;
     public static final String DATABASE_NAME = "data";
+    private Context context;
     /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + OldField.TABLE_NAME +
             " ( " + OldField._ID + " INTEGER PRIMARY KEY , "
             +  OldField.COLUMN_NAME_FIELD_NAME + " TEXT , " +
@@ -28,6 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Field.TABLE_NAME
             + " ( "
             + Contract.Field.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY NOT NULL, "
+            + Contract.Field.COLUMN_NAME_FIELD_TYPE + " INTEGER NOT NULL DEFAULT 0 , "
             + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
 
     /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Field.TABLE_NAME
@@ -85,6 +87,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
     }
     @Override
     public void onCreate( SQLiteDatabase sqLiteDatabase ) {
@@ -94,7 +97,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_LINKER_TABLE);
         Log.d("from APP to Ahmed", "table have been written");
     }
-
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        if (!db.isReadOnly()) {
+            // Enable foreign key constraints
+            db.execSQL("PRAGMA foreign_keys=ON;");
+        }
+    }
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Log.d("from Peninbin", "onUpgrade");
@@ -122,15 +132,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             onUpgradeForLinkerTableV5(sqLiteDatabase);
             migrateDataFromStudyDuringTempTableToLinkerStudyDuringFlagColumnV5(sqLiteDatabase);
         }
-    }
-    @Override
-    public void onOpen(SQLiteDatabase db) {
-        super.onOpen(db);
-        if (!db.isReadOnly()) {
-            // Enable foreign key constraints
-            db.execSQL("PRAGMA foreign_keys=ON;");
+        if ( oldVersion < 6 ) {
+            onUpgradeForFieldTableV6(sqLiteDatabase);
         }
     }
+
 
     public Cursor getFieldList() {
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
@@ -720,6 +726,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         }
         String drop = "DROP TABLE IF EXISTS " + Contract.Study_During_Temp.TABLE_NAME + ";";
+        sqLiteDatabase.execSQL(drop);
+    }
+    private void onUpgradeForFieldTableV6 ( SQLiteDatabase sqLiteDatabase ) {
+        String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+        sqLiteDatabase.execSQL(rename);
+        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
+        String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.Field.COLUMN_NAME_FIELD_NAME
+                + " , " + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                + "SELECT " + Contract.Field.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.COLUMN_NAME_CREATED_AT
+                + " FROM " + "tempTable"
+                + ";";
+        sqLiteDatabase.execSQL(copy);
+        String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
         sqLiteDatabase.execSQL(drop);
     }
 }

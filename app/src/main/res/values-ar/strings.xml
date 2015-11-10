@@ -74,4 +74,9 @@
     <string name="complete_or_cancel_last_study_session">لطفا أكمل أو ألغ أي جلسات استذكار أو اختبار خاصة بهذا المجال كنت قد أوقفتهاأولا!</string>
     <string name="repeated_entry">يوجد مُدخل يحتوي على نفس السؤال ونفس الإجابة، احذف هذا المُدخل إن أردت!</string>
     <string name="ask_for_continue_previous_test">هل تريد استكمال جلسة الاختبار السابقة؟</string>
+    <string name="notebook_field">مُفَكِّرة (السؤال مُخصصٌ للتاريخ والوقت)</string>
+    <string name="sample_field">مثال_للمجال_الذي_ستنشئ_مثله</string>
+    <string name="dont_display_again">لا تعرض هذا مرة أخرى</string>
+    <string name="example_field_message">مرحبا بالجميع، لتستخدم هذا البرنامج، ستقوم بإنشاء المجالات الخاصة بك وسوف تملئها بالبيانات الخاصة بك، لكن بسبب أنك ربما تجد البرنامج غير قابل للاستخدام بدون أي بيانات، سأقوم بتزويدك بمجال موجود به بعض البيانات، لذلك ستجد مجال تم إنشائه لك، ويمكنك حذفه متى تشاء.</string>
+    <string name="example_fields_dialog_title">مجالات الأمثلة!</string>
 </resources>
