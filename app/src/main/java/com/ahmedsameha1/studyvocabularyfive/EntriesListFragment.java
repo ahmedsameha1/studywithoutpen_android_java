@@ -18,7 +18,6 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,6 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -57,8 +55,8 @@ public class EntriesListFragment extends Fragment {
     public static final int ORDER_ENTRY_DATE_ASC = 9;
     public static final String FIELD_TYPE = "fieldType";
     protected int fieldType = 0;
-/*    protected EditText searchFor;
-    private ImageButton clearSearch;*/
+    /*    protected EditText searchFor;
+        private ImageButton clearSearch;*/
     private EditText searchQuestion, searchAnswer;
     private ImageButton clearSearchQuestion, clearSearchAnswer;
     private ListView fieldEntriesListView;
@@ -90,7 +88,7 @@ public class EntriesListFragment extends Fragment {
                     String searchQuestion = args.getString(EntriesListFragment.SEARCH_QUESTION_VALUE);
                     String searchAnswer = args.getString(EntriesListFragment.SEARCH_ANSWER_VALUE);
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
-                    if ( searchQuestion.length() > 0 && searchAnswer.length() > 0 ) {
+                    if (searchQuestion.length() > 0 && searchAnswer.length() > 0) {
                         return new CursorLoader(getActivity(),
                                 uri,
                                 new String[]{"rowid _id",
@@ -104,7 +102,7 @@ public class EntriesListFragment extends Fragment {
                                         + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                                 new String[]{"%" + searchQuestion + "%", currentField, "%" + searchAnswer + "%", currentField},
                                 "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") DESC");
-                    } else if ( searchQuestion.length() > 0 ) {
+                    } else if (searchQuestion.length() > 0) {
                         return new CursorLoader(getActivity(),
                                 uri,
                                 new String[]{"rowid _id",
@@ -125,65 +123,64 @@ public class EntriesListFragment extends Fragment {
                                 new String[]{"%" + searchAnswer + "%", currentField},
                                 "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") DESC");
                     }
-                } else if ( id == ORDER_DATE_DESC ){
+                } else if (id == ORDER_DATE_DESC) {
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
                     return new CursorLoader(getActivity(), uri,
                             new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{getCurrentField()},
-                        "date(" + Contract.Linker.COLUMN_NAME_QUESTION_LINK + ") DESC");
+                            "date(" + Contract.Linker.COLUMN_NAME_QUESTION_LINK + ") DESC");
 
-                } else if ( id == ORDER_DATE_ASC ) {
+                } else if (id == ORDER_DATE_ASC) {
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
                     return new CursorLoader(getActivity(), uri,
                             new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{getCurrentField()},
                             "date(" + Contract.Linker.COLUMN_NAME_QUESTION_LINK + ") ASC");
-                } else if ( id == ORDER_QUESTION_DESC ) {
+                } else if (id == ORDER_QUESTION_DESC) {
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
                     return new CursorLoader(getActivity(), uri,
                             new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{getCurrentField()},
                             Contract.Linker.COLUMN_NAME_QUESTION_LINK + " DESC");
-                } else if ( id == ORDER_QUESTION_ASC ) {
+                } else if (id == ORDER_QUESTION_ASC) {
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
                     return new CursorLoader(getActivity(), uri,
                             new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{getCurrentField()},
                             Contract.Linker.COLUMN_NAME_QUESTION_LINK + " ASC");
-                } else if ( id == ORDER_ANSWER_DESC ) {
+                } else if (id == ORDER_ANSWER_DESC) {
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
                     return new CursorLoader(getActivity(), uri,
                             new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{getCurrentField()},
                             Contract.Linker.COLUMN_NAME_ANSWER_LINK + " DESC");
-                } else if ( id == ORDER_ANSWER_ASC ) {
+                } else if (id == ORDER_ANSWER_ASC) {
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
                     return new CursorLoader(getActivity(), uri,
                             new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{getCurrentField()},
                             Contract.Linker.COLUMN_NAME_ANSWER_LINK + " ASC");
-                } else if ( id == ORDER_ENTRY_DATE_DESC ) {
+                } else if (id == ORDER_ENTRY_DATE_DESC) {
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
                     return new CursorLoader(getActivity(), uri,
                             new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{getCurrentField()},
                             "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") DESC");
-                } else if ( id == ORDER_ENTRY_DATE_ASC ) {
+                } else if (id == ORDER_ENTRY_DATE_ASC) {
                     Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
                     return new CursorLoader(getActivity(), uri,
                             new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{getCurrentField()},
                             "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") ASC");
-                }
-                else {
+                } else {
                     /*String currentField = null;
                     if (args != null) {
                         currentField = args.getString(FieldActivity.CURRENT_FIELD);
@@ -193,8 +190,8 @@ public class EntriesListFragment extends Fragment {
                     return new CursorLoader(getActivity(), uri,
                             new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
                             Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[] {getCurrentField()},
-                            "datetime(" + Contract.COLUMN_NAME_CREATED_AT +") DESC" );
+                            new String[]{getCurrentField()},
+                            "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") DESC");
                 }
             }
 
@@ -257,16 +254,16 @@ public class EntriesListFragment extends Fragment {
             public void afterTextChanged(Editable s) {
                 if (s.toString().length() > 0) {
                     Bundle bundle = new Bundle();
-                    bundle.putString(SEARCH_QUESTION_VALUE,s.toString());
-                    bundle.putString(SEARCH_ANSWER_VALUE,searchAnswer.getText().toString());
+                    bundle.putString(SEARCH_QUESTION_VALUE, s.toString());
+                    bundle.putString(SEARCH_ANSWER_VALUE, searchAnswer.getText().toString());
                     getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
                 } else {
                     getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
                     customCursorAdapterForFieldEntriesListView.changeCursor(null);
-                    if ( searchAnswer.getText().toString().length() > 0 ) {
+                    if (searchAnswer.getText().toString().length() > 0) {
                         Bundle bundle = new Bundle();
-                        bundle.putString(SEARCH_QUESTION_VALUE,"");
-                        bundle.putString(SEARCH_ANSWER_VALUE,searchAnswer.getText().toString());
+                        bundle.putString(SEARCH_QUESTION_VALUE, "");
+                        bundle.putString(SEARCH_ANSWER_VALUE, searchAnswer.getText().toString());
                         getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
                     } else {
                         Bundle bundle = new Bundle();
@@ -291,16 +288,16 @@ public class EntriesListFragment extends Fragment {
             public void afterTextChanged(Editable s) {
                 if (s.toString().length() > 0) {
                     Bundle bundle = new Bundle();
-                    bundle.putString(SEARCH_ANSWER_VALUE,s.toString());
-                    bundle.putString(SEARCH_QUESTION_VALUE,searchQuestion.getText().toString());
+                    bundle.putString(SEARCH_ANSWER_VALUE, s.toString());
+                    bundle.putString(SEARCH_QUESTION_VALUE, searchQuestion.getText().toString());
                     getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
                 } else {
                     getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
                     customCursorAdapterForFieldEntriesListView.changeCursor(null);
-                    if ( searchQuestion.getText().toString().length() > 0 ) {
+                    if (searchQuestion.getText().toString().length() > 0) {
                         Bundle bundle = new Bundle();
-                        bundle.putString(SEARCH_ANSWER_VALUE,"");
-                        bundle.putString(SEARCH_QUESTION_VALUE,searchQuestion.getText().toString());
+                        bundle.putString(SEARCH_ANSWER_VALUE, "");
+                        bundle.putString(SEARCH_QUESTION_VALUE, searchQuestion.getText().toString());
                         getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
                     } else {
                         Bundle bundle = new Bundle();
@@ -361,10 +358,10 @@ public class EntriesListFragment extends Fragment {
                 searchAnswer.setText("");
                 getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
                 customCursorAdapterForFieldEntriesListView.changeCursor(null);
-                if ( searchQuestion.getText().toString().length() > 0 ) {
+                if (searchQuestion.getText().toString().length() > 0) {
                     Bundle bundle = new Bundle();
-                    bundle.putString(SEARCH_ANSWER_VALUE,"");
-                    bundle.putString(SEARCH_QUESTION_VALUE,searchQuestion.getText().toString());
+                    bundle.putString(SEARCH_ANSWER_VALUE, "");
+                    bundle.putString(SEARCH_QUESTION_VALUE, searchQuestion.getText().toString());
                     getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
                 } else {
                     Bundle bundle = new Bundle();
@@ -405,20 +402,20 @@ public class EntriesListFragment extends Fragment {
         sortAnswer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if ( isChecked ) {
-                    getLoaderManager().restartLoader(ORDER_ANSWER_DESC,null,getFieldEntries);
+                if (isChecked) {
+                    getLoaderManager().restartLoader(ORDER_ANSWER_DESC, null, getFieldEntries);
                 } else {
-                    getLoaderManager().restartLoader(ORDER_ANSWER_ASC,null,getFieldEntries);
+                    getLoaderManager().restartLoader(ORDER_ANSWER_ASC, null, getFieldEntries);
                 }
             }
         });
         sortEntryDate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if ( isChecked ) {
-                    getLoaderManager().restartLoader(ORDER_ENTRY_DATE_ASC,null,getFieldEntries);
+                if (isChecked) {
+                    getLoaderManager().restartLoader(ORDER_ENTRY_DATE_ASC, null, getFieldEntries);
                 } else {
-                    getLoaderManager().restartLoader(ORDER_ENTRY_DATE_DESC,null,getFieldEntries);
+                    getLoaderManager().restartLoader(ORDER_ENTRY_DATE_DESC, null, getFieldEntries);
                 }
             }
         });
@@ -597,11 +594,18 @@ public class EntriesListFragment extends Fragment {
             studyEntry.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), StudyActivity.class);
-                    intent.putExtra(StudyActivity.CURRENT_FIELD, getCurrentField());
-                    intent.putExtra(StudyActivity.CURRENT_QUESTION, editQuestion.getText().toString());
-                    intent.putExtra(StudyActivity.CURRENT_ANSWER, editAnswer.getText().toString());
-                    startActivity(intent);
+                    switch (fieldType) {
+                        case Contract.Field.DEFAULT_TYPE:
+                            Intent intent = new Intent(getActivity(), StudyActivity.class);
+                            intent.putExtra(StudyActivity.CURRENT_FIELD, getCurrentField());
+                            intent.putExtra(StudyActivity.CURRENT_QUESTION, editQuestion.getText().toString());
+                            intent.putExtra(StudyActivity.CURRENT_ANSWER, editAnswer.getText().toString());
+                            startActivity(intent);
+                            break;
+                        case Contract.Field.NOTEBOOK_TYPE:
+                            Toast.makeText(getActivity(), R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT).show();
+                            break;
+                    }
                 }
             });
             deleteEntry.setOnClickListener(new View.OnClickListener() {
@@ -714,7 +718,7 @@ public class EntriesListFragment extends Fragment {
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
             View view = null;
-            switch ( fieldType ) {
+            switch (fieldType) {
                 case Contract.Field.DEFAULT_TYPE:
                     view = LayoutInflater.from(context).inflate(R.layout.field_entries_list_view, parent, false);
                     break;

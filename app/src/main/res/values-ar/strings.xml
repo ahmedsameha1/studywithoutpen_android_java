@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">انس القلم و القرطاس!</string>
+    <string name="app_name">Study Vocabulary Five</string>
     <string name="delete_field">حذف المجال</string>
     <string name="create_field">إنشاء مجال</string>
     <string name="enter_field_name">أدخل اسم المجال</string>
@@ -75,9 +75,11 @@
     <string name="repeated_entry">يوجد مُدخل يحتوي على نفس السؤال ونفس الإجابة، احذف هذا المُدخل إن أردت!</string>
     <string name="ask_for_continue_previous_test">هل تريد استكمال جلسة الاختبار السابقة؟</string>
     <string name="notebook_field">مُفَكِّرة (السؤال مُخصصٌ للتاريخ والوقت)</string>
-    <string name="sample_field">مثال_للمجال_الذي_ستنشئ_مثله</string>
     <string name="dont_display_again">لا تعرض هذا مرة أخرى</string>
     <string name="example_field_message">مرحبا بالجميع، لتستخدم هذا البرنامج، ستقوم بإنشاء المجالات الخاصة بك وسوف تملئها بالبيانات الخاصة بك، لكن بسبب أنك ربما تجد البرنامج غير قابل للاستخدام بدون أي بيانات، سأقوم بتزويدك بمجال موجود به بعض البيانات، لذلك ستجد مجالا تم إنشائه لك، ويمكنك حذفه متى تشاء.</string>
     <string name="example_fields_dialog_title">مجالات الأمثلة!</string>
     <string name="cannot_create_example_field">البرنامج لا يستطيع إنشاء المجال المثال، لديك مجال بنفس الاسم!</string>
+    <string name="notbook_feature_is_not_active">هذه الخاصية غير فعالة في مجالات المفكرة!</string>
+    <string name="enter_date_time">انقر لتحديد التاريخ والوقت</string>
+    <string name="write_whatever">اكتب ما تشاء</string>
 </resources>

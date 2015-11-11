@@ -15,7 +15,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -99,10 +98,19 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                     entriesListFragment.getLoaderManager().restartLoader(EntriesListFragment.GET_ENTRIES_LOADER_ID,
                             bundle, entriesListFragment.getFieldEntries);
                     entriesListFragment.fieldType = databaseOperations.getFieldType(getCurrentField());
-                    ((AddEntryFragment) getSupportFragmentManager().findFragmentById(R.id.add_entry_fragment))
-                            .enterAnswer.requestFocus();
                 }
-
+                AddEntryFragment addEntryFragment = ((AddEntryFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.add_entry_fragment));
+                addEntryFragment.enterAnswer.requestFocus();
+                switch ( fieldType ) {
+                    case Contract.Field.NOTEBOOK_TYPE:
+                        addEntryFragment.enterQuestion.setHint(R.string.enter_date_time);
+                        addEntryFragment.enterAnswer.setHint(R.string.write_whatever);
+                        break;
+                    case Contract.Field.DEFAULT_TYPE:
+                        addEntryFragment.enterQuestion.setHint(R.string.enter_a_question);
+                        addEntryFragment.enterAnswer.setHint(R.string.enter_an_answer);
+                }
             }
 
             @Override
@@ -214,31 +222,41 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                 fragment1.show(getSupportFragmentManager(), GET_CONFIRMATION);
                 return true;
             case R.id.test:
-/*                if ( fieldEntriesCursor != null ) {
-                    fieldEntriesCursor.close();
-                }*/
-//                fieldEntriesCursor = databaseOperations.getFieldEntries(getCurrentField());
-                if ( fieldEntriesCursor.getCount() > 0 ) {
-                    if ( databaseOperations.checkLinkerTest(getCurrentField()) ) {
-                        AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
-                        fragment3.show(getSupportFragmentManager(),CHECK_IF_CONTINUE_TEST_SESSION);
-                    } else {
-                        Intent intent = new Intent(this, TestActivity.class);
-                        intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
-                        intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,false);
-                        startActivity(intent);
-                    }
-                } else {
-                    Toast.makeText(this,getString(R.string.no_entries_in_field),Toast.LENGTH_SHORT).show();
+                switch (fieldType) {
+                    case Contract.Field.DEFAULT_TYPE:
+                        if ( fieldEntriesCursor.getCount() > 0 ) {
+                            if ( databaseOperations.checkLinkerTest(getCurrentField()) ) {
+                                AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
+                                fragment3.show(getSupportFragmentManager(),CHECK_IF_CONTINUE_TEST_SESSION);
+                            } else {
+                                Intent intent = new Intent(this, TestActivity.class);
+                                intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
+                                intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,false);
+                                startActivity(intent);
+                            }
+                        } else {
+                            Toast.makeText(this,getString(R.string.no_entries_in_field),Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    case Contract.Field.NOTEBOOK_TYPE:
+                        Toast.makeText(this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT).show();
+                        break;
                 }
                 return true;
             case R.id.study_during:
-                if ( databaseOperations.checkLinkerStudyDuring(getCurrentField()) ) {
-                    AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
-                    fragment2.show(getSupportFragmentManager(),CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
-                } else {
-                    StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
-                    fragment2.show(getSupportFragmentManager(),fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+                switch (fieldType) {
+                    case Contract.Field.DEFAULT_TYPE:
+                        if ( databaseOperations.checkLinkerStudyDuring(getCurrentField()) ) {
+                            AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
+                            fragment2.show(getSupportFragmentManager(),CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
+                        } else {
+                            StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                            fragment2.show(getSupportFragmentManager(),fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+                        }
+                        break;
+                    case Contract.Field.NOTEBOOK_TYPE:
+                        Toast.makeText(this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT).show();
+                        break;
                 }
                 return true;
             case R.id.rate_the_app:
@@ -279,11 +297,14 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
 //        simpleCursorAdapterForFieldSpinner.changeCursor(fieldListCursor);
 //        fieldsListSpinner.setSelection(fieldListCursor.getCount());
         setLastUsedField(fieldListCursor.getCount());
+
         EntriesListFragment entriesListFragment = (EntriesListFragment) getSupportFragmentManager().findFragmentById(R.id.entries_list_fragment);
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.detach(entriesListFragment);
-        transaction.attach(entriesListFragment);
-        transaction.commit();
+        if ( entriesListFragment != null ) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.detach(entriesListFragment);
+            transaction.attach(entriesListFragment);
+            transaction.commit();
+        }
     }
 
     private SimpleCursorAdapter initializeSimpleCursorAdapterForFieldSpinner() {

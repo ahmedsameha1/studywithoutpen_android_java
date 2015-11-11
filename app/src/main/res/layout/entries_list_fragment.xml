@@ -3,102 +3,116 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#74AFAD">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center">
-    <ToggleButton
-        android:id="@+id/sort_question"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:textOff=""
-        android:textOn=""
-        android:background="@drawable/ic_sort_by_alpha_black_24dp"
-        android:focusable="false"
-        android:layout_marginLeft="20dp"/>
-    <LinearLayout
-        android:layout_width="0dp"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_gravity="center"
-        android:gravity="center"
         >
-        <EditText
-            android:id="@+id/search_question"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="3dp"
-            android:hint="@string/question"
-            android:imeOptions="flagNoExtractUi"/>
-
-        <ImageButton
-            android:id="@+id/clear_search_question"
+        <ToggleButton
+            android:id="@+id/sort_question"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_weight="0"
-            android:layout_gravity="center"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_clear_black_24dp" />
-    </LinearLayout>
-    <ToggleButton
-        android:id="@+id/sort_entry_date"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:textOff=""
-        android:textOn=""
-        android:background="@drawable/ic_access_time_black_24dp"
-        android:focusable="false"/>
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:textOff=""
+            android:textOn=""
+            android:background="@drawable/ic_sort_by_alpha_black_24dp"
+            android:focusable="false"
+            android:layout_marginLeft="20dp"/>
+
+        <ToggleButton
+            android:id="@+id/sort_entry_date"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerHorizontal="true"
+            android:textOff=""
+            android:textOn=""
+            android:background="@drawable/ic_access_time_black_24dp"
+            android:focusable="false"/>
+
+        <ToggleButton
+            android:id="@+id/sort_answer"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:gravity="end"
+            android:textOff=""
+            android:textOn=""
+            android:background="@drawable/ic_sort_by_alpha_black_24dp"
+            android:focusable="false"
+            android:layout_marginRight="20dp"/>
+    </RelativeLayout>
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_gravity="center"
-        android:gravity="center">
-        <EditText
-            android:id="@+id/search_answer"
-            android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_gravity="center"
-            android:layout_marginTop="3dp"
-            android:hint="@string/answer"
-            android:imeOptions="flagNoExtractUi"/>
+            android:gravity="center"
+            >
+            <EditText
+                android:id="@+id/search_question"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:layout_marginTop="3dp"
+                android:hint="@string/question"
+                android:imeOptions="flagNoExtractUi"/>
 
-        <ImageButton
-            android:id="@+id/clear_search_answer"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_weight="0"
+            <ImageButton
+                android:id="@+id/clear_search_question"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_weight="0"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_clear_black_24dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_gravity="center"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_clear_black_24dp" />
+            android:gravity="center">
+            <EditText
+                android:id="@+id/search_answer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:layout_marginTop="3dp"
+                android:hint="@string/answer"
+                android:imeOptions="flagNoExtractUi"/>
+
+            <ImageButton
+                android:id="@+id/clear_search_answer"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_weight="0"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_clear_black_24dp" />
+        </LinearLayout>
     </LinearLayout>
-    <ToggleButton
-        android:id="@+id/sort_answer"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:textOff=""
-        android:textOn=""
-        android:background="@drawable/ic_sort_by_alpha_black_24dp"
-        android:focusable="false"
-        android:layout_marginRight="20dp"/>
-</LinearLayout>
 
-        <ListView
-            android:id="@+id/field_entries_list_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="15dp"
-            android:cacheColorHint="#00000000"
-            android:choiceMode="singleChoice"
-            android:divider="#FF0000"
-            android:dividerHeight="1dp"
-            android:drawSelectorOnTop="false"
-            android:focusable="true"
-            android:listSelector="#00FF00"
-            android:orientation="vertical" />
+    <ListView
+        android:id="@+id/field_entries_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="15dp"
+        android:cacheColorHint="#00000000"
+        android:choiceMode="singleChoice"
+        android:divider="#FF0000"
+        android:dividerHeight="1dp"
+        android:drawSelectorOnTop="false"
+        android:focusable="true"
+        android:listSelector="#00FF00"
+        android:orientation="vertical" />
 
 
 </LinearLayout>
