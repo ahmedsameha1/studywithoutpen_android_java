@@ -227,7 +227,7 @@
                         android:layout_gravity="center"
                         android:layout_marginRight="10dp"
                         android:enabled="true"
-                        android:hint="@string/enter_an_answer"
+                        android:hint="@string/enter_your_answer"
                         android:imeOptions="flagNoExtractUi"
                         android:minLines="1"
                         android:scrollbarAlwaysDrawVerticalTrack="true"

@@ -138,12 +138,6 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*if ( enterAnswer.getText().toString().equals(listForTest [currentQuestionCounter][1])) {
-                    currentQuestionCounter++;
-                    showQuestion.setText(listForTest [currentQuestionCounter][0]);
-                } else {
-                    i
-                }*/
                 testingNow = true;
                 int j = 0;
                 try {
@@ -221,14 +215,30 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 } else {
                     Toast.makeText(StudyDuringActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT).show();
                 }
+                enterAnswer.setHint(R.string.enter_your_answer);
             }
         });
         nextHint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (hints != null) {
+                    int n = hintCounter;
                     hintIfMoreThanOneAnswer.setText(hints.get(hintCounter++));
                     hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+                    String s = hints.get(n);
+                    s = String.valueOf(s.charAt(s.length()-1));
+                    if ( n == 0 ) {
+                        enterAnswer.setHint(s);
+                    } else if ( n == 1 ) {
+                        int l = Integer.valueOf(s);
+                        String f = "";
+                        for ( int i = 0; i < l; i++ ) {
+                            f += "?";
+                        }
+                        enterAnswer.setHint(f);
+                    } else if ( n == 2 ) {
+                        enterAnswer.setHint(hints.get(n));
+                    }
                 }
             }
         });
@@ -282,6 +292,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 check.setEnabled(true);
                 enterAnswer.setText("");
                 _continue.setEnabled(false);
+                enterAnswer.setHint(R.string.enter_your_answer);
             }
         });
         permitedTriesNumber = 3;
@@ -589,7 +600,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
             }
 
-        } else if ( questionsNumber > 0 && loader.getId() == START_NEW_SESSION){
+        } else if ( questionsNumber <= 0 && loader.getId() == START_NEW_SESSION){
             Toast.makeText(this,getString(R.string.no_entries_in_this_time_range),Toast.LENGTH_LONG).show();
             finish();
         }

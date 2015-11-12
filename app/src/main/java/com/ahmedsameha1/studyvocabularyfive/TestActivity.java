@@ -211,6 +211,7 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
                 } else {
                     Toast.makeText(TestActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT).show();
                 }
+                enterAnswer.setHint(R.string.enter_your_answer);
             }
         });
         enterAnswer.addTextChangedListener(new TextWatcher() {
@@ -235,8 +236,23 @@ public class TestActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void onClick(View v) {
                 if (hints != null) {
+                    int n = hintCounter;
                     hintIfMoreThanOneAnswer.setText(hints.get(hintCounter++));
                     hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+                    String s = hints.get(n);
+                    s = String.valueOf(s.charAt(s.length()-1));
+                    if ( n == 0 ) {
+                        enterAnswer.setHint(s);
+                    } else if ( n == 1 ) {
+                        int l = Integer.valueOf(s);
+                        String f = "";
+                        for ( int i = 0; i < l; i++ ) {
+                            f += "?";
+                        }
+                        enterAnswer.setHint(f);
+                    } else if ( n == 2 ) {
+                        enterAnswer.setHint(hints.get(n));
+                    }
                 }
             }
         });

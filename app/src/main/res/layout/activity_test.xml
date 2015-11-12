@@ -262,7 +262,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginRight="10dp"
-                    android:hint="@string/enter_an_answer"
+                    android:hint="@string/enter_your_answer"
                     android:minLines="1"
                     android:enabled="false"
                     android:scrollbarAlwaysDrawVerticalTrack="true"
