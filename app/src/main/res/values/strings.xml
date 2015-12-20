@@ -83,4 +83,6 @@
     <string name="notbook_feature_is_not_active">This feature is not active on notebook fields!</string>
     <string name="enter_date_time">Click to specify the date and time.</string>
     <string name="write_whatever">Write whatever you want</string>
+    <string name="export_fields">Export Filelds</string>
+    <string name="export">Export</string>
 </resources>

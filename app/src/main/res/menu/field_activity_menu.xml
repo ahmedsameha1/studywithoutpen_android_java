@@ -23,6 +23,10 @@
         android:title="@string/study_during"
         app:showAsAction="ifRoom"/>
     <item
+        android:id="@+id/export"
+        android:title="@string/export"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/rate_the_app"
         android:icon="@drawable/ic_rate_review_white_24dp"
         android:title="@string/rate"

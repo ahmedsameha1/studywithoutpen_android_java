@@ -259,6 +259,10 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                         break;
                 }
                 return true;
+            case R.id.export:
+                ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                exportFieldsDialogFragment.show(getSupportFragmentManager(),ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                return true;
             case R.id.rate_the_app:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());
                 Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
@@ -308,7 +312,7 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
     }
 
     private SimpleCursorAdapter initializeSimpleCursorAdapterForFieldSpinner() {
-        String[] fromColumns = {Contract.OldField.COLUMN_NAME_FIELD_NAME};
+        String[] fromColumns = {Contract.Field.COLUMN_NAME_FIELD_NAME};
         int[] toViews = {R.id.list_item};
     /*    if ( fieldListCursor != null ) {
             fieldListCursor.close();

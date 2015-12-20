@@ -82,4 +82,6 @@
     <string name="notbook_feature_is_not_active">هذه الخاصية غير فعالة في مجالات المفكرة!</string>
     <string name="enter_date_time">انقر لتحديد التاريخ والوقت</string>
     <string name="write_whatever">اكتب ما تشاء</string>
+    <string name="export_fields">صَدِّر المجالات</string>
+    <string name="export">تصدير</string>
 </resources>
