@@ -1,4 +1,4 @@
-package com.ahmedsameha1.studyvocabularyfive;
+package com.ahmedsameha1.studyvocabularyfive.Dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.ahmedsameha1.studyvocabularyfive.R;
 
 /**
  * Created by ahmed on 7/21/2015.

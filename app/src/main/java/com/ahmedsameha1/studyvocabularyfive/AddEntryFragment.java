@@ -6,7 +6,6 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -18,8 +17,11 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TimePicker;
+
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseHelper;
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

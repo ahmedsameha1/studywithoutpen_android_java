@@ -1,10 +1,12 @@
-package com.ahmedsameha1.studyvocabularyfive;
+package com.ahmedsameha1.studyvocabularyfive.Dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+
+import com.ahmedsameha1.studyvocabularyfive.R;
 
 /**
  * Created by ahmed on 7/22/2015.

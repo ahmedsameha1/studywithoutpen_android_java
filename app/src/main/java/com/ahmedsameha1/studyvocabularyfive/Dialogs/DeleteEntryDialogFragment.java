@@ -1,11 +1,15 @@
-package com.ahmedsameha1.studyvocabularyfive;
+package com.ahmedsameha1.studyvocabularyfive.Dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
+
+import com.ahmedsameha1.studyvocabularyfive.EntriesListActivity;
+import com.ahmedsameha1.studyvocabularyfive.EntriesListFragment;
+import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
+import com.ahmedsameha1.studyvocabularyfive.R;
 
 /**
  * Created by ahmed on 7/27/2015.

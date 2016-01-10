@@ -1,4 +1,4 @@
-package com.ahmedsameha1.studyvocabularyfive;
+package com.ahmedsameha1.studyvocabularyfive.Dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -13,6 +13,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+
+import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
+import com.ahmedsameha1.studyvocabularyfive.R;
 
 /**
  * Created by ahmed_000 on 11/8/2015.

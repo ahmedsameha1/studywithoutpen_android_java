@@ -1,4 +1,4 @@
-package com.ahmedsameha1.studyvocabularyfive;
+package com.ahmedsameha1.studyvocabularyfive.Dialogs;
 
 import android.support.v7.app.AlertDialog;
 import android.app.Dialog;
@@ -8,6 +8,12 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.Button;
+
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabularyfive.R;
+import com.ahmedsameha1.studyvocabularyfive.TestActivity;
+import com.ahmedsameha1.studyvocabularyfive.WrongAnswersActivity;
+import com.ahmedsameha1.studyvocabularyfive.WrongItem;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;

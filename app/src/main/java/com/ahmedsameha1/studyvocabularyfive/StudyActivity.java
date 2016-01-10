@@ -3,7 +3,6 @@ package com.ahmedsameha1.studyvocabularyfive;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -30,6 +29,11 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
+import com.ahmedsameha1.studyvocabularyfive.Database.DataProvider;
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseHelper;
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
 
 /**
  * Created by ahmed on 8/1/2015.

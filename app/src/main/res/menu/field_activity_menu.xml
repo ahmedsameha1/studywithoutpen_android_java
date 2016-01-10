@@ -24,7 +24,11 @@
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/export"
-        android:title="@string/export"
+        android:title="@string/export_fields"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/import_"
+        android:title="@string/import_fields"
         app:showAsAction="never"/>
     <item
         android:id="@+id/rate_the_app"

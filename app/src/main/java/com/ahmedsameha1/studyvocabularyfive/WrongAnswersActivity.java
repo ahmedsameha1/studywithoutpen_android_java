@@ -24,6 +24,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
+import com.ahmedsameha1.studyvocabularyfive.Database.DataProvider;
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;

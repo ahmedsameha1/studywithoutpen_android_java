@@ -30,6 +30,12 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
+import com.ahmedsameha1.studyvocabularyfive.Database.DataProvider;
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseHelper;
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabularyfive.Dialogs.DeleteEntryDialogFragment;
+
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

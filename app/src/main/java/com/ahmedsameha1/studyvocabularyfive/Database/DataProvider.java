@@ -1,10 +1,12 @@
-package com.ahmedsameha1.studyvocabularyfive;
+package com.ahmedsameha1.studyvocabularyfive.Database;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseHelper;
 
 /**
  * Created by ahmed on 9/11/2015.

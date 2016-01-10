@@ -1,4 +1,4 @@
-package com.ahmedsameha1.studyvocabularyfive;
+package com.ahmedsameha1.studyvocabularyfive.Database;
 
 import android.provider.BaseColumns;
 
@@ -41,6 +41,11 @@ public final class Contract {
         public static final String COLUMN_NAME_QUESTION = "question";
         public static final String COLUMN_NAME_ANSWER = "answer";
         public static final String COLUMN_NAME_FIELD = "field";
+    }
+    public static abstract class Check implements BaseColumns {
+        public static final int CHECK_NUMBER = 4179198;
+        public static final String TABLE_NAME = "check_table";
+        public static final String COLUMN_NAME_CHECK_NUMBER = "check_number";
     }
     public static abstract class OldField implements BaseColumns {
         // This constant represents the name of the table which contains the data of the names of the fields that the user will create.

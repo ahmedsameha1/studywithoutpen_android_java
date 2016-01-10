@@ -1,4 +1,4 @@
-package com.ahmedsameha1.studyvocabularyfive;
+package com.ahmedsameha1.studyvocabularyfive.Dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -8,6 +8,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
+import com.ahmedsameha1.studyvocabularyfive.R;
+import com.ahmedsameha1.studyvocabularyfive.TestActivity;
 
 /**
  * Created by ahmed_000 on 10/20/2015.

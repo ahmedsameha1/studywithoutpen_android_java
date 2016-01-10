@@ -1,4 +1,4 @@
-package com.ahmedsameha1.studyvocabularyfive;
+package com.ahmedsameha1.studyvocabularyfive.Database;
 
 
 import android.content.ContentValues;
@@ -6,12 +6,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.ahmedsameha1.studyvocabularyfive.Contract.OldField;
+
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract.OldField;
 import android.util.Log;
 
-import com.ahmedsameha1.studyvocabularyfive.Contract.Question;
-import com.ahmedsameha1.studyvocabularyfive.Contract.Answer;
-import com.ahmedsameha1.studyvocabularyfive.Contract.Linker;
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract.Question;
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract.Answer;
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract.Linker;
 
 import java.util.ArrayList;
 

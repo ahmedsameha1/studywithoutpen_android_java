@@ -23,6 +23,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
+import com.ahmedsameha1.studyvocabularyfive.Database.DataProvider;
+import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
+
 /**
  * Created by ahmed on 7/26/2015.
  */
