@@ -105,8 +105,6 @@
     <string name="not_imported_field">One field cannot be imported!</string>
     <string name="the_field">The field:</string>
     <string name="not_imported_because">cannot be imported because you have a field with the same name but with different type. If you want you can delete the current field then import the same file again.</string>
-    <string name="wait_till_current_export_finish">Please wait until you be notified about the current running export!</string>
-    <string name="wait_till_current_import_finish">Please wait until you be notified about the current running import!</string>
     <string name="import_fields">Import Fields</string>
     <string name="import_">Import</string>
     <string name="file_not_exist">This file does not exist! make sure that you have copied the file in the displayed path and that the file name is correctly written.</string>
@@ -116,4 +114,5 @@
     <string name="import_completed">Fields import has been completed</string>
     <string name="file_with_same_name">Enter another name for the file, There is file with the same name!</string>
     <string name="select_fields_export">Select all the fields that you want to export</string>
+    <string name="wait_until_current_export_import_finish">Wait until the current export/import process finishes!</string>
 </resources>

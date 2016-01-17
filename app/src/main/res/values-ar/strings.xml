@@ -104,10 +104,8 @@
     <string name="not_imported_field">هناك مجال لا يمكن نقله!</string>
     <string name="the_field">المجال:</string>
     <string name="not_imported_because">لا يمكن استيراده لأن لديك مجالا بنفس الاسم ولكنه مختلف في النوع. يمكنك حذف المجال الحالي  ثم استيراد الملف مرة أخرى.</string>
-    <string name="wait_till_current_export_finish">لطفا انتظر حتى يتم إعلامك عن التصدير الجاري! </string>
     <string name="import_">استورد</string>
     <string name="import_fields">استورد مجالات</string>
-    <string name="wait_till_current_import_finish">لطفا انتظر حتى يتم إعلامك عن الاستيراد الجاري!</string>
     <string name="file_not_exist">هذا الملف غير موجود! تأكد من أنك نسخت الملف في المسار الموضح، وأنك أدخلت اسم الملف بشكل صحيح.</string>
     <string name="lowercase">كل الحروف صغيرة</string>
     <string name="invalid_file">الملف المُستورَد هو ملف غير صالح.</string>
@@ -115,4 +113,5 @@
     <string name="import_completed">اكتمل استيراد المجالات</string>
     <string name="file_with_same_name">أدخل اسم آخر للملف، هناك ملف بنفس الاسم!</string>
     <string name="select_fields_export">اختر كل المجالات التي ترغب في تصديرها</string>
+    <string name="wait_until_current_export_import_finish">انتظر حتي تنتهي عملية التصدير/الاستيراد الحالية!</string>
 </resources>

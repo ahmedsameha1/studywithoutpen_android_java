@@ -1,21 +1,25 @@
 package com.ahmedsameha1.studyvocabularyfive.Database;
 
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.widget.Toast;
 
+import com.ahmedsameha1.studyvocabularyfive.Dialogs.ExportCompletedActivity;
+import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
 import com.ahmedsameha1.studyvocabularyfive.R;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -24,8 +28,66 @@ import java.util.ArrayList;
  */
 public class ExportImportDatabase {
     public static final String EXPORT_IMPORT_DIRECTORY_NAME = "StudyWithoutPen";
+    public static final int FAILED_EXPORT_NOTIFICATION = 0;
+    public static final int SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION = 1;
+    public static final int SUCCESFUL_EMULATED_STORAGE_NOTIFICATION = 2;
+    public static final int FAILED_IMPORT_NOTIFICATION = 3;
+    public static final int FAILED_IMPORT_INVALID_FILE_NOTIFICATION = 4;
+    public static final int SUCCESSFUL_IMPORT_NOTIFICATION = 5;
 
-    public static void exportFields(Context context, ArrayList<String> fieldNames, String fileName) throws IOException, SQLiteException {
+    private static Thread exportThread, importThread;
+
+
+    public static Thread getExportThread() {
+        return exportThread;
+    }
+
+    public static Thread getImportThread() {
+        return importThread;
+    }
+
+    public static void startExportThread( final Context context, final ArrayList<String> selectedFields, final String fileName ) {
+        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        exportThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    exportFields(context, selectedFields, fileName );
+                    if (Environment.isExternalStorageRemovable()) {
+                        showNotification(context,SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION, notificationManager);
+                    } else if (Environment.isExternalStorageEmulated()) {
+                        showNotification(context,SUCCESFUL_EMULATED_STORAGE_NOTIFICATION, notificationManager);
+                    }
+                } catch (SQLiteException | IOException e) {
+                    showNotification(context,FAILED_EXPORT_NOTIFICATION, notificationManager);
+                }
+            }
+        });
+        exportThread.start();
+    }
+
+    public static void startImportThread( final Context context, final String fileName ) {
+        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        importThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    importFields(context,fileName);
+                    showNotification(context,SUCCESSFUL_IMPORT_NOTIFICATION,notificationManager);
+                } catch (InvalidStudyWithoutPenFileException iswpfe ) {
+                    showNotification(context,FAILED_IMPORT_INVALID_FILE_NOTIFICATION,notificationManager);
+                } catch ( SQLiteException | IOException e ) {
+                    e.printStackTrace();
+                    showNotification(context,FAILED_IMPORT_NOTIFICATION, notificationManager);
+                }
+            }
+        });
+        importThread.start();
+    }
+
+
+    private static void exportFields( Context context, ArrayList<String> fieldNames, String fileName) throws IOException, SQLiteException {
         ContentResolver contentResolver = context.getContentResolver();
         fileName = fileName.toLowerCase();
         SQLiteDatabase toExportDatabase = null;
@@ -128,7 +190,7 @@ public class ExportImportDatabase {
         }
     }
 
-    public static void importFields(Context context, String fileName)
+    private static void importFields( Context context, String fileName)
             throws IOException, SQLiteException, InvalidStudyWithoutPenFileException {
         fileName = fileName.toLowerCase();
         SQLiteDatabase toImportDatabase = null;
@@ -297,5 +359,130 @@ public class ExportImportDatabase {
             unneededAnswerCursor.close();
         }
         answersCursor.close();
+    }
+
+    private static void showNotification( Context context ,int notificationId, NotificationManager notificationManager) {
+        NotificationCompat.Builder notificationBuilder = null;
+        Intent notifyIntent = null;
+        PendingIntent resultPendingIntent = null;
+        TaskStackBuilder stackBuilder = null;
+        switch (notificationId) {
+            case FAILED_EXPORT_NOTIFICATION:
+                notificationBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setContentTitle(context.getResources().getString(R.string.export_failed))
+                                .setContentText(context.getResources().getString(R.string.export_failed))
+                                .setTicker(context.getResources().getString(R.string.export_failed))
+                                .setAutoCancel(true);
+                notifyIntent = new Intent(context, ExportCompletedActivity.class);
+                notifyIntent.putExtra(ExportCompletedActivity.NOTIFICATION_ID, FAILED_EXPORT_NOTIFICATION);
+                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                resultPendingIntent =
+                        PendingIntent.getActivity(
+                                context,
+                                0,
+                                notifyIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                        );
+                notificationBuilder.setContentIntent(resultPendingIntent);
+                notificationManager.notify(notificationId, notificationBuilder.build());
+                break;
+            case SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION:
+                notificationBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setContentTitle(context.getResources().getString(R.string.export_completed))
+                                .setContentText(context.getString(R.string.export_completed))
+                                .setTicker(context.getResources().getString(R.string.export_completed))
+                                .setAutoCancel(true);
+                notifyIntent = new Intent(context, ExportCompletedActivity.class);
+                notifyIntent.putExtra(ExportCompletedActivity.NOTIFICATION_ID, SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION);
+                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                resultPendingIntent =
+                        PendingIntent.getActivity(
+                                context,
+                                0,
+                                notifyIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                        );
+
+                notificationBuilder.setContentIntent(resultPendingIntent);
+                notificationManager.notify(notificationId, notificationBuilder.build());
+                break;
+            case SUCCESFUL_EMULATED_STORAGE_NOTIFICATION:
+                notificationBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setContentTitle(context.getResources().getString(R.string.export_completed))
+                                .setContentText(context.getResources().getString(R.string.export_completed))
+                                .setTicker(context.getResources().getString(R.string.export_completed))
+                                .setAutoCancel(true);
+                notifyIntent = new Intent(context, ExportCompletedActivity.class);
+                notifyIntent.putExtra(ExportCompletedActivity.NOTIFICATION_ID, SUCCESFUL_EMULATED_STORAGE_NOTIFICATION);
+                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                resultPendingIntent =
+                        PendingIntent.getActivity(
+                                context,
+                                0,
+                                notifyIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                        );
+
+                notificationBuilder.setContentIntent(resultPendingIntent);
+                notificationManager.notify(notificationId, notificationBuilder.build());
+                break;
+            case FAILED_IMPORT_NOTIFICATION:
+                notificationBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setContentTitle(context.getResources().getString(R.string.import_failed))
+                                .setContentText(context.getResources().getString(R.string.import_failed))
+                                .setTicker(context.getResources().getString(R.string.import_failed))
+                                .setAutoCancel(true);
+                notifyIntent = new Intent(context, FieldActivity.class);
+                stackBuilder = TaskStackBuilder.create(context);
+                stackBuilder.addParentStack(FieldActivity.class);
+                stackBuilder.addNextIntent(notifyIntent);
+                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                notificationBuilder.setContentIntent(resultPendingIntent);
+                notificationManager.notify(notificationId, notificationBuilder.build());
+                break;
+            case FAILED_IMPORT_INVALID_FILE_NOTIFICATION:
+                notificationBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setContentTitle(context.getResources().getString(R.string.import_failed))
+                                .setContentText(context.getResources().getString(R.string.invalid_file))
+                                .setTicker(context.getResources().getString(R.string.import_failed))
+                                .setAutoCancel(true);
+                notifyIntent = new Intent(context, FieldActivity.class);
+                stackBuilder = TaskStackBuilder.create(context);
+                stackBuilder.addParentStack(FieldActivity.class);
+                stackBuilder.addNextIntent(notifyIntent);
+                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                notificationBuilder.setContentIntent(resultPendingIntent);
+                notificationManager.notify(notificationId, notificationBuilder.build());
+                break;
+            case SUCCESSFUL_IMPORT_NOTIFICATION:
+                notificationBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setContentTitle(context.getResources().getString(R.string.import_completed))
+                                .setContentText(context.getResources().getString(R.string.import_completed))
+                                .setTicker(context.getResources().getString(R.string.import_completed))
+                                .setAutoCancel(true);
+                notifyIntent = new Intent(context, FieldActivity.class);
+                stackBuilder = TaskStackBuilder.create(context);
+                stackBuilder.addParentStack(FieldActivity.class);
+                stackBuilder.addNextIntent(notifyIntent);
+                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                notificationBuilder.setContentIntent(resultPendingIntent);
+                notificationManager.notify(notificationId, notificationBuilder.build());
+                break;
+        }
     }
 }

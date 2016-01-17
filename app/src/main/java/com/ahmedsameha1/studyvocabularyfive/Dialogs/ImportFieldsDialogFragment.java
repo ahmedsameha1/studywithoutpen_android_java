@@ -83,31 +83,10 @@ public class ImportFieldsDialogFragment extends DialogFragment {
                                 Toast.makeText(context,R.string.file_not_exist,Toast.LENGTH_SHORT).show();
                                 Toast.makeText(context,R.string.lowercase,Toast.LENGTH_SHORT).show();
                             } else {
-                                Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_SHORT).show();
-                                Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_SHORT).show();
-                                Thread thread = new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                        editor.putBoolean(IMPORT_THREAD_IS_RUNNING,true);
-                                        editor.commit();
-                                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                                        try {
-                                            alertDialog.dismiss();
-                                            ExportImportDatabase.importFields(context, fileName);
-                                            showNotification(IMPORT_SUCCESSFUL_NOTIFICATION,notificationManager);
-                                        } catch (InvalidStudyWithoutPenFileException iswpfe ) {
-                                            showNotification(IMPORT_FAILED_INVALID_FILE_NOTIFICATION,notificationManager);
-                                        } catch ( SQLiteException | IOException e ) {
-                                            e.printStackTrace();
-                                            showNotification(IMPORT_FAILED_NOTIFICATION, notificationManager);
-                                        }
-                                        editor.putBoolean(IMPORT_THREAD_IS_RUNNING,false);
-                                        editor.commit();
-                                    }
-                                });
-                                thread.start();
+                                dismiss();
+                                Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG).show();
+                                Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG).show();
+                                ExportImportDatabase.startImportThread(context,fileName);
                             }
                         }
                     }

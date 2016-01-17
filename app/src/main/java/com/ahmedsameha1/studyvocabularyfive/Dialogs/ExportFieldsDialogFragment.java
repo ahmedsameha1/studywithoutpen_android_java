@@ -106,32 +106,10 @@ public class ExportFieldsDialogFragment extends DialogFragment {
                             } else if ( file.exists() ) {
                                 Toast.makeText(context, R.string.file_with_same_name, Toast.LENGTH_LONG).show();
                             } else {
-                                Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_SHORT).show();
-                                Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_SHORT).show();
-                                Thread thread = new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context); // getting the preferences
-                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                        editor.putBoolean(EXPORT_THREAD_IS_RUNNING, true);
-                                        editor.commit();
-                                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                                        try {
-                                            alertDialog.dismiss();
-                                            ExportImportDatabase.exportFields(context, selectedFields, enterFileName.getText().toString());
-                                            if (Environment.isExternalStorageRemovable()) {
-                                                showNotification(REMOVABLE_STORAGE_NOTIFICATION, notificationManager);
-                                            } else if (Environment.isExternalStorageEmulated()) {
-                                                showNotification(EMULATED_STORAGE_NOTIFICATION, notificationManager);
-                                            }
-                                        } catch (SQLiteException | IOException e) {
-                                            showNotification(EXPORT_FAILED_NOTIFICATION, notificationManager);
-                                        }
-                                        editor.putBoolean(EXPORT_THREAD_IS_RUNNING, false);
-                                        editor.commit();
-                                    }
-                                });
-                                thread.start();
+                                alertDialog.dismiss();
+                                Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG).show();
+                                ExportImportDatabase.startExportThread(context,selectedFields,fileName);
                             }
                         }
                     }

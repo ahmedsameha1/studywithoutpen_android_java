@@ -30,6 +30,7 @@ import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
 import com.ahmedsameha1.studyvocabularyfive.Database.DataProvider;
 import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabularyfive.Database.ExportImportDatabase;
 import com.ahmedsameha1.studyvocabularyfive.Dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
 import com.ahmedsameha1.studyvocabularyfive.Dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.studyvocabularyfive.Dialogs.CreateFieldDialogFragment;
@@ -221,7 +222,8 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        //noinspection SimplifiableIfStatement
+        Thread exportThread = ExportImportDatabase.getExportThread();
+        Thread importThread = ExportImportDatabase.getImportThread();
         switch (id) {
             case R.id.add_field:
                 CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
@@ -273,20 +275,34 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                 }
                 return true;
             case R.id.export:
-                if ( ! sharedPreferences.getBoolean(ExportFieldsDialogFragment.EXPORT_THREAD_IS_RUNNING,false) ) {
+                if ( (exportThread == null || !exportThread.isAlive()) &&
+                        (importThread == null || !importThread.isAlive()) ) {
+                    ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                    exportFieldsDialogFragment.show(getSupportFragmentManager(),ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                } else {
+                    Toast.makeText(this,R.string.wait_until_current_export_import_finish,Toast.LENGTH_SHORT).show();
+                }
+                /*if ( ! sharedPreferences.getBoolean(ExportFieldsDialogFragment.EXPORT_THREAD_IS_RUNNING,false) ) {
                     ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
                     exportFieldsDialogFragment.show(getSupportFragmentManager(),ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
                 } else {
                     Toast.makeText(this,R.string.wait_till_current_export_finish,Toast.LENGTH_SHORT).show();
-                }
+                }*/
                 return true;
             case R.id.import_:
-                if ( ! sharedPreferences.getBoolean(ImportFieldsDialogFragment.IMPORT_THREAD_IS_RUNNING,false) ) {
+                if ( ( exportThread == null || !exportThread.isAlive() ) &&
+                        ( importThread == null || !importThread.isAlive() ) ) {
+                    ImportFieldsDialogFragment importFieldsDialogFragment = new ImportFieldsDialogFragment();
+                    importFieldsDialogFragment.show(getSupportFragmentManager(),ImportFieldsDialogFragment.IMPORT_FIELD_DIALOG_FRAGMENT);
+                } else {
+                    Toast.makeText(this,R.string.wait_until_current_export_import_finish,Toast.LENGTH_SHORT).show();
+                }
+                /*if ( ! sharedPreferences.getBoolean(ImportFieldsDialogFragment.IMPORT_THREAD_IS_RUNNING,false) ) {
                     ImportFieldsDialogFragment importFieldsDialogFragment = new ImportFieldsDialogFragment();
                     importFieldsDialogFragment.show(getSupportFragmentManager(),ImportFieldsDialogFragment.IMPORT_FIELD_DIALOG_FRAGMENT);
                 } else {
                     Toast.makeText(this,R.string.wait_till_current_import_finish,Toast.LENGTH_SHORT).show();
-                }
+                }*/
                 return true;
             case R.id.rate_the_app:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());
