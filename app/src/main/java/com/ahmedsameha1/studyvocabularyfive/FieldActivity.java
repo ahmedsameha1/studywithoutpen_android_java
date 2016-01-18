@@ -231,7 +231,7 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                 return true;
             case R.id.delete_field:
                 Bundle bundle = new Bundle();
-                bundle.putString(DeleteFieldDialogFragment.CONFIRMATION_MESSAGE, getString(R.string.field_deletion_message) + " ( " + getCurrentField() + " ) ?");
+                bundle.putString(DeleteFieldDialogFragment.CONFIRMATION_MESSAGE, getString(R.string.field_deletion_message,getCurrentField()));
                 DeleteFieldDialogFragment fragment1 = new DeleteFieldDialogFragment();
                 fragment1.setArguments(bundle);
                 fragment1.show(getSupportFragmentManager(), GET_CONFIRMATION);

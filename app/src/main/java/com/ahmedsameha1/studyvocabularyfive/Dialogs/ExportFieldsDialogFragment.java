@@ -42,17 +42,11 @@ import java.util.ArrayList;
  * Created by ahmed on 12/20/2015.
  */
 public class ExportFieldsDialogFragment extends DialogFragment {
-    public static final String EXPORT_THREAD_IS_RUNNING = "exportThreadIsRunning";
     public static final String EXPORT_FIELD_DIALOG_FRAGMENT = "exportFieldDialogFragment";
-    public static final int EXPORT_FAILED_NOTIFICATION = 0;
-    public static final int REMOVABLE_STORAGE_NOTIFICATION = 1;
-    public static final int EMULATED_STORAGE_NOTIFICATION = 2;
 
     private DatabaseOperations databaseOperations;
     private EditText enterFileName;
     private ListView listView;
-
-
     private Context context;
 
     @NonNull
@@ -79,8 +73,8 @@ public class ExportFieldsDialogFragment extends DialogFragment {
                                 new int[]{android.R.id.text1}, 0);
                 listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
                 listView.setAdapter(simpleCursorAdapter);
-                Button p = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                p.setOnClickListener(new View.OnClickListener() {
+                Button positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         String fileName = enterFileName.getText().toString();
@@ -103,13 +97,13 @@ public class ExportFieldsDialogFragment extends DialogFragment {
                                 Toast.makeText(context, R.string.plug_your_sdcard, Toast.LENGTH_SHORT).show();
                             } else if (Environment.getExternalStorageState().equals(Environment.MEDIA_UNMOUNTED)) {
                                 Toast.makeText(context, R.string.external_storage_unmounted, Toast.LENGTH_SHORT).show();
-                            } else if ( file.exists() ) {
+                            } else if (file.exists()) {
                                 Toast.makeText(context, R.string.file_with_same_name, Toast.LENGTH_LONG).show();
                             } else {
                                 alertDialog.dismiss();
                                 Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG).show();
                                 Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG).show();
-                                ExportImportDatabase.startExportThread(context,selectedFields,fileName);
+                                ExportImportDatabase.startExportThread(context, selectedFields, fileName);
                             }
                         }
                     }
@@ -118,81 +112,5 @@ public class ExportFieldsDialogFragment extends DialogFragment {
 
         });
         return alertDialog;
-    }
-
-    private void showNotification(int notificationId, NotificationManager notificationManager) {
-        NotificationCompat.Builder notificationBuilder = null;
-        Intent notifyIntent = null;
-        PendingIntent resultPendingIntent = null;
-        switch (notificationId) {
-            case EXPORT_FAILED_NOTIFICATION:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.export_failed))
-                                .setContentText(context.getResources().getString(R.string.export_failed))
-                                .setTicker(context.getResources().getString(R.string.export_failed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, ExportCompletedActivity.class);
-                notifyIntent.putExtra(ExportCompletedActivity.NOTIFICATION_ID, EXPORT_FAILED_NOTIFICATION);
-                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                resultPendingIntent =
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                notifyIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
-            case REMOVABLE_STORAGE_NOTIFICATION:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.export_completed))
-                                .setContentText(context.getString(R.string.export_completed))
-                                .setTicker(context.getResources().getString(R.string.export_completed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, ExportCompletedActivity.class);
-                notifyIntent.putExtra(ExportCompletedActivity.NOTIFICATION_ID, REMOVABLE_STORAGE_NOTIFICATION);
-                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                resultPendingIntent =
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                notifyIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
-            case EMULATED_STORAGE_NOTIFICATION:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.export_completed))
-                                .setContentText(context.getResources().getString(R.string.export_completed))
-                                .setTicker(context.getResources().getString(R.string.export_completed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, ExportCompletedActivity.class);
-                notifyIntent.putExtra(ExportCompletedActivity.NOTIFICATION_ID, EMULATED_STORAGE_NOTIFICATION);
-                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                resultPendingIntent =
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                notifyIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
-        }
     }
 }

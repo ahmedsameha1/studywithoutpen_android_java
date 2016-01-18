@@ -28,25 +28,27 @@ public class ExportCompletedActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_export_completed);
-        int notificationId = getIntent().getIntExtra(NOTIFICATION_ID, ExportFieldsDialogFragment.EXPORT_FAILED_NOTIFICATION);
+        int notificationId = getIntent().getIntExtra(NOTIFICATION_ID, ExportImportDatabase.FAILED_EXPORT_NOTIFICATION);
         exportFilePlace = (TextView) findViewById(R.id.export_file_place);
         filePath = (TextView) findViewById(R.id.file_path);
         openFolder = (Button) findViewById(R.id.open_folder);
         switch (notificationId) {
-            case ExportFieldsDialogFragment.EXPORT_FAILED_NOTIFICATION:
+            case ExportImportDatabase.FAILED_EXPORT_NOTIFICATION:
                 exportFilePlace.setText(R.string.export_failed);
                 openFolder.setVisibility(View.GONE);
                 filePath.setVisibility(View.GONE);
                 break;
-            case ExportFieldsDialogFragment.REMOVABLE_STORAGE_NOTIFICATION:
+            case ExportImportDatabase.SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION:
                 exportFilePlace.setText(R.string.removable_storage_notification);
-                filePath.setText(getString(R.string.file_path) + " " + Environment.getExternalStorageDirectory().getAbsolutePath()
-                        + File.separator + ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME);
+                filePath.setText(getString(R.string.file_path,
+                        getString(R.string.export_import_file_path,Environment.getExternalStorageDirectory().getAbsolutePath()
+                                ,File.separator,ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME)));
                 break;
-            case ExportFieldsDialogFragment.EMULATED_STORAGE_NOTIFICATION:
+            case ExportImportDatabase.SUCCESFUL_EMULATED_STORAGE_NOTIFICATION:
                 exportFilePlace.setText(R.string.emulated_storage_notification);
-                filePath.setText(getString(R.string.file_path) + " " + Environment.getExternalStorageDirectory().getAbsolutePath()
-                        + File.separator + ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME);
+                filePath.setText(getString(R.string.file_path,
+                        getString(R.string.export_import_file_path,Environment.getExternalStorageDirectory().getAbsolutePath()
+                                ,File.separator,ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME)));
                 break;
         }
         Uri selectedUri = Uri.parse(Environment.getExternalStorageDirectory().getPath());

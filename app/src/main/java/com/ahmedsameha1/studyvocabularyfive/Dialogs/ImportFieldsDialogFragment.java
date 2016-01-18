@@ -36,11 +36,7 @@ import java.io.IOException;
  * Created by ahmed on 1/4/2016.
  */
 public class ImportFieldsDialogFragment extends DialogFragment {
-    public static final String IMPORT_THREAD_IS_RUNNING = "importThreadIsRunning";
     public static final String IMPORT_FIELD_DIALOG_FRAGMENT = "importFieldDialogFragment";
-    public static final int IMPORT_FAILED_INVALID_FILE_NOTIFICATION = 0;
-    public static final int IMPORT_FAILED_NOTIFICATION = 1;
-    public static final int IMPORT_SUCCESSFUL_NOTIFICATION = 2;
     private Context context;
 
     @NonNull
@@ -64,8 +60,8 @@ public class ImportFieldsDialogFragment extends DialogFragment {
                 } else if ( Environment.isExternalStorageEmulated() ) {
                     copyFileIn.setText(R.string.copy_import_file_emulated);
                 }
-                filePath.setText(Environment.getExternalStorageDirectory().getAbsolutePath()
-                        + File.separator + ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME);
+                filePath.setText(getString(R.string.export_import_file_path,Environment.getExternalStorageDirectory().getAbsolutePath()
+                        ,File.separator,ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME));
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -94,61 +90,5 @@ public class ImportFieldsDialogFragment extends DialogFragment {
             }
         });
         return alertDialog;
-    }
-    private void showNotification(int notificationId, NotificationManager notificationManager ) {
-        NotificationCompat.Builder notificationBuilder = null;
-        Intent notifyIntent = null;
-        PendingIntent resultPendingIntent = null;
-        TaskStackBuilder stackBuilder = null;
-        switch (notificationId) {
-            case IMPORT_FAILED_INVALID_FILE_NOTIFICATION:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.import_failed))
-                                .setContentText(context.getResources().getString(R.string.invalid_file))
-                                .setTicker(context.getResources().getString(R.string.import_failed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, FieldActivity.class);
-                stackBuilder = TaskStackBuilder.create(context);
-                stackBuilder.addParentStack(FieldActivity.class);
-                stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
-            case IMPORT_FAILED_NOTIFICATION:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.import_failed))
-                                .setContentText(context.getResources().getString(R.string.import_failed))
-                                .setTicker(context.getResources().getString(R.string.import_failed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, FieldActivity.class);
-                stackBuilder = TaskStackBuilder.create(context);
-                stackBuilder.addParentStack(FieldActivity.class);
-                stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
-            case IMPORT_SUCCESSFUL_NOTIFICATION:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.import_completed))
-                                .setContentText(context.getResources().getString(R.string.import_completed))
-                                .setTicker(context.getResources().getString(R.string.import_completed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, FieldActivity.class);
-                stackBuilder = TaskStackBuilder.create(context);
-                stackBuilder.addParentStack(FieldActivity.class);
-                stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
-        }
     }
 }

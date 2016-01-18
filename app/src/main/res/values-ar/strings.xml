@@ -6,7 +6,7 @@
     <string name="action_settings">الإعدادات</string>
     <string name="cancel">إلغاء</string>
     <string name="ok">موافق</string>
-    <string name="field_deletion_message">هل أنت متأكد من أنك تريد حذف هذا المجال:</string>
+    <string name="field_deletion_message">هل أنت متأكد من أنك تريد حذف المجال (%1$s)؟</string>
     <string name="field"> مجال؟</string>
     <string name="test">اختبار</string>
     <string name="add_new_entryies">أدخل بعض المدخلات في هذا المجال</string>
@@ -85,10 +85,10 @@
     <string name="export_fields">صَدِّر مجالات</string>
     <string name="export">صدِّر</string>
     <string name="file_name">أدخل اسم للملف الذي سيتم تصديره (حروف صغيرة):</string>
-    <string name="no_file_name_toast">لطفا، أدخل اسم الملف الذي سيتم تصديره!</string>
-    <string name="zero_selected_fields_toast">لطفا، أختر على الأقل مجالا واحدا لتصديره</string>
+    <string name="no_file_name_toast">أدخل اسم للملف الذي سيتم تصديره!</string>
+    <string name="zero_selected_fields_toast">أختر على الأقل مجالا واحدا لتصديره!</string>
     <string name="export_failed">لقد فشل تصدير المجالات</string>
-    <string name="plug_your_sdcard">لطفا، تأكد من أن بطاقة SD مُرَكَّبة في مكانها.</string>
+    <string name="plug_your_sdcard"> تأكد من أن بطاقة SD مُرَكَّبة في مكانها!</string>
     <string name="external_storage_unmounted">وحدة التخزين الخاصة بجهازك غير مُعَدَة لعملية التصدير!</string>
     <string name="emulated_storage_notification">ستجد الملف المُصَدَّر في ذاكرة التخزين الداخلية لجهازك تحت مجلد يسمى \"StudyWithoutPen\". يمكنك  نسخ أو مشاركة الملف باستخدام مدير ملفات في جهازك أو باستخدام حاسوب</string>
     <string name="export_completed">اكتمل تصدير مجالاتك</string>
@@ -100,7 +100,7 @@
     <string name="shut_down_warning"> يجب عدم إغلاق جهازك حتى تكتمل العملية بنجاح</string>
     <string name="copy_import_file_emulated">ستجد المجلد \"StudyWithoutPen\" في ذاكرة التخزين الداخلية لجهازك. انسخ الملف الذي ترغب في استيراده في هذا المجلد.</string>
     <string name="copy_import_file_removable">ستجد المجلد \"StudyWithoutPen\" في ذاكرة التخزين الخارجية لجهازك (غالبا، الـ SD card). انسخ الملف الذي ترغب في استيراده في هذا المجلد.</string>
-    <string name="file_path">مسار الملف: </string>
+    <string name="file_path">مسار الملف: %1$s</string>
     <string name="not_imported_field">هناك مجال لا يمكن نقله!</string>
     <string name="the_field">المجال:</string>
     <string name="not_imported_because">لا يمكن استيراده لأن لديك مجالا بنفس الاسم ولكنه مختلف في النوع. يمكنك حذف المجال الحالي  ثم استيراد الملف مرة أخرى.</string>
@@ -111,7 +111,7 @@
     <string name="invalid_file">الملف المُستورَد هو ملف غير صالح.</string>
     <string name="import_failed">لقد فشل استيراد المجالات</string>
     <string name="import_completed">اكتمل استيراد المجالات</string>
-    <string name="file_with_same_name">أدخل اسم آخر للملف، هناك ملف بنفس الاسم!</string>
-    <string name="select_fields_export">اختر كل المجالات التي ترغب في تصديرها</string>
+    <string name="file_with_same_name">أدخل اسم آخر للملف. حاليا المجلد به ملف بنفس الاسم!</string>
+    <string name="select_fields_export">اختر كل المجالات التي ترغب في تصديرها:</string>
     <string name="wait_until_current_export_import_finish">انتظر حتي تنتهي عملية التصدير/الاستيراد الحالية!</string>
 </resources>
