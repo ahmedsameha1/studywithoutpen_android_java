@@ -46,20 +46,10 @@ public class ExportImportDatabase {
     }
 
     public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String fileName) {
-        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         exportThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    exportFields(context, selectedFields, fileName);
-                    if (Environment.isExternalStorageRemovable()) {
-                        showNotification(context, SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION, notificationManager);
-                    } else if (Environment.isExternalStorageEmulated()) {
-                        showNotification(context, SUCCESFUL_EMULATED_STORAGE_NOTIFICATION, notificationManager);
-                    }
-                } catch (SQLiteException | IOException e) {
-                    showNotification(context, FAILED_EXPORT_NOTIFICATION, notificationManager);
-                }
+                exportFields(context, selectedFields, fileName);
             }
         });
         exportThread.start();
@@ -85,16 +75,19 @@ public class ExportImportDatabase {
     }
 
 
-    private static void exportFields(Context context, ArrayList<String> fieldNames, String fileName) throws IOException, SQLiteException {
+    private static void exportFields(Context context, ArrayList<String> fieldNames, String fileName) {
+        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         ContentResolver contentResolver = context.getContentResolver();
         fileName = fileName.toLowerCase();
         SQLiteDatabase toExportDatabase = null;
+        File exportDirectory = null;
+        File exportedDatabaseFile = null;
         try {
-            File exportDirectory = new File(Environment.getExternalStorageDirectory(), EXPORT_IMPORT_DIRECTORY_NAME);
+            exportDirectory = new File(Environment.getExternalStorageDirectory(), EXPORT_IMPORT_DIRECTORY_NAME);
             if (!exportDirectory.exists()) {
                 exportDirectory.mkdir();
             }
-            File exportedDatabaseFile = new File(exportDirectory, fileName);
+            exportedDatabaseFile = new File(exportDirectory, fileName);
             toExportDatabase = SQLiteDatabase.openOrCreateDatabase(exportedDatabaseFile, null);
             toExportDatabase.beginTransaction();
             toExportDatabase.setVersion(DatabaseHelper.DATABASE_VERSION);
@@ -183,10 +176,25 @@ public class ExportImportDatabase {
             contentValues.put(Contract.Check.COLUMN_NAME_CHECK_NUMBER, Contract.Check.CHECK_NUMBER);
             toExportDatabase.insert(Contract.Check.TABLE_NAME, null, contentValues);
             toExportDatabase.setTransactionSuccessful();
+            if (Environment.isExternalStorageRemovable()) {
+                showNotification(context, SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION, notificationManager);
+            } else if (Environment.isExternalStorageEmulated()) {
+                showNotification(context, SUCCESFUL_EMULATED_STORAGE_NOTIFICATION, notificationManager);
+            }
+        } catch (SQLiteException e) {
+            if (exportedDatabaseFile != null && exportedDatabaseFile.exists()) {
+                exportedDatabaseFile.delete();
+            }
+            showNotification(context, FAILED_EXPORT_NOTIFICATION, notificationManager);
         } finally {
             if (toExportDatabase != null) {
                 toExportDatabase.endTransaction();
                 toExportDatabase.close();
+            }
+            String journalFileName = fileName + "-journal";
+            File journalFile = new File(exportDirectory, journalFileName);
+            if ( journalFile.exists() ) {
+                journalFile.delete();
             }
         }
     }
