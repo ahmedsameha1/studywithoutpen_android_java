@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
-import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseHelper;
-
 /**
  * Created by ahmed on 9/11/2015.
  */
@@ -17,8 +15,8 @@ public class DataProvider extends ContentProvider {
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" );
     @Override
     public boolean onCreate() {
-        OneDatabaseInstance.initializeInstance(new DatabaseHelper(getContext()));
-        sqLiteDatabase = OneDatabaseInstance.getInstance().openDatabase();
+        DatabaseInstance.initializeInstance(new DatabaseHelper(getContext()));
+        sqLiteDatabase = DatabaseInstance.getInstance().openDatabase();
         return false;
     }
 

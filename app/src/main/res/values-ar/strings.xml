@@ -101,7 +101,7 @@
     <string name="copy_import_file_emulated">ستجد المجلد \"StudyWithoutPen\" في ذاكرة التخزين الداخلية لجهازك. انسخ الملف الذي ترغب في استيراده في هذا المجلد.</string>
     <string name="copy_import_file_removable">ستجد المجلد \"StudyWithoutPen\" في ذاكرة التخزين الخارجية لجهازك (غالبا، الـ SD card). انسخ الملف الذي ترغب في استيراده في هذا المجلد.</string>
     <string name="file_path">مسار الملف: %1$s</string>
-    <string name="not_imported_field">هناك مجال لا يمكن نقله!</string>
+    <string name="not_imported_fields">بعض المجالات لا يمكن استيرادها!</string>
     <string name="the_field">المجال:</string>
     <string name="not_imported_because">لا يمكن استيراده لأن لديك مجالا بنفس الاسم ولكنه مختلف في النوع. يمكنك حذف المجال الحالي  ثم استيراد الملف مرة أخرى.</string>
     <string name="import_">استورد</string>
@@ -114,4 +114,5 @@
     <string name="file_with_same_name">أدخل اسم آخر للملف. حاليا المجلد به ملف بنفس الاسم!</string>
     <string name="select_fields_export">اختر كل المجالات التي ترغب في تصديرها:</string>
     <string name="wait_until_current_export_import_finish">انتظر حتي تنتهي عملية التصدير/الاستيراد الحالية!</string>
+    <string name="not_imported_fields_notification">المجالات التالية لا يمكن استيرادها بسبب وجود مجالات لديك لها نفس الأسماء ولكن لها أنواع مجالات مختلفة: %1$s.</string>
 </resources>

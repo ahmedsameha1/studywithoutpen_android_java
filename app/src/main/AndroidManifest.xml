@@ -39,7 +39,12 @@
         <activity
             android:name="com.ahmedsameha1.studyvocabularyfive.StudyWrongAnswersActivity"
             android:label="@string/app_name" />
-        <activity android:name=".Dialogs.ExportCompletedActivity"
+        <activity android:name=".Dialogs.ExportSuccessfulActivity"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Dialog"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"/>
+        <activity android:name=".Dialogs.NotImportedFieldsActivity"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Dialog"
             android:taskAffinity=""

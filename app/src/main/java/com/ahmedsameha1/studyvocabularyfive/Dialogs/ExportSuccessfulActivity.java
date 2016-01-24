@@ -19,7 +19,7 @@ import java.io.File;
 /**
  * Created by ahmed on 1/2/2016.
  */
-public class ExportCompletedActivity extends Activity {
+public class ExportSuccessfulActivity extends Activity {
     public static final String NOTIFICATION_ID = "notification_id";
     private TextView exportFilePlace, filePath;
     private Button openFolder;
@@ -74,7 +74,7 @@ public class ExportCompletedActivity extends Activity {
                                                   try {
                                                       startActivity(myAppLinkToMarket);
                                                   } catch (ActivityNotFoundException e) {
-                                                      Toast.makeText(ExportCompletedActivity.this, "Unable to find market app", Toast.LENGTH_LONG).show();
+                                                      Toast.makeText(ExportSuccessfulActivity.this, "Unable to find market app", Toast.LENGTH_LONG).show();
                                                   }
                                               }
                                           }

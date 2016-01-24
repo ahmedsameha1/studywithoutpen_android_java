@@ -102,7 +102,7 @@
     <string name="copy_import_file_emulated">You will find \"StudyWithoutPen\" folder in your device (internal) storage. Copy the file that you want to import in this folder</string>
     <string name="enter_file_name_to_import">Enter a name for the file that will be imported </string>
     <string name="file_path">File Path: %1$s</string>
-    <string name="not_imported_field">One field cannot be imported!</string>
+    <string name="not_imported_fields">Some fields cannot be imported!</string>
     <string name="the_field">The field:</string>
     <string name="not_imported_because">cannot be imported because you have a field with the same name but with different type. If you want you can delete the current field then import the same file again.</string>
     <string name="import_fields">Import Fields</string>
@@ -116,4 +116,5 @@
     <string name="select_fields_export">Select all the fields that you want to export:</string>
     <string name="wait_until_current_export_import_finish">Wait until the current export/import process finishes!</string>
     <string name="export_import_file_path" translatable="false">%1$s%2$s%3$s</string>
+    <string name="not_imported_fields_notification">The following fields cannot be imported because you have fields with the same name but with different field type : %1$s.</string>
 </resources>

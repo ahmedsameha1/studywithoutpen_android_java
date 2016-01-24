@@ -8,23 +8,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by ahmed on 1/23/2016.
  */
-public class OneDatabaseInstance {
+public class DatabaseInstance {
     private AtomicInteger mOpenCounter = new AtomicInteger();
 
-    private static OneDatabaseInstance instance;
+    private static DatabaseInstance instance;
     private static SQLiteOpenHelper mDatabaseHelper;
     private SQLiteDatabase mDatabase;
 
     public static synchronized void initializeInstance(SQLiteOpenHelper helper) {
         if (instance == null) {
-            instance = new OneDatabaseInstance();
+            instance = new DatabaseInstance();
             mDatabaseHelper = helper;
         }
     }
 
-    public static synchronized OneDatabaseInstance getInstance() {
+    public static synchronized DatabaseInstance getInstance() {
         if (instance == null) {
-            throw new IllegalStateException(OneDatabaseInstance.class.getSimpleName() +
+            throw new IllegalStateException(DatabaseInstance.class.getSimpleName() +
                     " is not initialized, call initializeInstance(..) method first.");
         }
 

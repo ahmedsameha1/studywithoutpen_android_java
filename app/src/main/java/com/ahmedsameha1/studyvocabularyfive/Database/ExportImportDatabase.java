@@ -15,7 +15,8 @@ import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
-import com.ahmedsameha1.studyvocabularyfive.Dialogs.ExportCompletedActivity;
+import com.ahmedsameha1.studyvocabularyfive.Dialogs.ExportSuccessfulActivity;
+import com.ahmedsameha1.studyvocabularyfive.Dialogs.NotImportedFieldsActivity;
 import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
 import com.ahmedsameha1.studyvocabularyfive.R;
 
@@ -34,9 +35,10 @@ public class ExportImportDatabase {
     public static final int FAILED_IMPORT_NOTIFICATION = 3;
     public static final int FAILED_IMPORT_INVALID_FILE_NOTIFICATION = 4;
     public static final int SUCCESSFUL_IMPORT_NOTIFICATION = 5;
+    public static final int NOT_IMPORTED_FIELDS = 6;
 
     private static Thread exportThread, importThread;
-
+    private static ArrayList<String> notImportedFields;
 
     public static Thread getExportThread() {
         return exportThread;
@@ -216,6 +218,7 @@ public class ExportImportDatabase {
         } catch (InvalidStudyWithoutPenFileException e) {
             showNotification(context, FAILED_IMPORT_INVALID_FILE_NOTIFICATION, notificationManager);
         } catch (IOException | SQLiteException e) {
+            e.printStackTrace();
             showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
         } finally {
             if (toImportDatabase != null) {
@@ -226,10 +229,11 @@ public class ExportImportDatabase {
 
     private static void importFieldsDBV6(Context context, SQLiteDatabase toImportDatabase)
             throws IOException, SQLiteException, InvalidStudyWithoutPenFileException {
-        ArrayList<String> notCopiedFields = new ArrayList<String>();
+        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notImportedFields = new ArrayList<String>();
         final ContentResolver contentResolver = context.getContentResolver();
-        OneDatabaseInstance.initializeInstance(new DatabaseHelper(context));
-        SQLiteDatabase appDatabase = OneDatabaseInstance.getInstance().openDatabase();
+        DatabaseInstance.initializeInstance(new DatabaseHelper(context));
+        SQLiteDatabase appDatabase = DatabaseInstance.getInstance().openDatabase();
         appDatabase.beginTransactionWithListenerNonExclusive(new SQLiteTransactionListener() {
             @Override
             public void onBegin() {
@@ -265,16 +269,7 @@ public class ExportImportDatabase {
                 } else {
                     appFieldCursor.moveToFirst();
                     if (toImportFieldCursor.getInt(1) != appFieldCursor.getInt(1)) {
-                        notCopiedFields.add(toImportFieldCursor.getString(0));
-                        String contentText = context.getString(R.string.the_field) + " " + toImportFieldCursor.getString(0) +
-                                context.getString(R.string.not_imported_because);
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.not_imported_field))
-                                .setContentText(contentText)
-                                .setTicker(context.getResources().getString(R.string.not_imported_field))
-                                .setAutoCancel(true);
-                        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(0, builder.build());
+                        notImportedFields.add(toImportFieldCursor.getString(0));
                     }
                 }
                 appFieldCursor.close();
@@ -320,13 +315,13 @@ public class ExportImportDatabase {
                 appAnswerCursor.close();
             }
             toImportAnswerCursor.close();
-            String[] notCopiedArray = notCopiedFields.size() <= 0 ? new String[]{""} : (String[]) notCopiedFields.toArray();
+            String[] notImportedArray = notImportedFields.size() <= 0 ? new String[]{""} : notImportedFields.toArray(new String[notImportedFields.size()]);
             String placeholders = "( ";
-            if (notCopiedArray.length <= 1) {
+            if (notImportedArray.length <= 1) {
                 placeholders += "? )";
             } else {
-                for (int i = 0; i < notCopiedArray.length; i++) {
-                    if (i < notCopiedArray.length - 1) {
+                for (int i = 0; i < notImportedArray.length; i++) {
+                    if (i < notImportedArray.length - 1) {
                         placeholders += "?, ";
                     } else {
                         placeholders += "? )";
@@ -336,7 +331,7 @@ public class ExportImportDatabase {
             Uri linkerTableUri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
             Cursor toImportLinkerCursor = toImportDatabase.query(Contract.Linker.TABLE_NAME, null,
                     Contract.Linker.COLUMN_NAME_FIELD_LINK + " NOT IN " + placeholders,
-                    notCopiedArray, null, null, null);
+                    notImportedArray, null, null, null);
             for (toImportLinkerCursor.moveToFirst(); toImportLinkerCursor.getPosition() < toImportLinkerCursor.getCount();
                  toImportLinkerCursor.moveToNext()) {
                 Cursor appLinkerCursor = contentResolver.query(linkerTableUri,
@@ -362,8 +357,10 @@ public class ExportImportDatabase {
                 appLinkerCursor.close();
             }
             toImportLinkerCursor.close();
-            Cursor questionsCursor = contentResolver.query(questionTableUri, new String[]{Contract.Question.COLUMN_NAME_QUESTION_ENTRY},
-                    null, null, null);
+/*            Cursor questionsCursor = contentResolver.query(questionTableUri, new String[]{Contract.Question.COLUMN_NAME_QUESTION_ENTRY},
+                    null, null, null);*/
+            Cursor questionsCursor = toImportDatabase.query(Contract.Question.TABLE_NAME,new String[]{Contract.Question.COLUMN_NAME_QUESTION_ENTRY},
+                    null, null, null,null,null);
             for (questionsCursor.moveToFirst(); questionsCursor.getPosition() < questionsCursor.getCount();
                  questionsCursor.moveToNext()) {
                 Cursor unneededQuestionCursor = contentResolver.query(linkerTableUri, new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
@@ -378,8 +375,10 @@ public class ExportImportDatabase {
                 unneededQuestionCursor.close();
             }
             questionsCursor.close();
-            Cursor answersCursor = contentResolver.query(answerTableUri, new String[]{Contract.Answer.COLUMN_NAME_ANSWER_ENTRY},
-                    null, null, null);
+            /*Cursor answersCursor = contentResolver.query(answerTableUri, new String[]{Contract.Answer.COLUMN_NAME_ANSWER_ENTRY},
+                    null, null, null);*/
+            Cursor answersCursor = toImportDatabase.query(Contract.Answer.TABLE_NAME,new String[]{Contract.Answer.COLUMN_NAME_ANSWER_ENTRY},
+                    null, null, null, null, null);
             for (answersCursor.moveToFirst(); answersCursor.getPosition() < answersCursor.getCount();
                  answersCursor.moveToNext()) {
                 Cursor unneededAnswerCursor = contentResolver.query(linkerTableUri, new String[]{Contract.Linker.COLUMN_NAME_ANSWER_LINK},
@@ -388,16 +387,19 @@ public class ExportImportDatabase {
                 if (unneededAnswerCursor.getCount() <= 0) {
 /*                    contentResolver.delete(answerTableUri, Contract.Answer.COLUMN_NAME_ANSWER_ENTRY + " = ?",
                             new String[]{answersCursor.getString(0)});*/
-                    appDatabase.delete(Contract.Question.TABLE_NAME, Contract.Answer.COLUMN_NAME_ANSWER_ENTRY + " = ?",
+                    appDatabase.delete(Contract.Answer.TABLE_NAME, Contract.Answer.COLUMN_NAME_ANSWER_ENTRY + " = ?",
                             new String[]{answersCursor.getString(0)});
                 }
                 unneededAnswerCursor.close();
             }
             answersCursor.close();
             appDatabase.setTransactionSuccessful();
+            if ( notImportedFields.size() > 0 ) {
+                showNotification(context,NOT_IMPORTED_FIELDS,notificationManager);
+            }
         } finally {
             appDatabase.endTransaction();
-            OneDatabaseInstance.getInstance().closeDatabase();
+            DatabaseInstance.getInstance().closeDatabase();
         }
     }
 
@@ -415,8 +417,8 @@ public class ExportImportDatabase {
                                 .setContentText(context.getResources().getString(R.string.export_failed))
                                 .setTicker(context.getResources().getString(R.string.export_failed))
                                 .setAutoCancel(true);
-                notifyIntent = new Intent(context, ExportCompletedActivity.class);
-                notifyIntent.putExtra(ExportCompletedActivity.NOTIFICATION_ID, FAILED_EXPORT_NOTIFICATION);
+                notifyIntent = new Intent(context, ExportSuccessfulActivity.class);
+                notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, FAILED_EXPORT_NOTIFICATION);
                 notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 resultPendingIntent =
@@ -437,8 +439,8 @@ public class ExportImportDatabase {
                                 .setContentText(context.getString(R.string.export_completed))
                                 .setTicker(context.getResources().getString(R.string.export_completed))
                                 .setAutoCancel(true);
-                notifyIntent = new Intent(context, ExportCompletedActivity.class);
-                notifyIntent.putExtra(ExportCompletedActivity.NOTIFICATION_ID, SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION);
+                notifyIntent = new Intent(context, ExportSuccessfulActivity.class);
+                notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION);
                 notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 resultPendingIntent =
@@ -460,8 +462,8 @@ public class ExportImportDatabase {
                                 .setContentText(context.getResources().getString(R.string.export_completed))
                                 .setTicker(context.getResources().getString(R.string.export_completed))
                                 .setAutoCancel(true);
-                notifyIntent = new Intent(context, ExportCompletedActivity.class);
-                notifyIntent.putExtra(ExportCompletedActivity.NOTIFICATION_ID, SUCCESFUL_EMULATED_STORAGE_NOTIFICATION);
+                notifyIntent = new Intent(context, ExportSuccessfulActivity.class);
+                notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, SUCCESFUL_EMULATED_STORAGE_NOTIFICATION);
                 notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 resultPendingIntent =
@@ -520,6 +522,28 @@ public class ExportImportDatabase {
                 stackBuilder.addParentStack(FieldActivity.class);
                 stackBuilder.addNextIntent(notifyIntent);
                 resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                notificationBuilder.setContentIntent(resultPendingIntent);
+                notificationManager.notify(notificationId, notificationBuilder.build());
+                break;
+            case NOT_IMPORTED_FIELDS:
+                notificationBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setContentTitle(context.getResources().getString(R.string.not_imported_fields))
+                                .setContentText(context.getString(R.string.not_imported_fields))
+                                .setTicker(context.getResources().getString(R.string.not_imported_fields))
+                                .setAutoCancel(true);
+                notifyIntent = new Intent(context, NotImportedFieldsActivity.class);
+                notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, notImportedFields);
+                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                resultPendingIntent =
+                        PendingIntent.getActivity(
+                                context,
+                                0,
+                                notifyIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                        );
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
