@@ -46,29 +46,40 @@ public class StudyDuringDialogFragment extends DialogFragment {
                     public void onClick(View view) {
                         EditText enterDay = (EditText) alertDialog.findViewById(R.id.enter_day);
                         EditText enterHour = (EditText) alertDialog.findViewById(R.id.enter_hour);
-                        int day = 0;
-                        int hour = 0;
-                        if ( enterDay.getText().toString().length() > 0 || enterHour.getText().toString().length() > 0 ) {
-                            if ( enterDay.getText().toString().length() > 0) {
-                                day = Integer.parseInt(enterDay.getText().toString());
+                        EditText enterTries = (EditText) alertDialog.findViewById(R.id.enter_tries);
+                        if ( enterTries.getText().toString().length() > 0 ) {
+                            int trys = Integer.parseInt(enterTries.getText().toString());
+                            if ( trys > 0 ) {
+                                int day = 0;
+                                int hour = 0;
+                                if ( enterDay.getText().toString().length() > 0 || enterHour.getText().toString().length() > 0 ) {
+                                    if ( enterDay.getText().toString().length() > 0) {
+                                        day = Integer.parseInt(enterDay.getText().toString());
+                                    }
+                                    if ( enterHour.getText().toString().length() > 0) {
+                                        hour = Integer.parseInt(enterHour.getText().toString());
+                                    }
+                                    long duration = ( day * ( (long) MILLISECONDS_IN_DAY) ) + ( hour * ( (long) MILLISECONDS_IN_HOUR) );
+                                    Date now = new Date();
+                                    //                            long nowInMilliseconds = now.getTime();
+                                    long nowInMilliseconds = System.currentTimeMillis();
+                                    long startingTime = nowInMilliseconds - duration;
+                                    Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
+                                    intent.putExtra(StudyDuringActivity.CURRENT_FIELD,((FieldActivity) getActivity()).getCurrentField());
+                                    intent.putExtra(StudyDuringActivity.STARTING_TIME,startingTime);
+                                    intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,false);
+                                    intent.putExtra(StudyDuringActivity.NUMBER_OF_TRIES,trys);
+                                    startActivity(intent);
+                                    dismiss();
+                                } else {
+                                    Toast.makeText(getActivity(),R.string.please_enter_at_least_one_value,Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Toast.makeText(getActivity(),R.string.greater_zero,Toast.LENGTH_SHORT).show();
                             }
-                            if ( enterHour.getText().toString().length() > 0) {
-                                hour = Integer.parseInt(enterHour.getText().toString());
-                            }
-                            long duration = ( day * ( (long) MILLISECONDS_IN_DAY) ) + ( hour * ( (long) MILLISECONDS_IN_HOUR) );
-                            Date now = new Date();
-//                            long nowInMilliseconds = now.getTime();
-                            long nowInMilliseconds = System.currentTimeMillis();
-                            long startingTime = nowInMilliseconds - duration;
-                            Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
-                            intent.putExtra(StudyDuringActivity.CURRENT_FIELD,((FieldActivity) getActivity()).getCurrentField());
-                            intent.putExtra(StudyDuringActivity.STARTING_TIME,startingTime);
-                            intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,false);
-                            startActivity(intent);
                         } else {
-                            Toast.makeText(getActivity(),getString(R.string.please_enter_at_least_one_value),Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(),R.string.enter_tries_number,Toast.LENGTH_SHORT).show();
                         }
-                        dismiss();
                     }
                 });
             }

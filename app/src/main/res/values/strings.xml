@@ -46,7 +46,7 @@
     <string name="of_questions">" of questions."</string>
     <string name="try_number">Try Number:</string>
     <string name="number_of_questions">Number Of Questions:</string>
-    <string name="hints">Hints (Only if there more than one answer)</string>
+    <string name="hint">Hint</string>
     <string name="test_result">Test Result</string>
     <string name="no_space_allowed">Space " " is not allowed in field name!</string>
     <string name="no_entries_in_field">There is no entries in this field!</string>
@@ -117,4 +117,7 @@
     <string name="wait_until_current_export_import_finish">Wait until the current export/import process finishes!</string>
     <string name="export_import_file_path" translatable="false">%1$s%2$s%3$s</string>
     <string name="not_imported_fields_notification">The following fields cannot be imported because you have fields with the same name but with different field type : %1$s.</string>
+    <string name="show">show</string>
+    <string name="hide">hide</string>
+    <string name="greater_zero">The number of tries must be greater than 0!</string>
 </resources>

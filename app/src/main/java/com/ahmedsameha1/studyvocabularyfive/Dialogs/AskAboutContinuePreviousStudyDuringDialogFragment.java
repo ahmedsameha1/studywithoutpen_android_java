@@ -54,6 +54,8 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                                 editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
                                         StudyDuringActivity.CURRENT_QUESTION_COUNTER
                                         + StudyDuringActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
+                                editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
+                                StudyDuringActivity.NUMBER_OF_TRIES +StudyDuringActivity.DASH + ((FieldActivity) getActivity() ).getCurrentField());
                                 editor.commit();
                                 dismiss();
                             }

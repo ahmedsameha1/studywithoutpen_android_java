@@ -14,17 +14,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TableRow;
+
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
 import com.ahmedsameha1.studyvocabularyfive.Database.DataProvider;
@@ -46,6 +49,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public static final String STRING_REPRESENTING_REPEATED_ENTRIES = "strigRepresentingRepeatedEntries";
     public static final String LAST_SESSION_OR_NEW_ONE = "lastSessionOrNewOne";
     public static final String DASH = "-";
+    public static final String NUMBER_OF_TRIES = "numberOftries";
     public static final int CONTINUE_PREVIOUS_SESSION = 1;
     public static final int START_NEW_SESSION = 2;
     private String currentField;
@@ -68,30 +72,25 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public static final String TRIES_COUNTER = "triesCounter";
     public static final String CHECK_BUTTON_STATE = "checkButtonState";
     public static final String RESULT = "result";
-    public static final String PERMITED_TRIES_NUMBER = "permitedTriesNumber";
+
     public static final String TESTING_NOW = "testingNow";
-    public static final String NUMBER_OF_WRONG_ANSWERS = "numberOfWrongAnswers";
+
     public static final String NUMBER_OF_QUESTIONS = "numberOfQuestions";
     public static final String HINT_COUNTER = "hintCounter";
     public static final String HINTS = "hints";
-    public static final String WRONG_ANSWERS = "wrongAnswers";
-    public static final String WRONG_ITEMS = "wrongItems";
     public static final String _CONTINUE_BUTTON_STATE = "_continueButtonState";
-    private String [][] listForTest;
-    private ArrayList<String> hints, wrongAnswers;
-    private ArrayList<WrongItem> wrongItems;
+    private String[][] listForTest;
+    private ArrayList<String> hints;
     private boolean result, testingNow = false;
-    private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber,wrongAnswersCounter;
+    private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-    private Cursor fieldEntriesCursor, searchForCursor;
-    private Toolbar toolbar;
-    private EditText enterPercent, enterAnswer, numberOfTries;
-    private TextView showQuestion, remainingQuestionCounter, hintIfMoreThanOneAnswer,showTries, showNumberOfQuetions;
-    private Button start, check, _continue;
-    private ImageView imageResult;
-    private ProgressBar progressBar;
-    private ImageButton nextHint;
-    private TableRow hintTableRow;
+    private Cursor searchForCursor;
+    private EditText enterAnswer;
+    private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuetions;
+    private Button nextHint, check, _continue;
+//    private ProgressBar progressBar;
+    private ToggleButton showActionbar;
+
     //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
@@ -99,8 +98,6 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
     @Override
@@ -111,9 +108,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         startingTime = getIntent().getLongExtra(STARTING_TIME, 0);
         retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
         // if the reference to the fragment was null we create a new fragment object and add it to the activity
-        if ( retainedFragment == null ) {
+        if (retainedFragment == null) {
             retainedFragment = new RetainedFragment();
-            getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
+            getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
         }
         /*listForTest = retainedFragment.getListForTest_StudyDuringActivity();
         if ( listForTest == null ) {
@@ -121,39 +118,29 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         }*/
 //        questionsNumber = listForTest.length;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         enterAnswer = (EditText) findViewById(R.id.enter_answer);
         showQuestion = (TextView) findViewById(R.id.display_question);
         check = (Button) findViewById(R.id.check);
         remainingQuestionCounter = (TextView) findViewById(R.id.remaining_question_counter);
         _continue = (Button) findViewById(R.id._continue);
-        hintIfMoreThanOneAnswer = (TextView) findViewById(R.id.hint_if_there_is_more_than_one_answer);
-        nextHint = (ImageButton) findViewById(R.id.next_hint);
+        nextHint = (Button) findViewById(R.id.next_hint);
         showTries = (TextView) findViewById(R.id.trys);
-        numberOfTries = (EditText) findViewById(R.id.enter_tries);
+
         showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
-        imageResult = (ImageView) findViewById(R.id.image_result);
-        hintTableRow = (TableRow) findViewById(R.id.hint_table_row);
+
+        showActionbar = (ToggleButton) findViewById(R.id.show_actionbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().hide();
+        showQuestion.setMovementMethod(new ScrollingMovementMethod());
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 testingNow = true;
-                int j = 0;
-                try {
-                    j = Integer.parseInt(numberOfTries.getText().toString());
-                    permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
-                } catch ( NumberFormatException nfe ) {
-                    numberOfTries.setText(Integer.toString(1));
-                }
-                if ( j <= 0) {
-                    numberOfTries.setText(Integer.toString(1));
-                    permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
-                    Toast.makeText(StudyDuringActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
-                } else if (enterAnswer.getText().toString().length() > 0) {
-                    numberOfTries.setEnabled(false);
+                if (enterAnswer.getText().toString().length() > 0) {
+
                     result = checkAnAnswer();
                     if (triesCounter < permitedTriesNumber && !result) {
                         showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -171,7 +158,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                         if (currentQuestionCounter >= questionsNumber) {
                             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
                             questionsNumber = 0;
-                            hintIfMoreThanOneAnswer.setText("");
+                            enterAnswer.setHint(R.string.enter_your_answer);
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
                             if (repeatedEntries.size() > 0) {
                                 listForTest = prepareListForStudySecondAndMore(repeatedEntries);
@@ -180,7 +167,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
                                 showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                                ifMoreThanOnce(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                             } else {
                                 databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
                                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyDuringActivity.this); // getting the preferences
@@ -191,6 +178,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                                         + DASH + currentField);
                                 editor.remove(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
                                         + DASH + currentField);
+                                editor.remove(ACTIVITY_NAME + DASH + NUMBER_OF_TRIES + DASH + currentField);
                                 editor.commit();
                                 finish();
                             }
@@ -209,7 +197,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                             showTries.setText(Integer.toString(triesCounter + 1));
                             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                            hintIfMoreThanOneAnswer.setText("");
+                            enterAnswer.setHint(R.string.enter_your_answer);
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
 //                            wrongAnswers = new ArrayList<String>(permitedTriesNumber);
                         }
@@ -224,23 +212,12 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             @Override
             public void onClick(View v) {
                 if (hints != null) {
-                    int n = hintCounter;
-                    hintIfMoreThanOneAnswer.setText(hints.get(hintCounter++));
-                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
-                    String s = hints.get(n);
-                    s = String.valueOf(s.charAt(s.length()-1));
-                    if ( n == 0 ) {
-                        enterAnswer.setHint(s);
-                    } else if ( n == 1 ) {
-                        int l = Integer.valueOf(s);
-                        String f = "";
-                        for ( int i = 0; i < l; i++ ) {
-                            f += "?";
-                        }
-                        enterAnswer.setHint(f);
-                    } else if ( n == 2 ) {
-                        enterAnswer.setHint(hints.get(n));
+                    if ( enterAnswer.getText().toString().length() <= 0 ) {
+                        enterAnswer.setHint(hints.get(hintCounter++));
+                    } else {
+                        Toast.makeText(StudyDuringActivity.this,hints.get(hintCounter++),Toast.LENGTH_SHORT).show();
                     }
+                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
                 }
             }
         });
@@ -283,8 +260,8 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().length() > 0) {
-                    imageResult.setImageResource(R.drawable.ic_question_marks);
+                if (s.toString().length() > 0 && permitedTriesNumber != 1) {
+                    check.setBackgroundResource(R.drawable.ic_question_marks);
                 }
             }
         });
@@ -295,22 +272,37 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 enterAnswer.setText("");
                 _continue.setEnabled(false);
                 enterAnswer.setHint(R.string.enter_your_answer);
+                if ( permitedTriesNumber == 1 ) {
+                    check.setBackgroundResource(R.drawable.ic_question_marks);
+                }
+            }
+        });
+        showActionbar.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    getSupportActionBar().show();
+                } else {
+                    getSupportActionBar().hide();
+                }
             }
         });
         permitedTriesNumber = 3;
         showTries.setText(Integer.toString(triesCounter + 1));
         databaseOperations = new DatabaseOperations(getContentResolver());
-        boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE,false);
-        if ( boolean_continue ) {
+        boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
+        if (boolean_continue) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             String string = sharedPreferences.getString(ACTIVITY_NAME + DASH + STRING_REPRESENTING_REPEATED_ENTRIES
-                    + DASH + currentField,null);
+                    + DASH + currentField, null);
             currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
-                    + DASH + currentField,0);
+                    + DASH + currentField, 0);
             repeatedEntries = convertStringToRepeatedEntriesArrayList(string);
-            getSupportLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION,null,this);
+            permitedTriesNumber = sharedPreferences.getInt(ACTIVITY_NAME + DASH + NUMBER_OF_TRIES + DASH + currentField, 0);
+            getSupportLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION, null, this);
         } else {
-            getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
+            permitedTriesNumber = getIntent().getExtras().getInt(NUMBER_OF_TRIES);
+            getSupportLoaderManager().initLoader(START_NEW_SESSION, null, this);
         }
 
     }
@@ -342,7 +334,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 return true;
             case R.id.stop:
                 final DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
-                progressBar.setVisibility(View.VISIBLE);
+//                progressBar.setVisibility(View.VISIBLE);
                 databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
                 databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest, currentField);
 
@@ -354,6 +346,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                         + DASH + currentField, convertRepeatedEntriesArrayListToString());
                 editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
                         + DASH + currentField, currentQuestionCounter);
+                editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_TRIES + DASH + currentField, permitedTriesNumber);
                 editor.commit();
                 finish();
                 return true;
@@ -367,97 +360,100 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 
 
     }
+
     @Override
     protected void onStop() {
         super.onStop();
         retainedFragment.setListForTest_StudyDuringActivity(listForTest);
     }
-    private String [][] prepareListForStudyFirstTime() {
-        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
+
+    private String[][] prepareListForStudyFirstTime() {
+        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
             Timestamp timestamp = Timestamp.valueOf(cursor.getString(2));
             long thisTime = timestamp.getTime();
-            if ( thisTime >= startingTime ) {
+            if (thisTime >= startingTime) {
                 questions.add(cursor.getString(0));
                 answers.add(cursor.getString(1));
             }
         }
-        String [][] listForTest = new String [questions.size()][2];
-        for ( int i = 0; i < questions.size(); i++ ) {
-            listForTest [i][0] = questions.get(i);
-            listForTest [i][1] = answers.get(i);
+        String[][] listForTest = new String[questions.size()][2];
+        for (int i = 0; i < questions.size(); i++) {
+            listForTest[i][0] = questions.get(i);
+            listForTest[i][1] = answers.get(i);
         }
         shuffleArray(listForTest);
         return listForTest;
     }
-    private String [][] prepareListForStudySecondAndMore( ArrayList<Integer> indices ) {
-        String [][] temp = new String [indices.size()][2];
-        for ( int i = 0; i < indices.size(); i++ ) {
-            temp [i][0] = listForTest [indices.get(i)][0];
-            temp [i][1] = listForTest [indices.get(i)][1];
+
+    private String[][] prepareListForStudySecondAndMore(ArrayList<Integer> indices) {
+        String[][] temp = new String[indices.size()][2];
+        for (int i = 0; i < indices.size(); i++) {
+            temp[i][0] = listForTest[indices.get(i)][0];
+            temp[i][1] = listForTest[indices.get(i)][1];
         }
         shuffleArray(temp);
         return temp;
     }
-    private void ifMoreThanOnce( String currentQuestion, String currentAnswer) {
-        if ( searchForCursor != null ) {
+
+    private void ifMoreThanOnce(String currentQuestion, String currentAnswer) {
+        if (searchForCursor != null) {
             searchForCursor.close();
         }
         searchForCursor = databaseOperations.searchExactlyFor(currentField, currentQuestion);
-        if ( searchForCursor.getCount() > 1 ) {
+        if (searchForCursor.getCount() > 1) {
             hints = new ArrayList<String>(3);
             hints.add(getString(R.string.first_character) + currentAnswer.charAt(0));
-            hints.add( getString(R.string.number_of_characters) + Integer.toString(currentAnswer.length()));
+            hints.add(getString(R.string.number_of_characters) + Integer.toString(currentAnswer.length()));
             hints.add(getString(R.string.last_character) + currentAnswer.charAt(currentAnswer.length() - 1));
             nextHint.setEnabled(true);
-            hintTableRow.setBackgroundResource(R.color.enabled_color);
-        }
-        else {
+
+        } else {
             hints = null;
             nextHint.setEnabled(false);
-            hintTableRow.setBackgroundResource(R.color.default_background_color);
+
         }
         searchForCursor.close();
     }
+
     private boolean checkAnAnswer() {
         boolean result = false;
-        if ( enterAnswer.getText().toString().equals(listForTest [currentQuestionCounter][1]) ){
-            imageResult.setImageResource(R.drawable.ic_correct_sign);
+        if (enterAnswer.getText().toString().equals(listForTest[currentQuestionCounter][1])) {
+            check.setBackgroundResource(R.drawable.ic_correct_sign);
             result = true;
-        }
-        else {
-            imageResult.setImageResource(R.drawable.ic_wrong_sign);
+        } else {
+            check.setBackgroundResource(R.drawable.ic_wrong_sign);
             result = false;
 //            wrongAnswers.add(enterAnswer.getText().toString());
         }
         enterAnswer.setText("");
         triesCounter++;
-       if ( triesCounter == permitedTriesNumber && !result ) {
+        if (triesCounter == permitedTriesNumber && !result) {
 //            wrongAnswersCounter++;
 //            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
 //            wrongItems.add(wrongItem);
 //            wrongAnswers = null;
-           if ( ! repeatedEntries.contains(Integer.valueOf(currentQuestionCounter)) ) {
-               repeatedEntries.add(currentQuestionCounter);
-           }
+            if (!repeatedEntries.contains(Integer.valueOf(currentQuestionCounter))) {
+                repeatedEntries.add(currentQuestionCounter);
+            }
         }
         return result;
     }
-    private void shuffleArray( String [][] array )
-    {
+
+    private void shuffleArray(String[][] array) {
         Random rnd = new Random();
-        for (int i = array.length - 1; i > 0; i--)
-        {
+        for (int i = array.length - 1; i > 0; i--) {
             int index = rnd.nextInt(i + 1);
             // Simple swap
             String question = array[index][0];
-            String answer = array [index][1];
+            String answer = array[index][1];
             array[index][0] = array[i][0];
             array[index][1] = array[i][1];
             array[i][0] = question;
             array[i][1] = answer;
         }
     }
-    public void onSaveInstanceState ( Bundle savedInsatanceState ) {
+
+    public void onSaveInstanceState(Bundle savedInsatanceState) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField, currentQuestionCounter);
@@ -473,16 +469,17 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 //        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
-        savedInsatanceState.putIntegerArrayList(REPEATED_ENTRIES,repeatedEntries);
+        savedInsatanceState.putIntegerArrayList(REPEATED_ENTRIES, repeatedEntries);
 //        savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         super.onSaveInstanceState(savedInsatanceState);
     }
-    public void onRestoreInstanceState( Bundle savedInstanceState ) {
+
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
-                + DASH + currentField,0);
+                + DASH + currentField, 0);
 //        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);
@@ -497,7 +494,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
         repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
 //        wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
 //        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
-        if ( testingNow ) {
+        if (testingNow) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             showTries.setText(Integer.toString(triesCounter + 1));
             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -505,63 +502,67 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             check.setEnabled(checkState);
             _continue.setEnabled(_continueState);
 //            enterPercent.setEnabled(false);
-            numberOfTries.setEnabled(false);
+
             enterAnswer.setEnabled(true);
-            ifMoreThanOnce(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+            ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
         }
-        if ( hintCounter > 0 ) {
-            hintIfMoreThanOneAnswer.setText(hints.get(hintCounter - 1));
+        if (hintCounter > 0) {
+            enterAnswer.setHint(hints.get(hintCounter - 1));
         }
     }
+
     private String convertRepeatedEntriesArrayListToString() {
 //        StringBuilder stringBuilder = new StringBuilder();
         String s = "";
-        for ( int i = 0; i < repeatedEntries.size(); i++ ) {
+        for (int i = 0; i < repeatedEntries.size(); i++) {
             s += Integer.toString(repeatedEntries.get(i));
-            if ( i < repeatedEntries.size() - 1) {
+            if (i < repeatedEntries.size() - 1) {
                 s += "-";
             }
         }
         return s;
     }
-    private ArrayList<Integer> convertStringToRepeatedEntriesArrayList( String s ) {
+
+    private ArrayList<Integer> convertStringToRepeatedEntriesArrayList(String s) {
         ArrayList<Integer> arrayList = new ArrayList<Integer>();
-        if ( s == null) {
+        if (s == null) {
             return arrayList;
         }
-        StringTokenizer stringTokenizer = new StringTokenizer(s,"-");
-        while ( stringTokenizer.hasMoreTokens() ) {
+        StringTokenizer stringTokenizer = new StringTokenizer(s, "-");
+        while (stringTokenizer.hasMoreTokens()) {
             arrayList.add(Integer.parseInt(stringTokenizer.nextToken()));
         }
         return arrayList;
     }
-/*    private String [][] readFromLinkerTableStudyDuringColumn() {
-        String array [][] = new String [cursor.getCount()][2];
-        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
-            array [cursor.getPosition()][0] = cursor.getString(0);
-            array [cursor.getPosition()][1] = cursor.getString(1);
-        }
-        return array;
-    }*/
-    private String [][] readFromLinkerTableStudyDuringColumn() {
-        String array [][] = new String [cursor.getCount()][2];
-        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
+
+    /*    private String [][] readFromLinkerTableStudyDuringColumn() {
+            String array [][] = new String [cursor.getCount()][2];
+            for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
+                array [cursor.getPosition()][0] = cursor.getString(0);
+                array [cursor.getPosition()][1] = cursor.getString(1);
+            }
+            return array;
+        }*/
+    private String[][] readFromLinkerTableStudyDuringColumn() {
+        String array[][] = new String[cursor.getCount()][2];
+        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
             int order = cursor.getInt(2);
-            array [order][0] = cursor.getString(0);
-            array [order][1] = cursor.getString(1);
+            array[order][0] = cursor.getString(0);
+            array[order][1] = cursor.getString(1);
         }
         return array;
     }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-        if ( id == CONTINUE_PREVIOUS_SESSION ) {
+        if (id == CONTINUE_PREVIOUS_SESSION) {
             Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
-            return new CursorLoader(this,uri,
-                    new String[] {Contract.Linker.COLUMN_NAME_QUESTION_LINK,
+            return new CursorLoader(this, uri,
+                    new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK,
                             Contract.Linker.COLUMN_NAME_ANSWER_LINK,
                             Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER},
                     Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                    new String[] {"0", currentField},
+                    new String[]{"0", currentField},
                     null);
             /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
             return new CursorLoader(this,uri,
@@ -573,9 +574,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
             return new CursorLoader(this,
                     uri,
-                    new String [] {Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK, Contract.COLUMN_NAME_CREATED_AT},
+                    new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK, Contract.COLUMN_NAME_CREATED_AT},
                     Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
-                    new String[] {currentField},
+                    new String[]{currentField},
                     null);
         }
     }
@@ -584,26 +585,26 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         this.cursor = cursor;
         listForTest = retainedFragment.getListForTest_StudyDuringActivity();
-        if ( listForTest == null ) {
-            if ( boolean_continue ) {
+        if (listForTest == null) {
+            if (boolean_continue) {
                 listForTest = readFromLinkerTableStudyDuringColumn();
             } else {
                 listForTest = prepareListForStudyFirstTime();
             }
         }
         questionsNumber = listForTest.length;
-        if ( questionsNumber > 0 ) {
+        if (questionsNumber > 0) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
             showNumberOfQuetions.setText(Integer.toString(questionsNumber));
-            if ( boolean_continue ) {
+            if (boolean_continue) {
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
             } else {
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
             }
 
-        } else if ( questionsNumber <= 0 && loader.getId() == START_NEW_SESSION){
-            Toast.makeText(this,getString(R.string.no_entries_in_this_time_range),Toast.LENGTH_LONG).show();
+        } else if (questionsNumber <= 0 && loader.getId() == START_NEW_SESSION) {
+            Toast.makeText(this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG).show();
             finish();
         }
     }

@@ -45,7 +45,7 @@
     <string name="enter_tries_number">أدخل عدد المحاولات</string>
     <string name="enter_percentage">أدخل النسبة المئوية</string>
     <string name="try_number">المحاولة رقم</string>
-    <string name="hints">مساعدة في حالة وجود أكثر من إجابة</string>
+    <string name="hint">مساعدة</string>
     <string name="number_of_questions">عدد الأسئلة:</string>
     <string name="test_result">نتيجة الاختبار</string>
     <string name="no_entries_in_field">لا توجد مُدخلات في هذا المجال!</string>
@@ -115,4 +115,7 @@
     <string name="select_fields_export">اختر كل المجالات التي ترغب في تصديرها:</string>
     <string name="wait_until_current_export_import_finish">انتظر حتي تنتهي عملية التصدير/الاستيراد الحالية!</string>
     <string name="not_imported_fields_notification">المجالات التالية لا يمكن استيرادها بسبب وجود مجالات لديك لها نفس الأسماء ولكن لها أنواع مجالات مختلفة: %1$s.</string>
+    <string name="show">أظهِر</string>
+    <string name="hide">أخْفِ</string>
+    <string name="greater_zero">عدد المحاولات يجب أن يكون أكبر من صفر!</string>
 </resources>
