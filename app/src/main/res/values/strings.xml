@@ -31,7 +31,7 @@
     <string name="next">Next</string>
     <string name="from_entries">%</string>
     <string name="enter_percentage">Enter the percentage</string>
-    <string name="remaining_questions">Remaining Questions:</string>
+    <string name="remaining_questions">Remaining Questions: %1$s</string>
     <string name="first_character">"The first character is: "</string>
     <string name="number_of_characters">"The number of characters is: "</string>
     <string name="last_character">"The last character is: "</string>
@@ -44,8 +44,8 @@
     <string name="show_entries">Show Entries</string>
     <string name="Your_correct_answers_was">"Your correct answers was: "</string>
     <string name="of_questions">" of questions."</string>
-    <string name="try_number">Try Number:</string>
-    <string name="number_of_questions">Number Of Questions:</string>
+    <string name="try_number">Try Number: %1$s</string>
+    <string name="number_of_questions">Number Of Questions: %1$s</string>
     <string name="hint">Hint</string>
     <string name="test_result">Test Result</string>
     <string name="no_space_allowed">Space " " is not allowed in field name!</string>
@@ -117,7 +117,15 @@
     <string name="wait_until_current_export_import_finish">Wait until the current export/import process finishes!</string>
     <string name="export_import_file_path" translatable="false">%1$s%2$s%3$s</string>
     <string name="not_imported_fields_notification">The following fields cannot be imported because you have fields with the same name but with different field type : %1$s.</string>
-    <string name="show">show</string>
-    <string name="hide">hide</string>
+    <string name="show">Show</string>
+    <string name="hide">Hide</string>
     <string name="greater_zero">The number of tries must be greater than 0!</string>
+    <string name="change_areas">Change areas</string>
+    <string name="greater_than_zero">The two numbers must be greater than 0!</string>
+    <string name="question_area">Question Area</string>
+    <string name="answer_area">Answer Area</string>
+    <string name="change_text_size">Change text size</string>
+    <string name="normal_size">Normal</string>
+    <string name="large_size">Large</string>
+    <string name="small_size">Small</string>
 </resources>

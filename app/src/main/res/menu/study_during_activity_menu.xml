@@ -9,6 +9,13 @@
         app:showAsAction="ifRoom"
         />
     <item
+        android:id="@+id/change_areas"
+        android:title="@string/change_areas"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/change_text_size"
+        android:title="@string/change_text_size"/>
+    <item
         android:id="@+id/rate_the_app"
         android:icon="@drawable/ic_rate_review_white_24dp"
         android:title="@string/rate"

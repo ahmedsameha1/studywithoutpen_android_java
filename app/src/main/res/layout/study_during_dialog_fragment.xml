@@ -9,19 +9,24 @@
         android:layout_height="wrap_content"
         android:imeOptions="flagNoExtractUi"
         android:inputType="number"
-        android:hint="@string/enter_tries_number" />
+        android:hint="@string/enter_tries_number"
+        />
 
     <EditText
         android:id="@+id/enter_day"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/day"
-        android:inputType="number"/>
+        android:inputType="number"
+        android:imeOptions="flagNoExtractUi"
+        />
 
     <EditText
         android:id="@+id/enter_hour"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/hour"
-        android:inputType="number" />
+        android:inputType="number"
+        android:imeOptions="flagNoExtractUi"
+        />
 </LinearLayout>

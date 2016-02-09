@@ -1,6 +1,8 @@
 package com.ahmedsameha1.studyvocabularyfive;
 
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -15,15 +17,15 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +34,8 @@ import android.widget.ToggleButton;
 import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
 import com.ahmedsameha1.studyvocabularyfive.Database.DataProvider;
 import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabularyfive.Dialogs.ChangeAreasDialogFragment;
+import com.ahmedsameha1.studyvocabularyfive.Dialogs.ChangeTextSizeDialogFragment;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -41,7 +45,10 @@ import java.util.StringTokenizer;
 /**
  * Created by ahmed_000 on 9/23/2015.
  */
-public class StudyDuringActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class StudyDuringActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> ,
+        ChangeAreasDialogFragment.ChangeAreas,
+        ChangeTextSizeDialogFragment.ChangeTextSize {
     public static final String ACTIVITY_NAME = "StudyDuringActivity";
     public static final String CURRENT_FIELD = "currentField";
     public static final String STARTING_TIME = "startingTime";
@@ -54,7 +61,7 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     public static final int START_NEW_SESSION = 2;
     private String currentField;
     private long startingTime;
-    boolean boolean_continue;
+    boolean boolean_continue, actionBarShown;
     private Cursor cursor;
     private ArrayList<String> questions = new ArrayList<String>(), answers = new ArrayList<String>();
     private ArrayList<Integer> repeatedEntries = new ArrayList<Integer>();
@@ -87,10 +94,10 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     private Cursor searchForCursor;
     private EditText enterAnswer;
     private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuetions;
-    private Button nextHint, check, _continue;
+    private TextView nextHint, check, _continue;
 //    private ProgressBar progressBar;
-    private ToggleButton showActionbar;
-
+    private TextView showActionbar;
+    private LinearLayout showResult,questionLinearlayout, container;
     //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
@@ -120,19 +127,21 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        showResult = (LinearLayout) findViewById(R.id.result);
+        questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
+        container = (LinearLayout) findViewById(R.id.container);
         enterAnswer = (EditText) findViewById(R.id.enter_answer);
         showQuestion = (TextView) findViewById(R.id.display_question);
-        check = (Button) findViewById(R.id.check);
+        check = (TextView) findViewById(R.id.check);
         remainingQuestionCounter = (TextView) findViewById(R.id.remaining_question_counter);
-        _continue = (Button) findViewById(R.id._continue);
-        nextHint = (Button) findViewById(R.id.next_hint);
+        _continue = (TextView) findViewById(R.id._continue);
+        nextHint = (TextView) findViewById(R.id.next_hint);
         showTries = (TextView) findViewById(R.id.trys);
-
         showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
-
-        showActionbar = (ToggleButton) findViewById(R.id.show_actionbar);
+        showActionbar = (TextView) findViewById(R.id.show_actionbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().hide();
+        actionBarShown = false;
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         check.setOnClickListener(new View.OnClickListener() {
@@ -203,7 +212,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                         }
                     }
                 } else {
-                    Toast.makeText(StudyDuringActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT).show();
+                    Toast toast = Toast.makeText(StudyDuringActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,200);
+                    toast.show();
                 }
                 enterAnswer.setHint(R.string.enter_your_answer);
             }
@@ -215,7 +226,9 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                     if ( enterAnswer.getText().toString().length() <= 0 ) {
                         enterAnswer.setHint(hints.get(hintCounter++));
                     } else {
-                        Toast.makeText(StudyDuringActivity.this,hints.get(hintCounter++),Toast.LENGTH_SHORT).show();
+                        Toast toast = Toast.makeText(StudyDuringActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP,0,200);
+                        toast.show();
                     }
                     hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
                 }
@@ -261,7 +274,8 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.toString().length() > 0 && permitedTriesNumber != 1) {
-                    check.setBackgroundResource(R.drawable.ic_question_marks);
+//                    check.setBackgroundResource(R.drawable.ic_question_marks);
+                    showResult.setBackgroundResource(R.drawable.smiley_question_marks1);
                 }
             }
         });
@@ -273,18 +287,50 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 _continue.setEnabled(false);
                 enterAnswer.setHint(R.string.enter_your_answer);
                 if ( permitedTriesNumber == 1 ) {
-                    check.setBackgroundResource(R.drawable.ic_question_marks);
+//                    check.setBackgroundResource(R.drawable.ic_question_marks);
+                    showResult.setBackgroundResource(R.drawable.smiley_question_marks1);
                 }
             }
         });
-        showActionbar.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    getSupportActionBar().show();
-                } else {
+            public void onClick(View v) {
+                if ( actionBarShown ) {
                     getSupportActionBar().hide();
+                    actionBarShown = (! actionBarShown);
+                    showActionbar.setText(R.string.show);
+                } else {
+                    getSupportActionBar().show();
+                    actionBarShown = (! actionBarShown);
+                    showActionbar.setText(R.string.hide);
                 }
+            }
+        });
+        showNumberOfQuetions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast toast = Toast.makeText(StudyDuringActivity.this,
+                        getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 200);
+                toast.show();
+            }
+        });
+        remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast toast = Toast.makeText(StudyDuringActivity.this,
+                        getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 200);
+                toast.show();
+            }
+        });
+        showTries.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast toast = Toast.makeText(StudyDuringActivity.this,
+                        getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 200);
+                toast.show();
             }
         });
         permitedTriesNumber = 3;
@@ -349,6 +395,14 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
                 editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_TRIES + DASH + currentField, permitedTriesNumber);
                 editor.commit();
                 finish();
+                return true;
+            case R.id.change_areas:
+                ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
+                changeAreasDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                return true;
+            case R.id.change_text_size:
+                ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
+                changeTextSizeDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
             case R.id.open_facebook_page:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
@@ -418,10 +472,12 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     private boolean checkAnAnswer() {
         boolean result = false;
         if (enterAnswer.getText().toString().equals(listForTest[currentQuestionCounter][1])) {
-            check.setBackgroundResource(R.drawable.ic_correct_sign);
+//            check.setBackgroundResource(R.drawable.ic_correct_sign);
+            showResult.setBackgroundResource(R.drawable.correct_sign);
             result = true;
         } else {
-            check.setBackgroundResource(R.drawable.ic_wrong_sign);
+//            check.setBackgroundResource(R.drawable.ic_wrong_sign);
+            showResult.setBackgroundResource(R.drawable.wrong_sign);
             result = false;
 //            wrongAnswers.add(enterAnswer.getText().toString());
         }
@@ -612,5 +668,22 @@ public class StudyDuringActivity extends AppCompatActivity implements LoaderMana
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         this.cursor = null;
+    }
+
+    @Override
+    public void changeAreas(int questionArea, int answerArea) {
+        LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams();
+        LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) showResult.getLayoutParams();
+        container.setWeightSum(questionArea + answerArea);
+        question_params.weight = (float) (questionArea);
+        answer_params.weight = (float) (answerArea);
+        questionLinearlayout.setLayoutParams(question_params);
+        showResult.setLayoutParams(answer_params);
+    }
+
+    @Override
+    public void changeTextSize(int textSize) {
+        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_SP,textSize);
+        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP,textSize);
     }
 }

@@ -1,0 +1,61 @@
+package com.ahmedsameha1.studyvocabularyfive.Dialogs;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RadioGroup;
+
+import com.ahmedsameha1.studyvocabularyfive.R;
+
+/**
+ * Created by ahmed on 2/8/2016.
+ */
+public class ChangeTextSizeDialogFragment extends DialogFragment {
+    public static final String CHANGE_TEXT_SIZE_DIALOG_FRAGMENT = "changeTextSizeDialogFragment";
+    public static final int LARGE_SIZE = 20;
+    public static final int NORMAL_SIZE = 15;
+    public static final int SMALL_SIZE = 10;
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final AlertDialog alertDialog =
+                builder.setView(inflater.inflate(R.layout.change_text_size_dialog_fragment,null))
+                .setPositiveButton(R.string.ok,null).create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                final RadioGroup radioGroup = (RadioGroup) alertDialog.findViewById(R.id.text_size_radio_group);
+                Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        switch (radioGroup.getCheckedRadioButtonId()) {
+                            case R.id.large_size:
+                                ((ChangeTextSize)getActivity()).changeTextSize(LARGE_SIZE);
+                                break;
+                            case R.id.normal_size:
+                                ((ChangeTextSize)getActivity()).changeTextSize(NORMAL_SIZE);
+                                break;
+                            case R.id.small_size:
+                                ((ChangeTextSize)getActivity()).changeTextSize(SMALL_SIZE);
+                                break;
+                        }
+                        dismiss();
+                    }
+                });
+            }
+        });
+        return alertDialog;
+    }
+    public interface ChangeTextSize {
+        void changeTextSize(int textSize);
+    }
+}

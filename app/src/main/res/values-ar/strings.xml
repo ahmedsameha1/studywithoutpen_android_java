@@ -30,7 +30,7 @@
     <string name="start">ابدأ</string>
     <string name="next">التالي</string>
     <string name="from_entries">% من المُدخلات</string>
-    <string name="remaining_questions">الأسئلة المتبقية:</string>
+    <string name="remaining_questions">الأسئلة المتبقية: %1$s</string>
     <string name="first_character">"أول حرف هو: "</string>
     <string name="number_of_characters">"عدد الأحرف هو: "</string>
     <string name="last_character">"آخر حرف هو: "</string>
@@ -44,9 +44,9 @@
     <string name="Your_correct_answers_was">إجاباتك الصحيحة كانت </string>
     <string name="enter_tries_number">أدخل عدد المحاولات</string>
     <string name="enter_percentage">أدخل النسبة المئوية</string>
-    <string name="try_number">المحاولة رقم</string>
+    <string name="try_number">المحاولة رقم: %1$s</string>
     <string name="hint">مساعدة</string>
-    <string name="number_of_questions">عدد الأسئلة:</string>
+    <string name="number_of_questions">عدد الأسئلة: %1$s</string>
     <string name="test_result">نتيجة الاختبار</string>
     <string name="no_entries_in_field">لا توجد مُدخلات في هذا المجال!</string>
     <string name="no_space_allowed">غير مسموح بالمسافة " " في اسم المجال!</string>
@@ -118,4 +118,12 @@
     <string name="show">أظهِر</string>
     <string name="hide">أخْفِ</string>
     <string name="greater_zero">عدد المحاولات يجب أن يكون أكبر من صفر!</string>
+    <string name="change_areas">غَيِّر المساحات</string>
+    <string name="greater_than_zero">الرقمين يجب أن يكونا أكبر من صفر!</string>
+    <string name="answer_area">مساحة الإجابة</string>
+    <string name="question_area">مساحة السؤال</string>
+    <string name="change_text_size">غَيِّر حجم النص</string>
+    <string name="normal_size">عادي</string>
+    <string name="large_size">كبير</string>
+    <string name="small_size">صغير</string>
 </resources>
