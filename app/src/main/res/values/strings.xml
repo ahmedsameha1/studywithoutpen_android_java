@@ -30,7 +30,7 @@
     <string name="start">Start</string>
     <string name="next">Next</string>
     <string name="from_entries">%</string>
-    <string name="enter_percentage">Enter the percentage</string>
+    <string name="enter_percentage">Percentage of the field (without %)</string>
     <string name="remaining_questions">Remaining Questions: %1$s</string>
     <string name="first_character">"The first character is: "</string>
     <string name="number_of_characters">"The number of characters is: "</string>
@@ -51,7 +51,7 @@
     <string name="no_space_allowed">Space " " is not allowed in field name!</string>
     <string name="no_entries_in_field">There is no entries in this field!</string>
     <string name="tries_at_least">Tries must be at least 1</string>
-    <string name="percentage_between">Please enter a number bigger than 0 and less than or equals 100</string>
+    <string name="percentage_between">Enter a number greater than 0 and less than or equals 100, for percentage.</string>
     <string name="where_the_answer">Where is the answer?!</string>
     <string name="wrong_answers">Wrong Answers</string>
     <string name="delete_entry">This entry will be deleted?</string>
@@ -59,11 +59,11 @@
     <string name="day">Enter the number of days</string>
     <string name="please_enter_at_least_one_value">Please enter at least one value for day or hour</string>
     <string name="enter_study_duration">Enter study duration</string>
-    <string name="study_during">Study During Period</string>
+    <string name="study_by_a_period">Study By A Period</string>
     <string name="check">Check</string>
     <string name="no_entries_in_this_time_range">There is no entries in this time range!</string>
     <string name="_continue">Continue</string>
-    <string name="enter_the_period">Enter the period that you want to study (the entries that you have entered during it)</string>
+    <string name="start_studying_a_period">Start Study By A Period</string>
     <string name="rate">Rate and Review this app</string>
     <string name="stop_studying_now">Stop studying now!</string>
     <string name="ask_for_continue_previous_study_during">Do you want to continue the previous studying session?</string>
@@ -124,8 +124,17 @@
     <string name="greater_than_zero">The two numbers must be greater than 0!</string>
     <string name="question_area">Question Area</string>
     <string name="answer_area">Answer Area</string>
-    <string name="change_text_size">Change text size</string>
+    <string name="change_text_size">Change Text Size</string>
     <string name="normal_size">Normal</string>
     <string name="large_size">Large</string>
     <string name="small_size">Small</string>
+    <string name="partion_the_area">Partition The Area</string>
+    <string name="select_text_size">Select Text Size</string>
+    <string name="start_a_test">Start A Test</string>
+    <string name="enter_one_of">Enter only one of:</string>
+    <string name="please_enter_percentage_or_number_of_question" >Please enter a percentage of questions or a number of questions</string>
+    <string name="percentage_asked" translatable="false">You will be asked in %1$s  of the filed entries</string>
+    <string name="enter_number_of_questions">Number of questions</string>
+    <string name="number_of_questions_smaller_than">Enter a number of questions which is smaller than or equals %1$d.</string>
+    <string name="enter_question_area_answer_area">Enter values for the question area and answer area!</string>
 </resources>

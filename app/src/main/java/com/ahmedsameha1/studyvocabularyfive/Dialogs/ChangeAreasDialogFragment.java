@@ -13,36 +13,54 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
 import com.ahmedsameha1.studyvocabularyfive.R;
+import com.ahmedsameha1.studyvocabularyfive.StudyDuringActivity;
 
 /**
  * Created by ahmed on 2/7/2016.
  */
 public class ChangeAreasDialogFragment extends DialogFragment{
     public static final String CHANGE_AREAS_DIALOG_FRAGMENT = "change_areas_dialog_fragment";
+    private float initialQuestionArea,initialAnsweArea;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initialQuestionArea = getArguments().getFloat(StudyDuringActivity.QUESTION_LAYOUT);
+        initialAnsweArea = getArguments().getFloat(StudyDuringActivity.ANSWER_LAYOUT);
+    }
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        final AlertDialog alertDialog = builder.setView(inflater.inflate(R.layout.change_areas_dialog_fragment, null))
+        final AlertDialog alertDialog = builder.setTitle(R.string.partion_the_area)
+                .setView(inflater.inflate(R.layout.change_areas_dialog_fragment, null))
                 .setPositiveButton(R.string.ok,null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                final EditText enterquestionArea = (EditText) alertDialog.findViewById(R.id.questio_area);
-                final EditText enteranswerArea = (EditText) alertDialog.findViewById(R.id.answer_area);
+                final EditText enterQuestionArea = (EditText) alertDialog.findViewById(R.id.questio_area);
+                final EditText enterAnswerArea = (EditText) alertDialog.findViewById(R.id.answer_area);
+                enterQuestionArea.setText(String.format("%d", (int) initialQuestionArea));
+                enterAnswerArea.setText(String.format("%d",(int) initialAnsweArea));
                 Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        int questionArea = Integer.parseInt(enterquestionArea.getText().toString());
-                        int answerArea = Integer.parseInt(enteranswerArea.getText().toString());
-                        if ( questionArea > 0 && answerArea > 0 ) {
-                            ((ChangeAreas) getActivity()).changeAreas(questionArea,answerArea);
-                            dismiss();
+                        if ( enterQuestionArea.getText().toString().length() > 0 && enterAnswerArea.getText().toString().length() > 0 ) {
+                            int questionArea = Integer.parseInt(enterQuestionArea.getText().toString());
+                            int answerArea = Integer.parseInt(enterAnswerArea.getText().toString());
+                            if ( questionArea > 0 && answerArea > 0 ) {
+                                ((ChangeAreas) getActivity()).changeAreas((float) questionArea,(float) answerArea);
+                                dismiss();
+                            } else {
+                                Toast toast = Toast.makeText(getActivity(), R.string.greater_than_zero, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,0);
+                                toast.show();
+                            }
                         } else {
-                            Toast toast = Toast.makeText(getActivity(), R.string.greater_than_zero, Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP,0,0);
                             toast.show();
                         }
@@ -53,6 +71,6 @@ public class ChangeAreasDialogFragment extends DialogFragment{
         return alertDialog;
     }
     public interface ChangeAreas {
-        void changeAreas( int questionArea, int answerArea );
+        void changeAreas( float questionArea, float answerArea );
     }
 }

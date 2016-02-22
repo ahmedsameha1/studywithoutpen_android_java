@@ -62,6 +62,7 @@ public class ShowResultDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
                         databaseOperations.clearLinkerTableWrongAnswers(currentField);
+                        getActivity().finish();
                     }
                 })
                 .create();
@@ -80,6 +81,7 @@ public class ShowResultDialogFragment extends DialogFragment {
                         Intent intent = new Intent(getActivity(),WrongAnswersActivity.class);
                         intent.putExtra(WrongAnswersActivity.WRONG_ITEM_LIST,bundle);
                         startActivity(intent);
+                        getActivity().finish();
                         dismiss();
                     }
                 });

@@ -1,10 +1,9 @@
 package com.ahmedsameha1.studyvocabularyfive;
 
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,14 +21,12 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
 import com.ahmedsameha1.studyvocabularyfive.Database.DataProvider;
@@ -59,6 +56,11 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public static final String NUMBER_OF_TRIES = "numberOftries";
     public static final int CONTINUE_PREVIOUS_SESSION = 1;
     public static final int START_NEW_SESSION = 2;
+
+    public static final String QUESTION_LAYOUT = "user_defined_question_layout";
+    public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
+    public static final String TEXT_SIZE = "user_defined_question_text_size";
+
     private String currentField;
     private long startingTime;
     boolean boolean_continue, actionBarShown;
@@ -93,10 +95,10 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private Cursor searchForCursor;
     private EditText enterAnswer;
-    private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuetions;
+    private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuetions,showActionbar;
     private TextView nextHint, check, _continue;
 //    private ProgressBar progressBar;
-    private TextView showActionbar;
+
     private LinearLayout showResult,questionLinearlayout, container;
     //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
@@ -140,7 +142,12 @@ public class StudyDuringActivity extends AppCompatActivity implements
         showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().hide();
+        int screenSize = getResources().getConfiguration().screenLayout &
+                Configuration.SCREENLAYOUT_SIZE_MASK;
+        if ( screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE || screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
+                || screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL ) {
+            getSupportActionBar().hide();
+        }
         actionBarShown = false;
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -160,6 +167,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                         showTries.setText(Integer.toString(triesCounter + 1));
                         check.setEnabled(false);
                         _continue.setEnabled(true);
+                        enterAnswer.setEnabled(false);
                     } else {
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                         showTries.setText(Integer.toString(triesCounter + 1));
@@ -285,6 +293,12 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 check.setEnabled(true);
                 enterAnswer.setText("");
                 _continue.setEnabled(false);
+                enterAnswer.setEnabled(true);
+//                enterAnswer.requestFocus();
+//                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+                InputMethodManager inputMethodManager =  (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInputFromWindow(enterAnswer.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+                enterAnswer.requestFocus();
                 enterAnswer.setHint(R.string.enter_your_answer);
                 if ( permitedTriesNumber == 1 ) {
 //                    check.setBackgroundResource(R.drawable.ic_question_marks);
@@ -379,29 +393,23 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 }
                 return true;
             case R.id.stop:
-                final DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
-//                progressBar.setVisibility(View.VISIBLE);
-                databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
-                databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest, currentField);
-
-//                databaseOperations.clearStudyDuringTempTable(currentField);
-//                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(ACTIVITY_NAME + DASH + STRING_REPRESENTING_REPEATED_ENTRIES
-                        + DASH + currentField, convertRepeatedEntriesArrayListToString());
-                editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
-                        + DASH + currentField, currentQuestionCounter);
-                editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_TRIES + DASH + currentField, permitedTriesNumber);
-                editor.commit();
+                toStop();
                 finish();
                 return true;
             case R.id.change_areas:
+                Bundle bundle = new Bundle();
+                bundle.putFloat(QUESTION_LAYOUT,((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
+                bundle.putFloat(ANSWER_LAYOUT,((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
+                changeAreasDialogFragment.setArguments(bundle);
                 changeAreasDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
             case R.id.change_text_size:
+                Bundle bundle1 = new Bundle();
+                float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
+                bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize()/scaledDensity) );
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
+                changeTextSizeDialogFragment.setArguments(bundle1);
                 changeTextSizeDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
             case R.id.open_facebook_page:
@@ -414,11 +422,28 @@ public class StudyDuringActivity extends AppCompatActivity implements
 
 
     }
-
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         retainedFragment.setListForTest_StudyDuringActivity(listForTest);
+    }
+
+    private void toStop() {
+        final DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
+//                progressBar.setVisibility(View.VISIBLE);
+        databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
+        databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest, currentField);
+
+//                databaseOperations.clearStudyDuringTempTable(currentField);
+//                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(ACTIVITY_NAME + DASH + STRING_REPRESENTING_REPEATED_ENTRIES
+                + DASH + currentField, convertRepeatedEntriesArrayListToString());
+        editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
+                + DASH + currentField, currentQuestionCounter);
+        editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_TRIES + DASH + currentField, permitedTriesNumber);
+        editor.commit();
     }
 
     private String[][] prepareListForStudyFirstTime() {
@@ -526,6 +551,10 @@ public class StudyDuringActivity extends AppCompatActivity implements
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
         savedInsatanceState.putIntegerArrayList(REPEATED_ENTRIES, repeatedEntries);
+        saveUserLayoutChanges(savedInsatanceState);
+        if ( ! isFinishing() ) {
+            toStop();
+        }
 //        savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         super.onSaveInstanceState(savedInsatanceState);
@@ -548,6 +577,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
+        restoreUserLayoutChanges(savedInstanceState);
 //        wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
 //        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
         if (testingNow) {
@@ -556,6 +586,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
             showNumberOfQuetions.setText(Integer.toString(questionsNumber));
             check.setEnabled(checkState);
+            enterAnswer.setEnabled(checkState);
             _continue.setEnabled(_continueState);
 //            enterPercent.setEnabled(false);
 
@@ -671,7 +702,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void changeAreas(int questionArea, int answerArea) {
+    public void changeAreas(float questionArea, float answerArea) {
         LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams();
         LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) showResult.getLayoutParams();
         container.setWeightSum(questionArea + answerArea);
@@ -682,8 +713,18 @@ public class StudyDuringActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void changeTextSize(int textSize) {
-        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_SP,textSize);
-        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP,textSize);
+    public void changeTextSize(float textSize) {
+        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+    }
+    private void saveUserLayoutChanges(Bundle bundle) {
+        bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
+        bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
+        bundle.putFloat(TEXT_SIZE, showQuestion.getTextSize());
+    }
+    private void restoreUserLayoutChanges(Bundle bundle) {
+        changeAreas(bundle.getFloat(QUESTION_LAYOUT),bundle.getFloat(ANSWER_LAYOUT));
+        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_PX,bundle.getFloat(TEXT_SIZE));
+        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_PX,bundle.getFloat(TEXT_SIZE));
     }
 }

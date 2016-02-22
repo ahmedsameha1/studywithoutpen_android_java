@@ -7,7 +7,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:inputType="number"
-    android:text="2"
     android:hint="@string/question_area"
     android:imeOptions="flagNoExtractUi"
     />
@@ -16,7 +15,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="number"
-        android:text="1"
         android:hint="@string/answer_area"
         android:imeOptions="flagNoExtractUi"
         />

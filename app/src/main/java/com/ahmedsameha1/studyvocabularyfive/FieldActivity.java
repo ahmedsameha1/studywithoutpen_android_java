@@ -39,6 +39,7 @@ import com.ahmedsameha1.studyvocabularyfive.Dialogs.ExampleFieldsDailogFragment;
 import com.ahmedsameha1.studyvocabularyfive.Dialogs.ExportFieldsDialogFragment;
 import com.ahmedsameha1.studyvocabularyfive.Dialogs.ImportFieldsDialogFragment;
 import com.ahmedsameha1.studyvocabularyfive.Dialogs.StudyDuringDialogFragment;
+import com.ahmedsameha1.studyvocabularyfive.Dialogs.TestDialogFragment;
 
 
 public class FieldActivity extends AppCompatActivity implements CreateFieldDialogFragment.Contact,
@@ -244,10 +245,12 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                                 AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
                                 fragment3.show(getSupportFragmentManager(),CHECK_IF_CONTINUE_TEST_SESSION);
                             } else {
-                                Intent intent = new Intent(this, TestActivity.class);
+                                TestDialogFragment dialogFragment = new TestDialogFragment();
+                                dialogFragment.show(getSupportFragmentManager(),TestDialogFragment.TEST_DIALOG_FRAGMENT);
+                                /*Intent intent = new Intent(this, TestActivity.class);
                                 intent.putExtra(TestActivity.CURRENT_FIELD, getCurrentField());
                                 intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,false);
-                                startActivity(intent);
+                                startActivity(intent);*/
                             }
                         } else {
                             Toast.makeText(this,getString(R.string.no_entries_in_field),Toast.LENGTH_SHORT).show();

@@ -20,7 +20,7 @@
     <item
         android:id="@+id/study_during"
         android:icon="@drawable/ic_restore_white_24dp"
-        android:title="@string/study_during"
+        android:title="@string/study_by_a_period"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/export"

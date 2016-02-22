@@ -12,21 +12,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/large_size"
-            android:id="@+id/large_size"
-            android:checked="false" />
+            android:id="@+id/large_size" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/normal_size"
-            android:id="@+id/normal_size"
-            android:checked="true" />
+            android:id="@+id/normal_size" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/small_size"
-            android:id="@+id/small_size"
-            android:checked="false" />
+            android:id="@+id/small_size" />
     </RadioGroup>
 </LinearLayout>

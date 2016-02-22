@@ -845,4 +845,10 @@ public class DatabaseOperations {
             }
         }
     }
+    public int getEntriesNumber(String fieldName) {
+        Cursor cursor = getFieldEntries(fieldName);
+        int number = cursor.getCount();
+        cursor.close();
+        return number;
+    }
 }
