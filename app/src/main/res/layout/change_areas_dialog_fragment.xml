@@ -2,20 +2,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-<EditText
-    android:id="@+id/questio_area"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:inputType="number"
-    android:hint="@string/question_area"
-    android:imeOptions="flagNoExtractUi"
-    />
-    <EditText
-        android:id="@+id/answer_area"
+
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        android:hint="@string/answer_area"
-        android:imeOptions="flagNoExtractUi"
-        />
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <EditText
+            android:id="@+id/questio_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="9"
+            android:inputType="number"
+            android:hint="@string/question_area"
+            android:imeOptions="flagNoExtractUi"
+            />
+
+        <ImageButton
+            android:id="@+id/question_area_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_help_black_24dp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <EditText
+            android:id="@+id/answer_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="9"
+            android:inputType="number"
+            android:hint="@string/answer_area"
+            android:imeOptions="flagNoExtractUi"
+            />
+
+        <ImageButton
+            android:id="@+id/answer_area_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_help_black_24dp" />
+    </LinearLayout>
 </LinearLayout>

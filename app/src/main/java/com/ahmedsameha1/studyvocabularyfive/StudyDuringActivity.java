@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -60,7 +61,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
-
+    public static final int PORTRAIT = 0;
+    public static final int LANDSCAPE = 1;
     private String currentField;
     private long startingTime;
     boolean boolean_continue, actionBarShown;
@@ -76,6 +78,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
+    public static final int RETURN_TIME = 1000;
     public static final String LIST_FOR_TEST = "listForTest";
     public static final String CURRENT_QUESTION_COUNTER = "currentQuestionCounter";
     public static final String TRIES_COUNTER = "triesCounter";
@@ -97,12 +100,15 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private EditText enterAnswer;
     private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuetions,showActionbar;
     private TextView nextHint, check, _continue;
+
 //    private ProgressBar progressBar;
 
     private LinearLayout showResult,questionLinearlayout, container;
     //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
+    private Handler mHandler = new Handler();
+    private Runnable mRunnable;
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,7 +227,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                     }
                 } else {
                     Toast toast = Toast.makeText(StudyDuringActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP,0,200);
+                    toast.setGravity(Gravity.TOP,0,400);
                     toast.show();
                 }
                 enterAnswer.setHint(R.string.enter_your_answer);
@@ -235,7 +241,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                         enterAnswer.setHint(hints.get(hintCounter++));
                     } else {
                         Toast toast = Toast.makeText(StudyDuringActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,200);
+                        toast.setGravity(Gravity.TOP,0,400);
                         toast.show();
                     }
                     hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
@@ -283,7 +289,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
             public void afterTextChanged(Editable s) {
                 if (s.toString().length() > 0 && permitedTriesNumber != 1) {
 //                    check.setBackgroundResource(R.drawable.ic_question_marks);
-                    showResult.setBackgroundResource(R.drawable.smiley_question_marks1);
+                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                    showResult.setPadding(0, 0, 0, 0);
                 }
             }
         });
@@ -302,7 +309,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 enterAnswer.setHint(R.string.enter_your_answer);
                 if ( permitedTriesNumber == 1 ) {
 //                    check.setBackgroundResource(R.drawable.ic_question_marks);
-                    showResult.setBackgroundResource(R.drawable.smiley_question_marks1);
+                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                    showResult.setPadding(0, 0, 0, 0);
                 }
             }
         });
@@ -325,7 +333,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 Toast toast = Toast.makeText(StudyDuringActivity.this,
                         getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 200);
+                toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
         });
@@ -334,7 +342,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 Toast toast = Toast.makeText(StudyDuringActivity.this,
                         getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 200);
+                toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
         });
@@ -343,7 +351,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 Toast toast = Toast.makeText(StudyDuringActivity.this,
                         getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 200);
+                toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
         });
@@ -389,7 +397,9 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 try {
                     startActivity(myAppLinkToMarket);
                 } catch (ActivityNotFoundException e) {
-                    Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
+                    Toast toast = Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
                 }
                 return true;
             case R.id.stop:
@@ -498,11 +508,29 @@ public class StudyDuringActivity extends AppCompatActivity implements
         boolean result = false;
         if (enterAnswer.getText().toString().equals(listForTest[currentQuestionCounter][1])) {
 //            check.setBackgroundResource(R.drawable.ic_correct_sign);
-            showResult.setBackgroundResource(R.drawable.correct_sign);
+            showResult.setBackgroundResource(R.drawable.correct_answer_background);
+            showResult.setPadding(0, 0, 0, 0);
+            mRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                    showResult.setPadding(0, 0, 0, 0);
+                }
+            };
+            mHandler.postDelayed(mRunnable, RETURN_TIME);
             result = true;
         } else {
 //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
-            showResult.setBackgroundResource(R.drawable.wrong_sign);
+            showResult.setBackgroundResource(R.drawable.wrong_answer_background);
+            showResult.setPadding(0, 0, 0, 0);
+            mRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                    showResult.setPadding(0, 0, 0, 0);
+                }
+            };
+            mHandler.postDelayed(mRunnable, RETURN_TIME);
             result = false;
 //            wrongAnswers.add(enterAnswer.getText().toString());
         }
@@ -534,30 +562,30 @@ public class StudyDuringActivity extends AppCompatActivity implements
         }
     }
 
-    public void onSaveInstanceState(Bundle savedInsatanceState) {
+    public void onSaveInstanceState(Bundle savedInstanceState) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField, currentQuestionCounter);
         editor.commit();
 //        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
-        savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
-        savedInsatanceState.putBoolean(RESULT, result);
+        savedInstanceState.putInt(TRIES_COUNTER, triesCounter);
+        savedInstanceState.putBoolean(RESULT, result);
 //        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
-        savedInsatanceState.putBoolean(CHECK_BUTTON_STATE, check.isEnabled());
-        savedInsatanceState.putBoolean(_CONTINUE_BUTTON_STATE, _continue.isEnabled());
-        savedInsatanceState.putBoolean(TESTING_NOW, testingNow);
-        savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
+        savedInstanceState.putBoolean(CHECK_BUTTON_STATE, check.isEnabled());
+        savedInstanceState.putBoolean(_CONTINUE_BUTTON_STATE, _continue.isEnabled());
+        savedInstanceState.putBoolean(TESTING_NOW, testingNow);
+        savedInstanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
 //        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
-        savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
-        savedInsatanceState.putStringArrayList(HINTS, hints);
-        savedInsatanceState.putIntegerArrayList(REPEATED_ENTRIES, repeatedEntries);
-        saveUserLayoutChanges(savedInsatanceState);
+        savedInstanceState.putInt(HINT_COUNTER, hintCounter);
+        savedInstanceState.putStringArrayList(HINTS, hints);
+        savedInstanceState.putIntegerArrayList(REPEATED_ENTRIES, repeatedEntries);
+        saveUserLayoutChanges(savedInstanceState);
         if ( ! isFinishing() ) {
             toStop();
         }
 //        savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
-        super.onSaveInstanceState(savedInsatanceState);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     public void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -691,7 +719,9 @@ public class StudyDuringActivity extends AppCompatActivity implements
             }
 
         } else if (questionsNumber <= 0 && loader.getId() == START_NEW_SESSION) {
-            Toast.makeText(this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG).show();
+            Toast toast = Toast.makeText(this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.TOP,0,400);
+            toast.show();
             finish();
         }
     }

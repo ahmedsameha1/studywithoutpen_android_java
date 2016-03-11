@@ -1,7 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools">
+    <item
+        android:id="@+id/change_areas"
+        android:title="@string/partiton_the_area"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/change_text_size"
+        android:title="@string/change_text_size"/>
     <item
         android:id="@+id/rate_the_app"
         android:icon="@drawable/ic_rate_review_white_24dp"

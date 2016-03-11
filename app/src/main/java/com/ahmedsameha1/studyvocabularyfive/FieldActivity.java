@@ -15,6 +15,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -253,11 +254,15 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                                 startActivity(intent);*/
                             }
                         } else {
-                            Toast.makeText(this,getString(R.string.no_entries_in_field),Toast.LENGTH_SHORT).show();
+                            Toast toast = Toast.makeText(this,getString(R.string.no_entries_in_field),Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP,0,400);
+                            toast.show();
                         }
                         break;
                     case Contract.Field.NOTEBOOK_TYPE:
-                        Toast.makeText(this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT).show();
+                        Toast toast = Toast.makeText(this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
                         break;
                 }
                 return true;
@@ -273,7 +278,9 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                         }
                         break;
                     case Contract.Field.NOTEBOOK_TYPE:
-                        Toast.makeText(this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT).show();
+                        Toast toast = Toast.makeText(this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
                         break;
                 }
                 return true;
@@ -283,7 +290,9 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                     ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
                     exportFieldsDialogFragment.show(getSupportFragmentManager(),ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
                 } else {
-                    Toast.makeText(this,R.string.wait_until_current_export_import_finish,Toast.LENGTH_SHORT).show();
+                    Toast toast = Toast.makeText(this,R.string.wait_until_current_export_import_finish,Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
                 }
                 /*if ( ! sharedPreferences.getBoolean(ExportFieldsDialogFragment.EXPORT_THREAD_IS_RUNNING,false) ) {
                     ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
@@ -298,7 +307,9 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                     ImportFieldsDialogFragment importFieldsDialogFragment = new ImportFieldsDialogFragment();
                     importFieldsDialogFragment.show(getSupportFragmentManager(),ImportFieldsDialogFragment.IMPORT_FIELD_DIALOG_FRAGMENT);
                 } else {
-                    Toast.makeText(this,R.string.wait_until_current_export_import_finish,Toast.LENGTH_SHORT).show();
+                    Toast toast = Toast.makeText(this,R.string.wait_until_current_export_import_finish,Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
                 }
                 /*if ( ! sharedPreferences.getBoolean(ImportFieldsDialogFragment.IMPORT_THREAD_IS_RUNNING,false) ) {
                     ImportFieldsDialogFragment importFieldsDialogFragment = new ImportFieldsDialogFragment();
@@ -313,7 +324,9 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
                 try {
                     startActivity(myAppLinkToMarket);
                 } catch (ActivityNotFoundException e) {
-                    Toast.makeText(this, "Unable to find market app", Toast.LENGTH_LONG).show();
+                    Toast toast = Toast.makeText(this, "Unable to find market app", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
                 }
                 return true;
             case R.id.open_facebook_page:
@@ -333,11 +346,17 @@ public class FieldActivity extends AppCompatActivity implements CreateFieldDialo
         int type = notebookCheckbox.isChecked()? Contract.Field.NOTEBOOK_TYPE : Contract.Field.DEFAULT_TYPE;
         String fieldName = enterFieldName.getText().toString();
         if (fieldName.contains(" ")) {
-            Toast.makeText(FieldActivity.this, "Spaces is not allowed in field name", Toast.LENGTH_SHORT).show();
+            Toast toast = Toast.makeText(FieldActivity.this, "Spaces is not allowed in field name", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP,0,400);
+            toast.show();
         } else if (fieldName.equals("")) {
-            Toast.makeText(FieldActivity.this, "Where is the field name?!", Toast.LENGTH_SHORT).show();
+            Toast toast = Toast.makeText(FieldActivity.this, "Where is the field name?!", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP,0,400);
+            toast.show();
         } else if (databaseOperations.checkFieldDuplication(fieldName)) {
-            Toast.makeText(FieldActivity.this, "There is an field with the same name!", Toast.LENGTH_SHORT).show();
+            Toast toast = Toast.makeText(FieldActivity.this, "There is an field with the same name!", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP,0,400);
+            toast.show();
         } else {
             databaseOperations.createNewField(fieldName, type);
         }

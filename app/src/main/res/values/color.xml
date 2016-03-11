@@ -2,7 +2,7 @@
 <resources>
     <color name="enabled_color">#00DD00</color>
     <color name="disabled_color">#0000FF</color>
-    <color name="default_background_color">#74AFAD</color>
+    <color name="default_background_color">#F8BBD0</color>
     <color name="white_color">#FFFFFF</color>
     <color name="black_color">#000000</color>
 </resources>

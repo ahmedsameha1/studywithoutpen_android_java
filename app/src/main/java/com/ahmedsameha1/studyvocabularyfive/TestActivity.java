@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -55,6 +56,7 @@ public class TestActivity extends AppCompatActivity implements
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
     public static final int CONTINUE_PREVIOUS_SESSION = 1;
+    public static final int RETURN_TIME = 1000;
     public static final String DASH = "-";
     public static final int START_NEW_SESSION = 2;
     public static final String LIST_FOR_TEST = "listForTest";
@@ -89,7 +91,8 @@ public class TestActivity extends AppCompatActivity implements
     private EditText enterAnswer;
     private TextView showQuestion, remainingQuestionCounter,showTries, showNumberOfQuestions,check,nextHint,showActionbar;
     private LinearLayout showResult,questionLinearlayout, container;
-
+    private Handler mHandler = new Handler();
+    private Runnable mRunnable;
 
 //    private TableRow hintTableRow;
 //    private SQLiteDatabase sqLiteDatabase;
@@ -197,7 +200,8 @@ public class TestActivity extends AppCompatActivity implements
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                         currentQuestionCounter++;
                         if (currentQuestionCounter >= questionsNumber) {
-                            showQuestion.setText(getString(R.string.test_has_completed));
+                            showQuestion.setText(R.string.test_has_completed);
+                            enterAnswer.setText(R.string.test_has_completed);
                             check.setEnabled(false);
 //                            start.setEnabled(true);
 
@@ -221,7 +225,8 @@ public class TestActivity extends AppCompatActivity implements
                             showTries.setText("");
                             enterAnswer.setHint(R.string.enter_your_answer);
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                            showResult.setBackgroundResource(R.drawable.smiley_question_marks1);
+                            showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                            showResult.setPadding(0,0,0,0);
 //                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, TestActivity.this);
                             databaseOperations.clearLinkerTableTestOrder(currentField);
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TestActivity.this); // getting the preferences
@@ -263,7 +268,8 @@ public class TestActivity extends AppCompatActivity implements
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.toString().length() > 0) {
-                    showResult.setBackgroundResource(R.drawable.smiley_question_marks1);
+                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                    showResult.setPadding(0, 0, 0, 0);
                 }
             }
         });
@@ -275,7 +281,7 @@ public class TestActivity extends AppCompatActivity implements
                         enterAnswer.setHint(hints.get(hintCounter++));
                     } else {
                         Toast toast = Toast.makeText(TestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 200);
+                        toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
                     hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
@@ -294,6 +300,33 @@ public class TestActivity extends AppCompatActivity implements
                     actionBarShown = (! actionBarShown);
                     showActionbar.setText(R.string.hide);
                 }
+            }
+        });
+        showNumberOfQuestions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast toast = Toast.makeText(TestActivity.this,
+                        getString(R.string.number_of_questions, showNumberOfQuestions.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        });
+        remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast toast = Toast.makeText(TestActivity.this,
+                        getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        });
+        showTries.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast toast = Toast.makeText(TestActivity.this,
+                        getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
             }
         });
         if ( boolean_continue ) {
@@ -329,9 +362,8 @@ public class TestActivity extends AppCompatActivity implements
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.stop:
-                if ( testingNow ) {
-                    toStop();
-                }
+                toStop();
+                finish();
                 return true;
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
@@ -355,7 +387,9 @@ public class TestActivity extends AppCompatActivity implements
                 try {
                     startActivity(myAppLinkToMarket);
                 } catch (ActivityNotFoundException e) {
-                    Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
+                    Toast toast = Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
                 }
                 return true;
             case R.id.open_facebook_page:
@@ -379,7 +413,6 @@ public class TestActivity extends AppCompatActivity implements
         editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS + DASH + currentField, wrongAnswersCounter);
         editor.putInt(ACTIVITY_NAME + DASH + PERMITED_TRIES_NUMBER + DASH + currentField,permitedTriesNumber);
         editor.commit();
-        finish();
     }
 /*    private String [][] getListForTest ( double percent ) {
         int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
@@ -482,11 +515,29 @@ public class TestActivity extends AppCompatActivity implements
     private boolean checkAnAnswer() {
         boolean result = false;
         if ( enterAnswer.getText().toString().equals(listForTest [currentQuestionCounter][1]) ){
-            showResult.setBackgroundResource(R.drawable.correct_sign);
+            showResult.setBackgroundResource(R.drawable.correct_answer_background);
+            showResult.setPadding(0,0,0,0);
+            mRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                    showResult.setPadding(0, 0, 0, 0);
+                }
+            };
+            mHandler.postDelayed(mRunnable, RETURN_TIME);
             result = true;
         }
         else {
-            showResult.setBackgroundResource(R.drawable.wrong_sign);
+            showResult.setBackgroundResource(R.drawable.wrong_answer_background);
+            showResult.setPadding(0,0,0,0);
+            mRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                    showResult.setPadding(0, 0, 0, 0);
+                }
+            };
+            mHandler.postDelayed(mRunnable, RETURN_TIME);
             result = false;
             wrongAnswers.add(enterAnswer.getText().toString());
         }

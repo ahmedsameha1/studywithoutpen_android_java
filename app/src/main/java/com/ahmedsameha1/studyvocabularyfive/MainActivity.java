@@ -13,6 +13,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -111,7 +112,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 try {
                     startActivity(myAppLinkToMarket);
                 } catch (ActivityNotFoundException e) {
-                    Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
+                    Toast toast = Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
                 }
                 return true;
             case R.id.open_facebook_page:
@@ -163,11 +166,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     public void createNewField(String fieldName) {
         if (fieldName.contains(" ")) {
-            Toast.makeText(MainActivity.this, "Spaces is not allowed in field name", Toast.LENGTH_SHORT).show();
+            Toast toast = Toast.makeText(MainActivity.this, "Spaces is not allowed in field name", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP,0,400);
+            toast.show();
         } else if (fieldName.equals("")) {
-            Toast.makeText(MainActivity.this, "Where is the field name?!", Toast.LENGTH_SHORT).show();
+            Toast toast = Toast.makeText(MainActivity.this, "Where is the field name?!", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP,0,400);
+            toast.show();
         } else if (databaseOperations.checkFieldDuplication(fieldName)) {
-            Toast.makeText(MainActivity.this, "There is an field with the same name!", Toast.LENGTH_SHORT).show();
+            Toast toast = Toast.makeText(MainActivity.this, "There is an field with the same name!", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP,0,400);
+            toast.show();
         } else {
 //            databaseOperations.createNewField(fieldName);
             setLastUsedField(fieldListCursor.getCount());

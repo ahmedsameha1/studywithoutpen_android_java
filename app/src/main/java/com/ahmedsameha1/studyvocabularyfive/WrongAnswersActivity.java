@@ -11,6 +11,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -78,7 +79,9 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
                 try {
                     startActivity(myAppLinkToMarket);
                 } catch (ActivityNotFoundException e) {
-                    Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
+                    Toast toast = Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
                 }
                 return true;
             case R.id.open_facebook_page:
@@ -174,11 +177,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         }
         return wrongItemsList;
     }
-    public void onDestroy() {
-        DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
-        databaseOperations.clearLinkerTableWrongAnswers(currentField);
-        super.onDestroy();
-    }
+
     @Override
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
         savedInsatanceState.putSerializable(WRONG_ITEM_LIST, wrongItemList);
@@ -204,6 +203,8 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         this.cursor = data;
         if ( wrongItemList == null ) {
             wrongItemList = readWrongAnswersFromLinkerTable();
+            DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
+            databaseOperations.clearLinkerTableWrongAnswers(currentField);
         }
         WrongItemAdapter wrongItemAdapter = new WrongItemAdapter(this, wrongItemList);
         listView.setAdapter(wrongItemAdapter);

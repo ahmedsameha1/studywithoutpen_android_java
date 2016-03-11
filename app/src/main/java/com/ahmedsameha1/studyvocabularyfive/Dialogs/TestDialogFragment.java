@@ -10,6 +10,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -89,12 +90,9 @@ public class TestDialogFragment extends DialogFragment {
                 number_of_tries_help.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        TextView textView = new TextView(getActivity());
-                        textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
-                        textView.setText("ffffff");
                         AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
                         number_of_tries_help_dialog_builder
-                                .setMessage("fffffff").create().show();/*(textView).create().show();*/
+                                .setMessage(R.string.enter_number_of_tries_help).create().show();/*(textView).create().show();*/
 
                     }
                 });
@@ -102,18 +100,25 @@ public class TestDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
 
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.enter_only_one_of_help).create().show();
                     }
                 });
                 enter_percentage_help.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.enter_percentage_help).create().show();
                     }
                 });
                 number_of_questions_help.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.enter_number_of_questions_help).create().show();
                     }
                 });
                 positiveButton.setOnClickListener(new View.OnClickListener() {
@@ -135,7 +140,9 @@ public class TestDialogFragment extends DialogFragment {
                                             startActivity(intent);
                                             dismiss();
                                         } else {
-                                            Toast.makeText(getActivity(), getString(R.string.percentage_between), Toast.LENGTH_LONG).show();
+                                            Toast toast = Toast.makeText(getActivity(), getString(R.string.percentage_between), Toast.LENGTH_LONG);
+                                            toast.setGravity(Gravity.TOP,0,400);
+                                            toast.show();
                                         }
                                     } else if ( enterNumberOfQuestions.getText().toString().length() > 0) {
                                         int numberQuestions = Integer.parseInt(enterNumberOfQuestions.getText().toString());
@@ -151,8 +158,10 @@ public class TestDialogFragment extends DialogFragment {
                                             startActivity(intent);
                                             dismiss();
                                         } else {
-                                            Toast.makeText(getActivity(),
-                                                    getString(R.string.number_of_questions_smaller_than,currentNumberOfEntries),Toast.LENGTH_LONG).show();
+                                            Toast toast = Toast.makeText(getActivity(),
+                                                    getString(R.string.number_of_questions_smaller_than,currentNumberOfEntries),Toast.LENGTH_LONG);
+                                            toast.setGravity(Gravity.TOP,0,400);
+                                            toast.show();
                                         }
                                     }
                                 } else {

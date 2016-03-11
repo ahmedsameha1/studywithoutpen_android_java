@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+
 import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
 import com.ahmedsameha1.studyvocabularyfive.R;

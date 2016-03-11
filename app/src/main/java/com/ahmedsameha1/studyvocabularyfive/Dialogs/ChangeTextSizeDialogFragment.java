@@ -1,6 +1,6 @@
 package com.ahmedsameha1.studyvocabularyfive.Dialogs;
 
-import android.app.AlertDialog;
+
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -9,7 +9,11 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RadioGroup;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
+import android.widget.TextView;
 
 import com.ahmedsameha1.studyvocabularyfive.R;
 import com.ahmedsameha1.studyvocabularyfive.StudyDuringActivity;
@@ -40,6 +44,7 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
+                final ImageButton text_size_help = (ImageButton) alertDialog.findViewById(R.id.text_size_help);
                 final RadioGroup radioGroup = (RadioGroup) alertDialog.findViewById(R.id.text_size_radio_group);
                 switch (textSize) {
                     case LARGE_SIZE:
@@ -68,6 +73,14 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                                 break;
                         }
                         dismiss();
+                    }
+                });
+                text_size_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.text_size_help).create().show();
                     }
                 });
             }

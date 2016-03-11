@@ -52,10 +52,8 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                 editor.commit();
                                 dismiss();*/
 //                                ((Contact) getActivity()).continueTest(false);
-                                Intent intent = new Intent(getActivity(), TestActivity.class);
-                                intent.putExtra(TestActivity.CURRENT_FIELD, ((FieldActivity) getActivity() ).getCurrentField());
-                                intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE, false);
-                                startActivity(intent);
+                                TestDialogFragment dialogFragment = new TestDialogFragment();
+                                dialogFragment.show(getActivity().getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
                                 DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
                                 databaseOperations.clearLinkerTableWrongAnswers(((FieldActivity) getActivity() ).getCurrentField());
                                 databaseOperations.clearLinkerTableTestOrder(((FieldActivity) getActivity() ).getCurrentField());

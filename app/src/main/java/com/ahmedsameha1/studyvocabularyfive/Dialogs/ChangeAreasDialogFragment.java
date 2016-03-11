@@ -1,6 +1,6 @@
 package com.ahmedsameha1.studyvocabularyfive.Dialogs;
 
-import android.app.AlertDialog;
+
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -11,9 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.support.v7.app.AlertDialog;
 
-import com.ahmedsameha1.studyvocabularyfive.Database.Contract;
 import com.ahmedsameha1.studyvocabularyfive.R;
 import com.ahmedsameha1.studyvocabularyfive.StudyDuringActivity;
 
@@ -34,16 +36,18 @@ public class ChangeAreasDialogFragment extends DialogFragment{
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        final AlertDialog alertDialog = builder.setTitle(R.string.partion_the_area)
+        final AlertDialog alertDialog = builder.setTitle(R.string.partiton_the_area)
                 .setView(inflater.inflate(R.layout.change_areas_dialog_fragment, null))
                 .setPositiveButton(R.string.ok,null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
+                final ImageButton question_area_help = (ImageButton) alertDialog.findViewById(R.id.question_area_help);
+                final ImageButton answer_area_help = (ImageButton) alertDialog.findViewById(R.id.answer_area_help);
                 final EditText enterQuestionArea = (EditText) alertDialog.findViewById(R.id.questio_area);
                 final EditText enterAnswerArea = (EditText) alertDialog.findViewById(R.id.answer_area);
                 enterQuestionArea.setText(String.format("%d", (int) initialQuestionArea));
-                enterAnswerArea.setText(String.format("%d",(int) initialAnsweArea));
+                enterAnswerArea.setText(String.format("%d", (int) initialAnsweArea));
                 Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -56,14 +60,30 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                                 dismiss();
                             } else {
                                 Toast toast = Toast.makeText(getActivity(), R.string.greater_than_zero, Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,0);
+                                toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
                             }
                         } else {
                             Toast toast = Toast.makeText(getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,0);
+                            toast.setGravity(Gravity.TOP,0,400);
                             toast.show();
                         }
+                    }
+                });
+                question_area_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.question_area_help).create().show();
+                    }
+                });
+                answer_area_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.answer_area_help).create().show();
                     }
                 });
             }

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="10">
     <RadioGroup
         android:id="@+id/text_size_radio_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="9">
 
         <RadioButton
             android:layout_width="wrap_content"
@@ -26,4 +27,11 @@
             android:text="@string/small_size"
             android:id="@+id/small_size" />
     </RadioGroup>
+    <ImageButton
+        android:id="@+id/text_size_help"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_help_black_24dp" />
 </LinearLayout>

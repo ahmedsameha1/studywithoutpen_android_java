@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="#74AFAD">
+    android:background="#F8BBD0">
 
     <Spinner
         android:id="@+id/wrong_answer_spinner"

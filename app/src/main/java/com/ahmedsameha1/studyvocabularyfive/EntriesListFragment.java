@@ -18,6 +18,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,7 +70,7 @@ public class EntriesListFragment extends Fragment {
     private ToggleButton sortQuestion, sortAnswer, sortEntryDate;
     private CustomCursorAdapter customCursorAdapterForFieldEntriesListView;
     protected LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
-
+    private int currentLoader = GET_ENTRIES_LOADER_ID;
 
     private DatabaseHelper databaseHelper;
     //    private SQLiteDatabase sqLiteDatabase;
@@ -388,18 +389,22 @@ public class EntriesListFragment extends Fragment {
                     switch (fieldType) {
                         case Contract.Field.NOTEBOOK_TYPE:
                             getLoaderManager().restartLoader(ORDER_DATE_DESC, null, getFieldEntries);
+                            currentLoader = ORDER_DATE_DESC;
                             break;
                         case Contract.Field.DEFAULT_TYPE:
                             getLoaderManager().restartLoader(ORDER_QUESTION_DESC, null, getFieldEntries);
+                            currentLoader = ORDER_QUESTION_DESC;
                             break;
                     }
                 } else {
                     switch (fieldType) {
                         case Contract.Field.NOTEBOOK_TYPE:
                             getLoaderManager().restartLoader(ORDER_DATE_ASC, null, getFieldEntries);
+                            currentLoader = ORDER_DATE_ASC;
                             break;
                         case Contract.Field.DEFAULT_TYPE:
                             getLoaderManager().restartLoader(ORDER_QUESTION_ASC, null, getFieldEntries);
+                            currentLoader = ORDER_QUESTION_ASC;
                             break;
                     }
                 }
@@ -410,8 +415,10 @@ public class EntriesListFragment extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     getLoaderManager().restartLoader(ORDER_ANSWER_DESC, null, getFieldEntries);
+                    currentLoader = ORDER_ANSWER_DESC;
                 } else {
                     getLoaderManager().restartLoader(ORDER_ANSWER_ASC, null, getFieldEntries);
+                    currentLoader = ORDER_ANSWER_ASC;
                 }
             }
         });
@@ -420,8 +427,10 @@ public class EntriesListFragment extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     getLoaderManager().restartLoader(ORDER_ENTRY_DATE_ASC, null, getFieldEntries);
+                    currentLoader = ORDER_ENTRY_DATE_ASC;
                 } else {
                     getLoaderManager().restartLoader(ORDER_ENTRY_DATE_DESC, null, getFieldEntries);
+                    currentLoader = ORDER_ENTRY_DATE_DESC;
                 }
             }
         });
@@ -600,17 +609,26 @@ public class EntriesListFragment extends Fragment {
             studyEntry.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    switch (fieldType) {
-                        case Contract.Field.DEFAULT_TYPE:
-                            Intent intent = new Intent(getActivity(), StudyActivity.class);
-                            intent.putExtra(StudyActivity.CURRENT_FIELD, getCurrentField());
-                            intent.putExtra(StudyActivity.CURRENT_QUESTION, editQuestion.getText().toString());
-                            intent.putExtra(StudyActivity.CURRENT_ANSWER, editAnswer.getText().toString());
-                            startActivity(intent);
-                            break;
-                        case Contract.Field.NOTEBOOK_TYPE:
-                            Toast.makeText(getActivity(), R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT).show();
-                            break;
+                    if ( databaseOperations.getFieldType(getCurrentField()) != Contract.Field.NOTEBOOK_TYPE) {
+                        switch (fieldType) {
+                            case Contract.Field.DEFAULT_TYPE:
+                                Intent intent = new Intent(getActivity(), StudyActivity.class);
+                                intent.putExtra(StudyActivity.CURRENT_FIELD, getCurrentField());
+                                intent.putExtra(StudyActivity.CURRENT_QUESTION, editQuestion.getText().toString());
+                                intent.putExtra(StudyActivity.CURRENT_ANSWER, editAnswer.getText().toString());
+                                intent.putExtra(StudyActivity.ORDER_OF_ENTRIES,currentLoader);
+                                startActivity(intent);
+                                break;
+                            case Contract.Field.NOTEBOOK_TYPE:
+                                Toast toast = Toast.makeText(getActivity(), R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                                break;
+                        }
+                    } else {
+                        Toast toast = Toast.makeText(getActivity(), R.string.study_not_for_notebook,Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
                     }
                 }
             });
@@ -647,7 +665,9 @@ public class EntriesListFragment extends Fragment {
                                     DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
                         }
                     } else {
-                        Toast.makeText(getActivity(), R.string.complete_or_cancel_last_study_session, Toast.LENGTH_LONG).show();
+                        Toast toast = Toast.makeText(getActivity(), R.string.complete_or_cancel_last_study_session, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
                     }
                     studyDuringCursor.close();
                     testCursor.close();
@@ -666,7 +686,9 @@ public class EntriesListFragment extends Fragment {
                                 boolean b = databaseOperations.editFieldEntry(getCurrentField(), question, editQuestion.getText().toString(),
                                         answer, editAnswer.getText().toString());
                                 if (!b) {
-                                    Toast.makeText(getActivity(), R.string.repeated_entry, Toast.LENGTH_LONG).show();
+                                    Toast toast = Toast.makeText(getActivity(), R.string.repeated_entry, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP,0,400);
+                                    toast.show();
                                 }
                             }
                             break;
@@ -684,7 +706,9 @@ public class EntriesListFragment extends Fragment {
                                 boolean b = databaseOperations.editFieldEntry(getCurrentField(), question, dateToSave,
                                         answer, editAnswer.getText().toString());
                                 if (!b) {
-                                    Toast.makeText(getActivity(), R.string.repeated_entry, Toast.LENGTH_LONG).show();
+                                    Toast toast = Toast.makeText(getActivity(), R.string.repeated_entry, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP,0,400);
+                                    toast.show();
                                 }
                             }
                             break;

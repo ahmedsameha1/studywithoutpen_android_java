@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#74AFAD">
+    android:background="#F8BBD0">
     <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/toolbar_main_activity"
         android:layout_width="fill_parent"
@@ -23,7 +23,7 @@
             android:textSize="20sp"
             android:text="@string/wrong_answers"
             android:gravity="center"
-            android:textColor="#0000FF"/>
+            android:textColor="#EA80FC"/>
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
             android:textSize="20sp"
             android:text="@string/answer"
             android:gravity="center"
-            android:textColor="#0000FF"/>
+            android:textColor="#EA80FC"/>
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
             android:textSize="20sp"
             android:text="@string/question"
             android:gravity="center"
-            android:textColor="#0000FF"/>
+            android:textColor="#EA80FC"/>
 
     </LinearLayout>
     <ListView

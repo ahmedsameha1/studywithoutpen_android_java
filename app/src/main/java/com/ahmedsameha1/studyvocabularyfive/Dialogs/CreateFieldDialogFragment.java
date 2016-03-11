@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -45,7 +46,9 @@ public class CreateFieldDialogFragment extends DialogFragment {
                         EditText enterFieldName = (EditText) alertDialog.findViewById(R.id.enter_field_name);
                         String string = enterFieldName.getText().toString();
                         if ( string.contains(" ") ) {
-                            Toast.makeText(getActivity(),getString(R.string.no_space_allowed),Toast.LENGTH_SHORT).show();
+                            Toast toast = Toast.makeText(getActivity(),getString(R.string.no_space_allowed),Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP,0,400);
+                            toast.show();
                         } else {
                             ((Contact) getActivity()).createNewField(CreateFieldDialogFragment.this);
                             alertDialog.dismiss();

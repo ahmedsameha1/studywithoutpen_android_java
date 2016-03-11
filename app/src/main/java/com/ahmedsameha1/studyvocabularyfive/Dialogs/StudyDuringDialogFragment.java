@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
@@ -38,7 +40,9 @@ public class StudyDuringDialogFragment extends DialogFragment {
 
             @Override
             public void onShow(DialogInterface dialog) {
-
+                final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
+                final ImageButton number_of_days_help = (ImageButton) alertDialog.findViewById(R.id.number_of_days_help);
+                final ImageButton number_of_hours_help = (ImageButton) alertDialog.findViewById(R.id.number_of_hours_help);
                 Button positive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 positive.setOnClickListener(new View.OnClickListener() {
 
@@ -80,6 +84,30 @@ public class StudyDuringDialogFragment extends DialogFragment {
                         } else {
                             Toast.makeText(getActivity(),R.string.enter_tries_number,Toast.LENGTH_SHORT).show();
                         }
+                    }
+                });
+                number_of_tries_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.enter_number_of_tries_help).create().show();
+                    }
+                });
+                number_of_days_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.enter_number_of_days_help).create().show();
+                    }
+                });
+                number_of_hours_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.enter_number_of_hours_help).create().show();
                     }
                 });
             }

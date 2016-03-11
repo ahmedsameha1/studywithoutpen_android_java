@@ -10,7 +10,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="com.ahmedsameha1.studyvocabularyfive.FieldActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -23,24 +24,34 @@
         </activity>
         <activity
             android:name="com.ahmedsameha1.studyvocabularyfive.StudyActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:launchMode="singleTop">
+            <meta-data
+                android:name="android.app.default_searchable"
+                android:value=".SearchActivity" />
+        </activity>
         <activity
             android:name="com.ahmedsameha1.studyvocabularyfive.TestActivity"
             android:label="@string/app_name"
-            android:windowSoftInputMode="stateAlwaysVisible"/>
+            android:windowSoftInputMode="stateAlwaysVisible"
+            android:launchMode="singleTop"/>
         <activity
             android:name="com.ahmedsameha1.studyvocabularyfive.EntriesListActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:launchMode="singleTop"/>
         <activity
             android:name="com.ahmedsameha1.studyvocabularyfive.WrongAnswersActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:launchMode="singleTop"/>
         <activity
             android:name="com.ahmedsameha1.studyvocabularyfive.StudyDuringActivity"
             android:label="@string/app_name"
-            android:windowSoftInputMode="stateAlwaysVisible"/>
+            android:windowSoftInputMode="stateAlwaysVisible"
+            android:launchMode="singleTop"/>
         <activity
             android:name="com.ahmedsameha1.studyvocabularyfive.StudyWrongAnswersActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:launchMode="singleTop"/>
         <activity android:name=".Dialogs.ExportSuccessfulActivity"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Dialog"
@@ -51,6 +62,19 @@
             android:theme="@android:style/Theme.Dialog"
             android:taskAffinity=""
             android:excludeFromRecents="true"/>
+        <activity
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:name=".SearchActivity"
+            android:screenOrientation="portrait">
+            <intent-filter >
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+
+        </activity>
         <provider
             android:name=".Database.DataProvider"
             android:authorities="com.ahmedsameha1.studyvocabularyfive.contentprovider" />
