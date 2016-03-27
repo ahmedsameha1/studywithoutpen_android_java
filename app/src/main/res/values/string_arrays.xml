@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="main_activity_features">
+        <item>Export Fields</item>
+        <item>Import Fields</item>
+        <item>Review on Play Store</item>
+        <item>Facebook</item>
+    </string-array>
+    <string-array name="field_activity_features">
+        <item>Sort</item>
+        <item>Study</item>
+        <item>Study a Period</item>
+        <item>Test</item>
+        <item>Review on Play Store</item>
+        <item>Facebook</item>
+    </string-array>
+    <string-array name="field_types">
+        <item>Select a Field Type</item>
+        <item>Default</item>
+        <item>Notebook</item>
+    </string-array>
+</resources>

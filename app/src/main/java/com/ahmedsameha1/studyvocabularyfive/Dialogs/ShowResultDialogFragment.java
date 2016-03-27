@@ -11,8 +11,8 @@ import android.widget.Button;
 
 import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabularyfive.R;
-import com.ahmedsameha1.studyvocabularyfive.TestActivity;
-import com.ahmedsameha1.studyvocabularyfive.WrongAnswersActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.TestActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.WrongAnswersActivity;
 import com.ahmedsameha1.studyvocabularyfive.WrongItem;
 
 import java.text.NumberFormat;

@@ -1,6 +1,5 @@
 package com.ahmedsameha1.studyvocabularyfive.Dialogs;
 
-import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,14 +15,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
-import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.FieldActivity;
 import com.ahmedsameha1.studyvocabularyfive.R;
-import com.ahmedsameha1.studyvocabularyfive.TestActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.TestActivity;
 
 /**
  * Created by ahmed on 2/8/2016.

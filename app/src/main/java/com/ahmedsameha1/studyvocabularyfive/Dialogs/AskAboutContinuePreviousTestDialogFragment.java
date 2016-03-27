@@ -10,9 +10,9 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
 import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
-import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.FieldActivity;
 import com.ahmedsameha1.studyvocabularyfive.R;
-import com.ahmedsameha1.studyvocabularyfive.TestActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.TestActivity;
 
 /**
  * Created by ahmed_000 on 10/20/2015.

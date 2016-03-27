@@ -35,7 +35,7 @@ public class DatabaseOperations {
 
     public Cursor getFieldList() {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);
-        String[] string = {"rowid _id", Contract.Field.COLUMN_NAME_FIELD_NAME};
+        String[] string = {"rowid _id", Contract.Field.COLUMN_NAME_FIELD_NAME, Contract.Field.COLUMN_NAME_FIELD_TYPE};
         Cursor cursor = contentResolver.query(uri, string, null, null, null);
         return cursor;
     }

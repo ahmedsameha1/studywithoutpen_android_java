@@ -7,7 +7,7 @@
         android:id="@+id/list_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textSize="35sp"
-        android:gravity="center_horizontal"/>
+        android:textColor="@color/textColorPrimary"
+        android:textSize="20dp"/>
 
 </LinearLayout>

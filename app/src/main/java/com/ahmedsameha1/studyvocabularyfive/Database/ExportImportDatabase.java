@@ -17,7 +17,7 @@ import android.support.v4.app.TaskStackBuilder;
 
 import com.ahmedsameha1.studyvocabularyfive.Dialogs.ExportSuccessfulActivity;
 import com.ahmedsameha1.studyvocabularyfive.Dialogs.NotImportedFieldsActivity;
-import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.FieldActivity;
 import com.ahmedsameha1.studyvocabularyfive.R;
 
 import java.io.File;

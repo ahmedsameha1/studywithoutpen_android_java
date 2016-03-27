@@ -2,20 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
+    android:paddingStart="20dp"
+    android:paddingLeft="20dp"
+    android:paddingEnd="20dp"
+    android:paddingRight="20dp">
 
     <EditText
         android:id="@+id/enter_field_name"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/enter_field_name"
         android:layout_gravity="center"
-        android:imeOptions="flagNoExtractUi"/>
-    <CheckBox
+        android:imeOptions="flagNoExtractUi"
+
+        />
+    <Spinner
+        android:id="@+id/field_type_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"/>
+   <!-- <CheckBox
         android:id="@+id/notebook_field_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/notebook_field"/>
-
+-->
 </LinearLayout>

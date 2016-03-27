@@ -11,9 +11,9 @@ import android.support.v7.app.AlertDialog;
 
 
 import com.ahmedsameha1.studyvocabularyfive.Database.DatabaseOperations;
-import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.FieldActivity;
 import com.ahmedsameha1.studyvocabularyfive.R;
-import com.ahmedsameha1.studyvocabularyfive.StudyDuringActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.StudyDuringActivity;
 
 /**
  * Created by ahmed_000 on 10/13/2015.

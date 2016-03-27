@@ -1,12 +1,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
-    <item
-        android:id="@+id/test"
-        android:title="@string/test"
-        app:showAsAction="ifRoom"
-        />
+    tools:context=".Activities.MainActivity">
+
     <item
         android:id="@+id/add_field"
         android:icon="@drawable/ic_add_white_24dp"
@@ -17,11 +13,6 @@
         android:icon="@drawable/ic_delete_white_24dp"
         android:title="@string/delete_field"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/study_during"
-        android:icon="@drawable/ic_restore_white_24dp"
-        android:title="@string/study_by_a_period"
-        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/export"
         android:title="@string/export_fields"

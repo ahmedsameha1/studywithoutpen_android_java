@@ -11,12 +11,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.studyvocabularyfive.FieldActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.FieldActivity;
 import com.ahmedsameha1.studyvocabularyfive.R;
-import com.ahmedsameha1.studyvocabularyfive.StudyDuringActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.StudyDuringActivity;
 
 import java.util.Date;
 

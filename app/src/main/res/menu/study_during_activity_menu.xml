@@ -1,10 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
+    tools:context=".Activities.MainActivity">
     <item
         android:id="@+id/stop"
-        android:icon="@drawable/ic_stop_black_24dp"
+        android:icon="@drawable/ic_stop_white_24dp"
         android:title="@string/stop_studying_now"
         app:showAsAction="ifRoom"
         />

@@ -1,26 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F8BBD0">
-    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/toolbar_field_activity"
-        android:layout_width="match_parent"
-        android:layout_height="65dp"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize">
+    android:layout_height="match_parent">
 
-        <Spinner
-            android:id="@+id/fields_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-    </android.support.v7.widget.Toolbar>
-    <fragment
-        android:id="@+id/add_entry_fragment"
-        class="com.ahmedsameha1.studyvocabularyfive.AddEntryFragment"
+    <include
+        layout="@layout/app_bar_field"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</LinearLayout>
+    <fragment
+        android:id="@+id/fragment_navigation_drawer"
+        android:name="com.ahmedsameha1.studyvocabularyfive.Fragments.FieldActivityFragmentDrawer"
+        android:layout_width="@dimen/nav_drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:layout="@layout/field_activity_fragment_navigation_drawer"
+        tools:layout="@layout/field_activity_fragment_navigation_drawer" />
+
+</android.support.v4.widget.DrawerLayout>

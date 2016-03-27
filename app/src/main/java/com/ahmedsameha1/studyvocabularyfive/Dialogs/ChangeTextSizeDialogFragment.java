@@ -11,12 +11,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.widget.TextView;
 
 import com.ahmedsameha1.studyvocabularyfive.R;
-import com.ahmedsameha1.studyvocabularyfive.StudyDuringActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.StudyDuringActivity;
 
 /**
  * Created by ahmed on 2/8/2016.

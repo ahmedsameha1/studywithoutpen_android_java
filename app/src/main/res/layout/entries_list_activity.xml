@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F8BBD0">
+    >
     <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/toolbar"
         android:layout_width="fill_parent"
@@ -12,7 +12,7 @@
         android:minHeight="?attr/actionBarSize" />
     <fragment
         android:id="@+id/entries_list_fragment"
-        class="com.ahmedsameha1.studyvocabularyfive.EntriesListFragment"
+        class="com.ahmedsameha1.studyvocabularyfive.Activities.EntriesListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

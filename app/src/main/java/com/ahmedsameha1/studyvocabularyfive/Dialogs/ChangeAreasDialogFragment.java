@@ -12,12 +12,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.app.AlertDialog;
 
 import com.ahmedsameha1.studyvocabularyfive.R;
-import com.ahmedsameha1.studyvocabularyfive.StudyDuringActivity;
+import com.ahmedsameha1.studyvocabularyfive.Activities.StudyDuringActivity;
 
 /**
  * Created by ahmed on 2/7/2016.

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="main_activity_features">
+        <item>تصدير مجالات</item>
+        <item>استيراد مجالات</item>
+        <item>راجع التطبيق على متجر بلاي</item>
+        <item>فيسبوك</item>
+    </string-array>
+    <string-array name="field_activity_features">
+        <item>رَتِّب</item>
+        <item>ذاكر</item>
+        <item>ذاكر فترة</item>
+        <item>اختبر نفسك</item>
+        <item>راجع التطبيق على متجر بلاي</item>
+        <item>فيسبوك</item>
+    </string-array>
+    <string-array name="field_types">
+        <item>اختر نوعا للمجال</item>
+        <item>عاديّ</item>
+        <item>مُفَكِّرَة</item>
+    </string-array>
+</resources>

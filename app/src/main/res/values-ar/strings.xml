@@ -10,8 +10,8 @@
     <string name="field"> مجال؟</string>
     <string name="test">اختبار</string>
     <string name="add_new_entryies">أدخل بعض المدخلات في هذا المجال</string>
-    <string name="enter_a_question">أدخل السؤال</string>
-    <string name="enter_an_answer">أدخل الجواب</string>
+    <string name="enter_a_question">أدخل سؤال\nالسؤال هنا هو: أي نص، ترغب في أن يكون دالاً على الجواب، الذي سوف تدخله أدناه. مهمة السؤال هي: عندما يقوم البرنامج بعرض السؤال عليك، فالمطلوب أن تُدخل الجواب المرتبط به، أي الجواب الذي ستدخله أدناه.</string>
+    <string name="enter_an_answer">أدخل جواب\nالجواب هنا هو: أي  نص تريد أن تذاكره.</string>
     <string name="save">حفظ</string>
     <string name="save_and_clear">حفظ وتفريغ</string>
     <string name="select_an_field">اختر مجالا</string>
@@ -53,7 +53,7 @@
     <string name="percentage_between">أدخل رقما أكبر من صفر وأقل من أو يساوي مائة عند استعمال النسبة المئوية</string>
     <string name="tries_at_least">عدد المحاولات لا يقل عن 1</string>
     <string name="where_the_answer">أين الجواب؟!</string>
-    <string name="delete_entry">سوف يتم حذف هذا المُدخل؟</string>
+    <string name="delete_entry">هل أنت متأكد من أنك تريد حذف هذا المُدخَل؟</string>
     <string name="wrong_answers">الإجابات الخاطئة</string>
     <string name="hour">أدخل عدد الساعات</string>
     <string name="day">أدخل عدد الأيام</string>
@@ -146,4 +146,13 @@
     <string name="question_area_help">هذا الرقم يمثل حصة مساحة السؤال في المساحة الإجمالية. إذا كنت تريد مساحة السؤال أن تكون أكبر، زد من هذا الرقم، إذا كنت تريد مساحة السؤال أن تكون أصغر، قلل من هذا الرقم. طبعا، كلما زادت مساحة السؤال كلما قلت مساحة الجواب.</string>
     <string name="answer_area_help">هذا الرقم يمثل حصة مساحة الجواب في المساحة الإجمالية. إذا كنت تريد مساحة الجواب أن تكون أكبر، زد من هذا الرقم، إذا كنت تريد مساحة الجواب أن تكون أصغر، قلل من هذا الرقم. طبعا، كلما زادت مساحة الجواب كلما قلت مساحة السؤال.</string>
     <string name="text_size_help">اختر حجم نص السؤال والجواب. لاحظ، هذا لا يؤثر على حجم الخط الذي تحدده في إعدادات النظام.</string>
+    <string name="drawer_close">أغلق</string>
+    <string name="drawer_open">افتح</string>
+    <string name="select_a_field_type">لطفا، اختر نوعا للمجال!</string>
+    <string name="add_entry">أضف مُدخلاً</string>
+    <string name="add_entry_finish">أضف مُدخلاً واخرج</string>
+    <string name="edit">عَدِّل</string>
+    <string name="select_field">لطفا، اختر مجالا</string>
+    <string name="unable_find_market_app">غير قادر على إيجاد تطبيق السوق</string>
+    <string name="delete_an_entry">حذف مُدخَلٍ</string>
 </resources>
