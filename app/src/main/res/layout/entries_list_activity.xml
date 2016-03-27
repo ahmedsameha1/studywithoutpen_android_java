@@ -12,7 +12,7 @@
         android:minHeight="?attr/actionBarSize" />
     <fragment
         android:id="@+id/entries_list_fragment"
-        class="com.ahmedsameha1.studyvocabularyfive.Activities.EntriesListFragment"
+        class="com.ahmedsameha1.studyvocabularyfive.activitiestemp.EntriesListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

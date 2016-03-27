@@ -1,0 +1,116 @@
+package com.ahmedsameha1.studyvocabularyfive.dialogstemp;
+
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
+
+import com.ahmedsameha1.studyvocabularyfive.activitiestemp.FieldActivity;
+import com.ahmedsameha1.studyvocabularyfive.R;
+import com.ahmedsameha1.studyvocabularyfive.activitiestemp.StudyDuringActivity;
+
+import java.util.Date;
+
+/**
+ * Created by ahmed on 9/23/2015.
+ */
+public class StudyDuringDialogFragment extends DialogFragment {
+    public static final String SHOW_STUDY_DURING_DIALOG_FRAGMENT = "showStudyDuringDialogFragment";
+    public static final int MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
+    public static final int MILLISECONDS_IN_HOUR = 60 * 60 * 1000;
+    @Override
+    public Dialog onCreateDialog( Bundle savedInstanceState ) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        final AlertDialog alertDialog =
+                builder.setTitle(R.string.start_studying_a_period)
+                        .setView(inflater.inflate(R.layout.study_during_dialog_fragment,null))
+                        .setPositiveButton(R.string.ok, null)
+                        .setNegativeButton(R.string.cancel, null).create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(DialogInterface dialog) {
+                final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
+                final ImageButton number_of_days_help = (ImageButton) alertDialog.findViewById(R.id.number_of_days_help);
+                final ImageButton number_of_hours_help = (ImageButton) alertDialog.findViewById(R.id.number_of_hours_help);
+                Button positive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positive.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        EditText enterDay = (EditText) alertDialog.findViewById(R.id.enter_day);
+                        EditText enterHour = (EditText) alertDialog.findViewById(R.id.enter_hour);
+                        EditText enterTries = (EditText) alertDialog.findViewById(R.id.enter_tries);
+                        if ( enterTries.getText().toString().length() > 0 ) {
+                            int trys = Integer.parseInt(enterTries.getText().toString());
+                            if ( trys > 0 ) {
+                                int day = 0;
+                                int hour = 0;
+                                if ( enterDay.getText().toString().length() > 0 || enterHour.getText().toString().length() > 0 ) {
+                                    if ( enterDay.getText().toString().length() > 0) {
+                                        day = Integer.parseInt(enterDay.getText().toString());
+                                    }
+                                    if ( enterHour.getText().toString().length() > 0) {
+                                        hour = Integer.parseInt(enterHour.getText().toString());
+                                    }
+                                    long duration = ( day * ( (long) MILLISECONDS_IN_DAY) ) + ( hour * ( (long) MILLISECONDS_IN_HOUR) );
+                                    Date now = new Date();
+                                    //                            long nowInMilliseconds = now.getTime();
+                                    long nowInMilliseconds = System.currentTimeMillis();
+                                    long startingTime = nowInMilliseconds - duration;
+                                    Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
+                                    intent.putExtra(StudyDuringActivity.CURRENT_FIELD,((FieldActivity) getActivity()).getCurrentField());
+                                    intent.putExtra(StudyDuringActivity.STARTING_TIME,startingTime);
+                                    intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,false);
+                                    intent.putExtra(StudyDuringActivity.NUMBER_OF_TRIES,trys);
+                                    startActivity(intent);
+                                    dismiss();
+                                } else {
+                                    Toast.makeText(getActivity(),R.string.please_enter_at_least_one_value,Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Toast.makeText(getActivity(),R.string.greater_zero,Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(getActivity(),R.string.enter_tries_number,Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                number_of_tries_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.enter_number_of_tries_help).create().show();
+                    }
+                });
+                number_of_days_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.enter_number_of_days_help).create().show();
+                    }
+                });
+                number_of_hours_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.enter_number_of_hours_help).create().show();
+                    }
+                });
+            }
+        });
+        return alertDialog;
+    }
+}
