@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.ahmedsameha1.studyvocabularyfive.TestActivity"
+    tools:context="com.ahmedsameha1.studyvocabulary.TestActivity"
     tools:showIn="@layout/app_bar_test">
 
     <LinearLayout
@@ -50,7 +50,7 @@
                         android:scrollbarAlwaysDrawVerticalTrack="true"
                         android:scrollbars="vertical"
                         android:textColor="#FFFFFF"
-                        android:textColorHint="#FFFFFF"
+
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:typeface="monospace" />
@@ -88,7 +88,7 @@
                         android:padding="5dp"
                         android:scrollbarAlwaysDrawVerticalTrack="true"
                         android:textColor="#FFFFFF"
-                        android:textColorHint="#FFFFFF"
+
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:typeface="monospace" />

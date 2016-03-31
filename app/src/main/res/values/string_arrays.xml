@@ -8,11 +8,10 @@
     </string-array>
     <string-array name="field_activity_features">
         <item>Sort</item>
-        <item>Study</item>
         <item>Study a Period</item>
         <item>Test</item>
         <item>Review on Play Store</item>
-        <item>Facebook</item>
+        <item>Facebook Page</item>
     </string-array>
     <string-array name="field_types">
         <item>Select a Field Type</item>

@@ -35,7 +35,7 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:textColor="#EA80FC"
+                        android:textColor="#ffffff"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -45,7 +45,7 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:textColor="#EA80FC"
+                        android:textColor="#ffffff"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -55,7 +55,7 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:textColor="#EA80FC"
+                        android:textColor="#ffffff"
                         android:textStyle="bold"/>
 
                 </LinearLayout>

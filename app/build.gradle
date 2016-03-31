@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.ahmedsameha1.studyvocabularyfive"
+        applicationId "com.ahmedsameha1.studyvocabulary"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1

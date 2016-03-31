@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Study Vocabulary Five</string>
+    <string name="app_name">Study Vocabulary</string>
     <string name="delete_field">حذف المجال</string>
     <string name="create_field">إنشاء مجال</string>
     <string name="enter_field_name">أدخل اسم المجال</string>
@@ -132,7 +132,7 @@
     <string name="enter_one_of">أدخل واحدا فقط من:</string>
     <string name="please_enter_percentage_or_number_of_question" >لطفا، أدخل نسبة مئوية للأسئلة أو عدد الأسئلة</string>
     <string name="enter_number_of_questions">أدخل عدد الأسئلة</string>
-    <string name="number_of_questions_smaller_than">أدخل عدد أسئلة أصغر من أو يساوي %1$d.</string>
+    <string name="number_of_questions_smaller_than">أدخل عدد أسئلة أصغر من أو يساوي %1$d وأكبر من صفر.</string>
     <string name="enter_question_area_answer_area">أدخل قيمة لكل من مساحة السؤال ومساحة الجواب!</string>
     <string name="show_entry">المُدخَل؟!</string>
     <string name="study_not_for_notebook">هذه الخاصية غير متاحة للمجالات من نوع مٌفَكِّرة</string>
@@ -140,7 +140,7 @@
     <string name="enter_number_of_tries_help">ادخل عدد المحاولات هنا. التطبيق سوف يدعك تستمر في محاولة إدخال الإجابة الصحيحة للسؤال الحالي حتى تصل عدد محاولاتك لهذا الرقم، بعدها سيحتسب التطبيق هذا المُدخل في المُدخلات التي أخطأت في إجابتها ثم ينتقل إلى السؤال التالي، إذا أدخلت إجابة صحيحة للسؤال الحالي قبل أن تصل عدد محاولاتك لهذا الرقم فلن يتم احتساب المُدخل على أنه من المُدخلات التي أخطأت في إجابتها.</string>
     <string name="enter_number_of_days_help">أدخل عدد الأيام الماضية من الآن. لنفترض أنك تريد أن تذاكر كافة المُدخلات التي كنت قد دخلتها في الأيام الخمسة الماضية، لذلك، أدخل 5 هنا. لاحظ أنه قد لا تُدخل أي شيء هنا. إذا قمت بإدخال رقم هنا ورقم للساعات أدناه، فإن التطبيق سيقوم بإضافتهما إلى بعضهما البعض، وسوف يجلب المُداخلات الخاصة بالفترة الناتجة.</string>
     <string name="enter_number_of_hours_help">أدخل عدد الساعات الماضية من الآن. لنفترض أنك تريد أن تذاكر كافة المُدخلات التي كنت قد دخلتها في الساعات الخمسة الماضية، لذلك، أدخل 5 هنا. لاحظ أنه قد لا تُدخل أي شيء هنا. إذا قمت بإدخال رقم هنا ورقم للأيام أعلاه، فإن التطبيق سيقوم بإضافتهما إلى بعضهما البعض، وسوف يجلب المُداخلات الخاصة بالفترة الناتجة.</string>
-    <string name="enter_only_one_of_help">لو أنك ستُدخِل نسبة، فلا تُدخِل عددا للأسئلة، ولو أنك ستُدخِل عددا للأسئلة، لا تُدخِل نسبة.</string>
+    <string name="percentage_or_number_help">بالنسبة المئوية\nأدخل رقما أكبر من 0 وأصغر من أو يساوي 100. التطبيق هنا يسمح لك بتحديد عدد الأسئلة التي سيسألها لك عن طريق إدخال نسبة من عدد المُدخلات الموجودة في المجال الحالي. لنفترض أن المجال الحالي به 100 مُدخل، وأنت ستُدخِل 50 هنا. وفقا لهذا، التطبيق سوف يضرب 100 * 0.50، النتيجة 50، لذلك التطبيق سوف يسألك 50 سؤالا. لا تُدخِل علامة %.\nبالعدد\nأدخل رقما أكبر من 0 وأصغر من أو يساوي عدد المُدخلات الموجودة في المجال الحالي. التطبيق هنا يسمح لك بتحديد عدد الأسئلة التي سيسألها لك عن طريق إدخال رقم. لنفترض أنك ستُدخِل 50، لذلك التطبيق سوف يسألك 50 سؤال. لو أن المجال الحالي ليس به 50 مُدخلا، سيرفض التطبيق هذا الرقم.</string>
     <string name="enter_percentage_help">أدخل رقما أكبر من 0 وأصغر من أو يساوي 100. التطبيق هنا يسمح لك بتحديد عدد الأسئلة التي سيسألها لك عن طريق إدخال نسبة من عدد المُدخلات في المجال الحالي. لنفترض أن المجال الحالي به 100 مُدخل، وأنت ستُدخِل 50 هنا. وفقا لهذا، التطبيق سوف يضرب 100 * 0.50، النتيجة 50، لذلك التطبيق سوف يسألك 50 سؤالا. لا تُدخِل علامة %.</string>
     <string name="enter_number_of_questions_help">أدخل رقما أكبر من 0 وأصغر من أو يساوي عدد المُدخلات في المجال الحالي. التطبيق هنا يسمح لك بتحديد عدد الأسئلة التي سيسألها لك عن طريق إدخال رقم. لنفترض أنك ستُدخِل 50، لذلك التطبيق سوف يسألك 50 سؤال. لو أن المجال الحالي ليس به 50 مُدخلا، سيرفض التطبيق هذا الرقم.</string>
     <string name="question_area_help">هذا الرقم يمثل حصة مساحة السؤال في المساحة الإجمالية. إذا كنت تريد مساحة السؤال أن تكون أكبر، زد من هذا الرقم، إذا كنت تريد مساحة السؤال أن تكون أصغر، قلل من هذا الرقم. طبعا، كلما زادت مساحة السؤال كلما قلت مساحة الجواب.</string>
@@ -155,4 +155,21 @@
     <string name="select_field">لطفا، اختر مجالا</string>
     <string name="unable_find_market_app">غير قادر على إيجاد تطبيق السوق</string>
     <string name="delete_an_entry">حذف مُدخَلٍ</string>
+    <string name="enter_search_text">لطفا، أدخل نصا للبحث.</string>
+    <string name="pick_date">اختر تاريخا</string>
+    <string name="search_text">أدخل نصا</string>
+    <string name="by_percentage">بالنسبة المئوية</string>
+    <string name="by_number">بالعدد</string>
+    <string name="please_enter_percentage"> أدخل نسبة مئوية (بدون %)</string>
+    <string name="please_enter_number_of_question">أدخل عدد الآسئلة</string>
+    <string name="both_question_answer">يجب أن تدخل شيئا في كل من السؤال والجواب</string>
+    <string name="something_both_question_answer">كل من السؤال والجواب يجب أن يحتويا شيئاً</string>
+    <string name="sort_question_desc">رتب على حسب السؤال (تنازليا)</string>
+    <string name="sort_question_asc">رتب على حسب السؤال (تصاعديا)</string>
+    <string name="sort_answer_desc">رتب على حسب الجواب (تنازليا)</string>
+    <string name="sort_answer_asc">رتب على حسب الجواب (تصاعديا)</string>
+    <string name="sort_date_desc">رتب على حسب التاريخ (تنازليا)</string>
+    <string name="sort_date_asc">رتب على حسب التاريخ (تصاعديا)</string>
+    <string name="sort_creation_desc">الافتراضي: رتب على حسب تاريخ الإنشاء (تنازليا)</string>
+    <string name="sort_creation_asc">رتب على حسب تاريخ الإنشاء (تصاعديا)</string>
 </resources>

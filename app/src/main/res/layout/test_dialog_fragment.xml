@@ -28,28 +28,29 @@
             android:src="@drawable/ic_help_black_24dp" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="10">
 
-        <TextView
+    <!--    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="9"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:text="@string/enter_one_of"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:weightSum="10">
 
-        <ImageButton
-            android:id="@+id/one_only_of_help"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:src="@drawable/ic_help_black_24dp" />
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="9"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="@string/enter_one_of"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/one_only_of_help"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_help_black_24dp" />
+        </LinearLayout>-->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -58,23 +59,45 @@
         android:weightSum="10">
 
         <EditText
-            android:id="@+id/questions_percentage"
+            android:id="@+id/number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="9"
-            android:hint="@string/enter_percentage"
             android:imeOptions="flagNoExtractUi"
             android:inputType="numberDecimal" />
 
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="9"
+            android:gravity="center">
+
+            <ToggleButton
+                android:id="@+id/percentage_number"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textOn="@string/by_percentage"
+                android:textOff="@string/by_number"/>
+
+        </LinearLayout>
+
         <ImageButton
-            android:id="@+id/enter_percentage_help"
+            android:id="@+id/percentage_or_number_help"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:src="@drawable/ic_help_black_24dp" />
+
     </LinearLayout>
 
-    <LinearLayout
+<!--    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -95,7 +118,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:src="@drawable/ic_help_black_24dp" />
-    </LinearLayout>
+    </LinearLayout>-->
 
 
 </LinearLayout>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Study Vocabulary Five</string>
+    <string name="app_name">Study Vocabulary</string>
     <string name="delete_field">Delete a Field</string>
     <string name="create_field">Create a Field</string>
     <string name="enter_field_name">Enter field name</string>
@@ -135,7 +135,7 @@
     <string name="please_enter_percentage_or_number_of_question" >Please enter a percentage of questions or a number of questions</string>
     <string name="percentage_asked" translatable="false">You will be asked in %1$s  of the filed entries</string>
     <string name="enter_number_of_questions">Number of questions</string>
-    <string name="number_of_questions_smaller_than">Enter a number of questions which is smaller than or equals %1$d.</string>
+    <string name="number_of_questions_smaller_than">Enter a number of questions which is smaller than or equals %1$d and greater than 0.</string>
     <string name="enter_question_area_answer_area">Enter values for the question area and answer area!</string>
     <string name="show_entry">Entry?!</string>
     <string name="study_not_for_notebook">This feature is not available for notebook fields</string>
@@ -143,7 +143,6 @@
     <string name="enter_number_of_tries_help">Enter a number of tries here. The app will let you keep tring to enter a correct answer of the current question until your number of tries reaches this number, then the app will include the current entry in the wrong answerd entries and will show you the next question. If you entered a correct answer before the number of your tries reaches this number, the app won\'t include this entry in the wrong answered entries.</string>
     <string name="enter_number_of_days_help">Enter the number of past days from now. Let\'s assume that you want to study all the entries that you have entered in the last five days, so, enter 5 here. Note that you mightn\'t enter anything here. If you entered a number here and a number in the hours below, the app will add them to each other, and will bring the entries of the result period.</string>
     <string name="enter_number_of_hours_help">Enter the number of past hours from now. Let\'s assume that you want to study all the entries that you have entered in the last five hours, so, enter 5 here. Note that you mightn\'t enter anything here. If you entered a number here and a number in the days above, the app will add them to each other, and will bring the entries of the result period.</string>
-    <string name="enter_only_one_of_help">If you will enter a percentage, don\'t enter a number of questions. If you will enter a number of questions, don\'t enter a percentage.</string>
     <string name="enter_percentage_help">Enter a number greater than zero and smaller than or equals 100. The app here lets you determine the number of questions that it will ask you by entering a percentage of the number of the entries in the current field. Assume that the current field has 100 entry, and you will enter 50 here. According to this the app will multiply 100 * 0.50, the result is 50, so the app will ask you 50 questions. Don\'t enter the % sign.</string>
     <string name="enter_number_of_questions_help">Enter a number greater than zero and smaller than or equals the number of entries in the current field. The app here lets you determine the number of questions that it will ask you by entering a number. Assume that you will enter 50 here, so the app will ask you 50 questions. If the current field doesn\'t have 50 entries, the app will refuse this number.</string>
     <string name="question_area_help">This number is the share of the area of question of the whole area. If you want the area of question to become bigger, increase this number, if you want the area of question to become smaller, decrease this number. Of course, as the area of question is getting bigger the area of answer is getting smaller.</string>
@@ -159,4 +158,22 @@
     <string name="select_field">Please, select a field</string>
     <string name="unable_find_market_app">Unable to find the market app</string>
     <string name="delete_an_entry">Delete an Entry</string>
+    <string name="enter_search_text">Please, enter the text for search!</string>
+    <string name="pick_date">Pick a Date</string>
+    <string name="search_text">Enter a Text</string>
+    <string name="by_percentage">By Percentage</string>
+    <string name="by_number">By Number</string>
+    <string name="please_enter_percentage">Enter a percentage (without %)</string>
+    <string name="please_enter_number_of_question">Enter a number of questions</string>
+    <string name="percentage_or_number_help">By Percentage:\nEnter a number greater than zero and smaller than or equals 100. The app here lets you determine the number of questions that it will ask you by entering a percentage of the number of the entries in the current field. Assume that the current field has 100 entry, and you will enter 50 here. According to this the app will multiply 100 * 0.50, the result is 50, so the app will ask you 50 questions. Don\'t enter the % sign.\nBy Number:\nEnter a number greater than zero and smaller than or equals the number of entries in the current field. The app here lets you determine the number of questions that it will ask you by entering a number. Assume that you will enter 50 here, so the app will ask you 50 questions. If the current field doesn\'t have 50 entries, the app will refuse this number.</string>
+    <string name="both_question_answer">You should enter something in both the question and the answer</string>
+    <string name="something_both_question_answer">Both the question and the answer should have something</string>
+    <string name="sort_question_desc">Sort By Question (Descending)</string>
+    <string name="sort_question_asc">Sort By Question (Ascending)</string>
+    <string name="sort_answer_desc">Sort By Answer (Descending)</string>
+    <string name="sort_answer_asc">Sort By Answer (Ascending)</string>
+    <string name="sort_date_desc">Sort By Date (Descending)</string>
+    <string name="sort_date_asc">Sort By Date (Ascending)</string>
+    <string name="sort_creation_desc">Default: Sort By Creation Date (Descending)</string>
+    <string name="sort_creation_asc">Sort By Creation Date (Ascending)</string>
 </resources>
