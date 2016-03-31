@@ -93,6 +93,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="recyclerview-v7-23.2.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-basement-8.1.0" level="project" />
+    <orderEntry type="library" exported="" name="CWAC-LoaderEx" level="project" />
     <orderEntry type="library" exported="" name="support-v4-23.2.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-appindexing-8.1.0" level="project" />
     <orderEntry type="library" exported="" name="CircularFloatingActionMenu-1.0.2" level="project" />
