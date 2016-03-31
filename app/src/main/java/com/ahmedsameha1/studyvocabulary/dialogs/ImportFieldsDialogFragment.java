@@ -41,6 +41,10 @@ public class ImportFieldsDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
+                File exportDirectory = new File(Environment.getExternalStorageDirectory(), ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME);
+                if (!exportDirectory.exists()) {
+                    exportDirectory.mkdir();
+                }
                 TextView copyFileIn = (TextView) alertDialog.findViewById(R.id.copy_file_to_import);
                 TextView filePath = (TextView) alertDialog.findViewById(R.id.import_file_path);
                 final EditText enterFileName = (EditText) alertDialog.findViewById(R.id.enter_import_file_name);
