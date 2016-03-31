@@ -52,6 +52,7 @@ public class ExportImportDatabase {
         exportThread = new Thread(new Runnable() {
             @Override
             public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 exportFields(context, selectedFields, fileName);
             }
         });
@@ -63,6 +64,7 @@ public class ExportImportDatabase {
         importThread = new Thread(new Runnable() {
             @Override
             public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 importFields(context, fileName);
             }
         });
