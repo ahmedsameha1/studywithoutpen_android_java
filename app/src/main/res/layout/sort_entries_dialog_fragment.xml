@@ -1,50 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <Button
         android:id="@+id/sort_question_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/sort_question_desc"
-        android:visibility="gone"/>
+        android:visibility="gone" />
+
     <Button
         android:id="@+id/sort_question_asc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/sort_question_asc"
-        android:visibility="gone"/>
-    <Button
-        android:id="@+id/sort_answer_desc"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/sort_answer_desc"/>
-    <Button
-        android:id="@+id/sort_answer_asc"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/sort_answer_asc"/>
+        android:visibility="gone" />
+
     <Button
         android:id="@+id/sort_date_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/sort_date_desc"
-        android:visibility="gone"/>
+        android:visibility="gone" />
+
     <Button
         android:id="@+id/sort_date_asc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/sort_date_asc"
-        android:visibility="gone"/>
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/sort_answer_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sort_answer_desc" />
+
+    <Button
+        android:id="@+id/sort_answer_asc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sort_answer_asc" />
+
     <Button
         android:id="@+id/sort_creation_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/sort_creation_desc"/>
+        android:text="@string/sort_creation_desc" />
+
     <Button
         android:id="@+id/sort_creation_asc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/sort_creation_asc"/>
+        android:text="@string/sort_creation_asc" />
 
 </LinearLayout>

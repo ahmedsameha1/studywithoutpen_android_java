@@ -83,7 +83,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         container = (LinearLayout) findViewById(R.id.container);
             int screenSize = getResources().getConfiguration().screenLayout &
                     Configuration.SCREENLAYOUT_SIZE_MASK;
-            if (screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE || screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
+            if ( screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
                     || screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL) {
                 getSupportActionBar().hide();
             }

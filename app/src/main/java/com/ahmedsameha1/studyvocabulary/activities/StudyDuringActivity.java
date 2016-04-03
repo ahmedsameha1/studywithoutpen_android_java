@@ -150,7 +150,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
         int screenSize = getResources().getConfiguration().screenLayout &
                 Configuration.SCREENLAYOUT_SIZE_MASK;
-        if ( screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE || screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
+        if ( screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
                 || screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL ) {
             getSupportActionBar().hide();
         }

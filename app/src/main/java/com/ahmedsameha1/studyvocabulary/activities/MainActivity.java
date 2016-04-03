@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int IMPORT_FIELD = 1;
     private static final int REVIEW = 2;
     private static final int FACEBOOK = 3;
+    public static final int DROPBOX = 4;
     private Spinner fieldSpinner;
     private Button createFieldButton, fieldChooseOk;
     private EditText enterNewFieldName;
@@ -254,6 +255,10 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case FACEBOOK:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
+                startActivity(browserIntent);
+                break;
+            case DROPBOX:
+                browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.dropbox.com/sh/qq4rzots8vrb1mi/AAA6loAcxX6edP5bnHflXSFSa?dl=0"));
                 startActivity(browserIntent);
                 break;
         }

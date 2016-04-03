@@ -4,7 +4,8 @@
         <item>Export Fields</item>
         <item>Import Fields</item>
         <item>Review on Play Store</item>
-        <item>Facebook</item>
+        <item>Facebook Page</item>
+        <item>Dropbox Folder</item>
     </string-array>
     <string-array name="field_activity_features">
         <item>Sort</item>
