@@ -376,61 +376,74 @@ public class FieldActivity extends AppCompatActivity implements
 
     @Override
     public void onDrawerItemSelected(View view, int position) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
         int number_of_entries = databaseOperations.getEntriesNumber(currentField);
         Bundle bundle = new Bundle();
         bundle.putString(StudyActivity.CURRENT_FIELD, currentField);
         switch (position) {
             case TEST:
-                switch (fieldType) {
-                    case Contract.Field.DEFAULT_TYPE:
-                        if ( number_of_entries > 0) {
-                            if (databaseOperations.checkLinkerTest(currentField)) {
-                                AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
-                                fragment3.setArguments(bundle);
-                                fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
+                if ( ! sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + currentField) ) {
+                    switch (fieldType) {
+                        case Contract.Field.DEFAULT_TYPE:
+                            if ( number_of_entries > 0) {
+                                if (databaseOperations.checkLinkerTest(currentField)) {
+                                    AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
+                                    fragment3.setArguments(bundle);
+                                    fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
+                                } else {
+                                    TestDialogFragment dialogFragment = new TestDialogFragment();
+                                    dialogFragment.setArguments(bundle);
+                                    dialogFragment.show(getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
+                                }
                             } else {
-                                TestDialogFragment dialogFragment = new TestDialogFragment();
-                                dialogFragment.setArguments(bundle);
-                                dialogFragment.show(getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
+                                Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
                             }
-                        } else {
-                            Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                            break;
+                        case Contract.Field.NOTEBOOK_TYPE:
+                            Toast toast = Toast.makeText(FieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
-                        }
-                        break;
-                    case Contract.Field.NOTEBOOK_TYPE:
-                        Toast toast = Toast.makeText(FieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        break;
+                            break;
+                    }
+                } else {
+                    Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 }
                 break;
 
             case STUDY_DURING:
-                switch (fieldType) {
-                    case Contract.Field.DEFAULT_TYPE:
-                        if ( number_of_entries > 0) {
-                            if (databaseOperations.checkLinkerStudyDuring(currentField)) {
-                                AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
-                                fragment2.setArguments(bundle);
-                                fragment2.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
+                if ( ! sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + currentField) ) {
+                    switch (fieldType) {
+                        case Contract.Field.DEFAULT_TYPE:
+                            if ( number_of_entries > 0) {
+                                if (databaseOperations.checkLinkerStudyDuring(currentField)) {
+                                    AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
+                                    fragment2.setArguments(bundle);
+                                    fragment2.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
+                                } else {
+                                    StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                                    fragment2.setArguments(bundle);
+                                    fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+                                }
                             } else {
-                                StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
-                                fragment2.setArguments(bundle);
-                                fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+                                Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
                             }
-                        } else {
-                            Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP, 0, 400);
+                            break;
+                        case Contract.Field.NOTEBOOK_TYPE:
+                            Toast toast = Toast.makeText(FieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP,0,400);
                             toast.show();
-                        }
-                        break;
-                    case Contract.Field.NOTEBOOK_TYPE:
-                        Toast toast = Toast.makeText(FieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,400);
-                        toast.show();
-                        break;
+                            break;
+                    }
+                } else {
+                    Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_study_during_pausing_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 }
                 break;
             case SORT:

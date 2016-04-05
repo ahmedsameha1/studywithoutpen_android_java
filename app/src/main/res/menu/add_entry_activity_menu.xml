@@ -5,7 +5,7 @@
 
     <item
         android:id="@+id/change_areas"
-        android:title="@string/partiton_the_area"
+        android:title="@string/repartition_the_area"
         app:showAsAction="never"/>
     <item
         android:id="@+id/change_text_size"

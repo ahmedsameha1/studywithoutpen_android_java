@@ -35,7 +35,7 @@ public class ChangeAreasDialogFragment extends DialogFragment{
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        final AlertDialog alertDialog = builder.setTitle(R.string.partiton_the_area)
+        final AlertDialog alertDialog = builder.setTitle(R.string.repartition_the_area)
                 .setView(inflater.inflate(R.layout.change_areas_dialog_fragment, null))
                 .setPositiveButton(R.string.ok,null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {

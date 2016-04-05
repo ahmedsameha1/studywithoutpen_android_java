@@ -4,9 +4,11 @@ package com.ahmedsameha1.studyvocabulary.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -18,6 +20,8 @@ import android.widget.Toast;
 import com.ahmedsameha1.studyvocabulary.activities.EditEntryActivity;
 import com.ahmedsameha1.studyvocabulary.activities.FieldActivity;
 import com.ahmedsameha1.studyvocabulary.activities.StudyActivity;
+import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
+import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DataProvider;
 import com.ahmedsameha1.studyvocabulary.dialogs.DeleteEntryDialogFragment;
@@ -36,11 +40,13 @@ public class FieldActivityRecyclerViewAdapter extends
     private Context context;
     private String fieldName;
     private int fieldType;
+    private SharedPreferences sharedPreferences;
     public FieldActivityRecyclerViewAdapter(Context context, Cursor data, String fieldName, int fieldType ) {
         super(context,data);
         this.context = context;
         this.fieldName = fieldName;
         this.fieldType = fieldType;
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
     @Override
     public FieldActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -95,39 +101,46 @@ public class FieldActivityRecyclerViewAdapter extends
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
-                Cursor studyDuringCursor = context.getContentResolver().query(uri,
-                        new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
-                        Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND "
-                                + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
-                                + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? AND "
-                                + Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? ",
-                        new String[]{question, answer, fieldName, "0"},
-                        null);
-                Cursor testCursor = context.getContentResolver().query(uri,
-                        new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
-                        Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND "
-                                + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
-                                + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? AND "
-                                + Contract.Linker.COLUMN_NAME_TEST_ORDER + " >= ? ",
-                        new String[]{question, answer, fieldName, "0"},
-                        null);
-                if (studyDuringCursor.getCount() <= 0 && testCursor.getCount() <= 0) {
-                    DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putString(StudyActivity.CURRENT_FIELD,fieldName);
-                    bundle.putString(StudyActivity.CURRENT_QUESTION,question);
-                    bundle.putString(StudyActivity.CURRENT_ANSWER,answer);
-                    fragment.setArguments(bundle);
-                    FragmentManager fragmentManager = ((FieldActivity) context).getSupportFragmentManager();
-                    fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
+                if ( (! sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + fieldName)) &&
+                        (! sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + fieldName))) {
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Cursor studyDuringCursor = context.getContentResolver().query(uri,
+                            new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
+                            Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? ",
+                            new String[]{question, answer, fieldName, "0"},
+                            null);
+                    Cursor testCursor = context.getContentResolver().query(uri,
+                            new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
+                            Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? AND "
+                                    + Contract.Linker.COLUMN_NAME_TEST_ORDER + " >= ? ",
+                            new String[]{question, answer, fieldName, "0"},
+                            null);
+                    if (studyDuringCursor.getCount() <= 0 && testCursor.getCount() <= 0) {
+                        DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putString(StudyActivity.CURRENT_FIELD,fieldName);
+                        bundle.putString(StudyActivity.CURRENT_QUESTION,question);
+                        bundle.putString(StudyActivity.CURRENT_ANSWER,answer);
+                        fragment.setArguments(bundle);
+                        FragmentManager fragmentManager = ((FieldActivity) context).getSupportFragmentManager();
+                        fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
+                    } else {
+                        Toast toast = Toast.makeText(context, R.string.complete_or_cancel_last_study_session, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
+                    }
+                    studyDuringCursor.close();
+                    testCursor.close();
                 } else {
-                    Toast toast = Toast.makeText(context, R.string.complete_or_cancel_last_study_session, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP,0,400);
+                    Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-                studyDuringCursor.close();
-                testCursor.close();
             }
         });
         switch (fieldType) {

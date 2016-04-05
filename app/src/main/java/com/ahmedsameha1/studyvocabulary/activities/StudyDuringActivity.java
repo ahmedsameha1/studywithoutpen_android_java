@@ -63,12 +63,33 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final int PORTRAIT = 0;
     public static final int LANDSCAPE = 1;
+    public static final String PAUSING = "pausing";
     private String currentField;
     private long startingTime;
     boolean boolean_continue, actionBarShown;
     private Cursor cursor;
     private ArrayList<String> questions = new ArrayList<String>(), answers = new ArrayList<String>();
     private ArrayList<Integer> repeatedEntries = new ArrayList<Integer>();
+    private Thread pauseThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            toPause();
+            pauseRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyDuringActivity.this);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.remove(ACTIVITY_NAME + PAUSING + currentField);
+                    editor.commit();
+                    Toast toast = Toast.makeText(StudyDuringActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            };
+            mHandler.post(pauseRunnable);
+        }
+    });
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +129,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
     private Handler mHandler = new Handler();
-    private Runnable mRunnable;
+    private Runnable mRunnable,pauseRunnable;
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -392,8 +413,15 @@ public class StudyDuringActivity extends AppCompatActivity implements
 
         //noinspection SimplifiableIfStatement
         switch (id) {
-            case R.id.stop:
-                toStop();
+            case R.id.pause:
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(ACTIVITY_NAME + PAUSING + currentField, true);
+                editor.commit();
+                Toast toast = Toast.makeText(this, R.string.pause_do_not_shutdown, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                pauseThread.start();
                 finish();
                 return true;
             case R.id.change_areas:
@@ -424,7 +452,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         retainedFragment.setListForTest_StudyDuringActivity(listForTest);
     }
 
-    private void toStop() {
+    private void toPause() {
         final DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
 //                progressBar.setVisibility(View.VISIBLE);
         databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
@@ -567,7 +595,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         savedInstanceState.putIntegerArrayList(REPEATED_ENTRIES, repeatedEntries);
         saveUserLayoutChanges(savedInstanceState);
         if ( ! isFinishing() ) {
-            toStop();
+            pauseThread.start();
         }
 //        savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);

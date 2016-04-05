@@ -3,14 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activities.MainActivity">
     <item
-        android:id="@+id/stop"
-        android:icon="@drawable/ic_stop_white_24dp"
-        android:title="@string/stop_studying_now"
+        android:id="@+id/pause"
+        android:icon="@drawable/ic_pause_white_24dp"
+        android:title="@string/pause_studying_now"
         app:showAsAction="ifRoom"
         />
     <item
         android:id="@+id/change_areas"
-        android:title="@string/partiton_the_area"
+        android:title="@string/repartition_the_area"
         app:showAsAction="never"/>
     <item
         android:id="@+id/change_text_size"

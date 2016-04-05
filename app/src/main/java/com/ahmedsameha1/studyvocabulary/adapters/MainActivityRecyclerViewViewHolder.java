@@ -2,6 +2,7 @@ package com.ahmedsameha1.studyvocabulary.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -15,6 +16,7 @@ public class MainActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder 
     public TextView name;
     public ImageView type;
     public String fieldName;
+    public Button delete;
     public LinearLayout actions;
     public IMyViewHolderClicks mListener;
     public MainActivityRecyclerViewViewHolder(View view, IMyViewHolderClicks listener) {
@@ -23,6 +25,7 @@ public class MainActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder 
         type = (ImageView) view.findViewById(R.id.type);
         name = (TextView) view.findViewById(R.id.field_name);
         actions = (LinearLayout) view.findViewById(R.id.main_recyclerview_item_actions);
+        delete = (Button) view.findViewById(R.id.delete);
         view.setOnLongClickListener(this);
         view.setOnClickListener(this);
     }

@@ -77,6 +77,7 @@ public class TestActivity extends AppCompatActivity implements
     private static final String QUESTION_LAYOUT = "user_defined_question_layout";
     private static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     private static final String TEXT_SIZE = "user_defined_question_text_size";
+    public static final String PAUSING = "pausing";
     private String currentField;
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
@@ -92,7 +93,27 @@ public class TestActivity extends AppCompatActivity implements
     private TextView showQuestion, remainingQuestionCounter,showTries, showNumberOfQuestions,check,nextHint,showActionbar;
     private LinearLayout showResult,questionLinearlayout, container;
     private Handler mHandler = new Handler();
-    private Runnable mRunnable;
+    private Runnable mRunnable, pauseRunnable;
+    private Thread pauseThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            toPause();
+            pauseRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TestActivity.this);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.remove(ACTIVITY_NAME + PAUSING + currentField);
+                    editor.commit();
+                    Toast toast = Toast.makeText(TestActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            };
+            mHandler.post(pauseRunnable);
+        }
+    });
 
 //    private TableRow hintTableRow;
 //    private SQLiteDatabase sqLiteDatabase;
@@ -364,8 +385,15 @@ public class TestActivity extends AppCompatActivity implements
 
         //noinspection SimplifiableIfStatement
         switch (id) {
-            case R.id.stop:
-                toStop();
+            case R.id.pause:
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(ACTIVITY_NAME + PAUSING + currentField, true);
+                editor.commit();
+                Toast toast = Toast.makeText(TestActivity.this, R.string.pause_do_not_shutdown, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                pauseThread.start();
                 finish();
                 return true;
             case R.id.change_areas:
@@ -392,7 +420,7 @@ public class TestActivity extends AppCompatActivity implements
 
     }
 
-    private void toStop() {
+    private void toPause() {
         if ( ! databaseOperations.checkLinkerTest(currentField) ) {
             databaseOperations.writeLinkerTableTestOrder(listForTest,currentField);
         }
@@ -599,7 +627,7 @@ public class TestActivity extends AppCompatActivity implements
         savedInsatanceState.putBoolean(BOOLEAN_CONTINUE,boolean_continue);
         saveUserLayoutChanges(savedInsatanceState);
         if ( ! isFinishing() ) {
-            toStop();
+            pauseThread.start();
         }
         super.onSaveInstanceState(savedInsatanceState);
     }
