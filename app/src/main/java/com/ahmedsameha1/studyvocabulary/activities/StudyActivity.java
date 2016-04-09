@@ -503,11 +503,11 @@ public class StudyActivity extends AppCompatActivity implements
  /*       getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this,
                             uri,
-                            new String[] {"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[] {"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[] {currentField},
                             null);
                 }
@@ -525,74 +525,74 @@ public class StudyActivity extends AppCompatActivity implements
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                  if (id == ORDER_DATE_DESC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{currentField},
-                            "date(" + Contract.Linker.COLUMN_NAME_QUESTION_LINK + ") DESC");
+                            "date(" + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + ") DESC");
 
                 } else if (id == ORDER_DATE_ASC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{currentField},
-                            "date(" + Contract.Linker.COLUMN_NAME_QUESTION_LINK + ") ASC");
+                            "date(" + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + ") ASC");
                 } else if (id == ORDER_QUESTION_DESC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{currentField},
-                            Contract.Linker.COLUMN_NAME_QUESTION_LINK + " DESC");
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " DESC");
                 } else if (id == ORDER_QUESTION_ASC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{currentField},
-                            Contract.Linker.COLUMN_NAME_QUESTION_LINK + " ASC");
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " ASC");
                 } else if (id == ORDER_ANSWER_DESC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{currentField},
-                            Contract.Linker.COLUMN_NAME_ANSWER_LINK + " DESC");
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " DESC");
                 } else if (id == ORDER_ANSWER_ASC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{currentField},
-                            Contract.Linker.COLUMN_NAME_ANSWER_LINK + " ASC");
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " ASC");
                 } else if (id == ORDER_ENTRY_DATE_DESC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{currentField},
-                            "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") DESC");
+                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
                 } else if (id == ORDER_ENTRY_DATE_ASC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{currentField},
-                            "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") ASC");
+                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") ASC");
                 } else {
                     /*String currentField = null;
                     if (args != null) {
                         currentField = args.getString(FieldActivity.CURRENT_FIELD);
                     }
                     currentField = currentField == null ? getCurrentField() : currentField;*/
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[]{currentField},
-                            "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") DESC");
+                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
                 }
             }
 
@@ -610,18 +610,18 @@ public class StudyActivity extends AppCompatActivity implements
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                     String searchString = args.getString(StudyActivity.SEARCH_VALUE);
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     return new CursorLoader(StudyActivity.this,
                             uri,
                             new String[] {"rowid _id",
-                                    Contract.Linker.COLUMN_NAME_QUESTION_LINK,
-                                    Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Linker.COLUMN_NAME_QUESTION_LINK + " LIKE ? AND "
-                                    + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? "
+                                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
+                                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " LIKE ? AND "
+                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? "
                                     + " OR " +
-                                    Contract.Linker.COLUMN_NAME_ANSWER_LINK
+                                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK
                                     + " LIKE ? AND "
-                                    + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                             new String[] {"%" + searchString + "%",currentField,"%" + searchString + "%",currentField},
                             null);
             }
@@ -638,7 +638,7 @@ public class StudyActivity extends AppCompatActivity implements
         simpleCursorAdapter = new SimpleCursorAdapter(StudyActivity.this,
                 R.layout.search_row,
                 null,
-                new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
+                new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
                 new int[]{R.id.study_search_list_view_text1, R.id.study_search_list_view_text2},
                 0);*/
 //        searchResults.setAdapter(simpleCursorAdapter);

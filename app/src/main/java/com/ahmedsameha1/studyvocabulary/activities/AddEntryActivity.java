@@ -100,7 +100,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
         simple_cursor_adapter = new SimpleCursorAdapter(this,R.layout.field_spinner,null,
-                new String [] {Contract.Field.COLUMN_NAME_FIELD_NAME}, new int[] {R.id.list_item}, 0);
+                new String [] {Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME}, new int[] {R.id.list_item}, 0);
         field_spinner.setAdapter(simple_cursor_adapter);
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         setHints(fieldType);
@@ -110,11 +110,11 @@ public class AddEntryActivity extends AppCompatActivity implements
                 if ( enter_question.getText().toString().length() > 0 && enter_answer.getText().toString().length() > 0) {
                     if (fromFieldActivity) {
                         switch (fieldType) {
-                            case Contract.Field.DEFAULT_TYPE:
+                            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
                                 databaseOperations.insertFieldEntry(currentField, enter_question.getText().toString(),
                                         enter_answer.getText().toString());
                                 break;
-                            case Contract.Field.NOTEBOOK_TYPE:
+                            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
                                 String dateTimeUserFormat = enter_question.getText().toString();
                                 StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                 stringTokenizer.nextToken();
@@ -128,11 +128,11 @@ public class AddEntryActivity extends AppCompatActivity implements
                     } else {
                         if ( field_chosen ) {
                             switch (fieldType) {
-                                case Contract.Field.DEFAULT_TYPE:
+                                case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
                                     databaseOperations.insertFieldEntry(currentField, enter_question.getText().toString(),
                                             enter_answer.getText().toString());
                                     break;
-                                case Contract.Field.NOTEBOOK_TYPE:
+                                case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
                                     String dateTimeUserFormat = enter_question.getText().toString();
                                     StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                     stringTokenizer.nextToken();
@@ -162,11 +162,11 @@ public class AddEntryActivity extends AppCompatActivity implements
                 if (enter_question.getText().toString().length() > 0 && enter_answer.getText().toString().length() > 0) {
                     if (fromFieldActivity) {
                         switch (fieldType) {
-                            case Contract.Field.DEFAULT_TYPE:
+                            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
                                 databaseOperations.insertFieldEntry(currentField, enter_question.getText().toString(),
                                         enter_answer.getText().toString());
                                 break;
-                            case Contract.Field.NOTEBOOK_TYPE:
+                            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
                                 String dateTimeUserFormat = enter_question.getText().toString();
                                 StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                 stringTokenizer.nextToken();
@@ -179,11 +179,11 @@ public class AddEntryActivity extends AppCompatActivity implements
                     } else {
                         if (field_chosen) {
                             switch (fieldType) {
-                                case Contract.Field.DEFAULT_TYPE:
+                                case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
                                     databaseOperations.insertFieldEntry(currentField, enter_question.getText().toString(),
                                             enter_answer.getText().toString());
                                     break;
-                                case Contract.Field.NOTEBOOK_TYPE:
+                                case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
                                     String dateTimeUserFormat = enter_question.getText().toString();
                                     StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                     stringTokenizer.nextToken();
@@ -220,7 +220,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 currentField = c.getString(1);
                 fieldType = databaseOperations.getFieldType(currentField);
                 setHints(fieldType);
-                if ( fieldType == Contract.Field.NOTEBOOK_TYPE) {
+                if ( fieldType == Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE) {
                     enter_question.setText("");
                     enter_question.clearFocus();
                 }
@@ -251,7 +251,7 @@ public class AddEntryActivity extends AppCompatActivity implements
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     switch (fieldType) {
-                        case Contract.Field.NOTEBOOK_TYPE:
+                        case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
 //                            enterQuestion.clearFocus();
                             enter_answer.requestFocus();
                             Calendar calendar = Calendar.getInstance();
@@ -296,11 +296,11 @@ public class AddEntryActivity extends AppCompatActivity implements
 
     private void setHints(int fieldType ) {
         switch ( fieldType ) {
-            case Contract.Field.NOTEBOOK_TYPE:
+            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
                 enter_question.setHint(R.string.enter_date_time);
                 enter_answer.setHint(R.string.write_whatever);
                 break;
-            case Contract.Field.DEFAULT_TYPE:
+            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
                 enter_question.setHint(R.string.enter_a_question);
                 enter_answer.setHint(R.string.enter_an_answer);
         }
@@ -368,9 +368,9 @@ public class AddEntryActivity extends AppCompatActivity implements
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);
-        return new CursorLoader(this,uri, new String[]{"rowid _id",Contract.Field.COLUMN_NAME_FIELD_NAME},null,null,
-                "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") DESC");
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Field_DBV6_AppV32.TABLE_NAME);
+        return new CursorLoader(this,uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME},null,null,
+                "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
     }
 
     @Override

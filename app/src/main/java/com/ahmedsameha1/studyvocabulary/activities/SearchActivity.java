@@ -124,16 +124,16 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String searchString = args.getString(QUERY_KEY);
-        return new CursorLoader(this,Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME),
+        return new CursorLoader(this,Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME),
                 new String[]{"rowid _id",
-                        Contract.Linker.COLUMN_NAME_QUESTION_LINK,
-                        Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                Contract.Linker.COLUMN_NAME_QUESTION_LINK + " LIKE ? AND "
-                        + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? "
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " LIKE ? AND "
+                        + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? "
                         + " OR " +
-                        Contract.Linker.COLUMN_NAME_ANSWER_LINK
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK
                         + " LIKE ? AND "
-                        + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                        + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                 new String[]{"%" + searchString + "%", currentField, "%" + searchString + "%", currentField},
                 null);
     }

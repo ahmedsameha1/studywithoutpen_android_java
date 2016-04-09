@@ -56,7 +56,7 @@ public class FieldActivityRecyclerViewAdapter extends
                 new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
                     public void onClick(View v, String fieldName, String currentQuestion, String currentAnswer ) {
-                        if ( fieldType != Contract.Field.NOTEBOOK_TYPE) {
+                        if ( fieldType != Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE) {
                             Intent intent = new Intent(context, StudyActivity.class);
                             intent.putExtra(StudyActivity.CURRENT_FIELD, fieldName);
                             intent.putExtra(StudyActivity.CURRENT_QUESTION,currentQuestion);
@@ -103,21 +103,21 @@ public class FieldActivityRecyclerViewAdapter extends
             public void onClick(View v) {
                 if ( (! sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + fieldName)) &&
                         (! sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + fieldName))) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
                     Cursor studyDuringCursor = context.getContentResolver().query(uri,
-                            new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
-                            Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND "
-                                    + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
-                                    + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? AND "
-                                    + Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? ",
+                            new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " = ? AND "
+                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? AND "
+                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? ",
                             new String[]{question, answer, fieldName, "0"},
                             null);
                     Cursor testCursor = context.getContentResolver().query(uri,
-                            new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
-                            Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND "
-                                    + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
-                                    + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? AND "
-                                    + Contract.Linker.COLUMN_NAME_TEST_ORDER + " >= ? ",
+                            new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " = ? AND "
+                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? AND "
+                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER + " >= ? ",
                             new String[]{question, answer, fieldName, "0"},
                             null);
                     if (studyDuringCursor.getCount() <= 0 && testCursor.getCount() <= 0) {
@@ -144,11 +144,11 @@ public class FieldActivityRecyclerViewAdapter extends
             }
         });
         switch (fieldType) {
-            case Contract.Field.DEFAULT_TYPE:
+            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
                 viewHolder.question.setText(question);
                 viewHolder.answer.setText(answer);
                 break;
-            case Contract.Field.NOTEBOOK_TYPE:
+            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
                 Timestamp timestamp = Timestamp.valueOf(question);
                 Date date = new Date(timestamp.getTime());
                 viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));

@@ -56,7 +56,7 @@ public class CreateFieldDialogFragment extends DialogFragment {
                     public void onClick(View view) {
 
 //                        CheckBox notebookCheckbox = (CheckBox) alertDialog.findViewById(R.id.notebook_field_checkbox);
-//                        int type = notebookCheckbox.isChecked()? Contract.Field.NOTEBOOK_TYPE : Contract.Field.DEFAULT_TYPE;
+//                        int type = notebookCheckbox.isChecked()? Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE : Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE;
                         String fieldName = enterFieldName.getText().toString();
                         if (fieldName.equals("")) {
                             Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);

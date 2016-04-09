@@ -91,10 +91,10 @@ public class EditEntryActivity extends AppCompatActivity implements
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         editAnswer.setText(currentAnswer);
         switch (fieldType) {
-            case Contract.Field.DEFAULT_TYPE:
+            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
                 editQuestion.setText(currentQuestion);
                 break;
-            case Contract.Field.NOTEBOOK_TYPE:
+            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
                 Timestamp timestamp = Timestamp.valueOf(currentQuestion);
                 Date date = new Date(timestamp.getTime());
                 editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm").format(date));
@@ -120,7 +120,7 @@ public class EditEntryActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 if ( editQuestion.getText().toString().length() > 0 && editAnswer.getText().toString().length() > 0 ) {
                     switch (fieldType) {
-                        case Contract.Field.DEFAULT_TYPE:
+                        case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
                             editQuestion.setEnabled(false);
                             editAnswer.setEnabled(false);
                             if (!editQuestion.getText().toString().equals(currentQuestion) || !editAnswer.getText().toString().equals(currentAnswer)) {
@@ -133,7 +133,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                                 }
                             }
                             break;
-                        case Contract.Field.NOTEBOOK_TYPE:
+                        case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
                             editQuestion.setEnabled(false);
                             editAnswer.setEnabled(false);
                             String dateTimeUserFormat = editQuestion.getText().toString();
@@ -166,7 +166,7 @@ public class EditEntryActivity extends AppCompatActivity implements
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     switch (fieldType) {
-                        case Contract.Field.NOTEBOOK_TYPE:
+                        case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
 //                            enterQuestion.clearFocus();
                             editAnswer.requestFocus();
                             Calendar calendar = Calendar.getInstance();
@@ -209,11 +209,11 @@ public class EditEntryActivity extends AppCompatActivity implements
     }
     private void setHints(int fieldType ) {
         switch ( fieldType ) {
-            case Contract.Field.NOTEBOOK_TYPE:
+            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
                 editQuestion.setHint(R.string.enter_date_time);
                 editAnswer.setHint(R.string.write_whatever);
                 break;
-            case Contract.Field.DEFAULT_TYPE:
+            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
                 editQuestion.setHint(R.string.enter_a_question);
                 editAnswer.setHint(R.string.enter_an_answer);
         }

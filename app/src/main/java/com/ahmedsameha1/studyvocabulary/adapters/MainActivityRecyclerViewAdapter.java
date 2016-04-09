@@ -12,12 +12,10 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabulary.activities.FieldActivity;
-import com.ahmedsameha1.studyvocabulary.activities.MainActivity;
 import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
 import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
@@ -96,9 +94,9 @@ public class MainActivityRecyclerViewAdapter extends
                 }
             }
         });
-        if (data.getInt(1) == Contract.Field.DEFAULT_TYPE) {
+        if (data.getInt(1) == Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE) {
             viewHolder.type.setImageResource(R.drawable.books1);
-        } else if (data.getInt(1) == Contract.Field.NOTEBOOK_TYPE) {
+        } else if (data.getInt(1) == Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE) {
             viewHolder.type.setImageResource(R.drawable.agenda1);
         }
         viewHolder.name.setText(fieldName);

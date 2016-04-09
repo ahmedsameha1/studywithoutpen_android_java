@@ -102,17 +102,17 @@ public class MainActivity extends AppCompatActivity implements
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);
+                Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Field_DBV6_AppV32.TABLE_NAME);
                 if ( id == GET_FIELDS_ID ) {
-                    return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Field.COLUMN_NAME_FIELD_TYPE, Contract.Field.COLUMN_NAME_FIELD_NAME}, null, null,
-                            "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") DESC");
+                    return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME}, null, null,
+                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
                 } else if ( id == SEARCH_FIELDS_ID) {
                     String query = args.getString(QUERY_KEY);
                     return new CursorLoader(MainActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Field.COLUMN_NAME_FIELD_TYPE, Contract.Field.COLUMN_NAME_FIELD_NAME},
-                            Contract.Field.COLUMN_NAME_FIELD_NAME + " LIKE ? ",
+                            new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME},
+                            Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " LIKE ? ",
                             new String[] {"%" + query + "%"},
-                            "datetime(" + Contract.COLUMN_NAME_CREATED_AT + ") DESC");
+                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
                 }
                 return null;
             }

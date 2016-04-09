@@ -3,88 +3,231 @@ package com.ahmedsameha1.studyvocabulary.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
+import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
 import com.ahmedsameha1.studyvocabulary.database.Contract.OldField;
-import android.util.Log;
 
-import com.ahmedsameha1.studyvocabulary.database.Contract.Question;
-import com.ahmedsameha1.studyvocabulary.database.Contract.Answer;
-import com.ahmedsameha1.studyvocabulary.database.Contract.Linker;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Field;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Field_Type;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Locale;
+import com.ahmedsameha1.studyvocabulary.database.Contract.STring;
+import com.ahmedsameha1.studyvocabulary.database.Contract.String_Entry;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Not_String;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Not_String_Entry;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Test_Wrong_Answer_String;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Test_Wrong_Answer_Not_String;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Test_Paused;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Study_Period_Repeated_Entry;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Study_Period_Paused;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Alternative_Answer_String;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Alternative_Answer_Not_String;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Old_Question_DBV6_AppV32;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Old_Answer_DBV6_AppV32;
+import com.ahmedsameha1.studyvocabulary.database.Contract.Old_Linker_DBV6_AppV32;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 /**
  * Created by ahmed on 7/4/2015.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 6;
+    public static final int DATABASE_VERSION = 7;
     public static final String DATABASE_NAME = "data";
     private Context context;
+
+    public static final String CREATE_FIELD_TABLE = "CREATE TABLE IF NOT EXISTS " + Field.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Field.COLUMN_NAME_FIELD_NAME + " TEXT UNIQUE NOT NULL, "
+            + Field.COLUMN_NAME_FIELD_TYPE + " INTEGER NOT NULL, "
+            + Field.COLUMN_NAME_ENTRY_ANSWER_COLUMN_DATA_TYPE + " INTEGER NOT NULL, "
+            + Field.COLUMN_NAME_LOCALE + " INTEGER DEFAULT NULL, "
+            + Field.COLUMN_NAME_SORT_BY + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_NAME_LIST_TEXT_SIZE + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_NAME_QUESTION_AREA_SIZE + " INTEGER NOT NULL DEFAULT 1, "
+            + Field.COLUMN_NAME_ANSWER_AREA_SIZE + " INTEGER NOT NULL DEFAULT 1, "
+            + Field.COLUMN_NAME_TEST_TEXT_SIZE + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_NAME_ACTION_BAR_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_NAME_SPEECH + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_NAME_USAGE_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
+            + "FOREIGN KEY(" + Field.COLUMN_NAME_FIELD_TYPE + ") REFERENCES " + Field_Type.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + "FOREIGN KEY(" + Field.COLUMN_NAME_LOCALE + ") REFERENCES " + Locale.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE DEFAULT"
+            + " );";
+    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Field_Type.COLUMN_NAME_FIELD_TYPE_NAME + " TEXT UNIQUE NOT NULL"
+            + " );";
+    public static final String CREATE_LOCALE_TABLE = "CREATE TABLE IF NOT EXISTS " + Locale.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Locale.COLUMN_NAME_LOCALE_NAME + " TEXT UNIQUE NOT NULL"
+            + " );";
+    public static final String CREATE_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + STring.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + STring.COLUMN_NAME_VALUE + " TEXT UNIQUE NOT NULL"
+            + " );";
+    public static final String CREATE_NOT_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Not_String.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Not_String.COLUMN_NAME_VALUE + " BLOB NOT NULL"
+            + " );";
+    public static final String CREATE_ENTRY_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + String_Entry.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + String_Entry.COLUMN_NAME_QUESTION + " INTEGER NOT NULL, "
+            + String_Entry.COLUMN_NAME_ANSWER + " INTEGER NOT NULL, "
+            + String_Entry.COLUMN_NAME_FIELD + " INTEGER NOT NULL, "
+            + String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + String_Entry.COLUMN_NAME_PAUSED_STUDY_PERIOD_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + String_Entry.COLUMN_NAME_ASKED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + String_Entry.COLUMN_NAME_WRONGLY_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + String_Entry.COLUMN_NAME_RANK + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
+            + "FOREIGN KEY(" + String_Entry.COLUMN_NAME_QUESTION + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + String_Entry.COLUMN_NAME_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + String_Entry.COLUMN_NAME_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + " UNIQUE ( " + String_Entry.COLUMN_NAME_QUESTION + ", "
+            + String_Entry.COLUMN_NAME_ANSWER + ", "
+            + String_Entry.COLUMN_NAME_FIELD + " )"
+            + " );";
+    public static final String CREATE_ENTRY_NOT_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Not_String_Entry.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Not_String_Entry.COLUMN_NAME_QUESTION + " INTEGER NOT NULL, "
+            + Not_String_Entry.COLUMN_NAME_ANSWER + " INTEGER NOT NULL, "
+            + Not_String_Entry.COLUMN_NAME_FIELD + " INTEGER NOT NULL, "
+            + Not_String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + Not_String_Entry.COLUMN_NAME_PAUSED_STUDY_PERIOD_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + Not_String_Entry.COLUMN_NAME_ASKED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + Not_String_Entry.COLUMN_NAME_WRONGLY_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + Not_String_Entry.COLUMN_NAME_RANK + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
+            + "FOREIGN KEY(" + Not_String_Entry.COLUMN_NAME_QUESTION + ") REFERENCES " + Not_String.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + Not_String_Entry.COLUMN_NAME_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + Not_String_Entry.COLUMN_NAME_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + " UNIQUE ( " + Not_String_Entry.COLUMN_NAME_QUESTION + ", "
+            + Not_String_Entry.COLUMN_NAME_ANSWER + ", "
+            + Not_String_Entry.COLUMN_NAME_FIELD + " )"
+            + " );";
+    public static final String CREATE_TEST_WRONG_ANSWER_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Test_Wrong_Answer_String.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Test_Wrong_Answer_String.COLUMN_NAME_ENTRY + " INTEGER NOT NULL, "
+            + Test_Wrong_Answer_String.COLUMN_NAME_WRONG_ANSWER + " TEXT NOT NULL, "
+            + "FOREIGN KEY(" + Test_Wrong_Answer_String.COLUMN_NAME_ENTRY + ") REFERENCES " + String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
+    public static final String CREATE_TEST_WRONG_ANSWER_NOT_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Test_Wrong_Answer_Not_String.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Test_Wrong_Answer_Not_String.COLUMN_NAME_ENTRY + " INTEGER NOT NULL, "
+            + Test_Wrong_Answer_Not_String.COLUMN_NAME_WRONG_ANSWER + " TEXT NOT NULL, "
+            + "FOREIGN KEY(" + Test_Wrong_Answer_Not_String.COLUMN_NAME_ENTRY + ") REFERENCES " + Not_String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
+    public static final String CREATE_TEST_PAUSED_TABLE = "CREATE TABLE IF NOT EXISTS " + Test_Paused.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Test_Paused.COLUMN_NAME_FIELD + " INTEGER UNIQUE NOT NULL, "
+            + Test_Paused.COLUMN_NAME_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
+            + Test_Paused.COLUMN_NAME_WRONG_ANSWERS_COUNT + " INTEGER NOT NULL, "
+            + Test_Paused.COLUMN_NAME_TRIES_NUMBER + " INTEGER NOT NULL, "
+            + "FOREIGN KEY(" + Test_Paused.COLUMN_NAME_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
+    public static final String CREATE_STUDY_PERIOD_REPEATED_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + Study_Period_Repeated_Entry.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Study_Period_Repeated_Entry.COLUMN_NAME_FIELD + " INTEGER NOT NULL, "
+            + Study_Period_Repeated_Entry.COLUMN_NAME_REPEATED_ENTRY + " INTEGER NOT NULL, "
+            + "FOREIGN KEY(" + Study_Period_Repeated_Entry.COLUMN_NAME_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
+    public static final String CREATE_STUDY_PERIOD_PAUSED_TABLE = "CREATE TABLE IF NOT EXISTS " + Study_Period_Paused.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Study_Period_Paused.COLUMN_NAME_FIELD + " INTEGER UNIQUE NOT NULL, "
+            + Study_Period_Paused.COLUMN_NAME_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
+            + Study_Period_Paused.COLUMN_NAME_TRIES_NUMBER + " INTEGER NOT NULL, "
+            + "FOREIGN KEY(" + Study_Period_Paused.COLUMN_NAME_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
+    public static final String CREATE_ALTERNATIVE_ANSWER_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Alternative_Answer_String.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Alternative_Answer_String.COLUMN_NAME_ENTRY + " INTEGER NOT NULL, "
+            + Alternative_Answer_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " TEXT NOT NULL, "
+            + Alternative_Answer_String.COLUMN_NAME_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + "FOREIGN KEY(" + Alternative_Answer_String.COLUMN_NAME_ENTRY + ") REFERENCES " + String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
+    public static final String CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Alternative_Answer_Not_String.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Alternative_Answer_Not_String.COLUMN_NAME_ENTRY + " INTEGER NOT NULL, "
+            + Alternative_Answer_Not_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " TEXT NOT NULL, "
+            + Alternative_Answer_Not_String.COLUMN_NAME_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + "FOREIGN KEY(" + Alternative_Answer_Not_String.COLUMN_NAME_ENTRY + ") REFERENCES " + Not_String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + OldField.TABLE_NAME +
             " ( " + OldField._ID + " INTEGER PRIMARY KEY , "
             +  OldField.COLUMN_NAME_FIELD_NAME + " TEXT , " +
-             OldField.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP );";*/
-    public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Field.TABLE_NAME
+             OldField.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " DATETIME DEFAULT CURRENT_TIMESTAMP );";*/
+    public static final String DBV6_APPV32_CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME
             + " ( "
-            + Contract.Field.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY NOT NULL, "
-            + Contract.Field.COLUMN_NAME_FIELD_TYPE + " INTEGER NOT NULL DEFAULT 0 , "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
+            + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY NOT NULL, "
+            + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE + " INTEGER NOT NULL DEFAULT 0 , "
+            + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
 
-    /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Field.TABLE_NAME
+    /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME
             + " ( "
-            + Contract.Field.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY, "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";*/
+            + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY, "
+            + Contract.Old_COLUMN_NAME_CREATED_AT
+            _DBV6_AppV32 + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";*/
     
-    public static final String CREATE_QUESTION_TABLE = "CREATE TABLE " + Question.TABLE_NAME
-            + " ( " + Question.COLUMN_NAME_QUESTION_ENTRY
+    public static final String DBV6_APPV32_CREATE_QUESTION_TABLE = "CREATE TABLE " + Old_Question_DBV6_AppV32.TABLE_NAME
+            + " ( " + Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY
             + " TEXT PRIMARY KEY NOT NULL, "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
+            + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
 
-    public static final String CREATE_ANSWER_TABLE = "CREATE TABLE " + Answer.TABLE_NAME
-            + " ( " + Answer.COLUMN_NAME_ANSWER_ENTRY
+    public static final String DBV6_APPV32_CREATE_ANSWER_TABLE = "CREATE TABLE " + Old_Answer_DBV6_AppV32.TABLE_NAME
+            + " ( " + Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY
             + " TEXT PRIMARY KEY NOT NULL, "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
+            + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";
 
-    public static final String CREATE_LINKER_TABLE = "CREATE TABLE " + Linker.TABLE_NAME
-            + " ( " + Linker.COLUMN_NAME_QUESTION_LINK + " TEXT NOT NULL, "
-            + Linker.COLUMN_NAME_ANSWER_LINK + " TEXT NOT NULL, "
-            + Linker.COLUMN_NAME_FIELD_LINK + " TEXT NOT NULL, "
-            + Linker.COLUMN_NAME_STUDY_DURING_ORDER + " INTEGER NOT NULL DEFAULT -1 , "
-            + Linker.COLUMN_NAME_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1 , "
-            + Linker.COLUMN_NAME_TEST_WRONG_ANSWERS + " TEXT NOT NULL DEFAULT '' , "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
-            + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_QUESTION_LINK + ")" + " REFERENCES "
-            + Question.TABLE_NAME + "(" + Question.COLUMN_NAME_QUESTION_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
-            + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_ANSWER_LINK + ")" + " REFERENCES "
-            + Answer.TABLE_NAME + "(" + Answer.COLUMN_NAME_ANSWER_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
-            + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_FIELD_LINK + ")" + " REFERENCES "
-            + Contract.Field.TABLE_NAME + "(" + Contract.Field.COLUMN_NAME_FIELD_NAME + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
-            + " PRIMARY KEY ( " + Linker.COLUMN_NAME_QUESTION_LINK + ","
-            + Linker.COLUMN_NAME_ANSWER_LINK + ","
-            + Linker.COLUMN_NAME_FIELD_LINK + ")" + ");";
+    public static final String DBV6_APPV32_CREATE_LINKER_TABLE = "CREATE TABLE " + Old_Linker_DBV6_AppV32.TABLE_NAME
+            + " ( " + Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " TEXT NOT NULL, "
+            + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " TEXT NOT NULL, "
+            + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " TEXT NOT NULL, "
+            + Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER + " INTEGER NOT NULL DEFAULT -1 , "
+            + Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1 , "
+            + Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_WRONG_ANSWERS + " TEXT NOT NULL DEFAULT '' , "
+            + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
+            + " FOREIGN KEY " + " (" + Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + ")" + " REFERENCES "
+            + Old_Question_DBV6_AppV32.TABLE_NAME + "(" + Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
+            + " FOREIGN KEY " + " (" + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + ")" + " REFERENCES "
+            + Old_Answer_DBV6_AppV32.TABLE_NAME + "(" + Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
+            + " FOREIGN KEY " + " (" + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + ")" + " REFERENCES "
+            + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + "(" + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
+            + " PRIMARY KEY ( " + Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + ","
+            + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + ","
+            + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + ")" + ");";
 
-    /*public static final String CREATE_LINKER_TABLE = "CREATE TABLE " + Linker.TABLE_NAME
-            + " ( " + Linker.COLUMN_NAME_QUESTION_LINK + " TEXT , "
-            + Linker.COLUMN_NAME_ANSWER_LINK + " TEXT , "
-            + Linker.COLUMN_NAME_FIELD_LINK + " TEXT , "
-            + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) ,"
-            + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_QUESTION_LINK + ")" + " REFERENCES "
-            + Question.TABLE_NAME + "(" + Question.COLUMN_NAME_QUESTION_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
-            + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_ANSWER_LINK + ")" + " REFERENCES "
-            + Answer.TABLE_NAME + "(" + Answer.COLUMN_NAME_ANSWER_ENTRY + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
-            + " FOREIGN KEY " + " (" + Linker.COLUMN_NAME_FIELD_LINK + ")" + " REFERENCES "
-            + Contract.Field.TABLE_NAME + "(" + Contract.Field.COLUMN_NAME_FIELD_NAME + ") ON DELETE CASCADE ON UPDATE CASCADE" + ","
-            + " PRIMARY KEY ( " + Linker.COLUMN_NAME_QUESTION_LINK + ","
-            + Linker.COLUMN_NAME_ANSWER_LINK + ","
-            + Linker.COLUMN_NAME_FIELD_LINK + ")" + ");";*/
 
-    public static final String CREATE_STUDY_DURING_TEMP_TABLE = "CREATE TABLE " + Contract.Study_During_Temp.TABLE_NAME
-            + " ( " + Contract.Study_During_Temp.COLUMN_NAME_QUESTION + " TEXT NOT NULL, "
-            + Contract.Study_During_Temp.COLUMN_NAME_ANSWER + " TEXT NOT NULL, "
-            + Contract.Study_During_Temp.COLUMN_NAME_FIELD + " TEXT NOT NULL );";
+    public static final String DBV6_APPV32_CREATE_STUDY_DURING_TEMP_TABLE = "CREATE TABLE " + Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME
+            + " ( " + Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_QUESTION + " TEXT NOT NULL, "
+            + Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_ANSWER + " TEXT NOT NULL, "
+            + Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_FIELD + " TEXT NOT NULL );";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -93,9 +236,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate( SQLiteDatabase sqLiteDatabase ) {
         sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
-        sqLiteDatabase.execSQL(CREATE_QUESTION_TABLE);
-        sqLiteDatabase.execSQL(CREATE_ANSWER_TABLE);
-        sqLiteDatabase.execSQL(CREATE_LINKER_TABLE);
+        sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_TABLE);
+        sqLiteDatabase.execSQL(CREATE_LOCALE_TABLE);
+        sqLiteDatabase.execSQL(CREATE_STRING_TABLE);
+        sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);
+        sqLiteDatabase.execSQL(CREATE_ENTRY_STRING_TABLE);
+        sqLiteDatabase.execSQL(CREATE_ENTRY_NOT_STRING_TABLE);
+        sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_STRING_TABLE);
+        sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_NOT_STRING_TABLE);
+        sqLiteDatabase.execSQL(CREATE_TEST_PAUSED_TABLE);
+        sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_REPEATED_ENTRY_TABLE);
+        sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_PAUSED_TABLE);
+        sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);
+        sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);
         Log.d("from APP to Ahmed", "table have been written");
     }
     @Override
@@ -111,9 +264,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d("from Peninbin", "onUpgrade");
         if ( oldVersion < 2 ) {
             fieldTableMigration(sqLiteDatabase);
-            sqLiteDatabase.execSQL(CREATE_QUESTION_TABLE);
-            sqLiteDatabase.execSQL(CREATE_ANSWER_TABLE);
-            sqLiteDatabase.execSQL(CREATE_LINKER_TABLE);
+            sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_QUESTION_TABLE);
+            sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_ANSWER_TABLE);
+            sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_LINKER_TABLE);
             questionMigration(sqLiteDatabase);
             answerMigration(sqLiteDatabase);
             linkerMigration(sqLiteDatabase);
@@ -126,7 +279,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             onUpgradeForLinkerTableV3(sqLiteDatabase);
         }
         if ( oldVersion < 4 ) {
-            sqLiteDatabase.execSQL(CREATE_STUDY_DURING_TEMP_TABLE);
+            sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_STUDY_DURING_TEMP_TABLE);
         }
         if ( oldVersion < 5 ) {
             onUpgradeForFieldTableV5(sqLiteDatabase);
@@ -135,6 +288,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         if ( oldVersion < 6 ) {
             onUpgradeForFieldTableV6(sqLiteDatabase);
+        }
+        if ( oldVersion < 7 ) {
+            sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_TABLE);
+            sqLiteDatabase.execSQL(CREATE_LOCALE_TABLE);
+            sqLiteDatabase.execSQL(CREATE_STRING_TABLE);
+            sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);
+            sqLiteDatabase.execSQL(CREATE_ENTRY_STRING_TABLE);
+            sqLiteDatabase.execSQL(CREATE_ENTRY_NOT_STRING_TABLE);
+            sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_STRING_TABLE);
+            sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_NOT_STRING_TABLE);
+            sqLiteDatabase.execSQL(CREATE_TEST_PAUSED_TABLE);
+            sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_REPEATED_ENTRY_TABLE);
+            sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_PAUSED_TABLE);
+            sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);
+            sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);
+            onUpgradeDatabaseToDBV7AppV33(sqLiteDatabase);
         }
     }
 
@@ -426,8 +595,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if ( !equals ) {
                     mainArrayList.add(s);
                     s = s.replace("'","''");
-                    String statement = "INSERT INTO " + Question.TABLE_NAME + " ( " + Question.COLUMN_NAME_QUESTION_ENTRY
-                            + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                    String statement = "INSERT INTO " + Old_Question_DBV6_AppV32.TABLE_NAME + " ( " + Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY
+                            + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
                             + "SELECT " + fieldName + OldField.COLUMN_NAME_QUESTION_SUFFIX + "," + OldField.COLUMN_NAME_CREATED_AT
                             + " FROM " + fieldName + OldField.TABLE_NAME_QUESTION_SUFFIX
                             + " WHERE " + fieldName + OldField.COLUMN_NAME_QUESTION_SUFFIX + " = " + "'" + s + "'" + ";";
@@ -439,9 +608,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d("From Pen in Bin", "questions has been transfered");
 /*        ContentValues contentValues = new ContentValues();
         for ( String question : mainArrayList ) {
-            contentValues.put(Question.COLUMN_NAME_QUESTION_ENTRY,question);
+            contentValues.put(Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY,question);
         }
-        sqLiteDatabase.insert(Question.TABLE_NAME,null,contentValues);*/
+        sqLiteDatabase.insert(Old_Question_DBV6_AppV32.TABLE_NAME,null,contentValues);*/
     }
     private void answerMigration(SQLiteDatabase sqLiteDatabase) {
         Cursor cursor = getFieldList(sqLiteDatabase);
@@ -466,8 +635,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if ( !equals ) {
                     mainArrayList.add(s);
                     s = s.replace("'","''");
-                    String statement = "INSERT INTO " + Answer.TABLE_NAME + " ( " + Answer.COLUMN_NAME_ANSWER_ENTRY
-                            + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                    String statement = "INSERT INTO " + Old_Answer_DBV6_AppV32.TABLE_NAME + " ( " + Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY
+                            + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
                             + "SELECT " + fieldName + OldField.COLUMN_NAME_ANSWER_SUFFIX + "," + OldField.COLUMN_NAME_CREATED_AT
                             + " FROM " + fieldName + OldField.TABLE_NAME_ANSWER_SUFFIX
                             + " WHERE " + fieldName + OldField.COLUMN_NAME_ANSWER_SUFFIX + " = " + "'" + s + "'" + ";";
@@ -480,9 +649,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d("From Pen in Bin", "answers has been transfered");
         /*ContentValues contentValues = new ContentValues();
         for ( String answer : mainArrayList ) {
-            contentValues.put(Answer.COLUMN_NAME_ANSWER_ENTRY,answer);
+            contentValues.put(Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY,answer);
         }
-        sqLiteDatabase.insert(Answer.TABLE_NAME,null,contentValues);*/
+        sqLiteDatabase.insert(Old_Answer_DBV6_AppV32.TABLE_NAME,null,contentValues);*/
     }
     private void linkerMigration(SQLiteDatabase sqLiteDatabase) {
         Cursor cursor = getFieldList(sqLiteDatabase);
@@ -501,9 +670,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 answer = cursor.getString(1);
                 question = question.replace("'", "''");
                 answer = answer.replace("'", "''");
-                String statement = "INSERT INTO " + Linker.TABLE_NAME + " ( " + Linker.COLUMN_NAME_QUESTION_LINK
-                        + "," + Linker.COLUMN_NAME_ANSWER_LINK
-                        + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
+                String statement = "INSERT INTO " + Contract.Old_Linker_DBV6_AppV32.TABLE_NAME + " ( " + Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK
+                        + "," + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK
+                        + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
                         + "SELECT " + fieldName + OldField.COLUMN_NAME_QUESTION_LINK_SUFFIX + ","
                         + fieldName + OldField.COLUMN_NAME_ANSWER_LINK_SUFFIX + "," + OldField.COLUMN_NAME_CREATED_AT
                         + " FROM " + fieldName + OldField.TABLE_NAME_LINK_SUFFIX
@@ -511,23 +680,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         + fieldName + OldField.COLUMN_NAME_ANSWER_LINK_SUFFIX + " = " + "'" + answer + "'" + ";";
                 sqLiteDatabase.execSQL(statement);
                 /*ContentValues contentValues = new ContentValues();
-                contentValues.put(Linker.COLUMN_NAME_FIELD_LINK,fieldName);
+                contentValues.put(Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK,fieldName);
                 int rows = 0;
                 int r = 0;
-                Cursor c = sqLiteDatabase.query(Linker.TABLE_NAME,null,Linker.COLUMN_NAME_QUESTION_LINK
-                        + " = ? AND " + Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND " + Linker.COLUMN_NAME_FIELD_LINK + " IS NULL",
+                Cursor c = sqLiteDatabase.query(Old_Linker_DBV6_AppV32.TABLE_NAME,null,Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK
+                        + " = ? AND " + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND " + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " IS NULL",
                         new String[] {question,answer},null,null,null);
                 r = c.getCount();
-              *//*  rows = sqLiteDatabase.update(Linker.TABLE_NAME,contentValues, Linker.COLUMN_NAME_QUESTION_LINK
-                        + " = ? AND " + Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND " + Linker.COLUMN_NAME_FIELD_LINK + " IS NULL",
+              *//*  rows = sqLiteDatabase.update(Old_Linker_DBV6_AppV32.TABLE_NAME,contentValues, Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK
+                        + " = ? AND " + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND " + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " IS NULL",
                         new String[] {question,answer});*//*
-                rows = sqLiteDatabase.update(Linker.TABLE_NAME,contentValues, Linker.COLUMN_NAME_QUESTION_LINK
-                                + " = ? AND " + Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND " + Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                rows = sqLiteDatabase.update(Old_Linker_DBV6_AppV32.TABLE_NAME,contentValues, Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK
+                                + " = ? AND " + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND " + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                         new String[] {question,answer,""});*/
-                String update = "UPDATE " + Linker.TABLE_NAME + " SET " + Linker.COLUMN_NAME_FIELD_LINK + " = " + "'" + fieldName + "'"
-                        + " WHERE " + Linker.COLUMN_NAME_QUESTION_LINK + " = " + "'" + question + "'" + " AND "
-                        + Linker.COLUMN_NAME_ANSWER_LINK + " = " + "'" + answer + "'" + " AND "
-                        + Linker.COLUMN_NAME_FIELD_LINK + " IS NULL;";
+                String update = "UPDATE " + Contract.Old_Linker_DBV6_AppV32.TABLE_NAME + " SET " + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = " + "'" + fieldName + "'"
+                        + " WHERE " + Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " = " + "'" + question + "'" + " AND "
+                        + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = " + "'" + answer + "'" + " AND "
+                        + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " IS NULL;";
                 sqLiteDatabase.execSQL(update);
             }
         }
@@ -548,9 +717,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(copy);
         String drop = "DROP TABLE IF EXISTS " + OldField.TABLE_NAME + ";";
         sqLiteDatabase.execSQL(drop);
-        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
-        copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.Field.COLUMN_NAME_FIELD_NAME
-                + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
+        sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_FIELD_TABLE);
+        copy = "INSERT INTO " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " ( " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
                 + "SELECT " + OldField.COLUMN_NAME_FIELD_NAME + ","
                 + OldField.COLUMN_NAME_CREATED_AT
                 + " FROM " + "tempTable"
@@ -578,23 +747,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private void onUpgradeForFieldTableV3(SQLiteDatabase sqLiteDatabase) {
         String tempTable = "CREATE TABLE " + "tempTable"
                 + " ( "
-                + Contract.Field.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY, "
-                + Contract.COLUMN_NAME_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP );";
+                + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY, "
+                + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " DATETIME DEFAULT CURRENT_TIMESTAMP );";
         sqLiteDatabase.execSQL(tempTable);
-        String copy =  "INSERT INTO " + "tempTable" + " ( " + Contract.Field.COLUMN_NAME_FIELD_NAME
-                + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
-                + "SELECT " + Contract.Field.COLUMN_NAME_FIELD_NAME + ","
-                + Contract.COLUMN_NAME_CREATED_AT
-                + " FROM " + Contract.Field.TABLE_NAME
+        String copy =  "INSERT INTO " + "tempTable" + " ( " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
+                + "SELECT " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + ","
+                + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32
+                + " FROM " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME
                 +  ";";
         sqLiteDatabase.execSQL(copy);
-        String drop = "DROP TABLE IF EXISTS " + Contract.Field.TABLE_NAME + ";";
+        String drop = "DROP TABLE IF EXISTS " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + ";";
         sqLiteDatabase.execSQL(drop);
-        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
-        copy =  "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.Field.COLUMN_NAME_FIELD_NAME
-                + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
-                + "SELECT " + Contract.Field.COLUMN_NAME_FIELD_NAME + ","
-                + Contract.COLUMN_NAME_CREATED_AT
+        sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_FIELD_TABLE);
+        copy =  "INSERT INTO " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " ( " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
+                + "SELECT " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + ","
+                + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32
                 + " FROM " + "tempTable"
                 +  ";";
         sqLiteDatabase.execSQL(copy);
@@ -602,13 +771,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(drop);
     }
     private void onUpgradeForQuestionTableV3(SQLiteDatabase sqLiteDatabase) {
-        String rename = "ALTER TABLE " + Question.TABLE_NAME + " RENAME TO " + "tempTable";
+        String rename = "ALTER TABLE " + Old_Question_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
         sqLiteDatabase.execSQL(rename);
-        sqLiteDatabase.execSQL(CREATE_QUESTION_TABLE);
-        String copy =  "INSERT INTO " + Question.TABLE_NAME + " ( " + Question.COLUMN_NAME_QUESTION_ENTRY
-                + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
-                + "SELECT " + Question.COLUMN_NAME_QUESTION_ENTRY + ","
-                + Contract.COLUMN_NAME_CREATED_AT
+        sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_QUESTION_TABLE);
+        String copy =  "INSERT INTO " + Old_Question_DBV6_AppV32.TABLE_NAME + " ( " + Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY
+                + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
+                + "SELECT " + Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY + ","
+                + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32
                 + " FROM " + "tempTable"
                 +  ";";
         sqLiteDatabase.execSQL(copy);
@@ -616,13 +785,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(drop);
     }
     private void onUpgradeForAnswerTableV3(SQLiteDatabase sqLiteDatabase) {
-        String rename = "ALTER TABLE " + Answer.TABLE_NAME + " RENAME TO " + "tempTable";
+        String rename = "ALTER TABLE " + Old_Answer_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
         sqLiteDatabase.execSQL(rename);
-        sqLiteDatabase.execSQL(CREATE_ANSWER_TABLE);
-        String copy =  "INSERT INTO " + Answer.TABLE_NAME + " ( " + Answer.COLUMN_NAME_ANSWER_ENTRY
-                + "," + Contract.COLUMN_NAME_CREATED_AT + " ) "
-                + "SELECT " + Answer.COLUMN_NAME_ANSWER_ENTRY + ","
-                + Contract.COLUMN_NAME_CREATED_AT
+        sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_ANSWER_TABLE);
+        String copy =  "INSERT INTO " + Old_Answer_DBV6_AppV32.TABLE_NAME + " ( " + Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY
+                + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
+                + "SELECT " + Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY + ","
+                + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32
                 + " FROM " + "tempTable"
                 +  ";";
         sqLiteDatabase.execSQL(copy);
@@ -630,17 +799,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(drop);
     }
     private void onUpgradeForLinkerTableV3(SQLiteDatabase sqLiteDatabase) {
-        String rename = "ALTER TABLE " + Linker.TABLE_NAME + " RENAME TO " + "tempTable";
+        String rename = "ALTER TABLE " + Old_Linker_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
         sqLiteDatabase.execSQL(rename);
-        sqLiteDatabase.execSQL(CREATE_LINKER_TABLE);
-        String copy =  "INSERT INTO " + Linker.TABLE_NAME + " ( " + Linker.COLUMN_NAME_QUESTION_LINK
-                + "," + Linker.COLUMN_NAME_ANSWER_LINK + ","
-                + Linker.COLUMN_NAME_FIELD_LINK + ","
-                + Contract.COLUMN_NAME_CREATED_AT + " ) "
-                + "SELECT " + Linker.COLUMN_NAME_QUESTION_LINK
-                + "," + Linker.COLUMN_NAME_ANSWER_LINK + ","
-                + Linker.COLUMN_NAME_FIELD_LINK + ","
-                + Contract.COLUMN_NAME_CREATED_AT
+        sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_LINKER_TABLE);
+        String copy =  "INSERT INTO " + Old_Linker_DBV6_AppV32.TABLE_NAME + " ( " + Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK
+                + "," + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + ","
+                + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + ","
+                + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
+                + "SELECT " + Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK
+                + "," + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + ","
+                + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + ","
+                + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32
                 + " FROM " + "tempTable"
                 +  ";";
         sqLiteDatabase.execSQL(copy);
@@ -648,13 +817,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(drop);
     }
     private void onUpgradeForFieldTableV5 ( SQLiteDatabase sqLiteDatabase ) {
-        String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+        String rename = "ALTER TABLE " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
         sqLiteDatabase.execSQL(rename);
-        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
-        String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.Field.COLUMN_NAME_FIELD_NAME
-                + " , " + Contract.COLUMN_NAME_CREATED_AT + " ) "
-                + "SELECT " + Contract.Field.COLUMN_NAME_FIELD_NAME
-                + "," + Contract.COLUMN_NAME_CREATED_AT
+        sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_FIELD_TABLE);
+        String copy = "INSERT INTO " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " ( " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME
+                + " , " + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
+                + "SELECT " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32
                 + " FROM " + "tempTable"
                 + ";";
         sqLiteDatabase.execSQL(copy);
@@ -662,17 +831,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(drop);
     }
     private void onUpgradeForLinkerTableV5 ( SQLiteDatabase sqLiteDatabase ) {
-        String rename = "ALTER TABLE " + Linker.TABLE_NAME + " RENAME TO " + "tempTable";
+        String rename = "ALTER TABLE " + Contract.Old_Linker_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
         sqLiteDatabase.execSQL(rename);
-        sqLiteDatabase.execSQL(CREATE_LINKER_TABLE);
-        String copy = "INSERT INTO " + Linker.TABLE_NAME + " ( " + Linker.COLUMN_NAME_QUESTION_LINK
-                + " , " + Linker.COLUMN_NAME_ANSWER_LINK
-                + " , " + Linker.COLUMN_NAME_FIELD_LINK
-                + " , " + Contract.COLUMN_NAME_CREATED_AT + " ) "
-                + "SELECT " + Linker.COLUMN_NAME_QUESTION_LINK
-                + "," + Linker.COLUMN_NAME_ANSWER_LINK
-                + "," + Linker.COLUMN_NAME_FIELD_LINK
-                + "," + Contract.COLUMN_NAME_CREATED_AT
+        sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_LINKER_TABLE);
+        String copy = "INSERT INTO " + Old_Linker_DBV6_AppV32.TABLE_NAME + " ( " + Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK
+                + " , " + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK
+                + " , " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK
+                + " , " + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
+                + "SELECT " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK
+                + "," + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK
+                + "," + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK
+                + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32
                 + " FROM " + "tempTable"
                 + ";";
         sqLiteDatabase.execSQL(copy);
@@ -680,10 +849,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(drop);
     }
 /*    private void migrateDataFromStudyDuringTempTableToLinkerStudyDuringFlagColumnV5 ( SQLiteDatabase sqLiteDatabase ) {
-        Cursor studyDuringTempCursor = sqLiteDatabase.query(Contract.Study_During_Temp.TABLE_NAME,
-                new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION,
-                        Contract.Study_During_Temp.COLUMN_NAME_ANSWER,
-                        Contract.Study_During_Temp.COLUMN_NAME_FIELD},
+        Cursor studyDuringTempCursor = sqLiteDatabase.query(Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME,
+                new String[] {Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_QUESTION,
+                        Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_ANSWER,
+                        Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_FIELD},
                 null,null,null,null,null);
         for ( studyDuringTempCursor.moveToFirst(); studyDuringTempCursor.getPosition() < studyDuringTempCursor.getCount();
               studyDuringTempCursor.moveToNext() ) {
@@ -691,26 +860,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String answer = studyDuringTempCursor.getString(1);
             String fieldName = studyDuringTempCursor.getString(2);
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Linker.COLUMN_NAME_STUDY_DURING_ORDER,studyDuringTempCursor.getPosition());
-            sqLiteDatabase.update(Linker.TABLE_NAME, contentValues,
-                    Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
-                            + Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+            contentValues.put(Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER,studyDuringTempCursor.getPosition());
+            sqLiteDatabase.update(Old_Linker_DBV6_AppV32.TABLE_NAME, contentValues,
+                    Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                            + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                     new String[]{question, answer, fieldName});
         }
-        String drop = "DROP TABLE IF EXISTS " + Contract.Study_During_Temp.TABLE_NAME + ";";
+        String drop = "DROP TABLE IF EXISTS " + Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME + ";";
         sqLiteDatabase.execSQL(drop);
     }*/
     public void migrateDataFromStudyDuringTempTableToLinkerStudyDuringFlagColumnV5 ( SQLiteDatabase sqLiteDatabase ) {
-        Cursor fieldCursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
-                new String[]{Contract.Field.COLUMN_NAME_FIELD_NAME},
+        Cursor fieldCursor = sqLiteDatabase.query(Contract.Old_Field_DBV6_AppV32.TABLE_NAME,
+                new String[]{Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME},
                 null, null, null, null, null);
         for ( fieldCursor.moveToFirst(); fieldCursor.getPosition() < fieldCursor.getCount();
               fieldCursor.moveToNext() ){
-            Cursor studyDuringTempCursor = sqLiteDatabase.query(Contract.Study_During_Temp.TABLE_NAME,
-                    new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION,
-                            Contract.Study_During_Temp.COLUMN_NAME_ANSWER,
-                            Contract.Study_During_Temp.COLUMN_NAME_FIELD},
-                    Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ? ",
+            Cursor studyDuringTempCursor = sqLiteDatabase.query(Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME,
+                    new String[] {Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_QUESTION,
+                            Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_ANSWER,
+                            Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_FIELD},
+                    Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_FIELD + " = ? ",
                     new String[] {fieldCursor.getString(0)},
                     null,null,null);
             for ( studyDuringTempCursor.moveToFirst(); studyDuringTempCursor.getPosition() < studyDuringTempCursor.getCount();
@@ -719,28 +888,189 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String answer = studyDuringTempCursor.getString(1);
                 String fieldName = studyDuringTempCursor.getString(2);
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(Linker.COLUMN_NAME_STUDY_DURING_ORDER,studyDuringTempCursor.getPosition());
-                sqLiteDatabase.update(Linker.TABLE_NAME, contentValues,
-                        Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND "
-                                + Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                contentValues.put(Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER,studyDuringTempCursor.getPosition());
+                sqLiteDatabase.update(Contract.Old_Linker_DBV6_AppV32.TABLE_NAME, contentValues,
+                        Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND "
+                                + Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                         new String[]{question, answer, fieldName});
             }
         }
-        String drop = "DROP TABLE IF EXISTS " + Contract.Study_During_Temp.TABLE_NAME + ";";
+        String drop = "DROP TABLE IF EXISTS " + Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME + ";";
         sqLiteDatabase.execSQL(drop);
     }
     private void onUpgradeForFieldTableV6 ( SQLiteDatabase sqLiteDatabase ) {
-        String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+        String rename = "ALTER TABLE " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
         sqLiteDatabase.execSQL(rename);
-        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
-        String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.Field.COLUMN_NAME_FIELD_NAME
-                + " , " + Contract.COLUMN_NAME_CREATED_AT + " ) "
-                + "SELECT " + Contract.Field.COLUMN_NAME_FIELD_NAME
-                + "," + Contract.COLUMN_NAME_CREATED_AT
+        sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_FIELD_TABLE);
+        String copy = "INSERT INTO " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " ( " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME
+                + " , " + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " ) "
+                + "SELECT " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32
                 + " FROM " + "tempTable"
                 + ";";
         sqLiteDatabase.execSQL(copy);
         String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+        sqLiteDatabase.execSQL(drop);
+    }
+
+    private void onUpgradeDatabaseToDBV7AppV33( SQLiteDatabase sqLiteDatabase ) {
+        String rename = "ALTER TABLE " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
+        sqLiteDatabase.execSQL(rename);
+        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
+        String copy = "INSERT INTO " + Field.TABLE_NAME + " ( " + Field.COLUMN_NAME_FIELD_NAME
+                + " , " + Field.COLUMN_NAME_FIELD_TYPE
+                + " , " + Contract.CREATION_DATE + " ) "
+                + "SELECT " + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME
+                + "," + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE
+                + "," + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32
+                + " FROM " + "tempTable"
+                + ";";
+        sqLiteDatabase.execSQL(copy);  // At this point the data of the old field table has been copied to the new field table
+        String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+        sqLiteDatabase.execSQL(drop);
+        /////////////////////////////
+        Cursor questionCursor = sqLiteDatabase.query(Old_Question_DBV6_AppV32.TABLE_NAME,
+                new String[]{Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY},
+                null,null,null,null,null);
+        for ( questionCursor.moveToFirst(); questionCursor.getPosition() < questionCursor.getCount();
+              questionCursor.moveToNext() ) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(STring.COLUMN_NAME_VALUE,questionCursor.getString(0));
+            sqLiteDatabase.insertWithOnConflict(STring.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+        }
+        questionCursor.close();
+        Cursor answerCursor = sqLiteDatabase.query(Old_Answer_DBV6_AppV32.TABLE_NAME,
+                new String[]{Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY},
+                null,null,null,null,null);
+        for ( answerCursor.moveToFirst(); answerCursor.getPosition() < answerCursor.getCount();
+              answerCursor.moveToNext() ) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(STring.COLUMN_NAME_VALUE,answerCursor.getString(0));
+            sqLiteDatabase.insertWithOnConflict(STring.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+        }
+        answerCursor.close();
+        // at this point the needed data on the old question and old answer tables has been copied to the new STring table.
+        drop = "DROP TABLE IF EXISTS " + Old_Question_DBV6_AppV32.TABLE_NAME + ";";
+        sqLiteDatabase.execSQL(drop);
+        drop = "DROP TABLE IF EXISTS " + Old_Answer_DBV6_AppV32.TABLE_NAME + ";";
+        sqLiteDatabase.execSQL(drop);
+        /////////////////////////////////
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Cursor linkerCursor = sqLiteDatabase.query(Old_Linker_DBV6_AppV32.TABLE_NAME,
+                new String[]{Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK,
+                Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK,Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER,Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER,
+                Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_WRONG_ANSWERS,Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32},
+                null,null,null,null,null,null);
+        for ( linkerCursor.moveToFirst(); linkerCursor.getPosition() < linkerCursor.getCount();
+              linkerCursor.moveToNext() ) {
+            String field = linkerCursor.getString(2);
+            Cursor question_id_cursor = sqLiteDatabase.query(STring.TABLE_NAME,new String[] { Contract.COLUMN_NAME_ID},
+                    STring.COLUMN_NAME_VALUE + " = ? ",
+                    new String[]{linkerCursor.getString(0)},null,null,null,null);
+            question_id_cursor.moveToFirst();
+            int question_id = question_id_cursor.getInt(0);
+            Cursor answer_id_cursor = sqLiteDatabase.query(STring.TABLE_NAME,new String[] { Contract.COLUMN_NAME_ID},
+                    STring.COLUMN_NAME_VALUE + " = ? ",
+                    new String[]{linkerCursor.getString(1)},null,null,null,null);
+            answer_id_cursor.moveToFirst();
+            int answer_id = answer_id_cursor.getInt(0);
+            Cursor field_id_cursor = sqLiteDatabase.query(Field.TABLE_NAME,new String[] { Contract.COLUMN_NAME_ID},
+                    Field.COLUMN_NAME_FIELD_NAME + " = ? ",
+                    new String[]{field},null,null,null,null);
+            field_id_cursor.moveToFirst();
+            int field_id = field_id_cursor.getInt(0);
+            question_id_cursor.close();
+            answer_id_cursor.close();
+            field_id_cursor.close();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(String_Entry.COLUMN_NAME_QUESTION,question_id);
+            contentValues.put(String_Entry.COLUMN_NAME_ANSWER,answer_id);
+            contentValues.put(String_Entry.COLUMN_NAME_FIELD,field_id);
+            contentValues.put(String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER,linkerCursor.getInt(3));
+            contentValues.put(String_Entry.COLUMN_NAME_PAUSED_STUDY_PERIOD_ORDER,linkerCursor.getInt(4));
+            contentValues.put(Contract.CREATION_DATE,linkerCursor.getString(6));
+            long entry_id = sqLiteDatabase.insert(String_Entry.TABLE_NAME,null,contentValues);
+            if ( linkerCursor.getString(5).length() > 0 ) {
+                StringTokenizer stringTokenizer = new StringTokenizer(linkerCursor.getString(5),"\t");
+                while ( stringTokenizer.hasMoreTokens() ) {
+                    contentValues = new ContentValues();
+                    contentValues.put(Test_Wrong_Answer_String.COLUMN_NAME_ENTRY,entry_id);
+                    contentValues.put(Test_Wrong_Answer_String.COLUMN_NAME_WRONG_ANSWER,stringTokenizer.nextToken());
+                    sqLiteDatabase.insert(Test_Wrong_Answer_String.TABLE_NAME,null,contentValues);
+                }
+            }
+            Cursor test_paused_cursor = sqLiteDatabase.query(Test_Paused.TABLE_NAME,new String[]{Test_Paused.COLUMN_NAME_FIELD},
+                    Test_Paused.COLUMN_NAME_FIELD + " = ? ",
+                    new String[]{field_id + ""},null,null,null);
+            if ( test_paused_cursor.getCount() <= 0 ) {
+                if ( new DatabaseOperations(context.getContentResolver()).checkLinkerTest(field) ) {
+                    int currentQuestionCounter = sharedPreferences.getInt(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.CURRENT_QUESTION_COUNTER
+                            + TestActivity.DASH + field,0);
+                    int wrongAnswersCounter = sharedPreferences.getInt(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.NUMBER_OF_WRONG_ANSWERS
+                            + TestActivity.DASH + field,0);
+                    int permitedTriesNumber = sharedPreferences.getInt(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.PERMITED_TRIES_NUMBER
+                            + TestActivity.DASH + field,0);
+                    contentValues = new ContentValues();
+                    contentValues.put(Test_Paused.COLUMN_NAME_FIELD,field_id);
+                    contentValues.put(Test_Paused.COLUMN_NAME_CURRENT_QUESTION_COUNTER,currentQuestionCounter);
+                    contentValues.put(Test_Paused.COLUMN_NAME_WRONG_ANSWERS_COUNT,wrongAnswersCounter);
+                    contentValues.put(Test_Paused.COLUMN_NAME_TRIES_NUMBER,permitedTriesNumber);
+                    sqLiteDatabase.insert(Test_Paused.TABLE_NAME,null,contentValues);
+                    editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.CURRENT_QUESTION_COUNTER
+                            + TestActivity.DASH + field);
+                    editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.NUMBER_OF_WRONG_ANSWERS
+                            + TestActivity.DASH + field);
+                    editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.PERMITED_TRIES_NUMBER
+                            + TestActivity.DASH + field);
+                }
+            }
+            Cursor study_period_paused_cursor = sqLiteDatabase.query(Study_Period_Paused.TABLE_NAME,new String[]{Study_Period_Paused.COLUMN_NAME_FIELD},
+                    Study_Period_Paused.COLUMN_NAME_FIELD + " = ? ",
+                    new String[]{field_id + ""},null,null,null);
+            if ( study_period_paused_cursor.getCount() <= 0 ) {
+                if ( new DatabaseOperations(context.getContentResolver()).checkLinkerTest(field) ) {
+                    String string = sharedPreferences.getString(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
+                            StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES
+                            + StudyDuringActivity.DASH + field, null);
+                    if ( string != null ) {
+                        StringTokenizer stringTokenizer = new StringTokenizer(string, "-");
+                        while (stringTokenizer.hasMoreTokens()) {
+                            contentValues = new ContentValues();
+                            contentValues.put(Study_Period_Repeated_Entry.COLUMN_NAME_FIELD,field_id);
+                            contentValues.put(Study_Period_Repeated_Entry.COLUMN_NAME_REPEATED_ENTRY,Integer.parseInt(stringTokenizer.nextToken()));
+                            sqLiteDatabase.insert(Study_Period_Repeated_Entry.TABLE_NAME,null,contentValues);
+                        }
+                    }
+                    int currentQuestionCounter = sharedPreferences.getInt(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
+                            StudyDuringActivity.CURRENT_QUESTION_COUNTER
+                            + StudyDuringActivity.DASH + field, 0);
+                    int permitedTriesNumber = sharedPreferences.getInt(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
+                            StudyDuringActivity.NUMBER_OF_TRIES + StudyDuringActivity.DASH + field, 0);
+                    contentValues = new ContentValues();
+                    contentValues.put(Study_Period_Paused.COLUMN_NAME_FIELD,field_id);
+                    contentValues.put(Study_Period_Paused.COLUMN_NAME_CURRENT_QUESTION_COUNTER,currentQuestionCounter);
+                    contentValues.put(Study_Period_Paused.COLUMN_NAME_TRIES_NUMBER,permitedTriesNumber);
+                    sqLiteDatabase.insert(Study_Period_Paused.TABLE_NAME,null,contentValues);
+                    editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
+                            StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES
+                            + StudyDuringActivity.DASH + field);
+                    editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
+                            StudyDuringActivity.CURRENT_QUESTION_COUNTER
+                            + StudyDuringActivity.DASH + field);
+                    editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
+                            StudyDuringActivity.NUMBER_OF_TRIES + StudyDuringActivity.DASH + field);
+                }
+            }
+            question_id_cursor.close();
+            answer_id_cursor.close();
+            field_id_cursor.close();
+            test_paused_cursor.close();
+            study_period_paused_cursor.close();
+        }
+        editor.apply();
+        linkerCursor.close();
+        drop = "DROP TABLE IF EXISTS " + Old_Linker_DBV6_AppV32.TABLE_NAME + ";";
         sqLiteDatabase.execSQL(drop);
     }
 }

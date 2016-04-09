@@ -685,26 +685,26 @@ public class StudyDuringActivity extends AppCompatActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
         if (id == CONTINUE_PREVIOUS_SESSION) {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this, uri,
-                    new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK,
-                            Contract.Linker.COLUMN_NAME_ANSWER_LINK,
-                            Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER},
-                    Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK,
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER},
+                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                     new String[]{"0", currentField},
                     null);
-            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Study_During_Temp.TABLE_NAME);
+            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,uri,
-                    new String[] {Contract.Study_During_Temp.COLUMN_NAME_QUESTION, Contract.Study_During_Temp.COLUMN_NAME_ANSWER},
-                    Contract.Study_During_Temp.COLUMN_NAME_FIELD + " = ?",
+                    new String[] {Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_QUESTION, Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_ANSWER},
+                    Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_FIELD + " = ?",
                     new String[] {currentField},
                     null);*/
         } else {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,
                     uri,
-                    new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK, Contract.COLUMN_NAME_CREATED_AT},
-                    Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK, Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32},
+                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                     new String[]{currentField},
                     null);
         }

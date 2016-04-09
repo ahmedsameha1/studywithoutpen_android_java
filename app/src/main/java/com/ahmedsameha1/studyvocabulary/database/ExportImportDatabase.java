@@ -89,81 +89,81 @@ public class ExportImportDatabase {
             toExportDatabase.beginTransactionNonExclusive();
             toExportDatabase.setVersion(DatabaseHelper.DATABASE_VERSION);
             toExportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
-            toExportDatabase.execSQL(DatabaseHelper.CREATE_QUESTION_TABLE);
-            toExportDatabase.execSQL(DatabaseHelper.CREATE_ANSWER_TABLE);
-            toExportDatabase.execSQL(DatabaseHelper.CREATE_LINKER_TABLE);
+            toExportDatabase.execSQL(DatabaseHelper.DBV6_APPV32_CREATE_QUESTION_TABLE);
+            toExportDatabase.execSQL(DatabaseHelper.DBV6_APPV32_CREATE_ANSWER_TABLE);
+            toExportDatabase.execSQL(DatabaseHelper.DBV6_APPV32_CREATE_LINKER_TABLE);
             toExportDatabase.execSQL("PRAGMA foreign_keys=ON;");
             for (String tempFieldName : fieldNames) {
-                Uri uriFieldTable = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);
+                Uri uriFieldTable = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Field_DBV6_AppV32.TABLE_NAME);
                 Cursor fieldCursor = contentResolver.query(uriFieldTable,
                         null,
-                        Contract.Field.COLUMN_NAME_FIELD_NAME + " = ? ",
+                        Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " = ? ",
                         new String[]{tempFieldName},
                         null);
                 fieldCursor.moveToFirst();
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(Contract.Field.COLUMN_NAME_FIELD_NAME, fieldCursor.getString(0));
-                contentValues.put(Contract.Field.COLUMN_NAME_FIELD_TYPE, fieldCursor.getInt(1));
-                contentValues.put(Contract.COLUMN_NAME_CREATED_AT, fieldCursor.getString(2));
-                toExportDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
+                contentValues.put(Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME, fieldCursor.getString(0));
+                contentValues.put(Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, fieldCursor.getInt(1));
+                contentValues.put(Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32, fieldCursor.getString(2));
+                toExportDatabase.insert(Contract.Old_Field_DBV6_AppV32.TABLE_NAME, null, contentValues);
                 fieldCursor.close();
                 ///////////////////////////////////////////////////////////
-                Uri uri1 = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
-                Cursor linkerCursor = contentResolver.query(uri1, null, Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ?",
+                Uri uri1 = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
+                Cursor linkerCursor = contentResolver.query(uri1, null, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ?",
                         new String[]{tempFieldName}, null);
                 for (linkerCursor.moveToFirst(); linkerCursor.getPosition() < linkerCursor.getCount();
                      linkerCursor.moveToNext()) {
-                    Uri uri2 = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Question.TABLE_NAME);
+                    Uri uri2 = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Question_DBV6_AppV32.TABLE_NAME);
                     Cursor questionCursor = contentResolver.query(uri2,
                             null,
-                            Contract.Question.COLUMN_NAME_QUESTION_ENTRY + " = ?",
+                            Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY + " = ?",
                             new String[]{linkerCursor.getString(0)},
                             null);
-                    Cursor checkQuestionCursor = toExportDatabase.query(Contract.Question.TABLE_NAME,
-                            new String[]{Contract.Question.COLUMN_NAME_QUESTION_ENTRY},
-                            Contract.Question.COLUMN_NAME_QUESTION_ENTRY + " = ? ",
+                    Cursor checkQuestionCursor = toExportDatabase.query(Contract.Old_Question_DBV6_AppV32.TABLE_NAME,
+                            new String[]{Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY},
+                            Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY + " = ? ",
                             new String[]{linkerCursor.getString(0)},
                             null, null, null);
                     if (checkQuestionCursor.getCount() <= 0) {
                         questionCursor.moveToFirst();
                         ContentValues contentValues1 = new ContentValues();
-                        contentValues1.put(Contract.Question.COLUMN_NAME_QUESTION_ENTRY, questionCursor.getString(0));
-                        contentValues1.put(Contract.COLUMN_NAME_CREATED_AT, questionCursor.getString(1));
-                        toExportDatabase.insert(Contract.Question.TABLE_NAME, null, contentValues1);
+                        contentValues1.put(Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY, questionCursor.getString(0));
+                        contentValues1.put(Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32, questionCursor.getString(1));
+                        toExportDatabase.insert(Contract.Old_Question_DBV6_AppV32.TABLE_NAME, null, contentValues1);
                     }
                     questionCursor.close();
                     checkQuestionCursor.close();
                     ///////////////////////////////////////////////////////////
-                    uri2 = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Answer.TABLE_NAME);
+                    uri2 = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Answer_DBV6_AppV32.TABLE_NAME);
                     Cursor answerCursor = contentResolver.query(uri2,
                             null,
-                            Contract.Answer.COLUMN_NAME_ANSWER_ENTRY + " = ?",
+                            Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY + " = ?",
                             new String[]{linkerCursor.getString(1)},
                             null);
-                    Cursor checkAnswerCursor = toExportDatabase.query(Contract.Answer.TABLE_NAME,
-                            new String[]{Contract.Answer.COLUMN_NAME_ANSWER_ENTRY},
-                            Contract.Answer.COLUMN_NAME_ANSWER_ENTRY + " = ? ",
+                    Cursor checkAnswerCursor = toExportDatabase.query(Contract.Old_Answer_DBV6_AppV32.TABLE_NAME,
+                            new String[]{Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY},
+                            Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY + " = ? ",
                             new String[]{linkerCursor.getString(1)},
                             null, null, null);
                     if (checkAnswerCursor.getCount() <= 0) {
                         answerCursor.moveToFirst();
                         ContentValues contentValues1 = new ContentValues();
-                        contentValues1.put(Contract.Answer.COLUMN_NAME_ANSWER_ENTRY, answerCursor.getString(0));
-                        contentValues1.put(Contract.COLUMN_NAME_CREATED_AT, answerCursor.getString(1));
-                        toExportDatabase.insert(Contract.Answer.TABLE_NAME, null, contentValues1);
+                        contentValues1.put(Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY, answerCursor.getString(0));
+                        contentValues1.put(Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32, answerCursor.getString(1));
+                        toExportDatabase.insert(Contract.Old_Answer_DBV6_AppV32.TABLE_NAME, null, contentValues1);
                     }
                     answerCursor.close();
                     checkAnswerCursor.close();
                     ///////////////////////////////////////////////////////////
                     contentValues = new ContentValues();
-                    contentValues.put(Contract.Linker.COLUMN_NAME_QUESTION_LINK, linkerCursor.getString(0));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_ANSWER_LINK, linkerCursor.getString(1));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_FIELD_LINK, linkerCursor.getString(2));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER, linkerCursor.getInt(3));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_TEST_ORDER, linkerCursor.getInt(4));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_TEST_WRONG_ANSWERS, linkerCursor.getString(5));
-                    contentValues.put(Contract.COLUMN_NAME_CREATED_AT, linkerCursor.getString(6));
-                    toExportDatabase.insert(Contract.Linker.TABLE_NAME, null, contentValues);
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, linkerCursor.getString(0));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK, linkerCursor.getString(1));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK, linkerCursor.getString(2));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER, linkerCursor.getInt(3));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER, linkerCursor.getInt(4));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_WRONG_ANSWERS, linkerCursor.getString(5));
+                    contentValues.put(Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32, linkerCursor.getString(6));
+                    toExportDatabase.insert(Contract.Old_Linker_DBV6_AppV32.TABLE_NAME, null, contentValues);
                 }
                 linkerCursor.close();
             }
@@ -253,21 +253,21 @@ public class ExportImportDatabase {
             }
         });
         try {
-            Cursor toImportFieldCursor = toImportDatabase.query(Contract.Field.TABLE_NAME, null, null, null, null, null, null);
+            Cursor toImportFieldCursor = toImportDatabase.query(Contract.Old_Field_DBV6_AppV32.TABLE_NAME, null, null, null, null, null, null);
             for (toImportFieldCursor.moveToFirst(); toImportFieldCursor.getPosition() < toImportFieldCursor.getCount();
                  toImportFieldCursor.moveToNext()) {
-                Uri uriFieldTable = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);
+                Uri uriFieldTable = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Field_DBV6_AppV32.TABLE_NAME);
                 Cursor appFieldCursor = contentResolver.query(uriFieldTable, null,
-                        Contract.Field.COLUMN_NAME_FIELD_NAME + " = ? ",
+                        Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " = ? ",
                         new String[]{toImportFieldCursor.getString(0)},
                         null);
                 if (appFieldCursor.getCount() <= 0) {
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.Field.COLUMN_NAME_FIELD_NAME, toImportFieldCursor.getString(0));
-                    contentValues.put(Contract.Field.COLUMN_NAME_FIELD_TYPE, toImportFieldCursor.getInt(1));
-                    contentValues.put(Contract.COLUMN_NAME_CREATED_AT, toImportFieldCursor.getString(2));
+                    contentValues.put(Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME, toImportFieldCursor.getString(0));
+                    contentValues.put(Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, toImportFieldCursor.getInt(1));
+                    contentValues.put(Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32, toImportFieldCursor.getString(2));
 //                    contentResolver.insert(uriFieldTable, contentValues);
-                    appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
+                    appDatabase.insert(Contract.Old_Field_DBV6_AppV32.TABLE_NAME, null, contentValues);
                 } else {
                     appFieldCursor.moveToFirst();
                     if (toImportFieldCursor.getInt(1) != appFieldCursor.getInt(1)) {
@@ -277,42 +277,42 @@ public class ExportImportDatabase {
                 appFieldCursor.close();
             }
             toImportFieldCursor.close();
-            Uri questionTableUri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Question.TABLE_NAME);
-            Cursor toImportQuestionCursor = toImportDatabase.query(Contract.Question.TABLE_NAME, null, null, null, null, null, null);
+            Uri questionTableUri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Question_DBV6_AppV32.TABLE_NAME);
+            Cursor toImportQuestionCursor = toImportDatabase.query(Contract.Old_Question_DBV6_AppV32.TABLE_NAME, null, null, null, null, null, null);
             Cursor appQuestionCursor;
             for (toImportQuestionCursor.moveToFirst(); toImportQuestionCursor.getPosition() < toImportQuestionCursor.getCount();
                  toImportQuestionCursor.moveToNext()) {
                 appQuestionCursor = contentResolver.query(questionTableUri,
-                        new String[]{Contract.Question.COLUMN_NAME_QUESTION_ENTRY},
-                        Contract.Question.COLUMN_NAME_QUESTION_ENTRY + " = ?",
+                        new String[]{Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY},
+                        Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY + " = ?",
                         new String[]{toImportQuestionCursor.getString(0)},
                         null);
                 if (appQuestionCursor.getCount() <= 0) {
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.Question.COLUMN_NAME_QUESTION_ENTRY, toImportQuestionCursor.getString(0));
-                    contentValues.put(Contract.COLUMN_NAME_CREATED_AT, toImportQuestionCursor.getString(1));
+                    contentValues.put(Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY, toImportQuestionCursor.getString(0));
+                    contentValues.put(Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32, toImportQuestionCursor.getString(1));
 //                    contentResolver.insert(questionTableUri, contentValues);
-                    appDatabase.insert(Contract.Question.TABLE_NAME, null, contentValues);
+                    appDatabase.insert(Contract.Old_Question_DBV6_AppV32.TABLE_NAME, null, contentValues);
                 }
                 appQuestionCursor.close();
             }
             toImportQuestionCursor.close();
-            Uri answerTableUri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Answer.TABLE_NAME);
-            Cursor toImportAnswerCursor = toImportDatabase.query(Contract.Answer.TABLE_NAME, null, null, null, null, null, null);
+            Uri answerTableUri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Answer_DBV6_AppV32.TABLE_NAME);
+            Cursor toImportAnswerCursor = toImportDatabase.query(Contract.Old_Answer_DBV6_AppV32.TABLE_NAME, null, null, null, null, null, null);
             Cursor appAnswerCursor;
             for (toImportAnswerCursor.moveToFirst(); toImportAnswerCursor.getPosition() < toImportAnswerCursor.getCount();
                  toImportAnswerCursor.moveToNext()) {
                 appAnswerCursor = contentResolver.query(answerTableUri,
-                        new String[]{Contract.Answer.COLUMN_NAME_ANSWER_ENTRY},
-                        Contract.Answer.COLUMN_NAME_ANSWER_ENTRY + " = ?",
+                        new String[]{Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY},
+                        Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY + " = ?",
                         new String[]{toImportAnswerCursor.getString(0)},
                         null);
                 if (appAnswerCursor.getCount() <= 0) {
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.Answer.COLUMN_NAME_ANSWER_ENTRY, toImportAnswerCursor.getString(0));
-                    contentValues.put(Contract.COLUMN_NAME_CREATED_AT, toImportAnswerCursor.getString(1));
+                    contentValues.put(Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY, toImportAnswerCursor.getString(0));
+                    contentValues.put(Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32, toImportAnswerCursor.getString(1));
 //                    contentResolver.insert(answerTableUri, contentValues);
-                    appDatabase.insert(Contract.Answer.TABLE_NAME, null, contentValues);
+                    appDatabase.insert(Contract.Old_Answer_DBV6_AppV32.TABLE_NAME, null, contentValues);
                 }
                 appAnswerCursor.close();
             }
@@ -330,66 +330,66 @@ public class ExportImportDatabase {
                     }
                 }
             }
-            Uri linkerTableUri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
-            Cursor toImportLinkerCursor = toImportDatabase.query(Contract.Linker.TABLE_NAME, null,
-                    Contract.Linker.COLUMN_NAME_FIELD_LINK + " NOT IN " + placeholders,
+            Uri linkerTableUri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
+            Cursor toImportLinkerCursor = toImportDatabase.query(Contract.Old_Linker_DBV6_AppV32.TABLE_NAME, null,
+                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " NOT IN " + placeholders,
                     notImportedArray, null, null, null);
             for (toImportLinkerCursor.moveToFirst(); toImportLinkerCursor.getPosition() < toImportLinkerCursor.getCount();
                  toImportLinkerCursor.moveToNext()) {
                 Cursor appLinkerCursor = contentResolver.query(linkerTableUri,
-                        new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK,
-                                Contract.Linker.COLUMN_NAME_ANSWER_LINK,
-                                Contract.Linker.COLUMN_NAME_FIELD_LINK},
-                        Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? AND " +
-                                Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ?",
+                        new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
+                                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK,
+                                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK},
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " = ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND " +
+                                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ?",
                         new String[]{toImportLinkerCursor.getString(0), toImportLinkerCursor.getString(1), toImportLinkerCursor.getString(2)},
                         null);
                 if (appLinkerCursor.getCount() <= 0) {
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.Linker.COLUMN_NAME_QUESTION_LINK, toImportLinkerCursor.getString(0));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_ANSWER_LINK, toImportLinkerCursor.getString(1));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_FIELD_LINK, toImportLinkerCursor.getString(2));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_STUDY_DURING_ORDER, toImportLinkerCursor.getInt(3));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_TEST_ORDER, toImportLinkerCursor.getInt(4));
-                    contentValues.put(Contract.Linker.COLUMN_NAME_TEST_WRONG_ANSWERS, toImportLinkerCursor.getString(5));
-                    contentValues.put(Contract.COLUMN_NAME_CREATED_AT, toImportLinkerCursor.getString(6));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, toImportLinkerCursor.getString(0));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK, toImportLinkerCursor.getString(1));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK, toImportLinkerCursor.getString(2));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER, toImportLinkerCursor.getInt(3));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER, toImportLinkerCursor.getInt(4));
+                    contentValues.put(Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_WRONG_ANSWERS, toImportLinkerCursor.getString(5));
+                    contentValues.put(Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32, toImportLinkerCursor.getString(6));
 //                    contentResolver.insert(linkerTableUri, contentValues);
-                    appDatabase.insert(Contract.Linker.TABLE_NAME, null, contentValues);
+                    appDatabase.insert(Contract.Old_Linker_DBV6_AppV32.TABLE_NAME, null, contentValues);
                 }
                 appLinkerCursor.close();
             }
             toImportLinkerCursor.close();
-/*            Cursor questionsCursor = contentResolver.query(questionTableUri, new String[]{Contract.Question.COLUMN_NAME_QUESTION_ENTRY},
+/*            Cursor questionsCursor = contentResolver.query(questionTableUri, new String[]{Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY},
                     null, null, null);*/
-            Cursor questionsCursor = toImportDatabase.query(Contract.Question.TABLE_NAME,new String[]{Contract.Question.COLUMN_NAME_QUESTION_ENTRY},
+            Cursor questionsCursor = toImportDatabase.query(Contract.Old_Question_DBV6_AppV32.TABLE_NAME,new String[]{Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY},
                     null, null, null,null,null);
             for (questionsCursor.moveToFirst(); questionsCursor.getPosition() < questionsCursor.getCount();
                  questionsCursor.moveToNext()) {
-                Cursor unneededQuestionCursor = contentResolver.query(linkerTableUri, new String[]{Contract.Linker.COLUMN_NAME_QUESTION_LINK},
-                        Contract.Linker.COLUMN_NAME_QUESTION_LINK + " = ? ",
+                Cursor unneededQuestionCursor = contentResolver.query(linkerTableUri, new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK},
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " = ? ",
                         new String[]{questionsCursor.getString(0)}, null);
                 if (unneededQuestionCursor.getCount() <= 0) {
-          /*          contentResolver.delete(questionTableUri, Contract.Question.COLUMN_NAME_QUESTION_ENTRY + " = ?",
+          /*          contentResolver.delete(questionTableUri, Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY + " = ?",
                             new String[]{questionsCursor.getString(0)});*/
-                    appDatabase.delete(Contract.Question.TABLE_NAME, Contract.Question.COLUMN_NAME_QUESTION_ENTRY + " = ?",
+                    appDatabase.delete(Contract.Old_Question_DBV6_AppV32.TABLE_NAME, Contract.Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY + " = ?",
                             new String[]{questionsCursor.getString(0)});
                 }
                 unneededQuestionCursor.close();
             }
             questionsCursor.close();
-            /*Cursor answersCursor = contentResolver.query(answerTableUri, new String[]{Contract.Answer.COLUMN_NAME_ANSWER_ENTRY},
+            /*Cursor answersCursor = contentResolver.query(answerTableUri, new String[]{Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY},
                     null, null, null);*/
-            Cursor answersCursor = toImportDatabase.query(Contract.Answer.TABLE_NAME,new String[]{Contract.Answer.COLUMN_NAME_ANSWER_ENTRY},
+            Cursor answersCursor = toImportDatabase.query(Contract.Old_Answer_DBV6_AppV32.TABLE_NAME,new String[]{Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY},
                     null, null, null, null, null);
             for (answersCursor.moveToFirst(); answersCursor.getPosition() < answersCursor.getCount();
                  answersCursor.moveToNext()) {
-                Cursor unneededAnswerCursor = contentResolver.query(linkerTableUri, new String[]{Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                        Contract.Linker.COLUMN_NAME_ANSWER_LINK + " = ? ",
+                Cursor unneededAnswerCursor = contentResolver.query(linkerTableUri, new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? ",
                         new String[]{answersCursor.getString(0)}, null);
                 if (unneededAnswerCursor.getCount() <= 0) {
-/*                    contentResolver.delete(answerTableUri, Contract.Answer.COLUMN_NAME_ANSWER_ENTRY + " = ?",
+/*                    contentResolver.delete(answerTableUri, Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY + " = ?",
                             new String[]{answersCursor.getString(0)});*/
-                    appDatabase.delete(Contract.Answer.TABLE_NAME, Contract.Answer.COLUMN_NAME_ANSWER_ENTRY + " = ?",
+                    appDatabase.delete(Contract.Old_Answer_DBV6_AppV32.TABLE_NAME, Contract.Old_Answer_DBV6_AppV32.COLUMN_NAME_ANSWER_ENTRY + " = ?",
                             new String[]{answersCursor.getString(0)});
                 }
                 unneededAnswerCursor.close();

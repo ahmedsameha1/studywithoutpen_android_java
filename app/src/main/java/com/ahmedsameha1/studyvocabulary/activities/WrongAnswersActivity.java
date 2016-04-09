@@ -88,12 +88,12 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
         return new CursorLoader(this,uri,
-                new String[] {Contract.Linker.COLUMN_NAME_QUESTION_LINK,
-                        Contract.Linker.COLUMN_NAME_ANSWER_LINK,
-                        Contract.Linker.COLUMN_NAME_TEST_WRONG_ANSWERS},
-                Contract.Linker.COLUMN_NAME_TEST_WRONG_ANSWERS + " != ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[] {Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK,
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_WRONG_ANSWERS},
+                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_WRONG_ANSWERS + " != ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                 new String[] {"", currentField},
                 null);
     }

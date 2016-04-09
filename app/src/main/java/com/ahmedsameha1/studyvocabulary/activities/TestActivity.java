@@ -700,20 +700,20 @@ public class TestActivity extends AppCompatActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if ( id == CONTINUE_PREVIOUS_SESSION ) {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,uri,
-                    new String[] {Contract.Linker.COLUMN_NAME_QUESTION_LINK,
-                            Contract.Linker.COLUMN_NAME_ANSWER_LINK,
-                            Contract.Linker.COLUMN_NAME_TEST_ORDER},
-                    Contract.Linker.COLUMN_NAME_TEST_ORDER + " >= ? AND " + Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[] {Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK,
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER},
+                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                     new String[] {"0", currentField},
                     null);
         } else {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Linker.TABLE_NAME);
+            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,
                     uri,
-                    new String[]{"rowid _id", Contract.Linker.COLUMN_NAME_QUESTION_LINK, Contract.Linker.COLUMN_NAME_ANSWER_LINK},
-                    Contract.Linker.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                     new String[]{currentField},
                     null);
         }
