@@ -82,7 +82,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Not_String.COLUMN_NAME_VALUE + " BLOB NOT NULL"
             + " );";
-    public static final String CREATE_ENTRY_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + String_Entry.TABLE_NAME
+    public static final String CREATE_STRING_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + String_Entry.TABLE_NAME
             + " ( "
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + String_Entry.COLUMN_NAME_QUESTION + " INTEGER NOT NULL, "
@@ -101,7 +101,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + String_Entry.COLUMN_NAME_ANSWER + ", "
             + String_Entry.COLUMN_NAME_FIELD + " )"
             + " );";
-    public static final String CREATE_ENTRY_NOT_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Not_String_Entry.TABLE_NAME
+    public static final String CREATE_NOT_STRING_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + Not_String_Entry.TABLE_NAME
             + " ( "
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Not_String_Entry.COLUMN_NAME_QUESTION + " INTEGER NOT NULL, "
@@ -148,7 +148,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Study_Period_Repeated_Entry.COLUMN_NAME_FIELD + " INTEGER NOT NULL, "
             + Study_Period_Repeated_Entry.COLUMN_NAME_REPEATED_ENTRY + " INTEGER NOT NULL, "
-            + "FOREIGN KEY(" + Study_Period_Repeated_Entry.COLUMN_NAME_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + "FOREIGN KEY(" + Study_Period_Repeated_Entry.COLUMN_NAME_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + " UNIQUE ( " + Study_Period_Repeated_Entry.COLUMN_NAME_FIELD + ", "
+            + Study_Period_Repeated_Entry.COLUMN_NAME_REPEATED_ENTRY + " )"
             + " );";
     public static final String CREATE_STUDY_PERIOD_PAUSED_TABLE = "CREATE TABLE IF NOT EXISTS " + Study_Period_Paused.TABLE_NAME
             + " ( "
@@ -162,17 +164,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " ( "
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Alternative_Answer_String.COLUMN_NAME_ENTRY + " INTEGER NOT NULL, "
-            + Alternative_Answer_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " TEXT NOT NULL, "
+            + Alternative_Answer_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " INTEGER NOT NULL, "
             + Alternative_Answer_String.COLUMN_NAME_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
-            + "FOREIGN KEY(" + Alternative_Answer_String.COLUMN_NAME_ENTRY + ") REFERENCES " + String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + "FOREIGN KEY(" + Alternative_Answer_String.COLUMN_NAME_ENTRY + ") REFERENCES " + String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + "FOREIGN KEY(" + Alternative_Answer_String.COLUMN_NAME_ALTERNATIVE_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + " UNIQUE ( " + Alternative_Answer_String.COLUMN_NAME_ENTRY + ", "
+            + Alternative_Answer_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " )"
             + " );";
     public static final String CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Alternative_Answer_Not_String.TABLE_NAME
             + " ( "
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Alternative_Answer_Not_String.COLUMN_NAME_ENTRY + " INTEGER NOT NULL, "
-            + Alternative_Answer_Not_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " TEXT NOT NULL, "
+            + Alternative_Answer_Not_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " INTEGER NOT NULL, "
             + Alternative_Answer_Not_String.COLUMN_NAME_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
-            + "FOREIGN KEY(" + Alternative_Answer_Not_String.COLUMN_NAME_ENTRY + ") REFERENCES " + Not_String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + "FOREIGN KEY(" + Alternative_Answer_Not_String.COLUMN_NAME_ENTRY + ") REFERENCES " + Not_String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + "FOREIGN KEY(" + Alternative_Answer_Not_String.COLUMN_NAME_ALTERNATIVE_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + " UNIQUE ( " + Alternative_Answer_Not_String.COLUMN_NAME_ENTRY + ", "
+            + Alternative_Answer_Not_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " )"
             + " );";
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -235,20 +243,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onCreate( SQLiteDatabase sqLiteDatabase ) {
-        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
+        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
         sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_TABLE);
         sqLiteDatabase.execSQL(CREATE_LOCALE_TABLE);
-        sqLiteDatabase.execSQL(CREATE_STRING_TABLE);
-        sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);
-        sqLiteDatabase.execSQL(CREATE_ENTRY_STRING_TABLE);
-        sqLiteDatabase.execSQL(CREATE_ENTRY_NOT_STRING_TABLE);
+        sqLiteDatabase.execSQL(CREATE_STRING_TABLE);//
+        sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);//
+        sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);//
+        sqLiteDatabase.execSQL(CREATE_NOT_STRING_ENTRY_TABLE);//
         sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_STRING_TABLE);
         sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_NOT_STRING_TABLE);
         sqLiteDatabase.execSQL(CREATE_TEST_PAUSED_TABLE);
         sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_REPEATED_ENTRY_TABLE);
         sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_PAUSED_TABLE);
-        sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);
-        sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);
+        sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);//
+        sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);//
         Log.d("from APP to Ahmed", "table have been written");
     }
     @Override
@@ -294,8 +302,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(CREATE_LOCALE_TABLE);
             sqLiteDatabase.execSQL(CREATE_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);
-            sqLiteDatabase.execSQL(CREATE_ENTRY_STRING_TABLE);
-            sqLiteDatabase.execSQL(CREATE_ENTRY_NOT_STRING_TABLE);
+            sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);
+            sqLiteDatabase.execSQL(CREATE_NOT_STRING_ENTRY_TABLE);
             sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_NOT_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_TEST_PAUSED_TABLE);
