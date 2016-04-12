@@ -13,6 +13,7 @@ import com.commonsware.cwac.loaderex.SQLiteCursorLoader;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Ahmed on 4/9/16.
@@ -29,6 +30,10 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         this.db=db;
         this.rawQuery=rawQuery;
         this.args=args;
+    }
+    public MySQLiteCursorLoader(Context context, SQLiteOpenHelper db) {
+        super(context);
+        this.db=db;
     }
 
     /**
@@ -56,15 +61,38 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         writer.println(Arrays.toString(args));
     }
 
-    public void insert(String table, String nullColumnHack,
+    public long insert(String table, String nullColumnHack,
                        ContentValues values) {
-        buildInsertTask(this).execute(db, table, nullColumnHack, values);
+        try {
+            return buildInsertTask(this).execute(db, table, nullColumnHack, values).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return -2;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return -2;
+        }
+    }
+    public long insertWithOnConflict (String table, String nullColumnHack, ContentValues values, int conflictAlgorithm) {
+        try {
+            return buildInsertWithOnConflictTask(this).execute(db, table, nullColumnHack, values, conflictAlgorithm).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return -2;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return -2;
+        }
     }
 
     public void update(String table, ContentValues values,
                        String whereClause, String[] whereArgs) {
         buildUpdateTask(this).execute(db, table, values, whereClause,
                 whereArgs);
+    }
+    public void updateWithOnConflict(String table, ContentValues values, String whereClause, String[] whereArgs, int conflictAlgorithm) {
+        buildUpdateWithOnConflictTask(this).execute(db, table, values, whereClause,
+                whereArgs,conflictAlgorithm);
     }
 
     public void replace(String table, String nullColumnHack,
@@ -84,9 +112,15 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     protected MyContentChangingTask buildInsertTask(MySQLiteCursorLoader loader) {
         return(new InsertTask(loader));
     }
+    protected MyContentChangingTask buildInsertWithOnConflictTask(MySQLiteCursorLoader loader) {
+        return(new InsertWithOnConflictTask(loader));
+    }
 
-    protected MyContentChangingTask buildUpdateTask(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildUpdateTask(MySQLiteCursorLoader loader) {
         return(new UpdateTask(loader));
+    }
+    protected ContentChangingTask buildUpdateWithOnConflictTask(MySQLiteCursorLoader loader) {
+        return(new UpdateWithOnConflictTask(loader));
     }
 
     protected MyContentChangingTask buildReplaceTask(MySQLiteCursorLoader loader) {
@@ -113,12 +147,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             String nullColumnHack=(String)params[2];
             ContentValues values=(ContentValues)params[3];
 
-            return db.getWritableDatabase().insertWithOnConflict(table, nullColumnHack, values, SQLiteDatabase.CONFLICT_IGNORE);
+            return db.getWritableDatabase().insert(table, nullColumnHack, values);
         }
     }
 
-    protected static class UpdateTask extends MyContentChangingTask {
-        UpdateTask(MySQLiteCursorLoader loader) {
+    protected static class InsertWithOnConflictTask extends MyContentChangingTask {
+        InsertWithOnConflictTask(MySQLiteCursorLoader loader) {
             super(loader);
         }
 
@@ -126,12 +160,51 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         protected Long doInBackground(Object... params) {
             SQLiteOpenHelper db=(SQLiteOpenHelper)params[0];
             String table=(String)params[1];
+            String nullColumnHack=(String)params[2];
+            ContentValues values=(ContentValues)params[3];
+            Integer conflictAlgorithm = (Integer) params[4];
+
+            return db.getWritableDatabase().insertWithOnConflict(table, nullColumnHack, values,conflictAlgorithm);
+        }
+    }
+
+    protected static class UpdateTask extends ContentChangingTask {
+        UpdateTask(MySQLiteCursorLoader loader) {
+            super(loader);
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            SQLiteOpenHelper db=(SQLiteOpenHelper)params[0];
+            String table=(String)params[1];
             ContentValues values=(ContentValues)params[2];
             String where=(String)params[3];
             String[] whereParams=(String[])params[4];
 
-            return Long.valueOf(db.getWritableDatabase()
-                    .updateWithOnConflict(table, values, where, whereParams,SQLiteDatabase.CONFLICT_IGNORE));
+            db.getWritableDatabase()
+                    .update(table, values, where, whereParams);
+
+            return(null);
+        }
+    }
+    protected static class UpdateWithOnConflictTask extends ContentChangingTask {
+        UpdateWithOnConflictTask(MySQLiteCursorLoader loader) {
+            super(loader);
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            SQLiteOpenHelper db=(SQLiteOpenHelper)params[0];
+            String table=(String)params[1];
+            ContentValues values=(ContentValues)params[2];
+            String where=(String)params[3];
+            String[] whereParams=(String[])params[4];
+            Integer conflictAlgorithm = (Integer) params[5];
+
+            db.getWritableDatabase()
+                    .updateWithOnConflict(table, values, where, whereParams,conflictAlgorithm);
+
+            return(null);
         }
     }
 

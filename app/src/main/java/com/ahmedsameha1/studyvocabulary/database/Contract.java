@@ -26,6 +26,7 @@ public final class Contract {
         public static final String COLUMN_NAME_ACTION_BAR_SHOWN = "action_bar_shown";
         public static final String COLUMN_NAME_SPEECH = "speech";
         public static final String COLUMN_NAME_USAGE_COUNT = "usage_count";
+        public static final String COLUMN_NAME_CREATION_EMULATION_NUMBER = "creation_emulation_number";
     }
     public static abstract class Field_Type implements BaseColumns {
         public static final String TABLE_NAME = "field_type";
@@ -53,6 +54,7 @@ public final class Contract {
         public static final String COLUMN_NAME_ASKED_COUNT = "asked_count";
         public static final String COLUMN_NAME_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
         public static final String COLUMN_NAME_RANK = "rank";
+        public static final String COLUMN_NAME_CREATION_EMULATED_DATE = "creation_emulated_date";
     }
     public static abstract class Not_String_Entry implements BaseColumns {
         public static final String TABLE_NAME = "not_string_entry";
@@ -64,6 +66,7 @@ public final class Contract {
         public static final String COLUMN_NAME_ASKED_COUNT = "asked_count";
         public static final String COLUMN_NAME_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
         public static final String COLUMN_NAME_RANK = "rank";
+        public static final String COLUMN_NAME_CREATION_EMULATED_DATE = "creation_emulated_date";
     }
     public static abstract class Test_Wrong_Answer_String implements BaseColumns {
         public static final String TABLE_NAME = "test_wrong_answer_string";
