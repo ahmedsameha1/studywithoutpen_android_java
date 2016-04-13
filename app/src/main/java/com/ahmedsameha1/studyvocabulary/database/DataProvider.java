@@ -15,8 +15,7 @@ public class DataProvider extends ContentProvider {
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" );
     @Override
     public boolean onCreate() {
-        DatabaseInstance.initializeInstance(new DatabaseHelper(getContext()));
-        sqLiteDatabase = DatabaseInstance.getInstance().openDatabase();
+        sqLiteDatabase = DatabaseHelper.getInstance(getContext()).getWritableDatabase();
         return false;
     }
 

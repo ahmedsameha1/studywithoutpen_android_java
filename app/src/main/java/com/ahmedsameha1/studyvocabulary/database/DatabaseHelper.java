@@ -15,8 +15,8 @@ import com.ahmedsameha1.studyvocabulary.database.Contract.OldField;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import com.ahmedsameha1.studyvocabulary.database.Contract.Field;
-import com.ahmedsameha1.studyvocabulary.database.Contract.Field_Type;
-import com.ahmedsameha1.studyvocabulary.database.Contract.Locale;
+
+
 import com.ahmedsameha1.studyvocabulary.database.Contract.STring;
 import com.ahmedsameha1.studyvocabulary.database.Contract.String_Entry;
 import com.ahmedsameha1.studyvocabulary.database.Contract.Not_String;
@@ -42,14 +42,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 7;
     public static final String DATABASE_NAME = "data";
     private Context context;
+    private static DatabaseHelper sInstance;
 
     public static final String CREATE_FIELD_TABLE = "CREATE TABLE IF NOT EXISTS " + Field.TABLE_NAME
             + " ( "
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Field.COLUMN_NAME_FIELD_NAME + " TEXT UNIQUE NOT NULL, "
-            + Field.COLUMN_NAME_FIELD_TYPE + " INTEGER NOT NULL, "
-            + Field.COLUMN_NAME_ENTRY_ANSWER_COLUMN_DATA_TYPE + " INTEGER NOT NULL, "
-            + Field.COLUMN_NAME_LOCALE + " INTEGER DEFAULT NULL, "
+            + Field.COLUMN_NAME_FIELD_TYPE + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_NAME_ENTRY_ANSWER_COLUMN_DATA_TYPE + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_NAME_LOCALE + " TEXT DEFAULT NULL, "
             + Field.COLUMN_NAME_SORT_BY + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_NAME_LIST_TEXT_SIZE + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_NAME_QUESTION_AREA_SIZE + " INTEGER NOT NULL DEFAULT 1, "
@@ -59,20 +60,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_NAME_SPEECH + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_NAME_USAGE_COUNT + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_NAME_CREATION_EMULATION_NUMBER + " INTEGER NOT NULL DEFAULT 0, "
-            + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
-            + "FOREIGN KEY(" + Field.COLUMN_NAME_FIELD_TYPE + ") REFERENCES " + Field_Type.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
-            + "FOREIGN KEY(" + Field.COLUMN_NAME_LOCALE + ") REFERENCES " + Locale.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE DEFAULT"
+            + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'))"
             + " );";
-    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME
+/*    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME
             + " ( "
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Field_Type.COLUMN_NAME_FIELD_TYPE_NAME + " TEXT UNIQUE NOT NULL"
-            + " );";
-    public static final String CREATE_LOCALE_TABLE = "CREATE TABLE IF NOT EXISTS " + Locale.TABLE_NAME
+            + " );";*/
+/*    public static final String CREATE_LOCALE_TABLE = "CREATE TABLE IF NOT EXISTS " + Locale.TABLE_NAME
             + " ( "
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Locale.COLUMN_NAME_LOCALE_NAME + " TEXT UNIQUE NOT NULL"
-            + " );";
+            + " );";*/
     public static final String CREATE_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + STring.TABLE_NAME
             + " ( "
             + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
@@ -240,15 +239,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_ANSWER + " TEXT NOT NULL, "
             + Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_FIELD + " TEXT NOT NULL );";
 
-    public DatabaseHelper(Context context) {
+    public static synchronized DatabaseHelper getInstance(Context context) {
+
+        // Use the application context, which will ensure that you
+        // don't accidentally leak an Activity's context.
+        // See this article for more information: http://bit.ly/6LRzfx
+        if (sInstance == null) {
+            sInstance = new DatabaseHelper(context.getApplicationContext());
+        }
+        return sInstance;
+    }
+    private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
     }
     @Override
     public void onCreate( SQLiteDatabase sqLiteDatabase ) {
         sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
-        sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_TABLE);
-        sqLiteDatabase.execSQL(CREATE_LOCALE_TABLE);
         sqLiteDatabase.execSQL(CREATE_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);//
@@ -301,8 +308,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             onUpgradeForFieldTableV6(sqLiteDatabase);
         }
         if ( oldVersion < 7 ) {
-            sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_TABLE);
-            sqLiteDatabase.execSQL(CREATE_LOCALE_TABLE);
             sqLiteDatabase.execSQL(CREATE_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);

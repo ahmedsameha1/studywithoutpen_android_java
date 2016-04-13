@@ -84,14 +84,43 @@ public class ImportFieldsDialogFragment extends DialogFragment {
                                 toast.show();
                             } else {
                                 dismiss();
+                                /*
                                 Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                                 toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
-                                ExportImportDatabase.startImportThread(context,fileName);
-                            }
+                                ExportImportDatabase.startImportThread(context,fileName);*/
+                                AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(getActivity());
+                                importUserUsageData
+                                        .setMessage(R.string.enter_number_of_tries_help)
+                                        .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
+                                                toast.setGravity(Gravity.TOP, 0, 400);
+                                                toast.show();
+                                                toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
+                                                toast.setGravity(Gravity.TOP, 0, 400);
+                                                toast.show();
+                                                ExportImportDatabase.startImportThread(context,fileName,false);
+                                            }
+                                        })
+                                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
+                                                toast.setGravity(Gravity.TOP, 0, 400);
+                                                toast.show();
+                                                toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
+                                                toast.setGravity(Gravity.TOP, 0, 400);
+                                                toast.show();
+                                                ExportImportDatabase.startImportThread(context,fileName,true);
+                                            }
+                                        })
+                                    .create().show();
+                        }
                         }
                     }
                 });

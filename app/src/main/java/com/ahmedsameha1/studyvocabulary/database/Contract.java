@@ -28,14 +28,6 @@ public final class Contract {
         public static final String COLUMN_NAME_USAGE_COUNT = "usage_count";
         public static final String COLUMN_NAME_CREATION_EMULATION_NUMBER = "creation_emulation_number";
     }
-    public static abstract class Field_Type implements BaseColumns {
-        public static final String TABLE_NAME = "field_type";
-        public static final String COLUMN_NAME_FIELD_TYPE_NAME = "name";
-    }
-    public static abstract class Locale implements BaseColumns {
-        public static final String TABLE_NAME = "locale";
-        public static final String COLUMN_NAME_LOCALE_NAME = "name";
-    }
     public static abstract class STring implements BaseColumns {
         public static final String TABLE_NAME = "string";
         public static final String COLUMN_NAME_VALUE = "value";
