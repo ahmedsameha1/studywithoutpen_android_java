@@ -54,7 +54,7 @@ public class ExportFieldsDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                databaseOperations = new DatabaseOperations(context.getContentResolver());
+                databaseOperations = new DatabaseOperations(context);
                 enterFileName = (EditText) alertDialog.findViewById(R.id.file_name);
                 listView = (ListView) alertDialog.findViewById(R.id.export_fields_list_view);
 

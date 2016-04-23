@@ -7,9 +7,9 @@ import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
+import android.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,33 +24,50 @@ import android.widget.SimpleCursorAdapter;
 import com.ahmedsameha1.studyvocabulary.adapters.SearchActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DataProvider;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.studyvocabulary.dialogs.DeleteEntryDialogFragment;
 
 /**
  * Created by ahmed on 3/2/2016.
  */
-public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> ,
+        DeleteEntryDialogFragment.Contact{
     private static final String CURRENT_FIELD = "current_field";
-    private static final int SEARCH_LOADER = 0;
+    public static final int SORT_QUESTION_DESC = 0;
+    public static final int SORT_ANSWER_DESC = 1;
+    public static final int SORT_QUESTION_ASC = 2;
+    public static final int SORT_ANSWER_ASC = 3;
+    public static final int SORT_DATE_DESC = 4;
+    public static final int SORT_DATE_ASC = 5;
+    public static final int SORT_CREATION_DATE_DESC = 6;
+    public static final int SORT_CREATION_DATE_ASC = 7;
+    public static final int DEFAULT_SORT = SORT_CREATION_DATE_DESC;
+    public static final int SEARCH_LOADER = 0;
     private static final String QUERY_KEY = "query_key";
+    private static final String CURRENT_SORT = "current_sort";
+    private static final String CURRENT_FIELD_ID = "current_field_id";
     private ListView listView;
-    private String currentField;
     private SimpleCursorAdapter simpleCursorAdapter;
     private RecyclerView recyclerView;
     private SearchActivityRecyclerViewAdapter mAdapter;
     private int fieldType;
-
+    private long current_field_id;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private int currentSort;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.search_activity_recyclerview);
-        currentField = getIntent().getStringExtra(StudyActivity.CURRENT_FIELD);
+        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
+        currentSort = getIntent().getIntExtra(StudyActivity.ORDER_OF_ENTRIES,DEFAULT_SORT);
         setSupportActionBar(toolbar);
-        fieldType = new DatabaseOperations(getContentResolver()).getFieldType(currentField);
-        mAdapter = new SearchActivityRecyclerViewAdapter(SearchActivity.this,null,currentField,fieldType);
+        fieldType = new DatabaseOperations(this).getFieldType(current_field_id);
+        mAdapter = new SearchActivityRecyclerViewAdapter(SearchActivity.this,null, current_field_id,fieldType);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(SearchActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -75,13 +92,15 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                     intent.getStringExtra(SearchManager.QUERY);
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, query);
-            getSupportLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
+            bundle.putInt(CURRENT_SORT, currentSort);
+            getLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
         }
     }
     private void handleIntent(String query) {
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, query);
-            getSupportLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
+            bundle.putInt(CURRENT_SORT, currentSort);
+            getLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
     }
 
     @Override
@@ -111,31 +130,31 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
         super.onSaveInstanceState(savedInsatanceState);
-        savedInsatanceState.putString(CURRENT_FIELD, currentField);
+        savedInsatanceState.putLong(CURRENT_FIELD_ID,current_field_id);
     }
     @Override
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         super.onSaveInstanceState(savedInstanceState);
-        if ( savedInstanceState != null && currentField == null ) {
-            currentField = savedInstanceState.getString(CURRENT_FIELD);
+        if ( savedInstanceState != null && current_field_id == 0 ) {
+            current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
         }
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        int sort = args.getInt(CURRENT_SORT);
         String searchString = args.getString(QUERY_KEY);
-        return new CursorLoader(this,Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME),
-                new String[]{"rowid _id",
-                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
-                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " LIKE ? AND "
-                        + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? "
-                        + " OR " +
-                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK
-                        + " LIKE ? AND "
-                        + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                new String[]{"%" + searchString + "%", currentField, "%" + searchString + "%", currentField},
-                null);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(SearchActivity.this,
+                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                        + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
+                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
+                        + " WHERE " + " se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? AND "
+                        + "  q LIKE ? "
+                        + " OR " + " se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? AND "
+                        + " a LIKE ? ORDER BY " + FieldActivity.SORT_STRINGS[sort],
+                new String[]{ current_field_id + "","%" + searchString + "%", current_field_id + "","%" + searchString + "%"});
+        return mySQLiteCursorLoader;
     }
 
     @Override
@@ -146,6 +165,11 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void deleteEntry(long entry_id, int question_data_type) {
+        mySQLiteCursorLoader.deleteEntry(entry_id,question_data_type);
     }
 
 

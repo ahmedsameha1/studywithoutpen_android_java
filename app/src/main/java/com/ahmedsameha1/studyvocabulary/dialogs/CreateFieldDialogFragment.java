@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;
 
@@ -29,7 +30,7 @@ public class CreateFieldDialogFragment extends DialogFragment {
     }*/
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {
-        final DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
+        final DatabaseOperations databaseOperations = new DatabaseOperations(getActivity());
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -72,7 +73,7 @@ public class CreateFieldDialogFragment extends DialogFragment {
                             toast.show();
                         } else {
                             int type = spinner.getSelectedItemPosition() - 1;
-                            databaseOperations.createNewField(fieldName, type);
+                            ((CreateFieldDialogFragment.Contact)getActivity()).createField(fieldName,type, Contract.Field.STRING_DATA_TYPE);
                             alertDialog.dismiss();
                         }
 
@@ -89,6 +90,9 @@ public class CreateFieldDialogFragment extends DialogFragment {
         enterFieldName = (EditText) view.findViewById(R.id.enter_field_name);
         return view;
     }*/
+    public interface Contact {
+    void createField(String field_name, int field_type, int question_data_type);
+}
 
 }
 

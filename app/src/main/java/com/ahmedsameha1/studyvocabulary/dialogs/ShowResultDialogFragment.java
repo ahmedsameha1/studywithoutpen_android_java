@@ -10,11 +10,14 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
+import com.ahmedsameha1.studyvocabulary.activities.StudyActivity;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;
 import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
 import com.ahmedsameha1.studyvocabulary.activities.WrongAnswersActivity;
 import com.ahmedsameha1.studyvocabulary.adapters.WrongItem;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -27,19 +30,20 @@ public class ShowResultDialogFragment extends DialogFragment {
     private int questionsNumber, wrongAnswersNumber;
     private double correctAnswersPercent;
     private String message;
-    private String currentField;
+    private long current_field_id;
     ArrayList<WrongItem> wrongItemList;
     private DatabaseOperations databaseOperations;
-
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
+        databaseOperations = new DatabaseOperations(getActivity());
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
 /*        wrongItemList = (ArrayList<WrongItem>) getArguments()
                 .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);*/
         questionsNumber = getArguments().getInt(TestActivity.NUMBER_OF_QUESTIONS);
         wrongAnswersNumber = getArguments().getInt(TestActivity.NUMBER_OF_WRONG_ANSWERS);
-        currentField = getArguments().getString(TestActivity.CURRENT_FIELD);
+        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) /questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();
         message = getString(R.string.Your_correct_answers_was) + " " + numberFormat.format(correctAnswersPercent)+ " " +
@@ -63,7 +67,7 @@ public class ShowResultDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        databaseOperations.clearLinkerTableWrongAnswers(currentField);
+                        mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                         getActivity().finish();
                     }
                 })
@@ -73,7 +77,7 @@ public class ShowResultDialogFragment extends DialogFragment {
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        databaseOperations.clearLinkerTableWrongAnswers(currentField);
+                        mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                         getActivity().finish();
                         return false;
                     }
@@ -92,7 +96,7 @@ public class ShowResultDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View view) {
                         Bundle bundle = new Bundle();
-                        bundle.putString(TestActivity.CURRENT_FIELD,currentField);
+                        bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                         bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItemList);
                         Intent intent = new Intent(getActivity(),WrongAnswersActivity.class);
                         intent.putExtra(WrongAnswersActivity.WRONG_ITEM_LIST,bundle);
@@ -104,7 +108,7 @@ public class ShowResultDialogFragment extends DialogFragment {
                 if ( wrongAnswersNumber <= 0 ) {
                     b.setEnabled(false);
                 }
-                databaseOperations.clearLinkerTableTestOrder(currentField);
+                mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
             }
         });
 

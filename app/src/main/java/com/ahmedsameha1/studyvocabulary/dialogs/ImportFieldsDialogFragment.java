@@ -94,7 +94,7 @@ public class ImportFieldsDialogFragment extends DialogFragment {
                                 ExportImportDatabase.startImportThread(context,fileName);*/
                                 AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(getActivity());
                                 importUserUsageData
-                                        .setMessage(R.string.enter_number_of_tries_help)
+                                        .setMessage(R.string.import_user_usage)
                                         .setNegativeButton("NO", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {

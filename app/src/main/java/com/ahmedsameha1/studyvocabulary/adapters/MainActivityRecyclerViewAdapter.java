@@ -19,6 +19,9 @@ import com.ahmedsameha1.studyvocabulary.activities.FieldActivity;
 import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
 import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.studyvocabulary.R;
 
@@ -31,6 +34,7 @@ public class MainActivityRecyclerViewAdapter extends
     private Context context;
     private Cursor cursor;
     private SharedPreferences sharedPreferences;
+    DatabaseOperations databaseOperations = new DatabaseOperations(context);
 
     public MainActivityRecyclerViewAdapter(Context context, Cursor data) {
         super(context, data);
@@ -46,17 +50,22 @@ public class MainActivityRecyclerViewAdapter extends
         MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder =
                 new MainActivityRecyclerViewViewHolder(itemView, new MainActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
-                    public void onClick(View v, String fieldName) {
-                        Intent intent = new Intent(context, FieldActivity.class);
-                        intent.putExtra(FieldActivity.INITIAL_FIELD, fieldName);
-                        context.startActivity(intent);
+                    public void onClick(View v, long field_id,boolean isDeleting) {
+                        if ( ! isDeleting ) {
+                            Intent intent = new Intent(context, FieldActivity.class);
+                            intent.putExtra(FieldActivity.FIELD_ID, field_id);
+                            context.startActivity(intent);
+                            new MySQLiteCursorLoader(context).incrementFieldUsage(field_id);
+                        }
                     }
 
                     @Override
-                    public void onLongClick(View view, final String fieldName) {
-                        View actions = view.findViewById(R.id.main_recyclerview_item_actions);
-                        Expand_Custom_Animation expandAni = new Expand_Custom_Animation(actions, 500);
-                        actions.startAnimation(expandAni);
+                    public void onLongClick(View view, final long field_id,boolean isDeleting) {
+                        if ( ! isDeleting ) {
+                            View actions = view.findViewById(R.id.main_recyclerview_item_actions);
+                            Expand_Custom_Animation expandAni = new Expand_Custom_Animation(actions, 500);
+                            actions.startAnimation(expandAni);
+                        }
                     }
                 });
         return mainActivityRecyclerViewViewHolder;
@@ -72,20 +81,22 @@ public class MainActivityRecyclerViewAdapter extends
           }
       }*/
     @Override
-    public void onBindViewHolder(MainActivityRecyclerViewViewHolder viewHolder, Cursor data) {
+    public void onBindViewHolder(final MainActivityRecyclerViewViewHolder viewHolder, Cursor data) {
         ((LinearLayout.LayoutParams) viewHolder.actions.getLayoutParams()).bottomMargin = -50;
         viewHolder.actions.setVisibility(View.GONE);
+        viewHolder.field_id = data.getInt(0);
         final String fieldName = data.getString(2);
-        viewHolder.fieldName = fieldName;
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if ( (! sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + fieldName)) &&
                         (! sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + fieldName)) ) {
                     Bundle bundle = new Bundle();
+                    bundle.putLong(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_ID,viewHolder.field_id);
                     bundle.putString(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_NAME, fieldName);
                     DeleteFieldDialogFragment fragment = new DeleteFieldDialogFragment();
                     fragment.setArguments(bundle);
+                    fragment.setMainActivityRecyclerViewViewHolder(viewHolder);
                     fragment.show(((AppCompatActivity) context).getSupportFragmentManager(), GET_CONFIRMATION);
                 } else {
                     Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);

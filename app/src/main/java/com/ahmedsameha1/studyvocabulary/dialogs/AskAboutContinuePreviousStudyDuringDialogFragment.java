@@ -3,28 +3,28 @@ package com.ahmedsameha1.studyvocabulary.dialogs;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
 
 import com.ahmedsameha1.studyvocabulary.activities.StudyActivity;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;
 import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 
 /**
  * Created by ahmed_000 on 10/13/2015.
  */
 public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFragment {
-    private String currentField;
-
+    private long current_field_id;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentField = getArguments().getString(StudyActivity.CURRENT_FIELD);
+        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
 
 //                        ((Contact) getActivity()).continueStudyDuring(true);
                                 Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
-                                intent.putExtra(StudyDuringActivity.CURRENT_FIELD,(currentField));
+                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,(current_field_id));
                                 intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,true);
                                 startActivity(intent);
                             }
@@ -49,26 +49,16 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 //                                ((Contact) getActivity()).continueStudyDuring(false);
+                                mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+                                DatabaseOperations databaseOperations = new DatabaseOperations(getActivity());
+                                mySQLiteCursorLoader
+                                        .resetEntriesStudyPeriodOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+                                mySQLiteCursorLoader.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
                                 Bundle bundle = new Bundle();
-                                bundle.putString(StudyActivity.CURRENT_FIELD,currentField);
+                                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                 StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
                                 fragment2.setArguments(bundle);
                                 fragment2.show(getActivity().getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
-                                DatabaseOperations databaseOperations = new DatabaseOperations(getActivity().getContentResolver());
-                                databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
-                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity()); // getting the preferences
-                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                /*editor.putString(StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES, null);
-                                editor.putInt(StudyDuringActivity.CURRENT_QUESTION_COUNTER, 0);*/
-                                editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
-                                        StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES
-                                        + StudyDuringActivity.DASH + (currentField));
-                                editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
-                                        StudyDuringActivity.CURRENT_QUESTION_COUNTER
-                                        + StudyDuringActivity.DASH + (currentField));
-                                editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
-                                StudyDuringActivity.NUMBER_OF_TRIES +StudyDuringActivity.DASH + (currentField));
-                                editor.commit();
                                 dismiss();
                             }
                         }

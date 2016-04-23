@@ -15,6 +15,7 @@ import android.widget.EditText;
 
 import com.ahmedsameha1.studyvocabulary.R;
 import com.ahmedsameha1.studyvocabulary.activities.FieldActivity;
+import com.ahmedsameha1.studyvocabulary.adapters.FieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 
@@ -30,6 +31,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
     private EditText enterText;
     private String text;
     private int fieldType;
+    private FieldActivityRecyclerViewAdapter fieldActivityRecyclerViewAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_ANSWER_DESC);
+                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_ANSWER_DESC);
                         dismiss();
                     }
                 });
@@ -76,6 +79,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_ANSWER_ASC);
+                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_ANSWER_ASC);
                         dismiss();
                     }
                 });
@@ -83,6 +87,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_QUESTION_DESC);
+                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_QUESTION_DESC);
                         dismiss();
                     }
                 });
@@ -90,6 +95,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_QUESTION_ASC);
+                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_QUESTION_ASC);
                         dismiss();
                     }
                 });
@@ -97,6 +103,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_DATE_DESC);
+                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_DATE_DESC);
                         dismiss();
                     }
                 });
@@ -104,6 +111,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_DATE_ASC);
+                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_DATE_ASC);
                         dismiss();
                     }
                 });
@@ -111,6 +119,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_CREATION_DATE_DESC);
+                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_CREATION_DATE_DESC);
                         dismiss();
                     }
                 });
@@ -118,6 +127,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_CREATION_DATE_ASC);
+                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_CREATION_DATE_ASC);
                         dismiss();
                     }
                 });

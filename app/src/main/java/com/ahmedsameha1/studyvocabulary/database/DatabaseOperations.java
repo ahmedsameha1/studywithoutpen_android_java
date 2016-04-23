@@ -23,10 +23,16 @@ import java.util.ArrayList;
 public class DatabaseOperations {
     public static final String EXPORT_DIRECTORY_NAME = "StudyWithoutPen";
     private ContentResolver contentResolver;
+    private Context context;
+    private SQLiteDatabase sqLiteDatabase;
 
     public DatabaseOperations(ContentResolver contentResolver) {
         this.contentResolver = contentResolver;
 
+    }
+    public DatabaseOperations(Context context) {
+        this.context = context;
+        sqLiteDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
     }
 
     public Cursor getFieldList() {
@@ -35,8 +41,142 @@ public class DatabaseOperations {
         Cursor cursor = contentResolver.query(uri, string, null, null, null);
         return cursor;
     }
-
-
+    public boolean checkEntryDuplication (String question,String answer,long field_id ,int question_data_type) {
+        boolean thereIsduplication;
+        long question_id,answer_id;
+        if ( question_data_type == Contract.Field.STRING_DATA_TYPE) {
+            Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                    Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                    new String[]{question},null,null,null);
+            if ( questionCursor.moveToFirst() ) {
+                question_id = questionCursor.getLong(0);
+            } else {
+                return false;
+            }
+            Cursor answerCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                    Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                    new String[]{answer},null,null,null);
+            if ( answerCursor.moveToFirst() ) {
+                answer_id = answerCursor.getLong(0);
+            } else {
+                return false;
+            }
+            Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,null,
+                    Contract.String_Entry.COLUMN_NAME_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_NAME_ANSWER + " = ? AND "
+            + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                    new String[]{question_id + "",answer_id + "", field_id + ""},null,null,null);
+            thereIsduplication = cursor.getCount() > 0;
+            cursor.close();
+            return thereIsduplication;
+        } else if ( question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+        }
+        return true;
+    }
+    public String getFieldName( long field_id ) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_NAME_FIELD_NAME},
+                Contract.COLUMN_NAME_ID + " = ? ",
+                new String[]{field_id + ""},null,null,null);
+        cursor.moveToFirst();
+        String field_name = cursor.getString(0);
+        cursor.close();
+        return field_name;
+    }
+    public void incrementFieldUsage ( long field_id ) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_NAME_USAGE_COUNT},
+                Contract.COLUMN_NAME_ID + " = ? ",
+                new String[]{field_id + ""},null,null,null);
+        cursor.moveToFirst();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field.COLUMN_NAME_USAGE_COUNT,cursor.getInt(0) + 1);
+        sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues, Contract.COLUMN_NAME_ID + " = ? ", new String[]{field_id + ""});
+        cursor.close();
+    }
+    public int getQuestionDataType( long field_id) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_NAME_ENTRY_QUESTION_COLUMN_DATA_TYPE},
+                Contract.COLUMN_NAME_ID + " = ? ",
+                new String[]{field_id + ""},null,null,null);
+        cursor.moveToFirst();
+        int question_data_type = cursor.getInt(0);
+        cursor.close();
+        return question_data_type;
+    }
+    public boolean checkIfIncludedInPausedOperations (long field_id, long entry_id){
+        Cursor cursor = null;
+        if ( getQuestionDataType(field_id) == Contract.Field.STRING_DATA_TYPE ) {
+            cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                    new String[]{Contract.String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER},
+                    Contract.COLUMN_NAME_ID + " = ? AND ( " + Contract.String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER + " >= ? OR "
+            + Contract.String_Entry.COLUMN_NAME_PAUSED_STUDY_PERIOD_ORDER + " >= ? )",
+                    new String[]{entry_id + "" , "0", "0"},null,null,null);
+        } else if (getQuestionDataType(field_id) == Contract.Field.NOT_STRING_DATA_TYPE  ) {}
+        if ( cursor == null || cursor.getCount() <= 0 ) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    public ArrayList<String> getEntryWrongAnswers(String question,String answer, long field_id ,int question_data_type ) {
+        Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
+                Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                new String[]{question}, null, null, null);
+        questionCursor.moveToFirst();
+        long question_id = questionCursor.getLong(0);
+        questionCursor.close();
+        Cursor answerCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
+                Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                new String[]{answer}, null, null, null);
+        answerCursor.moveToFirst();
+        long answer_id = answerCursor.getLong(0);
+        answerCursor.close();
+        Cursor entryCursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
+                Contract.String_Entry.COLUMN_NAME_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_NAME_ANSWER + " = ? AND "
+                        + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                new String[]{question_id + "", answer_id + "", field_id + ""}, null, null, null);
+        entryCursor.moveToFirst();
+        long entry_id = entryCursor.getLong(0);
+        entryCursor.close();
+        ArrayList<String> wrongAnswers = new ArrayList<>();
+        if ( question_data_type == Contract.Field.STRING_DATA_TYPE ) {
+            Cursor wrong_answers_cursor = sqLiteDatabase.query(Contract.Test_Wrong_Answer_String.TABLE_NAME,new String[]{Contract.Test_Wrong_Answer_String.COLUMN_NAME_WRONG_ANSWER},
+                    Contract.Test_Wrong_Answer_String.COLUMN_NAME_ENTRY + " = ? ",
+                    new String[]{entry_id + ""},null,null,null);
+            if ( wrong_answers_cursor.moveToFirst() ) {
+                for ( wrong_answers_cursor.moveToFirst(); wrong_answers_cursor.getPosition() < wrong_answers_cursor.getCount();
+                      wrong_answers_cursor.moveToNext() ) {
+                    wrongAnswers.add(wrong_answers_cursor.getString(0));
+                }
+            }
+        } else if ( question_data_type == Contract.Field.NOT_STRING_DATA_TYPE ) {
+        }
+        return wrongAnswers;
+    }
+    public ArrayList<Integer> getStudyPeriodRepeatedEntries(long field_id) {
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        Cursor cursor = sqLiteDatabase.query(Contract.Study_Period_Repeated_Entry.TABLE_NAME,new String[]{Contract.Study_Period_Repeated_Entry.COLUMN_NAME_REPEATED_ENTRY},
+                Contract.Study_Period_Repeated_Entry.COLUMN_NAME_FIELD + " = ? ",
+                new String[]{field_id + ""},null,null,null);
+        if ( cursor.getCount() <=0 ) {
+            cursor.close();
+            return arrayList;
+        }
+        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
+            arrayList.add(cursor.getInt(0));
+        }
+        cursor.close();
+        return arrayList;
+    }
+    public int[] getDataFromStudyPeriodPaused(long field_id ) {
+        int[] array = new int[2];
+        Cursor cursor = sqLiteDatabase.query(Contract.Study_Period_Paused.TABLE_NAME,
+                new String[]{Contract.Study_Period_Paused.COLUMN_NAME_CURRENT_QUESTION_COUNTER, Contract.Study_Period_Paused.COLUMN_NAME_TRIES_NUMBER},
+                Contract.Study_Period_Paused.COLUMN_NAME_FIELD + " = ? ",
+                new String[]{field_id + ""},null,null,null);
+        cursor.moveToFirst();
+        array[0] = cursor.getInt(0);
+        array[1] = cursor.getInt(1);
+        cursor.close();
+        return array;
+    }
     public void createNewField(String fieldName, int fieldType) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Field_DBV6_AppV32.TABLE_NAME);
         ContentValues contentValues = new ContentValues();
@@ -77,12 +217,11 @@ public class DatabaseOperations {
     }
 
     public boolean checkFieldDuplication(String fieldName) {
-        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Field_DBV6_AppV32.TABLE_NAME);
-        String[] string = {"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME};
-        String selection = Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " = ? ";
-        Cursor cursor = contentResolver.query(uri, string, selection, new String[]{fieldName}, null);
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_NAME_FIELD_NAME},
+                Contract.Field.COLUMN_NAME_FIELD_NAME + " = ? ",
+                new String[]{fieldName},null,null,null);
         boolean temp = cursor.getCount() == 0 ? false : true;
-
+        cursor.close();
         return temp;
     }
 
@@ -577,6 +716,21 @@ public class DatabaseOperations {
                 null);
     }
 
+    public Cursor searchExactlyFor(long field_id, int question_data_type, String searchString) {
+        Cursor cursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+            new String[]{searchString},null,null,null);
+        cursor.moveToFirst();
+        long searchString_id = cursor.getLong(0);
+        cursor.close();
+        if ( question_data_type == Contract.Field.STRING_DATA_TYPE ) {
+            return sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                    Contract.String_Entry.COLUMN_NAME_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                           new String[]{searchString_id + "",field_id + ""},null,null,null);
+        } else if ( question_data_type == Contract.Field.NOT_STRING_DATA_TYPE ) {
+        }
+        return null;
+    }
     public Cursor searchExactlyFor(String fieldName, String searchString) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
         return contentResolver.query(uri,
@@ -692,6 +846,39 @@ public class DatabaseOperations {
                 null);
         return cursor.getCount() > 0 ? true : false;
     }
+    public boolean checkEntriesForAnyTestOrder(long field_id, int question_data_type ) {
+        boolean result = false;
+        if ( question_data_type == Contract.Field.STRING_DATA_TYPE ) {
+            Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
+            + " WHERE " + Contract.String_Entry.COLUMN_NAME_FIELD + " = ?  AND " + Contract.String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER
+            + " >= ? ", new String[]{field_id + "", "0"});
+            cursor.moveToFirst();
+            int number = cursor.getInt(0);
+            cursor.close();
+            result =  number > 0;
+        }
+        return result;
+    }
+
+    public boolean isThisFieldTestPaused (long field_id ) {
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.Test_Paused.TABLE_NAME
+                        + " WHERE " + Contract.Test_Paused.COLUMN_NAME_FIELD + " = ? ",
+                new String[]{field_id + ""});
+        cursor.moveToFirst();
+        int number = cursor.getInt(0);
+        cursor.close();
+        return number == 1;
+    }
+
+    public boolean isThisFieldStudyPeriodPaused (long field_id ) {
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.Study_Period_Paused.TABLE_NAME
+                        + " WHERE " + Contract.Study_Period_Paused.COLUMN_NAME_FIELD + " = ? ",
+                new String[]{field_id + ""});
+        cursor.moveToFirst();
+        int number = cursor.getInt(0);
+        cursor.close();
+        return number == 1;
+    }
 
     public void clearLinkerTableTestOrder(String fieldName) {
         Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
@@ -711,6 +898,15 @@ public class DatabaseOperations {
                 Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " = ? ",
                 new String[]{fieldName},
                 null);
+        cursor.moveToFirst();
+        int n = cursor.getInt(0);
+        cursor.close();
+        return n;
+    }
+    public int getFieldType ( long field_id ) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_NAME_FIELD_TYPE},
+                Contract.COLUMN_NAME_ID + " = ? ",
+                new String[]{field_id + ""},null,null,null);
         cursor.moveToFirst();
         int n = cursor.getInt(0);
         cursor.close();
@@ -835,4 +1031,32 @@ public class DatabaseOperations {
         cursor.close();
         return number;
     }
+    public int[] getDataFromTestPaused(long field_id ) {
+        int[] array = new int[3];
+        Cursor cursor = sqLiteDatabase.query(Contract.Test_Paused.TABLE_NAME,
+                new String[]{Contract.Test_Paused.COLUMN_NAME_CURRENT_QUESTION_COUNTER,
+                        Contract.Test_Paused.COLUMN_NAME_WRONG_ANSWERS_COUNT, Contract.Test_Paused.COLUMN_NAME_TRIES_NUMBER},
+                Contract.Test_Paused.COLUMN_NAME_FIELD + " = ? ",
+                new String[]{field_id + ""},null,null,null);
+        cursor.moveToFirst();
+        array[0] = cursor.getInt(0);
+        array[1] = cursor.getInt(1);
+        array[2] = cursor.getInt(2);
+        cursor.close();
+        return array;
+    }
+    public int getEntriesNumber(long field_id, int question_data_type ) {
+        int number = 0;
+        if ( question_data_type == Contract.Field.STRING_DATA_TYPE ) {
+            Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
+            + " WHERE " + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                    new String[]{field_id + ""});
+            cursor.moveToFirst();
+            number = cursor.getInt(0);
+            cursor.close();
+        } else if ( question_data_type == Contract.Field.NOT_STRING_DATA_TYPE ) {}
+
+        return number;
+    }
+
 }

@@ -41,7 +41,7 @@
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.app.default_searchable"
-                android:value="com.ahmedsameha1.studyvocabularyfive.activities.SearchActivity" />
+                android:value="com.ahmedsameha1.studyvocabulary.activities.SearchActivity" />
         </activity>
         <activity
             android:name="com.ahmedsameha1.studyvocabulary.activities.TestActivity"

@@ -13,10 +13,12 @@ public final class Contract {
     public static abstract class Field implements BaseColumns {
         public static final int DEFAULT_TYPE = 0;
         public static final int NOTEBOOK_TYPE = 1;
+        public static final int STRING_DATA_TYPE = 0;
+        public static final int NOT_STRING_DATA_TYPE = 1;
         public static final String TABLE_NAME = "field";
         public static final String COLUMN_NAME_FIELD_NAME = "name";
         public static final String COLUMN_NAME_FIELD_TYPE = "type";
-        public static final String COLUMN_NAME_ENTRY_ANSWER_COLUMN_DATA_TYPE = "string_or_blob";
+        public static final String COLUMN_NAME_ENTRY_QUESTION_COLUMN_DATA_TYPE = "string_or_blob";
         public static final String COLUMN_NAME_LOCALE = "locale";
         public static final String COLUMN_NAME_SORT_BY = "sort_by";
         public static final String COLUMN_NAME_LIST_TEXT_SIZE = "list_text_size";

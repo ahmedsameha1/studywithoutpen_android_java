@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.app.LoaderManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -31,7 +28,9 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DataProvider;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.studyvocabulary.R;
@@ -42,7 +41,7 @@ import com.ahmedsameha1.studyvocabulary.R;
 public class StudyActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize {
-    public static final String CURRENT_FIELD = "currentField";
+    public static final String CURRENT_FIELD_ID = "currentField";
     public static final String CURRENT_QUESTION = "currentQuestion";
     public static final String CURRENT_ANSWER = "currentAnswer";
     public static final String CORRECT_ANSWERS_COUNTER = "correctAnswerCounter";
@@ -50,43 +49,47 @@ public class StudyActivity extends AppCompatActivity implements
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final String SEARCH_VALUE = "searchValue";
+    private static final String CURRENT_SORT = "currentSort";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int SEARCH_ENTRIES_LOADER_ID = 1;
-    public static final int ORDER_QUESTION_DESC = 2;
-    public static final int ORDER_ANSWER_DESC = 3;
-    public static final int ORDER_QUESTION_ASC = 4;
-    public static final int ORDER_ANSWER_ASC = 5;
-    public static final int ORDER_DATE_DESC = 6;
-    public static final int ORDER_DATE_ASC = 7;
-    public static final int ORDER_ENTRY_DATE_DESC = 8;
-    public static final int ORDER_ENTRY_DATE_ASC = 9;
+    public static final int SORT_QUESTION_DESC = 0;
+    public static final int SORT_ANSWER_DESC = 1;
+    public static final int SORT_QUESTION_ASC = 2;
+    public static final int SORT_ANSWER_ASC = 3;
+    public static final int SORT_DATE_DESC = 4;
+    public static final int SORT_DATE_ASC = 5;
+    public static final int SORT_CREATION_DATE_DESC = 6;
+    public static final int SORT_CREATION_DATE_ASC = 7;
+    public static final int DEFAULT_SORT = SORT_CREATION_DATE_DESC;
     public static final int SELECT_ENTRY_REQUEST = 1;
     public static final int RETURN_TIME = 1000;
     public static final String ORDER_OF_ENTRIES = "order_of_entries";
     private boolean actionBarShown;
-    private String currentField,currentQuestion, currentAnswer;
+    private String currentQuestion, currentAnswer;
     private TextView correctAnswers, check,showActionbar;
     private CheckBox studyQuestion, studyAnswer;
     private ToggleButton showCurrentEntry;
     private EditText enterQuestion, enterAnswer;
     private ImageButton  up , down;
     private int correctAnswersCounter = 0;
-
+    private long current_field_id;
     private LinearLayout answerLinearlayout,questionLinearlayout, container;
-
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
     private Cursor fieldEntriesCursor;
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
-
+    private int currentSort = DEFAULT_SORT;
     private int currentLoader;
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
+    private DatabaseOperations databaseOperations;
 
     @Override
     protected void onCreate ( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study);
 
-        currentField = getIntent().getStringExtra(CURRENT_FIELD);
+        databaseOperations = new DatabaseOperations(this);
+        current_field_id = getIntent().getLongExtra(CURRENT_FIELD_ID,0);
         currentQuestion = getIntent().getStringExtra(CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(CURRENT_ANSWER);
         currentLoader = getIntent().getIntExtra(ORDER_OF_ENTRIES,0);
@@ -295,62 +298,7 @@ public class StudyActivity extends AppCompatActivity implements
                 }
             }
         });
-/*        searchFor.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                String value = s.toString();
-                if (value.length() > 0) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString(StudyActivity.SEARCH_VALUE,value);
-                    getSupportLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID,bundle,searchFieldEntries);
-                    *//*searchForCursor = databaseOperations.searchFor(currentField, value);
-                    simpleCursorAdapter = new SimpleCursorAdapter(StudyActivity.this,
-                            R.layout.search_row,
-                            searchForCursor,
-                            new String[]{currentField + Contract.OldField.COLUMN_NAME_QUESTION_LINK_SUFFIX, currentField + Contract.OldField.COLUMN_NAME_ANSWER_LINK_SUFFIX},
-                            new int[]{R.id.study_search_list_view_text1, R.id.study_search_list_view_text2},
-                            0);
-                    searchResults.setAdapter(simpleCursorAdapter);*//*
-                } else {
-                    simpleCursorAdapter.changeCursor(null);
-                }
-            }
-        });*/
-        /*searchResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Cursor cursor = (Cursor) searchResults.getItemAtPosition(position);
-                currentQuestion = cursor.getString(1);
-                currentAnswer = cursor.getString(2);
-                viewQuestion.setText(currentQuestion);
-                viewAnswer.setText(currentAnswer);
-//                searchFor.setText("");
-                if (studyQuestion.isChecked()) {
-                    enterQuestion.setText("");
-                } else {
-                    enterQuestion.setText(currentQuestion);
-                    enterQuestion.setEnabled(false);
-                }
-                if (studyAnswer.isChecked()) {
-                    enterAnswer.setText("");
-                } else {
-                    enterAnswer.setText(currentAnswer);
-                    enterAnswer.setEnabled(false);
-                }
-            }
-        });
-        searchResults.getViewTreeObserver()
-                .addOnGlobalLayoutListener(new OnViewGlobalLayoutListener(searchResults));*/
         up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -500,151 +448,48 @@ public class StudyActivity extends AppCompatActivity implements
         });
 
 
- /*       getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this,
-                            uri,
-                            new String[] {"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[] {currentField},
-                            null);
-                }
-            @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                fieldEntriesCursor = data;
-            }
-
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-                fieldEntriesCursor = null;
-            }
-        };*/
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                 if (id == ORDER_DATE_DESC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[]{currentField},
-                            "date(" + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + ") DESC");
+            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                if ( databaseOperations.getQuestionDataType(current_field_id) == Contract.Field.STRING_DATA_TYPE ) {
+                    int sort = args.getInt(CURRENT_SORT);
 
-                } else if (id == ORDER_DATE_ASC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[]{currentField},
-                            "date(" + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + ") ASC");
-                } else if (id == ORDER_QUESTION_DESC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[]{currentField},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " DESC");
-                } else if (id == ORDER_QUESTION_ASC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[]{currentField},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " ASC");
-                } else if (id == ORDER_ANSWER_DESC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[]{currentField},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " DESC");
-                } else if (id == ORDER_ANSWER_ASC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[]{currentField},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " ASC");
-                } else if (id == ORDER_ENTRY_DATE_DESC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[]{currentField},
-                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
-                } else if (id == ORDER_ENTRY_DATE_ASC) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[]{currentField},
-                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") ASC");
-                } else {
-                    /*String currentField = null;
-                    if (args != null) {
-                        currentField = args.getString(FieldActivity.CURRENT_FIELD);
-                    }
-                    currentField = currentField == null ? getCurrentField() : currentField;*/
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[]{currentField},
-                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
+                        mySQLiteCursorLoader = new MySQLiteCursorLoader(StudyActivity.this,
+                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                                        + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? "
+                                        + "ORDER BY " + FieldActivity.SORT_STRINGS[sort] ,
+                                new String[]{current_field_id + ""});
+                        return mySQLiteCursorLoader;
+                        /*return new CursorLoader(FieldActivity.this, uri,
+                                new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
+                                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
+                                new String[]{currentField},
+                                sortStrings[sort]);*/
+
                 }
+
+                return null;
             }
 
             @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
                 fieldEntriesCursor = data;
             }
 
             @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-                fieldEntriesCursor = null;
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+                fieldEntriesCursor= null;
             }
         };
-        /*searchFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                    String searchString = args.getString(StudyActivity.SEARCH_VALUE);
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    return new CursorLoader(StudyActivity.this,
-                            uri,
-                            new String[] {"rowid _id",
-                                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
-                                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " LIKE ? AND "
-                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? "
-                                    + " OR " +
-                                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK
-                                    + " LIKE ? AND "
-                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                            new String[] {"%" + searchString + "%",currentField,"%" + searchString + "%",currentField},
-                            null);
-            }
-            @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                simpleCursorAdapter.swapCursor(data);
-            }
 
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-                simpleCursorAdapter.swapCursor(null);
-            }
-        };
-        simpleCursorAdapter = new SimpleCursorAdapter(StudyActivity.this,
-                R.layout.search_row,
-                null,
-                new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                new int[]{R.id.study_search_list_view_text1, R.id.study_search_list_view_text2},
-                0);*/
-//        searchResults.setAdapter(simpleCursorAdapter);
         correctAnswers.setText(Integer.toString(0));
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        getSupportLoaderManager().initLoader(currentLoader, null, getFieldEntries);
+        Bundle bundle = new Bundle();
+        bundle.putInt(CURRENT_SORT, currentSort);
+        getLoaderManager().initLoader(currentLoader, bundle, getFieldEntries);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -699,7 +544,8 @@ public class StudyActivity extends AppCompatActivity implements
             // add query to the Intent Extras
             searchIntent.setAction(Intent.ACTION_SEARCH);
             searchIntent.putExtra(SearchManager.QUERY, query);
-            searchIntent.putExtra(CURRENT_FIELD, currentField);
+            searchIntent.putExtra(CURRENT_FIELD_ID, current_field_id);
+            searchIntent.putExtra(ORDER_OF_ENTRIES,currentSort);
             startActivityForResult(searchIntent, SELECT_ENTRY_REQUEST);
             /*intent.putExtra(CURRENT_FIELD, currentField);
             startActivityForResult(intent,SELECT_ENTRY_REQUEST);*/
@@ -713,14 +559,16 @@ public class StudyActivity extends AppCompatActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SELECT_ENTRY_REQUEST) {
             if (resultCode == RESULT_OK) {
-                currentField = data.getStringExtra(CURRENT_FIELD);
+                current_field_id = data.getLongExtra(CURRENT_FIELD_ID,0);
                 currentQuestion = data.getStringExtra(CURRENT_QUESTION);
                 currentAnswer = data.getStringExtra(CURRENT_ANSWER);
                 currentLoader = data.getIntExtra(ORDER_OF_ENTRIES, 0);
                 enterQuestion.setText(currentQuestion);
                 correctAnswers.setText(Integer.toString(0));
                 this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                getSupportLoaderManager().restartLoader(currentLoader,null,getFieldEntries);
+                Bundle bundle = new Bundle();
+                bundle.putInt(CURRENT_SORT, currentSort);
+                getLoaderManager().restartLoader(currentLoader,bundle,getFieldEntries);
             }
         }
     }
@@ -740,7 +588,7 @@ public class StudyActivity extends AppCompatActivity implements
     public void onSaveInstanceState( Bundle savedInstanceState ) {
 //        searchFor.setText("");
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putString(CURRENT_FIELD, currentField);
+        savedInstanceState.putLong(CURRENT_FIELD_ID, current_field_id);
         savedInstanceState.putString(CURRENT_QUESTION, currentQuestion);
         savedInstanceState.putString(CURRENT_ANSWER, currentAnswer);
         savedInstanceState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
@@ -748,7 +596,7 @@ public class StudyActivity extends AppCompatActivity implements
     }
     @Override
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
-        currentField = savedInstanceState.getString(CURRENT_FIELD);
+        current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
         super.onRestoreInstanceState(savedInstanceState);
         currentQuestion = savedInstanceState.getString(CURRENT_QUESTION);
         currentAnswer = savedInstanceState.getString(CURRENT_ANSWER);

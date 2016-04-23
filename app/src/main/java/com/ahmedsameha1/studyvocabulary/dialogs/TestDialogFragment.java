@@ -27,12 +27,12 @@ import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
  */
 public class TestDialogFragment extends DialogFragment {
     public static final String TEST_DIALOG_FRAGMENT = "test_dialog_fragment";
-    private String currentField;
+    private long current_field_id;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentField = getArguments().getString(StudyActivity.CURRENT_FIELD);
+        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
     }
 
     @NonNull
@@ -150,7 +150,7 @@ public class TestDialogFragment extends DialogFragment {
                                             intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.PERCENTAGE);
                                             intent.putExtra(TestActivity.QUESTION_PERCENTAGE, number);
                                             intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, trys);
-                                            intent.putExtra(TestActivity.CURRENT_FIELD, (currentField));
+                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                             intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                             startActivity(intent);
                                             dismiss();
@@ -160,15 +160,16 @@ public class TestDialogFragment extends DialogFragment {
                                             toast.show();
                                         }
                                     } else {
-                                        int currentNumberOfEntries = new DatabaseOperations(getActivity().getContentResolver())
-                                                .getEntriesNumber((currentField));
+                                        DatabaseOperations databaseOperations = new DatabaseOperations(getActivity());
+                                        int currentNumberOfEntries =
+                                                databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                                         int numberInt = Double.valueOf(number).intValue();
                                         if ( numberInt > 0 && numberInt <= currentNumberOfEntries) {
                                             Intent intent = new Intent(getActivity(), TestActivity.class);
                                             intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
                                             intent.putExtra(TestActivity.QUESTION_NUMBER, numberInt);
                                             intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, trys);
-                                            intent.putExtra(TestActivity.CURRENT_FIELD, (currentField));
+                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                             intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                             startActivity(intent);
                                             dismiss();

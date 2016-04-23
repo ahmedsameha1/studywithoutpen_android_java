@@ -7,9 +7,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.LoaderManager;
+import android.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -28,7 +28,9 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DataProvider;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ShowResultDialogFragment;
@@ -78,10 +80,11 @@ public class TestActivity extends AppCompatActivity implements
     private static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     private static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final String PAUSING = "pausing";
-    private String currentField;
+    private long current_field_id;
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
     private boolean boolean_continue = false, actionBarShown;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
 //    private ArrayList<WrongItem> wrongItems;
     private boolean result, testingNow = false;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber,wrongAnswersCounter , percent_or_number,number;
@@ -98,20 +101,23 @@ public class TestActivity extends AppCompatActivity implements
         @Override
         public void run() {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-            toPause();
-            pauseRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TestActivity.this);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.remove(ACTIVITY_NAME + PAUSING + currentField);
-                    editor.commit();
-                    Toast toast = Toast.makeText(TestActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
-            };
-            mHandler.post(pauseRunnable);
+            try {
+                toPause();
+            } finally {
+                pauseRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TestActivity.this);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
+                        editor.commit();
+                        Toast toast = Toast.makeText(TestActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                };
+                mHandler.post(pauseRunnable);
+            }
         }
     });
 
@@ -130,9 +136,11 @@ public class TestActivity extends AppCompatActivity implements
             retainedFragment = new RetainedFragment();
             getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
         }
+        databaseOperations = new DatabaseOperations(this);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         listForTest = retainedFragment.getListForTest_TestActivity();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        currentField = getIntent().getStringExtra(CURRENT_FIELD);
+        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
         percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
@@ -232,7 +240,7 @@ public class TestActivity extends AppCompatActivity implements
                             Bundle bundle = new Bundle();
                             bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
                             bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
-                            bundle.putString(CURRENT_FIELD, currentField);
+                            bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
 //                            wrongItems.trimToSize();
 //                            bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItems);
                             fragment.setArguments(bundle);
@@ -250,15 +258,8 @@ public class TestActivity extends AppCompatActivity implements
                             showResult.setBackgroundResource(R.drawable.enter_answer_background);
                             showResult.setPadding(0,0,0,0);
 //                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, TestActivity.this);
-                            databaseOperations.clearLinkerTableTestOrder(currentField);
-                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TestActivity.this); // getting the preferences
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.CURRENT_QUESTION_COUNTER
-                                    + TestActivity.DASH + currentField);
-                            editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.NUMBER_OF_WRONG_ANSWERS
-                                    + TestActivity.DASH + currentField);
-                            editor.commit();
-                            editor.remove(ACTIVITY_NAME + DASH + PERMITED_TRIES_NUMBER + DASH + currentField);
+                            mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+                            mySQLiteCursorLoader.clearThisFieldFromTestPaused(current_field_id);
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
                             showQuestion.scrollTo(0,0);
@@ -354,19 +355,16 @@ public class TestActivity extends AppCompatActivity implements
             }
         });
         if ( boolean_continue ) {
-            getSupportLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION,null,this);
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
-                    + DASH + currentField,0);
-            wrongAnswersCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS
-                    + DASH + currentField,0);
-            permitedTriesNumber = sharedPreferences.getInt(ACTIVITY_NAME + DASH + PERMITED_TRIES_NUMBER
-                    + DASH + currentField,0);
+            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION,null,this);
+            int[] array = databaseOperations.getDataFromTestPaused(current_field_id);
+            currentQuestionCounter = array[0];
+            wrongAnswersCounter = array[1];
+            permitedTriesNumber = array[2];
         } else {
-            getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
+            getLoaderManager().initLoader(START_NEW_SESSION,null,this);
         }
 
-        databaseOperations = new DatabaseOperations(getContentResolver());
+
         Log.d("fff", "onCreate()");
     }
     @Override
@@ -388,7 +386,7 @@ public class TestActivity extends AppCompatActivity implements
             case R.id.pause:
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(ACTIVITY_NAME + PAUSING + currentField, true);
+                editor.putBoolean(ACTIVITY_NAME + PAUSING + current_field_id, true);
                 editor.commit();
                 Toast toast = Toast.makeText(TestActivity.this, R.string.pause_do_not_shutdown, Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -421,15 +419,16 @@ public class TestActivity extends AppCompatActivity implements
     }
 
     private void toPause() {
-        if ( ! databaseOperations.checkLinkerTest(currentField) ) {
-            databaseOperations.writeLinkerTableTestOrder(listForTest,currentField);
+        if ( ! databaseOperations.checkEntriesForAnyTestOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id)) ) {
+            mySQLiteCursorLoader.putEntriesTestOrder(current_field_id,
+                    databaseOperations.getQuestionDataType(current_field_id),listForTest);
         }
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField,currentQuestionCounter);
-        editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS + DASH + currentField, wrongAnswersCounter);
-        editor.putInt(ACTIVITY_NAME + DASH + PERMITED_TRIES_NUMBER + DASH + currentField,permitedTriesNumber);
-        editor.commit();
+        mySQLiteCursorLoader.clearThisFieldFromTestPaused(current_field_id);
+        int[] array = new int[3];
+        array[0] = currentQuestionCounter;
+        array[1] = wrongAnswersCounter;
+        array[2] = permitedTriesNumber;
+        mySQLiteCursorLoader.putTestPausedData(current_field_id,array);
     }
 /*    private String [][] getListForTest ( double percent ) {
         int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
@@ -512,7 +511,8 @@ public class TestActivity extends AppCompatActivity implements
         if ( searchForCursor != null ) {
             searchForCursor.close();
         }
-        searchForCursor = databaseOperations.searchExactlyFor(currentField, listForTest[currentQuestionCounter][0]);
+        searchForCursor = databaseOperations.searchExactlyFor(current_field_id,
+                databaseOperations.getQuestionDataType(current_field_id), listForTest[currentQuestionCounter][0]);
         if ( searchForCursor.getCount() > 1 ) {
             hints = new ArrayList<String>(3);
             hints.add( getString(R.string.first_character) + listForTest[currentQuestionCounter][1].charAt(0));
@@ -562,11 +562,8 @@ public class TestActivity extends AppCompatActivity implements
         triesCounter++;
         if ( triesCounter == permitedTriesNumber && !result ) {
             wrongAnswersCounter++;
-            databaseOperations.writeTestActivityWrongAnswers(listForTest [currentQuestionCounter][0],
-                    listForTest[currentQuestionCounter][1],currentField,convertWrongAnswersArrayListToString(wrongAnswers));
-/*            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
-            wrongItems.add(wrongItem);*/
-
+            mySQLiteCursorLoader.putEntryWrongAnswers(listForTest [currentQuestionCounter][0],
+                    listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,databaseOperations.getQuestionDataType(current_field_id));
             wrongAnswers = null;
         }
         return result;
@@ -606,12 +603,9 @@ public class TestActivity extends AppCompatActivity implements
     }
     @Override
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField,currentQuestionCounter);
-        editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS + DASH + currentField, wrongAnswersCounter);
-        editor.putInt(ACTIVITY_NAME + DASH + PERMITED_TRIES_NUMBER + DASH + currentField, permitedTriesNumber);
-        editor.commit();
+        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER,currentQuestionCounter);
+        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS,wrongAnswersCounter);
+        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER,permitedTriesNumber);
 //        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInsatanceState.putBoolean(RESULT, result);
@@ -626,18 +620,17 @@ public class TestActivity extends AppCompatActivity implements
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         savedInsatanceState.putBoolean(BOOLEAN_CONTINUE,boolean_continue);
         saveUserLayoutChanges(savedInsatanceState);
-        if ( ! isFinishing() ) {
+       /* if ( ! isFinishing() ) {
             pauseThread.start();
-        }
+        }*/
         super.onSaveInstanceState(savedInsatanceState);
     }
     @Override
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         super.onRestoreInstanceState(savedInstanceState);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField,0);
-        wrongAnswersCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + NUMBER_OF_WRONG_ANSWERS + DASH + currentField, 0);
-        permitedTriesNumber = sharedPreferences.getInt(ACTIVITY_NAME + DASH + PERMITED_TRIES_NUMBER + DASH + currentField,0);
+        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
+        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
+        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
 //        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);
@@ -700,22 +693,38 @@ public class TestActivity extends AppCompatActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if ( id == CONTINUE_PREVIOUS_SESSION ) {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
+            return new MySQLiteCursorLoader(TestActivity.this,
+                    "SELECT " + " s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                            + " a , se." + Contract.String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
+                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
+                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER + " >= ? ",
+                    new String[]{current_field_id + "", "0"});
+            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,uri,
                     new String[] {Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
                             Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK,
                             Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER},
                     Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                     new String[] {"0", currentField},
-                    null);
+                    null);*/
         } else {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
+            return new MySQLiteCursorLoader(TestActivity.this,
+                    "SELECT " + "se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                            + " a " + " FROM " + Contract.STring.TABLE_NAME
+                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
+                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                    new String[]{current_field_id + ""});
+            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,
                     uri,
                     new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
                     Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
                     new String[]{currentField},
-                    null);
+                    null);*/
         }
     }
     @Override
@@ -739,8 +748,8 @@ public class TestActivity extends AppCompatActivity implements
                 wrongAnswers = new ArrayList<String>(permitedTriesNumber);
                 boolean_continue = false;
                 ifMoreThanOnce();
-                getSupportLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
-                getSupportLoaderManager().initLoader(START_NEW_SESSION,null,this);
+                getLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
+                getLoaderManager().initLoader(START_NEW_SESSION,null,this);
             }
         } else {
             if ( listForTest == null ) {

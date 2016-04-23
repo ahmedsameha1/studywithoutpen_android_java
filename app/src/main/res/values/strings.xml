@@ -37,7 +37,7 @@
     <string name="check">Check</string>
     <string name="no_entries_in_this_time_range">There is no entries in this time range!</string>
     <string name="_continue">Continue</string>
-    <string name="start_studying_a_period">Start Study By A Period</string>
+    <string name="start_studying_a_period">Start Study a Period</string>
     <string name="pause_studying_now">Pause studying now!</string>
     <string name="ask_for_continue_previous_study_during">Do you want to continue the previous studying session?</string>
     <string name="yes">Yes</string>
@@ -90,7 +90,7 @@
     <string name="small_size">Small</string>
     <string name="repartition_the_area">Repartition The Area</string>
     <string name="select_text_size">Select Text Size</string>
-    <string name="start_a_test">Start A Test</string>
+    <string name="start_a_test">Start a Test</string>
     <string name="enter_number_of_questions">Number of questions</string>
     <string name="number_of_questions_smaller_than">Enter a number of questions which is smaller than or equals %1$d and greater than 0.</string>
     <string name="enter_question_area_answer_area">Enter values for the question area and answer area!</string>
@@ -136,4 +136,6 @@
     <string name="wait_until_study_during_pausing_finish" >Please, wait until the current study a period session pause opertation of this field finishes.</string>
     <string name="wait_until_current_session_pausing_finish">Please, wait until any pausing operations of this field finish</string>
     <string name="pause_testing_now">Pause testing now!</string>
+    <string name="already_inserted">This entry is already in this field!</string>
+    <string name="import_user_usage">If you are the one who has created this file, click yes.\nIf this file was created by others then shared with you, click no.</string>
 </resources>

@@ -47,7 +47,7 @@ public class SearchDateOrTextDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                databaseOperations = new DatabaseOperations(context.getContentResolver());
+                databaseOperations = new DatabaseOperations(context);
                 Button search_date = (Button) alertDialog.findViewById(R.id.search_date);
                 enterText = (EditText) alertDialog.findViewById(R.id.search_text);
                 Button positiveButton = alertDialog.getButton(Dialog.BUTTON_POSITIVE);

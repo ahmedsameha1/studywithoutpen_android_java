@@ -134,4 +134,6 @@
     <string name="wait_until_study_during_pausing_finish" >لطفا، انتظر حتى تنتهي عملية إيقاف جلسة المذاكرة لفترة الخاصة بهذا المجال.</string>
     <string name="wait_until_current_session_pausing_finish">لطفا، انتظر حتى تنهي عمليات إيقاف أي جلسة خاصة بهذا المجال. </string>
     <string name="pause_testing_now">أوقف الاختبار الآن!</string>
+    <string name="already_inserted">هذا المُدخل موجود بالفعل في هذا المجال!</string>
+    <string name="import_user_usage">لو كنت أنت من أنشأ هذا الملف، اختر نعم.\nلو كان أحد غيرك قد أنشأ هذا الملف ثم شاركه معك، اختر لا.</string>
 </resources>

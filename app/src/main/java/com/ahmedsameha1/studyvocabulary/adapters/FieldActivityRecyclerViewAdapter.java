@@ -2,6 +2,7 @@ package com.ahmedsameha1.studyvocabulary.adapters;
 
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,8 +25,10 @@ import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
 import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DataProvider;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.studyvocabulary.R;
+import com.ahmedsameha1.studyvocabulary.dialogs.DeleteFieldDialogFragment;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -39,13 +42,17 @@ public class FieldActivityRecyclerViewAdapter extends
     public static final String GET_CONFIRMATION = "getConfirmation";
     private Context context;
     private String fieldName;
+    private long field_id;
     private int fieldType;
+    private int sort = FieldActivity.DEFAULT_SORT;
     private SharedPreferences sharedPreferences;
-    public FieldActivityRecyclerViewAdapter(Context context, Cursor data, String fieldName, int fieldType ) {
+    private DatabaseOperations databaseOperations;
+    public FieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, int fieldType ) {
         super(context,data);
         this.context = context;
-        this.fieldName = fieldName;
+        this.field_id = field_id;
         this.fieldType = fieldType;
+        databaseOperations = new DatabaseOperations(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
     @Override
@@ -55,13 +62,13 @@ public class FieldActivityRecyclerViewAdapter extends
         FieldActivityRecyclerViewViewHolder fieldActivityRecyclerViewViewHolder =
                 new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
-                    public void onClick(View v, String fieldName, String currentQuestion, String currentAnswer ) {
+                    public void onClick(View v, String currentQuestion, String currentAnswer ) {
                         if ( fieldType != Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE) {
                             Intent intent = new Intent(context, StudyActivity.class);
-                            intent.putExtra(StudyActivity.CURRENT_FIELD, fieldName);
+                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                             intent.putExtra(StudyActivity.CURRENT_QUESTION,currentQuestion);
                             intent.putExtra(StudyActivity.CURRENT_ANSWER,currentAnswer);
-                            intent.putExtra(StudyActivity.ORDER_OF_ENTRIES,0);
+                            intent.putExtra(StudyActivity.ORDER_OF_ENTRIES,sort);
                             context.startActivity(intent);
                         } else {
                             Toast toast = Toast.makeText(context, R.string.study_not_for_notebook,Toast.LENGTH_LONG);
@@ -70,7 +77,7 @@ public class FieldActivityRecyclerViewAdapter extends
                         }
                     }
                     @Override
-                    public void onLongClick(View view, String fieldName) {
+                    public void onLongClick(View view) {
                         View toolbar = view.findViewById(R.id.field_recyclerview_item_actions);
                         Expand_Custom_Animation expandAni = new Expand_Custom_Animation(toolbar, 500);
                         toolbar.startAnimation(expandAni);
@@ -83,49 +90,37 @@ public class FieldActivityRecyclerViewAdapter extends
     public void onBindViewHolder(FieldActivityRecyclerViewViewHolder viewHolder, Cursor data) {
         ((LinearLayout.LayoutParams) viewHolder.toolbar.getLayoutParams()).bottomMargin = -50;
         viewHolder.toolbar.setVisibility(View.GONE);
+        final long entry_id = data.getLong(0);
         final String question = data.getString(1);
         final String answer = data.getString(2);
-        viewHolder.fieldName = fieldName;
+        viewHolder.field_id = field_id;
         viewHolder.currentQuestion = question;
         viewHolder.currentAnswer = answer;
         viewHolder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, EditEntryActivity.class);
-                intent.putExtra(StudyActivity.CURRENT_FIELD, fieldName);
+                intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
+                intent.putExtra(EditEntryActivity.FIELD_TYPE, fieldType );
+                intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,databaseOperations.getQuestionDataType(field_id));
                 intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
                 intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
+                ((Activity) context).getLoaderManager().destroyLoader(FieldActivity.SEARCH_ENTRIES_LOADER_ID);
+                ((Activity) context).getLoaderManager().destroyLoader(FieldActivity.GET_ENTRIES_LOADER_ID);
                 context.startActivity(intent);
             }
         });
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( (! sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + fieldName)) &&
-                        (! sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + fieldName))) {
-                    Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-                    Cursor studyDuringCursor = context.getContentResolver().query(uri,
-                            new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " = ? AND "
-                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND "
-                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? AND "
-                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? ",
-                            new String[]{question, answer, fieldName, "0"},
-                            null);
-                    Cursor testCursor = context.getContentResolver().query(uri,
-                            new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK},
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK + " = ? AND "
-                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK + " = ? AND "
-                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? AND "
-                                    + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER + " >= ? ",
-                            new String[]{question, answer, fieldName, "0"},
-                            null);
-                    if (studyDuringCursor.getCount() <= 0 && testCursor.getCount() <= 0) {
+                if ( (! sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + field_id)) &&
+                        (! sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + field_id))) {
+                    if ( ! databaseOperations.checkIfIncludedInPausedOperations(field_id,entry_id) ) {
                         DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
                         Bundle bundle = new Bundle();
-                        bundle.putString(StudyActivity.CURRENT_FIELD,fieldName);
-                        bundle.putString(StudyActivity.CURRENT_QUESTION,question);
-                        bundle.putString(StudyActivity.CURRENT_ANSWER,answer);
+                        bundle.putLong(DeleteEntryDialogFragment.TO_BE_DELETED_ENTRY_ID,entry_id);
+                        bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,databaseOperations.getQuestionDataType(field_id));
                         fragment.setArguments(bundle);
                         FragmentManager fragmentManager = ((FieldActivity) context).getSupportFragmentManager();
                         fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
@@ -134,8 +129,6 @@ public class FieldActivityRecyclerViewAdapter extends
                         toast.setGravity(Gravity.TOP,0,400);
                         toast.show();
                     }
-                    studyDuringCursor.close();
-                    testCursor.close();
                 } else {
                     Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -144,16 +137,19 @@ public class FieldActivityRecyclerViewAdapter extends
             }
         });
         switch (fieldType) {
-            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
+            case Contract.Field.DEFAULT_TYPE:
                 viewHolder.question.setText(question);
                 viewHolder.answer.setText(answer);
                 break;
-            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
+            case Contract.Field.NOTEBOOK_TYPE:
                 Timestamp timestamp = Timestamp.valueOf(question);
                 Date date = new Date(timestamp.getTime());
                 viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));
                 viewHolder.answer.setText(answer);
                 break;
         }
+    }
+    public void setSort(int sort) {
+        this.sort = sort;
     }
 }

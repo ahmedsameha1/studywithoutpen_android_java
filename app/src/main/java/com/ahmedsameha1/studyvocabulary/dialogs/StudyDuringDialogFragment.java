@@ -27,12 +27,12 @@ public class StudyDuringDialogFragment extends DialogFragment {
     public static final String SHOW_STUDY_DURING_DIALOG_FRAGMENT = "showStudyDuringDialogFragment";
     public static final int MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
     public static final int MILLISECONDS_IN_HOUR = 60 * 60 * 1000;
-    private String currentField;
+    private long current_field_id;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentField = getArguments().getString(StudyActivity.CURRENT_FIELD);
+        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
     }
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {
@@ -76,7 +76,7 @@ public class StudyDuringDialogFragment extends DialogFragment {
                                     long nowInMilliseconds = System.currentTimeMillis();
                                     long startingTime = nowInMilliseconds - duration;
                                     Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
-                                    intent.putExtra(StudyDuringActivity.CURRENT_FIELD,(currentField));
+                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                     intent.putExtra(StudyDuringActivity.STARTING_TIME,startingTime);
                                     intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,false);
                                     intent.putExtra(StudyDuringActivity.NUMBER_OF_TRIES,trys);

@@ -13,10 +13,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.LoaderManager;
+import android.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -41,9 +40,12 @@ import android.widget.Toast;
 import com.ahmedsameha1.studyvocabulary.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DataProvider;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.ExportImportDatabase;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.CreateFieldDialogFragment;
+import com.ahmedsameha1.studyvocabulary.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ExportFieldsDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ImportFieldsDialogFragment;
 import com.ahmedsameha1.studyvocabulary.fragments.MainActivityFragmentDrawer;
@@ -55,7 +57,9 @@ import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
  * Created by ahmed on 7/26/2015.
  */
 public class MainActivity extends AppCompatActivity implements
-        MainActivityFragmentDrawer.FragmentDrawerListener {
+        MainActivityFragmentDrawer.FragmentDrawerListener,
+        DeleteFieldDialogFragment.Contact,
+        CreateFieldDialogFragment.Contact {
     private static final String RUN_FIRST_TIME = "run_first_time";
     public static final String RUN_FIRST_TIME_DIALOG = "runFirstTimeDialog";
     public static final String RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS = "runFirstTimeCreateExample_Fields";
@@ -75,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements
     private EditText enterNewFieldName;
     private TextView orChooseOne;
     private SimpleCursorAdapter simpleCursorAdapterForFieldSpinner;
-//    private DatabaseHelper databaseHelper;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    //    private DatabaseHelper databaseHelper;
 //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
     private Cursor fieldListCursor;
@@ -84,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements
     private MainActivityRecyclerViewAdapter mAdapter;
     private String first_field_name;
     private LoaderManager.LoaderCallbacks<Cursor> getFields;
+    private long first_field_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,23 +102,34 @@ public class MainActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);       // setting toolbar as the action bar of the activity
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         drawerFragment = (MainActivityFragmentDrawer)
-        getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
+                getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setDrawerListener(this);
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Field_DBV6_AppV32.TABLE_NAME);
-                if ( id == GET_FIELDS_ID ) {
-                    return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME}, null, null,
-                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
-                } else if ( id == SEARCH_FIELDS_ID) {
+                Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);
+                if (id == GET_FIELDS_ID) {
+                    /*return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME}, null, null,
+                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
+                    mySQLiteCursorLoader = new MySQLiteCursorLoader(MainActivity.this,
+                            "SELECT " + Contract.COLUMN_NAME_ID + ", " + Contract.Field.COLUMN_NAME_FIELD_TYPE + ", " + Contract.Field.COLUMN_NAME_FIELD_NAME
+                                    + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_NAME_USAGE_COUNT + " DESC",
+                            null);
+                    return mySQLiteCursorLoader;
+                } else if (id == SEARCH_FIELDS_ID) {
                     String query = args.getString(QUERY_KEY);
-                    return new CursorLoader(MainActivity.this, uri,
+                    /*return new CursorLoader(MainActivity.this, uri,
                             new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME},
                             Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " LIKE ? ",
                             new String[] {"%" + query + "%"},
-                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
+                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
+                    mySQLiteCursorLoader = new MySQLiteCursorLoader(MainActivity.this,
+                            "SELECT " + Contract.COLUMN_NAME_ID + ", " + Contract.Field.COLUMN_NAME_FIELD_TYPE + ", "
+                                    + Contract.Field.COLUMN_NAME_FIELD_NAME
+                                    + " FROM " + Contract.Field.TABLE_NAME + " WHERE " + Contract.Field.COLUMN_NAME_FIELD_NAME + " LIKE ? "
+                                    + " ORDER BY " + Contract.Field.COLUMN_NAME_USAGE_COUNT + " DESC", new String[]{"%" + query + "%"});
+                    return mySQLiteCursorLoader;
                 }
                 return null;
             }
@@ -120,8 +137,9 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 mAdapter.swapCursor(data);
-                if ( data.moveToFirst() ) {
+                if (data.moveToFirst()) {
                     first_field_name = data.getString(2);
+                    first_field_id = data.getLong(0);
                 }
             }
 
@@ -130,8 +148,8 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.swapCursor(null);
             }
         };
-        mAdapter = new MainActivityRecyclerViewAdapter(this,null);
-        RecyclerView.LayoutManager mLayoutManager = new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL);
+        mAdapter = new MainActivityRecyclerViewAdapter(this, null);
+        RecyclerView.LayoutManager mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
@@ -139,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements
         int spacing = 3;
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing, true));
         addFab();
-        getSupportLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
+        getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
         deleteUnNeadedSharedPreferences();
     }
 
@@ -152,25 +170,26 @@ public class MainActivity extends AppCompatActivity implements
             try {
                 PackageInfo info = manager.getPackageInfo(getPackageName(), 0);
                 for (int versionCode = info.versionCode; versionCode >= 1; versionCode--) {
-                    if ( sharedPreferences.contains(RUN_FIRST_TIME_DIALOG + versionCode) ) {
+                    if (sharedPreferences.contains(RUN_FIRST_TIME_DIALOG + versionCode)) {
                         editor.remove(RUN_FIRST_TIME_DIALOG + versionCode);
                     }
-                    if ( sharedPreferences.contains(RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS + versionCode)) {
+                    if (sharedPreferences.contains(RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS + versionCode)) {
                         editor.remove(RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS + versionCode);
                     }
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             }
-            if ( sharedPreferences.contains(LAST_USED_FIELD_POSITION) ) {
+            if (sharedPreferences.contains(LAST_USED_FIELD_POSITION)) {
                 editor.remove(LAST_USED_FIELD_POSITION);
             }
-            if ( sharedPreferences.contains(FieldActivity.CURRENT_FIELD) ) {
-                editor.remove(FieldActivity.CURRENT_FIELD);
+            if (sharedPreferences.contains(FieldActivity.CURRENT_FIELD_NAME)) {
+                editor.remove(FieldActivity.CURRENT_FIELD_NAME);
             }
             editor.commit();
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -187,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements
 
                     @Override
                     public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                        getSupportLoaderManager().restartLoader(GET_FIELDS_ID,null,getFields);
+                        getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
                         return true;
                     }
                 });
@@ -202,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (!newText.equals("")) {
                     handleIntent(newText);
                 } else {
-                    getSupportLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
+                    getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
                 }
                 return true;
             }
@@ -221,24 +240,24 @@ public class MainActivity extends AppCompatActivity implements
         Thread importThread = ExportImportDatabase.getImportThread();
         switch (position) {
             case EXPORT_FIELD:
-                if ( (exportThread == null || !exportThread.isAlive()) &&
-                        (importThread == null || !importThread.isAlive()) ) {
+                if ((exportThread == null || !exportThread.isAlive()) &&
+                        (importThread == null || !importThread.isAlive())) {
                     ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
                     exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
                 } else {
-                    Toast toast = Toast.makeText(this,R.string.wait_until_current_export_import_finish,Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP,0,400);
+                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
                 break;
             case IMPORT_FIELD:
-                if ( ( exportThread == null || !exportThread.isAlive() ) &&
-                        ( importThread == null || !importThread.isAlive() ) ) {
+                if ((exportThread == null || !exportThread.isAlive()) &&
+                        (importThread == null || !importThread.isAlive())) {
                     ImportFieldsDialogFragment importFieldsDialogFragment = new ImportFieldsDialogFragment();
                     importFieldsDialogFragment.show(getSupportFragmentManager(), ImportFieldsDialogFragment.IMPORT_FIELD_DIALOG_FRAGMENT);
                 } else {
-                    Toast toast = Toast.makeText(this,R.string.wait_until_current_export_import_finish,Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP,0,400);
+                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
                 break;
@@ -249,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements
                     startActivity(myAppLinkToMarket);
                 } catch (ActivityNotFoundException e) {
                     Toast toast = Toast.makeText(this, "Unable to find market app", Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
                 break;
@@ -267,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements
     private void handleIntent(String query) {
         Bundle bundle = new Bundle();
         bundle.putString(QUERY_KEY, query);
-        getSupportLoaderManager().restartLoader(SEARCH_FIELDS_ID, bundle, getFields);
+        getLoaderManager().restartLoader(SEARCH_FIELDS_ID, bundle, getFields);
     }
 
     /*
@@ -277,28 +296,20 @@ public class MainActivity extends AppCompatActivity implements
      */
 
 
-    /**
-     * This method creates a SimpleCursorAdapter to populate the data from cursor to the field spinner
-     * @return SimpleCursorAdapter object
-     */
-    private SimpleCursorAdapter initializeSimpleCursorAdapterForFieldSpinner() {
-        String[] fromColumns = {Contract.OldField.COLUMN_NAME_FIELD_NAME}; // the field name column in the cursor
-        int[] toViews = {R.id.list_item};   // the view that will hold the data of the field name
-//        fieldListCursor = databaseOperations.getFieldList(); // the cursor of the list of the field names
-        return new SimpleCursorAdapter(this, R.layout.field_spinner, null, fromColumns, toViews, 0); // creating the adapter then returning it
-    }
+
+
     private void addFab() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         SubActionButton.Builder itemBuilder = new SubActionButton.Builder(this);
         itemBuilder.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.fab_selector));
         ImageView itemIcon1 = new ImageView(this);
         itemIcon1.setImageResource(R.drawable.entry);
-        SubActionButton button1 = itemBuilder.setLayoutParams(new FrameLayout.LayoutParams(100,100))
+        SubActionButton button1 = itemBuilder.setLayoutParams(new FrameLayout.LayoutParams(100, 100))
                 .setContentView(itemIcon1, new FrameLayout.LayoutParams(50, 50, Gravity.CENTER)).build();
         ImageView itemIcon2 = new ImageView(this);
         itemIcon2.setImageResource(R.drawable.folder);
-        SubActionButton button2 = itemBuilder.setLayoutParams(new FrameLayout.LayoutParams(100,100))
-                .setContentView(itemIcon2, new FrameLayout.LayoutParams(50, 50,Gravity.CENTER)).build();
+        SubActionButton button2 = itemBuilder.setLayoutParams(new FrameLayout.LayoutParams(100, 100))
+                .setContentView(itemIcon2, new FrameLayout.LayoutParams(50, 50, Gravity.CENTER)).build();
         final FloatingActionMenu actionMenu = new FloatingActionMenu.Builder(this)
                 .addSubActionView(button1)
                 .addSubActionView(button2)
@@ -310,7 +321,8 @@ public class MainActivity extends AppCompatActivity implements
                 if (mAdapter.getItemCount() > 0) {
                     if (first_field_name != null) {
                         Intent intent = new Intent(MainActivity.this, AddEntryActivity.class);
-                        intent.putExtra(FieldActivity.CURRENT_FIELD, first_field_name);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, first_field_id);
+                        intent.putExtra(FieldActivity.CURRENT_FIELD_NAME, first_field_name);
                         intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
                         startActivity(intent);
                     }
@@ -331,6 +343,15 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    @Override
+    public void deleteField(long field_id) {
+        mySQLiteCursorLoader.deleteField(field_id);
+    }
+
+    @Override
+    public void createField(String field_name, int field_type, int question_data_type) {
+        mySQLiteCursorLoader.createField(field_name, field_type, question_data_type);
+    }
 
 
     public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {

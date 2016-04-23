@@ -4,6 +4,8 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -22,10 +24,13 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabulary.database.Contract;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.studyvocabulary.dialogs.DeleteEntryDialogFragment;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -43,6 +48,8 @@ public class EditEntryActivity extends AppCompatActivity implements
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
+    public static final String FIELD_TYPE = "field_type";
+    public static final String ENTRY_ID = "entry_id";
     private Spinner field_spinner;
     private EditText editQuestion;
     private EditText editAnswer;
@@ -51,7 +58,6 @@ public class EditEntryActivity extends AppCompatActivity implements
     private TextView showActionbar;
     private SimpleCursorAdapter simple_cursor_adapter;
     private DatabaseOperations databaseOperations;
-    private String currentField;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
     private int fieldType;
@@ -59,9 +65,13 @@ public class EditEntryActivity extends AppCompatActivity implements
     private Cursor cursor;
     private boolean field_chosen;
     private TextView save;
+    private long current_field_id;
     private String currentQuestion;
     private String currentAnswer;
     private LinearLayout showResult,questionLinearlayout, container;
+    private long entry_id;
+    private int question_data_type;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,11 +79,14 @@ public class EditEntryActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_edit_entry);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        currentField = getIntent().getStringExtra(FieldActivity.CURRENT_FIELD);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
+        fieldType = getIntent().getIntExtra(FIELD_TYPE,0);
+        entry_id = getIntent().getLongExtra(ENTRY_ID,0);
+        question_data_type = getIntent().getIntExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,0);
         currentQuestion = getIntent().getStringExtra(StudyActivity.CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(StudyActivity.CURRENT_ANSWER);
-        databaseOperations = new DatabaseOperations(getContentResolver());
-        fieldType = databaseOperations.getFieldType(currentField);
+        databaseOperations = new DatabaseOperations(this);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         save = (TextView) findViewById(R.id.save);
         editQuestion = (EditText) findViewById(R.id.question);
@@ -91,10 +104,10 @@ public class EditEntryActivity extends AppCompatActivity implements
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         editAnswer.setText(currentAnswer);
         switch (fieldType) {
-            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
+            case Contract.Field.DEFAULT_TYPE:
                 editQuestion.setText(currentQuestion);
                 break;
-            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
+            case Contract.Field.NOTEBOOK_TYPE:
                 Timestamp timestamp = Timestamp.valueOf(currentQuestion);
                 Date date = new Date(timestamp.getTime());
                 editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm").format(date));
@@ -118,33 +131,35 @@ public class EditEntryActivity extends AppCompatActivity implements
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( editQuestion.getText().toString().length() > 0 && editAnswer.getText().toString().length() > 0 ) {
+                String editedQuestion = editQuestion.getText().toString();
+                String editedAnswer = editAnswer.getText().toString();
+                if ( editedQuestion.length() > 0 && editedAnswer.length() > 0 ) {
                     switch (fieldType) {
-                        case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
+                        case Contract.Field.DEFAULT_TYPE:
                             editQuestion.setEnabled(false);
                             editAnswer.setEnabled(false);
-                            if (!editQuestion.getText().toString().equals(currentQuestion) || !editAnswer.getText().toString().equals(currentAnswer)) {
-                                boolean b = databaseOperations.editFieldEntry(currentField, currentQuestion, editQuestion.getText().toString(),
-                                        currentAnswer, editAnswer.getText().toString());
-                                if (!b) {
-                                    Toast toast = Toast.makeText(EditEntryActivity.this, R.string.repeated_entry, Toast.LENGTH_LONG);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
+                            if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
+                                if ( ! databaseOperations.checkEntryDuplication(editedQuestion,editedAnswer,current_field_id,question_data_type)) {
+                                    mySQLiteCursorLoader.editEntry(entry_id,question_data_type,editedQuestion,editedAnswer);
+                                } else {
+                                Toast toast = Toast.makeText(EditEntryActivity.this, R.string.repeated_entry, Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
                                 }
                             }
                             break;
-                        case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
+                        case Contract.Field.NOTEBOOK_TYPE:
                             editQuestion.setEnabled(false);
                             editAnswer.setEnabled(false);
-                            String dateTimeUserFormat = editQuestion.getText().toString();
+                            String dateTimeUserFormat = editedQuestion;
                             StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                             stringTokenizer.nextToken();
                             String dateToSave = stringTokenizer.nextToken() + " "
                                     + stringTokenizer.nextToken() + ":00";
-                            if (!dateToSave.equals(currentQuestion) || !editAnswer.getText().toString().equals(currentAnswer)) {
-                                boolean b = databaseOperations.editFieldEntry(currentField, currentQuestion, dateToSave,
-                                        currentAnswer, editAnswer.getText().toString());
-                                if (!b) {
+                            if (!dateToSave.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
+                                if ( ! databaseOperations.checkEntryDuplication(dateToSave,editedAnswer,current_field_id,question_data_type)) {
+                                 mySQLiteCursorLoader.editEntry(entry_id,question_data_type,dateToSave,editedAnswer);
+                                } else {
                                     Toast toast = Toast.makeText(EditEntryActivity.this, R.string.repeated_entry, Toast.LENGTH_LONG);
                                     toast.setGravity(Gravity.TOP, 0, 400);
                                     toast.show();
@@ -166,7 +181,7 @@ public class EditEntryActivity extends AppCompatActivity implements
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     switch (fieldType) {
-                        case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
+                        case Contract.Field.NOTEBOOK_TYPE:
 //                            enterQuestion.clearFocus();
                             editAnswer.requestFocus();
                             Calendar calendar = Calendar.getInstance();
@@ -209,11 +224,11 @@ public class EditEntryActivity extends AppCompatActivity implements
     }
     private void setHints(int fieldType ) {
         switch ( fieldType ) {
-            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
+            case Contract.Field.NOTEBOOK_TYPE:
                 editQuestion.setHint(R.string.enter_date_time);
                 editAnswer.setHint(R.string.write_whatever);
                 break;
-            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
+            case Contract.Field.DEFAULT_TYPE:
                 editQuestion.setHint(R.string.enter_a_question);
                 editAnswer.setHint(R.string.enter_an_answer);
         }

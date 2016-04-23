@@ -15,16 +15,16 @@ import com.ahmedsameha1.studyvocabulary.R;
  */
 public class DeleteEntryDialogFragment extends DialogFragment {
     public static final String DELETE_ENTRY_DIALOG_FRAGMENT = "deleteEntryDialogFragment";
-    private String current_field;
-    private String current_question;
-    private String current_answer;
+    public static final String TO_BE_DELETED_ENTRY_ID = "to_be_deleted_entry_id";
+    public static final String QUESTION_DATA_TYPE = "question_data_type";
+    private long entry_id;
+    private int question_data_type;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        current_field = getArguments().getString(StudyActivity.CURRENT_FIELD);
-        current_question = getArguments().getString(StudyActivity.CURRENT_QUESTION);
-        current_answer = getArguments().getString(StudyActivity.CURRENT_ANSWER);
+        entry_id = getArguments().getLong(TO_BE_DELETED_ENTRY_ID);
+        question_data_type = getArguments().getInt(QUESTION_DATA_TYPE);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class DeleteEntryDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                new DatabaseOperations(getActivity().getContentResolver()).deleteFieldEntry(current_question, current_answer, current_field);
+                                ((Contact) getActivity()).deleteEntry(entry_id,question_data_type);
                             }
                         }
                 )
@@ -52,6 +52,6 @@ public class DeleteEntryDialogFragment extends DialogFragment {
                     return builder.create();
                 }
         public interface Contact {
-        public void deleteFieldEntry(DeleteEntryDialogFragment dialog);
+        public void deleteEntry(long entry_id,int question_data_type);
     }
 }

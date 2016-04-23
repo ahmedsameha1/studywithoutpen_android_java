@@ -7,9 +7,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.LoaderManager;
+import android.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -29,7 +29,9 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DataProvider;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.studyvocabulary.R;
@@ -44,11 +46,11 @@ import java.util.StringTokenizer;
  * Created by ahmed_000 on 9/23/2015.
  */
 public class StudyDuringActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<Cursor> ,
+        LoaderManager.LoaderCallbacks<Cursor>,
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize {
     public static final String ACTIVITY_NAME = "StudyDuringActivity";
-    public static final String CURRENT_FIELD = "currentField";
+    public static final String CURRENT_FIELD = "current_field_name";
     public static final String STARTING_TIME = "startingTime";
     public static final String REPEATED_ENTRIES = "repeatedEntries";
     public static final String STRING_REPRESENTING_REPEATED_ENTRIES = "strigRepresentingRepeatedEntries";
@@ -64,30 +66,33 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public static final int PORTRAIT = 0;
     public static final int LANDSCAPE = 1;
     public static final String PAUSING = "pausing";
-    private String currentField;
     private long startingTime;
     boolean boolean_continue, actionBarShown;
     private Cursor cursor;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
     private ArrayList<String> questions = new ArrayList<String>(), answers = new ArrayList<String>();
     private ArrayList<Integer> repeatedEntries = new ArrayList<Integer>();
     private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-            toPause();
-            pauseRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyDuringActivity.this);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.remove(ACTIVITY_NAME + PAUSING + currentField);
-                    editor.commit();
-                    Toast toast = Toast.makeText(StudyDuringActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
-            };
-            mHandler.post(pauseRunnable);
+            try {
+                toPause();
+            } finally {
+                pauseRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyDuringActivity.this);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
+                        editor.commit();
+                        Toast toast = Toast.makeText(StudyDuringActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                };
+                mHandler.post(pauseRunnable);
+            }
         }
     });
 
@@ -119,17 +124,18 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private Cursor searchForCursor;
     private EditText enterAnswer;
-    private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuetions,showActionbar;
+    private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuetions, showActionbar;
     private TextView nextHint, check, _continue;
 
 //    private ProgressBar progressBar;
 
-    private LinearLayout showResult,questionLinearlayout, container;
+    private LinearLayout showResult, questionLinearlayout, container;
     //    private SQLiteDatabase sqLiteDatabase;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
     private Handler mHandler = new Handler();
-    private Runnable mRunnable,pauseRunnable;
+    private Runnable mRunnable, pauseRunnable;
+    private long current_field_id;
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +146,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study_during);
-        currentField = getIntent().getStringExtra(CURRENT_FIELD);
+        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         startingTime = getIntent().getLongExtra(STARTING_TIME, 0);
         retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
         // if the reference to the fragment was null we create a new fragment object and add it to the activity
@@ -148,6 +154,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             retainedFragment = new RetainedFragment();
             getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
         }
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         /*listForTest = retainedFragment.getListForTest_StudyDuringActivity();
         if ( listForTest == null ) {
             listForTest = prepareListForStudyFirstTime();
@@ -171,12 +178,12 @@ public class StudyDuringActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
         int screenSize = getResources().getConfiguration().screenLayout &
                 Configuration.SCREENLAYOUT_SIZE_MASK;
-        if ( screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
-                || screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL ) {
+        if (screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
+                || screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL) {
             getSupportActionBar().hide();
         }
         actionBarShown = getSupportActionBar().isShowing();
-        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show );
+        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         check.setOnClickListener(new View.OnClickListener() {
@@ -214,29 +221,10 @@ public class StudyDuringActivity extends AppCompatActivity implements
                                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                                 ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                             } else {
-                                databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
-                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyDuringActivity.this); // getting the preferences
-                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                /*editor.putString(STRING_REPRESENTING_REPEATED_ENTRIES, null);
-                                editor.putInt(CURRENT_QUESTION_COUNTER, 0);*/
-                                editor.remove(ACTIVITY_NAME + DASH + STRING_REPRESENTING_REPEATED_ENTRIES
-                                        + DASH + currentField);
-                                editor.remove(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
-                                        + DASH + currentField);
-                                editor.remove(ACTIVITY_NAME + DASH + NUMBER_OF_TRIES + DASH + currentField);
-                                editor.commit();
+                                mySQLiteCursorLoader.resetEntriesStudyPeriodOrder(current_field_id, databaseOperations.getQuestionDataType(current_field_id));
+                                mySQLiteCursorLoader.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
                                 finish();
                             }
-//                            testingNow = false;
-//                            enterAnswer.setEnabled(false);
-//                            showNumberOfQuetions.setText("");
-//                            remainingQuestionCounter.setText("");
-//                            showTries.setText("");
-//
-//                            start.setEnabled(true);
-//                            numberOfTries.setEnabled(true);
-
-//                            Toast.makeText(TestActivity.this, "Test Completed!", Toast.LENGTH_SHORT).show();
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
                             showTries.setText(Integer.toString(triesCounter + 1));
@@ -244,12 +232,11 @@ public class StudyDuringActivity extends AppCompatActivity implements
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                             enterAnswer.setHint(R.string.enter_your_answer);
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-//                            wrongAnswers = new ArrayList<String>(permitedTriesNumber);
                         }
                     }
                 } else {
                     Toast toast = Toast.makeText(StudyDuringActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
                 enterAnswer.setHint(R.string.enter_your_answer);
@@ -259,11 +246,11 @@ public class StudyDuringActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 if (hints != null) {
-                    if ( enterAnswer.getText().toString().length() <= 0 ) {
+                    if (enterAnswer.getText().toString().length() <= 0) {
                         enterAnswer.setHint(hints.get(hintCounter++));
                     } else {
                         Toast toast = Toast.makeText(StudyDuringActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
                     hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
@@ -325,11 +312,11 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 enterAnswer.setEnabled(true);
 //                enterAnswer.requestFocus();
 //                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-                InputMethodManager inputMethodManager =  (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                 inputMethodManager.toggleSoftInputFromWindow(enterAnswer.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
                 enterAnswer.requestFocus();
                 enterAnswer.setHint(R.string.enter_your_answer);
-                if ( permitedTriesNumber == 1 ) {
+                if (permitedTriesNumber == 1) {
 //                    check.setBackgroundResource(R.drawable.ic_question_marks);
                     showResult.setBackgroundResource(R.drawable.enter_answer_background);
                     showResult.setPadding(0, 0, 0, 0);
@@ -339,13 +326,13 @@ public class StudyDuringActivity extends AppCompatActivity implements
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( actionBarShown ) {
+                if (actionBarShown) {
                     getSupportActionBar().hide();
-                    actionBarShown = (! actionBarShown);
+                    actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
                 } else {
                     getSupportActionBar().show();
-                    actionBarShown = (! actionBarShown);
+                    actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
                 }
             }
@@ -377,22 +364,18 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 toast.show();
             }
         });
-        permitedTriesNumber = 3;
         showTries.setText(Integer.toString(triesCounter + 1));
-        databaseOperations = new DatabaseOperations(getContentResolver());
+        databaseOperations = new DatabaseOperations(this);
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         if (boolean_continue) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            String string = sharedPreferences.getString(ACTIVITY_NAME + DASH + STRING_REPRESENTING_REPEATED_ENTRIES
-                    + DASH + currentField, null);
-            currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
-                    + DASH + currentField, 0);
-            repeatedEntries = convertStringToRepeatedEntriesArrayList(string);
-            permitedTriesNumber = sharedPreferences.getInt(ACTIVITY_NAME + DASH + NUMBER_OF_TRIES + DASH + currentField, 0);
-            getSupportLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION, null, this);
+            int[] array = databaseOperations.getDataFromStudyPeriodPaused(current_field_id);
+            currentQuestionCounter = array[0];
+            permitedTriesNumber = array[1];
+            repeatedEntries = databaseOperations.getStudyPeriodRepeatedEntries(current_field_id);
+            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION, null, this);
         } else {
             permitedTriesNumber = getIntent().getExtras().getInt(NUMBER_OF_TRIES);
-            getSupportLoaderManager().initLoader(START_NEW_SESSION, null, this);
+            getLoaderManager().initLoader(START_NEW_SESSION, null, this);
         }
 
     }
@@ -416,7 +399,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             case R.id.pause:
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(ACTIVITY_NAME + PAUSING + currentField, true);
+                editor.putBoolean(ACTIVITY_NAME + PAUSING + current_field_id, true);
                 editor.commit();
                 Toast toast = Toast.makeText(this, R.string.pause_do_not_shutdown, Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -426,19 +409,19 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 return true;
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
-                bundle.putFloat(QUESTION_LAYOUT,((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
-                bundle.putFloat(ANSWER_LAYOUT,((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
+                bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
+                bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
                 changeAreasDialogFragment.setArguments(bundle);
-                changeAreasDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                changeAreasDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
-                bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize()/scaledDensity) );
+                bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize() / scaledDensity));
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
                 changeTextSizeDialogFragment.setArguments(bundle1);
-                changeTextSizeDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                changeTextSizeDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -446,6 +429,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
 
 
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -453,21 +437,14 @@ public class StudyDuringActivity extends AppCompatActivity implements
     }
 
     private void toPause() {
-        final DatabaseOperations databaseOperations = new DatabaseOperations(getContentResolver());
-//                progressBar.setVisibility(View.VISIBLE);
-        databaseOperations.clearStudyDuringDataFromLinkerTable(currentField);
-        databaseOperations.writeDataToLinkerTableStudyDuringColumns(listForTest, currentField);
-
-//                databaseOperations.clearStudyDuringTempTable(currentField);
-//                databaseOperations.writeToStudyDuringTempTable(listForTest,currentField);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(ACTIVITY_NAME + DASH + STRING_REPRESENTING_REPEATED_ENTRIES
-                + DASH + currentField, convertRepeatedEntriesArrayListToString());
-        editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
-                + DASH + currentField, currentQuestionCounter);
-        editor.putInt(ACTIVITY_NAME + DASH + NUMBER_OF_TRIES + DASH + currentField, permitedTriesNumber);
-        editor.commit();
+        int[] array = new int[2];
+        array[0] = currentQuestionCounter;
+        array[1] = permitedTriesNumber;
+        mySQLiteCursorLoader.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
+        mySQLiteCursorLoader.putStudyPeriodPausedData(current_field_id, array);
+        mySQLiteCursorLoader.resetEntriesStudyPeriodOrder(current_field_id, databaseOperations.getQuestionDataType(current_field_id));
+        mySQLiteCursorLoader.putEntriesStudyPeriodOrder(current_field_id, databaseOperations.getQuestionDataType(current_field_id), listForTest);
+        mySQLiteCursorLoader.putStudyPeriodRepeatedEntries(current_field_id, repeatedEntries);
     }
 
     private String[][] prepareListForStudyFirstTime() {
@@ -502,7 +479,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         if (searchForCursor != null) {
             searchForCursor.close();
         }
-        searchForCursor = databaseOperations.searchExactlyFor(currentField, currentQuestion);
+        searchForCursor = databaseOperations.searchExactlyFor(current_field_id, databaseOperations.getQuestionDataType(current_field_id), currentQuestion);
         if (searchForCursor.getCount() > 1) {
             hints = new ArrayList<String>(3);
             hints.add(getString(R.string.first_character) + currentAnswer.charAt(0));
@@ -577,51 +554,36 @@ public class StudyDuringActivity extends AppCompatActivity implements
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // getting the preferences
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER + DASH + currentField, currentQuestionCounter);
-        editor.commit();
-//        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
+        savedInstanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
         savedInstanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInstanceState.putBoolean(RESULT, result);
-//        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInstanceState.putBoolean(CHECK_BUTTON_STATE, check.isEnabled());
         savedInstanceState.putBoolean(_CONTINUE_BUTTON_STATE, _continue.isEnabled());
         savedInstanceState.putBoolean(TESTING_NOW, testingNow);
         savedInstanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
-//        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
         savedInstanceState.putInt(HINT_COUNTER, hintCounter);
         savedInstanceState.putStringArrayList(HINTS, hints);
         savedInstanceState.putIntegerArrayList(REPEATED_ENTRIES, repeatedEntries);
         saveUserLayoutChanges(savedInstanceState);
-        if ( ! isFinishing() ) {
+      /*  if (!isFinishing()) {
             pauseThread.start();
-        }
-//        savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
-//        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
+        }*/
         super.onSaveInstanceState(savedInstanceState);
     }
 
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        currentQuestionCounter = sharedPreferences.getInt(ACTIVITY_NAME + DASH + CURRENT_QUESTION_COUNTER
-                + DASH + currentField, 0);
-//        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
+        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);
-//        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
         testingNow = savedInstanceState.getBoolean(TESTING_NOW);
         boolean checkState = savedInstanceState.getBoolean(CHECK_BUTTON_STATE);
         boolean _continueState = savedInstanceState.getBoolean(_CONTINUE_BUTTON_STATE);
         questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
-//        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
         restoreUserLayoutChanges(savedInstanceState);
-//        wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
-//        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
         if (testingNow) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             showTries.setText(Integer.toString(triesCounter + 1));
@@ -630,7 +592,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             check.setEnabled(checkState);
             enterAnswer.setEnabled(checkState);
             _continue.setEnabled(_continueState);
-//            enterPercent.setEnabled(false);
+
 
             enterAnswer.setEnabled(true);
             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
@@ -686,27 +648,44 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
         if (id == CONTINUE_PREVIOUS_SESSION) {
             Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-            return new CursorLoader(this, uri,
+
+            return new MySQLiteCursorLoader(StudyDuringActivity.this,
+                    "SELECT " + " s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                            + " a , se." + Contract.String_Entry.COLUMN_NAME_PAUSED_STUDY_PERIOD_ORDER + " FROM " + Contract.STring.TABLE_NAME
+                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
+                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_NAME_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
+                    new String[]{current_field_id + "", "0"});
+           /* return new CursorLoader(this, uri,
                     new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
                             Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK,
                             Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER},
                     Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_STUDY_DURING_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                    new String[]{"0", currentField},
-                    null);
+                    new String[]{"0", current_field_name},
+                    null);*/
             /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,uri,
                     new String[] {Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_QUESTION, Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_ANSWER},
                     Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_NAME_FIELD + " = ?",
-                    new String[] {currentField},
+                    new String[] {current_field_name},
                     null);*/
         } else {
-            Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
+            return new MySQLiteCursorLoader(StudyDuringActivity.this,
+                    "SELECT " + " s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                            + " a , se." + Contract.CREATION_DATE + " FROM " + Contract.STring.TABLE_NAME
+                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
+                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                    new String[]{current_field_id + ""});
+           /* Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,
                     uri,
                     new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK, Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32},
                     Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                    new String[]{currentField},
-                    null);
+                    new String[]{current_field_name},
+                    null);*/
         }
     }
 
@@ -734,7 +713,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
 
         } else if (questionsNumber <= 0 && loader.getId() == START_NEW_SESSION) {
             Toast toast = Toast.makeText(this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.TOP,0,400);
+            toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
             finish();
         }
@@ -742,7 +721,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        this.cursor = null;
+
     }
 
     @Override
@@ -761,14 +740,16 @@ public class StudyDuringActivity extends AppCompatActivity implements
         showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
         enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
     }
+
     private void saveUserLayoutChanges(Bundle bundle) {
         bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
         bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
         bundle.putFloat(TEXT_SIZE, showQuestion.getTextSize());
     }
+
     private void restoreUserLayoutChanges(Bundle bundle) {
-        changeAreas(bundle.getFloat(QUESTION_LAYOUT),bundle.getFloat(ANSWER_LAYOUT));
-        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_PX,bundle.getFloat(TEXT_SIZE));
-        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_PX,bundle.getFloat(TEXT_SIZE));
+        changeAreas(bundle.getFloat(QUESTION_LAYOUT), bundle.getFloat(ANSWER_LAYOUT));
+        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
+        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
     }
 }

@@ -4,11 +4,9 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.app.LoaderManager;
+import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
@@ -29,9 +27,10 @@ import android.widget.Toast;
 
 
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DataProvider;
+import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeTextSizeDialogFragment;
 
@@ -52,6 +51,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
+    private static final String CURRENT_FIELD_ID = "current_field_id";
     private Spinner field_spinner;
     private EditText enter_question;
     private EditText enter_answer;
@@ -60,22 +60,28 @@ public class AddEntryActivity extends AppCompatActivity implements
     private TextView showActionbar;
     private SimpleCursorAdapter simple_cursor_adapter;
     private DatabaseOperations databaseOperations;
-    private String currentField;
+    private String current_field_name;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
     private int fieldType;
     private Cursor cursor;
     private boolean field_chosen;
     private LinearLayout showResult,questionLinearlayout, container;
-
+    private long current_field_id;
+    private int question_data_type;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_entry);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        databaseOperations = new DatabaseOperations(this);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, true);
-        currentField = getIntent().getStringExtra(FieldActivity.CURRENT_FIELD);
+        current_field_name = getIntent().getStringExtra(FieldActivity.CURRENT_FIELD_NAME);
+        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
+        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         field_spinner = (Spinner) findViewById(R.id.field_spinner);
         if ( fromFieldActivity ) {
             field_spinner.setEnabled(false);
@@ -94,33 +100,45 @@ public class AddEntryActivity extends AppCompatActivity implements
         add_entry = (TextView) findViewById(R.id.add_entry);
         add_entry_finish = (TextView) findViewById(R.id.add_entry_finish);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
-        databaseOperations = new DatabaseOperations(getContentResolver());
-        fieldType = databaseOperations.getFieldType(currentField);
+        fieldType = databaseOperations.getFieldType(current_field_id);
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
         simple_cursor_adapter = new SimpleCursorAdapter(this,R.layout.field_spinner,null,
-                new String [] {Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME}, new int[] {R.id.list_item}, 0);
+                new String [] {Contract.Field.COLUMN_NAME_FIELD_NAME}, new int[] {R.id.list_item}, 0);
         field_spinner.setAdapter(simple_cursor_adapter);
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         setHints(fieldType);
         add_entry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( enter_question.getText().toString().length() > 0 && enter_answer.getText().toString().length() > 0) {
+                String question = enter_question.getText().toString();
+                String answer = enter_answer.getText().toString();
+                if ( question.length() > 0 && answer.length() > 0) {
                     if (fromFieldActivity) {
                         switch (fieldType) {
-                            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
-                                databaseOperations.insertFieldEntry(currentField, enter_question.getText().toString(),
-                                        enter_answer.getText().toString());
+                            case Contract.Field.DEFAULT_TYPE:
+                                if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                    mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
+                                } else {
+                                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
                                 break;
-                            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
-                                String dateTimeUserFormat = enter_question.getText().toString();
+                            case Contract.Field.NOTEBOOK_TYPE:
+                                String dateTimeUserFormat = question;
                                 StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                 stringTokenizer.nextToken();
                                 String dateToSave = stringTokenizer.nextToken() + " "
                                         + stringTokenizer.nextToken() + ":00";
-                                databaseOperations.insertFieldEntry(currentField, dateToSave, enter_answer.getText().toString());
+                                if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                    mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
+                                } else {
+                                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
                                 break;
                         }
                         enter_question.setText("");
@@ -128,17 +146,28 @@ public class AddEntryActivity extends AppCompatActivity implements
                     } else {
                         if ( field_chosen ) {
                             switch (fieldType) {
-                                case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
-                                    databaseOperations.insertFieldEntry(currentField, enter_question.getText().toString(),
-                                            enter_answer.getText().toString());
+                                case Contract.Field.DEFAULT_TYPE:
+                                    if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                        mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
+                                    } else {
+                                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                    }
                                     break;
-                                case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
-                                    String dateTimeUserFormat = enter_question.getText().toString();
+                                case Contract.Field.NOTEBOOK_TYPE:
+                                    String dateTimeUserFormat = question;
                                     StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                     stringTokenizer.nextToken();
                                     String dateToSave = stringTokenizer.nextToken() + " "
                                             + stringTokenizer.nextToken() + ":00";
-                                    databaseOperations.insertFieldEntry(currentField, dateToSave, enter_answer.getText().toString());
+                                    if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                        mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
+                                    } else {
+                                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                    }
                                     break;
                             }
                             enter_question.setText("");
@@ -159,37 +188,61 @@ public class AddEntryActivity extends AppCompatActivity implements
         add_entry_finish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (enter_question.getText().toString().length() > 0 && enter_answer.getText().toString().length() > 0) {
+                String question = enter_question.getText().toString();
+                String answer = enter_answer.getText().toString();
+                if (question.length() > 0 && answer.length() > 0) {
                     if (fromFieldActivity) {
                         switch (fieldType) {
-                            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
-                                databaseOperations.insertFieldEntry(currentField, enter_question.getText().toString(),
-                                        enter_answer.getText().toString());
+                            case Contract.Field.DEFAULT_TYPE:
+                                if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                    mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
+                                } else {
+                                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
                                 break;
-                            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
-                                String dateTimeUserFormat = enter_question.getText().toString();
+                            case Contract.Field.NOTEBOOK_TYPE:
+                                String dateTimeUserFormat = question;
                                 StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                 stringTokenizer.nextToken();
                                 String dateToSave = stringTokenizer.nextToken() + " "
                                         + stringTokenizer.nextToken() + ":00";
-                                databaseOperations.insertFieldEntry(currentField, dateToSave, enter_answer.getText().toString());
+                                if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                    mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
+                                } else {
+                                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
                                 break;
                         }
                         finish();
                     } else {
                         if (field_chosen) {
                             switch (fieldType) {
-                                case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
-                                    databaseOperations.insertFieldEntry(currentField, enter_question.getText().toString(),
-                                            enter_answer.getText().toString());
+                                case Contract.Field.DEFAULT_TYPE:
+                                    if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                        mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
+                                    } else {
+                                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                    }
                                     break;
-                                case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
-                                    String dateTimeUserFormat = enter_question.getText().toString();
+                                case Contract.Field.NOTEBOOK_TYPE:
+                                    String dateTimeUserFormat = question;
                                     StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                     stringTokenizer.nextToken();
                                     String dateToSave = stringTokenizer.nextToken() + " "
                                             + stringTokenizer.nextToken() + ":00";
-                                    databaseOperations.insertFieldEntry(currentField, dateToSave, enter_answer.getText().toString());
+                                    if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                        mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
+                                    } else {
+                                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                    }
                                     break;
                             }
                             finish();
@@ -217,10 +270,10 @@ public class AddEntryActivity extends AppCompatActivity implements
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Cursor c = (Cursor) parent.getSelectedItem();
-                currentField = c.getString(1);
-                fieldType = databaseOperations.getFieldType(currentField);
+                current_field_name = c.getString(2);
+                fieldType = c.getInt(1);
                 setHints(fieldType);
-                if ( fieldType == Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE) {
+                if ( fieldType == Contract.Field.NOTEBOOK_TYPE) {
                     enter_question.setText("");
                     enter_question.clearFocus();
                 }
@@ -251,7 +304,7 @@ public class AddEntryActivity extends AppCompatActivity implements
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     switch (fieldType) {
-                        case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
+                        case Contract.Field.NOTEBOOK_TYPE:
 //                            enterQuestion.clearFocus();
                             enter_answer.requestFocus();
                             Calendar calendar = Calendar.getInstance();
@@ -290,17 +343,17 @@ public class AddEntryActivity extends AppCompatActivity implements
                 return true;
             }
         });
-        getSupportLoaderManager().restartLoader(0,null,this);
+        getLoaderManager().restartLoader(0,null,this);
         enter_answer.requestFocus();
     }
 
     private void setHints(int fieldType ) {
         switch ( fieldType ) {
-            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
+            case Contract.Field.NOTEBOOK_TYPE:
                 enter_question.setHint(R.string.enter_date_time);
                 enter_answer.setHint(R.string.write_whatever);
                 break;
-            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
+            case Contract.Field.DEFAULT_TYPE:
                 enter_question.setHint(R.string.enter_a_question);
                 enter_answer.setHint(R.string.enter_an_answer);
         }
@@ -344,7 +397,8 @@ public class AddEntryActivity extends AppCompatActivity implements
     @Override
     public void onSaveInstanceState( Bundle savedInstanceState ) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putString(FieldActivity.CURRENT_FIELD,currentField);
+        savedInstanceState.putString(FieldActivity.CURRENT_FIELD_NAME, current_field_name);
+        savedInstanceState.putLong(CURRENT_FIELD_ID,current_field_id);
         savedInstanceState.putBoolean(FIELD_CHOSEN, field_chosen);
         savedInstanceState.putInt(SPINNER_POSITION, field_spinner.getSelectedItemPosition());
         saveUserLayoutChanges(savedInstanceState);
@@ -352,7 +406,8 @@ public class AddEntryActivity extends AppCompatActivity implements
     @Override
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         super.onRestoreInstanceState(savedInstanceState);
-        currentField = savedInstanceState.getString(FieldActivity.CURRENT_FIELD);
+        current_field_name = savedInstanceState.getString(FieldActivity.CURRENT_FIELD_NAME);
+        current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
         field_chosen = savedInstanceState.getBoolean(FIELD_CHOSEN);
         restoreUserLayoutChanges(savedInstanceState);
     }
@@ -366,18 +421,29 @@ public class AddEntryActivity extends AppCompatActivity implements
             }
         }
     }
+    private void setSpinnerPosition(long field_id) {
+        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+              cursor.moveToNext() ){
+            long id = cursor.getLong(0);
+            if ( id == field_id ) {
+                field_spinner.setSelection(cursor.getPosition());
+                return;
+            }
+        }
+    }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Field_DBV6_AppV32.TABLE_NAME);
-        return new CursorLoader(this,uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME},null,null,
-                "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");
+        return new MySQLiteCursorLoader(AddEntryActivity.this,
+                "SELECT " + Contract.COLUMN_NAME_ID + ", " +  Contract.Field.COLUMN_NAME_FIELD_TYPE + ", " + Contract.Field.COLUMN_NAME_FIELD_NAME
+                        + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_NAME_USAGE_COUNT + " DESC",
+                null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         simple_cursor_adapter.swapCursor(data);
         cursor = data;
-        setSpinnerPosition(currentField);
+        setSpinnerPosition(current_field_id);
     }
 
     @Override
