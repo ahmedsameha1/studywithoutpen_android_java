@@ -53,6 +53,8 @@ public class ImportFieldsDialogFragment extends DialogFragment {
                     copyFileIn.setText(R.string.copy_import_file_removable);
                 } else if ( Environment.isExternalStorageEmulated() ) {
                     copyFileIn.setText(R.string.copy_import_file_emulated);
+                } else {
+                    copyFileIn.setText(R.string.copy_in_the_following_folder);
                 }
                 filePath.setText(getString(R.string.export_import_file_path,Environment.getExternalStorageDirectory().getAbsolutePath()
                         ,File.separator,ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME));

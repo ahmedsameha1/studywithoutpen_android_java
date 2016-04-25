@@ -93,9 +93,6 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <provider
-            android:name="com.ahmedsameha1.studyvocabulary.database.DataProvider"
-            android:authorities="com.ahmedsameha1.studyvocabulary.contentprovider" />
 
     </application>
 

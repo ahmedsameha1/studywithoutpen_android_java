@@ -23,7 +23,6 @@ import android.widget.SimpleCursorAdapter;
 
 import com.ahmedsameha1.studyvocabulary.adapters.SearchActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DataProvider;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;

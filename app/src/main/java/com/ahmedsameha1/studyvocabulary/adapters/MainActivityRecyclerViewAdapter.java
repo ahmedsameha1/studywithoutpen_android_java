@@ -34,7 +34,7 @@ public class MainActivityRecyclerViewAdapter extends
     private Context context;
     private Cursor cursor;
     private SharedPreferences sharedPreferences;
-    DatabaseOperations databaseOperations = new DatabaseOperations(context);
+
 
     public MainActivityRecyclerViewAdapter(Context context, Cursor data) {
         super(context, data);

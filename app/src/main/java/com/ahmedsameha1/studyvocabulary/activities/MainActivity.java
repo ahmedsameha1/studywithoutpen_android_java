@@ -39,7 +39,7 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabulary.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DataProvider;
+
 import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.ExportImportDatabase;
@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Field.TABLE_NAME);
                 if (id == GET_FIELDS_ID) {
                     /*return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME}, null, null,
                             "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
@@ -351,6 +350,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void createField(String field_name, int field_type, int question_data_type) {
         mySQLiteCursorLoader.createField(field_name, field_type, question_data_type);
+        getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
     }
 
 

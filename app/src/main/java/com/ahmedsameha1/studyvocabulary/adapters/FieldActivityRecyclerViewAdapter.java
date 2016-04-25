@@ -24,7 +24,6 @@ import com.ahmedsameha1.studyvocabulary.activities.StudyActivity;
 import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
 import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DataProvider;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.studyvocabulary.R;

@@ -1022,7 +1022,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         Test_Paused.COLUMN_NAME_FIELD + " = ? ",
                         new String[]{field_id + ""},null,null,null);
                 if ( test_paused_cursor.getCount() <= 0 ) {
-                    if ( new DatabaseOperations(context).checkLinkerTest(field) ) {
+                    Cursor cursor = sqLiteDatabase.query(Contract.Old_Linker_DBV6_AppV32.TABLE_NAME, new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"0", field},null,null,null);
+                    if ( cursor.getCount() > 0 ) {
                         int currentQuestionCounter = sharedPreferences.getInt(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.CURRENT_QUESTION_COUNTER
                                 + TestActivity.DASH + field,0);
                         int wrongAnswersCounter = sharedPreferences.getInt(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.NUMBER_OF_WRONG_ANSWERS
@@ -1042,12 +1045,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.PERMITED_TRIES_NUMBER
                                 + TestActivity.DASH + field);
                     }
+                    cursor.close();
                 }
                 Cursor study_period_paused_cursor = sqLiteDatabase.query(Study_Period_Paused.TABLE_NAME,new String[]{Study_Period_Paused.COLUMN_NAME_FIELD},
                         Study_Period_Paused.COLUMN_NAME_FIELD + " = ? ",
                         new String[]{field_id + ""},null,null,null);
                 if ( study_period_paused_cursor.getCount() <= 0 ) {
-                    if ( new DatabaseOperations(context).checkLinkerTest(field) ) {
+                    Cursor cursor = sqLiteDatabase.query(Contract.Old_Linker_DBV6_AppV32.TABLE_NAME, new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER},
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
+                            new String[]{"0", field},null,null,null);
+                    if ( cursor.getCount() > 0 ) {
                         String string = sharedPreferences.getString(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
                                 StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES
                                 + StudyDuringActivity.DASH + field, null);
@@ -1079,6 +1086,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
                                 StudyDuringActivity.NUMBER_OF_TRIES + StudyDuringActivity.DASH + field);
                     }
+                    cursor.close();
                 }
                 question_id_cursor.close();
                 answer_id_cursor.close();
@@ -1093,7 +1101,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();
-            sqLiteDatabase.close();
         }
     }
 }

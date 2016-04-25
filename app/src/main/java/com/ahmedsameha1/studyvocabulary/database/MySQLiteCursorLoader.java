@@ -753,12 +753,14 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     private static void cleanSTringTable(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("DELETE FROM " + Contract.STring.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID
                 + " IN ( SELECT "
+                + Contract.COLUMN_NAME_ID + " FROM " + Contract.STring.TABLE_NAME
+                + " EXCEPT SELECT * FROM ( SELECT "
                 + Contract.String_Entry.COLUMN_NAME_QUESTION + " FROM " + Contract.String_Entry.TABLE_NAME
                 + " UNION SELECT " + Contract.String_Entry.COLUMN_NAME_ANSWER + " FROM " + Contract.String_Entry.TABLE_NAME
                 + " UNION SELECT " + Contract.Not_String_Entry.COLUMN_NAME_ANSWER + " FROM " + Contract.Not_String_Entry.TABLE_NAME
                 + " UNION SELECT " + Contract.Alternative_Answer_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " FROM " + Contract.Alternative_Answer_String.TABLE_NAME
                 + " UNION SELECT " + Contract.Alternative_Answer_Not_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " FROM " + Contract.Alternative_Answer_Not_String.TABLE_NAME
-                + " EXCEPT SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.STring.TABLE_NAME
+                + " ) as jjj"
                 + " );");
     }
 }
