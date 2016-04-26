@@ -37,6 +37,7 @@ import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.DeleteEntryDialogFragment;
+import com.ahmedsameha1.studyvocabulary.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.SearchDateOrTextDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.StudyDuringDialogFragment;
@@ -82,20 +83,29 @@ public class FieldActivity extends AppCompatActivity implements
     public static final java.lang.String FIELD_TYPE = "field_type";
     private static final String SORT_DIALOG = "sort_dialog";
     public static final String FIELD_ID = "field_id";
+    public static final int EDIT_ENTRY = 0;
+    public static final String EDITED_ENTRY_ID = "edited_entry_id";
+    public static final String EDITED_QUESTION = "edited_question";
+    public static final String EDITED_ANSWER = "edited_answer";
+    public static final String INSERTED_QUESTION = "inserted_question";
+    public static final String INSERTED_ANSWER = "inserted_answer";
+    private static final int INSERT_ENTRY = 1;
+
+
+
     private String[] deleteEntryData = {null, null, null};
     private Cursor fieldEntriesCursor;
     private Cursor fieldListCursor;
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     protected int fieldType = 0;
-    private String current_field_name;
     private long current_field_id;
-    private int currentSort = DEFAULT_SORT;
-    public static final String[] SORT_STRINGS = {Contract.String_Entry.COLUMN_NAME_QUESTION + " DESC",
-            Contract.String_Entry.COLUMN_NAME_ANSWER + " DESC",
-            Contract.String_Entry.COLUMN_NAME_QUESTION + " ASC",
-            Contract.String_Entry.COLUMN_NAME_ANSWER + " ASC",
-            "date(" + Contract.String_Entry.COLUMN_NAME_QUESTION + ") DESC",
-            "date(" + Contract.String_Entry.COLUMN_NAME_QUESTION + ") ASC",
+    private int currentSort;
+    public static final String[] SORT_STRINGS = {" q DESC",
+            " a DESC",
+            " q ASC",
+            " a ASC",
+            "date( q ) DESC",
+            "date( q ) ASC",
             "datetime(" + Contract.CREATION_DATE + ") DESC",
             "datetime(" + Contract.CREATION_DATE + ") ASC"};
     private Spinner fieldsListSpinner;
@@ -124,7 +134,6 @@ public class FieldActivity extends AppCompatActivity implements
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setDrawerListener(FieldActivity.this);
         current_field_id = getIntent().getLongExtra(FIELD_ID, 0);
-        current_field_name = databaseOperations.getFieldName(current_field_id);
         fieldType = databaseOperations.getFieldType(current_field_id);
         mAdapter = new FieldActivityRecyclerViewAdapter(FieldActivity.this, null, current_field_id, fieldType);
         final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(FieldActivity.this);
@@ -139,9 +148,8 @@ public class FieldActivity extends AppCompatActivity implements
             public void onClick(View view) {
                 Intent intent = new Intent(FieldActivity.this, AddEntryActivity.class);
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                intent.putExtra(CURRENT_FIELD_NAME, current_field_name);
                 intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, true);
-                startActivity(intent);
+                startActivityForResult(intent,INSERT_ENTRY);
             }
         });
 
@@ -192,7 +200,10 @@ public class FieldActivity extends AppCompatActivity implements
                 mAdapter.swapCursor(null);
             }
         };
-
+        currentSort = savedInstanceState == null ? DEFAULT_SORT : savedInstanceState.getInt(CURRENT_SORT);
+        Bundle bundle = new Bundle();
+        bundle.putInt(CURRENT_SORT, currentSort);
+        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
     }
 
     /*
@@ -200,14 +211,32 @@ public class FieldActivity extends AppCompatActivity implements
     onResume() will be called before the user can react with the activity
     in onPause() I close all database related objects.
      */
-
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == EDIT_ENTRY) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                long entry_id = data.getLongExtra(EDITED_ENTRY_ID,1);
+               String question = data.getStringExtra(EDITED_QUESTION);
+                String answer = data.getStringExtra(EDITED_ANSWER);
+                mySQLiteCursorLoader.editEntry(entry_id,databaseOperations.getQuestionDataType(current_field_id),question,answer);
+            }
+        } else if ( requestCode == INSERT_ENTRY ) {
+            if ( resultCode == RESULT_OK ) {
+                String question = data.getStringExtra(INSERTED_QUESTION);
+                String answer = data.getStringExtra(INSERTED_ANSWER);
+                mySQLiteCursorLoader.insertEntry(databaseOperations.getQuestionDataType(current_field_id),question,answer,current_field_id);
+            }
+        }
+    }
+/*    @Override
     protected void onResume() {
         super.onResume();
         Bundle bundle = new Bundle();
         bundle.putInt(CURRENT_SORT, currentSort);
         getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
-    }
+    }*/
 
     private void handleIntent(String query) {
         search(query);
@@ -289,6 +318,7 @@ public class FieldActivity extends AppCompatActivity implements
                 bundle.putInt(FieldActivity.FIELD_TYPE, fieldType);
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
+                sortEntriesDialogFragment.setFieldActivityRecyclerViewAdapter(mAdapter);
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
                 break;
             case REVIEW:
@@ -315,14 +345,7 @@ public class FieldActivity extends AppCompatActivity implements
         savedInstanceState.putInt(CURRENT_SORT, currentSort);
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        currentSort = savedInstanceState.getInt(CURRENT_SORT);
-        Bundle bundle = new Bundle();
-        bundle.putInt(CURRENT_SORT, currentSort);
-        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -448,4 +471,5 @@ public class FieldActivity extends AppCompatActivity implements
             }
         }
     }
+
 }

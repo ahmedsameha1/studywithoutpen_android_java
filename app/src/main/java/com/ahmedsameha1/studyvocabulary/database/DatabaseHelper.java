@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
@@ -32,6 +33,11 @@ import com.ahmedsameha1.studyvocabulary.database.Contract.Old_Question_DBV6_AppV
 import com.ahmedsameha1.studyvocabulary.database.Contract.Old_Answer_DBV6_AppV32;
 import com.ahmedsameha1.studyvocabulary.database.Contract.Old_Linker_DBV6_AppV32;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -39,10 +45,12 @@ import java.util.StringTokenizer;
  * Created by ahmed on 7/4/2015.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
+    private final static String TAG = "DatabaseHelper";
     public static final int DATABASE_VERSION = 7;
     public static final String DATABASE_NAME = "data";
     private Context context;
     private static DatabaseHelper sInstance;
+    private String app_database_path;
 
     public static final String CREATE_FIELD_TABLE = "CREATE TABLE IF NOT EXISTS " + Field.TABLE_NAME
             + " ( "
@@ -252,10 +260,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
+        app_database_path = context.getApplicationContext().getDatabasePath(DATABASE_NAME).getAbsolutePath();
     }
     @Override
     public void onCreate( SQLiteDatabase sqLiteDatabase ) {
-        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
+        boolean dbExist = checkDataBase();
+        if(dbExist) {
+            Log.d(TAG, "Database exists.");
+            deleteDb();
+            try {
+                copyDataBase();
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        } else {
+            try {
+                copyDataBase();
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+    /*    sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);//
@@ -267,7 +292,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_PAUSED_TABLE);
         sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);//
-        Log.d("from APP to Ahmed", "table have been written");
+        Log.d("from APP to Ahmed", "table have been written");*/
+    }
+    private boolean checkDataBase() {
+        boolean checkDB = false;
+        try {
+            File file = new File(app_database_path);
+            checkDB = file.exists();
+        } catch(SQLiteException e) {
+            Log.d(TAG, e.getMessage());
+        }
+        return checkDB;
+    }
+    private void copyDataBase() throws IOException {
+        OutputStream os = new FileOutputStream(app_database_path);
+        InputStream is = context.getAssets().open("sqlite" + File.separator + DATABASE_NAME);
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = is.read(buffer)) > 0) {
+            os.write(buffer, 0, length);
+        }
+        is.close();
+        os.flush();
+        os.close();
+    }
+    public void deleteDb() {
+        File file = new File(app_database_path);
+        if(file.exists()) {
+            file.delete();
+            Log.d(TAG, "Database deleted.");
+        }
     }
     @Override
     public void onOpen(SQLiteDatabase db) {

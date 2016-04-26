@@ -105,9 +105,9 @@ public class MainActivityRecyclerViewAdapter extends
                 }
             }
         });
-        if (data.getInt(1) == Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE) {
+        if (data.getInt(1) == Contract.Field.DEFAULT_TYPE) {
             viewHolder.type.setImageResource(R.drawable.books1);
-        } else if (data.getInt(1) == Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE) {
+        } else if (data.getInt(1) == Contract.Field.NOTEBOOK_TYPE) {
             viewHolder.type.setImageResource(R.drawable.agenda1);
         }
         viewHolder.name.setText(fieldName);

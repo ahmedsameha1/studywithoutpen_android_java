@@ -2,11 +2,17 @@ package com.ahmedsameha1.studyvocabulary.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.view.Gravity;
+import android.widget.Toast;
 
+import com.ahmedsameha1.studyvocabulary.R;
 import com.commonsware.cwac.loaderex.AbstractCursorLoader;
 import com.commonsware.cwac.loaderex.ContentChangingTask;
 
@@ -65,10 +71,6 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         writer.println(Arrays.toString(args));
     }
 
-    public void insert(String table, String nullColumnHack,
-                       ContentValues values) {
-        buildInsertTask(this).execute(db, table, nullColumnHack, values);
-    }
 
     public void createField(String field_name, int field_type, int question_data_type) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
@@ -79,25 +81,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
 
-    public void deleteField(long field_id) {
-        buildDeleteField(this).execute(db, field_id);
-    }
 
-    public void update(String table, ContentValues values,
-                       String whereClause, String[] whereArgs) {
-        buildUpdateTask(this).execute(db, table, values, whereClause,
-                whereArgs);
-    }
 
-    public void replace(String table, String nullColumnHack,
-                        ContentValues values) {
-        buildReplaceTask(this).execute(db, table, nullColumnHack, values);
-    }
 
-    public void delete(String table, String whereClause,
-                       String[] whereArgs) {
-        buildDeleteTask(this).execute(db, table, whereClause, whereArgs);
-    }
+
+
+
 
     public void insertEntry(int question_data_type, String question, String answer, long field_id) {
         buildInsertEntryTask(this).execute(db, question_data_type, question, answer, field_id);
@@ -107,42 +96,21 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildDeleteEntryTask(this).execute(db, entry_id, question_data_type);
     }
 
-    public void execSQL(String sql, Object[] bindArgs) {
-        buildExecSQLTask(this).execute(db, sql, bindArgs);
-    }
-
-    protected ContentChangingTask buildInsertTask(MySQLiteCursorLoader loader) {
-        return (new InsertTask(loader));
-    }
-
-    protected ContentChangingTask buildDeleteField(MySQLiteCursorLoader loader) {
-        return (new DeleteField(loader));
-    }
 
 
-    protected ContentChangingTask buildUpdateTask(MySQLiteCursorLoader loader) {
-        return (new UpdateTask(loader));
-    }
 
-    protected ContentChangingTask buildReplaceTask(MySQLiteCursorLoader loader) {
-        return (new ReplaceTask(loader));
-    }
+
+
+
+
+
 
     protected ContentChangingTask buildDeleteEntryTask(MySQLiteCursorLoader loader) {
         return (new DeleteEntryTask(loader));
     }
 
-    protected ContentChangingTask buildDeleteTask(MySQLiteCursorLoader loader) {
-        return (new DeleteTask(loader));
-    }
 
-    protected ContentChangingTask buildExecSQLTask(MySQLiteCursorLoader loader) {
-        return (new ExecSQLTask(loader));
-    }
 
-    protected ContentChangingTask buildCreateFieldTask(MySQLiteCursorLoader loader) {
-        return (new CreateField(loader));
-    }
 
     protected ContentChangingTask buildIncrementFieldUsageTask(MySQLiteCursorLoader loader) {
         return (new IncrementFieldUsageTask(loader));
@@ -153,23 +121,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildIncrementFieldUsageTask(this).execute(db, field_id);
     }
 
-    protected static class InsertTask extends ContentChangingTask {
-        InsertTask(MySQLiteCursorLoader loader) {
-            super(loader);
-        }
 
-        @Override
-        protected Void doInBackground(Object... params) {
-            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
-            String table = (String) params[1];
-            String nullColumnHack = (String) params[2];
-            ContentValues values = (ContentValues) params[3];
-
-            db.getWritableDatabase().insert(table, nullColumnHack, values);
-
-            return (null);
-        }
-    }
 
     public void putEntriesTestOrder(long field_id, int question_data_type, String[][] array) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
@@ -465,7 +417,44 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         }
     }
 
+    public void deleteField(final long field_id, final Handler handler ) {
+        Thread pauseThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
 
+                    sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
+                            Contract.COLUMN_NAME_ID + " = ? ",
+                            new String[]{field_id + ""});
+
+
+
+
+
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            MySQLiteCursorLoader.this.onContentChanged();
+                        }
+                    };
+                    handler.post(runnable);
+
+            }
+        });
+        pauseThread.start();
+    }
+    public void cleanDatabase() {
+        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+        cleanSTringTable(sqLiteDatabase);
+
+        sqLiteDatabase.execSQL("DELETE FROM " + Contract.Not_String.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID
+                + " IN ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.Not_String.TABLE_NAME + " EXCEPT SELECT "
+                + Contract.Not_String_Entry.COLUMN_NAME_QUESTION + " FROM " + Contract.Not_String_Entry.TABLE_NAME + " );");
+    }
+    protected ContentChangingTask buildDeleteField(MySQLiteCursorLoader loader) {
+        return (new DeleteField(loader));
+    }
     protected static class DeleteField extends ContentChangingTask {
         DeleteField(MySQLiteCursorLoader loader) {
             super(loader);
@@ -484,26 +473,10 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
 
                 cleanSTringTable(sqLiteDatabase);
 
-            /*    sqLiteDatabase.execSQL("DELETE FROM " + Contract.STring.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID
-                + " IN ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.STring.TABLE_NAME + " EXCEPT SELECT "
-                + Contract.String_Entry.COLUMN_NAME_ANSWER + " FROM " + Contract.String_Entry.TABLE_NAME + " );")*/
-                ;
-
                 sqLiteDatabase.execSQL("DELETE FROM " + Contract.Not_String.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID
                         + " IN ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.Not_String.TABLE_NAME + " EXCEPT SELECT "
                         + Contract.Not_String_Entry.COLUMN_NAME_QUESTION + " FROM " + Contract.Not_String_Entry.TABLE_NAME + " );");
 
-           /*     sqLiteDatabase.execSQL("DELETE FROM " + Contract.STring.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID
-                + " IN ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.STring.TABLE_NAME + " EXCEPT SELECT "
-                + Contract.Not_String_Entry.COLUMN_NAME_ANSWER + " FROM " + Contract.Not_String_Entry.TABLE_NAME + " );");
-
-                sqLiteDatabase.execSQL("DELETE FROM " + Contract.STring.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID
-                + " IN ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.STring.TABLE_NAME + " EXCEPT SELECT "
-                + Contract.Alternative_Answer_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " FROM " + Contract.Alternative_Answer_String.TABLE_NAME + " );");
-
-                sqLiteDatabase.execSQL("DELETE FROM " + Contract.STring.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID
-                + " IN ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.STring.TABLE_NAME + " EXCEPT SELECT "
-                + Contract.Alternative_Answer_Not_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " FROM " + Contract.Alternative_Answer_Not_String.TABLE_NAME + " );");*/
 
                 sqLiteDatabase.setTransactionSuccessful();
             } finally {
@@ -534,25 +507,6 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                 new String[]{field_id + ""});
     }
 
-    protected ContentChangingTask buildClearThisFieldFromTestPaused(MySQLiteCursorLoader loader) {
-        return (new ClearThisFieldFromTestPaused(loader));
-    }
-
-    protected static class ClearThisFieldFromTestPaused extends ContentChangingTask {
-        ClearThisFieldFromTestPaused(MySQLiteCursorLoader loader) {
-            super(loader);
-        }
-
-        @Override
-        protected Void doInBackground(Object... params) {
-            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
-            long field_id = (long) params[1];
-            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-            sqLiteDatabase.delete(Contract.Test_Paused.TABLE_NAME, Contract.Test_Paused.COLUMN_NAME_FIELD + " = ? ",
-                    new String[]{field_id + ""});
-            return null;
-        }
-    }
 
     public void clearThisFieldFromWrongAnswers(long field_id, int question_data_type) {
         buildClearThisFieldFromWrongAnswers(this).execute(db, field_id, question_data_type);
@@ -654,101 +608,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         }
     }
 
-    protected static class CreateField extends ContentChangingTask {
-        CreateField(MySQLiteCursorLoader loader) {
-            super(loader);
-        }
 
-        @Override
-        protected Void doInBackground(Object... params) {
-            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
-            String field_name = (String) params[1];
-            int field_type = (Integer) params[2];
-            int question_data_type = (Integer) params[3];
-            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_NAME_FIELD_NAME, field_name);
-            contentValues.put(Contract.Field.COLUMN_NAME_FIELD_TYPE, field_type);
-            contentValues.put(Contract.Field.COLUMN_NAME_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
-            sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
-            return null;
-        }
-    }
-
-
-    protected static class UpdateTask extends ContentChangingTask {
-        UpdateTask(MySQLiteCursorLoader loader) {
-            super(loader);
-        }
-
-        @Override
-        protected Void doInBackground(Object... params) {
-            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
-            String table = (String) params[1];
-            ContentValues values = (ContentValues) params[2];
-            String where = (String) params[3];
-            String[] whereParams = (String[]) params[4];
-
-            db.getWritableDatabase()
-                    .update(table, values, where, whereParams);
-
-            return (null);
-        }
-    }
-
-
-    protected static class ReplaceTask extends ContentChangingTask {
-        ReplaceTask(MySQLiteCursorLoader loader) {
-            super(loader);
-        }
-
-        @Override
-        protected Void doInBackground(Object... params) {
-            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
-            String table = (String) params[1];
-            String nullColumnHack = (String) params[2];
-            ContentValues values = (ContentValues) params[3];
-
-            db.getWritableDatabase().replace(table, nullColumnHack, values);
-
-            return (null);
-        }
-    }
-
-    protected static class DeleteTask extends ContentChangingTask {
-        DeleteTask(MySQLiteCursorLoader loader) {
-            super(loader);
-        }
-
-        @Override
-        protected Void doInBackground(Object... params) {
-            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
-            String table = (String) params[1];
-            String where = (String) params[2];
-            String[] whereParams = (String[]) params[3];
-
-            db.getWritableDatabase().delete(table, where, whereParams);
-
-            return (null);
-        }
-    }
-
-    protected static class ExecSQLTask extends ContentChangingTask {
-        ExecSQLTask(MySQLiteCursorLoader loader) {
-            super(loader);
-        }
-
-        @Override
-        protected Void doInBackground(Object... params) {
-            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
-            String sql = (String) params[1];
-            Object[] bindParams = (Object[]) params[2];
-
-            db.getWritableDatabase().execSQL(sql, bindParams);
-
-            return (null);
-        }
-    }
 
     private static void cleanSTringTable(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("DELETE FROM " + Contract.STring.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID

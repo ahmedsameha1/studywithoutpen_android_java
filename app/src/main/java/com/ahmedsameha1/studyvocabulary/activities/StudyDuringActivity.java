@@ -589,11 +589,11 @@ public class StudyDuringActivity extends AppCompatActivity implements
             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
             showNumberOfQuetions.setText(Integer.toString(questionsNumber));
             check.setEnabled(checkState);
-            enterAnswer.setEnabled(checkState);
+//            enterAnswer.setEnabled(checkState);
             _continue.setEnabled(_continueState);
+            enterAnswer.setEnabled(! _continueState);
 
-
-            enterAnswer.setEnabled(true);
+//            enterAnswer.setEnabled(true);
             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
         }
         if (hintCounter > 0) {

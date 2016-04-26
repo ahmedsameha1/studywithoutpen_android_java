@@ -62,7 +62,7 @@ public class FieldActivityRecyclerViewAdapter extends
                 new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
                     public void onClick(View v, String currentQuestion, String currentAnswer ) {
-                        if ( fieldType != Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE) {
+                        if ( fieldType != Contract.Field.NOTEBOOK_TYPE) {
                             Intent intent = new Intent(context, StudyActivity.class);
                             intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                             intent.putExtra(StudyActivity.CURRENT_QUESTION,currentQuestion);
@@ -105,9 +105,7 @@ public class FieldActivityRecyclerViewAdapter extends
                 intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,databaseOperations.getQuestionDataType(field_id));
                 intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
                 intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
-                ((Activity) context).getLoaderManager().destroyLoader(FieldActivity.SEARCH_ENTRIES_LOADER_ID);
-                ((Activity) context).getLoaderManager().destroyLoader(FieldActivity.GET_ENTRIES_LOADER_ID);
-                context.startActivity(intent);
+                ((Activity) context).startActivityForResult(intent,FieldActivity.EDIT_ENTRY);
             }
         });
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {

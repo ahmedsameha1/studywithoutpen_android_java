@@ -320,7 +320,6 @@ public class ExportImportDatabase {
             if (toExportDatabase != null) {
                 toExportDatabase.endTransaction();
                 toExportDatabase.close();
-                appDatabase.close();
             }
             String journalFileName = fileName + "-journal";
             File journalFile = new File(exportDirectory, journalFileName);
@@ -710,7 +709,6 @@ public class ExportImportDatabase {
             }
         } finally {
             appDatabase.endTransaction();
-            appDatabase.close();
         }
     }
 

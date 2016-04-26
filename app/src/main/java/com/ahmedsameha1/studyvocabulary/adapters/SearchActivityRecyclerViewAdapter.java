@@ -62,7 +62,7 @@ public class SearchActivityRecyclerViewAdapter extends
                 new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
                     public void onClick(View v, String currentQuestion, String currentAnswer ) {
-                        if ( fieldType != Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE) {
+                        if ( fieldType != Contract.Field.NOTEBOOK_TYPE) {
                             Intent intent = new Intent(context, StudyActivity.class);
                             intent.putExtra(StudyActivity.CURRENT_FIELD_ID, fieldName);
                             intent.putExtra(StudyActivity.CURRENT_QUESTION,currentQuestion);
@@ -136,11 +136,11 @@ public class SearchActivityRecyclerViewAdapter extends
             }
         });
         switch (fieldType) {
-            case Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE:
+            case Contract.Field.DEFAULT_TYPE:
                 viewHolder.question.setText(question);
                 viewHolder.answer.setText(answer);
                 break;
-            case Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE:
+            case Contract.Field.NOTEBOOK_TYPE:
                 Timestamp timestamp = Timestamp.valueOf(question);
                 Date date = new Date(timestamp.getTime());
                 viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));

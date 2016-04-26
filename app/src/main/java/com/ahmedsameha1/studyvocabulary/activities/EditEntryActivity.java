@@ -2,6 +2,7 @@ package com.ahmedsameha1.studyvocabulary.activities;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
@@ -140,7 +141,12 @@ public class EditEntryActivity extends AppCompatActivity implements
                             editAnswer.setEnabled(false);
                             if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
                                 if ( ! databaseOperations.checkEntryDuplication(editedQuestion,editedAnswer,current_field_id,question_data_type)) {
-                                    mySQLiteCursorLoader.editEntry(entry_id,question_data_type,editedQuestion,editedAnswer);
+//                                    mySQLiteCursorLoader.editEntry(entry_id,question_data_type,editedQuestion,editedAnswer);
+                                    Intent intent = new Intent();
+                                    intent.putExtra(FieldActivity.EDITED_ENTRY_ID,entry_id);
+                                    intent.putExtra(FieldActivity.EDITED_QUESTION,editedQuestion);
+                                    intent.putExtra(FieldActivity.EDITED_ANSWER,editedAnswer);
+                                    setResult(RESULT_OK,intent);
                                 } else {
                                 Toast toast = Toast.makeText(EditEntryActivity.this, R.string.repeated_entry, Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -158,7 +164,12 @@ public class EditEntryActivity extends AppCompatActivity implements
                                     + stringTokenizer.nextToken() + ":00";
                             if (!dateToSave.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
                                 if ( ! databaseOperations.checkEntryDuplication(dateToSave,editedAnswer,current_field_id,question_data_type)) {
-                                 mySQLiteCursorLoader.editEntry(entry_id,question_data_type,dateToSave,editedAnswer);
+//                                 mySQLiteCursorLoader.editEntry(entry_id,question_data_type,dateToSave,editedAnswer);
+                                    Intent intent = new Intent();
+                                    intent.putExtra(FieldActivity.EDITED_ENTRY_ID,entry_id);
+                                    intent.putExtra(FieldActivity.EDITED_QUESTION,dateToSave);
+                                    intent.putExtra(FieldActivity.EDITED_ANSWER,editedAnswer);
+                                    setResult(RESULT_OK,intent);
                                 } else {
                                     Toast toast = Toast.makeText(EditEntryActivity.this, R.string.repeated_entry, Toast.LENGTH_LONG);
                                     toast.setGravity(Gravity.TOP, 0, 400);

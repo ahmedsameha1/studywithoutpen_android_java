@@ -31,6 +31,11 @@ public class SortEntriesDialogFragment extends DialogFragment {
     private EditText enterText;
     private String text;
     private int fieldType;
+
+    public void setFieldActivityRecyclerViewAdapter(FieldActivityRecyclerViewAdapter fieldActivityRecyclerViewAdapter) {
+        this.fieldActivityRecyclerViewAdapter = fieldActivityRecyclerViewAdapter;
+    }
+
     private FieldActivityRecyclerViewAdapter fieldActivityRecyclerViewAdapter;
 
     @Override

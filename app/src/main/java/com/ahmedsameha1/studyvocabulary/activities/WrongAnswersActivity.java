@@ -84,6 +84,8 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         wrongItemList = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEM_LIST);
+        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this,wrongItemList);
+        recyclerView.setAdapter(mAdapter);
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {

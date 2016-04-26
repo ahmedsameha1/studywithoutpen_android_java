@@ -181,16 +181,6 @@ public class DatabaseOperations {
 
 
 
-    /*public Cursor getFieldEntries(String fieldName) {
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + fieldName + Contract.OldField.TABLE_NAME_LINK_SUFFIX + "._id As" +
-                " _id, " + fieldName + Contract.OldField.COLUMN_NAME_QUESTION_SUFFIX + "," +
-                fieldName + Contract.OldField.COLUMN_NAME_ANSWER_LINK_SUFFIX +
-                " From " + fieldName + Contract.OldField.TABLE_NAME_QUESTION_SUFFIX +
-                " INNER JOIN " + fieldName + Contract.OldField.TABLE_NAME_LINK_SUFFIX + " ON " +
-                fieldName + Contract.OldField.COLUMN_NAME_QUESTION_SUFFIX +
-                " = " + fieldName + Contract.OldField.COLUMN_NAME_QUESTION_LINK_SUFFIX + "", null);
-        return cursor;
-    }*/
 
 
 
@@ -240,12 +230,7 @@ public class DatabaseOperations {
 
 
 
-    public boolean checkLinkerTest(String fieldName) {
-        Cursor cursor = sqLiteDatabase.query(Contract.Old_Linker_DBV6_AppV32.TABLE_NAME, new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER},
-                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
-                new String[]{"0", fieldName},null,null,null);
-        return cursor.getCount() > 0 ? true : false;
-    }
+
     public boolean checkEntriesForAnyTestOrder(long field_id, int question_data_type ) {
         boolean result = false;
         if ( question_data_type == Contract.Field.STRING_DATA_TYPE ) {

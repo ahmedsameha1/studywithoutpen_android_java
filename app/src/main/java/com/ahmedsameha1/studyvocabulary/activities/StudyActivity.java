@@ -64,6 +64,7 @@ public class StudyActivity extends AppCompatActivity implements
     public static final int SELECT_ENTRY_REQUEST = 1;
     public static final int RETURN_TIME = 1000;
     public static final String ORDER_OF_ENTRIES = "order_of_entries";
+    public static final String SORT = "sort";
     private boolean actionBarShown;
     private String currentQuestion, currentAnswer;
     private TextView correctAnswers, check,showActionbar;
@@ -77,8 +78,7 @@ public class StudyActivity extends AppCompatActivity implements
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private Cursor fieldEntriesCursor;
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
-    private int currentSort = DEFAULT_SORT;
-    private int currentLoader;
+    private int currentSort;
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
     private DatabaseOperations databaseOperations;
@@ -92,7 +92,7 @@ public class StudyActivity extends AppCompatActivity implements
         current_field_id = getIntent().getLongExtra(CURRENT_FIELD_ID,0);
         currentQuestion = getIntent().getStringExtra(CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(CURRENT_ANSWER);
-        currentLoader = getIntent().getIntExtra(ORDER_OF_ENTRIES,0);
+        currentSort = getIntent().getIntExtra(ORDER_OF_ENTRIES,0);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         showCurrentEntry = (ToggleButton) findViewById(R.id.show_current_study_entry);
@@ -489,7 +489,7 @@ public class StudyActivity extends AppCompatActivity implements
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         Bundle bundle = new Bundle();
         bundle.putInt(CURRENT_SORT, currentSort);
-        getLoaderManager().initLoader(currentLoader, bundle, getFieldEntries);
+        getLoaderManager().initLoader(0, bundle, getFieldEntries);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -562,13 +562,12 @@ public class StudyActivity extends AppCompatActivity implements
                 current_field_id = data.getLongExtra(CURRENT_FIELD_ID,0);
                 currentQuestion = data.getStringExtra(CURRENT_QUESTION);
                 currentAnswer = data.getStringExtra(CURRENT_ANSWER);
-                currentLoader = data.getIntExtra(ORDER_OF_ENTRIES, 0);
                 enterQuestion.setText(currentQuestion);
                 correctAnswers.setText(Integer.toString(0));
                 this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                 Bundle bundle = new Bundle();
                 bundle.putInt(CURRENT_SORT, currentSort);
-                getLoaderManager().restartLoader(currentLoader,bundle,getFieldEntries);
+                getLoaderManager().restartLoader(0,bundle,getFieldEntries);
             }
         }
     }

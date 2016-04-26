@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.app.LoaderManager;
@@ -78,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements
     private Button createFieldButton, fieldChooseOk;
     private EditText enterNewFieldName;
     private TextView orChooseOne;
+    private Handler mHandler = new Handler();
     private SimpleCursorAdapter simpleCursorAdapterForFieldSpinner;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     //    private DatabaseHelper databaseHelper;
@@ -321,7 +323,6 @@ public class MainActivity extends AppCompatActivity implements
                     if (first_field_name != null) {
                         Intent intent = new Intent(MainActivity.this, AddEntryActivity.class);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, first_field_id);
-                        intent.putExtra(FieldActivity.CURRENT_FIELD_NAME, first_field_name);
                         intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
                         startActivity(intent);
                     }
@@ -343,8 +344,14 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mySQLiteCursorLoader.cleanDatabase();
+    }
+
+    @Override
     public void deleteField(long field_id) {
-        mySQLiteCursorLoader.deleteField(field_id);
+        mySQLiteCursorLoader.deleteField(field_id,mHandler);
     }
 
     @Override
