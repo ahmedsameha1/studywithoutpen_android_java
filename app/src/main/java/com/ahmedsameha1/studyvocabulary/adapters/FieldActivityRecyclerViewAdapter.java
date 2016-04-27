@@ -40,7 +40,6 @@ public class FieldActivityRecyclerViewAdapter extends
         CursorRecyclerViewAdapter<FieldActivityRecyclerViewViewHolder> {
     public static final String GET_CONFIRMATION = "getConfirmation";
     private Context context;
-    private String fieldName;
     private long field_id;
     private int fieldType;
     private int sort = FieldActivity.DEFAULT_SORT;

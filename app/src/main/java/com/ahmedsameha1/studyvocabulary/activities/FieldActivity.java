@@ -71,7 +71,7 @@ public class FieldActivity extends AppCompatActivity implements
     public static final String INITIAL_FIELD = "intial_field";
     public static final String GET_NEW_FIELD_NAME = "getNewFieldName";
 
-    public static final String CURRENT_FIELD_NAME = "current_field_name";
+    public static final String CURRENT_FIELD_NAME = "currentField";
     public static final String CHECK_IF_CONTINUE_STUDY_DURING_SESSION = "checkIfContinueStudyDuringSession";
     public static final String CHECK_IF_CONTINUE_TEST_SESSION = "checkIfContinueTestSession";
     public static final String RUN_FIRST_TIME_DIALOG = "runFirstTimeDialog";

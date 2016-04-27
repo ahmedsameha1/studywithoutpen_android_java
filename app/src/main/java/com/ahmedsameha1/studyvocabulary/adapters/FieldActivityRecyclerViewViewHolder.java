@@ -16,7 +16,6 @@ public class FieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder
     public TextView answer;
     public Button edit;
     public Button delete;
-    public String fieldName;
     public String currentQuestion;
     public String currentAnswer;
     public LinearLayout toolbar;

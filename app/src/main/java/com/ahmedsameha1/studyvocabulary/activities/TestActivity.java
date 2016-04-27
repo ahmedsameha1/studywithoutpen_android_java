@@ -47,7 +47,6 @@ public class TestActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize {
     public static final String ACTIVITY_NAME = "TestActivity";
-    public static final String CURRENT_FIELD = "currentField";
     public static final String PERCENTAGE_OR_NUMBER = "percentage_or_number";
     public static final String QUESTION_PERCENTAGE = "question_percentage";
     public static final String QUESTION_NUMBER = "question_number";

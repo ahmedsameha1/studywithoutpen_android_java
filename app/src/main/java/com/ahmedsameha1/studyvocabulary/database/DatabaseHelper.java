@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -13,6 +14,7 @@ import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
 import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
 import com.ahmedsameha1.studyvocabulary.database.Contract.OldField;
 
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import com.ahmedsameha1.studyvocabulary.database.Contract.Field;
@@ -212,7 +214,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " TEXT PRIMARY KEY, "
             + Contract.Old_COLUMN_NAME_CREATED_AT
             _DBV6_AppV32 + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')) );";*/
-    
+
     public static final String DBV6_APPV32_CREATE_QUESTION_TABLE = "CREATE TABLE " + Old_Question_DBV6_AppV32.TABLE_NAME
             + " ( " + Old_Question_DBV6_AppV32.COLUMN_NAME_QUESTION_ENTRY
             + " TEXT PRIMARY KEY NOT NULL, "

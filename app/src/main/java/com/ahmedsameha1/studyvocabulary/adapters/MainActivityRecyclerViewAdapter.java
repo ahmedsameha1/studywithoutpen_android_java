@@ -89,8 +89,8 @@ public class MainActivityRecyclerViewAdapter extends
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( (! sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + fieldName)) &&
-                        (! sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + fieldName)) ) {
+                if ( (! sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + viewHolder.field_id)) &&
+                        (! sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + viewHolder.field_id)) ) {
                     Bundle bundle = new Bundle();
                     bundle.putLong(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_ID,viewHolder.field_id);
                     bundle.putString(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_NAME, fieldName);

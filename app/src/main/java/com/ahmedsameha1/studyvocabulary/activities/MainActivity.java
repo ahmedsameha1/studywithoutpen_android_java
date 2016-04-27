@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final int DROPBOX = 4;
     private Spinner fieldSpinner;
     private Button createFieldButton, fieldChooseOk;
-    private EditText enterNewFieldName;
+
     private TextView orChooseOne;
     private Handler mHandler = new Handler();
     private SimpleCursorAdapter simpleCursorAdapterForFieldSpinner;
@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements
     private MainActivityFragmentDrawer drawerFragment;
     private RecyclerView recyclerView;
     private MainActivityRecyclerViewAdapter mAdapter;
-    private String first_field_name;
     private LoaderManager.LoaderCallbacks<Cursor> getFields;
     private long first_field_id;
 
@@ -97,7 +96,12 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        try {
+            DatabaseHelper.getInstance(this).getWritableDatabase().rawQuery("SELECT _id FROM field",null);
+        } catch (android.database.sqlite.SQLiteException e) {
+            DatabaseHelper.getInstance(this).close();
+            recreate();
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main_activity); // this Toolbar will act as action bar of the activity
         recyclerView = (RecyclerView) findViewById(R.id.main_activity_recyclerview);
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -139,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 mAdapter.swapCursor(data);
                 if (data.moveToFirst()) {
-                    first_field_name = data.getString(2);
                     first_field_id = data.getLong(0);
                 }
             }
@@ -320,12 +323,10 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 if (mAdapter.getItemCount() > 0) {
-                    if (first_field_name != null) {
                         Intent intent = new Intent(MainActivity.this, AddEntryActivity.class);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, first_field_id);
                         intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
                         startActivity(intent);
-                    }
                 } else {
                     CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
                     fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);

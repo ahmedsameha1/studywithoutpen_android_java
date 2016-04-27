@@ -62,7 +62,7 @@
     <string name="open_file_manager">افتح مدير ملفات</string>
     <string name="will_notify_when_process_complete">سيتم إعلامك عند انتهاء العملية،</string>
     <string name="enter_file_name_to_import">أدخل اسم الملف الذي تريد استيراده</string>
-    <string name="shut_down_warning"> يجب عدم إغلاق جهازك حتى تكتمل العملية بنجاح</string>
+    <string name="shut_down_warning">يجب عدم إغلاق التطبيق حتى تكتمل العملية بنجاح.يمكنك الضغط على مفتاح الذي يذهب بك إلى الصفحة الرئيسية للنظام، لكن لا تضغظ مفتاح العودة.</string>
     <string name="copy_import_file_emulated">ستجد المجلد \"StudyWithoutPen\" في ذاكرة التخزين الداخلية لجهازك. انسخ الملف الذي ترغب في استيراده في هذا المجلد.</string>
     <string name="copy_import_file_removable">ستجد المجلد \"StudyWithoutPen\" في ذاكرة التخزين الخارجية لجهازك (غالبا، الـ SD card). انسخ الملف الذي ترغب في استيراده في هذا المجلد.</string>
     <string name="file_path">مسار الملف: %1$s</string>
@@ -128,8 +128,8 @@
     <string name="sort_date_asc">رتب على حسب التاريخ (تصاعديا)</string>
     <string name="sort_creation_desc">الافتراضي: رتب على حسب تاريخ الإنشاء (تنازليا)</string>
     <string name="sort_creation_asc">رتب على حسب تاريخ الإنشاء (تصاعديا)</string>
-    <string name="pause_do_not_shutdown">هذا قد يستفرق بعض الوقت، لا تغلق جهازك حتى يُعْلِمَك التطبيق.</string>
-    <string name="pause_shutdown">Study Without Pen!: عملية الإيقاف اكتملت، يمكنك غلق جهازك الآن.</string>
+    <string name="pause_do_not_shutdown">هذا قد يستفرق بعض الوقت، لا تغلق البرنامج حتى يُعْلِمك التطبيق. يمكنك الضغط على مفتاح الذي يذهب بك إلى الصفحة الرئيسية للنظام، لكن لا تضغظ مفتاح العودة.</string>
+    <string name="pause_shutdown">Study Without Pen!: عملية الإيقاف اكتملت، يمكنك غلق التطبيق الآن.</string>
     <string name="wait_until_test_pausing_finish">لطفا، انتظر حتى تنتهي عملية إيقاف جلسة الاختبار الخاصة بهذا المجال.</string>
     <string name="wait_until_study_during_pausing_finish" >لطفا، انتظر حتى تنتهي عملية إيقاف جلسة المذاكرة لفترة الخاصة بهذا المجال.</string>
     <string name="wait_until_current_session_pausing_finish">لطفا، انتظر حتى تنهي عمليات إيقاف أي جلسة خاصة بهذا المجال. </string>

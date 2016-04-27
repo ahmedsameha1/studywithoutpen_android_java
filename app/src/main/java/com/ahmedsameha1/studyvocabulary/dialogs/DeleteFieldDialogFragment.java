@@ -22,7 +22,6 @@ public class DeleteFieldDialogFragment extends DialogFragment {
     private String fieldName;
     private long field_id;
     private String message;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
     private MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder;
 
     public void setMainActivityRecyclerViewViewHolder(MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder) {
@@ -35,7 +34,6 @@ public class DeleteFieldDialogFragment extends DialogFragment {
         field_id = getArguments().getLong(TO_BE_DELETED_FIELD_ID);
         fieldName = getArguments().getString(TO_BE_DELETED_FIELD_NAME);
         message = getActivity().getString(R.string.field_deletion_message, fieldName );
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
     }
 
     @Override

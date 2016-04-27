@@ -41,14 +41,12 @@ public class SearchActivityRecyclerViewAdapter extends
     public static final String GET_CONFIRMATION = "getConfirmation";
     private DatabaseOperations databaseOperations;
     private Context context;
-    private String fieldName;
     private long field_id;
     private int fieldType;
     private SharedPreferences sharedPreferences;
     public SearchActivityRecyclerViewAdapter(Context context, Cursor data,  long field_id, int fieldType) {
         super(context,data);
         this.context = context;
-        this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.field_id = field_id;
         databaseOperations = new DatabaseOperations(context);
@@ -64,7 +62,7 @@ public class SearchActivityRecyclerViewAdapter extends
                     public void onClick(View v, String currentQuestion, String currentAnswer ) {
                         if ( fieldType != Contract.Field.NOTEBOOK_TYPE) {
                             Intent intent = new Intent(context, StudyActivity.class);
-                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, fieldName);
+                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                             intent.putExtra(StudyActivity.CURRENT_QUESTION,currentQuestion);
                             intent.putExtra(StudyActivity.CURRENT_ANSWER,currentAnswer);
                             intent.putExtra(StudyActivity.ORDER_OF_ENTRIES,0);
@@ -93,7 +91,6 @@ public class SearchActivityRecyclerViewAdapter extends
         final String answer = data.getString(2);
         final long entry_id = data.getLong(0);
         viewHolder.field_id = field_id;
-        viewHolder.fieldName = fieldName;
         viewHolder.currentQuestion = question;
         viewHolder.currentAnswer = answer;
         viewHolder.edit.setOnClickListener(new View.OnClickListener() {

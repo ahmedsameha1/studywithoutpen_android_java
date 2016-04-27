@@ -71,15 +71,7 @@ public class DatabaseOperations {
         }
         return true;
     }
-    public String getFieldName( long field_id ) {
-        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_NAME_FIELD_NAME},
-                Contract.COLUMN_NAME_ID + " = ? ",
-                new String[]{field_id + ""},null,null,null);
-        cursor.moveToFirst();
-        String field_name = cursor.getString(0);
-        cursor.close();
-        return field_name;
-    }
+
     public int getQuestionDataType( long field_id) {
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_NAME_ENTRY_QUESTION_COLUMN_DATA_TYPE},
                 Contract.COLUMN_NAME_ID + " = ? ",
@@ -171,7 +163,7 @@ public class DatabaseOperations {
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_NAME_FIELD_NAME},
                 Contract.Field.COLUMN_NAME_FIELD_NAME + " = ? ",
                 new String[]{fieldName},null,null,null);
-        boolean temp = cursor.getCount() == 0 ? false : true;
+        boolean temp = cursor.getCount() != 0;
         cursor.close();
         return temp;
     }

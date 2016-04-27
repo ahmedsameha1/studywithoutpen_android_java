@@ -464,16 +464,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         field_chosen = savedInstanceState.getBoolean(FIELD_CHOSEN);
         restoreUserLayoutChanges(savedInstanceState);
     }
-    private void setSpinnerPosition(String fieldName ) {
-        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-              cursor.moveToNext() ){
-            String name = cursor.getString(1);
-            if ( name.equals(fieldName) ) {
-                field_spinner.setSelection(cursor.getPosition());
-                return;
-            }
-        }
-    }
+
     private void setSpinnerPosition(long field_id) {
         for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
               cursor.moveToNext() ){

@@ -16,7 +16,6 @@ import com.ahmedsameha1.studyvocabulary.R;
 public class MainActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
     public TextView name;
     public ImageView type;
-    public String fieldName;
     public long field_id;
     public Button delete;
     public LinearLayout actions;

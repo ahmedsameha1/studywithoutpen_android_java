@@ -49,7 +49,6 @@ public class StudyDuringActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize {
     public static final String ACTIVITY_NAME = "StudyDuringActivity";
-    public static final String CURRENT_FIELD = "current_field_name";
     public static final String STARTING_TIME = "startingTime";
     public static final String REPEATED_ENTRIES = "repeatedEntries";
     public static final String STRING_REPRESENTING_REPEATED_ENTRIES = "strigRepresentingRepeatedEntries";

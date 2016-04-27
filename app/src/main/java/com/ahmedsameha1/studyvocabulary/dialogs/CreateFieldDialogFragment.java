@@ -22,7 +22,6 @@ import com.ahmedsameha1.studyvocabulary.R;
  * Created by ahmed on 7/21/2015.
  */
 public class CreateFieldDialogFragment extends DialogFragment {
-    EditText enterFieldName;
 /*    @Override
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);

@@ -61,7 +61,7 @@
     <string name="open_file_manager">Open File Manager</string>
     <string name="find_file_manager">Find Open Manager</string>
     <string name="will_notify_when_process_complete">You will be notified when the process complete.</string>
-    <string name="shut_down_warning">You must not shut down your device until the process be completed successfully</string>
+    <string name="shut_down_warning">You must not close the app until the process be completed successfully. You can press home button, but don\'t press back button.</string>
     <string name="copy_import_file_removable">You will find \"StudyWithoutPen\" folder in your external storage (almost,the SD card). Copy the file that you want to import in this folder.</string>
     <string name="copy_import_file_emulated">You will find \"StudyWithoutPen\" folder in your device (internal) storage. Copy the file that you want to import in this folder</string>
     <string name="enter_file_name_to_import">Enter a name for the file that will be imported </string>
@@ -130,8 +130,8 @@
     <string name="sort_date_asc">Sort By Date (Ascending)</string>
     <string name="sort_creation_desc">Default: Sort By Creation Date (Descending)</string>
     <string name="sort_creation_asc">Sort By Creation Date (Ascending)</string>
-    <string name="pause_do_not_shutdown">This may take some time, so don\'t shutdwon your device until the app notify you.</string>
-    <string name="pause_shutdown">Study Without Pen!: the pause operation completed, you can shutdown your device now.</string>
+    <string name="pause_do_not_shutdown">This may take some time, so don\'t close the app untill it notifies you. You can press home button, but don\'t press back button.</string>
+    <string name="pause_shutdown">Study Without Pen!: the pause operation completed, you can close the app now.</string>
     <string name="wait_until_test_pausing_finish">Please, wait until the current test session pause opertation of this field finishes.</string>
     <string name="wait_until_study_during_pausing_finish" >Please, wait until the current study a period session pause opertation of this field finishes.</string>
     <string name="wait_until_current_session_pausing_finish">Please, wait until any pausing operations of this field finish</string>
