@@ -2,17 +2,11 @@ package com.ahmedsameha1.studyvocabulary.database;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.net.Uri;
 import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.view.Gravity;
-import android.widget.Toast;
 
-import com.ahmedsameha1.studyvocabulary.R;
 import com.commonsware.cwac.loaderex.AbstractCursorLoader;
 import com.commonsware.cwac.loaderex.ContentChangingTask;
 
@@ -75,9 +69,9 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     public void createField(String field_name, int field_type, int question_data_type) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Field.COLUMN_NAME_FIELD_NAME, field_name);
-        contentValues.put(Contract.Field.COLUMN_NAME_FIELD_TYPE, field_type);
-        contentValues.put(Contract.Field.COLUMN_NAME_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
+        contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
+        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
+        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
 
@@ -128,21 +122,21 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             for (int i = 0; i < array.length; i++) {
                 Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                        Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                        Contract.STring.COLUMN_VALUE + " = ? ",
                         new String[]{array[i][0]}, null, null, null);
                 questionCursor.moveToFirst();
                 long question_id = questionCursor.getLong(0);
                 questionCursor.close();
                 Cursor answerCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                        Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                        Contract.STring.COLUMN_VALUE + " = ? ",
                         new String[]{array[i][1]}, null, null, null);
                 answerCursor.moveToFirst();
                 long answer_id = answerCursor.getLong(0);
                 answerCursor.close();
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(Contract.String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER, i);
-                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.String_Entry.COLUMN_NAME_QUESTION + " = ? AND "
-                                + Contract.String_Entry.COLUMN_NAME_ANSWER + " = ? AND " + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER, i);
+                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.String_Entry.COLUMN_QUESTION + " = ? AND "
+                                + Contract.String_Entry.COLUMN_ANSWER + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                         new String[]{question_id + "", answer_id + "", field_id + ""});
             }
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
@@ -154,21 +148,21 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             for (int i = 0; i < array.length; i++) {
                 Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                        Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                        Contract.STring.COLUMN_VALUE + " = ? ",
                         new String[]{array[i][0]}, null, null, null);
                 questionCursor.moveToFirst();
                 long question_id = questionCursor.getLong(0);
                 questionCursor.close();
                 Cursor answerCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                        Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                        Contract.STring.COLUMN_VALUE + " = ? ",
                         new String[]{array[i][1]}, null, null, null);
                 answerCursor.moveToFirst();
                 long answer_id = answerCursor.getLong(0);
                 answerCursor.close();
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(Contract.String_Entry.COLUMN_NAME_PAUSED_STUDY_PERIOD_ORDER, i);
-                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.String_Entry.COLUMN_NAME_QUESTION + " = ? AND "
-                                + Contract.String_Entry.COLUMN_NAME_ANSWER + " = ? AND " + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, i);
+                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.String_Entry.COLUMN_QUESTION + " = ? AND "
+                                + Contract.String_Entry.COLUMN_ANSWER + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                         new String[]{question_id + "", answer_id + "", field_id + ""});
             }
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
@@ -181,8 +175,8 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         try {
             for (Integer i : arrayList) {
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_NAME_REPEATED_ENTRY, i);
-                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_NAME_FIELD, field_id);
+                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_REPEATED_ENTRY, i);
+                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_FIELD, field_id);
                 sqLiteDatabase.insert(Contract.Study_Period_Repeated_Entry.TABLE_NAME, null, contentValues);
             }
             sqLiteDatabase.setTransactionSuccessful();
@@ -194,19 +188,19 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     public void putTestPausedData(long field_id, int[] array) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Test_Paused.COLUMN_NAME_CURRENT_QUESTION_COUNTER, array[0]);
-        contentValues.put(Contract.Test_Paused.COLUMN_NAME_WRONG_ANSWERS_COUNT, array[1]);
-        contentValues.put(Contract.Test_Paused.COLUMN_NAME_TRIES_NUMBER, array[2]);
-        contentValues.put(Contract.Test_Paused.COLUMN_NAME_FIELD, field_id);
+        contentValues.put(Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER, array[0]);
+        contentValues.put(Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT, array[1]);
+        contentValues.put(Contract.Test_Paused.COLUMN_TRIES_NUMBER, array[2]);
+        contentValues.put(Contract.Test_Paused.COLUMN_FIELD, field_id);
         sqLiteDatabase.insert(Contract.Test_Paused.TABLE_NAME, null, contentValues);
     }
 
     public void putStudyPeriodPausedData(long field_id, int[] array) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Study_Period_Paused.COLUMN_NAME_CURRENT_QUESTION_COUNTER, array[0]);
-        contentValues.put(Contract.Study_Period_Paused.COLUMN_NAME_TRIES_NUMBER, array[1]);
-        contentValues.put(Contract.Study_Period_Paused.COLUMN_NAME_FIELD, field_id);
+        contentValues.put(Contract.Study_Period_Paused.COLUMN_CURRENT_QUESTION_COUNTER, array[0]);
+        contentValues.put(Contract.Study_Period_Paused.COLUMN_TRIES_NUMBER, array[1]);
+        contentValues.put(Contract.Study_Period_Paused.COLUMN_FIELD, field_id);
         sqLiteDatabase.insert(Contract.Study_Period_Paused.TABLE_NAME, null, contentValues);
     }
 
@@ -244,32 +238,32 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
                     long question_id, answer_id;
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.STring.COLUMN_NAME_VALUE, answer);
+                    contentValues.put(Contract.STring.COLUMN_VALUE, answer);
                     try {
                         answer_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
                     } catch (Exception e) {
                         Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                                Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                                Contract.STring.COLUMN_VALUE + " = ? ",
                                 new String[]{answer}, null, null, null);
                         c.moveToFirst();
                         answer_id = c.getInt(0);
                         c.close();
                     }
                     contentValues = new ContentValues();
-                    contentValues.put(Contract.STring.COLUMN_NAME_VALUE, question);
+                    contentValues.put(Contract.STring.COLUMN_VALUE, question);
                     try {
                         question_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
                     } catch (Exception e) {
                         Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                                Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                                Contract.STring.COLUMN_VALUE + " = ? ",
                                 new String[]{question}, null, null, null);
                         c.moveToFirst();
                         question_id = c.getInt(0);
                         c.close();
                     }
                     contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_NAME_QUESTION, question_id);
-                    contentValues.put(Contract.String_Entry.COLUMN_NAME_ANSWER, answer_id);
+                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
+                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
 
                     sqLiteDatabase.updateWithOnConflict(Contract.String_Entry.TABLE_NAME, contentValues,
                             Contract.COLUMN_NAME_ID + " = ? ",
@@ -296,12 +290,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             long field_id = (long) params[1];
-            Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_NAME_USAGE_COUNT},
+            Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_USAGE_COUNT},
                     Contract.COLUMN_NAME_ID + " = ? ",
                     new String[]{field_id + ""}, null, null, null);
             cursor.moveToFirst();
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_NAME_USAGE_COUNT, cursor.getInt(0) + 1);
+            contentValues.put(Contract.Field.COLUMN_USAGE_COUNT, cursor.getInt(0) + 1);
             sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_NAME_ID + " = ? ", new String[]{field_id + ""});
             cursor.close();
             return (null);
@@ -326,33 +320,33 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
                     long question_id, answer_id;
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.STring.COLUMN_NAME_VALUE, answer);
+                    contentValues.put(Contract.STring.COLUMN_VALUE, answer);
                     try {
                         answer_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
                     } catch (Exception e) {
                         Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                                Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                                Contract.STring.COLUMN_VALUE + " = ? ",
                                 new String[]{answer}, null, null, null);
                         c.moveToFirst();
                         answer_id = c.getInt(0);
                         c.close();
                     }
                     contentValues = new ContentValues();
-                    contentValues.put(Contract.STring.COLUMN_NAME_VALUE, question);
+                    contentValues.put(Contract.STring.COLUMN_VALUE, question);
                     try {
                         question_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
                     } catch (Exception e) {
                         Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                                Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                                Contract.STring.COLUMN_VALUE + " = ? ",
                                 new String[]{question}, null, null, null);
                         c.moveToFirst();
                         question_id = c.getInt(0);
                         c.close();
                     }
                     contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_NAME_QUESTION, question_id);
-                    contentValues.put(Contract.String_Entry.COLUMN_NAME_ANSWER, answer_id);
-                    contentValues.put(Contract.String_Entry.COLUMN_NAME_FIELD, field_id);
+                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
+                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
+                    contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
                     sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
                 } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
                 }
@@ -397,9 +391,9 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.String_Entry.COLUMN_NAME_PAUSED_STUDY_PERIOD_ORDER, -1);
+            contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, -1);
             sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
-                    Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                    Contract.String_Entry.COLUMN_FIELD + " = ? ",
                     new String[]{field_id + ""});
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
@@ -409,9 +403,9 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER, -1);
+            contentValues.put(Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER, -1);
             sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
-                    Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                    Contract.String_Entry.COLUMN_FIELD + " = ? ",
                     new String[]{field_id + ""});
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
@@ -450,7 +444,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
 
         sqLiteDatabase.execSQL("DELETE FROM " + Contract.Not_String.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID
                 + " IN ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.Not_String.TABLE_NAME + " EXCEPT SELECT "
-                + Contract.Not_String_Entry.COLUMN_NAME_QUESTION + " FROM " + Contract.Not_String_Entry.TABLE_NAME + " );");
+                + Contract.Not_String_Entry.COLUMN_QUESTION + " FROM " + Contract.Not_String_Entry.TABLE_NAME + " );");
     }
     protected ContentChangingTask buildDeleteField(MySQLiteCursorLoader loader) {
         return (new DeleteField(loader));
@@ -475,7 +469,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
 
                 sqLiteDatabase.execSQL("DELETE FROM " + Contract.Not_String.TABLE_NAME + " WHERE " + Contract.COLUMN_NAME_ID
                         + " IN ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.Not_String.TABLE_NAME + " EXCEPT SELECT "
-                        + Contract.Not_String_Entry.COLUMN_NAME_QUESTION + " FROM " + Contract.Not_String_Entry.TABLE_NAME + " );");
+                        + Contract.Not_String_Entry.COLUMN_QUESTION + " FROM " + Contract.Not_String_Entry.TABLE_NAME + " );");
 
 
                 sqLiteDatabase.setTransactionSuccessful();
@@ -490,9 +484,9 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
-            sqLiteDatabase.delete(Contract.Study_Period_Paused.TABLE_NAME, Contract.Study_Period_Paused.COLUMN_NAME_FIELD + " = ? ",
+            sqLiteDatabase.delete(Contract.Study_Period_Paused.TABLE_NAME, Contract.Study_Period_Paused.COLUMN_FIELD + " = ? ",
                     new String[]{field_id + ""});
-            sqLiteDatabase.delete(Contract.Study_Period_Repeated_Entry.TABLE_NAME, Contract.Study_Period_Repeated_Entry.COLUMN_NAME_FIELD + " = ? ",
+            sqLiteDatabase.delete(Contract.Study_Period_Repeated_Entry.TABLE_NAME, Contract.Study_Period_Repeated_Entry.COLUMN_FIELD + " = ? ",
                     new String[]{field_id + ""});
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
@@ -503,7 +497,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
 
     public void clearThisFieldFromTestPaused(long field_id) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-        sqLiteDatabase.delete(Contract.Test_Paused.TABLE_NAME, Contract.Test_Paused.COLUMN_NAME_FIELD + " = ? ",
+        sqLiteDatabase.delete(Contract.Test_Paused.TABLE_NAME, Contract.Test_Paused.COLUMN_FIELD + " = ? ",
                 new String[]{field_id + ""});
     }
 
@@ -531,14 +525,14 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             try {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
                     sqLiteDatabase.execSQL("DELETE FROM " + Contract.Test_Wrong_Answer_String.TABLE_NAME
-                            + " WHERE " + Contract.Test_Wrong_Answer_String.COLUMN_NAME_ENTRY + " IN "
+                            + " WHERE " + Contract.Test_Wrong_Answer_String.COLUMN_ENTRY + " IN "
                             + " ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.String_Entry.TABLE_NAME
-                            + " WHERE " + Contract.String_Entry.COLUMN_NAME_FIELD + " = " + field_id + " );");
+                            + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = " + field_id + " );");
                 } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
                     sqLiteDatabase.execSQL("DELETE FROM " + Contract.Test_Wrong_Answer_Not_String.TABLE_NAME
-                            + " WHERE " + Contract.Test_Wrong_Answer_Not_String.COLUMN_NAME_ENTRY + " IN "
+                            + " WHERE " + Contract.Test_Wrong_Answer_Not_String.COLUMN_ENTRY + " IN "
                             + " ( SELECT " + Contract.COLUMN_NAME_ID + " FROM " + Contract.Not_String_Entry.TABLE_NAME
-                            + " WHERE " + Contract.Not_String_Entry.COLUMN_NAME_FIELD + " = " + field_id + " );");
+                            + " WHERE " + Contract.Not_String_Entry.COLUMN_FIELD + " = " + field_id + " );");
                 }
                 sqLiteDatabase.setTransactionSuccessful();
             } finally {
@@ -574,28 +568,28 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             try {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
                     Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                        Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                        Contract.STring.COLUMN_VALUE + " = ? ",
                         new String[]{question}, null, null, null);
                     questionCursor.moveToFirst();
                     long question_id = questionCursor.getLong(0);
                     questionCursor.close();
                     Cursor answerCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                            Contract.STring.COLUMN_NAME_VALUE + " = ? ",
+                            Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{answer}, null, null, null);
                     answerCursor.moveToFirst();
                     long answer_id = answerCursor.getLong(0);
                     answerCursor.close();
                     Cursor entryCursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_NAME_ID},
-                            Contract.String_Entry.COLUMN_NAME_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_NAME_ANSWER + " = ? AND "
-                            + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                            Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_ANSWER + " = ? AND "
+                            + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                             new String[]{question_id + "", answer_id + "", field_id + ""}, null, null, null);
                     entryCursor.moveToFirst();
                     long entry_id = entryCursor.getLong(0);
                     entryCursor.close();
                     for (String string : wrongAnswers) {
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put(Contract.Test_Wrong_Answer_String.COLUMN_NAME_ENTRY, entry_id);
-                        contentValues.put(Contract.Test_Wrong_Answer_String.COLUMN_NAME_WRONG_ANSWER, string);
+                        contentValues.put(Contract.Test_Wrong_Answer_String.COLUMN_ENTRY, entry_id);
+                        contentValues.put(Contract.Test_Wrong_Answer_String.COLUMN_WRONG_ANSWER, string);
                         sqLiteDatabase.insert(Contract.Test_Wrong_Answer_String.TABLE_NAME, null, contentValues);
                     }
                 } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
@@ -615,11 +609,11 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                 + " IN ( SELECT "
                 + Contract.COLUMN_NAME_ID + " FROM " + Contract.STring.TABLE_NAME
                 + " EXCEPT SELECT * FROM ( SELECT "
-                + Contract.String_Entry.COLUMN_NAME_QUESTION + " FROM " + Contract.String_Entry.TABLE_NAME
-                + " UNION SELECT " + Contract.String_Entry.COLUMN_NAME_ANSWER + " FROM " + Contract.String_Entry.TABLE_NAME
-                + " UNION SELECT " + Contract.Not_String_Entry.COLUMN_NAME_ANSWER + " FROM " + Contract.Not_String_Entry.TABLE_NAME
-                + " UNION SELECT " + Contract.Alternative_Answer_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " FROM " + Contract.Alternative_Answer_String.TABLE_NAME
-                + " UNION SELECT " + Contract.Alternative_Answer_Not_String.COLUMN_NAME_ALTERNATIVE_ANSWER + " FROM " + Contract.Alternative_Answer_Not_String.TABLE_NAME
+                + Contract.String_Entry.COLUMN_QUESTION + " FROM " + Contract.String_Entry.TABLE_NAME
+                + " UNION SELECT " + Contract.String_Entry.COLUMN_ANSWER + " FROM " + Contract.String_Entry.TABLE_NAME
+                + " UNION SELECT " + Contract.Not_String_Entry.COLUMN_ANSWER + " FROM " + Contract.Not_String_Entry.TABLE_NAME
+                + " UNION SELECT " + Contract.Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER + " FROM " + Contract.Alternative_Answer_String.TABLE_NAME
+                + " UNION SELECT " + Contract.Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER + " FROM " + Contract.Alternative_Answer_Not_String.TABLE_NAME
                 + " ) as jjj"
                 + " );");
     }

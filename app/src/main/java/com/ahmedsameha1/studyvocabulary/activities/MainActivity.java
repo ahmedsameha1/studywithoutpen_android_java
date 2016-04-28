@@ -31,7 +31,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -115,25 +114,25 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 if (id == GET_FIELDS_ID) {
-                    /*return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME}, null, null,
+                    /*return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME}, null, null,
                             "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
                     mySQLiteCursorLoader = new MySQLiteCursorLoader(MainActivity.this,
-                            "SELECT " + Contract.COLUMN_NAME_ID + ", " + Contract.Field.COLUMN_NAME_FIELD_TYPE + ", " + Contract.Field.COLUMN_NAME_FIELD_NAME
-                                    + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_NAME_USAGE_COUNT + " DESC",
+                            "SELECT " + Contract.COLUMN_NAME_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
+                                    + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                             null);
                     return mySQLiteCursorLoader;
                 } else if (id == SEARCH_FIELDS_ID) {
                     String query = args.getString(QUERY_KEY);
                     /*return new CursorLoader(MainActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME},
-                            Contract.Old_Field_DBV6_AppV32.COLUMN_NAME_FIELD_NAME + " LIKE ? ",
+                            new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME},
+                            Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME + " LIKE ? ",
                             new String[] {"%" + query + "%"},
                             "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
                     mySQLiteCursorLoader = new MySQLiteCursorLoader(MainActivity.this,
-                            "SELECT " + Contract.COLUMN_NAME_ID + ", " + Contract.Field.COLUMN_NAME_FIELD_TYPE + ", "
-                                    + Contract.Field.COLUMN_NAME_FIELD_NAME
-                                    + " FROM " + Contract.Field.TABLE_NAME + " WHERE " + Contract.Field.COLUMN_NAME_FIELD_NAME + " LIKE ? "
-                                    + " ORDER BY " + Contract.Field.COLUMN_NAME_USAGE_COUNT + " DESC", new String[]{"%" + query + "%"});
+                            "SELECT " + Contract.COLUMN_NAME_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", "
+                                    + Contract.Field.COLUMN_FIELD_NAME
+                                    + " FROM " + Contract.Field.TABLE_NAME + " WHERE " + Contract.Field.COLUMN_FIELD_NAME + " LIKE ? "
+                                    + " ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC", new String[]{"%" + query + "%"});
                     return mySQLiteCursorLoader;
                 }
                 return null;

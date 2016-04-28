@@ -3,12 +3,10 @@ package com.ahmedsameha1.studyvocabulary.activities;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
 import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -27,7 +25,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
@@ -692,35 +689,35 @@ public class TestActivity extends AppCompatActivity implements
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if ( id == CONTINUE_PREVIOUS_SESSION ) {
             return new MySQLiteCursorLoader(TestActivity.this,
-                    "SELECT " + " s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
-                            + " a , se." + Contract.String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
+                    "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                            + " a , se." + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
-                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_NAME_PAUSED_TEST_ORDER + " >= ? ",
+                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER + " >= ? ",
                     new String[]{current_field_id + "", "0"});
             /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,uri,
-                    new String[] {Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK,
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER},
-                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[] {Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK,
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK,
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_ORDER},
+                    Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
                     new String[] {"0", currentField},
                     null);*/
         } else {
             return new MySQLiteCursorLoader(TestActivity.this,
-                    "SELECT " + "se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                    "SELECT " + "se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a " + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
-                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                     new String[]{current_field_id + ""});
             /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
             return new CursorLoader(this,
                     uri,
-                    new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                    Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
+                    new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK},
+                    Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
                     new String[]{currentField},
                     null);*/
         }

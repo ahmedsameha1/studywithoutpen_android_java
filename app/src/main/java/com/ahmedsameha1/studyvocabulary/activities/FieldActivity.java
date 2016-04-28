@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.app.LoaderManager;
 import android.content.Loader;
@@ -37,7 +38,7 @@ import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.DeleteEntryDialogFragment;
-import com.ahmedsameha1.studyvocabulary.dialogs.DeleteFieldDialogFragment;
+import com.ahmedsameha1.studyvocabulary.dialogs.FieldOptionsDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.SearchDateOrTextDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.StudyDuringDialogFragment;
@@ -54,8 +55,9 @@ public class FieldActivity extends AppCompatActivity implements
     public static final int SORT = 0;
     public static final int STUDY_PERIOD = 1;
     public static final int TEST = 2;
-    private static final int REVIEW = 3;
-    private static final int FACEBOOK = 4;
+    public static final int FIELD_OPTIONS = 3;
+    private static final int REVIEW = 4;
+    private static final int FACEBOOK = 5;
     private static final String QUERY_KEY = "query_key";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int SEARCH_ENTRIES_LOADER_ID = 1;
@@ -90,7 +92,8 @@ public class FieldActivity extends AppCompatActivity implements
     public static final String INSERTED_QUESTION = "inserted_question";
     public static final String INSERTED_ANSWER = "inserted_answer";
     private static final int INSERT_ENTRY = 1;
-
+    private static final int MY_DATA_CHECK_CODE = 1234;
+    private static final String FIELD_OPTIONS_DIALOG = "field_options_dialog";
 
 
     private String[] deleteEntryData = {null, null, null};
@@ -118,6 +121,7 @@ public class FieldActivity extends AppCompatActivity implements
     private FieldActivityRecyclerViewAdapter mAdapter;
     private SearchView searchView;
     private MenuItem searchItem;
+    private boolean tts_available = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +147,9 @@ public class FieldActivity extends AppCompatActivity implements
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
+        Intent checkIntent = new Intent();
+        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -161,24 +168,24 @@ public class FieldActivity extends AppCompatActivity implements
                     if (id == SEARCH_ENTRIES_LOADER_ID) {
                         String searchString = args.getString(QUERY_KEY);
                         mySQLiteCursorLoader = new MySQLiteCursorLoader(FieldActivity.this,
-                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
-                                        + " WHERE " + " se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? AND "
+                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                                         + "  q LIKE ? "
-                                        + " OR " + " se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? AND "
+                                        + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                                         + " a LIKE ? ORDER BY " + SORT_STRINGS[sort],
                                 new String[]{ current_field_id + "","%" + searchString + "%", current_field_id + "","%" + searchString + "%"});
                         return mySQLiteCursorLoader;
 
                     } else if (id == GET_ENTRIES_LOADER_ID) {
                         mySQLiteCursorLoader = new MySQLiteCursorLoader(FieldActivity.this,
-                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
-                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? "
+                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
                                 + "ORDER BY " + SORT_STRINGS[sort] ,
                                 new String[]{current_field_id + ""});
                         return mySQLiteCursorLoader;
@@ -227,6 +234,11 @@ public class FieldActivity extends AppCompatActivity implements
                 String question = data.getStringExtra(INSERTED_QUESTION);
                 String answer = data.getStringExtra(INSERTED_ANSWER);
                 mySQLiteCursorLoader.insertEntry(databaseOperations.getQuestionDataType(current_field_id),question,answer,current_field_id);
+            }
+        } else if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
+            {
+                tts_available = true;
             }
         }
     }
@@ -320,6 +332,12 @@ public class FieldActivity extends AppCompatActivity implements
                 sortEntriesDialogFragment.setArguments(bundle);
                 sortEntriesDialogFragment.setFieldActivityRecyclerViewAdapter(mAdapter);
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
+                break;
+            case FIELD_OPTIONS:
+                bundle.putBoolean(FieldOptionsDialogFragment.TTS_AVAILABLE, tts_available);
+                FieldOptionsDialogFragment fieldOptionsDialogFragment = new FieldOptionsDialogFragment();
+                fieldOptionsDialogFragment.setArguments(bundle);
+                fieldOptionsDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
                 break;
             case REVIEW:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());

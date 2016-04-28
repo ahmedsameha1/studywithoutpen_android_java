@@ -137,4 +137,7 @@
     <string name="already_inserted">هذا المُدخل موجود بالفعل في هذا المجال!</string>
     <string name="import_user_usage">لو كنت أنت من أنشأ هذا الملف، اختر نعم.\nلو كان أحد غيرك قد أنشأ هذا الملف ثم شاركه معك، اختر لا.</string>
     <string name="copy_in_the_following_folder">انسخ الملف الذي تريد استيراده في المجلد التالي:</string>
+    <string name="ignore_case">تجاهل حالة الحرف في الجواب.</string>
+    <string name="read_answer">قراءة الجواب (لو أجبت بشكل صحيح)!!</string>
+    <string name="field_options">خيارات المجال</string>
 </resources>

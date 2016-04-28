@@ -28,7 +28,6 @@ import android.widget.Toast;
 
 
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
@@ -104,7 +103,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
         simple_cursor_adapter = new SimpleCursorAdapter(this,R.layout.field_spinner,null,
-                new String [] {Contract.Field.COLUMN_NAME_FIELD_NAME}, new int[] {R.id.list_item}, 0);
+                new String [] {Contract.Field.COLUMN_FIELD_NAME}, new int[] {R.id.list_item}, 0);
         field_spinner.setAdapter(simple_cursor_adapter);
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         setHints(fieldType);
@@ -478,8 +477,8 @@ public class AddEntryActivity extends AppCompatActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new MySQLiteCursorLoader(AddEntryActivity.this,
-                "SELECT " + Contract.COLUMN_NAME_ID + ", " +  Contract.Field.COLUMN_NAME_FIELD_TYPE + ", " + Contract.Field.COLUMN_NAME_FIELD_NAME
-                        + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_NAME_USAGE_COUNT + " DESC",
+                "SELECT " + Contract.COLUMN_NAME_ID + ", " +  Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
+                        + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                 null);
     }
 

@@ -62,7 +62,7 @@ public class ExportFieldsDialogFragment extends DialogFragment {
                         new SimpleCursorAdapter(context,
                                 android.R.layout.simple_list_item_multiple_choice,
                                 databaseOperations.getFieldList(),
-                                new String[]{Contract.Field.COLUMN_NAME_FIELD_NAME},
+                                new String[]{Contract.Field.COLUMN_FIELD_NAME},
                                 new int[]{android.R.id.text1}, 0);
                 listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
                 listView.setAdapter(simpleCursorAdapter);

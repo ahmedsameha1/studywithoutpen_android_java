@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.LoaderManager;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -28,7 +29,6 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
@@ -455,17 +455,17 @@ public class StudyActivity extends AppCompatActivity implements
                     int sort = args.getInt(CURRENT_SORT);
 
                         mySQLiteCursorLoader = new MySQLiteCursorLoader(StudyActivity.this,
-                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
-                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? "
+                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
                                         + "ORDER BY " + FieldActivity.SORT_STRINGS[sort] ,
                                 new String[]{current_field_id + ""});
                         return mySQLiteCursorLoader;
                         /*return new CursorLoader(FieldActivity.this, uri,
-                                new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK},
-                                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
+                                new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK},
+                                Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
                                 new String[]{currentField},
                                 sortStrings[sort]);*/
 
@@ -571,7 +571,6 @@ public class StudyActivity extends AppCompatActivity implements
             }
         }
     }
-
 
 /*    public int getEntryPostion (String fieldName, String question ,String answer ) {
         Cursor cursor = new DatabaseHelper(this).getFieldEntries(currentField);

@@ -64,7 +64,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                 Button sort_creation_desc = (Button) alertDialog.findViewById(R.id.sort_creation_desc);
                 Button sort_creation_asc = (Button) alertDialog.findViewById(R.id.sort_creation_asc);
 
-                if ( fieldType != Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE ) {
+                if ( fieldType != Contract.Field.NOTEBOOK_TYPE ) {
                     sort_question_asc.setVisibility(View.VISIBLE);
                     sort_question_desc.setVisibility(View.VISIBLE);
                 } else {

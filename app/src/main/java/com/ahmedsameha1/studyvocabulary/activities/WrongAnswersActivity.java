@@ -14,7 +14,6 @@ import android.view.View;
 
 import com.ahmedsameha1.studyvocabulary.adapters.WrongAnswersActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;
 import com.ahmedsameha1.studyvocabulary.adapters.WrongItem;
@@ -90,19 +89,19 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new MySQLiteCursorLoader(WrongAnswersActivity.this,
-                "SELECT " + " s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                         + " a " + " FROM " + Contract.STring.TABLE_NAME
                         + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
-                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
-                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? ",
+                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                 new String[]{current_field_id + ""});
         /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
         return new CursorLoader(this,uri,
-                new String[] {Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_QUESTION_LINK,
-                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_ANSWER_LINK,
-                        Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_WRONG_ANSWERS},
-                Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_TEST_WRONG_ANSWERS + " != ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_NAME_FIELD_LINK + " = ? ",
+                new String[] {Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK,
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK,
+                        Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_WRONG_ANSWERS},
+                Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_WRONG_ANSWERS + " != ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
                 new String[] {"", currentField},
                 null);*/
     }

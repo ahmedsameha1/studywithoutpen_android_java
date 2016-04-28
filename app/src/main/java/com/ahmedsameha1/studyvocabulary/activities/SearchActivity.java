@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
 import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -23,7 +21,6 @@ import android.widget.SimpleCursorAdapter;
 
 import com.ahmedsameha1.studyvocabulary.adapters.SearchActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.R;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
@@ -144,13 +141,13 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         int sort = args.getInt(CURRENT_SORT);
         String searchString = args.getString(QUERY_KEY);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(SearchActivity.this,
-                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_NAME_VALUE + " q , s2." + Contract.STring.COLUMN_NAME_VALUE
+                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_QUESTION + " INNER JOIN "
-                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_NAME_ANSWER
-                        + " WHERE " + " se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? AND "
+                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                        + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                         + "  q LIKE ? "
-                        + " OR " + " se." + Contract.String_Entry.COLUMN_NAME_FIELD + " = ? AND "
+                        + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                         + " a LIKE ? ORDER BY " + FieldActivity.SORT_STRINGS[sort],
                 new String[]{ current_field_id + "","%" + searchString + "%", current_field_id + "","%" + searchString + "%"});
         return mySQLiteCursorLoader;
