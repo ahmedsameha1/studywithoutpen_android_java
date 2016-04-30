@@ -100,7 +100,7 @@ public class ExportImportDatabase {
                                 Contract.Field.COLUMN_ANSWER_AREA_SIZE, Contract.Field.COLUMN_TEST_TEXT_SIZE,
                                 Contract.Field.COLUMN_ACTION_BAR_SHOWN, Contract.Field.COLUMN_USAGE_COUNT,
                                 Contract.CREATION_DATE,Contract.Field.COLUMN_CREATION_EMULATION_NUMBER,
-                                Contract.COLUMN_NAME_ID, Contract.Field.COLUMN_CHECK_TYPE},
+                                Contract.COLUMN_ID, Contract.Field.COLUMN_CHECK_TYPE},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{tempFieldName}, null, null, null, null);
                 fieldCursor.moveToFirst();
@@ -127,13 +127,13 @@ public class ExportImportDatabase {
                             new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
                                     Contract.String_Entry.COLUMN_FIELD, Contract.String_Entry.COLUMN_ASKED_COUNT,
                                     Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.String_Entry.COLUMN_RANK,
-                                    Contract.CREATION_DATE, Contract.COLUMN_NAME_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
+                                    Contract.CREATION_DATE, Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
                             Contract.String_Entry.COLUMN_FIELD + " = ?",
                             new String[]{temp_field_id + ""}, null, null, null, null);
                     for (stringEntryCursor.moveToFirst(); stringEntryCursor.getPosition() < stringEntryCursor.getCount();
                          stringEntryCursor.moveToNext()) {
                         Cursor questionCursor = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                                Contract.COLUMN_NAME_ID + " = ? ",
+                                Contract.COLUMN_ID + " = ? ",
                                 new String[]{stringEntryCursor.getInt(0) + ""}, null, null, null, null);
                         questionCursor.moveToFirst();
                         ContentValues contentValues1 = new ContentValues();
@@ -142,7 +142,7 @@ public class ExportImportDatabase {
                         try {
                             question_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                         } catch (Exception e) {
-                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                     Contract.STring.COLUMN_VALUE + " = ? ",
                                     new String[]{questionCursor.getString(0)},null,null,null,null);
                             c.moveToFirst();
@@ -151,7 +151,7 @@ public class ExportImportDatabase {
                         }
                         questionCursor.close();
                         Cursor answerCursor = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                                Contract.COLUMN_NAME_ID + " = ? ",
+                                Contract.COLUMN_ID + " = ? ",
                                 new String[]{stringEntryCursor.getInt(1) + ""}, null, null, null, null);
                         answerCursor.moveToFirst();
                         contentValues1 = new ContentValues();
@@ -160,7 +160,7 @@ public class ExportImportDatabase {
                         try {
                             answer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                         } catch (Exception e) {
-                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                     Contract.STring.COLUMN_VALUE + " = ? ",
                                     new String[]{answerCursor.getString(0)},null,null,null,null);
                             c.moveToFirst();
@@ -187,7 +187,7 @@ public class ExportImportDatabase {
                         for (alternativeStringCursor.moveToFirst(); alternativeStringCursor.getPosition() < alternativeStringCursor.getCount();
                              alternativeStringCursor.moveToNext()) {
                             Cursor alternativeAnswerCursor = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                                    Contract.COLUMN_NAME_ID + " = ? ",
+                                    Contract.COLUMN_ID + " = ? ",
                                     new String[]{alternativeStringCursor.getInt(0) + ""}, null, null, null, null);
                             alternativeAnswerCursor.moveToFirst();
                             contentValues = new ContentValues();
@@ -196,7 +196,7 @@ public class ExportImportDatabase {
                             try {
                                 wrongAnswer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME,null,contentValues);
                             } catch (Exception e) {
-                                Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                                Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                         Contract.STring.COLUMN_VALUE + " = ? ",
                                         new String[]{alternativeAnswerCursor.getString(0)},null,null,null,null);
                                 c.moveToFirst();
@@ -220,13 +220,13 @@ public class ExportImportDatabase {
                             new String[]{Contract.Not_String_Entry.COLUMN_QUESTION, Contract.Not_String_Entry.COLUMN_ANSWER,
                                     Contract.Not_String_Entry.COLUMN_FIELD, Contract.Not_String_Entry.COLUMN_ASKED_COUNT,
                                     Contract.Not_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.Not_String_Entry.COLUMN_RANK,
-                                    Contract.CREATION_DATE, Contract.COLUMN_NAME_ID, Contract.Not_String_Entry.COLUMN_CREATION_EMULATED_DATE},
+                                    Contract.CREATION_DATE, Contract.COLUMN_ID, Contract.Not_String_Entry.COLUMN_CREATION_EMULATED_DATE},
                             Contract.Not_String_Entry.COLUMN_FIELD + " = ?",
                             new String[]{tempFieldName}, null, null, null, null);
                     for (notstringEntryCursor.moveToFirst(); notstringEntryCursor.getPosition() < notstringEntryCursor.getCount();
                          notstringEntryCursor.moveToNext()) {
                         Cursor questionCursor = appDatabase.query(Contract.Not_String.TABLE_NAME, new String[]{Contract.Not_String.COLUMN_VALUE},
-                                Contract.COLUMN_NAME_ID + " = ? ",
+                                Contract.COLUMN_ID + " = ? ",
                                 new String[]{notstringEntryCursor.getInt(0) + ""}, null, null, null, null);
                         questionCursor.moveToFirst();
                         ContentValues contentValues1 = new ContentValues();
@@ -234,7 +234,7 @@ public class ExportImportDatabase {
                         long question_id = toExportDatabase.insert(Contract.Not_String.TABLE_NAME, null, contentValues1);
                         questionCursor.close();
                         Cursor answerCursor = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                                Contract.COLUMN_NAME_ID + " = ? ",
+                                Contract.COLUMN_ID + " = ? ",
                                 new String[]{notstringEntryCursor.getInt(1) + ""}, null, null, null, null);
                         answerCursor.moveToFirst();
                         contentValues1 = new ContentValues();
@@ -243,7 +243,7 @@ public class ExportImportDatabase {
                         try {
                             answer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                         } catch (Exception e) {
-                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                     Contract.STring.COLUMN_VALUE + " = ? ",
                                     new String[]{answerCursor.getString(0)},null,null,null,null);
                             c.moveToFirst();
@@ -270,7 +270,7 @@ public class ExportImportDatabase {
                         for (alternativeNotStringCursor.moveToFirst(); alternativeNotStringCursor.getPosition() < alternativeNotStringCursor.getCount();
                              alternativeNotStringCursor.moveToNext()) {
                             Cursor alternativeAnswerCursor = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                                    Contract.COLUMN_NAME_ID + " = ? ",
+                                    Contract.COLUMN_ID + " = ? ",
                                     new String[]{alternativeNotStringCursor.getInt(0) + ""}, null, null, null, null);
                             alternativeAnswerCursor.moveToFirst();
                             contentValues = new ContentValues();
@@ -279,7 +279,7 @@ public class ExportImportDatabase {
                             try {
                                 wrongAnswer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME,null,contentValues);
                             } catch (Exception e) {
-                                Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                                Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                         Contract.STring.COLUMN_VALUE + " = ? ",
                                         new String[]{alternativeAnswerCursor.getString(0)},null,null,null,null);
                                 c.moveToFirst();
@@ -390,7 +390,7 @@ public class ExportImportDatabase {
                             Contract.Field.COLUMN_ANSWER_AREA_SIZE, Contract.Field.COLUMN_TEST_TEXT_SIZE,
                             Contract.Field.COLUMN_ACTION_BAR_SHOWN, Contract.Field.COLUMN_USAGE_COUNT,
                             Contract.CREATION_DATE,Contract.Field.COLUMN_CREATION_EMULATION_NUMBER,
-                            Contract.COLUMN_NAME_ID, Contract.Field.COLUMN_CHECK_TYPE},
+                            Contract.COLUMN_ID, Contract.Field.COLUMN_CHECK_TYPE},
                     null, null, null, null, null);
             for (toImportFieldCursor.moveToFirst(); toImportFieldCursor.getPosition() < toImportFieldCursor.getCount();
                  toImportFieldCursor.moveToNext()) {
@@ -449,7 +449,7 @@ public class ExportImportDatabase {
             notImportedFieldsStrings = new ArrayList<String>();
             for ( Integer field_id : notImportedFieldsIntegers ) {
                 Cursor fieldNameCursor = toImportDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_FIELD_NAME},
-                        Contract.COLUMN_NAME_ID + " = ? ",
+                        Contract.COLUMN_ID + " = ? ",
                         new String[]{field_id.toString()},null,null,null,null);
                 fieldNameCursor.moveToFirst();
                 notImportedFieldsStrings.add(fieldNameCursor.getString(0));
@@ -458,13 +458,13 @@ public class ExportImportDatabase {
                     new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
                             Contract.String_Entry.COLUMN_FIELD, Contract.String_Entry.COLUMN_ASKED_COUNT,
                             Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.String_Entry.COLUMN_RANK,
-                            Contract.CREATION_DATE, Contract.COLUMN_NAME_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
-                    Contract.COLUMN_NAME_ID + " NOT IN " + placeholders,
+                            Contract.CREATION_DATE, Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
+                    Contract.COLUMN_ID + " NOT IN " + placeholders,
                     notImportedArray, null, null, null);
             for (toImportStringEntryCursor.moveToFirst(); toImportStringEntryCursor.getPosition() < toImportStringEntryCursor.getCount();
                  toImportStringEntryCursor.moveToNext()) {
                 Cursor questionCursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                        Contract.COLUMN_NAME_ID + " = ? ",
+                        Contract.COLUMN_ID + " = ? ",
                         new String[]{toImportStringEntryCursor.getInt(0) + ""}, null, null, null, null);
                 questionCursor.moveToFirst();
                 ContentValues contentValues1 = new ContentValues();
@@ -473,7 +473,7 @@ public class ExportImportDatabase {
                 try {
                     question_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                 } catch (Exception e) {
-                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{questionCursor.getString(0)},null,null,null,null);
                     c.moveToFirst();
@@ -482,7 +482,7 @@ public class ExportImportDatabase {
                 }
                 questionCursor.close();
                 Cursor answerCursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                        Contract.COLUMN_NAME_ID + " = ? ",
+                        Contract.COLUMN_ID + " = ? ",
                         new String[]{toImportStringEntryCursor.getInt(1) + ""}, null, null, null, null);
                 answerCursor.moveToFirst();
                 contentValues1 = new ContentValues();
@@ -491,7 +491,7 @@ public class ExportImportDatabase {
                 try {
                     answer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                 } catch (SQLException e) {
-                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{answerCursor.getString(0)},null,null,null,null);
                     c.moveToFirst();
@@ -500,10 +500,10 @@ public class ExportImportDatabase {
                 }
                 answerCursor.close();
                 Cursor toimportfieldCursor = toImportDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_FIELD_NAME},
-                        Contract.COLUMN_NAME_ID + " = ? ",
+                        Contract.COLUMN_ID + " = ? ",
                         new String[]{toImportStringEntryCursor.getInt(2) + ""}, null, null, null, null);
                 toimportfieldCursor.moveToFirst();
-                Cursor appfieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                Cursor appfieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{toimportfieldCursor.getString(0)},null,null,null,null);
                 appfieldCursor.moveToFirst();
@@ -524,7 +524,7 @@ public class ExportImportDatabase {
                     try {
                         string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                        Cursor c = appDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                 Contract.String_Entry.COLUMN_QUESTION + " = ? AND "
                                         + Contract.String_Entry.COLUMN_ANSWER + " = ? AND "
                                         + Contract.String_Entry.COLUMN_FIELD + " = ? ",
@@ -541,7 +541,7 @@ public class ExportImportDatabase {
                     try {
                         string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                        Cursor c = appDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                 Contract.String_Entry.COLUMN_QUESTION + " = ? AND "
                                         + Contract.String_Entry.COLUMN_ANSWER + " = ? AND "
                                         + Contract.String_Entry.COLUMN_FIELD + " = ? ",
@@ -559,7 +559,7 @@ public class ExportImportDatabase {
                 for (string_alternative_cursor.moveToFirst(); string_alternative_cursor.getPosition() < string_alternative_cursor.getCount();
                      string_alternative_cursor.moveToNext()) {
                     Cursor alternativeAnswerCursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                            Contract.COLUMN_NAME_ID + " = ? ",
+                            Contract.COLUMN_ID + " = ? ",
                             new String[]{string_alternative_cursor.getInt(0) + ""}, null, null, null, null);
                     alternativeAnswerCursor.moveToFirst();
                     ContentValues contentValues = new ContentValues();
@@ -568,7 +568,7 @@ public class ExportImportDatabase {
                     try {
                         wrongAnswer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME,null,contentValues);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                        Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                 Contract.STring.COLUMN_VALUE + " = ? ",
                                 new String[]{alternativeAnswerCursor.getString(0)},null,null,null,null);
                         c.moveToFirst();
@@ -590,13 +590,13 @@ public class ExportImportDatabase {
                     new String[]{Contract.Not_String_Entry.COLUMN_QUESTION, Contract.Not_String_Entry.COLUMN_ANSWER,
                             Contract.Not_String_Entry.COLUMN_FIELD, Contract.Not_String_Entry.COLUMN_ASKED_COUNT,
                             Contract.Not_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.Not_String_Entry.COLUMN_RANK,
-                            Contract.CREATION_DATE, Contract.COLUMN_NAME_ID, Contract.Not_String_Entry.COLUMN_CREATION_EMULATED_DATE},
-                    Contract.COLUMN_NAME_ID + " NOT IN " + placeholders,
+                            Contract.CREATION_DATE, Contract.COLUMN_ID, Contract.Not_String_Entry.COLUMN_CREATION_EMULATED_DATE},
+                    Contract.COLUMN_ID + " NOT IN " + placeholders,
                     notImportedArray, null, null, null);
             for (toImportNotStringEntryCursor.moveToFirst(); toImportNotStringEntryCursor.getPosition() < toImportNotStringEntryCursor.getCount();
                  toImportNotStringEntryCursor.moveToNext()) {
                 Cursor questionCursor = toImportDatabase.query(Contract.Not_String.TABLE_NAME, new String[]{Contract.Not_String.COLUMN_VALUE},
-                        Contract.COLUMN_NAME_ID + " = ? ",
+                        Contract.COLUMN_ID + " = ? ",
                         new String[]{toImportNotStringEntryCursor.getInt(0) + ""}, null, null, null, null);
                 questionCursor.moveToFirst();
                 ContentValues contentValues1 = new ContentValues();
@@ -604,7 +604,7 @@ public class ExportImportDatabase {
                 long question_id = appDatabase.insert(Contract.Not_String.TABLE_NAME, null, contentValues1);
                 questionCursor.close();
                 Cursor answerCursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                        Contract.COLUMN_NAME_ID + " = ? ",
+                        Contract.COLUMN_ID + " = ? ",
                         new String[]{toImportNotStringEntryCursor.getInt(1) + ""}, null, null, null, null);
                 answerCursor.moveToFirst();
                 contentValues1 = new ContentValues();
@@ -613,7 +613,7 @@ public class ExportImportDatabase {
                 try {
                     answer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                 } catch (Exception e) {
-                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{answerCursor.getString(0)},null,null,null,null);
                     c.moveToFirst();
@@ -622,10 +622,10 @@ public class ExportImportDatabase {
                 }
                 answerCursor.close();
                 Cursor toimportfieldCursor = toImportDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_FIELD_NAME},
-                        Contract.COLUMN_NAME_ID + " = ? ",
+                        Contract.COLUMN_ID + " = ? ",
                         new String[]{toImportNotStringEntryCursor.getInt(2) + ""}, null, null, null, null);
                 toimportfieldCursor.moveToFirst();
-                Cursor appfieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                Cursor appfieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                         Contract.Field.COLUMN_FIELD_NAME + " = ?",
                         new String[]{toimportfieldCursor.getString(0)},null,null,null,null);
                 appfieldCursor.moveToFirst();
@@ -647,7 +647,7 @@ public class ExportImportDatabase {
                     try {
                         not_string_entry_id = appDatabase.insertOrThrow(Contract.Not_String_Entry.TABLE_NAME,null,contentValues1);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.Not_String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                        Cursor c = appDatabase.query(Contract.Not_String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                 Contract.Not_String_Entry.COLUMN_QUESTION + " = ? AND "
                                         + Contract.Not_String_Entry.COLUMN_ANSWER + " = ? AND "
                                         + Contract.Not_String_Entry.COLUMN_FIELD + " = ? ",
@@ -664,7 +664,7 @@ public class ExportImportDatabase {
                     try {
                         not_string_entry_id = appDatabase.insertOrThrow(Contract.Not_String_Entry.TABLE_NAME,null,contentValues1);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.Not_String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                        Cursor c = appDatabase.query(Contract.Not_String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                 Contract.Not_String_Entry.COLUMN_QUESTION + " = ? AND "
                                         + Contract.Not_String_Entry.COLUMN_ANSWER + " = ? AND "
                                         + Contract.Not_String_Entry.COLUMN_FIELD + " = ? ",
@@ -682,7 +682,7 @@ public class ExportImportDatabase {
                 for (not_string_alternative_cursor.moveToFirst(); not_string_alternative_cursor.getPosition() < not_string_alternative_cursor.getCount();
                      not_string_alternative_cursor.moveToNext()) {
                     Cursor alternativeAnswerCursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
-                            Contract.COLUMN_NAME_ID + " = ? ",
+                            Contract.COLUMN_ID + " = ? ",
                             new String[]{not_string_alternative_cursor.getInt(0) + ""}, null, null, null, null);
                     alternativeAnswerCursor.moveToFirst();
                     ContentValues contentValues = new ContentValues();
@@ -691,7 +691,7 @@ public class ExportImportDatabase {
                     try {
                         wrongAnswer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME,null,contentValues);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_NAME_ID},
+                        Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                                 Contract.STring.COLUMN_VALUE + " = ? ",
                                 new String[]{alternativeAnswerCursor.getString(0)},null,null,null,null);
                         c.moveToFirst();
@@ -939,17 +939,17 @@ public class ExportImportDatabase {
             for ( linkerCursor.moveToFirst(); linkerCursor.getPosition() < linkerCursor.getCount();
                   linkerCursor.moveToNext() ) {
                 String field = linkerCursor.getString(2);
-                Cursor question_id_cursor = toImportDatabase.query(Contract.STring.TABLE_NAME,new String[] { Contract.COLUMN_NAME_ID},
+                Cursor question_id_cursor = toImportDatabase.query(Contract.STring.TABLE_NAME,new String[] { Contract.COLUMN_ID},
                         Contract.STring.COLUMN_VALUE + " = ? ",
                         new String[]{linkerCursor.getString(0)},null,null,null,null);
                 question_id_cursor.moveToFirst();
                 int question_id = question_id_cursor.getInt(0);
-                Cursor answer_id_cursor = toImportDatabase.query(Contract.STring.TABLE_NAME,new String[] { Contract.COLUMN_NAME_ID},
+                Cursor answer_id_cursor = toImportDatabase.query(Contract.STring.TABLE_NAME,new String[] { Contract.COLUMN_ID},
                         Contract.STring.COLUMN_VALUE + " = ? ",
                         new String[]{linkerCursor.getString(1)},null,null,null,null);
                 answer_id_cursor.moveToFirst();
                 int answer_id = answer_id_cursor.getInt(0);
-                Cursor field_id_cursor = toImportDatabase.query(Contract.Field.TABLE_NAME,new String[] { Contract.COLUMN_NAME_ID},
+                Cursor field_id_cursor = toImportDatabase.query(Contract.Field.TABLE_NAME,new String[] { Contract.COLUMN_ID},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{field},null,null,null,null);
                 field_id_cursor.moveToFirst();

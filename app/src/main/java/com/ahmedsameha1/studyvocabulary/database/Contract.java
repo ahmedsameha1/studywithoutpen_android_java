@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
  * Created by ahmed on 7/11/2015.
  */
 public final class Contract {
-    public static final String COLUMN_NAME_ID = "_id";
+    public static final String COLUMN_ID = "_id";
     public static final String CREATION_DATE = "creation_date";
 
     public static abstract class Field implements BaseColumns {
@@ -15,6 +15,10 @@ public final class Contract {
         public static final int NOTEBOOK_TYPE = 1;
         public static final int STRING_DATA_TYPE = 0;
         public static final int NOT_STRING_DATA_TYPE = 1;
+        public static final int DO_NOT_READ_ANSWER = 0;
+        public static final int READ_ANSWER = 1;
+        public static final int DO_NOT_IGNORE_CASE = 0;
+        public static final int IGNORE_CASE = 1;
         public static final String TABLE_NAME = "field";
         public static final String COLUMN_FIELD_NAME = "name";
         public static final String COLUMN_FIELD_TYPE = "type";
@@ -29,7 +33,7 @@ public final class Contract {
         public static final String COLUMN_READ_ANSWER = "read_answer";
         public static final String COLUMN_USAGE_COUNT = "usage_count";
         public static final String COLUMN_CREATION_EMULATION_NUMBER = "creation_emulation_number";
-        public static final String COLUMN_CHECK_TYPE = "creation_emulation_number";
+        public static final String COLUMN_CHECK_TYPE = "check_type";
     }
     public static abstract class STring implements BaseColumns {
         public static final String TABLE_NAME = "string";

@@ -1,13 +1,16 @@
 package com.ahmedsameha1.studyvocabulary.activities;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -35,6 +38,7 @@ import com.ahmedsameha1.studyvocabulary.fragments.RetainedFragment;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
 
@@ -44,7 +48,8 @@ import java.util.StringTokenizer;
 public class StudyDuringActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         ChangeAreasDialogFragment.ChangeAreas,
-        ChangeTextSizeDialogFragment.ChangeTextSize {
+        ChangeTextSizeDialogFragment.ChangeTextSize,
+        TextToSpeech.OnInitListener {
     public static final String ACTIVITY_NAME = "StudyDuringActivity";
     public static final String STARTING_TIME = "startingTime";
     public static final String REPEATED_ENTRIES = "repeatedEntries";
@@ -99,6 +104,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
+    private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
     public static final String LIST_FOR_TEST = "listForTest";
     public static final String CURRENT_QUESTION_COUNTER = "currentQuestionCounter";
@@ -131,7 +137,10 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private Handler mHandler = new Handler();
     private Runnable mRunnable, pauseRunnable;
     private long current_field_id;
-
+    private TextToSpeech tts;
+    private boolean isReadAnswer;
+    private boolean tts_available = false;
+    private boolean locale_available = false;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,6 +159,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
         }
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        databaseOperations = new DatabaseOperations(this);
         /*listForTest = retainedFragment.getListForTest_StudyDuringActivity();
         if ( listForTest == null ) {
             listForTest = prepareListForStudyFirstTime();
@@ -180,6 +190,12 @@ public class StudyDuringActivity extends AppCompatActivity implements
         actionBarShown = getSupportActionBar().isShowing();
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
+        isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
+        if ( isReadAnswer ) {
+            Intent checkIntent = new Intent();
+            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        }
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         check.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -360,7 +376,6 @@ public class StudyDuringActivity extends AppCompatActivity implements
             }
         });
         showTries.setText(Integer.toString(triesCounter + 1));
-        databaseOperations = new DatabaseOperations(this);
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         if (boolean_continue) {
             int[] array = databaseOperations.getDataFromStudyPeriodPaused(current_field_id);
@@ -374,7 +389,13 @@ public class StudyDuringActivity extends AppCompatActivity implements
         }
 
     }
-
+    @Override
+    public void onStop(){
+        super.onStop();
+        if ( tts_available && isFinishing() ) {
+            tts.stop();
+        }
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -489,11 +510,18 @@ public class StudyDuringActivity extends AppCompatActivity implements
         }
         searchForCursor.close();
     }
-
+    @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
         boolean result = false;
         if (enterAnswer.getText().toString().equals(listForTest[currentQuestionCounter][1])) {
 //            check.setBackgroundResource(R.drawable.ic_correct_sign);
+            if ( locale_available ) {
+                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                    tts.speak(listForTest[currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+                } else {
+                    tts.speak(listForTest[currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                }
+            }
             showResult.setBackgroundResource(R.drawable.correct_answer_background);
             showResult.setPadding(0, 0, 0, 0);
             mRunnable = new Runnable() {
@@ -647,8 +675,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
                     "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                             + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
                     new String[]{current_field_id + "", "0"});
            /* return new CursorLoader(this, uri,
@@ -669,8 +697,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
                     "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a , se." + Contract.CREATION_DATE + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                            + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                             + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                     new String[]{current_field_id + ""});
            /* Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
@@ -719,6 +747,22 @@ public class StudyDuringActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                // success, create the TTS instance
+                tts = new TextToSpeech(this, this);
+                tts_available = true;
+            } else {
+                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
+                Toast toast = Toast.makeText(this, R.string.tts_not_available, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP,0,400);
+                toast.show();
+            }
+        }
+    }
+
+    @Override
     public void changeAreas(float questionArea, float answerArea) {
         LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams();
         LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) showResult.getLayoutParams();
@@ -745,5 +789,25 @@ public class StudyDuringActivity extends AppCompatActivity implements
         changeAreas(bundle.getFloat(QUESTION_LAYOUT), bundle.getFloat(ANSWER_LAYOUT));
         showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
         enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
+    }
+    @Override
+    public void onInit(int i) {
+        if ( tts_available ) {
+            String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
+            StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
+            String lang = stringTokenizer.nextToken();
+            String country = stringTokenizer.nextToken();
+            Locale locale = new Locale(lang, country);
+            if ( tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE ) {
+                tts.setLanguage(locale);
+                locale_available = true;
+            } else {
+                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
+                mySQLiteCursorLoader.updateFieldLocale(current_field_id,null);
+                Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP,0,400);
+                toast.show();
+            }
+        }
     }
 }

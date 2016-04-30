@@ -16,8 +16,8 @@
         <item>Facebook Page</item>
     </string-array>
     <string-array name="field_types">
-        <item>Select a Field Type</item>
         <item>Default</item>
         <item>Notebook</item>
+        <item>Select a Field Type</item>
     </string-array>
 </resources>

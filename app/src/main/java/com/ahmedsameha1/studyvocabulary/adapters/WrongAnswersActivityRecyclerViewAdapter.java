@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import com.ahmedsameha1.studyvocabulary.R;
+import com.ahmedsameha1.studyvocabulary.activities.StudyActivity;
 import com.ahmedsameha1.studyvocabulary.activities.StudyWrongAnswersActivity;
 
 import java.util.ArrayList;
@@ -23,10 +24,12 @@ public class WrongAnswersActivityRecyclerViewAdapter extends
         RecyclerView.Adapter<WrongAnswersActivityRecyclerViewViewHolder> {
     private Context context;
     private List<WrongItem> wrongItemList;
+    private long field_id;
 
-    public WrongAnswersActivityRecyclerViewAdapter(Context context, List<WrongItem> wrongItemList) {
+    public WrongAnswersActivityRecyclerViewAdapter(Context context, List<WrongItem> wrongItemList, long field_id) {
         this.wrongItemList = wrongItemList;
         this.context = context;
+        this.field_id = field_id;
     }
     @Override
     public WrongAnswersActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -38,6 +41,7 @@ public class WrongAnswersActivityRecyclerViewAdapter extends
                     public void onClick(View v, String currentQuestion, String currentAnswer ) {
                         Intent intent = new Intent(context, StudyWrongAnswersActivity.class);
                         Bundle bundle = new Bundle();
+                        bundle.putLong(StudyActivity.CURRENT_FIELD_ID,field_id);
                         bundle.putString(StudyWrongAnswersActivity.CURRENT_QUESTION,currentQuestion);
                         bundle.putString(StudyWrongAnswersActivity.CURRENT_ANSWER, currentAnswer);
                         bundle.putSerializable(StudyWrongAnswersActivity.WRONG_ITEM_LIST, ((ArrayList<WrongItem>) wrongItemList));

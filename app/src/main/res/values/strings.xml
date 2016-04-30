@@ -142,4 +142,7 @@
     <string name="ignore_case">Ignore the case of the letters of the answer.</string>
     <string name="read_answer">Read the answer (if you have answered correctly)!!</string>
     <string name="field_options">Field Options</string>
+    <string name="select_locale">Select how to read the answer:</string>
+    <string name="tts_not_available">Text to Speech engine isn\'t available, so the app disabled read the answer feature. please go to Google Play and install Text to Speech to enable this feature.</string>
+    <string name="locale_is_not_available">The read answer feature has been disabled because the language is not available.</string>
 </resources>

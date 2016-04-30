@@ -54,7 +54,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String CREATE_FIELD_TABLE = "CREATE TABLE IF NOT EXISTS " + Field.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + Field.COLUMN_FIELD_NAME + " TEXT UNIQUE NOT NULL, "
             + Field.COLUMN_FIELD_TYPE + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE + " INTEGER NOT NULL DEFAULT 0, "
@@ -73,27 +73,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " );";
 /*    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Field_Type.COLUMN_NAME_FIELD_TYPE_NAME + " TEXT UNIQUE NOT NULL"
             + " );";*/
 /*    public static final String CREATE_LOCALE_TABLE = "CREATE TABLE IF NOT EXISTS " + Locale.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Locale.COLUMN_NAME_LOCALE_NAME + " TEXT UNIQUE NOT NULL"
             + " );";*/
     public static final String CREATE_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + STring.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + STring.COLUMN_VALUE + " TEXT UNIQUE NOT NULL"
             + " );";
     public static final String CREATE_NOT_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Not_String.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Not_String.COLUMN_VALUE + " BLOB NOT NULL"
             + " );";
     public static final String CREATE_STRING_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + String_Entry.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + String_Entry.COLUMN_QUESTION + " INTEGER NOT NULL, "
             + String_Entry.COLUMN_ANSWER + " INTEGER NOT NULL, "
             + String_Entry.COLUMN_FIELD + " INTEGER NOT NULL, "
@@ -104,16 +104,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + String_Entry.COLUMN_RANK + " INTEGER NOT NULL DEFAULT 0, "
             + String_Entry.COLUMN_CREATION_EMULATED_DATE + " DATETIME DEFAULT NULL, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
-            + "FOREIGN KEY(" + String_Entry.COLUMN_QUESTION + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
-            + "FOREIGN KEY(" + String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
-            + "FOREIGN KEY(" + String_Entry.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + "FOREIGN KEY(" + String_Entry.COLUMN_QUESTION + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + String_Entry.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
             + " UNIQUE ( " + String_Entry.COLUMN_QUESTION + ", "
             + String_Entry.COLUMN_ANSWER + ", "
             + String_Entry.COLUMN_FIELD + " )"
             + " );";
     public static final String CREATE_NOT_STRING_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + Not_String_Entry.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Not_String_Entry.COLUMN_QUESTION + " INTEGER NOT NULL, "
             + Not_String_Entry.COLUMN_ANSWER + " INTEGER NOT NULL, "
             + Not_String_Entry.COLUMN_FIELD + " INTEGER NOT NULL, "
@@ -124,72 +124,72 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Not_String_Entry.COLUMN_RANK + " INTEGER NOT NULL DEFAULT 0, "
             + Not_String_Entry.COLUMN_CREATION_EMULATED_DATE + " DATETIME DEFAULT NULL, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
-            + "FOREIGN KEY(" + Not_String_Entry.COLUMN_QUESTION + ") REFERENCES " + Not_String.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
-            + "FOREIGN KEY(" + Not_String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
-            + "FOREIGN KEY(" + Not_String_Entry.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + "FOREIGN KEY(" + Not_String_Entry.COLUMN_QUESTION + ") REFERENCES " + Not_String.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + Not_String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + Not_String_Entry.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
             + " UNIQUE ( " + Not_String_Entry.COLUMN_QUESTION + ", "
             + Not_String_Entry.COLUMN_ANSWER + ", "
             + Not_String_Entry.COLUMN_FIELD + " )"
             + " );";
     public static final String CREATE_TEST_WRONG_ANSWER_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Test_Wrong_Answer_String.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Test_Wrong_Answer_String.COLUMN_ENTRY + " INTEGER NOT NULL, "
             + Test_Wrong_Answer_String.COLUMN_WRONG_ANSWER + " TEXT NOT NULL, "
-            + "FOREIGN KEY(" + Test_Wrong_Answer_String.COLUMN_ENTRY + ") REFERENCES " + String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + "FOREIGN KEY(" + Test_Wrong_Answer_String.COLUMN_ENTRY + ") REFERENCES " + String_Entry.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
     public static final String CREATE_TEST_WRONG_ANSWER_NOT_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Test_Wrong_Answer_Not_String.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Test_Wrong_Answer_Not_String.COLUMN_ENTRY + " INTEGER NOT NULL, "
             + Test_Wrong_Answer_Not_String.COLUMN_WRONG_ANSWER + " TEXT NOT NULL, "
-            + "FOREIGN KEY(" + Test_Wrong_Answer_Not_String.COLUMN_ENTRY + ") REFERENCES " + Not_String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + "FOREIGN KEY(" + Test_Wrong_Answer_Not_String.COLUMN_ENTRY + ") REFERENCES " + Not_String_Entry.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
     public static final String CREATE_TEST_PAUSED_TABLE = "CREATE TABLE IF NOT EXISTS " + Test_Paused.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Test_Paused.COLUMN_FIELD + " INTEGER UNIQUE NOT NULL, "
             + Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
             + Test_Paused.COLUMN_WRONG_ANSWERS_COUNT + " INTEGER NOT NULL, "
             + Test_Paused.COLUMN_TRIES_NUMBER + " INTEGER NOT NULL, "
-            + "FOREIGN KEY(" + Test_Paused.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + "FOREIGN KEY(" + Test_Paused.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
     public static final String CREATE_STUDY_PERIOD_REPEATED_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + Study_Period_Repeated_Entry.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Study_Period_Repeated_Entry.COLUMN_FIELD + " INTEGER NOT NULL, "
             + Study_Period_Repeated_Entry.COLUMN_REPEATED_ENTRY + " INTEGER NOT NULL, "
-            + "FOREIGN KEY(" + Study_Period_Repeated_Entry.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + "FOREIGN KEY(" + Study_Period_Repeated_Entry.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
             + " UNIQUE ( " + Study_Period_Repeated_Entry.COLUMN_FIELD + ", "
             + Study_Period_Repeated_Entry.COLUMN_REPEATED_ENTRY + " )"
             + " );";
     public static final String CREATE_STUDY_PERIOD_PAUSED_TABLE = "CREATE TABLE IF NOT EXISTS " + Study_Period_Paused.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Study_Period_Paused.COLUMN_FIELD + " INTEGER UNIQUE NOT NULL, "
             + Study_Period_Paused.COLUMN_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
             + Study_Period_Paused.COLUMN_TRIES_NUMBER + " INTEGER NOT NULL, "
-            + "FOREIGN KEY(" + Study_Period_Paused.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + "FOREIGN KEY(" + Study_Period_Paused.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
     public static final String CREATE_ALTERNATIVE_ANSWER_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Alternative_Answer_String.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Alternative_Answer_String.COLUMN_ENTRY + " INTEGER NOT NULL, "
             + Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER + " INTEGER NOT NULL, "
             + Alternative_Answer_String.COLUMN_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
-            + "FOREIGN KEY(" + Alternative_Answer_String.COLUMN_ENTRY + ") REFERENCES " + String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
-            + "FOREIGN KEY(" + Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + Alternative_Answer_String.COLUMN_ENTRY + ") REFERENCES " + String_Entry.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + "FOREIGN KEY(" + Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
             + " UNIQUE ( " + Alternative_Answer_String.COLUMN_ENTRY + ", "
             + Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER + " )"
             + " );";
     public static final String CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Alternative_Answer_Not_String.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_NAME_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Alternative_Answer_Not_String.COLUMN_ENTRY + " INTEGER NOT NULL, "
             + Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER + " INTEGER NOT NULL, "
             + Alternative_Answer_Not_String.COLUMN_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
-            + "FOREIGN KEY(" + Alternative_Answer_Not_String.COLUMN_ENTRY + ") REFERENCES " + Not_String_Entry.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
-            + "FOREIGN KEY(" + Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_NAME_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + Alternative_Answer_Not_String.COLUMN_ENTRY + ") REFERENCES " + Not_String_Entry.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + "FOREIGN KEY(" + Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
             + " UNIQUE ( " + Alternative_Answer_Not_String.COLUMN_ENTRY + ", "
             + Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER + " )"
             + " );";
@@ -1038,17 +1038,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             for ( linkerCursor.moveToFirst(); linkerCursor.getPosition() < linkerCursor.getCount();
                   linkerCursor.moveToNext() ) {
                 String field = linkerCursor.getString(2);
-                Cursor question_id_cursor = sqLiteDatabase.query(STring.TABLE_NAME,new String[] { Contract.COLUMN_NAME_ID},
+                Cursor question_id_cursor = sqLiteDatabase.query(STring.TABLE_NAME,new String[] { Contract.COLUMN_ID},
                         STring.COLUMN_VALUE + " = ? ",
                         new String[]{linkerCursor.getString(0)},null,null,null,null);
                 question_id_cursor.moveToFirst();
                 int question_id = question_id_cursor.getInt(0);
-                Cursor answer_id_cursor = sqLiteDatabase.query(STring.TABLE_NAME,new String[] { Contract.COLUMN_NAME_ID},
+                Cursor answer_id_cursor = sqLiteDatabase.query(STring.TABLE_NAME,new String[] { Contract.COLUMN_ID},
                         STring.COLUMN_VALUE + " = ? ",
                         new String[]{linkerCursor.getString(1)},null,null,null,null);
                 answer_id_cursor.moveToFirst();
                 int answer_id = answer_id_cursor.getInt(0);
-                Cursor field_id_cursor = sqLiteDatabase.query(Field.TABLE_NAME,new String[] { Contract.COLUMN_NAME_ID},
+                Cursor field_id_cursor = sqLiteDatabase.query(Field.TABLE_NAME,new String[] { Contract.COLUMN_ID},
                         Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{field},null,null,null,null);
                 field_id_cursor.moveToFirst();

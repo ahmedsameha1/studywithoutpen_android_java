@@ -22,11 +22,23 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="6dp"/>
-   <!-- <CheckBox
-        android:id="@+id/notebook_field_checkbox"
-        android:layout_width="wrap_content"
+    <CheckBox
+        android:id="@+id/ignore_case"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/notebook_field"/>
--->
+        android:text="@string/ignore_case"
+        android:padding="3dp"/>
+    <CheckBox
+        android:id="@+id/read_answer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/read_answer"
+        android:padding="3dp"/>
+
+    <Spinner
+        android:id="@+id/locales_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:padding="3dp"/>
 </LinearLayout>

@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
@@ -47,6 +48,7 @@ import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.CreateFieldDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ExportFieldsDialogFragment;
+import com.ahmedsameha1.studyvocabulary.dialogs.FieldOptionsDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ImportFieldsDialogFragment;
 import com.ahmedsameha1.studyvocabulary.fragments.MainActivityFragmentDrawer;
 import com.ahmedsameha1.studyvocabulary.R;
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int REVIEW = 2;
     private static final int FACEBOOK = 3;
     public static final int DROPBOX = 4;
+    private static final int MY_DATA_CHECK_CODE = 1234;
     private Spinner fieldSpinner;
     private Button createFieldButton, fieldChooseOk;
 
@@ -90,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements
     private MainActivityRecyclerViewAdapter mAdapter;
     private LoaderManager.LoaderCallbacks<Cursor> getFields;
     private long first_field_id;
+    private boolean tts_available = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +114,9 @@ public class MainActivity extends AppCompatActivity implements
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setDrawerListener(this);
+        Intent checkIntent = new Intent();
+        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -117,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements
                     /*return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME}, null, null,
                             "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
                     mySQLiteCursorLoader = new MySQLiteCursorLoader(MainActivity.this,
-                            "SELECT " + Contract.COLUMN_NAME_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
+                            "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
                                     + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                             null);
                     return mySQLiteCursorLoader;
@@ -129,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements
                             new String[] {"%" + query + "%"},
                             "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
                     mySQLiteCursorLoader = new MySQLiteCursorLoader(MainActivity.this,
-                            "SELECT " + Contract.COLUMN_NAME_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", "
+                            "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", "
                                     + Contract.Field.COLUMN_FIELD_NAME
                                     + " FROM " + Contract.Field.TABLE_NAME + " WHERE " + Contract.Field.COLUMN_FIELD_NAME + " LIKE ? "
                                     + " ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC", new String[]{"%" + query + "%"});
@@ -192,7 +199,16 @@ public class MainActivity extends AppCompatActivity implements
             editor.commit();
         }
     }
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+         if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
+            {
+                tts_available = true;
+            }
+        }
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -336,7 +352,10 @@ public class MainActivity extends AppCompatActivity implements
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Bundle bundle = new Bundle();
+                bundle.putBoolean(FieldOptionsDialogFragment.TTS_AVAILABLE,tts_available);
                 CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
+                fragment.setArguments(bundle);
                 fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
                 actionMenu.close(true);
             }
@@ -355,8 +374,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void createField(String field_name, int field_type, int question_data_type) {
-        mySQLiteCursorLoader.createField(field_name, field_type, question_data_type);
+    public void createField(String field_name, int field_type, int question_data_type,boolean ignore_case, boolean read_answer, String locale) {
+        mySQLiteCursorLoader.createField(field_name, field_type, question_data_type,ignore_case,read_answer,locale);
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
     }
 

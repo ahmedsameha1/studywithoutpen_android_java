@@ -16,8 +16,8 @@
         <item>صفحة facebook</item>
     </string-array>
     <string-array name="field_types">
-        <item>اختر نوعا للمجال</item>
         <item>عاديّ</item>
         <item>مُفَكِّرَة</item>
+        <item>اختر نوعا للمجال</item>
     </string-array>
 </resources>

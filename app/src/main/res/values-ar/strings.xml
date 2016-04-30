@@ -140,4 +140,7 @@
     <string name="ignore_case">تجاهل حالة الحرف في الجواب.</string>
     <string name="read_answer">قراءة الجواب (لو أجبت بشكل صحيح)!!</string>
     <string name="field_options">خيارات المجال</string>
+    <string name="select_locale">اختر كيف سيقرأ الجواب:</string>
+    <string name="tts_not_available">آلة تحويل النص إلى حديث غير متوفرة، لذلك ألغى التطبيق خاصية قراءة الجواب. اذهب إلى Google Play و نصب تطبيق  Text to Speech لكي تفعل هذه الخاصية.</string>
+    <string name="locale_is_not_available">تم ألغاء تفعيل خاصية قراءة الجواب لعدم توفر اللغة.</string>
 </resources>

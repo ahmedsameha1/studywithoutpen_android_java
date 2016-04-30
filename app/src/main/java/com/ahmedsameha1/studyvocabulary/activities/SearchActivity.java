@@ -141,10 +141,10 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         int sort = args.getInt(CURRENT_SORT);
         String searchString = args.getString(QUERY_KEY);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(SearchActivity.this,
-                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                         + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                         + "  q LIKE ? "
                         + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "

@@ -46,12 +46,17 @@ import com.ahmedsameha1.studyvocabulary.dialogs.TestDialogFragment;
 import com.ahmedsameha1.studyvocabulary.fragments.FieldActivityFragmentDrawer;
 import com.ahmedsameha1.studyvocabulary.R;
 
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.StringTokenizer;
+
 
 public class FieldActivity extends AppCompatActivity implements
         FieldActivityFragmentDrawer.FragmentDrawerListener,
         SearchDateOrTextDialogFragment.Contact,
         SortEntriesDialogFragment.Contact,
-        DeleteEntryDialogFragment.Contact {
+        DeleteEntryDialogFragment.Contact,
+        TextToSpeech.OnInitListener {
     public static final int SORT = 0;
     public static final int STUDY_PERIOD = 1;
     public static final int TEST = 2;
@@ -122,6 +127,9 @@ public class FieldActivity extends AppCompatActivity implements
     private SearchView searchView;
     private MenuItem searchItem;
     private boolean tts_available = false;
+    private ArrayList<Locale> localeList = new ArrayList<Locale>();
+    private ArrayList<String> locale_display_names = new ArrayList<String>();
+    private TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +155,7 @@ public class FieldActivity extends AppCompatActivity implements
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
+        tts = new TextToSpeech(this,this);
         Intent checkIntent = new Intent();
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
@@ -168,10 +177,10 @@ public class FieldActivity extends AppCompatActivity implements
                     if (id == SEARCH_ENTRIES_LOADER_ID) {
                         String searchString = args.getString(QUERY_KEY);
                         mySQLiteCursorLoader = new MySQLiteCursorLoader(FieldActivity.this,
-                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                                         + "  q LIKE ? "
                                         + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
@@ -181,10 +190,10 @@ public class FieldActivity extends AppCompatActivity implements
 
                     } else if (id == GET_ENTRIES_LOADER_ID) {
                         mySQLiteCursorLoader = new MySQLiteCursorLoader(FieldActivity.this,
-                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
                                 + "ORDER BY " + SORT_STRINGS[sort] ,
                                 new String[]{current_field_id + ""});
@@ -208,16 +217,21 @@ public class FieldActivity extends AppCompatActivity implements
             }
         };
         currentSort = savedInstanceState == null ? DEFAULT_SORT : savedInstanceState.getInt(CURRENT_SORT);
-        Bundle bundle = new Bundle();
-        bundle.putInt(CURRENT_SORT, currentSort);
-        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+        getLoaderManager();
     }
 
+/*    @Override
+    protected void onPause() {
+        super.onPause();
+        getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
+        getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
+    }*/
+
     /*
-    Because the database related objects should close as soon as the activity does not use it, I put all database work on onResume()
-    onResume() will be called before the user can react with the activity
-    in onPause() I close all database related objects.
-     */
+        Because the database related objects should close as soon as the activity does not use it, I put all database work on onResume()
+        onResume() will be called before the user can react with the activity
+        in onPause() I close all database related objects.
+         */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
@@ -229,12 +243,6 @@ public class FieldActivity extends AppCompatActivity implements
                 String answer = data.getStringExtra(EDITED_ANSWER);
                 mySQLiteCursorLoader.editEntry(entry_id,databaseOperations.getQuestionDataType(current_field_id),question,answer);
             }
-        } else if ( requestCode == INSERT_ENTRY ) {
-            if ( resultCode == RESULT_OK ) {
-                String question = data.getStringExtra(INSERTED_QUESTION);
-                String answer = data.getStringExtra(INSERTED_ANSWER);
-                mySQLiteCursorLoader.insertEntry(databaseOperations.getQuestionDataType(current_field_id),question,answer,current_field_id);
-            }
         } else if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
             {
@@ -242,13 +250,26 @@ public class FieldActivity extends AppCompatActivity implements
             }
         }
     }
-/*    @Override
+    @Override
     protected void onResume() {
         super.onResume();
         Bundle bundle = new Bundle();
         bundle.putInt(CURRENT_SORT, currentSort);
         getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
-    }*/
+    }
+    @Override
+public void onInit(int status) {
+    Locale[] locales = Locale.getAvailableLocales();
+    for (Locale locale : locales) {
+        if ( locale.toString().equals("en_US_POSIX")) continue;
+        int res = tts.isLanguageAvailable(locale);
+        if (res == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
+            localeList.add(locale);
+            locale_display_names.add(locale.getDisplayName());
+        }
+    }
+    locale_display_names.add(getString(R.string.select_locale));
+}
 
     private void handleIntent(String query) {
         search(query);
@@ -334,7 +355,21 @@ public class FieldActivity extends AppCompatActivity implements
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
                 break;
             case FIELD_OPTIONS:
+                String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
+                if ( locale_short_name != null ) {
+                    StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
+                    String lang = stringTokenizer.nextToken();
+                    String country = stringTokenizer.nextToken();
+                    Locale locale = new Locale(lang, country);
+                    boolean locale_available = (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE);
+                    bundle.putBoolean(FieldOptionsDialogFragment.LOCALE_AVAILABLE, locale_available);
+                    if ( tts_available && locale_available) {
+                        bundle.putInt(FieldOptionsDialogFragment.INDEX_OF_LOCALE,localeList.indexOf(locale));
+                    }
+                }
                 bundle.putBoolean(FieldOptionsDialogFragment.TTS_AVAILABLE, tts_available);
+                bundle.putStringArrayList(FieldOptionsDialogFragment.LOCALE_DISPLAY_NAMES,locale_display_names);
+                bundle.putSerializable(FieldOptionsDialogFragment.LOCALE_LIST,localeList);
                 FieldOptionsDialogFragment fieldOptionsDialogFragment = new FieldOptionsDialogFragment();
                 fieldOptionsDialogFragment.setArguments(bundle);
                 fieldOptionsDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);

@@ -35,6 +35,7 @@ import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeTextSizeDialogFragment;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -69,6 +70,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private long current_field_id;
     private int question_data_type;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private ArrayList<String> toInsertQuestions = new ArrayList<>(), toInsertAnswers = new ArrayList<>();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,14 +119,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                         switch (fieldType) {
                             case Contract.Field.DEFAULT_TYPE:
                                 if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                    if ( fromFieldActivity ) {
-                                        Intent intent = new Intent();
-                                        intent.putExtra(FieldActivity.INSERTED_QUESTION,question);
-                                        intent.putExtra(FieldActivity.INSERTED_ANSWER,answer);
-                                        setResult(RESULT_OK,intent);
-                                    } else {
-                                        mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
-                                    }
+                                    mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
                                 } else {
                                     Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -138,14 +133,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                                 String dateToSave = stringTokenizer.nextToken() + " "
                                         + stringTokenizer.nextToken() + ":00";
                                 if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                    if (fromFieldActivity) {
-                                        Intent intent = new Intent();
-                                        intent.putExtra(FieldActivity.INSERTED_QUESTION,dateToSave);
-                                        intent.putExtra(FieldActivity.INSERTED_ANSWER,answer);
-                                        setResult(RESULT_OK,intent);
-                                    } else {
-                                        mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
-                                    }
+                                    mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
                                 } else {
                                     Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -160,14 +148,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                             switch (fieldType) {
                                 case Contract.Field.DEFAULT_TYPE:
                                     if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                        if (fromFieldActivity) {
-                                            Intent intent = new Intent();
-                                            intent.putExtra(FieldActivity.INSERTED_QUESTION,question);
-                                            intent.putExtra(FieldActivity.INSERTED_ANSWER,answer);
-                                            setResult(RESULT_OK,intent);
-                                        } else {
-                                            mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
-                                        }
+                                        mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
                                     } else {
                                         Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -181,14 +162,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                                     String dateToSave = stringTokenizer.nextToken() + " "
                                             + stringTokenizer.nextToken() + ":00";
                                     if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                        if (fromFieldActivity) {
-                                            Intent intent = new Intent();
-                                            intent.putExtra(FieldActivity.INSERTED_QUESTION,dateToSave);
-                                            intent.putExtra(FieldActivity.INSERTED_ANSWER,answer);
-                                            setResult(RESULT_OK,intent);
-                                        } else {
-                                            mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
-                                        }
+                                        mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
                                     } else {
                                         Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -221,14 +195,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                         switch (fieldType) {
                             case Contract.Field.DEFAULT_TYPE:
                                 if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                    if (fromFieldActivity) {
-                                        Intent intent = new Intent();
-                                        intent.putExtra(FieldActivity.INSERTED_QUESTION,question);
-                                        intent.putExtra(FieldActivity.INSERTED_ANSWER,answer);
-                                        setResult(RESULT_OK,intent);
-                                    } else {
-                                        mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
-                                    }
+                                    mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
                                 } else {
                                     Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -242,14 +209,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                                 String dateToSave = stringTokenizer.nextToken() + " "
                                         + stringTokenizer.nextToken() + ":00";
                                 if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                    if (fromFieldActivity) {
-                                        Intent intent = new Intent();
-                                        intent.putExtra(FieldActivity.INSERTED_QUESTION,dateToSave);
-                                        intent.putExtra(FieldActivity.INSERTED_ANSWER,answer);
-                                        setResult(RESULT_OK,intent);
-                                    } else {
-                                        mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
-                                    }
+                                    mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
                                 } else {
                                     Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -263,14 +223,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                             switch (fieldType) {
                                 case Contract.Field.DEFAULT_TYPE:
                                     if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                        if (fromFieldActivity) {
-                                            Intent intent = new Intent();
-                                            intent.putExtra(FieldActivity.INSERTED_QUESTION,question);
-                                            intent.putExtra(FieldActivity.INSERTED_ANSWER,answer);
-                                            setResult(RESULT_OK,intent);
-                                        } else {
-                                            mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
-                                        }
+                                        mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,current_field_id);
                                     } else {
                                         Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -284,14 +237,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                                     String dateToSave = stringTokenizer.nextToken() + " "
                                             + stringTokenizer.nextToken() + ":00";
                                     if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                        if (fromFieldActivity) {
-                                            Intent intent = new Intent();
-                                            intent.putExtra(FieldActivity.INSERTED_QUESTION,dateToSave);
-                                            intent.putExtra(FieldActivity.INSERTED_ANSWER,answer);
-                                            setResult(RESULT_OK,intent);
-                                        } else {
-                                            mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
-                                        }
+                                        mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,current_field_id);
                                     } else {
                                         Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -477,7 +423,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new MySQLiteCursorLoader(AddEntryActivity.this,
-                "SELECT " + Contract.COLUMN_NAME_ID + ", " +  Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
+                "SELECT " + Contract.COLUMN_ID + ", " +  Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
                         + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                 null);
     }

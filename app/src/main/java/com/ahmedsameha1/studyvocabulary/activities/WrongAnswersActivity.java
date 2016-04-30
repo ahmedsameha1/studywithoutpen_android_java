@@ -20,6 +20,7 @@ import com.ahmedsameha1.studyvocabulary.adapters.WrongItem;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by ahmed on 9/7/2015.
@@ -33,6 +34,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     private WrongAnswersActivityRecyclerViewAdapter mAdapter;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private DatabaseOperations databaseOperations;
+    private int question_data_type;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +47,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
         current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
+        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -61,16 +64,19 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
 
 
 
-
     private ArrayList<WrongItem> getWrongItems() {
         ArrayList<WrongItem> wrongItemsList = new ArrayList<WrongItem>();
+        String[][] wrong_answers = databaseOperations.getWrongAnswers(current_field_id,question_data_type);
         for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
-            String question = cursor.getString(0);
-            String answer = cursor.getString(1);
-            ArrayList<String> wrongAnswersList =
-                    databaseOperations.getEntryWrongAnswers(question,answer,current_field_id,databaseOperations.getQuestionDataType(current_field_id));
-            if ( wrongAnswersList.size() > 0 ) {
-                wrongItemsList.add(new WrongItem(question, answer, wrongAnswersList));
+            long entry_id = cursor.getLong(2);
+            ArrayList<String> wrong_answers_arrayList = new ArrayList<>();
+            for ( int i = 0; i < wrong_answers.length; i++ ) {
+                if ( entry_id == Long.valueOf(wrong_answers[i][0]) ) {
+                    wrong_answers_arrayList.add(wrong_answers[i][1]);
+                }
+            }
+            if ( wrong_answers_arrayList.size() > 0 ) {
+                wrongItemsList.add(new WrongItem(cursor.getString(0), cursor.getString(1), wrong_answers_arrayList));
             }
         }
         return wrongItemsList;
@@ -83,17 +89,17 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         wrongItemList = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEM_LIST);
-        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this,wrongItemList);
+        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this,wrongItemList,current_field_id);
         recyclerView.setAdapter(mAdapter);
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new MySQLiteCursorLoader(WrongAnswersActivity.this,
                 "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                        + " a " + " FROM " + Contract.STring.TABLE_NAME
+                        + " a , se." + Contract.COLUMN_ID + " FROM " + Contract.STring.TABLE_NAME
                         + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                 new String[]{current_field_id + ""});
         /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
@@ -110,11 +116,13 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.cursor = data;
         if ( wrongItemList == null ) {
-            wrongItemList = getWrongItems();
-            DatabaseOperations databaseOperations = new DatabaseOperations(this);
-            mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+            try {
+                wrongItemList = getWrongItems();
+            } finally {
+                mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,question_data_type);
+            }
         }
-        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this,wrongItemList);
+        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this,wrongItemList,current_field_id);
         recyclerView.setAdapter(mAdapter);
     }
 

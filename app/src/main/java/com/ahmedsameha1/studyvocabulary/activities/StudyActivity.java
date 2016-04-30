@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.LoaderManager;
@@ -15,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +28,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.ahmedsameha1.studyvocabulary.database.Contract;
@@ -35,12 +38,16 @@ import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.studyvocabulary.R;
 
+import java.util.Locale;
+import java.util.StringTokenizer;
+
 /**
  * Created by ahmed on 8/1/2015.
  */
 public class StudyActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
-        ChangeTextSizeDialogFragment.ChangeTextSize {
+        ChangeTextSizeDialogFragment.ChangeTextSize,
+        TextToSpeech.OnInitListener {
     public static final String CURRENT_FIELD_ID = "currentField";
     public static final String CURRENT_QUESTION = "currentQuestion";
     public static final String CURRENT_ANSWER = "currentAnswer";
@@ -58,6 +65,7 @@ public class StudyActivity extends AppCompatActivity implements
     public static final int SORT_ANSWER_ASC = 3;
     public static final int SORT_DATE_DESC = 4;
     public static final int SORT_DATE_ASC = 5;
+    private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int SORT_CREATION_DATE_DESC = 6;
     public static final int SORT_CREATION_DATE_ASC = 7;
     public static final int DEFAULT_SORT = SORT_CREATION_DATE_DESC;
@@ -82,6 +90,11 @@ public class StudyActivity extends AppCompatActivity implements
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
     private DatabaseOperations databaseOperations;
+    private TextToSpeech tts;
+    private boolean isReadAnswer;
+    private boolean tts_available = false;
+    private boolean locale_available = false;
+
 
     @Override
     protected void onCreate ( Bundle savedInstanceState ) {
@@ -94,7 +107,6 @@ public class StudyActivity extends AppCompatActivity implements
         currentAnswer = getIntent().getStringExtra(CURRENT_ANSWER);
         currentSort = getIntent().getIntExtra(ORDER_OF_ENTRIES,0);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-
         showCurrentEntry = (ToggleButton) findViewById(R.id.show_current_study_entry);
         studyQuestion = (CheckBox) findViewById(R.id.study_question);
         studyAnswer = (CheckBox) findViewById(R.id.study_answer);
@@ -120,6 +132,12 @@ public class StudyActivity extends AppCompatActivity implements
         actionBarShown = getSupportActionBar().isShowing();
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show );
         enterQuestion.setText(currentQuestion);
+        isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
+        if ( isReadAnswer ) {
+            Intent checkIntent = new Intent();
+            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        }
         showCurrentEntry.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -225,6 +243,7 @@ public class StudyActivity extends AppCompatActivity implements
 
         check.setOnClickListener(new View.OnClickListener() {
             @Override
+            @SuppressWarnings("deprecation")
             public void onClick(View v) {
                 if (studyQuestion.isChecked() && studyAnswer.isChecked()) {
                     if ( enterQuestion.getText().toString().equals(currentQuestion) ) {
@@ -242,6 +261,13 @@ public class StudyActivity extends AppCompatActivity implements
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     }
                     if (enterQuestion.getText().toString().equals(currentQuestion) && enterAnswer.getText().toString().equals(currentAnswer)) {
+                        if ( locale_available ) {
+                            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                            } else {
+                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                            }
+                        }
                         correctAnswersCounter++;
                         correctAnswers.setText(Integer.toString(correctAnswersCounter));
                     }
@@ -278,6 +304,13 @@ public class StudyActivity extends AppCompatActivity implements
                     mHandler.postDelayed(mRunnable, RETURN_TIME);
                 } else if (studyAnswer.isChecked()) {
                     if (enterAnswer.getText().toString().equals(currentAnswer)) {
+                        if ( locale_available ) {
+                            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                            } else {
+                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                            }
+                        }
                         correctAnswersCounter++;
                         correctAnswers.setText(Integer.toString(correctAnswersCounter));
                         answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
@@ -326,13 +359,13 @@ public class StudyActivity extends AppCompatActivity implements
                         enterQuestion.setText("");
                     } else {
                         enterQuestion.setText(currentQuestion);
-                        enterQuestion.setEnabled(false);
+                        enterQuestion.setFocusable(false);
                     }
                     if (studyAnswer.isChecked()) {
                         enterAnswer.setText("");
                     } else {
                         enterAnswer.setText(currentAnswer);
-                        enterAnswer.setEnabled(false);
+                        enterAnswer.setFocusable(false);
                     }
                     if (showCurrentEntry.isChecked()) {
                         enterQuestion.setText(currentQuestion);
@@ -372,13 +405,13 @@ public class StudyActivity extends AppCompatActivity implements
                         enterQuestion.setText("");
                     } else {
                         enterQuestion.setText(currentQuestion);
-                        enterQuestion.setEnabled(false);
+                        enterQuestion.setFocusable(false);
                     }
                     if (studyAnswer.isChecked()) {
                         enterAnswer.setText("");
                     } else {
                         enterAnswer.setText(currentAnswer);
-                        enterAnswer.setEnabled(false);
+                        enterAnswer.setFocusable(false);
                     }
                     if (showCurrentEntry.isChecked()) {
                         enterQuestion.setText(currentQuestion);
@@ -455,10 +488,10 @@ public class StudyActivity extends AppCompatActivity implements
                     int sort = args.getInt(CURRENT_SORT);
 
                         mySQLiteCursorLoader = new MySQLiteCursorLoader(StudyActivity.this,
-                                "SELECT " + " se." + Contract.COLUMN_NAME_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_NAME_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
                                         + "ORDER BY " + FieldActivity.SORT_STRINGS[sort] ,
                                 new String[]{current_field_id + ""});
@@ -532,6 +565,13 @@ public class StudyActivity extends AppCompatActivity implements
                 return super.onOptionsItemSelected(item);
         }
     }
+    @Override
+    public void onStop(){
+        super.onStop();
+        if ( tts_available && isFinishing() ) {
+            tts.stop();
+        }
+    }
 
     @Override
     public void startActivity(Intent intent) {
@@ -568,6 +608,17 @@ public class StudyActivity extends AppCompatActivity implements
                 Bundle bundle = new Bundle();
                 bundle.putInt(CURRENT_SORT, currentSort);
                 getLoaderManager().restartLoader(0,bundle,getFieldEntries);
+            }
+        } else if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                // success, create the TTS instance
+                tts = new TextToSpeech(this, this);
+                tts_available = true;
+            } else {
+                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
+                Toast toast = Toast.makeText(this, R.string.tts_not_available, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP,0,400);
+                toast.show();
             }
         }
     }
@@ -606,6 +657,28 @@ public class StudyActivity extends AppCompatActivity implements
             enterAnswer.setText(currentAnswer);
         }
     }
+
+    @Override
+    public void onInit(int i) {
+        if ( tts_available ) {
+            String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
+            StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
+            String lang = stringTokenizer.nextToken();
+            String country = stringTokenizer.nextToken();
+            Locale locale = new Locale(lang, country);
+            if ( tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE ) {
+                tts.setLanguage(locale);
+                locale_available = true;
+            } else {
+                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
+                mySQLiteCursorLoader.updateFieldLocale(current_field_id,null);
+                Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP,0,400);
+                toast.show();
+            }
+        }
+    }
+
     private static class OnViewGlobalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
         private final static int maxHeight = 75;
         private View view;
