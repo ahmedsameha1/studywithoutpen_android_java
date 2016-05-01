@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements
     public static final String RUN_FIRST_TIME_DIALOG = "runFirstTimeDialog";
     public static final String RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS = "runFirstTimeCreateExample_Fields";
     public static final String LAST_USED_FIELD_POSITION = "last_used_field_position";
-    public static final String SPINNER_POSITION = "spinnerPosition";
     private static final String CREATE_NEW_FIELD = "create_new_field";
     private static final String QUERY_KEY = "query_key";
     private static final int GET_FIELDS_ID = 0;
@@ -77,19 +76,8 @@ public class MainActivity extends AppCompatActivity implements
     private static final int FACEBOOK = 3;
     public static final int DROPBOX = 4;
     private static final int MY_DATA_CHECK_CODE = 1234;
-    private Spinner fieldSpinner;
-    private Button createFieldButton, fieldChooseOk;
-
-    private TextView orChooseOne;
     private Handler mHandler = new Handler();
-    private SimpleCursorAdapter simpleCursorAdapterForFieldSpinner;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-    //    private DatabaseHelper databaseHelper;
-//    private SQLiteDatabase sqLiteDatabase;
-    private DatabaseOperations databaseOperations;
-    private Cursor fieldListCursor;
-    private MainActivityFragmentDrawer drawerFragment;
-    private RecyclerView recyclerView;
     private MainActivityRecyclerViewAdapter mAdapter;
     private LoaderManager.LoaderCallbacks<Cursor> getFields;
     private long first_field_id;
@@ -99,24 +87,35 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        MainActivityFragmentDrawer drawerFragment;
+        RecyclerView recyclerView;
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main_activity); // this Toolbar will act as action bar of the activity
+        recyclerView = (RecyclerView) findViewById(R.id.main_activity_recyclerview);
+        drawerFragment = (MainActivityFragmentDrawer)
+                getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         try {
             DatabaseHelper.getInstance(this).getWritableDatabase().rawQuery("SELECT _id FROM field",null);
         } catch (android.database.sqlite.SQLiteException e) {
             DatabaseHelper.getInstance(this).close();
             recreate();
         }
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main_activity); // this Toolbar will act as action bar of the activity
-        recyclerView = (RecyclerView) findViewById(R.id.main_activity_recyclerview);
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        setSupportActionBar(toolbar);       // setting toolbar as the action bar of the activity
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        drawerFragment = (MainActivityFragmentDrawer)
-                getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setDrawerListener(this);
         Intent checkIntent = new Intent();
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        mAdapter = new MainActivityRecyclerViewAdapter(this, null);
+        RecyclerView.LayoutManager mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(mAdapter);
+        int spanCount = 2;
+        int spacing = 3;
+        recyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing, true));
+        addFab();
+        deleteUnNeadedSharedPreferences();
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -158,18 +157,9 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.swapCursor(null);
             }
         };
-        mAdapter = new MainActivityRecyclerViewAdapter(this, null);
-        RecyclerView.LayoutManager mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(mAdapter);
-        int spanCount = 2;
-        int spacing = 3;
-        recyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing, true));
-        addFab();
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
-        deleteUnNeadedSharedPreferences();
     }
+
 
     private void deleteUnNeadedSharedPreferences() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);

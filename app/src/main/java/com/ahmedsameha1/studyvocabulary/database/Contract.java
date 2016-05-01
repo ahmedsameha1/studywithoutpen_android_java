@@ -19,6 +19,8 @@ public final class Contract {
         public static final int READ_ANSWER = 1;
         public static final int DO_NOT_IGNORE_CASE = 0;
         public static final int IGNORE_CASE = 1;
+        public static final int SHOW_ACTION_BAR = 0;
+        public static final int DO_NOT_SHOW_ACTION_BAR = 1;
         public static final String TABLE_NAME = "field";
         public static final String COLUMN_FIELD_NAME = "name";
         public static final String COLUMN_FIELD_TYPE = "type";

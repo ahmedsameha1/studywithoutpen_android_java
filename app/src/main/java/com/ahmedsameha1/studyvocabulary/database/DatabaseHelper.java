@@ -59,14 +59,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_FIELD_TYPE + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_LOCALE + " TEXT DEFAULT NULL, "
-            + Field.COLUMN_CHECK_TYPE + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_CHECK_TYPE + " INTEGER NOT NULL DEFAULT " + Field.DO_NOT_IGNORE_CASE + ", "
             + Field.COLUMN_SORT_BY + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_LIST_TEXT_SIZE + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_QUESTION_AREA_SIZE + " INTEGER NOT NULL DEFAULT 1, "
             + Field.COLUMN_ANSWER_AREA_SIZE + " INTEGER NOT NULL DEFAULT 1, "
             + Field.COLUMN_TEST_TEXT_SIZE + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_ACTION_BAR_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
-            + Field.COLUMN_READ_ANSWER + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_READ_ANSWER + " INTEGER NOT NULL DEFAULT " + Field.DO_NOT_READ_ANSWER + ", "
             + Field.COLUMN_USAGE_COUNT + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_CREATION_EMULATION_NUMBER + " INTEGER NOT NULL DEFAULT 0, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'))"
@@ -93,7 +93,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " );";
     public static final String CREATE_STRING_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + String_Entry.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + String_Entry.COLUMN_QUESTION + " INTEGER NOT NULL, "
             + String_Entry.COLUMN_ANSWER + " INTEGER NOT NULL, "
             + String_Entry.COLUMN_FIELD + " INTEGER NOT NULL, "
@@ -113,7 +113,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " );";
     public static final String CREATE_NOT_STRING_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + Not_String_Entry.TABLE_NAME
             + " ( "
-            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + Not_String_Entry.COLUMN_QUESTION + " INTEGER NOT NULL, "
             + Not_String_Entry.COLUMN_ANSWER + " INTEGER NOT NULL, "
             + Not_String_Entry.COLUMN_FIELD + " INTEGER NOT NULL, "

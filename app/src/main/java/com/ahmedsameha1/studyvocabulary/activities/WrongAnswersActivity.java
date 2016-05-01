@@ -39,15 +39,15 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wrong_answers);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
-        databaseOperations = new DatabaseOperations(this);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
         current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        databaseOperations = new DatabaseOperations(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -55,15 +55,8 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
-//        ArrayList<WrongItem> wrongItemList = (ArrayList<WrongItem>) bundle.getSerializable(WRONG_ITEM_LIST);
-//        wrongItemList = new ArrayList<WrongItem>();
-//        WrongItemAdapter wrongItemAdapter = new WrongItemAdapter(this,wrongItemList);
-//        listView.setAdapter(wrongItemAdapter);
         getLoaderManager().initLoader(0,null,this);
     }
-
-
-
     private ArrayList<WrongItem> getWrongItems() {
         ArrayList<WrongItem> wrongItemsList = new ArrayList<WrongItem>();
         String[][] wrong_answers = databaseOperations.getWrongAnswers(current_field_id,question_data_type);

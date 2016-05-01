@@ -42,7 +42,7 @@ public class FieldActivityRecyclerViewAdapter extends
     private Context context;
     private long field_id;
     private int fieldType;
-    private int sort = FieldActivity.DEFAULT_SORT;
+    private int question_data_type;
     private SharedPreferences sharedPreferences;
     private DatabaseOperations databaseOperations;
     public FieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, int fieldType ) {
@@ -52,6 +52,7 @@ public class FieldActivityRecyclerViewAdapter extends
         this.fieldType = fieldType;
         databaseOperations = new DatabaseOperations(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        this.question_data_type = databaseOperations.getQuestionDataType(field_id);
     }
     @Override
     public FieldActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -66,7 +67,6 @@ public class FieldActivityRecyclerViewAdapter extends
                             intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                             intent.putExtra(StudyActivity.CURRENT_QUESTION,currentQuestion);
                             intent.putExtra(StudyActivity.CURRENT_ANSWER,currentAnswer);
-                            intent.putExtra(StudyActivity.ORDER_OF_ENTRIES,sort);
                             context.startActivity(intent);
                         } else {
                             Toast toast = Toast.makeText(context, R.string.study_not_for_notebook,Toast.LENGTH_LONG);
@@ -101,7 +101,7 @@ public class FieldActivityRecyclerViewAdapter extends
                 intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
                 intent.putExtra(EditEntryActivity.FIELD_TYPE, fieldType );
-                intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,databaseOperations.getQuestionDataType(field_id));
+                intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
                 intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
                 intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
                 ((Activity) context).startActivityForResult(intent,FieldActivity.EDIT_ENTRY);
@@ -116,7 +116,7 @@ public class FieldActivityRecyclerViewAdapter extends
                         DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
                         Bundle bundle = new Bundle();
                         bundle.putLong(DeleteEntryDialogFragment.TO_BE_DELETED_ENTRY_ID,entry_id);
-                        bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,databaseOperations.getQuestionDataType(field_id));
+                        bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
                         fragment.setArguments(bundle);
                         FragmentManager fragmentManager = ((FieldActivity) context).getSupportFragmentManager();
                         fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
@@ -144,8 +144,5 @@ public class FieldActivityRecyclerViewAdapter extends
                 viewHolder.answer.setText(answer);
                 break;
         }
-    }
-    public void setSort(int sort) {
-        this.sort = sort;
     }
 }

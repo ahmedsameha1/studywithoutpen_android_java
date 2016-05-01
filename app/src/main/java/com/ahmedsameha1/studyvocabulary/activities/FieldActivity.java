@@ -66,25 +66,17 @@ public class FieldActivity extends AppCompatActivity implements
     private static final String QUERY_KEY = "query_key";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int SEARCH_ENTRIES_LOADER_ID = 1;
-    public static final int SORT_QUESTION_DESC = 0;
+    public static final int SORT_CREATION_DATE_DESC = 0;
     public static final int SORT_ANSWER_DESC = 1;
     public static final int SORT_QUESTION_ASC = 2;
     public static final int SORT_ANSWER_ASC = 3;
     public static final int SORT_DATE_DESC = 4;
     public static final int SORT_DATE_ASC = 5;
-    public static final int SORT_CREATION_DATE_DESC = 6;
+    public static final int SORT_QUESTION_DESC = 6;
     public static final int SORT_CREATION_DATE_ASC = 7;
-    public static final int DEFAULT_SORT = SORT_CREATION_DATE_DESC;
-    public static final String INITIAL_FIELD = "intial_field";
-    public static final String GET_NEW_FIELD_NAME = "getNewFieldName";
-
     public static final String CURRENT_FIELD_NAME = "currentField";
     public static final String CHECK_IF_CONTINUE_STUDY_DURING_SESSION = "checkIfContinueStudyDuringSession";
     public static final String CHECK_IF_CONTINUE_TEST_SESSION = "checkIfContinueTestSession";
-    public static final String RUN_FIRST_TIME_DIALOG = "runFirstTimeDialog";
-    public static final String RUN_FIRST_TIME_CREATE_EXAMPLE_FIELDS = "runFirstTimeCreateExample_Fields";
-    public static final int FIELD_LIST_LOADER_ID = 0;
-    public static final int FIELD_ENTRIES_LOADER_ID = 1;
     private static final String SEARCH_DATE_OR_TEXT = "search_date_or_text";
     private static final String CURRENT_SORT = "currentSort";
     public static final java.lang.String FIELD_TYPE = "field_type";
@@ -94,35 +86,23 @@ public class FieldActivity extends AppCompatActivity implements
     public static final String EDITED_ENTRY_ID = "edited_entry_id";
     public static final String EDITED_QUESTION = "edited_question";
     public static final String EDITED_ANSWER = "edited_answer";
-    public static final String INSERTED_QUESTION = "inserted_question";
-    public static final String INSERTED_ANSWER = "inserted_answer";
-    private static final int INSERT_ENTRY = 1;
     private static final int MY_DATA_CHECK_CODE = 1234;
     private static final String FIELD_OPTIONS_DIALOG = "field_options_dialog";
-
-
-    private String[] deleteEntryData = {null, null, null};
-    private Cursor fieldEntriesCursor;
-    private Cursor fieldListCursor;
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     protected int fieldType = 0;
     private long current_field_id;
     private int currentSort;
-    public static final String[] SORT_STRINGS = {" q DESC",
+    public static final String[] SORT_STRINGS = {"datetime(" + Contract.CREATION_DATE + ") DESC",
             " a DESC",
             " q ASC",
             " a ASC",
             "date( q ) DESC",
             "date( q ) ASC",
-            "datetime(" + Contract.CREATION_DATE + ") DESC",
+            " q DESC",
             "datetime(" + Contract.CREATION_DATE + ") ASC"};
     private Spinner fieldsListSpinner;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-    private SimpleCursorAdapter simpleCursorAdapterForFieldSpinner;
-    private FieldActivityFragmentDrawer drawerFragment;
-    private DatabaseHelper databaseHelper;
     private DatabaseOperations databaseOperations;
-    private RecyclerView recyclerView;
     private FieldActivityRecyclerViewAdapter mAdapter;
     private SearchView searchView;
     private MenuItem searchItem;
@@ -130,23 +110,34 @@ public class FieldActivity extends AppCompatActivity implements
     private ArrayList<Locale> localeList = new ArrayList<Locale>();
     private ArrayList<String> locale_display_names = new ArrayList<String>();
     private TextToSpeech tts;
+    private boolean load_or_search = true;
+    private String search_value;
+    private int question_data_type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_field);
+        FieldActivityFragmentDrawer drawerFragment;
+        RecyclerView recyclerView;
+        if (savedInstanceState != null) {
+            current_field_id = savedInstanceState.getLong(FIELD_ID);
+        } else {
+            current_field_id = getIntent().getLongExtra(FIELD_ID, 0);
+        }
         databaseOperations = new DatabaseOperations(this);
+        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
+        fieldType = databaseOperations.getFieldType(current_field_id);
+        currentSort = databaseOperations.getFieldSort(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_field_activity); // FieldActivity.this Toolbar will act as action bar of the activity
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        setSupportActionBar(toolbar);       // setting toolbar as the action bar of the activity
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
         drawerFragment = (FieldActivityFragmentDrawer)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
+        setSupportActionBar(toolbar);       // setting toolbar as the action bar of the activity
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setDrawerListener(FieldActivity.this);
-        current_field_id = getIntent().getLongExtra(FIELD_ID, 0);
-        fieldType = databaseOperations.getFieldType(current_field_id);
         mAdapter = new FieldActivityRecyclerViewAdapter(FieldActivity.this, null, current_field_id, fieldType);
         final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(FieldActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -155,24 +146,24 @@ public class FieldActivity extends AppCompatActivity implements
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
-        tts = new TextToSpeech(this,this);
+        tts = new TextToSpeech(getApplicationContext(), this);
         Intent checkIntent = new Intent();
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(FieldActivity.this, AddEntryActivity.class);
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, true);
-                startActivityForResult(intent,INSERT_ENTRY);
+                startActivity(intent);
             }
         });
-
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if ( databaseOperations.getQuestionDataType(current_field_id) == Contract.Field.STRING_DATA_TYPE ) {
+                if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
                     int sort = args.getInt(CURRENT_SORT);
                     if (id == SEARCH_ENTRIES_LOADER_ID) {
                         String searchString = args.getString(QUERY_KEY);
@@ -185,7 +176,7 @@ public class FieldActivity extends AppCompatActivity implements
                                         + "  q LIKE ? "
                                         + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                                         + " a LIKE ? ORDER BY " + SORT_STRINGS[sort],
-                                new String[]{ current_field_id + "","%" + searchString + "%", current_field_id + "","%" + searchString + "%"});
+                                new String[]{current_field_id + "", "%" + searchString + "%", current_field_id + "", "%" + searchString + "%"});
                         return mySQLiteCursorLoader;
 
                     } else if (id == GET_ENTRIES_LOADER_ID) {
@@ -195,7 +186,7 @@ public class FieldActivity extends AppCompatActivity implements
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
-                                + "ORDER BY " + SORT_STRINGS[sort] ,
+                                        + "ORDER BY " + SORT_STRINGS[sort],
                                 new String[]{current_field_id + ""});
                         return mySQLiteCursorLoader;
 
@@ -208,7 +199,6 @@ public class FieldActivity extends AppCompatActivity implements
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 mAdapter.swapCursor(data);
-                fieldEntriesCursor = data;
             }
 
             @Override
@@ -216,7 +206,6 @@ public class FieldActivity extends AppCompatActivity implements
                 mAdapter.swapCursor(null);
             }
         };
-        currentSort = savedInstanceState == null ? DEFAULT_SORT : savedInstanceState.getInt(CURRENT_SORT);
         getLoaderManager();
     }
 
@@ -238,47 +227,68 @@ public class FieldActivity extends AppCompatActivity implements
         if (requestCode == EDIT_ENTRY) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                long entry_id = data.getLongExtra(EDITED_ENTRY_ID,1);
-               String question = data.getStringExtra(EDITED_QUESTION);
+                long entry_id = data.getLongExtra(EDITED_ENTRY_ID, 1);
+                String question = data.getStringExtra(EDITED_QUESTION);
                 String answer = data.getStringExtra(EDITED_ANSWER);
-                mySQLiteCursorLoader.editEntry(entry_id,databaseOperations.getQuestionDataType(current_field_id),question,answer);
+                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer);
             }
         } else if (requestCode == MY_DATA_CHECK_CODE) {
-            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
-            {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 tts_available = true;
             }
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
-        Bundle bundle = new Bundle();
-        bundle.putInt(CURRENT_SORT, currentSort);
-        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
-    }
-    @Override
-public void onInit(int status) {
-    Locale[] locales = Locale.getAvailableLocales();
-    for (Locale locale : locales) {
-        if ( locale.toString().equals("en_US_POSIX")) continue;
-        int res = tts.isLanguageAvailable(locale);
-        if (res == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
-            localeList.add(locale);
-            locale_display_names.add(locale.getDisplayName());
+        if (load_or_search) {
+            Bundle bundle = new Bundle();
+            bundle.putInt(CURRENT_SORT, currentSort);
+            getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putString(QUERY_KEY, search_value);
+            bundle.putInt(CURRENT_SORT, currentSort);
+            getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+            if (fieldType == Contract.Field.NOTEBOOK_TYPE) {
+                searchView.setQuery(search_value, false);
+            }
         }
     }
-    locale_display_names.add(getString(R.string.select_locale));
-}
 
-    private void handleIntent(String query) {
-        search(query);
+    @Override
+    public void onInit(int status) {
+        Locale[] locales = Locale.getAvailableLocales();
+        for (Locale locale : locales) {
+            if (locale.toString().equals("en_US_POSIX")) continue;
+            int res = tts.isLanguageAvailable(locale);
+            if (res == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
+                localeList.add(locale);
+                locale_display_names.add(locale.getDisplayName());
+            }
+        }
+        locale_display_names.add(getString(R.string.select_locale));
     }
+
+    public void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            search_value =
+                    intent.getStringExtra(SearchManager.QUERY);
+            load_or_search = false;
+        }
+    }
+
 
     @Override
     public void onDrawerItemSelected(View view, int position) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
-        int number_of_entries = databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+        int number_of_entries = databaseOperations.getEntriesNumber(current_field_id, question_data_type);
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         switch (position) {
@@ -316,7 +326,7 @@ public void onInit(int status) {
                 break;
 
             case STUDY_PERIOD:
-                if (!sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + current_field_id )) {
+                if (!sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + current_field_id)) {
                     switch (fieldType) {
                         case Contract.Field.DEFAULT_TYPE:
                             if (number_of_entries > 0) {
@@ -348,28 +358,27 @@ public void onInit(int status) {
                 }
                 break;
             case SORT:
-                bundle.putInt(FieldActivity.FIELD_TYPE, fieldType);
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
-                sortEntriesDialogFragment.setFieldActivityRecyclerViewAdapter(mAdapter);
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
                 break;
             case FIELD_OPTIONS:
                 String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
-                if ( locale_short_name != null ) {
+                if (locale_short_name != null) {
                     StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
                     String lang = stringTokenizer.nextToken();
                     String country = stringTokenizer.nextToken();
                     Locale locale = new Locale(lang, country);
                     boolean locale_available = (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE);
                     bundle.putBoolean(FieldOptionsDialogFragment.LOCALE_AVAILABLE, locale_available);
-                    if ( tts_available && locale_available) {
-                        bundle.putInt(FieldOptionsDialogFragment.INDEX_OF_LOCALE,localeList.indexOf(locale));
+                    if (tts_available && locale_available) {
+                        bundle.putInt(FieldOptionsDialogFragment.INDEX_OF_LOCALE, localeList.indexOf(locale));
                     }
                 }
                 bundle.putBoolean(FieldOptionsDialogFragment.TTS_AVAILABLE, tts_available);
-                bundle.putStringArrayList(FieldOptionsDialogFragment.LOCALE_DISPLAY_NAMES,locale_display_names);
-                bundle.putSerializable(FieldOptionsDialogFragment.LOCALE_LIST,localeList);
+                bundle.putStringArrayList(FieldOptionsDialogFragment.LOCALE_DISPLAY_NAMES, locale_display_names);
+                bundle.putSerializable(FieldOptionsDialogFragment.LOCALE_LIST, localeList);
                 FieldOptionsDialogFragment fieldOptionsDialogFragment = new FieldOptionsDialogFragment();
                 fieldOptionsDialogFragment.setArguments(bundle);
                 fieldOptionsDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
@@ -396,8 +405,8 @@ public void onInit(int status) {
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt(CURRENT_SORT, currentSort);
+        savedInstanceState.putLong(FIELD_ID, current_field_id);
     }
-
 
 
     @Override
@@ -426,7 +435,7 @@ public void onInit(int status) {
                         return true;
                     }
                 });
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+/*        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -447,7 +456,7 @@ public void onInit(int status) {
                 }
                 return true;
             }
-        });
+        });*/
         searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -465,7 +474,6 @@ public void onInit(int status) {
     }
 
 
-
     @Override
     public void search(String value) {
         Bundle bundle = new Bundle();
@@ -474,6 +482,7 @@ public void onInit(int status) {
         getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
         if (fieldType == Contract.Field.NOTEBOOK_TYPE) {
             searchView.setQuery(value, false);
+            searchView.clearFocus();
         }
     }
 
@@ -487,7 +496,7 @@ public void onInit(int status) {
 
     @Override
     public void deleteEntry(long entry_id, int question_data_type) {
-        mySQLiteCursorLoader.deleteEntry(entry_id,question_data_type);
+        mySQLiteCursorLoader.deleteEntry(entry_id, question_data_type);
     }
 
     public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {

@@ -31,6 +31,7 @@ public class ShowResultDialogFragment extends DialogFragment {
     private double correctAnswersPercent;
     private String message;
     private long current_field_id;
+    private int question_data_type;
     ArrayList<WrongItem> wrongItemList;
     private DatabaseOperations databaseOperations;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
@@ -48,6 +49,7 @@ public class ShowResultDialogFragment extends DialogFragment {
         NumberFormat numberFormat = NumberFormat.getPercentInstance();
         message = getString(R.string.Your_correct_answers_was) + " " + numberFormat.format(correctAnswersPercent)+ " " +
                 getString(R.string.of_questions);
+        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
     }
 
     @Override
@@ -67,7 +69,7 @@ public class ShowResultDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+                        mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,question_data_type);
                         getActivity().finish();
                     }
                 })
@@ -77,7 +79,7 @@ public class ShowResultDialogFragment extends DialogFragment {
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+                        mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,question_data_type);
                         getActivity().finish();
                         return false;
                     }
@@ -108,7 +110,7 @@ public class ShowResultDialogFragment extends DialogFragment {
                 if ( wrongAnswersNumber <= 0 ) {
                     b.setEnabled(false);
                 }
-                mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+                mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,question_data_type);
             }
         });
 

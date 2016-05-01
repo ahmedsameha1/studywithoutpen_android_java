@@ -14,7 +14,9 @@ import android.widget.RadioGroup;
 import android.support.v7.app.AlertDialog;
 
 import com.ahmedsameha1.studyvocabulary.R;
+import com.ahmedsameha1.studyvocabulary.activities.StudyActivity;
 import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 
 /**
  * Created by ahmed on 2/8/2016.
@@ -24,11 +26,18 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
     public static final int LARGE_SIZE = 20;
     public static final int NORMAL_SIZE = 15;
     public static final int SMALL_SIZE = 10;
+    public static final int SAVE_LARGE_SIZE = 2;
+    public static final int SAVE_NORMAL_SIZE = 0;
+    public static final int SAVE_SMALL_SIZE = 1;
     private int textSize;
+    private long current_field_id;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         textSize = (int) getArguments().getFloat(StudyDuringActivity.TEXT_SIZE);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
     }
     @NonNull
     @Override
@@ -62,12 +71,15 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                         switch (radioGroup.getCheckedRadioButtonId()) {
                             case R.id.large_size:
                                 ((ChangeTextSize)getActivity()).changeTextSize((float)LARGE_SIZE);
+                                mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id,SAVE_LARGE_SIZE);
                                 break;
                             case R.id.normal_size:
                                 ((ChangeTextSize)getActivity()).changeTextSize((float)NORMAL_SIZE);
+                                mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id,SAVE_NORMAL_SIZE);
                                 break;
                             case R.id.small_size:
                                 ((ChangeTextSize)getActivity()).changeTextSize((float) SMALL_SIZE);
+                                mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id,SAVE_SMALL_SIZE);
                                 break;
                         }
                         dismiss();

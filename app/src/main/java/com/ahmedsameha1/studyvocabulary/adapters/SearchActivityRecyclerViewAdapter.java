@@ -43,6 +43,7 @@ public class SearchActivityRecyclerViewAdapter extends
     private Context context;
     private long field_id;
     private int fieldType;
+    private int question_data_type;
     private SharedPreferences sharedPreferences;
     public SearchActivityRecyclerViewAdapter(Context context, Cursor data,  long field_id, int fieldType) {
         super(context,data);
@@ -51,6 +52,7 @@ public class SearchActivityRecyclerViewAdapter extends
         this.field_id = field_id;
         databaseOperations = new DatabaseOperations(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        question_data_type = databaseOperations.getQuestionDataType(field_id);
     }
     @Override
     public FieldActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -100,7 +102,7 @@ public class SearchActivityRecyclerViewAdapter extends
                 intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
                 intent.putExtra(EditEntryActivity.FIELD_TYPE, fieldType );
-                intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,databaseOperations.getQuestionDataType(field_id));
+                intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
                 intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
                 intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
                 ((Activity) context).getLoaderManager().destroyLoader(SearchActivity.SEARCH_LOADER);
@@ -116,7 +118,7 @@ public class SearchActivityRecyclerViewAdapter extends
                         DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
                         Bundle bundle = new Bundle();
                         bundle.putLong(DeleteEntryDialogFragment.TO_BE_DELETED_ENTRY_ID,entry_id);
-                        bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,databaseOperations.getQuestionDataType(field_id));
+                        bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
                         fragment.setArguments(bundle);
                         FragmentManager fragmentManager = ((SearchActivity) context).getSupportFragmentManager();
                         fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);

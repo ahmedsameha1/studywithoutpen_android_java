@@ -21,12 +21,15 @@ import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
  */
 public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
     private long current_field_id;
-
+    private DatabaseOperations databaseOperations;
+    private int question_data_type;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        databaseOperations = new DatabaseOperations(getActivity());
+        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
     }
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {
@@ -47,10 +50,9 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 MySQLiteCursorLoader mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
-                                DatabaseOperations databaseOperations = new DatabaseOperations(getActivity());
                                 mySQLiteCursorLoader.clearThisFieldFromTestPaused(current_field_id);
-                                mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
-                                mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+                                mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,question_data_type);
+                                mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,question_data_type);
                                 Bundle bundle = new Bundle();
                                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                 TestDialogFragment dialogFragment = new TestDialogFragment();

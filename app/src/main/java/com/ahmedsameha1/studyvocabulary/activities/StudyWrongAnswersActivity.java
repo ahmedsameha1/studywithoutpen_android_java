@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.ChangeAreasDialogFragment;
@@ -57,7 +58,6 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     private ToggleButton showCurrentEntry;
     private CheckBox studyQuestion, studyAnswer;
     private EditText enterQuestion, enterAnswer;
-    private ImageButton  up , down;
     private LinearLayout answerLinearlayout,questionLinearlayout, container;
     private int correctAnswersCounter = 0;
     private ArrayList<WrongItem> wrongItemsList;
@@ -66,23 +66,31 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     private Runnable mRunnable;
     private DatabaseOperations databaseOperations;
     private TextToSpeech tts;
-    private boolean isReadAnswer;
     private boolean tts_available = false;
     private boolean locale_available = false;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private long current_field_id;
+    private int check_type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study_wrong_answers);
+        boolean isReadAnswer;
+        int question_area_size,answer_area_size,test_text_size,action_bar_shown;
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
-        wrongItemsList = (ArrayList<WrongItem>) bundle.getSerializable(WRONG_ITEM_LIST);
         currentQuestion = bundle.getString(CURRENT_QUESTION);
         currentAnswer = bundle.getString(CURRENT_ANSWER);
+        wrongItemsList = (ArrayList<WrongItem>) bundle.getSerializable(WRONG_ITEM_LIST);
         current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
         databaseOperations = new DatabaseOperations(this);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
+        isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
+        check_type = databaseOperations.getFieldCheckType(current_field_id);
+        question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
+        answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
+        test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         showCurrentEntry = (ToggleButton) findViewById(R.id.show_current_study_entry);
         studyQuestion = (CheckBox) findViewById(R.id.study_question);
@@ -91,27 +99,33 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         enterAnswer = ( EditText) findViewById(R.id.answer);
         correctAnswers = ( TextView) findViewById(R.id.correct_answers);
         check = (TextView) findViewById(R.id.check);
-        up = (ImageButton) findViewById(R.id.up);
-        down = (ImageButton) findViewById(R.id.down);
+        ImageButton up = (ImageButton) findViewById(R.id.up);
+        ImageButton down = (ImageButton) findViewById(R.id.down);
         answerLinearlayout = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         setSupportActionBar(toolbar);
-        int screenSize = getResources().getConfiguration().screenLayout &
-                Configuration.SCREENLAYOUT_SIZE_MASK;
-        if (  screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
-                || screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL ) {
+        if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
             getSupportActionBar().hide();
         }
         actionBarShown = getSupportActionBar().isShowing();
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show );
         enterQuestion.setText(currentQuestion);
-        isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
         if ( isReadAnswer ) {
             Intent checkIntent = new Intent();
             checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
             startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        }
+        correctAnswers.setText(Integer.toString(0));
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        changeAreas(question_area_size,answer_area_size);
+        if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
+        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
+        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
         }
         showCurrentEntry.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -159,89 +173,180 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
             @Override
             @SuppressWarnings("deprecation")
             public void onClick(View v) {
+                String entered_question = enterQuestion.getText().toString();
+                String entered_answer = enterAnswer.getText().toString();
                 if (studyQuestion.isChecked() && studyAnswer.isChecked()) {
-                    if (enterQuestion.getText().toString().equals(currentQuestion)) {
-                        questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                        questionLinearlayout.setPadding(0, 0, 0, 0);
-                    } else {
-                        questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                        questionLinearlayout.setPadding(0, 0, 0, 0);
-                    }
-                    if (enterAnswer.getText().toString().equals(currentAnswer)) {
-                        answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                        answerLinearlayout.setPadding(0, 0, 0, 0);
-                    } else {
-                        answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                        answerLinearlayout.setPadding(0, 0, 0, 0);
-                    }
-                    if (enterQuestion.getText().toString().equals(currentQuestion) && enterAnswer.getText().toString().equals(currentAnswer)) {
-                        if ( locale_available ) {
-                            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
-                            } else {
-                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
-                            }
-                        }
-                        correctAnswersCounter++;
-                        correctAnswers.setText(Integer.toString(correctAnswersCounter));
-                    }
-                    enterQuestion.setText("");
-                    enterAnswer.setText("");
-                    mRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                    if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
+                        if (entered_question.compareTo(currentQuestion) == 0) {
+                            questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
                             questionLinearlayout.setPadding(0, 0, 0, 0);
-                            answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                        } else {
+                            questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        if (entered_answer.compareTo(currentAnswer) == 0) {
+                            answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
                         }
-                    };
-                    mHandler.postDelayed(mRunnable, RETURN_TIME);
+                        if ((entered_question.compareTo(currentQuestion) == 0) && (entered_answer.compareTo(currentAnswer) == 0) ) {
+                            if ( locale_available ) {
+                                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                } else {
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                                }
+                            }
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                        }
+                        enterQuestion.setText("");
+                        enterAnswer.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                                answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                answerLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    } else if ( check_type == Contract.Field.IGNORE_CASE ) {
+                        if (entered_question.compareToIgnoreCase(currentQuestion) == 0) {
+                            questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        if (entered_answer.compareToIgnoreCase(currentAnswer) == 0) {
+                            answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        if ((entered_question.compareToIgnoreCase(currentQuestion) == 0) && (entered_answer.compareToIgnoreCase(currentAnswer) == 0) ) {
+                            if ( locale_available ) {
+                                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                } else {
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                                }
+                            }
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                        }
+                        enterQuestion.setText("");
+                        enterAnswer.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                                answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                answerLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    }
                 } else if (studyQuestion.isChecked()) {
-                    if (enterQuestion.getText().toString().equals(currentQuestion)) {
-                        correctAnswersCounter++;
-                        correctAnswers.setText(Integer.toString(correctAnswersCounter));
-                        questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                        questionLinearlayout.setPadding(0, 0, 0, 0);
-                    } else {
-                        questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                        questionLinearlayout.setPadding(0, 0, 0, 0);
-                    }
-                    enterQuestion.setText("");
-                    mRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                    if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
+                        if (entered_question.compareTo(currentQuestion) == 0 ) {
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                            questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             questionLinearlayout.setPadding(0, 0, 0, 0);
                         }
-                    };
-                    mHandler.postDelayed(mRunnable, RETURN_TIME);
-                } else if (studyAnswer.isChecked()) {
-                    if (enterAnswer.getText().toString().equals(currentAnswer)) {
-                        if ( locale_available ) {
-                            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
-                            } else {
-                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                        enterQuestion.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
                             }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    } else if ( check_type == Contract.Field.IGNORE_CASE ) {
+                        if (entered_question.compareToIgnoreCase(currentQuestion) == 0 ) {
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                            questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
                         }
-                        correctAnswersCounter++;
-                        correctAnswers.setText(Integer.toString(correctAnswersCounter));
-                        answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                        answerLinearlayout.setPadding(0, 0, 0, 0);
-                    } else {
-                        answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                        answerLinearlayout.setPadding(0, 0, 0, 0);
+                        enterQuestion.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
                     }
-                    enterAnswer.setText("");
-                    mRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                } else if (studyAnswer.isChecked()) {
+                    if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
+                        if (entered_answer.compareTo(currentAnswer) == 0 ) {
+                            if ( locale_available ) {
+                                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                } else {
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                                }
+                            }
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                            answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
                         }
-                    };
-                    mHandler.postDelayed(mRunnable, RETURN_TIME);
+                        enterAnswer.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                answerLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    } else if ( check_type == Contract.Field.IGNORE_CASE ) {
+                        if (entered_answer.compareToIgnoreCase(currentAnswer) == 0 ) {
+                            if ( locale_available ) {
+                                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                } else {
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                                }
+                            }
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                            answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        enterAnswer.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                answerLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    }
                 }
             }
         });
@@ -274,7 +379,6 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 }
             }
         });
-
         studyAnswer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -304,8 +408,6 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 }
             }
         });
-
-
         up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -342,38 +444,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         break;
                     }
                 }
-                /*int position = 0;
-*//*                if (fieldEntriesCursor != null) {
-                    fieldEntriesCursor.close();
-                }*//*
-//                fieldEntriesCursor = databaseOperations.getFieldEntries(currentField);
-                for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount(); fieldEntriesCursor.moveToNext()) {
-                    if (fieldEntriesCursor.getString(1).equals(currentQuestion) && fieldEntriesCursor.getString(2).equals(currentAnswer)) {
-                        position = fieldEntriesCursor.getPosition();
-                    }
-                }
-                if (--position >= 0) {
-                    fieldEntriesCursor.moveToPosition(position);
-                    currentQuestion = fieldEntriesCursor.getString(1);
-                    currentAnswer = fieldEntriesCursor.getString(2);
-                    *//*viewQuestion.setText(currentQuestion);
-                    viewAnswer.setText(currentAnswer);*//*
-                    correctAnswersCounter = 0;
-                    correctAnswers.setText(Integer.toString(correctAnswersCounter));
-//                    showCurrentEntry.setChecked(true);
-                    if (studyQuestion.isChecked()) {
-                        enterQuestion.setText("");
-                    } else {
-                        enterQuestion.setText(currentQuestion);
-                        enterQuestion.setEnabled(false);
-                    }
-                    if (studyAnswer.isChecked()) {
-                        enterAnswer.setText("");
-                    } else {
-                        enterAnswer.setText(currentAnswer);
-                        enterAnswer.setEnabled(false);
-                    }
-                }*/
+
             }
         });
         down.setOnClickListener(new View.OnClickListener() {
@@ -387,7 +458,6 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                             currentAnswer = wrongItemsList.get(i+1).getAnswer();
                             correctAnswersCounter = 0;
                             correctAnswers.setText(Integer.toString(correctAnswersCounter));
-//                    showCurrentEntry.setChecked(true);
                             if (studyQuestion.isChecked()) {
                                 enterQuestion.setText("");
                             } else {
@@ -412,38 +482,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         break;
                     }
                 }
-                /*int position = 0;
-*//*                if (fieldEntriesCursor != null) {
-                    fieldEntriesCursor.close();
-                }*//*
-//                fieldEntriesCursor = databaseOperations.getFieldEntries(currentField);
-                for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount(); fieldEntriesCursor.moveToNext()) {
-                    if (fieldEntriesCursor.getString(1).equals(currentQuestion) && fieldEntriesCursor.getString(2).equals(currentAnswer)) {
-                        position = fieldEntriesCursor.getPosition();
-                    }
-                }
-                if (++position < fieldEntriesCursor.getCount()) {
-                    fieldEntriesCursor.moveToPosition(position);
-                    currentQuestion = fieldEntriesCursor.getString(1);
-                    currentAnswer = fieldEntriesCursor.getString(2);
-                    *//*viewQuestion.setText(currentQuestion);
-                    viewAnswer.setText(currentAnswer);*//*
-                    correctAnswersCounter = 0;
-                    correctAnswers.setText(Integer.toString(correctAnswersCounter));
-//                    showCurrentEntry.setChecked(true);
-                    if (studyQuestion.isChecked()) {
-                        enterQuestion.setText("");
-                    } else {
-                        enterQuestion.setText(currentQuestion);
-                        enterQuestion.setEnabled(false);
-                    }
-                    if (studyAnswer.isChecked()) {
-                        enterAnswer.setText("");
-                    } else {
-                        enterAnswer.setText(currentAnswer);
-                        enterAnswer.setEnabled(false);
-                    }
-                }*/
+
             }
         });
         enterQuestion.addTextChangedListener(new TextWatcher() {
@@ -460,7 +499,6 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.toString().length() > 0) {
-//                    resultImage.setImageResource(R.drawable.ic_question_marks);
                     questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                     questionLinearlayout.setPadding(0, 0, 0, 0);
                 }
@@ -480,7 +518,6 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.toString().length() > 0) {
-//                    resultImage.setImageResource(R.drawable.ic_question_marks);
                     answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                     answerLinearlayout.setPadding(0, 0, 0, 0);
 
@@ -494,16 +531,15 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
                     getSupportActionBar().show();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.SHOW_ACTION_BAR);
                 }
             }
         });
-        correctAnswers.setText(Integer.toString(0));
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -529,6 +565,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         switch (id) {
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                 bundle.putFloat(QUESTION_LAYOUT,((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
                 bundle.putFloat(ANSWER_LAYOUT,((LinearLayout.LayoutParams) answerLinearlayout.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
@@ -537,6 +574,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
+                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
                 bundle1.putFloat(TEXT_SIZE, (enterQuestion.getTextSize()/scaledDensity) );
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
@@ -582,7 +620,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 // success, create the TTS instance
-                tts = new TextToSpeech(this, this);
+                tts = new TextToSpeech(getApplicationContext(), this);
                 tts_available = true;
             } else {
                 mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id, false);
@@ -632,7 +670,6 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 locale_available = true;
             } else {
                 mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
-                mySQLiteCursorLoader.updateFieldLocale(current_field_id,null);
                 Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP,0,400);
                 toast.show();

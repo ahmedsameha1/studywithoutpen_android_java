@@ -310,7 +310,71 @@ public class DatabaseOperations {
         cursor.close();
         return n;
     }
-
+    public int getFieldSort( long field_id ) {
+        int sort = 0;
+        Cursor cursor = null;
+        try {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_SORT_BY},
+                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""},null,null,null);
+            cursor.moveToFirst();
+            sort = cursor.getInt(0);
+        } finally {
+            cursor.close();
+        }
+        return sort;
+    }
+    public int getFieldQuestionAreaSize( long field_id ) {
+        int question_area_size = 0;
+        Cursor cursor = null;
+        try {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_QUESTION_AREA_SIZE},
+                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""},null,null,null);
+            cursor.moveToFirst();
+            question_area_size = cursor.getInt(0);
+        } finally {
+            cursor.close();
+        }
+        return question_area_size;
+    }
+    public int getFieldAnswerAreaSize( long field_id ) {
+        int answer_area_size = 0;
+        Cursor cursor = null;
+        try {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_ANSWER_AREA_SIZE},
+                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""},null,null,null);
+            cursor.moveToFirst();
+            answer_area_size = cursor.getInt(0);
+        } finally {
+            cursor.close();
+        }
+        return answer_area_size;
+    }
+    public int getFieldTestTextSize( long field_id ) {
+        int test_text_size = 0;
+        Cursor cursor = null;
+        try {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_TEST_TEXT_SIZE},
+                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""},null,null,null);
+            cursor.moveToFirst();
+            test_text_size = cursor.getInt(0);
+        } finally {
+            cursor.close();
+        }
+        return test_text_size;
+    }
+    public int getFieldActionBarShown( long field_id ) {
+        int action_bar_shown = 0;
+        Cursor cursor = null;
+        try {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_ACTION_BAR_SHOWN},
+                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""},null,null,null);
+            cursor.moveToFirst();
+            action_bar_shown = cursor.getInt(0);
+        } finally {
+            cursor.close();
+        }
+        return action_bar_shown;
+    }
     public int[] getDataFromTestPaused(long field_id ) {
         int[] array = new int[3];
         Cursor cursor = sqLiteDatabase.query(Contract.Test_Paused.TABLE_NAME,

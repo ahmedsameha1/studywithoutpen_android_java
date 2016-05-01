@@ -56,8 +56,6 @@ public class AddEntryActivity extends AppCompatActivity implements
     private Spinner field_spinner;
     private EditText enter_question;
     private EditText enter_answer;
-    private TextView add_entry;
-    private TextView add_entry_finish;
     private TextView showActionbar;
     private SimpleCursorAdapter simple_cursor_adapter;
     private DatabaseOperations databaseOperations;
@@ -70,45 +68,54 @@ public class AddEntryActivity extends AppCompatActivity implements
     private long current_field_id;
     private int question_data_type;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-    private ArrayList<String> toInsertQuestions = new ArrayList<>(), toInsertAnswers = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_entry);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        databaseOperations = new DatabaseOperations(this);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        int question_area_size,answer_area_size,test_text_size,action_bar_shown;
         fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, true);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
+        databaseOperations = new DatabaseOperations(this);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
+        action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
+        fieldType = databaseOperations.getFieldType(current_field_id);
+        question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
+        answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
+        test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         field_spinner = (Spinner) findViewById(R.id.field_spinner);
-        if ( fromFieldActivity ) {
-            field_spinner.setEnabled(false);
-            int screenSize = getResources().getConfiguration().screenLayout &
-                    Configuration.SCREENLAYOUT_SIZE_MASK;
-            if ( screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
-                    || screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL) {
-                getSupportActionBar().hide();
-            }
-        }
-        actionBarShown = getSupportActionBar().isShowing();
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         enter_question = (EditText) findViewById(R.id.question);
         enter_answer = (EditText) findViewById(R.id.answer);
-        add_entry = (TextView) findViewById(R.id.add_entry);
-        add_entry_finish = (TextView) findViewById(R.id.add_entry_finish);
+        TextView add_entry = (TextView) findViewById(R.id.add_entry);
+        TextView add_entry_finish = (TextView) findViewById(R.id.add_entry_finish);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
-        fieldType = databaseOperations.getFieldType(current_field_id);
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
+            getSupportActionBar().hide();
+        }
+        actionBarShown = getSupportActionBar().isShowing();
         simple_cursor_adapter = new SimpleCursorAdapter(this,R.layout.field_spinner,null,
                 new String [] {Contract.Field.COLUMN_FIELD_NAME}, new int[] {R.id.list_item}, 0);
         field_spinner.setAdapter(simple_cursor_adapter);
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         setHints(fieldType);
+        getLoaderManager().restartLoader(0,null,this);
+        enter_answer.requestFocus();
+        changeAreas(question_area_size,answer_area_size);
+        if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
+        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
+        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
+        }
         add_entry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -292,10 +299,12 @@ public class AddEntryActivity extends AppCompatActivity implements
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
                     getSupportActionBar().show();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.SHOW_ACTION_BAR);
                 }
             }
         });
@@ -343,8 +352,6 @@ public class AddEntryActivity extends AppCompatActivity implements
                 return true;
             }
         });
-        getLoaderManager().restartLoader(0,null,this);
-        enter_answer.requestFocus();
     }
 
     private void setHints(int fieldType ) {
@@ -375,6 +382,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         switch (id) {
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                 bundle.putFloat(QUESTION_LAYOUT,((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
                 bundle.putFloat(ANSWER_LAYOUT,((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
@@ -383,6 +391,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
+                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
                 bundle1.putFloat(TEXT_SIZE, (enter_question.getTextSize()/scaledDensity) );
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();

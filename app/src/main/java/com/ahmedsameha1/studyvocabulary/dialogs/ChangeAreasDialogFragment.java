@@ -3,6 +3,7 @@ package com.ahmedsameha1.studyvocabulary.dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -16,7 +17,9 @@ import android.widget.Toast;
 import android.support.v7.app.AlertDialog;
 
 import com.ahmedsameha1.studyvocabulary.R;
+import com.ahmedsameha1.studyvocabulary.activities.StudyActivity;
 import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 
 /**
  * Created by ahmed on 2/7/2016.
@@ -24,11 +27,15 @@ import com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity;
 public class ChangeAreasDialogFragment extends DialogFragment{
     public static final String CHANGE_AREAS_DIALOG_FRAGMENT = "change_areas_dialog_fragment";
     private float initialQuestionArea,initialAnsweArea;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private long current_field_id;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         initialQuestionArea = getArguments().getFloat(StudyDuringActivity.QUESTION_LAYOUT);
         initialAnsweArea = getArguments().getFloat(StudyDuringActivity.ANSWER_LAYOUT);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
     }
     @NonNull
     @Override
@@ -51,21 +58,30 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if ( enterQuestionArea.getText().toString().length() > 0 && enterAnswerArea.getText().toString().length() > 0 ) {
-                            int questionArea = Integer.parseInt(enterQuestionArea.getText().toString());
-                            int answerArea = Integer.parseInt(enterAnswerArea.getText().toString());
-                            if ( questionArea > 0 && answerArea > 0 ) {
-                                ((ChangeAreas) getActivity()).changeAreas((float) questionArea,(float) answerArea);
-                                dismiss();
+                        try {
+                            if ( enterQuestionArea.getText().toString().length() > 0 && enterAnswerArea.getText().toString().length() > 0 ) {
+                                int questionArea = Integer.parseInt(enterQuestionArea.getText().toString());
+                                int answerArea = Integer.parseInt(enterAnswerArea.getText().toString());
+                                if ( questionArea > 0 && answerArea > 0 ) {
+                                    ((ChangeAreas) getActivity()).changeAreas((float) questionArea,(float) answerArea);
+                                    mySQLiteCursorLoader.updateFieldAreasSize(current_field_id,questionArea,answerArea);
+                                    dismiss();
+                                } else {
+                                    Toast toast = Toast.makeText(getActivity(), R.string.greater_than_zero, Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.TOP,0,400);
+                                    toast.show();
+                                }
                             } else {
-                                Toast toast = Toast.makeText(getActivity(), R.string.greater_than_zero, Toast.LENGTH_SHORT);
+                                Toast toast = Toast.makeText(getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
                             }
-                        } else {
-                            Toast toast = Toast.makeText(getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);
+                        } catch (NumberFormatException e) {
+                            Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP,0,400);
                             toast.show();
+                        } catch (Resources.NotFoundException e) {
+                            e.printStackTrace();
                         }
                     }
                 });

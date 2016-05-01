@@ -31,25 +31,13 @@ import com.ahmedsameha1.studyvocabulary.dialogs.DeleteEntryDialogFragment;
  */
 public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> ,
         DeleteEntryDialogFragment.Contact{
-    private static final String CURRENT_FIELD = "current_field";
-    public static final int SORT_QUESTION_DESC = 0;
-    public static final int SORT_ANSWER_DESC = 1;
-    public static final int SORT_QUESTION_ASC = 2;
-    public static final int SORT_ANSWER_ASC = 3;
-    public static final int SORT_DATE_DESC = 4;
-    public static final int SORT_DATE_ASC = 5;
     public static final int SORT_CREATION_DATE_DESC = 6;
-    public static final int SORT_CREATION_DATE_ASC = 7;
     public static final int DEFAULT_SORT = SORT_CREATION_DATE_DESC;
     public static final int SEARCH_LOADER = 0;
     private static final String QUERY_KEY = "query_key";
     private static final String CURRENT_SORT = "current_sort";
     private static final String CURRENT_FIELD_ID = "current_field_id";
-    private ListView listView;
-    private SimpleCursorAdapter simpleCursorAdapter;
-    private RecyclerView recyclerView;
     private SearchActivityRecyclerViewAdapter mAdapter;
-    private int fieldType;
     private long current_field_id;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private int currentSort;
@@ -57,12 +45,18 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        int fieldType;
+        RecyclerView recyclerView;
+        if ( savedInstanceState != null ) {
+            current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
+        } else {
+            current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
+        }
+        currentSort = getIntent().getIntExtra(StudyActivity.ORDER_OF_ENTRIES,DEFAULT_SORT);
+        fieldType = new DatabaseOperations(this).getFieldType(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.search_activity_recyclerview);
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
-        currentSort = getIntent().getIntExtra(StudyActivity.ORDER_OF_ENTRIES,DEFAULT_SORT);
         setSupportActionBar(toolbar);
-        fieldType = new DatabaseOperations(this).getFieldType(current_field_id);
         mAdapter = new SearchActivityRecyclerViewAdapter(SearchActivity.this,null, current_field_id,fieldType);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(SearchActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -71,11 +65,14 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
+        getLoaderManager();
     }
 
-/*    public void onNewIntent(Intent intent) {
+    public void onNewIntent(Intent intent) {
         setIntent(intent);
-    }*/
+        handleIntent(intent);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -92,12 +89,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             getLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
         }
     }
-    private void handleIntent(String query) {
-            Bundle bundle = new Bundle();
-            bundle.putString(QUERY_KEY, query);
-            bundle.putInt(CURRENT_SORT, currentSort);
-            getLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -106,18 +98,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                handleIntent(newText);
-                return true;
-            }
-        });
         // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false);
@@ -128,13 +109,13 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         super.onSaveInstanceState(savedInsatanceState);
         savedInsatanceState.putLong(CURRENT_FIELD_ID,current_field_id);
     }
-    @Override
+/*    @Override
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
         super.onSaveInstanceState(savedInstanceState);
         if ( savedInstanceState != null && current_field_id == 0 ) {
             current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
         }
-    }
+    }*/
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {

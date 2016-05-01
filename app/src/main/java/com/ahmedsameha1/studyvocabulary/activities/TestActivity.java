@@ -75,7 +75,6 @@ public class TestActivity extends AppCompatActivity implements
     public static final String HINT_COUNTER = "hintCounter";
     public static final String HINTS = "hints";
     public static final String WRONG_ANSWERS = "wrongAnswers";
-    public static final String WRONG_ITEMS = "wrongItems";
     public static final String LAST_SESSION_OR_NEW_ONE = "lastSessionOrNewOne";
     public static final String BOOLEAN_CONTINUE = "booleanContinue";
     private static final String QUESTION_LAYOUT = "user_defined_question_layout";
@@ -87,7 +86,6 @@ public class TestActivity extends AppCompatActivity implements
     private ArrayList<String> hints, wrongAnswers;
     private boolean boolean_continue = false, actionBarShown;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-//    private ArrayList<WrongItem> wrongItems;
     private boolean result, testingNow = false;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber,wrongAnswersCounter , percent_or_number,number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
@@ -98,10 +96,10 @@ public class TestActivity extends AppCompatActivity implements
     private TextView showQuestion, remainingQuestionCounter,showTries, showNumberOfQuestions,check,nextHint,showActionbar;
     private LinearLayout showResult,questionLinearlayout, container;
     private Handler mHandler = new Handler();
-    private Runnable mRunnable, pauseRunnable;
     private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
+            Runnable pauseRunnable;
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
             try {
                 toPause();
@@ -122,11 +120,9 @@ public class TestActivity extends AppCompatActivity implements
             }
         }
     });
-
-//    private TableRow hintTableRow;
-//    private SQLiteDatabase sqLiteDatabase;
+    private int question_data_type;
+    private int check_type;
     private TextToSpeech tts;
-    private boolean isReadAnswer;
     private boolean tts_available = false;
     private boolean locale_available = false;
     private DatabaseOperations databaseOperations;
@@ -135,6 +131,8 @@ public class TestActivity extends AppCompatActivity implements
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        int question_area_size,answer_area_size,test_text_size,action_bar_shown;
+        boolean isReadAnswer;
         // getting the reference of the fragment that holds the reference of list for test array
         retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
         // if the reference to the fragment was null we create a new fragment object and add it to the activity
@@ -156,8 +154,6 @@ public class TestActivity extends AppCompatActivity implements
         enterAnswer = (EditText) findViewById(R.id.enter_answer);
         showQuestion = (TextView) findViewById(R.id.display_question);
         check = (TextView) findViewById(R.id.check);
-//        start = (Button) findViewById(R.id.start);
-//        next = (Button) findViewById(R.id.next);
         remainingQuestionCounter = (TextView) findViewById(R.id.remaining_question_counter);
 
 
@@ -165,16 +161,13 @@ public class TestActivity extends AppCompatActivity implements
 
         nextHint = (TextView) findViewById(R.id.next_hint);
         showNumberOfQuestions = (TextView) findViewById(R.id.number_of_questions);
-//        hintTableRow = (TableRow) findViewById(R.id.hint_table_row);
         showResult = (LinearLayout) findViewById(R.id.result);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         setSupportActionBar(toolbar);
-        int screenSize = getResources().getConfiguration().screenLayout &
-                Configuration.SCREENLAYOUT_SIZE_MASK;
-        if (  screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
-                || screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL ) {
+        action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
+        if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
             getSupportActionBar().hide();
         }
         actionBarShown = getSupportActionBar().isShowing();
@@ -185,6 +178,7 @@ public class TestActivity extends AppCompatActivity implements
             checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
             startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
         }
+        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         /*start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -270,7 +264,7 @@ public class TestActivity extends AppCompatActivity implements
                             showResult.setBackgroundResource(R.drawable.enter_answer_background);
                             showResult.setPadding(0,0,0,0);
 //                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, TestActivity.this);
-                            mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+                            mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,question_data_type);
                             mySQLiteCursorLoader.clearThisFieldFromTestPaused(current_field_id);
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -332,10 +326,12 @@ public class TestActivity extends AppCompatActivity implements
                     getSupportActionBar().hide();
                     actionBarShown = (! actionBarShown);
                     showActionbar.setText(R.string.show);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
                     getSupportActionBar().show();
                     actionBarShown = (! actionBarShown);
                     showActionbar.setText(R.string.hide);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.SHOW_ACTION_BAR);
                 }
             }
         });
@@ -375,9 +371,18 @@ public class TestActivity extends AppCompatActivity implements
         } else {
             getLoaderManager().initLoader(START_NEW_SESSION,null,this);
         }
-
-
-        Log.d("fff", "onCreate()");
+        check_type = databaseOperations.getFieldCheckType(current_field_id);
+        question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
+        answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
+        changeAreas(question_area_size,answer_area_size);
+        test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
+        if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
+        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
+        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
+        }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -408,6 +413,7 @@ public class TestActivity extends AppCompatActivity implements
                 return true;
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                 bundle.putFloat(QUESTION_LAYOUT,((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
                 bundle.putFloat(ANSWER_LAYOUT,((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
@@ -416,6 +422,7 @@ public class TestActivity extends AppCompatActivity implements
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
+                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
                 bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize()/scaledDensity) );
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
@@ -431,9 +438,9 @@ public class TestActivity extends AppCompatActivity implements
     }
 
     private void toPause() {
-        if ( ! databaseOperations.checkEntriesForAnyTestOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id)) ) {
+        if ( ! databaseOperations.checkEntriesForAnyTestOrder(current_field_id,question_data_type) ) {
             mySQLiteCursorLoader.putEntriesTestOrder(current_field_id,
-                    databaseOperations.getQuestionDataType(current_field_id),listForTest);
+                    question_data_type,listForTest);
         }
         mySQLiteCursorLoader.clearThisFieldFromTestPaused(current_field_id);
         int[] array = new int[3];
@@ -524,7 +531,7 @@ public class TestActivity extends AppCompatActivity implements
             searchForCursor.close();
         }
         searchForCursor = databaseOperations.searchExactlyFor(current_field_id,
-                databaseOperations.getQuestionDataType(current_field_id), listForTest[currentQuestionCounter][0]);
+                question_data_type, listForTest[currentQuestionCounter][0]);
         if ( searchForCursor.getCount() > 1 ) {
             hints = new ArrayList<String>(3);
             hints.add( getString(R.string.first_character) + listForTest[currentQuestionCounter][1].charAt(0));
@@ -543,48 +550,94 @@ public class TestActivity extends AppCompatActivity implements
     }
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
+        Runnable mRunnable;
         boolean result = false;
-        if ( enterAnswer.getText().toString().equals(listForTest [currentQuestionCounter][1]) ){
-            if ( locale_available ) {
-                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                    tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
-                } else {
-                    tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+        if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
+            if ( enterAnswer.getText().toString().compareTo(listForTest [currentQuestionCounter][1]) == 0 ) {
+                if ( locale_available ) {
+                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+                    } else {
+                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                    }
                 }
+                showResult.setBackgroundResource(R.drawable.correct_answer_background);
+                showResult.setPadding(0,0,0,0);
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                        showResult.setPadding(0, 0, 0, 0);
+                    }
+                };
+                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                result = true;
             }
-            showResult.setBackgroundResource(R.drawable.correct_answer_background);
-            showResult.setPadding(0,0,0,0);
-            mRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                    showResult.setPadding(0, 0, 0, 0);
+            else {
+                showResult.setBackgroundResource(R.drawable.wrong_answer_background);
+                showResult.setPadding(0,0,0,0);
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                        showResult.setPadding(0, 0, 0, 0);
+                    }
+                };
+                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                result = false;
+                wrongAnswers.add(enterAnswer.getText().toString());
+            }
+            enterAnswer.setText("");
+            triesCounter++;
+            if ( triesCounter == permitedTriesNumber && !result ) {
+                wrongAnswersCounter++;
+                mySQLiteCursorLoader.putEntryWrongAnswers(listForTest [currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                wrongAnswers = null;
+            }
+        } else if ( check_type == Contract.Field.IGNORE_CASE ) {
+            if ( enterAnswer.getText().toString().compareToIgnoreCase(listForTest [currentQuestionCounter][1]) == 0 ) {
+                if ( locale_available ) {
+                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+                    } else {
+                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                    }
                 }
-            };
-            mHandler.postDelayed(mRunnable, RETURN_TIME);
-            result = true;
-        }
-        else {
-            showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-            showResult.setPadding(0,0,0,0);
-            mRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                    showResult.setPadding(0, 0, 0, 0);
-                }
-            };
-            mHandler.postDelayed(mRunnable, RETURN_TIME);
-            result = false;
-            wrongAnswers.add(enterAnswer.getText().toString());
-        }
-        enterAnswer.setText("");
-        triesCounter++;
-        if ( triesCounter == permitedTriesNumber && !result ) {
-            wrongAnswersCounter++;
-            mySQLiteCursorLoader.putEntryWrongAnswers(listForTest [currentQuestionCounter][0],
-                    listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,databaseOperations.getQuestionDataType(current_field_id));
-            wrongAnswers = null;
+                showResult.setBackgroundResource(R.drawable.correct_answer_background);
+                showResult.setPadding(0,0,0,0);
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                        showResult.setPadding(0, 0, 0, 0);
+                    }
+                };
+                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                result = true;
+            }
+            else {
+                showResult.setBackgroundResource(R.drawable.wrong_answer_background);
+                showResult.setPadding(0,0,0,0);
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                        showResult.setPadding(0, 0, 0, 0);
+                    }
+                };
+                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                result = false;
+                wrongAnswers.add(enterAnswer.getText().toString());
+            }
+            enterAnswer.setText("");
+            triesCounter++;
+            if ( triesCounter == permitedTriesNumber && !result ) {
+                wrongAnswersCounter++;
+                mySQLiteCursorLoader.putEntryWrongAnswers(listForTest [currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                wrongAnswers = null;
+            }
         }
         return result;
     }
@@ -693,7 +746,7 @@ public class TestActivity extends AppCompatActivity implements
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 // success, create the TTS instance
-                tts = new TextToSpeech(this, this);
+                tts = new TextToSpeech(getApplicationContext(), this);
                 tts_available = true;
             } else {
                 mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
@@ -824,7 +877,6 @@ public class TestActivity extends AppCompatActivity implements
                 locale_available = true;
             } else {
                 mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
-                mySQLiteCursorLoader.updateFieldLocale(current_field_id,null);
                 Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP,0,400);
                 toast.show();

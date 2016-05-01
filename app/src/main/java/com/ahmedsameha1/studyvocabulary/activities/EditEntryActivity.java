@@ -51,20 +51,12 @@ public class EditEntryActivity extends AppCompatActivity implements
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final String FIELD_TYPE = "field_type";
     public static final String ENTRY_ID = "entry_id";
-    private Spinner field_spinner;
     private EditText editQuestion;
     private EditText editAnswer;
-    private TextView add_entry;
-    private TextView add_entry_finish;
     private TextView showActionbar;
-    private SimpleCursorAdapter simple_cursor_adapter;
     private DatabaseOperations databaseOperations;
     private boolean actionBarShown;
-    private boolean fromFieldActivity;
     private int fieldType;
-    private int current_spinner_position;
-    private Cursor cursor;
-    private boolean field_chosen;
     private TextView save;
     private long current_field_id;
     private String currentQuestion;
@@ -78,16 +70,20 @@ public class EditEntryActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_entry);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        int question_area_size,answer_area_size,test_text_size,action_bar_shown;
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
         fieldType = getIntent().getIntExtra(FIELD_TYPE,0);
         entry_id = getIntent().getLongExtra(ENTRY_ID,0);
         question_data_type = getIntent().getIntExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,0);
         currentQuestion = getIntent().getStringExtra(StudyActivity.CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(StudyActivity.CURRENT_ANSWER);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         databaseOperations = new DatabaseOperations(this);
+        action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
+        question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
+        answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
+        test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         save = (TextView) findViewById(R.id.save);
         editQuestion = (EditText) findViewById(R.id.question);
@@ -95,12 +91,10 @@ public class EditEntryActivity extends AppCompatActivity implements
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
-            int screenSize = getResources().getConfiguration().screenLayout &
-                    Configuration.SCREENLAYOUT_SIZE_MASK;
-            if ( screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL
-                    || screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL) {
-                getSupportActionBar().hide();
-            }
+        setSupportActionBar(toolbar);
+        if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
+            getSupportActionBar().hide();
+        }
         actionBarShown = getSupportActionBar().isShowing();
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         editAnswer.setText(currentAnswer);
@@ -115,6 +109,15 @@ public class EditEntryActivity extends AppCompatActivity implements
                 break;
         }
         setHints(fieldType);
+        editAnswer.requestFocus();
+        changeAreas(question_area_size,answer_area_size);
+        if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
+        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
+        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
+            changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
+        }
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,10 +125,12 @@ public class EditEntryActivity extends AppCompatActivity implements
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
                     getSupportActionBar().show();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.SHOW_ACTION_BAR);
                 }
             }
         });
@@ -231,8 +236,8 @@ public class EditEntryActivity extends AppCompatActivity implements
                 return true;
             }
         });
-        editAnswer.requestFocus();
     }
+
     private void setHints(int fieldType ) {
         switch ( fieldType ) {
             case Contract.Field.NOTEBOOK_TYPE:
@@ -261,6 +266,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         switch (id) {
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                 bundle.putFloat(QUESTION_LAYOUT,((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
                 bundle.putFloat(ANSWER_LAYOUT,((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
@@ -269,6 +275,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
+                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
                 bundle1.putFloat(TEXT_SIZE, (editQuestion.getTextSize()/scaledDensity) );
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();

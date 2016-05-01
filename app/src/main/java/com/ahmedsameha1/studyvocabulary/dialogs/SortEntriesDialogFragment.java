@@ -15,33 +15,31 @@ import android.widget.EditText;
 
 import com.ahmedsameha1.studyvocabulary.R;
 import com.ahmedsameha1.studyvocabulary.activities.FieldActivity;
+import com.ahmedsameha1.studyvocabulary.activities.StudyActivity;
 import com.ahmedsameha1.studyvocabulary.adapters.FieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
+import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 
 /**
  * Created by ahmed on 12/20/2015.
  */
 public class SortEntriesDialogFragment extends DialogFragment {
     public static final String EXPORT_FIELD_DIALOG_FRAGMENT = "exportFieldDialogFragment";
-    private static final int TEXT = 0;
-    public static final int DATE = 1;
     private DatabaseOperations databaseOperations;
     private Context context;
-    private EditText enterText;
-    private String text;
     private int fieldType;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private long current_field_id;
 
-    public void setFieldActivityRecyclerViewAdapter(FieldActivityRecyclerViewAdapter fieldActivityRecyclerViewAdapter) {
-        this.fieldActivityRecyclerViewAdapter = fieldActivityRecyclerViewAdapter;
-    }
-
-    private FieldActivityRecyclerViewAdapter fieldActivityRecyclerViewAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fieldType = getArguments().getInt(FieldActivity.FIELD_TYPE);
+        databaseOperations = new DatabaseOperations(getActivity());
+        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        fieldType = databaseOperations.getFieldType(current_field_id);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
     }
     @NonNull
     @Override
@@ -76,7 +74,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_ANSWER_DESC);
-                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_ANSWER_DESC);
+                        mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_ANSWER_DESC);
                         dismiss();
                     }
                 });
@@ -84,7 +82,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_ANSWER_ASC);
-                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_ANSWER_ASC);
+                        mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_ANSWER_ASC);
                         dismiss();
                     }
                 });
@@ -92,7 +90,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_QUESTION_DESC);
-                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_QUESTION_DESC);
+                        mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_QUESTION_DESC);
                         dismiss();
                     }
                 });
@@ -100,7 +98,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_QUESTION_ASC);
-                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_QUESTION_ASC);
+                        mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_QUESTION_ASC);
                         dismiss();
                     }
                 });
@@ -108,7 +106,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_DATE_DESC);
-                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_DATE_DESC);
+                        mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_DATE_DESC);
                         dismiss();
                     }
                 });
@@ -116,7 +114,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_DATE_ASC);
-                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_DATE_ASC);
+                        mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_DATE_ASC);
                         dismiss();
                     }
                 });
@@ -124,7 +122,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_CREATION_DATE_DESC);
-                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_CREATION_DATE_DESC);
+                        mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_CREATION_DATE_DESC);
                         dismiss();
                     }
                 });
@@ -132,7 +130,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_CREATION_DATE_ASC);
-                        fieldActivityRecyclerViewAdapter.setSort(FieldActivity.SORT_CREATION_DATE_ASC);
+                        mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_CREATION_DATE_ASC);
                         dismiss();
                     }
                 });
