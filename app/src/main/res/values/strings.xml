@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Study Vocabulary</string>
+    <string name="app_name">Study Without Pen!</string>
     <string name="delete_field">Delete a Field</string>
     <string name="create_field">Create a Field</string>
     <string name="enter_field_name">Enter field name</string>

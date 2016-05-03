@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ahmedsameha1.studyvocabulary"
+    package="com.ahmedsameha1.peninbin"
     android:installLocation="auto">
-
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/MyMaterialTheme"
-        android:name="android.support.multidex.MultiDexApplication">
+        android:name="com.ahmedsameha1.peninbin.AnalyticsApplication">
 
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.FieldActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.FieldActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter >
@@ -23,7 +24,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.MainActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter>
@@ -38,53 +39,53 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.StudyActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.StudyActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.app.default_searchable"
-                android:value="com.ahmedsameha1.studyvocabulary.activities.SearchActivity" />
+                android:value="com.ahmedsameha1.peninbin.activities.SearchActivity" />
         </activity>
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.TestActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.TestActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateAlwaysVisible"
             android:launchMode="singleTop"/>
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.AddEntryActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.AddEntryActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateAlwaysVisible"
             android:launchMode="singleTop"/>
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.EditEntryActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.EditEntryActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateAlwaysVisible"
             android:launchMode="singleTop"/>
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.WrongAnswersActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.WrongAnswersActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"/>
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.StudyDuringActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.StudyDuringActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateAlwaysVisible"
             android:launchMode="singleTop"/>
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.StudyWrongAnswersActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.StudyWrongAnswersActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"/>
-        <activity android:name="com.ahmedsameha1.studyvocabulary.dialogs.ExportSuccessfulActivity"
+        <activity android:name="com.ahmedsameha1.peninbin.dialogs.ExportSuccessfulActivity"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Dialog"
             android:taskAffinity=""
             android:excludeFromRecents="true"/>
-        <activity android:name="com.ahmedsameha1.studyvocabulary.dialogs.NotImportedFieldsActivity"
+        <activity android:name="com.ahmedsameha1.peninbin.dialogs.NotImportedFieldsActivity"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Dialog"
             android:taskAffinity=""
             android:excludeFromRecents="true"/>
         <activity
-            android:name="com.ahmedsameha1.studyvocabulary.activities.SearchActivity"
+            android:name="com.ahmedsameha1.peninbin.activities.SearchActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             >

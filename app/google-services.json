@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "374962000794",
+    "project_id": "study-without-pen"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:374962000794:android:c17ad2d72a122f1a",
+        "android_client_info": {
+          "package_name": "com.ahmedsameha1.peninbin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrr_xNItak5kwcMO_6bbvF0HfOS0-FiYM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-77274864-1"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

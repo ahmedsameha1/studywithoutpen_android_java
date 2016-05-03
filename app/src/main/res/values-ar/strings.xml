@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Study Vocabulary</string>
+    <string name="app_name">Study Without Pen!</string>
     <string name="delete_field">حذف المجال</string>
     <string name="create_field">إنشاء مجال</string>
     <string name="enter_field_name">أدخل اسم المجال</string>
