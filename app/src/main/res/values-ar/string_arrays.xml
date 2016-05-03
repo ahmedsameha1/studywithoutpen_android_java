@@ -15,7 +15,7 @@
         <item>راجع التطبيق على متجر بلاي</item>
         <item>صفحة facebook</item>
     </string-array>
-    <string-array name="field_types">
+    <string-array name="field_type">
         <item>عاديّ</item>
         <item>مُفَكِّرَة</item>
         <item>اختر نوعا للمجال</item>
