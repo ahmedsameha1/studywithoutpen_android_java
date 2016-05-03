@@ -66,13 +66,13 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
 
-    public void createField(String field_name, int field_type, int question_data_type,boolean check_type, boolean read_answer, String locale) {
+    public void createField(String field_name, int field_type, int question_data_type,int check_type, boolean read_answer, String locale) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
         contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
         contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
-        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, check_type ? Contract.Field.IGNORE_CASE : Contract.Field.DO_NOT_IGNORE_CASE);
+        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, check_type );
         contentValues.put(Contract.Field.COLUMN_READ_ANSWER, read_answer ? Contract.Field.READ_ANSWER : Contract.Field.DO_NOT_READ_ANSWER);
         if ( locale != null ) {
             contentValues.put(Contract.Field.COLUMN_LOCALE,locale);
@@ -141,9 +141,9 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
     }
-    public void updateFieldCheckType( long field_id, boolean isIgnoreCase ) {
+    public void updateFieldCheckType( long field_id, int check_type ) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, isIgnoreCase ? Contract.Field.IGNORE_CASE : Contract.Field.DO_NOT_IGNORE_CASE);
+        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, check_type);
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
@@ -278,8 +278,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         return (new EditEntryTask(loader));
     }
 
-
-
+    public void updateFieldName(long current_field_id, String s) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field.COLUMN_FIELD_NAME,s);
+        db.getWritableDatabase().update(Contract.Field.TABLE_NAME,contentValues,
+                Contract.COLUMN_ID + " = ? ", new String[]{current_field_id + ""});
+    }
 
 
     protected static class EditEntryTask extends ContentChangingTask {

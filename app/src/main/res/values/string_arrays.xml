@@ -11,13 +11,20 @@
         <item>Sort</item>
         <item>Study a Period</item>
         <item>Test</item>
-        <item>Field Options</item>
+        <item>Field Properties</item>
         <item>Review on Play Store</item>
         <item>Facebook Page</item>
     </string-array>
-    <string-array name="field_types">
+    <string-array name="field_type">
         <item>Default</item>
         <item>Notebook</item>
-        <item>Select a Field Type</item>
+        <item>Select a field type</item>
+    </string-array>
+    <string-array name="check_type">
+        <item>Ignore either letters case and spaces</item>
+        <item>Ignore spaces</item>
+        <item>Ignore letters case</item>
+        <item>Don\'t ignore either letters case or spaces</item>
+        <item>Select a check type</item>
     </string-array>
 </resources>

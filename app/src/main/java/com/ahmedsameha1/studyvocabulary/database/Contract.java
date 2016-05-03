@@ -17,8 +17,10 @@ public final class Contract {
         public static final int NOT_STRING_DATA_TYPE = 1;
         public static final int DO_NOT_READ_ANSWER = 0;
         public static final int READ_ANSWER = 1;
-        public static final int DO_NOT_IGNORE_CASE = 0;
-        public static final int IGNORE_CASE = 1;
+        public static final int DO_NOT_IGNORE_CASE = 3;
+        public static final int IGNORE_CASE = 2;
+        public static final int NON_STRICT_DO_NOT_IGNORE_CASE = 1;
+        public static final int NON_STRICT_IGNORE_CASE = 0;
         public static final int SHOW_ACTION_BAR = 0;
         public static final int DO_NOT_SHOW_ACTION_BAR = 1;
         public static final String TABLE_NAME = "field";

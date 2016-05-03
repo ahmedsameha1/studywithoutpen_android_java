@@ -403,4 +403,12 @@ public class DatabaseOperations {
         return number;
     }
 
+    public String getFieldName(long current_field_id) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_FIELD_NAME},
+                Contract.COLUMN_ID + " = ? ", new String[]{current_field_id + ""},null,null,null);
+        cursor.moveToFirst();
+        String name = cursor.getString(0);
+        cursor.close();
+        return name;
+    }
 }

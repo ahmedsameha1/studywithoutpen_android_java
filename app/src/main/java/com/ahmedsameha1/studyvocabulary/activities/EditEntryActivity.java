@@ -153,7 +153,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                                     intent.putExtra(FieldActivity.EDITED_ANSWER,editedAnswer);
                                     setResult(RESULT_OK,intent);
                                 } else {
-                                Toast toast = Toast.makeText(EditEntryActivity.this, R.string.repeated_entry, Toast.LENGTH_LONG);
+                                Toast toast = Toast.makeText(EditEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                                 }
@@ -176,7 +176,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                                     intent.putExtra(FieldActivity.EDITED_ANSWER,editedAnswer);
                                     setResult(RESULT_OK,intent);
                                 } else {
-                                    Toast toast = Toast.makeText(EditEntryActivity.this, R.string.repeated_entry, Toast.LENGTH_LONG);
+                                    Toast toast = Toast.makeText(EditEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                     toast.setGravity(Gravity.TOP, 0, 400);
                                     toast.show();
                                 }

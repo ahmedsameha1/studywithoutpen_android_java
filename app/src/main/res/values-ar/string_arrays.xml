@@ -11,7 +11,7 @@
         <item>رَتِّب</item>
         <item>ذاكر فترة</item>
         <item>اختبر نفسك</item>
-        <item>خيارات المجال</item>
+        <item>خصائص المجال</item>
         <item>راجع التطبيق على متجر بلاي</item>
         <item>صفحة facebook</item>
     </string-array>
@@ -19,5 +19,12 @@
         <item>عاديّ</item>
         <item>مُفَكِّرَة</item>
         <item>اختر نوعا للمجال</item>
+    </string-array>
+    <string-array name="check_type">
+        <item>تجاهل كل من حالة الأحرف والمسافات</item>
+        <item>تجاهل المسافات</item>
+        <item>تجاهل حالة الأحرف</item>
+        <item>لا تتجاهل حالة الأحرف والمسافات</item>
+        <item>اختر نوع التَّحَقُّق</item>
     </string-array>
 </resources>

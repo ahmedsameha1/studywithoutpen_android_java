@@ -138,10 +138,12 @@
     <string name="import_user_usage">لو كنت أنت من أنشأ هذا الملف، اختر نعم.\nلو كان أحد غيرك قد أنشأ هذا الملف ثم شاركه معك، اختر لا.</string>
     <string name="copy_in_the_following_folder">انسخ الملف الذي تريد استيراده في المجلد التالي:</string>
     <string name="ignore_case">تجاهل حالة الحرف أثناء التّحَقق.</string>
-    <string name="read_answer">قراءة الجواب (لو أجبت بشكل صحيح)!!</string>
-    <string name="field_options">خيارات المجال</string>
+    <string name="read_answer">قراءة الجواب (لو أجبت بشكل صحيح!!)</string>
+    <string name="field_properties">خصائص المجال</string>
     <string name="select_locale">اختر كيف سيقرأ الجواب:</string>
     <string name="tts_not_available">آلة تحويل النص إلى حديث غير متوفرة، لذلك ألغى التطبيق خاصية قراءة الجواب. اذهب إلى Google Play و نصب تطبيق  Text to Speech لكي تفعل هذه الخاصية.</string>
     <string name="locale_is_not_available">تم ألغاء تفعيل خاصية قراءة الجواب لعدم توفر اللغة.</string>
     <string name="not_allowed_number">هذا الرقم غير مسموح به.</string>
+    <string name="select_a_check_type">اختر نوع التَّحَقُّق</string>
+    <string name="enter_new_field_name">أدخل اسم جديد للمجال</string>
 </resources>

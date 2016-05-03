@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ahmedsameha1.studyvocabulary.database.CompareUtility;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
@@ -474,9 +475,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private boolean checkAnAnswer() {
         Runnable mRunnable;
         boolean result = false;
-        if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
-            if (enterAnswer.getText().toString().compareTo(listForTest[currentQuestionCounter][1]) == 0 ) {
-    //            check.setBackgroundResource(R.drawable.ic_correct_sign);
+        if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
+            if ( CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1],enterAnswer.getText().toString()) ) {
                 if ( locale_available ) {
                     if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                         tts.speak(listForTest[currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
@@ -521,9 +521,100 @@ public class StudyDuringActivity extends AppCompatActivity implements
                     repeatedEntries.add(currentQuestionCounter);
                 }
             }
+        } else if ( check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE ) {
+            if ( CompareUtility.nonStrictCompare(listForTest[currentQuestionCounter][1],enterAnswer.getText().toString()) ) {
+                if ( locale_available ) {
+                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                        tts.speak(listForTest[currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+                    } else {
+                        tts.speak(listForTest[currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                    }
+                }
+                showResult.setBackgroundResource(R.drawable.correct_answer_background);
+                showResult.setPadding(0, 0, 0, 0);
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                        showResult.setPadding(0, 0, 0, 0);
+                    }
+                };
+                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                result = true;
+            } else {
+                //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
+                showResult.setBackgroundResource(R.drawable.wrong_answer_background);
+                showResult.setPadding(0, 0, 0, 0);
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                        showResult.setPadding(0, 0, 0, 0);
+                    }
+                };
+                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                result = false;
+                //            wrongAnswers.add(enterAnswer.getText().toString());
+            }
+            enterAnswer.setText("");
+            triesCounter++;
+            if (triesCounter == permitedTriesNumber && !result) {
+                //            wrongAnswersCounter++;
+                //            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
+                //            wrongItems.add(wrongItem);
+                //            wrongAnswers = null;
+                if (!repeatedEntries.contains(Integer.valueOf(currentQuestionCounter))) {
+                    repeatedEntries.add(currentQuestionCounter);
+                }
+            }
         } else if ( check_type == Contract.Field.IGNORE_CASE ) {
-            if (enterAnswer.getText().toString().compareToIgnoreCase(listForTest[currentQuestionCounter][1]) == 0 ) {
-                //            check.setBackgroundResource(R.drawable.ic_correct_sign);
+            if ( enterAnswer.getText().toString().equalsIgnoreCase(listForTest[currentQuestionCounter][1]) ) {
+                if ( locale_available ) {
+                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                        tts.speak(listForTest[currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+                    } else {
+                        tts.speak(listForTest[currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                    }
+                }
+                showResult.setBackgroundResource(R.drawable.correct_answer_background);
+                showResult.setPadding(0, 0, 0, 0);
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                        showResult.setPadding(0, 0, 0, 0);
+                    }
+                };
+                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                result = true;
+            } else {
+                //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
+                showResult.setBackgroundResource(R.drawable.wrong_answer_background);
+                showResult.setPadding(0, 0, 0, 0);
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                        showResult.setPadding(0, 0, 0, 0);
+                    }
+                };
+                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                result = false;
+                //            wrongAnswers.add(enterAnswer.getText().toString());
+            }
+            enterAnswer.setText("");
+            triesCounter++;
+            if (triesCounter == permitedTriesNumber && !result) {
+                //            wrongAnswersCounter++;
+                //            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
+                //            wrongItems.add(wrongItem);
+                //            wrongAnswers = null;
+                if (!repeatedEntries.contains(Integer.valueOf(currentQuestionCounter))) {
+                    repeatedEntries.add(currentQuestionCounter);
+                }
+            }
+        } else if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
+            if ( enterAnswer.getText().toString().equals(listForTest[currentQuestionCounter][1]) ) {
                 if ( locale_available ) {
                     if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                         tts.speak(listForTest[currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);

@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.ahmedsameha1.studyvocabulary.database.CompareUtility;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
@@ -280,22 +281,62 @@ public class StudyActivity extends AppCompatActivity implements
                 String entered_question = enterQuestion.getText().toString();
                 String entered_answer = enterAnswer.getText().toString();
                 if (studyQuestion.isChecked() && studyAnswer.isChecked()) {
-                    if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE) {
-                        if ( entered_question.compareTo(currentQuestion) == 0 ) {
+                    if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
+                        if ( CompareUtility.nonStrictCompareIgnoreCase(currentQuestion,entered_question) ) {
                             questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
                             questionLinearlayout.setPadding(0, 0, 0, 0);
                         } else {
                             questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             questionLinearlayout.setPadding(0, 0, 0, 0);
                         }
-                        if ( entered_answer.compareTo(currentAnswer) == 0 ) {
+                        if ( CompareUtility.nonStrictCompareIgnoreCase(currentAnswer,entered_answer)) {
                             answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
                         }
-                        if ( (entered_question.compareTo(currentQuestion) == 0) && (entered_answer.compareTo(currentAnswer) == 0) ) {
+                        if ( CompareUtility.nonStrictCompareIgnoreCase(currentQuestion,entered_question) &&
+                                CompareUtility.nonStrictCompareIgnoreCase(currentAnswer,entered_answer)) {
+                            if ( locale_available ) {
+                                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                } else {
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                                }
+                            }
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                        }
+                        enterQuestion.setText("");
+                        enterAnswer.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                                answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                answerLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    } else if ( check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE) {
+                        if ( CompareUtility.nonStrictCompare(currentQuestion,entered_question) ) {
+                            questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        if ( CompareUtility.nonStrictCompare(currentAnswer,entered_answer)) {
+                            answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        if ( CompareUtility.nonStrictCompare(currentQuestion,entered_question) &&
+                                CompareUtility.nonStrictCompare(currentAnswer,entered_answer)) {
                             if ( locale_available ) {
                                 if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                                     tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
@@ -319,21 +360,59 @@ public class StudyActivity extends AppCompatActivity implements
                         };
                         mHandler.postDelayed(mRunnable, RETURN_TIME);
                     } else if ( check_type == Contract.Field.IGNORE_CASE ){
-                        if ( entered_question.compareToIgnoreCase(currentQuestion) == 0 ) {
+                        if ( entered_question.equalsIgnoreCase(currentQuestion) ) {
                             questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
                             questionLinearlayout.setPadding(0, 0, 0, 0);
                         } else {
                             questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             questionLinearlayout.setPadding(0, 0, 0, 0);
                         }
-                        if ( entered_answer.compareToIgnoreCase(currentAnswer) == 0 ) {
+                        if ( entered_answer.equalsIgnoreCase(currentAnswer) ) {
                             answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
                         }
-                        if ( (entered_question.compareToIgnoreCase(currentQuestion) == 0) && (entered_answer.compareToIgnoreCase(currentAnswer) == 0)) {
+                        if ( entered_question.equalsIgnoreCase(currentQuestion) && entered_answer.equalsIgnoreCase(currentAnswer)) {
+                            if ( locale_available ) {
+                                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                } else {
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                                }
+                            }
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                        }
+                        enterQuestion.setText("");
+                        enterAnswer.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                                answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                answerLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    } else if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ){
+                        if ( entered_question.equals(currentQuestion) ) {
+                            questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        if ( entered_answer.equals(currentAnswer) ) {
+                            answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        if ( entered_question.equals(currentQuestion) && entered_answer.equals(currentAnswer)) {
                             if ( locale_available ) {
                                 if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                                     tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
@@ -358,8 +437,27 @@ public class StudyActivity extends AppCompatActivity implements
                         mHandler.postDelayed(mRunnable, RETURN_TIME);
                     }
                 } else if (studyQuestion.isChecked()) {
-                    if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
-                        if (entered_question.compareTo(currentQuestion) == 0) {
+                    if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
+                        if ( CompareUtility.nonStrictCompareIgnoreCase(currentQuestion,entered_question) ) {
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                            questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        enterQuestion.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    } else if ( check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE ) {
+                        if ( CompareUtility.nonStrictCompare(currentQuestion,entered_question) ) {
                             correctAnswersCounter++;
                             correctAnswers.setText(Integer.toString(correctAnswersCounter));
                             questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
@@ -378,7 +476,26 @@ public class StudyActivity extends AppCompatActivity implements
                         };
                         mHandler.postDelayed(mRunnable, RETURN_TIME);
                     } else if ( check_type == Contract.Field.IGNORE_CASE ) {
-                        if (entered_question.compareToIgnoreCase(currentQuestion) == 0) {
+                        if (entered_question.equalsIgnoreCase(currentQuestion)) {
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                            questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            questionLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        enterQuestion.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    } else if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
+                        if (entered_question.equals(currentQuestion)) {
                             correctAnswersCounter++;
                             correctAnswers.setText(Integer.toString(correctAnswersCounter));
                             questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
@@ -398,8 +515,34 @@ public class StudyActivity extends AppCompatActivity implements
                         mHandler.postDelayed(mRunnable, RETURN_TIME);
                     }
                 } else if (studyAnswer.isChecked()) {
-                    if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
-                        if (entered_answer.compareTo(currentAnswer) == 0 ) {
+                    if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
+                        if ( CompareUtility.nonStrictCompareIgnoreCase(currentAnswer,entered_answer) ) {
+                            if ( locale_available ) {
+                                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                } else {
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                                }
+                            }
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                            answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        enterAnswer.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                answerLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    } else if ( check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE ) {
+                        if ( CompareUtility.nonStrictCompare(currentAnswer,entered_answer) ) {
                             if ( locale_available ) {
                                 if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                                     tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
@@ -425,7 +568,33 @@ public class StudyActivity extends AppCompatActivity implements
                         };
                         mHandler.postDelayed(mRunnable, RETURN_TIME);
                     } else if ( check_type == Contract.Field.IGNORE_CASE ){
-                        if (entered_answer.compareToIgnoreCase(currentAnswer) == 0 ) {
+                        if (entered_answer.equalsIgnoreCase(currentAnswer) ) {
+                            if ( locale_available ) {
+                                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                } else {
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null);
+                                }
+                            }
+                            correctAnswersCounter++;
+                            correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                            answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        } else {
+                            answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
+                        enterAnswer.setText("");
+                        mRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                answerLinearlayout.setPadding(0, 0, 0, 0);
+                            }
+                        };
+                        mHandler.postDelayed(mRunnable, RETURN_TIME);
+                    } else if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ){
+                        if (entered_answer.equals(currentAnswer) ) {
                             if ( locale_available ) {
                                 if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                                     tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);

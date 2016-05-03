@@ -140,10 +140,12 @@
     <string name="import_user_usage">If you are the one who has created this file, click yes.\nIf this file was created by others then shared with you, click no.</string>
     <string name="copy_in_the_following_folder">Copy the file that you want to import in the following folder:</string>
     <string name="ignore_case">Ignore the case of the letters while checking.</string>
-    <string name="read_answer">Read the answer (if you have answered correctly)!!</string>
-    <string name="field_options">Field Options</string>
+    <string name="read_answer">Read the answer (if you have answered correctly!!)</string>
+    <string name="field_properties">Field Properties</string>
     <string name="select_locale">Select how to read the answer:</string>
     <string name="tts_not_available">Text to Speech engine isn\'t available, so the app disabled read the answer feature. please go to Google Play and install Text to Speech to enable this feature.</string>
     <string name="locale_is_not_available">The read answer feature has been disabled because the language is not available.</string>
     <string name="not_allowed_number">This number isn\'t allowed.</string>
+    <string name="select_a_check_type">Select a check type</string>
+    <string name="enter_new_field_name">Enter a new field name</string>
 </resources>

@@ -25,20 +25,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabulary.adapters.FieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
-import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.DeleteEntryDialogFragment;
-import com.ahmedsameha1.studyvocabulary.dialogs.FieldOptionsDialogFragment;
+import com.ahmedsameha1.studyvocabulary.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.SearchDateOrTextDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.StudyDuringDialogFragment;
@@ -371,17 +369,17 @@ public class FieldActivity extends AppCompatActivity implements
                     String country = stringTokenizer.nextToken();
                     Locale locale = new Locale(lang, country);
                     boolean locale_available = (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE);
-                    bundle.putBoolean(FieldOptionsDialogFragment.LOCALE_AVAILABLE, locale_available);
+                    bundle.putBoolean(FieldPropertiesDialogFragment.LOCALE_AVAILABLE, locale_available);
                     if (tts_available && locale_available) {
-                        bundle.putInt(FieldOptionsDialogFragment.INDEX_OF_LOCALE, localeList.indexOf(locale));
+                        bundle.putInt(FieldPropertiesDialogFragment.INDEX_OF_LOCALE, localeList.indexOf(locale));
                     }
                 }
-                bundle.putBoolean(FieldOptionsDialogFragment.TTS_AVAILABLE, tts_available);
-                bundle.putStringArrayList(FieldOptionsDialogFragment.LOCALE_DISPLAY_NAMES, locale_display_names);
-                bundle.putSerializable(FieldOptionsDialogFragment.LOCALE_LIST, localeList);
-                FieldOptionsDialogFragment fieldOptionsDialogFragment = new FieldOptionsDialogFragment();
-                fieldOptionsDialogFragment.setArguments(bundle);
-                fieldOptionsDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
+                bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
+                bundle.putStringArrayList(FieldPropertiesDialogFragment.LOCALE_DISPLAY_NAMES, locale_display_names);
+                bundle.putSerializable(FieldPropertiesDialogFragment.LOCALE_LIST, localeList);
+                FieldPropertiesDialogFragment fieldPropertiesDialogFragment = new FieldPropertiesDialogFragment();
+                fieldPropertiesDialogFragment.setArguments(bundle);
+                fieldPropertiesDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
                 break;
             case REVIEW:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());

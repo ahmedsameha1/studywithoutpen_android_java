@@ -20,7 +20,6 @@ import android.support.v4.content.ContextCompat;
 import android.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
@@ -31,24 +30,20 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.studyvocabulary.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.studyvocabulary.database.Contract;
 
 import com.ahmedsameha1.studyvocabulary.database.DatabaseHelper;
-import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.ExportImportDatabase;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.studyvocabulary.dialogs.CreateFieldDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ExportFieldsDialogFragment;
-import com.ahmedsameha1.studyvocabulary.dialogs.FieldOptionsDialogFragment;
+import com.ahmedsameha1.studyvocabulary.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.studyvocabulary.dialogs.ImportFieldsDialogFragment;
 import com.ahmedsameha1.studyvocabulary.fragments.MainActivityFragmentDrawer;
 import com.ahmedsameha1.studyvocabulary.R;
@@ -157,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.swapCursor(null);
             }
         };
-        getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
+        getLoaderManager();
     }
 
 
@@ -298,14 +293,12 @@ public class MainActivity extends AppCompatActivity implements
         getLoaderManager().restartLoader(SEARCH_FIELDS_ID, bundle, getFields);
     }
 
-    /*
-    Because the database related objects should close as soon as the activity does not use it, I put all database work on onResume()
-    onResume() will be called before the user can react with the activity
-    in onPause() I close all database related objects.
-     */
 
-
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
+    }
 
     private void addFab() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -343,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 Bundle bundle = new Bundle();
-                bundle.putBoolean(FieldOptionsDialogFragment.TTS_AVAILABLE,tts_available);
+                bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE,tts_available);
                 CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
                 fragment.setArguments(bundle);
                 fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
@@ -364,8 +357,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void createField(String field_name, int field_type, int question_data_type,boolean ignore_case, boolean read_answer, String locale) {
-        mySQLiteCursorLoader.createField(field_name, field_type, question_data_type,ignore_case,read_answer,locale);
+    public void createField(String field_name, int field_type, int question_data_type,int check_type, boolean read_answer, String locale) {
+        mySQLiteCursorLoader.createField(field_name, field_type, question_data_type,check_type,read_answer,locale);
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
     }
 

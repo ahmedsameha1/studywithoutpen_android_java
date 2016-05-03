@@ -11,33 +11,26 @@ import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.ahmedsameha1.studyvocabulary.R;
 import com.ahmedsameha1.studyvocabulary.activities.StudyActivity;
-import com.ahmedsameha1.studyvocabulary.activities.TestActivity;
 import com.ahmedsameha1.studyvocabulary.adapters.SpinnerWithHintAdapter;
-import com.ahmedsameha1.studyvocabulary.database.Contract;
 import com.ahmedsameha1.studyvocabulary.database.DatabaseOperations;
 import com.ahmedsameha1.studyvocabulary.database.MySQLiteCursorLoader;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.StringTokenizer;
 
 /**
  * Created by ahmed on 28/04/16.
  */
-public class FieldOptionsDialogFragment extends DialogFragment {
+public class FieldPropertiesDialogFragment extends DialogFragment {
     public static final String TEST_DIALOG_FRAGMENT = "test_dialog_fragment";
     public static final String LOCALE_DISPLAY_NAMES = "local_display_names";
     public static final String LOCALE_LIST = "locale_list";
@@ -53,12 +46,12 @@ public class FieldOptionsDialogFragment extends DialogFragment {
     private String locale_short_name;
     private boolean isReadAnswer;
     private int check_type;
-    private CheckBox ignore_case;
     private CheckBox read_answer;
     private Spinner select_locale;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private Button positive_button;
     private int index_of_locale;
+    private String field_name;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,6 +67,7 @@ public class FieldOptionsDialogFragment extends DialogFragment {
         isReadAnswer = databaseOpertations.isReadAnswer(current_field_id);
         locale_short_name = databaseOpertations.getFieldLocale(current_field_id);
         check_type = databaseOpertations.getFieldCheckType(current_field_id);
+        field_name = databaseOpertations.getFieldName(current_field_id);
     }
 
     @NonNull
@@ -82,20 +76,27 @@ public class FieldOptionsDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
-                builder.setTitle(R.string.field_options)
-                        .setView(inflater.inflate(R.layout.field_options_dialog_fragment, null))
+                builder.setTitle(R.string.field_properties)
+                        .setView(inflater.inflate(R.layout.field_properties_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
 
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                ignore_case = (CheckBox) alertDialog.findViewById(R.id.ignore_case);
+                final EditText new_field_name = (EditText) alertDialog.findViewById(R.id.enter_new_field_name);
+                final Spinner select_check_type = (Spinner) alertDialog.findViewById(R.id.check_type_spinner);
                 read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
                 select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
                 positive_button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                new_field_name.setText(field_name);
                 read_answer.setChecked(isReadAnswer);
-                ignore_case.setChecked(check_type > Contract.Field.DO_NOT_IGNORE_CASE);
+                final SpinnerWithHintAdapter check_type_adapter = new SpinnerWithHintAdapter(getActivity(),
+                        android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.check_type));
+                check_type_adapter.setDropDownViewResource
+                        (android.R.layout.simple_spinner_dropdown_item);
+                select_check_type.setAdapter(check_type_adapter);
+                select_check_type.setSelection(check_type);
                 final SpinnerWithHintAdapter spinnerWithHintAdapter =
                         new SpinnerWithHintAdapter(getActivity(),android.R.layout.simple_spinner_item,locale_display_names);
 
@@ -133,23 +134,36 @@ public class FieldOptionsDialogFragment extends DialogFragment {
                 positive_button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if ( read_answer.isChecked() && select_locale.getSelectedItemPosition() == spinnerWithHintAdapter.getCount() ) {
-                            Toast toast = Toast.makeText(getActivity(), R.string.select_locale, Toast.LENGTH_SHORT);
+                        if ( new_field_name.getText().toString().length() > 0 ) {
+                            if ( read_answer.isChecked() && select_locale.getSelectedItemPosition() == spinnerWithHintAdapter.getCount() ) {
+                                Toast toast = Toast.makeText(getActivity(), R.string.select_locale, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else if ( select_check_type.getSelectedItemPosition() == check_type_adapter.getCount() ) {
+                                Toast toast = Toast.makeText(getActivity(), R.string.select_a_check_type, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else {
+                                if ( ! new_field_name.equals(field_name) ) {
+                                    mySQLiteCursorLoader.updateFieldName(current_field_id,new_field_name.getText().toString());
+                                }
+                                mySQLiteCursorLoader.updateFieldCheckType(current_field_id,select_check_type.getSelectedItemPosition());
+                                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,read_answer.isChecked());
+                                int selected_locale_position = select_locale.getSelectedItemPosition();
+                                if ( selected_locale_position < spinnerWithHintAdapter.getCount()
+                                        && selected_locale_position >= 0 ) {
+                                    Locale locale = localeList.get(selected_locale_position);
+                                    locale_short_name = locale.getLanguage() + "," + locale.getCountry();
+                                    mySQLiteCursorLoader.updateFieldLocale(current_field_id,locale_short_name);
+                                } else {
+                                    mySQLiteCursorLoader.updateFieldLocale(current_field_id,null);
+                                }
+                                dismiss();
+                            }
+                        } else {
+                            Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP,0,400);
                             toast.show();
-                        } else {
-                            mySQLiteCursorLoader.updateFieldCheckType(current_field_id,ignore_case.isChecked());
-                            mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,read_answer.isChecked());
-                            int selected_locale_position = select_locale.getSelectedItemPosition();
-                            if ( selected_locale_position < spinnerWithHintAdapter.getCount()
-                                    && selected_locale_position >= 0 ) {
-                                Locale locale = localeList.get(selected_locale_position);
-                                locale_short_name = locale.getLanguage() + "," + locale.getCountry();
-                                mySQLiteCursorLoader.updateFieldLocale(current_field_id,locale_short_name);
-                            } else {
-                                mySQLiteCursorLoader.updateFieldLocale(current_field_id,null);
-                            }
-                            dismiss();
                         }
                     }
                 });
