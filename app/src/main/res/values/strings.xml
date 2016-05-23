@@ -19,7 +19,7 @@
     <string name="number_of_characters">"The number of characters is: "</string>
     <string name="last_character">"The last character is: "</string>
     <string name="enter_tries_number">Enter number of tries</string>
-    <string name="test_has_completed">Test has completed</string>
+    <string name="test_has_completed">Test Has Completed</string>
     <string name="Your_correct_answers_was">"Your correct answers was: "</string>
     <string name="of_questions">" of questions."</string>
     <string name="try_number">Try Number: %1$s</string>
@@ -133,7 +133,7 @@
     <string name="pause_do_not_shutdown">This may take some time, so don\'t close the app untill it notifies you. You can press home button, but don\'t press back button.</string>
     <string name="pause_shutdown">Study Without Pen!: the pause operation completed, you can close the app now.</string>
     <string name="wait_until_test_pausing_finish">Please, wait until the current test session pause opertation of this field finishes.</string>
-    <string name="wait_until_study_during_pausing_finish" >Please, wait until the current study a period session pause opertation of this field finishes.</string>
+    <string name="wait_until_study_during_pausing_finish">Please, wait until the current study a period session pause opertation of this field finishes.</string>
     <string name="wait_until_current_session_pausing_finish">Please, wait until any pausing operations of this field finish</string>
     <string name="pause_testing_now">Pause testing now!</string>
     <string name="already_inserted">This entry is already in this field!</string>
@@ -148,4 +148,27 @@
     <string name="not_allowed_number">This number isn\'t allowed.</string>
     <string name="select_a_check_type">Select a check type</string>
     <string name="enter_new_field_name">Enter a new field name</string>
+    <string name="quick_test_result">Quick Test Result</string>
+    <string name="quick_test_has_completed">Quick Test Has Completed</string>
+    <string name="start_a_quick_test">Start a Quick Test</string>
+    <string name="quick_test_time">Quick Test Time</string>
+    <string name="quick_test_time_text">Always Be Prepared</string>
+    <string name="schedule_quick_test">Schedule for a Quick Test</string>
+    <string name="schedule_text">Schedule for a Test</string>
+    <string name="schedule_study_perioid">Schedule for Study a Peroid</string>
+    <string name="test_time">Test Time</string>
+    <string name="study_period_time">Study a Peroid Time</string>
+    <string name="scheduled">Scheduled</string>
+    <string name="schedule_random_quick_tests">Schedule random quick test</string>
+    <string name="enter_values_of_tries_question_quick_tests">Please, enter number of tries, number of questions and number of quick tests</string>
+    <string name="zero_not_allowed">Zero isn\'t allowed!</string>
+    <string name="dont_schedule_tests_these_times">Exclude times from random quick tests</string>
+    <string name="fill_all_fields">Please, fill all fields</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="some_start_later_than_end">Please (To) must be later than (From)</string>
+    <string name="take_effect_next_midnight">Any change will take effect starting from the next midnight</string>
+    <string name="the_number_of_questions">The number of questions</string>
+    <string name="the_number_of_tries">The number of tries</string>
+    <string name="the_number_of_quick_tests">The number of quick tests</string>
 </resources>

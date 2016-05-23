@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+import com.ahmedsameha1.peninbin.activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
@@ -20,6 +21,7 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
     private long current_field_id;
     private DatabaseOperations databaseOperations;
     private int question_data_type;
+    private boolean from_notification;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,6 +29,7 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         databaseOperations = new DatabaseOperations(getActivity());
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
+        from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
     }
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {
@@ -40,6 +43,9 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                 intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,true);
                                 startActivity(intent);
+                                if ( from_notification ) {
+                                    getActivity().finish();
+                                }
                             }
                         }
                 )

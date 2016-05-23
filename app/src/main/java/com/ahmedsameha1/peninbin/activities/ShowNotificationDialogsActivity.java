@@ -1,0 +1,101 @@
+package com.ahmedsameha1.peninbin.activities;
+
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.widget.Toast;
+
+import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.QuickTestDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TestDialogFragment;
+
+public class ShowNotificationDialogsActivity extends AppCompatActivity {
+
+    public static final String DIALOG_TYPE = "dialog_type";
+    public static final int QUICK_TEST_DIALOG = 0;
+    public static final int TEST_DIALOG = 1;
+    public static final int STUDY_PERIOD_DIALOG = 2;
+    public static final String FROM_NOTIFICATION = "from_notification";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_show_notification_dialogs);
+        DatabaseOperations databaseOperations = new DatabaseOperations(this);
+        long current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, -1);
+        int dialog_type = getIntent().getIntExtra(DIALOG_TYPE, -1);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        int number_of_entries = databaseOperations.getEntriesNumber(current_field_id, databaseOperations.getQuestionDataType(current_field_id));
+        int field_type = databaseOperations.getFieldType(current_field_id);
+        Bundle bundle = new Bundle();
+        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        bundle.putBoolean(FROM_NOTIFICATION, true);
+        switch (dialog_type) {
+            case QUICK_TEST_DIALOG:
+
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                QuickTestDialogFragment quickTestDialogFragment = new QuickTestDialogFragment();
+                quickTestDialogFragment.setArguments(bundle);
+                quickTestDialogFragment.show(getSupportFragmentManager(), QuickTestDialogFragment.QUICK_TEST_DIALOG);
+
+                break;
+            case TEST_DIALOG:
+                if (!sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + current_field_id)) {
+
+                    if (number_of_entries > 0) {
+                        if (databaseOperations.isThisFieldTestPaused(current_field_id)) {
+                            AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
+                            fragment3.setArguments(bundle);
+                            fragment3.show(getSupportFragmentManager(), FieldActivity.CHECK_IF_CONTINUE_TEST_SESSION);
+                        } else {
+                            TestDialogFragment dialogFragment = new TestDialogFragment();
+                            dialogFragment.setArguments(bundle);
+                            dialogFragment.show(getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
+                        }
+                    } else {
+                        Toast toast = Toast.makeText(this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                break;
+            case STUDY_PERIOD_DIALOG:
+                if (!sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + current_field_id)) {
+
+                    if (number_of_entries > 0) {
+                        if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
+                            AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
+                            fragment2.setArguments(bundle);
+                            fragment2.show(getSupportFragmentManager(), FieldActivity.CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
+                        } else {
+                            StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                            fragment2.setArguments(bundle);
+                            fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+                        }
+                    } else {
+                        Toast toast = Toast.makeText(this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.wait_until_study_during_pausing_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                break;
+        }
+    }
+
+}

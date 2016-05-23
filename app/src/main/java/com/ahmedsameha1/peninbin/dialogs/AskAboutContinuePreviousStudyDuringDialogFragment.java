@@ -8,6 +8,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
 
+import com.ahmedsameha1.peninbin.activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
@@ -20,10 +21,12 @@ import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFragment {
     private long current_field_id;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private boolean from_notification;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
     }
 
     @Override
@@ -40,6 +43,9 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,(current_field_id));
                                 intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,true);
                                 startActivity(intent);
+                                if ( from_notification ) {
+                                    getActivity().finish();
+                                }
                             }
                         }
 

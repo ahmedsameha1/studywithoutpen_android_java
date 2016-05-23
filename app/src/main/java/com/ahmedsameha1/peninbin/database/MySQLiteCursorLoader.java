@@ -6,7 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
+import android.util.Log;
 
+import com.ahmedsameha1.peninbin.dialogs.CreateFieldDialogFragment;
 import com.commonsware.cwac.loaderex.AbstractCursorLoader;
 import com.commonsware.cwac.loaderex.ContentChangingTask;
 
@@ -81,7 +83,32 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
 
-
+    public void setRandomQuickTestData(long field_id,int number_of_quick_tests, int number_of_tries, int number_of_question, String [][] excluded_times ) {
+        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+        sqLiteDatabase.beginTransactionNonExclusive();
+        try {
+            int s = sqLiteDatabase.delete(Contract.Excluded_Time.TABLE_NAME, Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS,number_of_quick_tests);
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES,number_of_tries);
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS,number_of_question);
+            sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+            if ( excluded_times != null ) {
+                for ( String [] temp : excluded_times ) {
+                    if ( temp != null ) {
+                        contentValues = new ContentValues();
+                        contentValues.put(Contract.Excluded_Time.COLUMN_STARTS,temp[0]);
+                        contentValues.put(Contract.Excluded_Time.COLUMN_ENDS,temp[1]);
+                        contentValues.put(Contract.Excluded_Time.COLUMN_FIELD,field_id);
+                        sqLiteDatabase.insert(Contract.Excluded_Time.TABLE_NAME,null,contentValues);
+                    }
+                }
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
+    }
 
 
     public void insertEntry(int question_data_type, String question, String answer, long field_id) {

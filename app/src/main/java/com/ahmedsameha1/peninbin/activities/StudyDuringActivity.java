@@ -28,7 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
-import com.ahmedsameha1.peninbin.database.CompareUtility;
+import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
@@ -36,6 +36,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -286,16 +287,32 @@ public class StudyDuringActivity extends AppCompatActivity implements
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().length() > 0 && permitedTriesNumber != 1) {
+                if (s.length() > 0 && permitedTriesNumber != 1) {
                     showResult.setBackgroundResource(R.drawable.enter_answer_background);
                     showResult.setPadding(0, 0, 0, 0);
                 }
+                if ( s.length() > 0 ) {
+                    check.setEnabled(true);
+                } else {
+                    check.setEnabled(false);
+                }
+            }
+        });
+        enterAnswer.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft(){
+                enterAnswer.setText("");
+                enterAnswer.requestFocus();
+            }
+            @Override
+            public void onSwipeRight(){
+                enterAnswer.setText("");
+                enterAnswer.requestFocus();
             }
         });
         _continue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                check.setEnabled(true);
                 enterAnswer.setText("");
                 _continue.setEnabled(false);
                 enterAnswer.setEnabled(true);

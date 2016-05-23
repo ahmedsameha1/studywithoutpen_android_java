@@ -22,6 +22,7 @@ import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
 /**
  * Created by ahmed on 3/13/2016.

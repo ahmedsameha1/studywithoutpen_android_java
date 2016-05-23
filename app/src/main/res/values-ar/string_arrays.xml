@@ -8,11 +8,12 @@
         <item>مجلد Dropbox</item>
     </string-array>
     <string-array name="field_activity_features">
-        <item>رَتِّب</item>
-        <item>ذاكر فترة</item>
-        <item>اختبر نفسك</item>
+        <item>ترتيب</item>
+        <item>مذاكرة فترة</item>
+        <item>اختبار</item>
+        <item>حدد موعدا</item>
         <item>خصائص المجال</item>
-        <item>راجع التطبيق على متجر بلاي</item>
+        <item>قيِّم التطبيق على متجر بلاي</item>
         <item>صفحة facebook</item>
     </string-array>
     <string-array name="field_type">

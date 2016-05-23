@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <Button
+        android:id="@+id/schedule_quick_test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/schedule_quick_test"
+         />
+
+    <Button
+        android:id="@+id/schedule_test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/schedule_text"
+        />
+
+    <Button
+        android:id="@+id/schedule_study_period"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/schedule_study_perioid"
+        />
+    <Button
+        android:id="@+id/schedule_random_quick_test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Randomly Schedule Quick Tests"
+        />
+
+
+</LinearLayout>

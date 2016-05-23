@@ -38,6 +38,7 @@ import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyDuringDial
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SearchDateOrTextDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
@@ -62,9 +63,10 @@ public class FieldActivity extends AppCompatActivity implements
     public static final int SORT = 0;
     public static final int STUDY_PERIOD = 1;
     public static final int TEST = 2;
-    public static final int FIELD_OPTIONS = 3;
-    private static final int REVIEW = 4;
-    private static final int FACEBOOK = 5;
+    public static final int FIELD_OPTIONS = 4;
+    private static final int REVIEW = 5;
+    private static final int FACEBOOK = 6;
+    public static final int SCHEDULE_IN_FIELD = 3;
     private static final String QUERY_KEY = "query_key";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int SEARCH_ENTRIES_LOADER_ID = 1;
@@ -116,6 +118,7 @@ public class FieldActivity extends AppCompatActivity implements
     private String search_value;
     private int question_data_type;
     private Tracker mTracker;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -407,6 +410,39 @@ public class FieldActivity extends AppCompatActivity implements
                         .setCategory("Action")
                         .setAction("Share")
                         .build());
+                break;
+            case SCHEDULE_IN_FIELD:
+                if ( fieldType == Contract.Field.DEFAULT_TYPE ) {
+                    ScheduleInFieldDialogFragment scheduleInFieldDialogFragment = new ScheduleInFieldDialogFragment();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                    scheduleInFieldDialogFragment.setArguments(bundle1);
+                    scheduleInFieldDialogFragment.show(getSupportFragmentManager(),ScheduleInFieldDialogFragment.SCHEDULE_IN_FIELD);
+                } else {
+                    Toast toast = Toast.makeText(FieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                /*Calendar calendar_current_date_time = Calendar.getInstance();
+                final Calendar calendar_picked_date_time = Calendar.getInstance();
+                new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, final int year, final int monthOfYear, final int dayOfMonth) {
+                        new TimePickerDialog(FieldActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
+                                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                                Intent intent = new Intent(FieldActivity.this, ScheduleInFieldReceiver.class);
+                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                                int request = (int)System.currentTimeMillis();
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(FieldActivity.this,request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
+                            }
+                        }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
+                    }
+                }, calendar_current_date_time.get(Calendar.YEAR), calendar_current_date_time.get(Calendar.MONTH),
+                        calendar_current_date_time.get(Calendar.DAY_OF_MONTH)).show();*/
                 break;
         }
     }

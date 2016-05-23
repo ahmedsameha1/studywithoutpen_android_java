@@ -26,15 +26,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
-import com.ahmedsameha1.peninbin.database.CompareUtility;
+import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ShowResultDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -248,7 +249,7 @@ public class TestActivity extends AppCompatActivity implements
 //                            start.setEnabled(true);
 
 
-                            ShowResultDialogFragment fragment = new ShowResultDialogFragment();
+                            ShowTestResultDialogFragment fragment = new ShowTestResultDialogFragment();
                             Bundle bundle = new Bundle();
                             bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
                             bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
@@ -256,7 +257,7 @@ public class TestActivity extends AppCompatActivity implements
 //                            wrongItems.trimToSize();
 //                            bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItems);
                             fragment.setArguments(bundle);
-                            fragment.show(getSupportFragmentManager(), ShowResultDialogFragment.SHOW_RESULT_DIALOG_FRAGMENT);
+                            fragment.show(getSupportFragmentManager(), ShowTestResultDialogFragment.SHOW_TEST_RESULT_DIALOG_FRAGMENT);
                             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
                             questionsNumber = 0;
                             wrongAnswersCounter = 0;
@@ -304,10 +305,26 @@ public class TestActivity extends AppCompatActivity implements
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().length() > 0) {
+                if (s.length() > 0) {
+                    check.setEnabled(true);
                     showResult.setBackgroundResource(R.drawable.enter_answer_background);
                     showResult.setPadding(0, 0, 0, 0);
                 }
+                if ( s.length() <= 0 ) {
+                    check.setEnabled(false);
+                }
+            }
+        });
+        enterAnswer.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft(){
+                enterAnswer.setText("");
+                enterAnswer.requestFocus();
+            }
+            @Override
+            public void onSwipeRight(){
+                enterAnswer.setText("");
+                enterAnswer.requestFocus();
             }
         });
         nextHint.setOnClickListener(new View.OnClickListener() {
@@ -753,22 +770,21 @@ public class TestActivity extends AppCompatActivity implements
         }
         return listForTest;
     }
+
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         retainedFragment.setListForTest_TestActivity(listForTest);
-        if ( tts_available && isFinishing() ) {
-            tts.stop();
-        }
-//        sqLiteDatabase.close();
     }
 
     @Override
-    public void onDestroy() {
-        retainedFragment.setListForTest_TestActivity(listForTest);
-//        sqLiteDatabase.close();
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
+        if ( tts_available && isFinishing() ) {
+            tts.stop();
+        }
     }
+
     @Override
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
         savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER,currentQuestionCounter);
@@ -932,7 +948,7 @@ public class TestActivity extends AppCompatActivity implements
                 showTries.setText(Integer.toString(triesCounter + 1));
                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
 //                start.setEnabled(false);
-                check.setEnabled(true);
+
 
 
                 enterAnswer.setEnabled(true);

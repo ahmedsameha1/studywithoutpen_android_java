@@ -8,6 +8,8 @@ import android.app.LoaderManager;
 import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
@@ -32,6 +34,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -90,8 +93,8 @@ public class AddEntryActivity extends AppCompatActivity implements
         field_spinner = (Spinner) findViewById(R.id.field_spinner);
         enter_question = (EditText) findViewById(R.id.question);
         enter_answer = (EditText) findViewById(R.id.answer);
-        TextView add_entry = (TextView) findViewById(R.id.add_entry);
-        TextView add_entry_finish = (TextView) findViewById(R.id.add_entry_finish);
+        final TextView add_entry = (TextView) findViewById(R.id.add_entry);
+        final TextView add_entry_finish = (TextView) findViewById(R.id.add_entry_finish);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
@@ -286,7 +289,8 @@ public class AddEntryActivity extends AppCompatActivity implements
                 setHints(fieldType);
                 if ( fieldType == Contract.Field.NOTEBOOK_TYPE) {
                     enter_question.setText("");
-                    enter_question.clearFocus();
+//                    enter_question.clearFocus();
+                    enter_answer.requestFocus();
                 }
             }
 
@@ -329,7 +333,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                                         @Override
                                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                             calendar.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                            enter_question.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.ENGLISH).format(calendar.getTime()));
+                                            enter_question.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.US).format(calendar.getTime()));
 //                                            enterAnswer.requestFocus();
                                         }
                                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();
@@ -340,7 +344,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 }
             }
         });
-        enter_question.setOnLongClickListener(new View.OnLongClickListener() {
+/*        enter_question.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 enter_question.setText("");
@@ -355,7 +359,69 @@ public class AddEntryActivity extends AppCompatActivity implements
                 enter_answer.requestFocus();
                 return true;
             }
+        });*/
+        enter_answer.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft() {
+                enter_answer.setText("");
+                enter_answer.requestFocus();
+            }
+            @Override
+            public void onSwipeRight() {
+                enter_answer.setText("");
+                enter_answer.requestFocus();
+            }
         });
+        enter_question.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft() {
+                enter_question.setText("");
+                enter_question.requestFocus();
+            }
+            @Override
+            public void onSwipeRight() {
+                enter_question.setText("");
+                enter_question.requestFocus();
+            }
+        });
+
+        enter_question.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if ( editable.length() > 0 && enter_answer.getText().length() > 0 ) {
+                    add_entry.setEnabled(true);
+                    add_entry_finish.setEnabled(true);
+                } else {
+                    add_entry.setEnabled(false);
+                    add_entry_finish.setEnabled(false);
+                }
+            }
+        });
+        enter_answer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if ( editable.length() > 0 && enter_question.getText().length() > 0 ) {
+                    add_entry.setEnabled(true);
+                    add_entry_finish.setEnabled(true);
+                } else {
+                    add_entry.setEnabled(false);
+                    add_entry_finish.setEnabled(false);
+                }
+            }
+        });
+
     }
 
     private void setHints(int fieldType ) {

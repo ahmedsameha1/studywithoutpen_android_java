@@ -1,4 +1,4 @@
-package com.ahmedsameha1.peninbin.database;
+package com.ahmedsameha1.peninbin.utils;
 
 /**
  * Created by ahmed on 02/05/16.

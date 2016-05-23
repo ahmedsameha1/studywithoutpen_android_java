@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
@@ -26,6 +28,7 @@ import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -103,7 +106,7 @@ public class EditEntryActivity extends AppCompatActivity implements
             case Contract.Field.NOTEBOOK_TYPE:
                 Timestamp timestamp = Timestamp.valueOf(currentQuestion);
                 Date date = new Date(timestamp.getTime());
-                editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm").format(date));
+                editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm",Locale.US).format(date));
                 break;
         }
         setHints(fieldType);
@@ -209,7 +212,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                                         @Override
                                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                             calendar.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                            editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.ENGLISH).format(calendar.getTime()));
+                                            editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.US).format(calendar.getTime()));
 //                                            enterAnswer.requestFocus();
                                         }
                                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();
@@ -220,7 +223,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                 }
             }
         });
-        editQuestion.setOnLongClickListener(new View.OnLongClickListener() {
+/*        editQuestion.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 editQuestion.setText("");
@@ -234,6 +237,62 @@ public class EditEntryActivity extends AppCompatActivity implements
                 editAnswer.setText("");
                 editAnswer.requestFocus();
                 return true;
+            }
+        });*/
+        editQuestion.setOnTouchListener(new OnSwipeTouchListener(this){
+            @Override
+            public void onSwipeLeft(){
+                editQuestion.setText("");
+                editQuestion.requestFocus();
+            }
+            @Override
+            public void onSwipeRight(){
+                editQuestion.setText("");
+                editQuestion.requestFocus();
+            }
+        });
+        editAnswer.setOnTouchListener(new OnSwipeTouchListener(this){
+            @Override
+            public void onSwipeLeft(){
+                editAnswer.setText("");
+                editAnswer.requestFocus();
+            }
+            @Override
+            public void onSwipeRight(){
+                editAnswer.setText("");
+                editAnswer.requestFocus();
+            }
+        });
+        editQuestion.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if ( editable.length() > 0 && editAnswer.getText().length() > 0 ) {
+                    save.setEnabled(true);
+                } else {
+                    save.setEnabled(false);
+                }
+            }
+        });
+        editAnswer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if ( editable.length() > 0 && editQuestion.getText().length() > 0 ) {
+                    save.setEnabled(true);
+                } else {
+                    save.setEnabled(false);
+                }
             }
         });
     }

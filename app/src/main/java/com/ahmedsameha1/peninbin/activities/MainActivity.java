@@ -295,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements
                 browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.dropbox.com/sh/qq4rzots8vrb1mi/AAA6loAcxX6edP5bnHflXSFSa?dl=0"));
                 startActivity(browserIntent);
                 break;
+
         }
     }
 

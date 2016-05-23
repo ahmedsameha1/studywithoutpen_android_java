@@ -46,7 +46,7 @@ import java.util.StringTokenizer;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private final static String TAG = "DatabaseHelper";
-    public static final int DATABASE_VERSION = 7;
+    public static final int DATABASE_VERSION = 8;
     public static final String DATABASE_NAME = "data";
     private Context context;
     private static DatabaseHelper sInstance;
@@ -69,6 +69,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_READ_ANSWER + " INTEGER NOT NULL DEFAULT " + Field.DO_NOT_READ_ANSWER + ", "
             + Field.COLUMN_USAGE_COUNT + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_CREATION_EMULATION_NUMBER + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS + " INTEGER NOT NULL DEFAULT " + Field.ZERO_RANDOM_QUICK_TESTS + ", "
+            + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS + " INTEGER NOT NULL DEFAULT 0, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'))"
             + " );";
 /*    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME
@@ -103,6 +106,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
             + String_Entry.COLUMN_RANK + " INTEGER NOT NULL DEFAULT 0, "
             + String_Entry.COLUMN_CREATION_EMULATED_DATE + " DATETIME DEFAULT NULL, "
+            + String_Entry.COLUMN_NOTIFY_AT + " INTEGER NOT NULL DEFAULT " + String_Entry.NO_NOTIFICATION + " , "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
             + "FOREIGN KEY(" + String_Entry.COLUMN_QUESTION + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
             + "FOREIGN KEY(" + String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
@@ -193,7 +197,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " UNIQUE ( " + Alternative_Answer_Not_String.COLUMN_ENTRY + ", "
             + Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER + " )"
             + " );";
-
+    public static final String CREATE_EXCLUDED_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Excluded_Time.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.Excluded_Time.COLUMN_FIELD + " INTEGER NOT NULL, "
+            + Contract.Excluded_Time.COLUMN_STARTS + " TEXT NOT NULL, "
+            + Contract.Excluded_Time.COLUMN_ENDS + " TEXT NOT NULL, "
+            + "FOREIGN KEY(" + Contract.Excluded_Time.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
+    public static final String CREATE_SCHEDULED_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Scheduled_Time.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Contract.Scheduled_Time.COLUMN_FIELD + " INTEGER NOT NULL, "
+            + Contract.Scheduled_Time.COLUMN_SESSION_TYPE + " INTEGER NOT NULL, "
+            + Contract.Scheduled_Time.COLUMN_TIME + " INTEGER NOT NULL, "
+            + "FOREIGN KEY(" + Contract.Scheduled_Time.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +284,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onCreate( SQLiteDatabase sqLiteDatabase ) {
-        boolean dbExist = checkDataBase();
+        /*boolean dbExist = checkDataBase();
         if(dbExist) {
             Log.d(TAG, "Database exists.");
             deleteDb();
@@ -280,8 +299,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
             }
-        }
-    /*    sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
+        }*/
+        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);//
@@ -293,7 +312,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_PAUSED_TABLE);
         sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);//
-        Log.d("from APP to Ahmed", "table have been written");*/
+        sqLiteDatabase.execSQL(CREATE_EXCLUDED_TIME_TABLE);
+        sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_TABLE);
+        Log.d("from APP to Ahmed", "table have been written");
     }
     private boolean checkDataBase() {
         boolean checkDB = false;
@@ -376,7 +397,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);
             onUpgradeDatabaseToDBV7AppV33(sqLiteDatabase);
         }
+        if ( oldVersion < 8 ) {
+            onUpgradeDatabaseToDBV8AppV36(sqLiteDatabase);
+        }
     }
+    
 
 
     public Cursor getFieldList() {
@@ -1153,6 +1178,88 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             linkerCursor.close();
             drop = "DROP TABLE IF EXISTS " + Old_Linker_DBV6_AppV32.TABLE_NAME + ";";
             sqLiteDatabase.execSQL(drop);
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
+    }
+    private void onUpgradeDatabaseToDBV8AppV36(SQLiteDatabase sqLiteDatabase) {
+        sqLiteDatabase.beginTransaction();
+        try {
+            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+            sqLiteDatabase.execSQL(rename);
+            sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
+            String copy = "INSERT INTO " + Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Field.COLUMN_FIELD_NAME
+                    + " , " + Field.COLUMN_FIELD_TYPE
+                    + " , " + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Field.COLUMN_LOCALE
+                    + " , " + Field.COLUMN_CHECK_TYPE
+                    + " , " + Field.COLUMN_SORT_BY
+                    + " , " + Field.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Field.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Field.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Field.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Field.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Field.COLUMN_READ_ANSWER
+                    + " , " + Field.COLUMN_USAGE_COUNT
+                    + " , " + Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.CREATION_DATE
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Field.COLUMN_FIELD_NAME
+                    + " , " + Field.COLUMN_FIELD_TYPE
+                    + " , " + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Field.COLUMN_LOCALE
+                    + " , " + Field.COLUMN_CHECK_TYPE
+                    + " , " + Field.COLUMN_SORT_BY
+                    + " , " + Field.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Field.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Field.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Field.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Field.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Field.COLUMN_READ_ANSWER
+                    + " , " + Field.COLUMN_USAGE_COUNT
+                    + " , " + Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.CREATION_DATE
+                    + " FROM " + "tempTable"
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
+            rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
+            sqLiteDatabase.execSQL(rename);
+            sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);
+            copy = "INSERT INTO " + String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + String_Entry.COLUMN_QUESTION
+                    + " , " + String_Entry.COLUMN_ANSWER
+                    + " , " + String_Entry.COLUMN_FIELD
+                    + " , " + String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + String_Entry.COLUMN_RANK
+                    + " , " + String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.CREATION_DATE
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + String_Entry.COLUMN_QUESTION
+                    + " , " + String_Entry.COLUMN_ANSWER
+                    + " , " + String_Entry.COLUMN_FIELD
+                    + " , " + String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + String_Entry.COLUMN_RANK
+                    + " , " + String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.CREATION_DATE
+                    + " FROM " + "tempTable"
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
+            sqLiteDatabase.execSQL(CREATE_EXCLUDED_TIME_TABLE);
+            sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_TABLE);
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();

@@ -18,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.ahmedsameha1.peninbin.activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
@@ -29,11 +30,12 @@ import com.ahmedsameha1.peninbin.activities.TestActivity;
 public class TestDialogFragment extends DialogFragment {
     public static final String TEST_DIALOG_FRAGMENT = "test_dialog_fragment";
     private long current_field_id;
-
+    private boolean from_notification;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
     }
 
     @NonNull
@@ -155,6 +157,9 @@ public class TestDialogFragment extends DialogFragment {
                                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                                 intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                                 startActivity(intent);
+                                                if ( from_notification ) {
+                                                    getActivity().finish();
+                                                }
                                                 dismiss();
                                             } else {
                                                 Toast toast = Toast.makeText(getActivity(), getString(R.string.percentage_between), Toast.LENGTH_LONG);
@@ -174,6 +179,9 @@ public class TestDialogFragment extends DialogFragment {
                                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                                 intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                                 startActivity(intent);
+                                                if ( from_notification ) {
+                                                    getActivity().finish();
+                                                }
                                                 dismiss();
                                             } else {
                                                 Toast toast = Toast.makeText(getActivity(),

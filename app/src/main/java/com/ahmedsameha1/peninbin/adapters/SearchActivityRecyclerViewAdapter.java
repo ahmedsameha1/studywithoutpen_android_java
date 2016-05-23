@@ -26,6 +26,7 @@ import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;

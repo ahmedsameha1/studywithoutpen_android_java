@@ -31,13 +31,14 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
-import com.ahmedsameha1.peninbin.database.CompareUtility;
+import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -194,7 +195,6 @@ public class StudyActivity extends AppCompatActivity implements
                     answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
                     answerLinearlayout.setPadding(0,0,0,0);
                 } else {
-                    check.setEnabled(true);
                     if (studyQuestion.isChecked()) {
                         enterQuestion.setText("");
                         enterQuestion.setFocusable(true);
@@ -734,10 +734,15 @@ public class StudyActivity extends AppCompatActivity implements
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().length() > 0) {
+                if (s.length() > 0) {
 //                    resultImage.setImageResource(R.drawable.ic_question_marks);
                     questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                     questionLinearlayout.setPadding(0, 0, 0, 0);
+                }
+                if ( s.length() > 0 && enterAnswer.getText().length() > 0 ) {
+                    check.setEnabled(true);
+                } else{
+                    check.setEnabled(false);
                 }
             }
         });
@@ -754,14 +759,52 @@ public class StudyActivity extends AppCompatActivity implements
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().length() > 0) {
+                if (s.length() > 0) {
 //                    resultImage.setImageResource(R.drawable.ic_question_marks);
                     answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                     answerLinearlayout.setPadding(0, 0, 0, 0);
 
                 }
+                if ( s.length() > 0 && enterQuestion.getText().length() > 0 ) {
+                    check.setEnabled(true);
+                } else {
+                    check.setEnabled(false);
+                }
             }
         });
+        enterAnswer.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft(){
+                if ( studyAnswer.isChecked() ) {
+                    enterAnswer.setText("");
+                    enterAnswer.requestFocus();
+                }
+            }
+            @Override
+            public void onSwipeRight(){
+                if ( studyAnswer.isChecked() ) {
+                    enterAnswer.setText("");
+                    enterAnswer.requestFocus();
+                }
+            }
+        });
+        enterQuestion.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft(){
+                if ( studyQuestion.isChecked() ) {
+                    enterQuestion.setText("");
+                    enterQuestion.requestFocus();
+                }
+            }
+            @Override
+            public void onSwipeRight(){
+                if ( studyQuestion.isChecked() ) {
+                    enterQuestion.setText("");
+                    enterQuestion.requestFocus();
+                }
+            }
+        });
+
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
