@@ -8,6 +8,8 @@ import android.app.LoaderManager;
 import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
@@ -329,7 +331,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                                         @Override
                                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                             calendar.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                            enter_question.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.ENGLISH).format(calendar.getTime()));
+                                            enter_question.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.US).format(calendar.getTime()));
 //                                            enterAnswer.requestFocus();
                                         }
                                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();

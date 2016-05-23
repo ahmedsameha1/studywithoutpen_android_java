@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
@@ -103,7 +105,7 @@ public class EditEntryActivity extends AppCompatActivity implements
             case Contract.Field.NOTEBOOK_TYPE:
                 Timestamp timestamp = Timestamp.valueOf(currentQuestion);
                 Date date = new Date(timestamp.getTime());
-                editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm").format(date));
+                editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm",Locale.US).format(date));
                 break;
         }
         setHints(fieldType);
@@ -209,7 +211,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                                         @Override
                                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                             calendar.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                            editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.ENGLISH).format(calendar.getTime()));
+                                            editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.US).format(calendar.getTime()));
 //                                            enterAnswer.requestFocus();
                                         }
                                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();

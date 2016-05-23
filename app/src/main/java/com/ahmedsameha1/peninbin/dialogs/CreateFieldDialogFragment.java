@@ -169,6 +169,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     public void onInit(int status) {
         Locale[] locales = Locale.getAvailableLocales();
         for (Locale locale : locales) {
+            if (locale.toString().equals("en_US_POSIX")) continue;
             int res = tts.isLanguageAvailable(locale);
             if (res == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
                 localeList.add(locale);

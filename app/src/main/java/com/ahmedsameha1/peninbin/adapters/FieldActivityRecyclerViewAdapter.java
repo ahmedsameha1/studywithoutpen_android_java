@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,12 +25,18 @@ import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParseException;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by ahmed on 3/13/2016.
@@ -43,12 +50,14 @@ public class FieldActivityRecyclerViewAdapter extends
     private int question_data_type;
     private SharedPreferences sharedPreferences;
     private DatabaseOperations databaseOperations;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
     public FieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, int fieldType ) {
         super(context,data);
         this.context = context;
         this.field_id = field_id;
         this.fieldType = fieldType;
         databaseOperations = new DatabaseOperations(context);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         this.question_data_type = databaseOperations.getQuestionDataType(field_id);
     }
@@ -136,11 +145,25 @@ public class FieldActivityRecyclerViewAdapter extends
                 viewHolder.answer.setText(answer);
                 break;
             case Contract.Field.NOTEBOOK_TYPE:
-                Timestamp timestamp = Timestamp.valueOf(question);
-                Date date = new Date(timestamp.getTime());
-                viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));
-                viewHolder.answer.setText(answer);
-                break;
+                try {
+                    Timestamp timestamp = Timestamp.valueOf(question);
+                    Date date = new Date(timestamp.getTime());
+                    viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));
+                    viewHolder.answer.setText(answer);
+                    break;
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                    String s = question.substring(0,question.length() - 3);
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    Date date = null;
+                    try {
+                        date = dateFormat.parse(s);
+                    } catch (ParseException e1) {
+                        e1.printStackTrace();
+                    }
+                    String d = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(date) + ":00";
+                    mySQLiteCursorLoader.editEntry(entry_id, question_data_type,d,answer);
+                }
         }
     }
 }
