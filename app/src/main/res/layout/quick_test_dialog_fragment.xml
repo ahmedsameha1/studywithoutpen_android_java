@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <EditText
+            android:id="@+id/number_of_tries"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="9"
+            android:hint="@string/enter_tries_number"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="number" />
+
+        <ImageButton
+            android:id="@+id/number_of_tries_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:src="@drawable/ic_help_black_24dp" />
+    </LinearLayout>
+
+
+    <!--    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="10">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="9"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="@string/enter_one_of"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/one_only_of_help"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_help_black_24dp" />
+        </LinearLayout>-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <EditText
+            android:id="@+id/number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="9"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="number" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="9"
+            android:gravity="center">
+
+            <ToggleButton
+                android:id="@+id/percentage_number"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textOn="@string/by_percentage"
+                android:textOff="@string/by_number"/>
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/percentage_or_number_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_help_black_24dp" />
+
+    </LinearLayout>
+
+<!--    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <EditText
+            android:id="@+id/number_of_questions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="9"
+            android:hint="@string/enter_number_of_questions"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="number" />
+
+        <ImageButton
+            android:id="@+id/number_of_questions_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_help_black_24dp" />
+    </LinearLayout>-->
+
+
+</LinearLayout>

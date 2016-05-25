@@ -211,6 +211,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.Scheduled_Time.COLUMN_FIELD + " INTEGER NOT NULL, "
             + Contract.Scheduled_Time.COLUMN_SESSION_TYPE + " INTEGER NOT NULL, "
             + Contract.Scheduled_Time.COLUMN_TIME + " INTEGER NOT NULL, "
+            + Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST + " INTEGER NOT NULL, "
+            + Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE + " INTEGER DEFAULT NULL, "
+            + Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER + " INTEGER DEFAULT NULL, "
+            + Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES + " INTEGER DEFAULT NULL, "
             + "FOREIGN KEY(" + Contract.Scheduled_Time.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -398,7 +402,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             onUpgradeDatabaseToDBV7AppV33(sqLiteDatabase);
         }
         if ( oldVersion < 8 ) {
-            onUpgradeDatabaseToDBV8AppV36(sqLiteDatabase);
+            onUpgradeDatabaseToDBV8AppV37(sqLiteDatabase);
         }
     }
     
@@ -1183,7 +1187,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.endTransaction();
         }
     }
-    private void onUpgradeDatabaseToDBV8AppV36(SQLiteDatabase sqLiteDatabase) {
+    private void onUpgradeDatabaseToDBV8AppV37(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";

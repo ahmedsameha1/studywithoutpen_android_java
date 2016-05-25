@@ -360,35 +360,51 @@ public class QuickTestActivity extends AppCompatActivity implements
     }
 
     private String [][] getListForTest ( double percent ) {
-        int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
-        String[][] listForTest = new String[numberOfQuestions][2];
-        String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
-            listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
-            listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+        if ( fieldEntriesCursor.getCount() > 0 ) {
+            int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
+            String[][] listForTest = new String[numberOfQuestions][2];
+            String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
+            for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+                  fieldEntriesCursor.moveToNext() ) {
+                listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
+                listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+            }
+            shuffleArray(listOfEntries);
+            for ( int n = 0; n < listForTest.length; n++ ) {
+                listForTest [n][0] = listOfEntries [n][0];
+                listForTest [n][1] = listOfEntries [n][1];
+            }
+            return listForTest;
+        } else {
+            Toast toast = Toast.makeText(QuickTestActivity.this, R.string.no_entries_in_field, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+            finish();
         }
-        shuffleArray(listOfEntries);
-        for ( int n = 0; n < listForTest.length; n++ ) {
-            listForTest [n][0] = listOfEntries [n][0];
-            listForTest [n][1] = listOfEntries [n][1];
-        }
-        return listForTest;
+        return null;
     }
     private String [][] getListForTest ( int numberOfQuestions ) {
-        String[][] listForTest = new String[numberOfQuestions][2];
-        String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
-            listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
-            listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+        if ( fieldEntriesCursor.getCount() >= numberOfQuestions ) {
+            String[][] listForTest = new String[numberOfQuestions][2];
+            String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
+            for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+                  fieldEntriesCursor.moveToNext() ) {
+                listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
+                listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+            }
+            shuffleArray(listOfEntries);
+            for ( int n = 0; n < listForTest.length; n++ ) {
+                listForTest [n][0] = listOfEntries [n][0];
+                listForTest [n][1] = listOfEntries [n][1];
+            }
+            return listForTest;
+        } else {
+            Toast toast = Toast.makeText(QuickTestActivity.this, R.string.number_of_entries_less_than_number_of_questions, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+            finish();
         }
-        shuffleArray(listOfEntries);
-        for ( int n = 0; n < listForTest.length; n++ ) {
-            listForTest [n][0] = listOfEntries [n][0];
-            listForTest [n][1] = listOfEntries [n][1];
-        }
-        return listForTest;
+        return null;
     }
     private void shuffleArray( String [][] array )
     {
@@ -732,14 +748,18 @@ public class QuickTestActivity extends AppCompatActivity implements
                 } else if ( percent_or_number == NUMBER ) {
                     listForTest = getListForTest(number);
                 }
-                questionsNumber = listForTest.length;
-                showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                showTries.setText(Integer.toString(triesCounter + 1));
-                showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                enterAnswer.requestFocus();
-                 testingNow = true;
-                ifMoreThanOnce();
+                if ( listForTest != null ) {
+                    questionsNumber = listForTest.length;
+                    showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                    remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                    showTries.setText(Integer.toString(triesCounter + 1));
+                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                    enterAnswer.requestFocus();
+                    testingNow = true;
+                    ifMoreThanOnce();
+                } else {
+                    finish();
+                }
             }
     }
 

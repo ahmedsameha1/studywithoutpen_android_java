@@ -24,8 +24,8 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.ScheduleInFieldReceiver;
-import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
+import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.receivers_services.ScheduleInFieldReceiver;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
@@ -38,7 +38,6 @@ import java.util.Calendar;
 public class QuickTestDialogFragment extends DialogFragment {
     public static final String TEST_DIALOG_FRAGMENT = "test_dialog_fragment";
     public static final String SCHEDULE_WHAT = "schedule_what";
-    public static final int QUICK_TEST = 0;
     public static final String QUICK_TEST_DIALOG = "quick_test_dialog";
     public static final String YEAR = "year";
     public static final String MONTH_OF_YEAR = "month_of_year";
@@ -48,6 +47,7 @@ public class QuickTestDialogFragment extends DialogFragment {
     private long current_field_id;
     private int year,monthOfYear,dayOfMonth,hourOfDay,minute;
     private AlarmManager alarmManager;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +59,7 @@ public class QuickTestDialogFragment extends DialogFragment {
         hourOfDay = getArguments().getInt(HOUR_OF_DAY);
         minute = getArguments().getInt(MINUTE);
         alarmManager = (AlarmManager) getActivity().getSystemService(AppCompatActivity.ALARM_SERVICE);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
     }
 
     @NonNull
@@ -68,7 +69,7 @@ public class QuickTestDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
                 builder.setTitle(R.string.start_a_quick_test)
-                        .setView(inflater.inflate(R.layout.test_dialog_fragment, null))
+                        .setView(inflater.inflate(R.layout.quick_test_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -118,7 +119,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                 int trys = Integer.parseInt(enterTries.getText().toString());
                                 if (trys > 0) {
                                     if ( enterNumber.getText().toString().length() > 0) {
-                                        Double number = Double.parseDouble(enterNumber.getText().toString());
+                                        int number = Integer.parseInt(enterNumber.getText().toString());
                                         if (!percentage_number.isChecked()) {
                                             if (number <= 100 && number > 0) {
                                                 Intent intent = new Intent(getActivity(), ScheduleInFieldReceiver.class);
@@ -128,11 +129,14 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                                 final Calendar calendar_picked_date_time = Calendar.getInstance();
                                                 calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                                intent.putExtra(SCHEDULE_WHAT,QUICK_TEST);
-                                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                                                intent.putExtra(SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
+                                                intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
                                                 int request = (int)System.currentTimeMillis();
                                                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                                 alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
+                                                mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                                        ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
+                                                        TestActivity.PERCENTAGE,number,trys);
                                                 final Snackbar snackbar = Snackbar
                                                         .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
                                                 snackbar.setAction(R.string.ok, new View.OnClickListener() {
@@ -152,20 +156,22 @@ public class QuickTestDialogFragment extends DialogFragment {
                                             DatabaseOperations databaseOperations = new DatabaseOperations(getActivity());
                                             int currentNumberOfEntries =
                                                     databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
-                                            int numberInt = Double.valueOf(number).intValue();
-                                            if ( numberInt > 0 && numberInt <= currentNumberOfEntries) {
+                                            if ( number > 0 && number <= currentNumberOfEntries) {
                                                 Intent intent = new Intent(getActivity(), ScheduleInFieldReceiver.class);
                                                 intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
-                                                intent.putExtra(TestActivity.QUESTION_NUMBER, numberInt);
+                                                intent.putExtra(TestActivity.QUESTION_NUMBER, number);
                                                 intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, trys);
                                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                                 final Calendar calendar_picked_date_time = Calendar.getInstance();
                                                 calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                                intent.putExtra(SCHEDULE_WHAT,QUICK_TEST);
-                                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                                                intent.putExtra(SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
+                                                intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
                                                 int request = (int)System.currentTimeMillis();
                                                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                                 alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
+                                                mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                                        ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
+                                                        TestActivity.NUMBER,number,trys);
                                                 final Snackbar snackbar = Snackbar
                                                         .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
                                                 snackbar.setAction(R.string.ok, new View.OnClickListener() {

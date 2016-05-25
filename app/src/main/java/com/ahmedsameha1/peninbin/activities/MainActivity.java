@@ -1,5 +1,7 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -35,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.receivers_services.RandomQuickTestsSchedulingService;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 
@@ -53,6 +56,9 @@ import com.google.android.gms.analytics.Tracker;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 /**
  * Created by ahmed on 7/26/2015.
  */
@@ -60,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements
         MainActivityFragmentDrawer.FragmentDrawerListener,
         DeleteFieldDialogFragment.Contact,
         CreateFieldDialogFragment.Contact {
+    public static final String MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST = "mid_night_service_pendingintent_request";
     public static final String SCREEN_NAME = "MainActivity";
     private static final String RUN_FIRST_TIME = "run_first_time";
     public static final String RUN_FIRST_TIME_DIALOG = "runFirstTimeDialog";
@@ -115,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements
         int spacing = 3;
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing, true));
         addFab();
-        deleteUnNeadedSharedPreferences();
+        runFirstTimeAppRunOnly();
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -163,10 +170,30 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    private void deleteUnNeadedSharedPreferences() {
+    private void runFirstTimeAppRunOnly() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         if (sharedPreferences.getBoolean(RUN_FIRST_TIME, true)) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            Calendar cal = new GregorianCalendar();
+            cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH) + 1);
+            cal.set(Calendar.HOUR_OF_DAY,0);
+            cal.set(Calendar.MINUTE,0);
+            cal.set(Calendar.SECOND,0);
+            Intent intent = new Intent(this, RandomQuickTestsSchedulingService.class);
+            int request = (int) System.currentTimeMillis();
+            PendingIntent pintent = PendingIntent.getService(this, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+            alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 24 * 60 * 60 * 1000, pintent);
+            editor.putInt(MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST,request);
+
+
+
+
+
+
+
+
             editor.putBoolean(RUN_FIRST_TIME, false);
             PackageManager manager = getPackageManager();
             try {

@@ -1,4 +1,4 @@
-package com.ahmedsameha1.peninbin;
+package com.ahmedsameha1.peninbin.receivers_services;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -11,19 +11,23 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.TestActivity;
+import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.QuickTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 
 public class ScheduleInFieldReceiver extends BroadcastReceiver {
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
     public ScheduleInFieldReceiver() {
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
         Uri notification_sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = null;
         PendingIntent contentIntent = null;
@@ -35,12 +39,12 @@ public class ScheduleInFieldReceiver extends BroadcastReceiver {
                 quick_test_intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.PERCENTAGE);
                 quick_test_intent.putExtra(TestActivity.QUESTION_PERCENTAGE, intent.getIntExtra(TestActivity.QUESTION_PERCENTAGE,1));
                 quick_test_intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(TestActivity.PERMITED_TRIES_NUMBER,1));
-                quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, intent.getLongExtra(StudyActivity.CURRENT_FIELD_ID,1));
+                quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
             } else {
                 quick_test_intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
                 quick_test_intent.putExtra(TestActivity.QUESTION_NUMBER, intent.getIntExtra(TestActivity.QUESTION_NUMBER,1));
                 quick_test_intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(TestActivity.PERMITED_TRIES_NUMBER,1));
-                quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, intent.getLongExtra(StudyActivity.CURRENT_FIELD_ID,1));
+                quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
             }
             contentIntent = PendingIntent.getActivity(context, 0, quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
             notificationBuilder =
@@ -89,5 +93,6 @@ public class ScheduleInFieldReceiver extends BroadcastReceiver {
 
         // Send the notification to the system.
         ((NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE)).notify((int)System.currentTimeMillis(), notification);
+        mySQLiteCursorLoader.deleteScheduledTimeForBackup(current_field_id,schedule_what,intent.getLongExtra(ScheduleInFieldDialogFragment.TIME,0));
     }
 }

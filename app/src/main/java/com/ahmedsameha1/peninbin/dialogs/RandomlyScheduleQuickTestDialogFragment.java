@@ -381,7 +381,7 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                                     int number_of_tries = Integer.parseInt(enter_number_of_tries.getText().toString());
                                     int number_of_questions = Integer.parseInt(enter_number_of_questions.getText().toString());
                                     int number_of_quick_tests = Integer.parseInt(enter_number_of_quick_tests.getText().toString());
-                                    if (number_of_tries > 0 && number_of_questions > 0 && number_of_quick_tests > 0) {
+                                    if (number_of_tries > 0 && number_of_questions > 0 && (number_of_quick_tests > 0 && number_of_quick_tests <= 94) ) {
                                         if ( enable_exclude_times.isChecked() ) {
                                             if (!(excluded_time_1_layout.getVisibility() == View.VISIBLE &&
                                                     (enter_excluded_time_1_start.getText().length() == 0

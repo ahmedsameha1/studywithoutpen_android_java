@@ -381,6 +381,9 @@ public class ExportImportDatabase {
             } else if (databaseVersion == 7) {
                 importFields(context, toImportDatabase, importUserUsageData );
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
+            } else if (databaseVersion == 8 ) {
+                importFields(context, toImportDatabase, importUserUsageData );
+                showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else {
                 throw new InvalidStudyWithoutPenFileException();
             }
@@ -395,7 +398,7 @@ public class ExportImportDatabase {
             }
         }
     }
-
+// TODO: 25/05/16 must upgrade the imported file with version 7 to 8 before import it
 
     private static void importFields(Context context, SQLiteDatabase toImportDatabase, boolean importUserUsageData )
             throws IOException, SQLiteException, InvalidStudyWithoutPenFileException {

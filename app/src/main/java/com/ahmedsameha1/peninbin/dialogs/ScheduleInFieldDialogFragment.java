@@ -16,14 +16,14 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
-import com.ahmedsameha1.peninbin.ScheduleInFieldReceiver;
+import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.receivers_services.ScheduleInFieldReceiver;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 
@@ -36,17 +36,20 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
     public static final int QUICK_TEST = 0;
     public static final int TEST = 1;
     public static final int STUDY_A_PERIOD = 2;
+    public static final String TIME = "time";
     public static final String SCHEDULE_IN_FIELD = "schedule_in_field";
     public static final String SCHEDULE_WHAT = "schedule_what";
     private Context context;
     private long current_field_id;
     private AlarmManager alarmManager;
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         alarmManager = (AlarmManager) getActivity().getSystemService(AppCompatActivity.ALARM_SERVICE);
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
     }
     @NonNull
     @Override
@@ -127,9 +130,12 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         Intent intent = new Intent(getActivity(), ScheduleInFieldReceiver.class);
                                         intent.putExtra(SCHEDULE_WHAT,TEST);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                                        intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
                                         int request = (int)System.currentTimeMillis();
                                         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                         alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
+                                        mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                                ScheduleInFieldDialogFragment.TEST,calendar_picked_date_time.getTimeInMillis(),request);
                                         final Snackbar snackbar = Snackbar
                                                 .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
                                         snackbar.setAction(R.string.ok, new View.OnClickListener() {
@@ -162,9 +168,12 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         Intent intent = new Intent(getActivity(), ScheduleInFieldReceiver.class);
                                         intent.putExtra(SCHEDULE_WHAT,STUDY_A_PERIOD);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                                        intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
                                         int request = (int)System.currentTimeMillis();
                                         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                         alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
+                                        mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                                ScheduleInFieldDialogFragment.STUDY_A_PERIOD,calendar_picked_date_time.getTimeInMillis(),request);
                                         final Snackbar snackbar = Snackbar
                                                 .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
                                         snackbar.setAction(R.string.ok, new View.OnClickListener() {

@@ -159,7 +159,7 @@
     <string name="scheduled">تم حفظ الموعد</string>
     <string name="schedule_random_quick_tests">حدد موعدا عشوائيا لاختبار سريع</string>
     <string name="enter_values_of_tries_question_quick_tests">Please, enter number of tries, number of questions and number of quick tests</string>
-    <string name="zero_not_allowed">الصفر غير مسموح به</string>
+    <string name="zero_not_allowed">الصفر غير مسموح به، وعدد الاختبارات يجب أن يكون أقل من 95</string>
     <string name="dont_schedule_tests_these_times">Exclude times from random quick tests</string>
     <string name="fill_all_fields">Please, fill all fields</string>
     <string name="from">From</string>
@@ -169,4 +169,5 @@
     <string name="the_number_of_questions">The number of questions</string>
     <string name="the_number_of_tries">The number of tries</string>
     <string name="the_number_of_quick_tests">The number of quick tests</string>
+    <string name="number_of_entries_less_than_number_of_questions">The number of entries in this field is less than the number of questions.</string>
 </resources>

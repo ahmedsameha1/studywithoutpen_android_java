@@ -128,6 +128,10 @@ public final class Contract {
         public static final String COLUMN_FIELD = "field";
         public static final String COLUMN_SESSION_TYPE = "session_type";
         public static final String COLUMN_TIME = "time";
+        public static final String COLUMN_PENDINGINTENT_REQUEST = "pendingintent_request";
+        public static final String COLUMN_NOT_RANDOM_QUICK_TEST_TRIES = "not_random_quick_test_tries";
+        public static final String COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE = "not_random_quick_test_number_or_percentage";
+        public static final String COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER = "not_random_quick_test_number";
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////

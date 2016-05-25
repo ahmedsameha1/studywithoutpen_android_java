@@ -97,8 +97,10 @@ public class DatabaseOperations {
         int number_of_tries = cursor.getInt(1);
         int number_of_questions = cursor.getInt(2);
         if (number_of_quick_tests > 0 && number_of_tries > 0 && number_of_questions > 0) {
+            cursor.close();
             return new int[]{number_of_quick_tests, number_of_tries, number_of_questions};
         } else {
+            cursor.close();
             return null;
         }
     }
@@ -433,6 +435,27 @@ public class DatabaseOperations {
                 data.add(new long[]{cursor.getLong(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)});
             }
         }
+        cursor.close();
+        return data;
+    }
+    public ArrayList<long[]> getBackupSchedulingData() {
+        ArrayList<long[]> data = new ArrayList<>();
+        Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time.TABLE_NAME,
+                new String[]{Contract.Scheduled_Time.COLUMN_FIELD, Contract.Scheduled_Time.COLUMN_SESSION_TYPE,
+                Contract.Scheduled_Time.COLUMN_TIME, Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST,
+                        Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER,
+                        Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES},
+        null,null,null,null,null);
+        if ( cursor.getCount() > 0 ) {
+            for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                 cursor.moveToNext()) {
+                data.add(new long[]{cursor.getLong(0),cursor.getInt(1),cursor.getLong(2),cursor.getInt(3),
+                        (cursor.isNull(4)? -1 : cursor.getInt(4)),
+                        (cursor.isNull(5)? -1 : cursor.getInt(5)),
+                        (cursor.isNull(6)? -1 : cursor.getInt(6))});
+            }
+        }
+        cursor.close();
         return data;
     }
 }

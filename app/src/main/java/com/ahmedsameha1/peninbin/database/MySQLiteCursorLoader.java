@@ -1,7 +1,10 @@
 package com.ahmedsameha1.peninbin.database;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -9,6 +12,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.ahmedsameha1.peninbin.dialogs.CreateFieldDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
+import com.ahmedsameha1.peninbin.receivers_services.ScheduleInFieldReceiver;
 import com.commonsware.cwac.loaderex.AbstractCursorLoader;
 import com.commonsware.cwac.loaderex.ContentChangingTask;
 
@@ -68,39 +73,39 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
 
-    public void createField(String field_name, int field_type, int question_data_type,int check_type, boolean read_answer, String locale) {
+    public void createField(String field_name, int field_type, int question_data_type, int check_type, boolean read_answer, String locale) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
         contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
         contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
-        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, check_type );
+        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, check_type);
         contentValues.put(Contract.Field.COLUMN_READ_ANSWER, read_answer ? Contract.Field.READ_ANSWER : Contract.Field.DO_NOT_READ_ANSWER);
-        if ( locale != null ) {
-            contentValues.put(Contract.Field.COLUMN_LOCALE,locale);
+        if (locale != null) {
+            contentValues.put(Contract.Field.COLUMN_LOCALE, locale);
         }
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
 
 
-    public void setRandomQuickTestData(long field_id,int number_of_quick_tests, int number_of_tries, int number_of_question, String [][] excluded_times ) {
+    public void setRandomQuickTestData(long field_id, int number_of_quick_tests, int number_of_tries, int number_of_question, String[][] excluded_times) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             int s = sqLiteDatabase.delete(Contract.Excluded_Time.TABLE_NAME, Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS,number_of_quick_tests);
-            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES,number_of_tries);
-            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS,number_of_question);
-            sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
-            if ( excluded_times != null ) {
-                for ( String [] temp : excluded_times ) {
-                    if ( temp != null ) {
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, number_of_quick_tests);
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, number_of_tries);
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, number_of_question);
+            sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+            if (excluded_times != null) {
+                for (String[] temp : excluded_times) {
+                    if (temp != null) {
                         contentValues = new ContentValues();
-                        contentValues.put(Contract.Excluded_Time.COLUMN_STARTS,temp[0]);
-                        contentValues.put(Contract.Excluded_Time.COLUMN_ENDS,temp[1]);
-                        contentValues.put(Contract.Excluded_Time.COLUMN_FIELD,field_id);
-                        sqLiteDatabase.insert(Contract.Excluded_Time.TABLE_NAME,null,contentValues);
+                        contentValues.put(Contract.Excluded_Time.COLUMN_STARTS, temp[0]);
+                        contentValues.put(Contract.Excluded_Time.COLUMN_ENDS, temp[1]);
+                        contentValues.put(Contract.Excluded_Time.COLUMN_FIELD, field_id);
+                        sqLiteDatabase.insert(Contract.Excluded_Time.TABLE_NAME, null, contentValues);
                     }
                 }
             }
@@ -159,43 +164,38 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
 
-
-
-    public void updateFieldReadAnswer( long field_id, boolean isReadAnswer ) {
+    public void updateFieldReadAnswer(long field_id, boolean isReadAnswer) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_READ_ANSWER, isReadAnswer ? Contract.Field.READ_ANSWER : Contract.Field.DO_NOT_READ_ANSWER);
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-        sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
+        sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
     }
-    public void updateFieldCheckType( long field_id, int check_type ) {
+
+    public void updateFieldCheckType(long field_id, int check_type) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, check_type);
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-        sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
+        sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
     }
-    public void updateFieldLocale( long field_id, String locale ) {
+
+    public void updateFieldLocale(long field_id, String locale) {
         ContentValues contentValues = new ContentValues();
-        if ( locale != null ) {
+        if (locale != null) {
             contentValues.put(Contract.Field.COLUMN_LOCALE, locale);
         } else {
             contentValues.putNull(Contract.Field.COLUMN_LOCALE);
         }
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-        sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
+        sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
     }
-
-
-
 
 
     protected ContentChangingTask buildDeleteEntryTask(MySQLiteCursorLoader loader) {
         return (new DeleteEntryTask(loader));
     }
-
-
 
 
     protected ContentChangingTask buildIncrementFieldUsageTask(MySQLiteCursorLoader loader) {
@@ -206,7 +206,6 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     public void incrementFieldUsage(long field_id) {
         buildIncrementFieldUsageTask(this).execute(db, field_id);
     }
-
 
 
     public void putEntriesTestOrder(long field_id, int question_data_type, String[][] array) {
@@ -307,11 +306,10 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
 
     public void updateFieldName(long current_field_id, String s) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Field.COLUMN_FIELD_NAME,s);
-        db.getWritableDatabase().update(Contract.Field.TABLE_NAME,contentValues,
+        contentValues.put(Contract.Field.COLUMN_FIELD_NAME, s);
+        db.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{current_field_id + ""});
     }
-
 
     protected static class EditEntryTask extends ContentChangingTask {
         EditEntryTask(MySQLiteCursorLoader loader) {
@@ -374,8 +372,8 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
 
-    public void updateFieldSort( long field_id, int sort ) {
-        buildUpdateFieldSortTask(this).execute(db,field_id,sort);
+    public void updateFieldSort(long field_id, int sort) {
+        buildUpdateFieldSortTask(this).execute(db, field_id, sort);
     }
 
     protected ContentChangingTask buildUpdateFieldSortTask(MySQLiteCursorLoader loader) {
@@ -395,15 +393,15 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             int sort = (int) params[2];
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_SORT_BY,sort);
-            sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
+            contentValues.put(Contract.Field.COLUMN_SORT_BY, sort);
+            sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
             return (null);
         }
     }
 
-    public void updateFieldAreasSize( long field_id, int question_area_size,int answer_area_size ) {
-        buildUpdateFieldAreasSize(this).execute(db,field_id,question_area_size,answer_area_size);
+    public void updateFieldAreasSize(long field_id, int question_area_size, int answer_area_size) {
+        buildUpdateFieldAreasSize(this).execute(db, field_id, question_area_size, answer_area_size);
     }
 
     protected ContentChangingTask buildUpdateFieldAreasSize(MySQLiteCursorLoader loader) {
@@ -424,16 +422,16 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             int answer_area_size = (int) params[3];
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE,question_area_size);
-            contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE,answer_area_size);
-            sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
+            contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE, question_area_size);
+            contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE, answer_area_size);
+            sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
             return (null);
         }
     }
 
-    public void updateFieldAnswerAreaSize( long field_id, int question_area_size ) {
-        buildUpdateFieldAnswerAreaSize(this).execute(db,field_id,question_area_size);
+    public void updateFieldAnswerAreaSize(long field_id, int question_area_size) {
+        buildUpdateFieldAnswerAreaSize(this).execute(db, field_id, question_area_size);
     }
 
     protected ContentChangingTask buildUpdateFieldAnswerAreaSize(MySQLiteCursorLoader loader) {
@@ -453,15 +451,15 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             int answer_area_size = (int) params[2];
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE,answer_area_size);
-            sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
+            contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE, answer_area_size);
+            sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
             return (null);
         }
     }
 
-    public void updateFieldTestTextSize( long field_id, int test_text_size ) {
-        buildUpdateFieldTestTextSize(this).execute(db,field_id,test_text_size);
+    public void updateFieldTestTextSize(long field_id, int test_text_size) {
+        buildUpdateFieldTestTextSize(this).execute(db, field_id, test_text_size);
     }
 
     protected ContentChangingTask buildUpdateFieldTestTextSize(MySQLiteCursorLoader loader) {
@@ -481,15 +479,15 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             int test_text_size = (int) params[2];
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_TEST_TEXT_SIZE,test_text_size);
-            sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
+            contentValues.put(Contract.Field.COLUMN_TEST_TEXT_SIZE, test_text_size);
+            sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
             return (null);
         }
     }
 
-    public void updateFieldActionBarShown( long field_id, int action_bar_shown ) {
-        buildUpdateFieldActionBarShown(this).execute(db,field_id,action_bar_shown);
+    public void updateFieldActionBarShown(long field_id, int action_bar_shown) {
+        buildUpdateFieldActionBarShown(this).execute(db, field_id, action_bar_shown);
     }
 
     protected ContentChangingTask buildUpdateFieldActionBarShown(MySQLiteCursorLoader loader) {
@@ -509,8 +507,8 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             int action_bar_shown = (int) params[2];
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_ACTION_BAR_SHOWN,action_bar_shown);
-            sqLiteDatabase.update(Contract.Field.TABLE_NAME,contentValues,
+            contentValues.put(Contract.Field.COLUMN_ACTION_BAR_SHOWN, action_bar_shown);
+            sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
             return (null);
         }
@@ -591,33 +589,42 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         }
     }
 
-    public void deleteField(final long field_id, final Handler handler ) {
+    public void deleteField(final long field_id, final Handler handler) {
         Thread pauseThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
 
-                    sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
-                            Contract.COLUMN_ID + " = ? ",
-                            new String[]{field_id + ""});
+                sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
+                        Contract.COLUMN_ID + " = ? ",
+                        new String[]{field_id + ""});
+                Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time.TABLE_NAME,
+                        new String[]{Contract.Scheduled_Time.COLUMN_FIELD, Contract.Scheduled_Time.COLUMN_SESSION_TYPE,
+                                Contract.Scheduled_Time.TABLE_NAME, Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST},
+                        Contract.Scheduled_Time.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null, null);
+                if (cursor.getCount() > 0) {
+                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
+                        Intent intent = new Intent(context, ScheduleInFieldReceiver.class);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(3), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.cancel(pendingIntent);
+                    }
+                }
 
-
-
-
-
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            MySQLiteCursorLoader.this.onContentChanged();
-                        }
-                    };
-                    handler.post(runnable);
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        MySQLiteCursorLoader.this.onContentChanged();
+                    }
+                };
+                handler.post(runnable);
 
             }
         });
         pauseThread.start();
     }
+
     public void cleanDatabase() {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         cleanSTringTable(sqLiteDatabase);
@@ -626,7 +633,6 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                 + " IN ( SELECT " + Contract.COLUMN_ID + " FROM " + Contract.Not_String.TABLE_NAME + " EXCEPT SELECT "
                 + Contract.Not_String_Entry.COLUMN_QUESTION + " FROM " + Contract.Not_String_Entry.TABLE_NAME + " );");
     }
-
 
 
     public void clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(long field_id) {
@@ -691,8 +697,8 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         }
     }
 
-    public void putEntryWrongAnswers(String question,String answer , long field_id , ArrayList<String> wrongAnswer, int question_data_type) {
-        buildPutEntryWrongAnswers(this).execute(db, question,answer,field_id, wrongAnswer, question_data_type);
+    public void putEntryWrongAnswers(String question, String answer, long field_id, ArrayList<String> wrongAnswer, int question_data_type) {
+        buildPutEntryWrongAnswers(this).execute(db, question, answer, field_id, wrongAnswer, question_data_type);
     }
 
     protected ContentChangingTask buildPutEntryWrongAnswers(MySQLiteCursorLoader loader) {
@@ -717,8 +723,8 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             try {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
                     Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                        Contract.STring.COLUMN_VALUE + " = ? ",
-                        new String[]{question}, null, null, null);
+                            Contract.STring.COLUMN_VALUE + " = ? ",
+                            new String[]{question}, null, null, null);
                     questionCursor.moveToFirst();
                     long question_id = questionCursor.getLong(0);
                     questionCursor.close();
@@ -730,7 +736,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                     answerCursor.close();
                     Cursor entryCursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                             Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_ANSWER + " = ? AND "
-                            + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                                    + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                             new String[]{question_id + "", answer_id + "", field_id + ""}, null, null, null);
                     entryCursor.moveToFirst();
                     long entry_id = entryCursor.getLong(0);
@@ -751,7 +757,34 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         }
     }
 
+    public void addScheduledTimeForBackup(long field_id, int session_type, long time, int pendingintent_request) {
+        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Scheduled_Time.COLUMN_FIELD, field_id);
+        contentValues.put(Contract.Scheduled_Time.COLUMN_SESSION_TYPE, session_type);
+        contentValues.put(Contract.Scheduled_Time.COLUMN_TIME, time);
+        contentValues.put(Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST, pendingintent_request);
+        sqLiteDatabase.insert(Contract.Scheduled_Time.TABLE_NAME, null, contentValues);
+    }
+    public void addScheduledTimeForBackup(long field_id, int session_type, long time, int pendingintent_request,int percentage_or_number, int number, int number_of_tries) {
+        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Scheduled_Time.COLUMN_FIELD, field_id);
+        contentValues.put(Contract.Scheduled_Time.COLUMN_SESSION_TYPE, session_type);
+        contentValues.put(Contract.Scheduled_Time.COLUMN_TIME, time);
+        contentValues.put(Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST, pendingintent_request);
+        contentValues.put(Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, percentage_or_number);
+        contentValues.put(Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER, number);
+        contentValues.put(Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES, number_of_tries);
+        sqLiteDatabase.insert(Contract.Scheduled_Time.TABLE_NAME, null, contentValues);
+    }
 
+    public void deleteScheduledTimeForBackup(long field_id, int session_type, long time) {
+        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+        sqLiteDatabase.delete(Contract.Scheduled_Time.TABLE_NAME, Contract.Scheduled_Time.COLUMN_FIELD + " = ? AND "
+                        + Contract.Scheduled_Time.COLUMN_SESSION_TYPE + " = ? AND " + Contract.Scheduled_Time.COLUMN_TIME + " = ?",
+                new String[]{field_id + "", session_type + "", time + ""});
+    }
 
     private static void cleanSTringTable(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("DELETE FROM " + Contract.STring.TABLE_NAME + " WHERE " + Contract.COLUMN_ID
