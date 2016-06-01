@@ -1,0 +1,107 @@
+package com.ahmedsameha1.peninbin.receivers_services;
+
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
+import com.ahmedsameha1.peninbin.activities.MainActivity;
+import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.activities.TestActivity;
+import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.DatabaseHelper;
+import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+
+/**
+ * Created by ahmed on 24/05/16.
+ */
+public class BootCompletedReceiver extends BroadcastReceiver {
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        rescheduleMidnightService(context);
+        rescheduleAllSessions(context);
+    }
+
+    private void rescheduleAllSessions(Context context) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        ArrayList<long[]> data = new DatabaseOperations(context).getBackupSchedulingData();
+        for ( long[] session : data ) {
+            Log.i("reschedule","time");
+            if ( session[1] == ScheduleInFieldDialogFragment.QUICK_TEST ) {
+                if ( session[4] == -1 ) {
+                    Cursor cursor = DatabaseHelper.getInstance(context).getWritableDatabase().query(Contract.Field.TABLE_NAME,
+                            new String[]{Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS},
+                            Contract.COLUMN_ID + " = ? ", new String[]{session[0] + ""}, null, null, null);
+                    if ( cursor.moveToFirst() ) {
+                        Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                        intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
+                        intent.putExtra(TestActivity.QUESTION_NUMBER, cursor.getInt(1));
+                        intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, cursor.getInt(0));
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
+                        intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
+                        intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
+                    }
+                    cursor.close();
+                } else {
+                    if ( session [4] == TestActivity.PERCENTAGE) {
+                        Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                        intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.PERCENTAGE);
+                        intent.putExtra(TestActivity.QUESTION_PERCENTAGE, (int) session[5]);
+                        intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
+                        intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
+                        intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
+                    } else if ( session [4] == TestActivity.NUMBER ) {
+                        Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                        intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
+                        intent.putExtra(TestActivity.QUESTION_NUMBER, (int) session[5]);
+                        intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
+                        intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
+                        intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
+                    }
+                }
+            } else {
+                Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,(int) session[1]);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,session[0]);
+                intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
+            }
+        }
+    }
+
+    private void rescheduleMidnightService(Context context){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if ( sharedPreferences.contains(MainActivity.MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST) ) {
+            int request = sharedPreferences.getInt(MainActivity.MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST,0);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.set(Calendar.DAY_OF_MONTH,calendar.get(Calendar.DAY_OF_MONTH) + 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND,0);
+            Intent intent = new Intent(context, SimpleWakefulReceiver.class);
+            PendingIntent pintent = PendingIntent.getBroadcast(context, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
+        }
+    }
+}

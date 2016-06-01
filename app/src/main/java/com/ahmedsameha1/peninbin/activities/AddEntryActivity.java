@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,6 +17,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -34,6 +37,8 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -61,6 +66,9 @@ public class AddEntryActivity extends AppCompatActivity implements
     private EditText enter_answer;
     private TextView showActionbar;
     private SimpleCursorAdapter simple_cursor_adapter;
+
+
+
     private DatabaseOperations databaseOperations;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
@@ -92,12 +100,16 @@ public class AddEntryActivity extends AppCompatActivity implements
         field_spinner = (Spinner) findViewById(R.id.field_spinner);
         enter_question = (EditText) findViewById(R.id.question);
         enter_answer = (EditText) findViewById(R.id.answer);
-        TextView add_entry = (TextView) findViewById(R.id.add_entry);
-        TextView add_entry_finish = (TextView) findViewById(R.id.add_entry_finish);
+        final TextView add_entry = (TextView) findViewById(R.id.add_entry);
+        final TextView add_entry_finish = (TextView) findViewById(R.id.add_entry_finish);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
+        final CardView show_actionbar_cardview = (CardView) findViewById(R.id.show_actionbar_card_view);
+        final CardView add_entry_cardview = (CardView) findViewById(R.id.add_entry_card_view);
+        final CardView add_entry_finish_cardview = (CardView) findViewById(R.id.add_entry_finish_card_view);
+        final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -125,6 +137,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         add_entry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                add_entry_cardview.startAnimation(animAlpha);
                 String question = enter_question.getText().toString();
                 String answer = enter_answer.getText().toString();
                 if ( question.length() > 0 && answer.length() > 0) {
@@ -201,6 +214,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         add_entry_finish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                add_entry_finish_cardview.startAnimation(animAlpha);
                 String question = enter_question.getText().toString();
                 String answer = enter_answer.getText().toString();
                 if (question.length() > 0 && answer.length() > 0) {
@@ -288,7 +302,8 @@ public class AddEntryActivity extends AppCompatActivity implements
                 setHints(fieldType);
                 if ( fieldType == Contract.Field.NOTEBOOK_TYPE) {
                     enter_question.setText("");
-                    enter_question.clearFocus();
+//                    enter_question.clearFocus();
+                    enter_answer.requestFocus();
                 }
             }
 
@@ -301,6 +316,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                show_actionbar_cardview.startAnimation(animAlpha);
                 if (actionBarShown) {
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
@@ -342,7 +358,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 }
             }
         });
-        enter_question.setOnLongClickListener(new View.OnLongClickListener() {
+/*        enter_question.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 enter_question.setText("");
@@ -357,7 +373,69 @@ public class AddEntryActivity extends AppCompatActivity implements
                 enter_answer.requestFocus();
                 return true;
             }
+        });*/
+        enter_answer.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft() {
+                enter_answer.setText("");
+                enter_answer.requestFocus();
+            }
+            @Override
+            public void onSwipeRight() {
+                enter_answer.setText("");
+                enter_answer.requestFocus();
+            }
         });
+        enter_question.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft() {
+                enter_question.setText("");
+                enter_question.requestFocus();
+            }
+            @Override
+            public void onSwipeRight() {
+                enter_question.setText("");
+                enter_question.requestFocus();
+            }
+        });
+
+        enter_question.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if ( editable.length() > 0 && enter_answer.getText().length() > 0 ) {
+                    add_entry.setEnabled(true);
+                    add_entry_finish.setEnabled(true);
+                } else {
+                    add_entry.setEnabled(false);
+                    add_entry_finish.setEnabled(false);
+                }
+            }
+        });
+        enter_answer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if ( editable.length() > 0 && enter_question.getText().length() > 0 ) {
+                    add_entry.setEnabled(true);
+                    add_entry_finish.setEnabled(true);
+                } else {
+                    add_entry.setEnabled(false);
+                    add_entry_finish.setEnabled(false);
+                }
+            }
+        });
+
     }
 
     private void setHints(int fieldType ) {
@@ -374,8 +452,13 @@ public class AddEntryActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        UsageLastTime.updateUsageLastTime(this);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

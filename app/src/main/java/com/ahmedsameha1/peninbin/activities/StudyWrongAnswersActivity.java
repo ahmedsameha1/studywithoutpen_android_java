@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,6 +16,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -25,7 +28,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
-import com.ahmedsameha1.peninbin.database.CompareUtility;
+import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
@@ -33,6 +36,8 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -105,11 +110,17 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         correctAnswers = ( TextView) findViewById(R.id.correct_answers);
         check = (TextView) findViewById(R.id.check);
         ImageButton up = (ImageButton) findViewById(R.id.up);
-        ImageButton down = (ImageButton) findViewById(R.id.down);
+        final ImageButton down = (ImageButton) findViewById(R.id.down);
         answerLinearlayout = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
+        final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
+        final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
+        final CardView show_current_study_entry_card_view = (CardView) findViewById(R.id.show_current_study_entry_card_view);
+        final CardView up_card_view = (CardView) findViewById(R.id.up_card_view);
+        final CardView down_card_view = (CardView) findViewById(R.id.down_card_view);
+        final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         setSupportActionBar(toolbar);
         if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
             getSupportActionBar().hide();
@@ -137,39 +148,37 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         showCurrentEntry.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                show_current_study_entry_card_view.startAnimation(animAlpha);
                 if (isChecked) {
                     enterQuestion.setText(currentQuestion);
                     enterAnswer.setText(currentAnswer);
-                    enterQuestion.setFocusable(false);
-                    enterAnswer.setFocusable(false);
+                    enterQuestion.setEnabled(false);
+                    enterAnswer.setEnabled(false);
                     check.setEnabled(false);
                     questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
                     questionLinearlayout.setPadding(0, 0, 0, 0);
                     answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
                     answerLinearlayout.setPadding(0, 0, 0, 0);
                 } else {
-                    check.setEnabled(true);
                     if (studyQuestion.isChecked()) {
                         enterQuestion.setText("");
-                        enterQuestion.setFocusable(true);
-                        enterQuestion.setFocusableInTouchMode(true);
+                        enterQuestion.setEnabled(true);
                         questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                         questionLinearlayout.setPadding(0, 0, 0, 0);
                     } else {
                         enterQuestion.setText(currentQuestion);
-                        enterQuestion.setFocusable(false);
+                        enterQuestion.setEnabled(false);
                         questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
                         questionLinearlayout.setPadding(0, 0, 0, 0);
                     }
                     if (studyAnswer.isChecked()) {
                         enterAnswer.setText("");
-                        enterAnswer.setFocusable(true);
-                        enterAnswer.setFocusableInTouchMode(true);
+                        enterAnswer.setEnabled(true);
                         answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     } else {
                         enterAnswer.setText(currentAnswer);
-                        enterAnswer.setFocusable(false);
+                        enterAnswer.setEnabled(false);
                         answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     }
@@ -180,6 +189,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
             @Override
             @SuppressWarnings("deprecation")
             public void onClick(View v) {
+                check_card_view.startAnimation(animAlpha);
                 String entered_question = enterQuestion.getText().toString();
                 String entered_answer = enterAnswer.getText().toString();
                 if (studyQuestion.isChecked() && studyAnswer.isChecked()) {
@@ -532,14 +542,13 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 correctAnswers.setText(Integer.toString(correctAnswersCounter));
                 if ( ! showCurrentEntry.isChecked() ) {
                     if (isChecked) {
-                        enterQuestion.setFocusable(true);
-                        enterQuestion.setFocusableInTouchMode(true);
+                        enterQuestion.setEnabled(true);
                         enterQuestion.setText("");
                         questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                         questionLinearlayout.setPadding(0, 0, 0, 0);
                     } else {
                         if (studyAnswer.isChecked()) {
-                            enterQuestion.setFocusable(false);
+                            enterQuestion.setEnabled(false);
                             enterQuestion.setText(currentQuestion);
                             questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
                             questionLinearlayout.setPadding(0, 0, 0, 0);
@@ -561,14 +570,13 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 correctAnswers.setText(Integer.toString(correctAnswersCounter));
                 if ( ! showCurrentEntry.isChecked() ) {
                     if (isChecked) {
-                        enterAnswer.setFocusable(true);
-                        enterAnswer.setFocusableInTouchMode(true);
+                        enterAnswer.setEnabled(true);
                         enterAnswer.setText("");
                         answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     } else {
                         if ( studyQuestion.isChecked() ) {
-                            enterAnswer.setFocusable(false);
+                            enterAnswer.setEnabled(false);
                             enterAnswer.setText(currentAnswer);
                             answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
@@ -586,6 +594,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                up_card_view.startAnimation(animAlpha);
                 for (int i = 0; i < wrongItemsList.size(); i++) {
                     if (wrongItemsList.get(i).getQuestion().equals(currentQuestion) &&
                             wrongItemsList.get(i).getAnswer().equals(currentAnswer)) {
@@ -599,13 +608,13 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                                 enterQuestion.setText("");
                             } else {
                                 enterQuestion.setText(currentQuestion);
-                                enterQuestion.setFocusable(false);
+                                enterQuestion.setEnabled(false);
                             }
                             if (studyAnswer.isChecked()) {
                                 enterAnswer.setText("");
                             } else {
                                 enterAnswer.setText(currentAnswer);
-                                enterAnswer.setFocusable(false);
+                                enterAnswer.setEnabled(false);
                             }
                         }
                         if (showCurrentEntry.isChecked()) {
@@ -625,6 +634,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                down_card_view.startAnimation(animAlpha);
                 for ( int i = 0; i < wrongItemsList.size(); i++ ) {
                     if ( wrongItemsList.get(i).getQuestion().equals(currentQuestion) &&
                             wrongItemsList.get(i).getAnswer().equals(currentAnswer) ) {
@@ -637,13 +647,13 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                                 enterQuestion.setText("");
                             } else {
                                 enterQuestion.setText(currentQuestion);
-                                enterQuestion.setFocusable(false);
+                                enterQuestion.setEnabled(false);
                             }
                             if (studyAnswer.isChecked()) {
                                 enterAnswer.setText("");
                             } else {
                                 enterAnswer.setText(currentAnswer);
-                                enterAnswer.setFocusable(false);
+                                enterAnswer.setEnabled(false);
                             }
                         }
                         if ( showCurrentEntry.isChecked() ) {
@@ -673,9 +683,16 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().length() > 0) {
+                if (s.length() > 0) {
                     questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                     questionLinearlayout.setPadding(0, 0, 0, 0);
+                }
+                if ( s.length() > 0 && enterAnswer.getText().length() > 0 ) {
+                    if ( ! showCurrentEntry.isChecked() ) {
+                        check.setEnabled(true);
+                    }
+                } else{
+                    check.setEnabled(false);
                 }
             }
         });
@@ -692,16 +709,25 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().length() > 0) {
+                if (s.length() > 0) {
                     answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                     answerLinearlayout.setPadding(0, 0, 0, 0);
-
+                }
+                if ( s.length() > 0 && enterQuestion.getText().length() > 0 ) {
+                    if ( ! showCurrentEntry.isChecked() ) {
+                        check.setEnabled(true);
+                    }
+                }else {
+                    check.setEnabled(false);
                 }
             }
         });
+
+
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                show_actionbar_card_view.startAnimation(animAlpha);
                 if (actionBarShown) {
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
@@ -728,6 +754,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         if ( tts_available && isFinishing() ) {
             tts.stop();
         }
+        UsageLastTime.updateUsageLastTime(this);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -776,7 +803,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

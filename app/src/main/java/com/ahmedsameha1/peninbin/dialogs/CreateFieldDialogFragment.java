@@ -10,13 +10,17 @@ import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
@@ -25,7 +29,8 @@ import com.ahmedsameha1.peninbin.R;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 /**
  * Created by ahmed on 7/21/2015.
  */
@@ -40,12 +45,15 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     private int check_type;
     private CheckBox read_answer;
     private Spinner select_locale;
+    private Tracker mTracker;
     @Override
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         tts_available = getArguments().getBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE);
         tts = new TextToSpeech(getActivity().getApplicationContext(), this);
         databaseOperations = new DatabaseOperations(getActivity());
+        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
+        mTracker = application.getDefaultTracker();
     }
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {
@@ -68,6 +76,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                 final Spinner select_field_type = (Spinner) alertDialog.findViewById(R.id.field_type_spinner);
                 final CheckBox read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
                 final Spinner select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
+                final LinearLayout show_default_field_options = (LinearLayout) alertDialog.findViewById(R.id.show_default_field_options);
                 final SpinnerWithHintAdapter field_type_adapter = new SpinnerWithHintAdapter(getActivity(),
                         android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.field_type));
                 final SpinnerWithHintAdapter check_type_adapter = new SpinnerWithHintAdapter(getActivity(),
@@ -83,6 +92,21 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                 final SpinnerWithHintAdapter select_locale_adapter =
                         new SpinnerWithHintAdapter(getActivity(),android.R.layout.simple_spinner_item,locale_display_names);
                 Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                select_field_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                        if ( position == 0) {
+                            show_default_field_options.setVisibility(View.VISIBLE);
+                        } else {
+                            show_default_field_options.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
                 read_answer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
@@ -111,43 +135,68 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
 //                        CheckBox notebookCheckbox = (CheckBox) alertDialog.findViewById(R.id.notebook_field_checkbox);
 //                        int type = notebookCheckbox.isChecked()? Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE : Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE;
                         String fieldName = enterFieldName.getText().toString();
-                        if (fieldName.equals("")) {
-                            Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,400);
-                            toast.show();
-                        } else if (databaseOperations.checkFieldDuplication(fieldName)) {
-                            Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,400);
-                            toast.show();
-                        } else if ( select_field_type.getSelectedItemPosition() == field_type_adapter.getCount() ) {
-                            Toast toast = Toast.makeText(getActivity(), R.string.select_a_field_type, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,400);
-                            toast.show();
-                        } else if ( select_check_type.getSelectedItemPosition() == check_type_adapter.getCount() ) {
-                            Toast toast = Toast.makeText(getActivity(), R.string.select_a_check_type, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,400);
-                            toast.show();
-                        } else if ( read_answer.isChecked() && select_locale.getSelectedItemPosition() == select_locale_adapter.getCount() ) {
-                            Toast toast = Toast.makeText(getActivity(), R.string.select_locale, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,400);
-                            toast.show();
-                        } else {
-                            int field_type = select_field_type.getSelectedItemPosition();
-                            int check_type = select_check_type.getSelectedItemPosition();
-                            if (  select_locale.getSelectedItemPosition() < select_locale_adapter.getCount()
-                                    && select_locale.getSelectedItemPosition() >= 0 ) {
-                                int i = select_locale.getSelectedItemPosition();
-                                Locale locale = localeList.get(i);
-                                locale_short_name = locale.getLanguage() + "," + locale.getCountry();
-                                ((Contact)getActivity())
-                                        .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE,
-                                                check_type,read_answer.isChecked(),locale_short_name);
+                        if ( select_field_type.getSelectedItemPosition() == 0 ) {
+                            if (fieldName.equals("")) {
+                                Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else if (databaseOperations.checkFieldDuplication(fieldName)) {
+                                Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else if ( select_field_type.getSelectedItemPosition() == field_type_adapter.getCount() ) {
+                                Toast toast = Toast.makeText(getActivity(), R.string.select_a_field_type, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else if ( select_check_type.getSelectedItemPosition() == check_type_adapter.getCount() ) {
+                                Toast toast = Toast.makeText(getActivity(), R.string.select_a_check_type, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else if ( read_answer.isChecked() && select_locale.getSelectedItemPosition() == select_locale_adapter.getCount() ) {
+                                Toast toast = Toast.makeText(getActivity(), R.string.select_locale, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
                             } else {
-                                ((Contact)getActivity())
-                                        .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE,
-                                                check_type,read_answer.isChecked(),null);
+                                int field_type = select_field_type.getSelectedItemPosition();
+                                int check_type = select_check_type.getSelectedItemPosition();
+                                if (  select_locale.getSelectedItemPosition() < select_locale_adapter.getCount()
+                                        && select_locale.getSelectedItemPosition() >= 0 ) {
+                                    int i = select_locale.getSelectedItemPosition();
+                                    Locale locale = localeList.get(i);
+                                    locale_short_name = locale.getLanguage() + "," + locale.getCountry();
+                                    ((Contact)getActivity())
+                                            .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE,
+                                                    check_type,read_answer.isChecked(),locale_short_name);
+                                    mTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                            .setAction("selecting locale")
+                                            .build());
+                                } else {
+                                    ((Contact)getActivity())
+                                            .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE,
+                                                    check_type,read_answer.isChecked(),null);
+                                }
+                                alertDialog.dismiss();
                             }
-                            alertDialog.dismiss();
+                        } else {
+                            if (fieldName.equals("")) {
+                                Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else if (databaseOperations.checkFieldDuplication(fieldName)) {
+                                Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else if ( select_field_type.getSelectedItemPosition() == field_type_adapter.getCount() ) {
+                                Toast toast = Toast.makeText(getActivity(), R.string.select_a_field_type, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else {
+                                int field_type = select_field_type.getSelectedItemPosition();
+                                ((Contact)getActivity())
+                                        .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE);
+                                alertDialog.dismiss();
+                            }
                         }
 
 
@@ -165,6 +214,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     }*/
     public interface Contact {
     void createField(String field_name, int field_type, int question_data_type, int check_type, boolean read_answer, String locale);
+    void createField(String field_name, int field_type, int question_data_type);
 }
     public void onInit(int status) {
         Locale[] locales = Locale.getAvailableLocales();

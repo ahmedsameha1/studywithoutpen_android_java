@@ -1,5 +1,7 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -11,6 +13,7 @@ import android.app.LoaderManager;
 import android.content.Loader;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,15 +23,18 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
-import com.ahmedsameha1.peninbin.database.CompareUtility;
+import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
@@ -36,6 +42,8 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -67,6 +75,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final String PAUSING = "pausing";
+    private static final String CONTENT_VISIBILITY = "content_visibility";
+    private static final String LOADING_VISIBILITY = "loading_visibility";
     private long startingTime;
     boolean boolean_continue, actionBarShown;
     private Cursor cursor;
@@ -98,6 +108,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuetions, showActionbar;
     private TextView nextHint, check, _continue;
     private LinearLayout showResult, questionLinearlayout, container;
+    private CardView check_card_view, next_hint_card_view, show_action_bar_card_view,continue_card_view;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment;
     private Handler mHandler = new Handler();
@@ -107,6 +118,10 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private boolean locale_available = false;
     private int check_type;
     private Tracker mTracker;
+    private int mShortAnimationDuration;
+    private View mLoadingView;
+    private RelativeLayout content;
+
     private int question_data_type;private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -153,6 +168,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         showResult = (LinearLayout) findViewById(R.id.result);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
+        content = (RelativeLayout) findViewById(R.id.content);
+        mLoadingView = findViewById(R.id.loading);
         container = (LinearLayout) findViewById(R.id.container);
         enterAnswer = (EditText) findViewById(R.id.enter_answer);
         showQuestion = (TextView) findViewById(R.id.display_question);
@@ -163,7 +180,19 @@ public class StudyDuringActivity extends AppCompatActivity implements
         showTries = (TextView) findViewById(R.id.trys);
         showNumberOfQuetions = (TextView) findViewById(R.id.number_of_questions);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
-        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
+        check_card_view = (CardView) findViewById(R.id.check_card_view);
+        continue_card_view = (CardView) findViewById(R.id.continue_card_view);
+        next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
+        show_action_bar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
+        final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
+        if ( savedInstanceState == null ) {
+            content.setVisibility(View.GONE);
+            mShortAnimationDuration = getResources().getInteger(
+                    android.R.integer.config_shortAnimTime);
+        } else {
+            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
+            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
+        }
         // if the reference to the fragment was null we create a new fragment object and add it to the activity
         if (retainedFragment == null) {
             retainedFragment = new RetainedFragment();
@@ -205,6 +234,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                check_card_view.startAnimation(animAlpha);
                 testingNow = true;
                 if (enterAnswer.getText().toString().length() > 0) {
 
@@ -261,6 +291,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         nextHint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                next_hint_card_view.startAnimation(animAlpha);
                 if (hints != null) {
                     if (enterAnswer.getText().toString().length() <= 0) {
                         enterAnswer.setHint(hints.get(hintCounter++));
@@ -286,16 +317,22 @@ public class StudyDuringActivity extends AppCompatActivity implements
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().length() > 0 && permitedTriesNumber != 1) {
+                if (s.length() > 0 && permitedTriesNumber != 1) {
                     showResult.setBackgroundResource(R.drawable.enter_answer_background);
                     showResult.setPadding(0, 0, 0, 0);
                 }
+                if ( s.length() > 0 ) {
+                    check.setEnabled(true);
+                } else {
+                    check.setEnabled(false);
+                }
             }
         });
+
         _continue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                check.setEnabled(true);
+                continue_card_view.startAnimation(animAlpha);
                 enterAnswer.setText("");
                 _continue.setEnabled(false);
                 enterAnswer.setEnabled(true);
@@ -313,6 +350,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                show_action_bar_card_view.startAnimation(animAlpha);
                 if (actionBarShown) {
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
@@ -329,6 +367,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         showNumberOfQuetions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.startAnimation(animAlpha);
                 Toast toast = Toast.makeText(StudyDuringActivity.this,
                         getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -338,6 +377,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.startAnimation(animAlpha);
                 Toast toast = Toast.makeText(StudyDuringActivity.this,
                         getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -347,6 +387,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         showTries.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.startAnimation(animAlpha);
                 Toast toast = Toast.makeText(StudyDuringActivity.this,
                         getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -360,6 +401,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         if ( tts_available && isFinishing() ) {
             tts.stop();
         }
+        UsageLastTime.updateUsageLastTime(this);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -694,6 +736,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
         savedInstanceState.putInt(HINT_COUNTER, hintCounter);
         savedInstanceState.putStringArrayList(HINTS, hints);
         savedInstanceState.putIntegerArrayList(REPEATED_ENTRIES, repeatedEntries);
+        savedInstanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
+        savedInstanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
         saveUserLayoutChanges(savedInstanceState);
       /*  if (!isFinishing()) {
             pauseThread.start();
@@ -704,7 +748,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
@@ -853,6 +897,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             toast.show();
             finish();
         }
+        crossfade();
     }
 
     @Override
@@ -922,5 +967,32 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 toast.show();
             }
         }
+    }
+    private void crossfade() {
+
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        content.setAlpha(0f);
+        content.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        content.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
+
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        mLoadingView.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mLoadingView.setVisibility(View.GONE);
+                    }
+                });
     }
 }

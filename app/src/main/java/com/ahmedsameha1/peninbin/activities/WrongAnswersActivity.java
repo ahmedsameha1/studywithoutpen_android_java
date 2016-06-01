@@ -19,6 +19,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -43,7 +44,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
@@ -88,7 +89,11 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         }
         return wrongItemsList;
     }
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        UsageLastTime.updateUsageLastTime(this);
+    }
     @Override
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
         savedInsatanceState.putSerializable(WRONG_ITEM_LIST, wrongItemList);

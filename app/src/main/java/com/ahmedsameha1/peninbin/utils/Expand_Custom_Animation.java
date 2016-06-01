@@ -1,4 +1,4 @@
-package com.ahmedsameha1.peninbin.adapters;
+package com.ahmedsameha1.peninbin.utils;
 
 import android.view.View;
 import android.view.animation.Animation;

@@ -24,8 +24,8 @@ import java.util.ArrayList;
 /**
  * Created by ahmed on 7/22/2015.
  */
-public class ShowResultDialogFragment extends DialogFragment {
-    public static final String SHOW_RESULT_DIALOG_FRAGMENT = "showResultDialogFragment";
+public class ShowTestResultDialogFragment extends DialogFragment {
+    public static final String SHOW_TEST_RESULT_DIALOG_FRAGMENT = "showTestResultDialogFragment";
     private int questionsNumber, wrongAnswersNumber;
     private double correctAnswersPercent;
     private String message;

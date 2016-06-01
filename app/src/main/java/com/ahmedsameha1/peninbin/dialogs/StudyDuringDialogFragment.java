@@ -16,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 
@@ -29,11 +30,13 @@ public class StudyDuringDialogFragment extends DialogFragment {
     public static final int MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
     public static final int MILLISECONDS_IN_HOUR = 60 * 60 * 1000;
     private long current_field_id;
+    private boolean from_notification;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
     }
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {
@@ -83,6 +86,9 @@ public class StudyDuringDialogFragment extends DialogFragment {
                                         intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,false);
                                         intent.putExtra(StudyDuringActivity.NUMBER_OF_TRIES,trys);
                                         startActivity(intent);
+                                        if ( from_notification ) {
+                                            getActivity().finish();
+                                        }
                                         dismiss();
                                     } else {
                                         Toast toast = Toast.makeText(getActivity(),R.string.please_enter_at_least_one_value,Toast.LENGTH_SHORT);

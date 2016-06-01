@@ -8,6 +8,7 @@ import android.os.Bundle;
  */
 public class RetainedFragment extends Fragment {
     private String [][] listForTest_TestActivity;
+    private String [][] listForTest_QuickTestActivity;
     private String [][] listForTest_StudyDuringActivity;
 
     @Override
@@ -30,5 +31,12 @@ public class RetainedFragment extends Fragment {
 
     public void setListForTest_StudyDuringActivity(String[][] listForTest_StudyDuringActivity) {
         this.listForTest_StudyDuringActivity = listForTest_StudyDuringActivity;
+    }
+    public String[][] getListForTest_QuickTestActivity() {
+        return listForTest_QuickTestActivity;
+    }
+
+    public void setListForTest_QuickTestActivity(String[][] listForTest_QuickTestActivity) {
+        this.listForTest_QuickTestActivity = listForTest_QuickTestActivity;
     }
 }

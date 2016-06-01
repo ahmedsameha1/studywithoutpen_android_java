@@ -1,5 +1,7 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -26,6 +28,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +38,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 
@@ -48,10 +53,17 @@ import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ImportFieldsDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * Created by ahmed on 7/26/2015.
@@ -60,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements
         MainActivityFragmentDrawer.FragmentDrawerListener,
         DeleteFieldDialogFragment.Contact,
         CreateFieldDialogFragment.Contact {
+    public static final String MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST = "mid_night_service_pendingintent_request";
     public static final String SCREEN_NAME = "MainActivity";
     private static final String RUN_FIRST_TIME = "run_first_time";
     public static final String RUN_FIRST_TIME_DIALOG = "runFirstTimeDialog";
@@ -67,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final String LAST_USED_FIELD_POSITION = "last_used_field_position";
     private static final String CREATE_NEW_FIELD = "create_new_field";
     private static final String QUERY_KEY = "query_key";
+    public static final String ANALYTICS_CATEGORY = "Main Activity Category";
     private static final int GET_FIELDS_ID = 0;
     private static final int SEARCH_FIELDS_ID = 1;
     private static final int EXPORT_FIELD = 0;
@@ -93,12 +107,12 @@ public class MainActivity extends AppCompatActivity implements
         recyclerView = (RecyclerView) findViewById(R.id.main_activity_recyclerview);
         drawerFragment = (MainActivityFragmentDrawer)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
-        try {
+ /*       try {
             DatabaseHelper.getInstance(this).getWritableDatabase().rawQuery("SELECT _id FROM field",null);
         } catch (android.database.sqlite.SQLiteException e) {
             DatabaseHelper.getInstance(this).close();
             recreate();
-        }
+        }*/
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
@@ -115,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements
         int spacing = 3;
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing, true));
         addFab();
-        deleteUnNeadedSharedPreferences();
+        runFirstTimeAppRunOnly();
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -160,13 +174,41 @@ public class MainActivity extends AppCompatActivity implements
             }
         };
         getLoaderManager();
+        fff();
     }
 
-
-    private void deleteUnNeadedSharedPreferences() {
+    @Override
+    protected void onStop() {
+        super.onStop();
+        UsageLastTime.updateUsageLastTime(this);
+    }
+    private void runFirstTimeAppRunOnly() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         if (sharedPreferences.getBoolean(RUN_FIRST_TIME, true)) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.set(Calendar.DAY_OF_MONTH,calendar.get(Calendar.DAY_OF_MONTH) + 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND,0);
+            Intent intent = new Intent(this, SimpleWakefulReceiver.class);
+            int request = (int) System.currentTimeMillis();
+            PendingIntent pintent = PendingIntent.getBroadcast(this, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+            alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
+            Log.i("time of service", calendar.getTimeInMillis()+"");
+            Log.i("Time Zone",calendar.getTimeZone().getDisplayName());
+            editor.putInt(MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST,request);
+
+
+
+
+
+
+
+
             editor.putBoolean(RUN_FIRST_TIME, false);
             PackageManager manager = getPackageManager();
             try {
@@ -260,6 +302,10 @@ public class MainActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("open export field")
+                        .build());
                 break;
             case IMPORT_FIELD:
                 if ((exportThread == null || !exportThread.isAlive()) &&
@@ -271,6 +317,10 @@ public class MainActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("open import field")
+                        .build());
                 break;
             case REVIEW:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());
@@ -282,19 +332,28 @@ public class MainActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("open review")
+                        .build());
                 break;
             case FACEBOOK:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
                 startActivity(browserIntent);
                 mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory("Action")
-                        .setAction("Share")
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("open facebook page")
                         .build());
                 break;
             case DROPBOX:
                 browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.dropbox.com/sh/qq4rzots8vrb1mi/AAA6loAcxX6edP5bnHflXSFSa?dl=0"));
                 startActivity(browserIntent);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("open dropbox page")
+                        .build());
                 break;
+
         }
     }
 
@@ -309,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
@@ -343,6 +402,10 @@ public class MainActivity extends AppCompatActivity implements
                     fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
                 }
                 actionMenu.close(false);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("add entry from main activity")
+                        .build());
             }
         });
         button2.setOnClickListener(new View.OnClickListener() {
@@ -354,6 +417,10 @@ public class MainActivity extends AppCompatActivity implements
                 fragment.setArguments(bundle);
                 fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
                 actionMenu.close(true);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("create field")
+                        .build());
             }
         });
     }
@@ -367,11 +434,20 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void deleteField(long field_id) {
         mySQLiteCursorLoader.deleteField(field_id,mHandler);
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory(ANALYTICS_CATEGORY)
+                .setAction("delete field")
+                .build());
     }
 
     @Override
     public void createField(String field_name, int field_type, int question_data_type,int check_type, boolean read_answer, String locale) {
         mySQLiteCursorLoader.createField(field_name, field_type, question_data_type,check_type,read_answer,locale);
+        getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
+    }
+    @Override
+    public void createField(String field_name, int field_type, int question_data_type) {
+        mySQLiteCursorLoader.createField(field_name, field_type, question_data_type);
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
     }
 
@@ -409,5 +485,21 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         }
+    }
+    private void fff(){
+        ArrayList<long[]> data = new DatabaseOperations(this).getBackupSchedulingData();
+        Log.i("scheduled time number:",data.size()+"");
+        for ( long[] session : data ) {
+            if ( session[1] == ScheduleInFieldDialogFragment.QUICK_TEST ) {
+                Log.i("scheduled time:",session[2]+"");
+            }
+            }
+        Calendar cal = new GregorianCalendar(TimeZone.getDefault());
+        cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH) + 1);
+        cal.set(Calendar.HOUR_OF_DAY,0);
+        cal.set(Calendar.MINUTE,0);
+        cal.set(Calendar.SECOND,0);
+        Log.i("Time Zone",cal.getTimeZone().getDisplayName());
+
     }
 }

@@ -1,4 +1,4 @@
-package com.ahmedsameha1.peninbin.dialogs;
+package com.ahmedsameha1.peninbin.secondary_activities;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;

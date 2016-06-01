@@ -23,6 +23,7 @@ public final class Contract {
         public static final int NON_STRICT_IGNORE_CASE = 0;
         public static final int SHOW_ACTION_BAR = 0;
         public static final int DO_NOT_SHOW_ACTION_BAR = 1;
+        public static final int ZERO_RANDOM_QUICK_TESTS = 0;
         public static final String TABLE_NAME = "field";
         public static final String COLUMN_FIELD_NAME = "name";
         public static final String COLUMN_FIELD_TYPE = "type";
@@ -38,6 +39,9 @@ public final class Contract {
         public static final String COLUMN_USAGE_COUNT = "usage_count";
         public static final String COLUMN_CREATION_EMULATION_NUMBER = "creation_emulation_number";
         public static final String COLUMN_CHECK_TYPE = "check_type";
+        public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES = "random_quick_test_number_of_tries";
+        public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS = "random_quick_test_number_of_questions";
+        public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS = "random_quick_test_number_of_tests";
     }
     public static abstract class STring implements BaseColumns {
         public static final String TABLE_NAME = "string";
@@ -48,6 +52,7 @@ public final class Contract {
         public static final String COLUMN_VALUE = "value";
     }
     public static abstract class String_Entry implements BaseColumns {
+        public static final int NO_NOTIFICATION = -1;
         public static final String TABLE_NAME = "string_entry";
         public static final String COLUMN_QUESTION = "question";
         public static final String COLUMN_ANSWER = "answer";
@@ -58,6 +63,8 @@ public final class Contract {
         public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
         public static final String COLUMN_RANK = "rank";
         public static final String COLUMN_CREATION_EMULATED_DATE = "creation_emulated_date";
+        public static final String COLUMN_REMIND_AT = "remind_at";
+        public static final String COLUMN_REMIND_AT_PENDINGINTENT_REQUEST = "remind_at_pendingintent_request";
     }
     public static abstract class Not_String_Entry implements BaseColumns {
         public static final String TABLE_NAME = "not_string_entry";
@@ -110,6 +117,22 @@ public final class Contract {
         public static final String COLUMN_ENTRY = "entry";
         public static final String COLUMN_ALTERNATIVE_ANSWER = "alternative_answer";
         public static final String COLUMN_ANSWERED_COUNT = "answered_count";
+    }
+    public static abstract class Excluded_Time implements BaseColumns {
+        public static final String TABLE_NAME = "excluded_time";
+        public static final String COLUMN_FIELD = "field";
+        public static final String COLUMN_STARTS = "starts";
+        public static final String COLUMN_ENDS = "ends";
+    }
+    public static abstract class Scheduled_Time_Backup implements BaseColumns {
+        public static final String TABLE_NAME = "scheduled_time_backup";
+        public static final String COLUMN_FIELD = "field";
+        public static final String COLUMN_SESSION_TYPE = "session_type";
+        public static final String COLUMN_TIME = "time";
+        public static final String COLUMN_PENDINGINTENT_REQUEST = "pendingintent_request";
+        public static final String COLUMN_NOT_RANDOM_QUICK_TEST_TRIES = "not_random_quick_test_tries";
+        public static final String COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE = "not_random_quick_test_number_or_percentage";
+        public static final String COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER = "not_random_quick_test_number";
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////

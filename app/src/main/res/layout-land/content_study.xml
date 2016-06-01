@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.ahmedsameha1.peninbin.StudyActivity"
     tools:showIn="@layout/app_bar_study">
 
     <LinearLayout
@@ -43,7 +42,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@drawable/text_bordered_transperant"
-                        android:focusable="false"
+                        android:enabled="false"
                         android:gravity="center"
                         android:hint="@string/question"
                         android:imeOptions="flagNoExtractUi"
@@ -111,6 +110,7 @@
             android:layout_marginTop="2dp">
 
             <android.support.v7.widget.CardView
+                android:id="@+id/show_actionbar_card_view"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
@@ -133,6 +133,7 @@
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
+                android:id="@+id/check_card_view"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -144,10 +145,9 @@
                     android:id="@+id/check"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-
                     android:layout_margin="2dp"
                     android:background="@drawable/text_bordered_colored"
-                    android:enabled="true"
+                    android:enabled="false"
                     android:gravity="center"
                     android:padding="2dp"
                     android:text="@string/check"
@@ -180,6 +180,7 @@
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
+                android:id="@+id/show_current_study_entry_card_view"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -204,6 +205,7 @@
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
+                android:id="@+id/down_card_view"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
@@ -221,6 +223,7 @@
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
+                android:id="@+id/up_card_view"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
