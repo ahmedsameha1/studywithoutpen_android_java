@@ -1,17 +1,19 @@
 package com.ahmedsameha1.peninbin.receivers_services;
 
 import android.app.AlarmManager;
+import android.app.IntentService;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
-import com.ahmedsameha1.peninbin.receivers_services.ScheduleInFieldReceiver;
-import com.ahmedsameha1.peninbin.utils.WakefulIntentService;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,16 +24,22 @@ import java.util.StringTokenizer;
 /**
  * Created by ahmed on 22/05/16.
  */
-public class RandomQuickTestsSchedulingService extends WakefulIntentService {
-    public static final String SCHEDULE_WHAT = "schedule_what";
+public class RandomQuickTestsSchedulingService extends IntentService {
     private AlarmManager alarmManager;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-    public RandomQuickTestsSchedulingService(String name) {
-        super(name);
-    }
 
+    public RandomQuickTestsSchedulingService(){
+        super("RandomQuickTestsSchedulingService");
+    }
     @Override
-    public void doWakefulWork(Intent workIntent) {
+    protected void onHandleIntent(Intent workIntent) {
+        Log.i("service:","service running");
+        scheduleRandomQuickTest();
+        tryRefreshingAppUsage();
+        SimpleWakefulReceiver.completeWakefulIntent(workIntent);
+        Log.i("service:","service end");
+    }
+    private void scheduleRandomQuickTest() {
         alarmManager = (AlarmManager) this.getSystemService(AppCompatActivity.ALARM_SERVICE);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         DatabaseOperations databaseOperations = new DatabaseOperations(this);
@@ -54,42 +62,49 @@ public class RandomQuickTestsSchedulingService extends WakefulIntentService {
                         stringTokenizer = new StringTokenizer(text, ":");
                         calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(stringTokenizer.nextToken()));
                         calendar.set(Calendar.MINUTE, Integer.parseInt(stringTokenizer.nextToken()));
+                        calendar.set(Calendar.SECOND, 0);
                         long_excluded_times.add(calendar.getTimeInMillis());
                         text = excluded_time[1];
                         calendar = Calendar.getInstance(Locale.getDefault());
                         stringTokenizer = new StringTokenizer(text, ":");
                         calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(stringTokenizer.nextToken()));
                         calendar.set(Calendar.MINUTE, Integer.parseInt(stringTokenizer.nextToken()));
+                        calendar.set(Calendar.SECOND, 0);
                         long_excluded_times.add(calendar.getTimeInMillis());
                     }
                 }
                 ArrayList<Long> randoms = new ArrayList<>();
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.HOUR_OF_DAY,0);
+                calendar.set(Calendar.MINUTE,5);
+                calendar.set(Calendar.SECOND,0);
+                Random random_opject = new Random();
                 for ( int i = 0; i < number_of_quick_tests; i++ ) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.set(Calendar.HOUR_OF_DAY,0);
-                    calendar.set(Calendar.MINUTE,5);
-                    calendar.set(Calendar.SECOND,0);
-                    Random random_opject = new Random();
                     rrr:
-                    for ( int t = 0; t < 1000000; t++ ) {
+                    for ( int t = 0; t < 10000; t++ ) {
+                        Log.i("service:","try a time");
                         long random = calendar.getTimeInMillis() + 15 * 60 * 1000 * random_opject.nextInt(94);
                         if ( long_excluded_times.size() >= 2 ) {
                             if ( random >= long_excluded_times.get(0) && random <= long_excluded_times.get(1) ) {
                                 continue;
                             }
-                        } else if ( long_excluded_times.size() >= 4 ) {
+                        }
+                        if ( long_excluded_times.size() >= 4 ) {
                             if ( random >= long_excluded_times.get(2) && random <= long_excluded_times.get(3) ) {
                                 continue;
                             }
-                        } else if ( long_excluded_times.size() >= 6 ) {
+                        }
+                        if ( long_excluded_times.size() >= 6 ) {
                             if ( random >= long_excluded_times.get(4) && random <= long_excluded_times.get(5) ) {
                                 continue;
                             }
-                        } else if ( long_excluded_times.size() >= 8 ) {
+                        }
+                        if ( long_excluded_times.size() >= 8 ) {
                             if ( random >= long_excluded_times.get(6) && random <= long_excluded_times.get(7) ) {
                                 continue;
                             }
-                        } else if ( long_excluded_times.size() >= 10 ) {
+                        }
+                        if ( long_excluded_times.size() >= 10 ) {
                             if ( random >= long_excluded_times.get(8) && random <= long_excluded_times.get(9) ) {
                                 continue;
                             }
@@ -100,12 +115,13 @@ public class RandomQuickTestsSchedulingService extends WakefulIntentService {
                             }
                         }
                         randoms.add(random);
-                        Intent intent = new Intent(this, ScheduleInFieldReceiver.class);
+                        Log.i("service:","time");
+                        Intent intent = new Intent(this, ShowScheduledNotificationsReceiver.class);
                         intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
                         intent.putExtra(TestActivity.QUESTION_NUMBER, number_of_questions);
                         intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, number_of_tries);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
-                        intent.putExtra(SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
+                        intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,random);
                         int request = (int)System.currentTimeMillis();
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(this,request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -116,6 +132,18 @@ public class RandomQuickTestsSchedulingService extends WakefulIntentService {
                     }
                 }
             }
+        }
+    }
+    private void tryRefreshingAppUsage() {
+        if ( System.currentTimeMillis() - UsageLastTime.getUsageLastTime(this) > AlarmManager.INTERVAL_DAY ) {
+            Random random_object = new Random();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            long random = calendar.getTimeInMillis() + random_object.nextInt((int) (AlarmManager.INTERVAL_DAY - AlarmManager.INTERVAL_HOUR));
+            Intent intent = new Intent(this, ShowScheduledNotificationsReceiver.class);
+            intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.REFRESHING_USAGE_OF_APP);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this,(int)System.currentTimeMillis() , intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            alarmManager.set(AlarmManager.RTC, random, pendingIntent);
         }
     }
 }

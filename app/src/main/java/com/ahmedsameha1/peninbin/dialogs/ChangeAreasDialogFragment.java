@@ -16,11 +16,13 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import android.support.v7.app.AlertDialog;
 
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
-
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 /**
  * Created by ahmed on 2/7/2016.
  */
@@ -29,6 +31,7 @@ public class ChangeAreasDialogFragment extends DialogFragment{
     private float initialQuestionArea,initialAnsweArea;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private long current_field_id;
+    private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +39,8 @@ public class ChangeAreasDialogFragment extends DialogFragment{
         initialQuestionArea = getArguments().getFloat(StudyDuringActivity.QUESTION_LAYOUT);
         initialAnsweArea = getArguments().getFloat(StudyDuringActivity.ANSWER_LAYOUT);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
+        mTracker = application.getDefaultTracker();
     }
     @NonNull
     @Override
@@ -66,6 +71,10 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                                     ((ChangeAreas) getActivity()).changeAreas((float) questionArea,(float) answerArea);
                                     mySQLiteCursorLoader.updateFieldAreasSize(current_field_id,questionArea,answerArea);
                                     dismiss();
+                                    mTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory("Utilities")
+                                            .setAction("change areas size")
+                                            .build());
                                 } else {
                                     Toast toast = Toast.makeText(getActivity(), R.string.greater_than_zero, Toast.LENGTH_SHORT);
                                     toast.setGravity(Gravity.TOP,0,400);

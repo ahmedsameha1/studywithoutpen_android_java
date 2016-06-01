@@ -25,6 +25,14 @@ public class DatabaseOperations {
         return cursor;
     }
 
+    public boolean checkFieldExists( long field_id ) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                new String[]{Contract.COLUMN_ID},Contract.COLUMN_ID + " = ? ",new String[]{field_id +""},null,null,null);
+        boolean i = cursor.getCount() > 0;
+        cursor.close();
+        return i;
+    }
+
     public boolean checkEntryDuplication(String question, String answer, long field_id, int question_data_type) {
         boolean thereIsduplication;
         long question_id, answer_id;
@@ -440,11 +448,11 @@ public class DatabaseOperations {
     }
     public ArrayList<long[]> getBackupSchedulingData() {
         ArrayList<long[]> data = new ArrayList<>();
-        Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time.TABLE_NAME,
-                new String[]{Contract.Scheduled_Time.COLUMN_FIELD, Contract.Scheduled_Time.COLUMN_SESSION_TYPE,
-                Contract.Scheduled_Time.COLUMN_TIME, Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST,
-                        Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER,
-                        Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES},
+        Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time_Backup.TABLE_NAME,
+                new String[]{Contract.Scheduled_Time_Backup.COLUMN_FIELD, Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE,
+                Contract.Scheduled_Time_Backup.COLUMN_TIME, Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST,
+                        Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER,
+                        Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES},
         null,null,null,null,null);
         if ( cursor.getCount() > 0 ) {
             for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();

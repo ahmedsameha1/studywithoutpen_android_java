@@ -18,7 +18,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
@@ -26,7 +29,8 @@ import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 
 import java.util.ArrayList;
 import java.util.Locale;
-
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 /**
  * Created by ahmed on 28/04/16.
  */
@@ -52,7 +56,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
     private Button positive_button;
     private int index_of_locale;
     private String field_name;
-
+    private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +72,8 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         locale_short_name = databaseOpertations.getFieldLocale(current_field_id);
         check_type = databaseOpertations.getFieldCheckType(current_field_id);
         field_name = databaseOpertations.getFieldName(current_field_id);
+        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
+        mTracker = application.getDefaultTracker();
     }
 
     @NonNull
@@ -143,9 +149,14 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                 Toast toast = Toast.makeText(getActivity(), R.string.select_a_check_type, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
+                            } else if ( (! new_field_name.getText().toString().equals(field_name)) && databaseOpertations.checkFieldDuplication(new_field_name.getText().toString())) {
+                                Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
                             } else {
-                                if ( ! new_field_name.equals(field_name) ) {
+                                if ( ! new_field_name.getText().toString().equals(field_name) ) {
                                     mySQLiteCursorLoader.updateFieldName(current_field_id,new_field_name.getText().toString());
+                                    ((Contact) getActivity()).updateFieldName(new_field_name.getText().toString());
                                 }
                                 mySQLiteCursorLoader.updateFieldCheckType(current_field_id,select_check_type.getSelectedItemPosition());
                                 mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,read_answer.isChecked());
@@ -155,6 +166,10 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                     Locale locale = localeList.get(selected_locale_position);
                                     locale_short_name = locale.getLanguage() + "," + locale.getCountry();
                                     mySQLiteCursorLoader.updateFieldLocale(current_field_id,locale_short_name);
+                                    mTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory(FieldActivity.ANALYTICS_CATEGORY)
+                                            .setAction("selecting locale")
+                                            .build());
                                 } else {
                                     mySQLiteCursorLoader.updateFieldLocale(current_field_id,null);
                                 }
@@ -171,5 +186,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         });
         return alertDialog;
     }
-
+    public interface Contact {
+        void updateFieldName (String name ) ;
+    }
 }

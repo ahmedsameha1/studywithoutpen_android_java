@@ -13,8 +13,6 @@
         <item>Test</item>
         <item>Schedule</item>
         <item>Field Properties</item>
-        <item>Review on Play Store</item>
-        <item>Facebook Page</item>
     </string-array>
     <string-array name="field_type">
         <item>Default</item>
@@ -27,5 +25,31 @@
         <item>Ignore letters case</item>
         <item>Don\'t ignore either letters case or spaces</item>
         <item>Select a check type</item>
+    </string-array>
+    <string-array name="number_or_percentage">
+        <item>Enter number of questions:</item>
+        <item>Enter percentage of field entries:</item>
+    </string-array>
+    <string-array name="refreshing_messages">
+        <item>If you study 5 new words everyday.
+If you study it using study a period feature, assuming that the period is 10 days.
+Everyday, what you need is to enter 5 words, then study them with the study feature, then study with the study a period feature, 50 words, 5 words for everyday of 10 days.
+If you begin to study Spanish from the scratch, after one year, more than 1800 words.
+Notice that you can listen to the word every time you write it correctly.
+What about your Spanish after a year?</item>
+        <item>Are you facing new foreign words everyday?
+You can memorize these words, create a field for these words, enter them, study them, you will memorize how to spell them and you will know the pronunciation of them.
+Using the study a period feature, study these words for a couple of days.</item>
+    <item>Is it difficult to study irregular forms of verbs?
+Create a field, the entry will be as the following, the question is the main form of the verb, the answer is all forms of the verb.</item>
+    <item>You can study the years of historical events.
+Create a field for the history, the question will be the historical event, the answer will be the year.</item>
+    <item>You can study definitions.
+Create a field for definitions, the question will be what you want to define, the answer will be the definition.</item>
+    <item>You can study the physical constants.
+Create a field for the physical constants, the question will be the name of the constant, the answer will be the value of the constant.</item>
+    <item>You can study any text you want to study on the app. If you can enter the text on the app, you can study it on the app. Don’t think that you can only study vocabulary with the app.</item>
+    <item>Share your fields with others, and the others will share their fields with you. If you and 20 of your friends work on entering a dictionary, you will finish it easily, and you will be able to study it, and also the others.</item>
+    <item>Remember: you can always export and import your fields as files.</item>
     </string-array>
 </resources>

@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,6 +14,8 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -29,6 +32,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -92,6 +96,9 @@ public class EditEntryActivity extends AppCompatActivity implements
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
+        final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
+        final CardView save_card_view = (CardView) findViewById(R.id.save_card_view);
+        final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         setSupportActionBar(toolbar);
         if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
             getSupportActionBar().hide();
@@ -124,6 +131,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                show_actionbar_card_view.startAnimation(animAlpha);
                 if (actionBarShown) {
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
@@ -140,6 +148,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                save_card_view.startAnimation(animAlpha);
                 String editedQuestion = editQuestion.getText().toString();
                 String editedAnswer = editAnswer.getText().toString();
                 if ( editedQuestion.length() > 0 && editedAnswer.length() > 0 ) {
@@ -309,6 +318,11 @@ public class EditEntryActivity extends AppCompatActivity implements
         }
     }
     @Override
+    protected void onStop() {
+        super.onStop();
+        UsageLastTime.updateUsageLastTime(this);
+    }
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.edit_entry_activity_menu, menu);
@@ -349,7 +363,7 @@ public class EditEntryActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
     @Override

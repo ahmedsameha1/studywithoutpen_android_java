@@ -29,7 +29,7 @@
         android:id="@+id/schedule_random_quick_test"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Randomly Schedule Quick Tests"
+        android:text="@string/randomly_schedule_quick_tests"
         />
 
 

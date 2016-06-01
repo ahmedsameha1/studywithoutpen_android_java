@@ -1,10 +1,16 @@
 package com.ahmedsameha1.peninbin.utils;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 /**
  * Created by ahmed on 02/05/16.
  */
 public class CompareUtility {
-    public static boolean nonStrictCompareIgnoreCase( String text1, String text2 ) {
+
+
+    public static boolean nonStrictCompareIgnoreCase(String text1, String text2 ) {
         String toBeMatchedregex = "(?i)\\s*";
         for ( int i = 0; i < text1.length(); i++ ) {
             if ( Character.toString(text1.charAt(i)).matches("[\\s\\p{Punct}]") ) {

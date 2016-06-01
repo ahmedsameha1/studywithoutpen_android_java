@@ -16,22 +16,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
-import com.ahmedsameha1.peninbin.receivers_services.ScheduleInFieldReceiver;
+import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 
 import java.util.Calendar;
-
+import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.analytics.HitBuilders;
 /**
  * Created by ahmed on 2/8/2016.
  */
@@ -48,7 +54,7 @@ public class QuickTestDialogFragment extends DialogFragment {
     private int year,monthOfYear,dayOfMonth,hourOfDay,minute;
     private AlarmManager alarmManager;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-
+    private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +66,8 @@ public class QuickTestDialogFragment extends DialogFragment {
         minute = getArguments().getInt(MINUTE);
         alarmManager = (AlarmManager) getActivity().getSystemService(AppCompatActivity.ALARM_SERVICE);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
+        mTracker = application.getDefaultTracker();
     }
 
     @NonNull
@@ -77,20 +85,32 @@ public class QuickTestDialogFragment extends DialogFragment {
             public void onShow(DialogInterface dialog) {
                 final EditText enterTries = (EditText) alertDialog.findViewById(R.id.number_of_tries);
                 final EditText enterNumber = (EditText) alertDialog.findViewById(R.id.number);
-                final ToggleButton percentage_number = (ToggleButton) alertDialog.findViewById(R.id.percentage_number);
+                final Spinner number_or_percentage = (Spinner) alertDialog.findViewById(R.id.number_or_percentage);
                 final Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
                 final ImageButton percentage_or_number_help = (ImageButton) alertDialog.findViewById(R.id.percentage_or_number_help);
                 final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.root_view);
-                enterNumber.setHint(R.string.enter_percentage);
-                percentage_number.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                ArrayAdapter<String> number_or_percentage_array_adapter = new ArrayAdapter<String>(getActivity(),
+                        android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.number_or_percentage));
+//                final ImageButton enter_number_help = (ImageButton) alertDialog.findViewById(R.id.enter_number_help);
+//                final ImageButton number_of_questions_help = (ImageButton) alertDialog.findViewById(R.id.number_of_questions_help);
+                number_or_percentage.setAdapter(number_or_percentage_array_adapter);
+                number_or_percentage_array_adapter.setDropDownViewResource
+                        (android.R.layout.simple_spinner_dropdown_item);
+                number_or_percentage.setSelection(0);
+                number_or_percentage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (!isChecked) {
-                            enterNumber.setHint(R.string.enter_percentage);
-                        } else {
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        if ( i == 0 ) {
                             enterNumber.setHint(R.string.enter_number_of_questions);
+                        } else {
+                            enterNumber.setHint(R.string.enter_percentage);
                         }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
                     }
                 });
                 number_of_tries_help.setOnClickListener(new View.OnClickListener() {
@@ -120,9 +140,9 @@ public class QuickTestDialogFragment extends DialogFragment {
                                 if (trys > 0) {
                                     if ( enterNumber.getText().toString().length() > 0) {
                                         int number = Integer.parseInt(enterNumber.getText().toString());
-                                        if (!percentage_number.isChecked()) {
+                                        if (number_or_percentage.getSelectedItemPosition() == 1) {
                                             if (number <= 100 && number > 0) {
-                                                Intent intent = new Intent(getActivity(), ScheduleInFieldReceiver.class);
+                                                Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                                                 intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.PERCENTAGE);
                                                 intent.putExtra(TestActivity.QUESTION_PERCENTAGE, number);
                                                 intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, trys);
@@ -147,6 +167,10 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                 });
                                                 snackbar.show();
                                                 dismiss();
+                                                mTracker.send(new HitBuilders.EventBuilder()
+                                                        .setCategory(FieldActivity.ANALYTICS_CATEGORY)
+                                                        .setAction("schedule a random quick test")
+                                                        .build());
                                             } else {
                                                 Toast toast = Toast.makeText(getActivity(), getString(R.string.percentage_between), Toast.LENGTH_LONG);
                                                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -157,7 +181,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                             int currentNumberOfEntries =
                                                     databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                                             if ( number > 0 && number <= currentNumberOfEntries) {
-                                                Intent intent = new Intent(getActivity(), ScheduleInFieldReceiver.class);
+                                                Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                                                 intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
                                                 intent.putExtra(TestActivity.QUESTION_NUMBER, number);
                                                 intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, trys);
@@ -190,7 +214,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                             }
                                         }
                                     } else {
-                                        if ( ! percentage_number.isChecked() ){
+                                        if ( number_or_percentage.getSelectedItemPosition() == 1 ){
                                             Toast toast = Toast.makeText(getActivity(), R.string.please_enter_percentage, Toast.LENGTH_SHORT);
                                             toast.setGravity(Gravity.TOP,0,400);
                                             toast.show();

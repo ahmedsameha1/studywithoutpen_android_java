@@ -1,13 +1,11 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.SearchManager;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
@@ -16,6 +14,7 @@ import android.app.LoaderManager;
 import android.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -45,6 +44,7 @@ import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TestDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.FieldActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -58,14 +58,15 @@ public class FieldActivity extends AppCompatActivity implements
         SearchDateOrTextDialogFragment.Contact,
         SortEntriesDialogFragment.Contact,
         DeleteEntryDialogFragment.Contact,
+        FieldPropertiesDialogFragment.Contact,
         TextToSpeech.OnInitListener {
     public static final String SCREEN_NAME = "FieldActivity";
     public static final int SORT = 0;
     public static final int STUDY_PERIOD = 1;
     public static final int TEST = 2;
-    public static final int FIELD_OPTIONS = 4;
-    private static final int REVIEW = 5;
-    private static final int FACEBOOK = 6;
+    public static final int FIELD_PROPERTIES = 4;
+
+
     public static final int SCHEDULE_IN_FIELD = 3;
     private static final String QUERY_KEY = "query_key";
     public static final int GET_ENTRIES_LOADER_ID = 0;
@@ -92,6 +93,7 @@ public class FieldActivity extends AppCompatActivity implements
     public static final String EDITED_ANSWER = "edited_answer";
     private static final int MY_DATA_CHECK_CODE = 1234;
     private static final String FIELD_OPTIONS_DIALOG = "field_options_dialog";
+    public static final String ANALYTICS_CATEGORY = "Field Activity Category";
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     protected int fieldType = 0;
     private long current_field_id;
@@ -142,6 +144,8 @@ public class FieldActivity extends AppCompatActivity implements
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         setSupportActionBar(toolbar);       // setting toolbar as the action bar of the activity
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
+        getSupportActionBar().setTitle(databaseOperations.getFieldName(current_field_id));
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setDrawerListener(FieldActivity.this);
         mAdapter = new FieldActivityRecyclerViewAdapter(FieldActivity.this, null, current_field_id, fieldType);
@@ -262,10 +266,14 @@ public class FieldActivity extends AppCompatActivity implements
                 searchView.setQuery(search_value, false);
             }
         }
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        UsageLastTime.updateUsageLastTime(this);
+    }
     @Override
     public void onInit(int status) {
         Locale[] locales = Locale.getAvailableLocales();
@@ -371,8 +379,12 @@ public class FieldActivity extends AppCompatActivity implements
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("sort")
+                        .build());
                 break;
-            case FIELD_OPTIONS:
+            case FIELD_PROPERTIES:
                 String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
                 if (locale_short_name != null) {
                     StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
@@ -391,24 +403,9 @@ public class FieldActivity extends AppCompatActivity implements
                 FieldPropertiesDialogFragment fieldPropertiesDialogFragment = new FieldPropertiesDialogFragment();
                 fieldPropertiesDialogFragment.setArguments(bundle);
                 fieldPropertiesDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
-                break;
-            case REVIEW:
-                Uri uri = Uri.parse("market://details?id=" + getPackageName());
-                Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
-                try {
-                    startActivity(myAppLinkToMarket);
-                } catch (ActivityNotFoundException e) {
-                    Toast toast = Toast.makeText(this, "Unable to find market app", Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
-                break;
-            case FACEBOOK:
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
-                startActivity(browserIntent);
                 mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory("Action")
-                        .setAction("Share")
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("field properties")
                         .build());
                 break;
             case SCHEDULE_IN_FIELD:
@@ -433,7 +430,7 @@ public class FieldActivity extends AppCompatActivity implements
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                 calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                                 AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                                Intent intent = new Intent(FieldActivity.this, ScheduleInFieldReceiver.class);
+                                Intent intent = new Intent(FieldActivity.this, ShowScheduledNotificationsReceiver.class);
                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                 int request = (int)System.currentTimeMillis();
                                 PendingIntent pendingIntent = PendingIntent.getBroadcast(FieldActivity.this,request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -539,7 +536,10 @@ public class FieldActivity extends AppCompatActivity implements
         bundle.putInt(CURRENT_SORT, currentSort);
         getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
     }
-
+    @Override
+    public void updateFieldName( String name) {
+        getSupportActionBar().setTitle(name);
+    }
     @Override
     public void deleteEntry(long entry_id, int question_data_type) {
         mySQLiteCursorLoader.deleteEntry(entry_id, question_data_type);

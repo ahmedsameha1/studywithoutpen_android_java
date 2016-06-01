@@ -106,7 +106,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
             + String_Entry.COLUMN_RANK + " INTEGER NOT NULL DEFAULT 0, "
             + String_Entry.COLUMN_CREATION_EMULATED_DATE + " DATETIME DEFAULT NULL, "
-            + String_Entry.COLUMN_NOTIFY_AT + " INTEGER NOT NULL DEFAULT " + String_Entry.NO_NOTIFICATION + " , "
+            + String_Entry.COLUMN_REMIND_AT + " INTEGER DEFAULT NULL, "
+            + String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " INTEGER DEFAULT NULL, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
             + "FOREIGN KEY(" + String_Entry.COLUMN_QUESTION + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
             + "FOREIGN KEY(" + String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
@@ -205,17 +206,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.Excluded_Time.COLUMN_ENDS + " TEXT NOT NULL, "
             + "FOREIGN KEY(" + Contract.Excluded_Time.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
-    public static final String CREATE_SCHEDULED_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Scheduled_Time.TABLE_NAME
+    public static final String CREATE_SCHEDULED_TIME_BACKUP_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Scheduled_Time_Backup.TABLE_NAME
             + " ( "
             + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
-            + Contract.Scheduled_Time.COLUMN_FIELD + " INTEGER NOT NULL, "
-            + Contract.Scheduled_Time.COLUMN_SESSION_TYPE + " INTEGER NOT NULL, "
-            + Contract.Scheduled_Time.COLUMN_TIME + " INTEGER NOT NULL, "
-            + Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST + " INTEGER NOT NULL, "
-            + Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE + " INTEGER DEFAULT NULL, "
-            + Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER + " INTEGER DEFAULT NULL, "
-            + Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES + " INTEGER DEFAULT NULL, "
-            + "FOREIGN KEY(" + Contract.Scheduled_Time.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + Contract.Scheduled_Time_Backup.COLUMN_FIELD + " INTEGER NOT NULL, "
+            + Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE + " INTEGER NOT NULL, "
+            + Contract.Scheduled_Time_Backup.COLUMN_TIME + " INTEGER NOT NULL, "
+            + Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST + " INTEGER NOT NULL, "
+            + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE + " INTEGER DEFAULT NULL, "
+            + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER + " INTEGER DEFAULT NULL, "
+            + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES + " INTEGER DEFAULT NULL, "
+            + "FOREIGN KEY(" + Contract.Scheduled_Time_Backup.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -317,7 +318,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_EXCLUDED_TIME_TABLE);
-        sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_TABLE);
+        sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_BACKUP_TABLE);
         Log.d("from APP to Ahmed", "table have been written");
     }
     private boolean checkDataBase() {
@@ -1263,7 +1264,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
             sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.execSQL(CREATE_EXCLUDED_TIME_TABLE);
-            sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_TABLE);
+            sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_BACKUP_TABLE);
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();

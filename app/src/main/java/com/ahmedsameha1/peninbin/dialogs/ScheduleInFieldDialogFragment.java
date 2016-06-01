@@ -21,14 +21,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
-
+import com.google.android.gms.analytics.HitBuilders;
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
-import com.ahmedsameha1.peninbin.receivers_services.ScheduleInFieldReceiver;
+import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 
 import java.util.Calendar;
-
+import com.google.android.gms.analytics.Tracker;
 /**
  * Created by ahmed on 12/20/2015.
  */
@@ -36,13 +39,16 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
     public static final int QUICK_TEST = 0;
     public static final int TEST = 1;
     public static final int STUDY_A_PERIOD = 2;
+    public static final int REFRESHING_USAGE_OF_APP = 3;
     public static final String TIME = "time";
     public static final String SCHEDULE_IN_FIELD = "schedule_in_field";
     public static final String SCHEDULE_WHAT = "schedule_what";
+
     private Context context;
     private long current_field_id;
     private AlarmManager alarmManager;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private Tracker mTracker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,6 +56,8 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         alarmManager = (AlarmManager) getActivity().getSystemService(AppCompatActivity.ALARM_SERVICE);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
+        mTracker = application.getDefaultTracker();
     }
     @NonNull
     @Override
@@ -90,9 +98,13 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         quickTestDialogFragment.setArguments(bundle);
                                         quickTestDialogFragment.show(getActivity().getSupportFragmentManager(), QuickTestDialogFragment.QUICK_TEST_DIALOG);
                                         ScheduleInFieldDialogFragment.this.dismiss();
+                                        mTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
+                                                .setAction("schedule a quick test")
+                                                .build());
                                         /*Log.i("time Picker",hourOfDay +" " + minute);
                                         calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                        Intent intent = new Intent(getActivity(), ScheduleInFieldReceiver.class);
+                                        Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                                         intent.putExtra(SCHEDULE_WHAT,QUICK_TEST);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                         int request = (int)System.currentTimeMillis();
@@ -127,7 +139,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                     @Override
                                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                         calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                        Intent intent = new Intent(getActivity(), ScheduleInFieldReceiver.class);
+                                        Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                                         intent.putExtra(SCHEDULE_WHAT,TEST);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
@@ -146,6 +158,10 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         });
                                         snackbar.show();
                                         ScheduleInFieldDialogFragment.this.dismiss();
+                                        mTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
+                                                .setAction("schedule a test")
+                                                .build());
                                     }
                                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
                             }
@@ -165,7 +181,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                     @Override
                                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                         calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                        Intent intent = new Intent(getActivity(), ScheduleInFieldReceiver.class);
+                                        Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                                         intent.putExtra(SCHEDULE_WHAT,STUDY_A_PERIOD);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
@@ -184,6 +200,10 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         });
                                         snackbar.show();
                                         ScheduleInFieldDialogFragment.this.dismiss();
+                                        mTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
+                                                .setAction("schedule a study a period")
+                                                .build());
                                     }
                                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
                             }

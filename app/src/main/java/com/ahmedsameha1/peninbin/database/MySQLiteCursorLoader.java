@@ -9,11 +9,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
-import android.util.Log;
 
-import com.ahmedsameha1.peninbin.dialogs.CreateFieldDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
-import com.ahmedsameha1.peninbin.receivers_services.ScheduleInFieldReceiver;
+import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.commonsware.cwac.loaderex.AbstractCursorLoader;
 import com.commonsware.cwac.loaderex.ContentChangingTask;
 
@@ -84,6 +81,14 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         if (locale != null) {
             contentValues.put(Contract.Field.COLUMN_LOCALE, locale);
         }
+        sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
+    }
+    public void createField(String field_name, int field_type, int question_data_type) {
+        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
+        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
+        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
 
@@ -595,22 +600,21 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-
-                sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
-                        Contract.COLUMN_ID + " = ? ",
-                        new String[]{field_id + ""});
-                Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time.TABLE_NAME,
-                        new String[]{Contract.Scheduled_Time.COLUMN_FIELD, Contract.Scheduled_Time.COLUMN_SESSION_TYPE,
-                                Contract.Scheduled_Time.TABLE_NAME, Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST},
-                        Contract.Scheduled_Time.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null, null);
+                Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time_Backup.TABLE_NAME,
+                        new String[]{ Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST},
+                        Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null, null);
                 if (cursor.getCount() > 0) {
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                     for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
-                        Intent intent = new Intent(context, ScheduleInFieldReceiver.class);
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(3), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.cancel(pendingIntent);
                     }
                 }
+                cursor.close();
+                sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
+                        Contract.COLUMN_ID + " = ? ",
+                        new String[]{field_id + ""});
 
                 Runnable runnable = new Runnable() {
                     @Override
@@ -760,29 +764,29 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     public void addScheduledTimeForBackup(long field_id, int session_type, long time, int pendingintent_request) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Scheduled_Time.COLUMN_FIELD, field_id);
-        contentValues.put(Contract.Scheduled_Time.COLUMN_SESSION_TYPE, session_type);
-        contentValues.put(Contract.Scheduled_Time.COLUMN_TIME, time);
-        contentValues.put(Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST, pendingintent_request);
-        sqLiteDatabase.insert(Contract.Scheduled_Time.TABLE_NAME, null, contentValues);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_FIELD, field_id);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE, session_type);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_TIME, time);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST, pendingintent_request);
+        sqLiteDatabase.insert(Contract.Scheduled_Time_Backup.TABLE_NAME, null, contentValues);
     }
     public void addScheduledTimeForBackup(long field_id, int session_type, long time, int pendingintent_request,int percentage_or_number, int number, int number_of_tries) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Scheduled_Time.COLUMN_FIELD, field_id);
-        contentValues.put(Contract.Scheduled_Time.COLUMN_SESSION_TYPE, session_type);
-        contentValues.put(Contract.Scheduled_Time.COLUMN_TIME, time);
-        contentValues.put(Contract.Scheduled_Time.COLUMN_PENDINGINTENT_REQUEST, pendingintent_request);
-        contentValues.put(Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, percentage_or_number);
-        contentValues.put(Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER, number);
-        contentValues.put(Contract.Scheduled_Time.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES, number_of_tries);
-        sqLiteDatabase.insert(Contract.Scheduled_Time.TABLE_NAME, null, contentValues);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_FIELD, field_id);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE, session_type);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_TIME, time);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST, pendingintent_request);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, percentage_or_number);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER, number);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES, number_of_tries);
+        sqLiteDatabase.insert(Contract.Scheduled_Time_Backup.TABLE_NAME, null, contentValues);
     }
 
     public void deleteScheduledTimeForBackup(long field_id, int session_type, long time) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-        sqLiteDatabase.delete(Contract.Scheduled_Time.TABLE_NAME, Contract.Scheduled_Time.COLUMN_FIELD + " = ? AND "
-                        + Contract.Scheduled_Time.COLUMN_SESSION_TYPE + " = ? AND " + Contract.Scheduled_Time.COLUMN_TIME + " = ?",
+        sqLiteDatabase.delete(Contract.Scheduled_Time_Backup.TABLE_NAME, Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? AND "
+                        + Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE + " = ? AND " + Contract.Scheduled_Time_Backup.COLUMN_TIME + " = ?",
                 new String[]{field_id + "", session_type + "", time + ""});
     }
 

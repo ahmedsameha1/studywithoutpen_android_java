@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,6 +19,8 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,6 +37,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowQuickTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -50,7 +54,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener {
-    public static final String SCREEN_NAME = "TestActivity";
+    public static final String SCREEN_NAME = "QuickTestActivity";
     public static final String ACTIVITY_NAME = "TestActivity";
     public static final String PERCENTAGE_OR_NUMBER = "percentage_or_number";
     public static final String QUESTION_PERCENTAGE = "question_percentage";
@@ -108,215 +112,223 @@ public class QuickTestActivity extends AppCompatActivity implements
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        int question_area_size,answer_area_size,test_text_size,action_bar_shown;
-        boolean isReadAnswer;
-        // getting the reference of the fragment that holds the reference of list for test array
-        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
-        // if the reference to the fragment was null we create a new fragment object and add it to the activity
-        if ( retainedFragment == null ) {
-            retainedFragment = new RetainedFragment();
-            getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
-        }
         databaseOperations = new DatabaseOperations(this);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
-        listForTest = retainedFragment.getListForTest_QuickTestActivity();
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
-        permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
-        percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
-        number = getIntent().getIntExtra(QUESTION_NUMBER, 0);
-        percentage = getIntent().getDoubleExtra(QUESTION_PERCENTAGE, 0);
-        showActionbar = (TextView) findViewById(R.id.show_actionbar);
-        enterAnswer = (EditText) findViewById(R.id.enter_answer);
-        showQuestion = (TextView) findViewById(R.id.display_question);
-        check = (TextView) findViewById(R.id.check);
-        remainingQuestionCounter = (TextView) findViewById(R.id.remaining_question_counter);
+        if ( databaseOperations.checkFieldExists(current_field_id) ) {
+            int question_area_size,answer_area_size,test_text_size,action_bar_shown;
+            boolean isReadAnswer;
+            // getting the reference of the fragment that holds the reference of list for test array
+            retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
+            // if the reference to the fragment was null we create a new fragment object and add it to the activity
+            if ( retainedFragment == null ) {
+                retainedFragment = new RetainedFragment();
+                getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
+            }
+            databaseOperations = new DatabaseOperations(this);
+            mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+            listForTest = retainedFragment.getListForTest_QuickTestActivity();
+            toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+            permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
+            percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
+            number = getIntent().getIntExtra(QUESTION_NUMBER, 0);
+            percentage = getIntent().getIntExtra(QUESTION_PERCENTAGE, 0);
+            showActionbar = (TextView) findViewById(R.id.show_actionbar);
+            enterAnswer = (EditText) findViewById(R.id.enter_answer);
+            showQuestion = (TextView) findViewById(R.id.display_question);
+            check = (TextView) findViewById(R.id.check);
+            remainingQuestionCounter = (TextView) findViewById(R.id.remaining_question_counter);
 
 
-        showTries = (TextView) findViewById(R.id.trys);
+            showTries = (TextView) findViewById(R.id.trys);
 
-        nextHint = (TextView) findViewById(R.id.next_hint);
-        showNumberOfQuestions = (TextView) findViewById(R.id.number_of_questions);
-        showResult = (LinearLayout) findViewById(R.id.result);
-        questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
-        container = (LinearLayout) findViewById(R.id.container);
-        showQuestion.setMovementMethod(new ScrollingMovementMethod());
-        setSupportActionBar(toolbar);
-        action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
-        if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
-            getSupportActionBar().hide();
-        }
-        actionBarShown = getSupportActionBar().isShowing();
-        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show );
-        isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
-        if ( isReadAnswer ) {
-            Intent checkIntent = new Intent();
-            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
-        }
-        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
-        check.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (enterAnswer.getText().toString().length() > 0) {
-                    result = checkAnAnswer();
-                    if (triesCounter < permitedTriesNumber && !result) {
-                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                        showTries.setText(Integer.toString(triesCounter + 1));
-                    } else {
-                        triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                        currentQuestionCounter++;
-                        if (currentQuestionCounter >= questionsNumber) {
-                            showQuestion.setText(R.string.quick_test_has_completed);
-                            enterAnswer.setText(R.string.quick_test_has_completed);
-                            check.setEnabled(false);
-                            ShowQuickTestResultDialogFragment fragment = new ShowQuickTestResultDialogFragment();
-                            Bundle bundle = new Bundle();
-                            bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
-                            bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
-                            bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                            fragment.setArguments(bundle);
-                            fragment.show(getSupportFragmentManager(), ShowQuickTestResultDialogFragment.SHOW_QUICK_TEST_RESULT_DIALOG_FRAGMENT);
-                            currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                            questionsNumber = 0;
-                            wrongAnswersCounter = 0;
-                            testingNow = false;
-                            enterAnswer.setEnabled(false);
-                            showNumberOfQuestions.setText("");
-                            remainingQuestionCounter.setText("");
-                            showTries.setText("");
-                            enterAnswer.setHint(R.string.enter_your_answer);
-                            hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                            showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                            showResult.setPadding(0,0,0,0);
-//                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, TestActivity.this);
-                        } else {
+            nextHint = (TextView) findViewById(R.id.next_hint);
+            showNumberOfQuestions = (TextView) findViewById(R.id.number_of_questions);
+            showResult = (LinearLayout) findViewById(R.id.result);
+            questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
+            container = (LinearLayout) findViewById(R.id.container);
+            final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
+            final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
+            final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
+            final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
+            showQuestion.setMovementMethod(new ScrollingMovementMethod());
+            setSupportActionBar(toolbar);
+            action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
+            if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
+                getSupportActionBar().hide();
+            }
+            actionBarShown = getSupportActionBar().isShowing();
+            showActionbar.setText(actionBarShown ? R.string.hide : R.string.show );
+            isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
+            if ( isReadAnswer ) {
+                Intent checkIntent = new Intent();
+                checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+                startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+            }
+            question_data_type = databaseOperations.getQuestionDataType(current_field_id);
+            AnalyticsApplication application = (AnalyticsApplication) getApplication();
+            mTracker = application.getDefaultTracker();
+            check.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    check_card_view.startAnimation(animAlpha);
+                    if (enterAnswer.getText().toString().length() > 0) {
+                        result = checkAnAnswer();
+                        if (triesCounter < permitedTriesNumber && !result) {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                            showQuestion.scrollTo(0,0);
                             showTries.setText(Integer.toString(triesCounter + 1));
-                            ifMoreThanOnce();
-                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                            enterAnswer.setHint(R.string.enter_your_answer);
-                            hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                        } else {
+                            triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                            currentQuestionCounter++;
+                            if (currentQuestionCounter >= questionsNumber) {
+                                showQuestion.setText(R.string.quick_test_has_completed);
+                                enterAnswer.setText(R.string.quick_test_has_completed);
+                                check.setEnabled(false);
+                                ShowQuickTestResultDialogFragment fragment = new ShowQuickTestResultDialogFragment();
+                                Bundle bundle = new Bundle();
+                                bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
+                                bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
+                                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                fragment.setArguments(bundle);
+                                fragment.show(getSupportFragmentManager(), ShowQuickTestResultDialogFragment.SHOW_QUICK_TEST_RESULT_DIALOG_FRAGMENT);
+                                currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                                questionsNumber = 0;
+                                wrongAnswersCounter = 0;
+                                testingNow = false;
+                                enterAnswer.setEnabled(false);
+                                showNumberOfQuestions.setText("");
+                                remainingQuestionCounter.setText("");
+                                showTries.setText("");
+                                enterAnswer.setHint(R.string.enter_your_answer);
+                                hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                                showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                                showResult.setPadding(0,0,0,0);
+    //                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, TestActivity.this);
+                            } else {
+                                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                                showQuestion.scrollTo(0,0);
+                                showTries.setText(Integer.toString(triesCounter + 1));
+                                ifMoreThanOnce();
+                                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                                enterAnswer.setHint(R.string.enter_your_answer);
+                                hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                            }
                         }
-                    }
-                } else {
-                    Toast toast = Toast.makeText(QuickTestActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
-                enterAnswer.setHint(R.string.enter_your_answer);
-            }
-        });
-        enterAnswer.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (s.length() > 0) {
-                    check.setEnabled(true);
-                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                    showResult.setPadding(0, 0, 0, 0);
-                }
-                if ( s.length() <= 0 ) {
-                    check.setEnabled(false);
-                }
-            }
-        });
-        enterAnswer.setOnTouchListener(new OnSwipeTouchListener(this) {
-            @Override
-            public void onSwipeLeft(){
-                enterAnswer.setText("");
-                enterAnswer.requestFocus();
-            }
-            @Override
-            public void onSwipeRight(){
-                enterAnswer.setText("");
-                enterAnswer.requestFocus();
-            }
-        });
-        nextHint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (hints != null) {
-                    if (enterAnswer.getText().toString().length() <= 0) {
-                        enterAnswer.setHint(hints.get(hintCounter++));
                     } else {
-                        Toast toast = Toast.makeText(QuickTestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(QuickTestActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
-                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+                    enterAnswer.setHint(R.string.enter_your_answer);
                 }
-            }
-        });
-        showActionbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ( actionBarShown ) {
-                    getSupportActionBar().hide();
-                    actionBarShown = (! actionBarShown);
-                    showActionbar.setText(R.string.show);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.DO_NOT_SHOW_ACTION_BAR);
-                } else {
-                    getSupportActionBar().show();
-                    actionBarShown = (! actionBarShown);
-                    showActionbar.setText(R.string.hide);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.SHOW_ACTION_BAR);
+            });
+            enterAnswer.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
                 }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (s.length() > 0) {
+                        check.setEnabled(true);
+                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                        showResult.setPadding(0, 0, 0, 0);
+                    }
+                    if ( s.length() <= 0 ) {
+                        check.setEnabled(false);
+                    }
+                }
+            });
+            nextHint.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    next_hint_card_view.startAnimation(animAlpha);
+                    if (hints != null) {
+                        if (enterAnswer.getText().toString().length() <= 0) {
+                            enterAnswer.setHint(hints.get(hintCounter++));
+                        } else {
+                            Toast toast = Toast.makeText(QuickTestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
+                        hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+                    }
+                }
+            });
+            showActionbar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    show_actionbar_card_view.startAnimation(animAlpha);
+                    if ( actionBarShown ) {
+                        getSupportActionBar().hide();
+                        actionBarShown = (! actionBarShown);
+                        showActionbar.setText(R.string.show);
+                        mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                    } else {
+                        getSupportActionBar().show();
+                        actionBarShown = (! actionBarShown);
+                        showActionbar.setText(R.string.hide);
+                        mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.SHOW_ACTION_BAR);
+                    }
+                }
+            });
+            showNumberOfQuestions.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.startAnimation(animAlpha);
+                    Toast toast = Toast.makeText(QuickTestActivity.this,
+                            getString(R.string.number_of_questions, showNumberOfQuestions.getText().toString()), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            });
+            remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.startAnimation(animAlpha);
+                    Toast toast = Toast.makeText(QuickTestActivity.this,
+                            getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            });
+            showTries.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.startAnimation(animAlpha);
+                    Toast toast = Toast.makeText(QuickTestActivity.this,
+                            getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            });
+            getLoaderManager().initLoader(START_NEW_SESSION,null,this);
+            check_type = databaseOperations.getFieldCheckType(current_field_id);
+            question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
+            answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
+            changeAreas(question_area_size,answer_area_size);
+            test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
+            if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
+                changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
+            } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE ) {
+                changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
+            } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
+                changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
             }
-        });
-        showNumberOfQuestions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast toast = Toast.makeText(QuickTestActivity.this,
-                        getString(R.string.number_of_questions, showNumberOfQuestions.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
-        });
-        remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast toast = Toast.makeText(QuickTestActivity.this,
-                        getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
-        });
-        showTries.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast toast = Toast.makeText(QuickTestActivity.this,
-                        getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
-        });
-        getLoaderManager().initLoader(START_NEW_SESSION,null,this);
-        check_type = databaseOperations.getFieldCheckType(current_field_id);
-        question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
-        answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
-        changeAreas(question_area_size,answer_area_size);
-        test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
-        if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
-            changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
-        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE ) {
-            changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
-        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
-            changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
+        } else {
+            Toast toast = Toast.makeText(QuickTestActivity.this, R.string.field_doesnot_exist, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+            finish();
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -620,6 +632,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         if ( tts_available && isFinishing() ) {
             tts.stop();
         }
+        UsageLastTime.updateUsageLastTime(this);
     }
 
     @Override
@@ -641,7 +654,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

@@ -24,6 +24,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -82,10 +83,14 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     protected void onResume() {
         super.onResume();
         handleIntent(getIntent());
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName( SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        UsageLastTime.updateUsageLastTime(this);
+    }
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query =

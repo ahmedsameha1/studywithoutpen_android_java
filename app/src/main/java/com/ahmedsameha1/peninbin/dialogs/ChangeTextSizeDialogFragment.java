@@ -13,11 +13,13 @@ import android.widget.ImageButton;
 import android.widget.RadioGroup;
 import android.support.v7.app.AlertDialog;
 
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
-
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 /**
  * Created by ahmed on 2/8/2016.
  */
@@ -32,12 +34,15 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
     private int textSize;
     private long current_field_id;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         textSize = (int) getArguments().getFloat(StudyDuringActivity.TEXT_SIZE);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
+        mTracker = application.getDefaultTracker();
     }
     @NonNull
     @Override
@@ -83,6 +88,10 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                                 break;
                         }
                         dismiss();
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("Utilities")
+                                .setAction("change text size")
+                                .build());
                     }
                 });
                 text_size_help.setOnClickListener(new View.OnClickListener() {

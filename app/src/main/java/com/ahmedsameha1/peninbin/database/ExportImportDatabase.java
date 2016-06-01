@@ -14,8 +14,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.ahmedsameha1.peninbin.activities.MainActivity;
-import com.ahmedsameha1.peninbin.dialogs.ExportSuccessfulActivity;
-import com.ahmedsameha1.peninbin.dialogs.NotImportedFieldsActivity;
+import com.ahmedsameha1.peninbin.secondary_activities.ExportSuccessfulActivity;
+import com.ahmedsameha1.peninbin.secondary_activities.NotImportedFieldsActivity;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.InvalidStudyWithoutPenFileException;
 
@@ -135,7 +135,7 @@ public class ExportImportDatabase {
                                     Contract.String_Entry.COLUMN_FIELD, Contract.String_Entry.COLUMN_ASKED_COUNT,
                                     Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.String_Entry.COLUMN_RANK,
                                     Contract.CREATION_DATE, Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                                    Contract.String_Entry.COLUMN_NOTIFY_AT},
+                                    Contract.String_Entry.COLUMN_REMIND_AT},
                             Contract.String_Entry.COLUMN_FIELD + " = ?",
                             new String[]{temp_field_id + ""}, null, null, null, null);
                     for (stringEntryCursor.moveToFirst(); stringEntryCursor.getPosition() < stringEntryCursor.getCount();
@@ -186,7 +186,7 @@ public class ExportImportDatabase {
                         contentValues.put(Contract.String_Entry.COLUMN_RANK,stringEntryCursor.getInt(5));
                         contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,stringEntryCursor.getString(8));
                         contentValues.put(Contract.CREATION_DATE,stringEntryCursor.getString(6));
-                        contentValues.put(Contract.String_Entry.COLUMN_NOTIFY_AT,stringEntryCursor.getLong(9));
+                        contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT,stringEntryCursor.getLong(9));
                         long stringEntry_id = toExportDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
                         Cursor alternativeStringCursor = appDatabase.query(Contract.Alternative_Answer_String.TABLE_NAME,
                                 new String[]{Contract.Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER,
@@ -372,6 +372,7 @@ public class ExportImportDatabase {
             if (databaseVersion == 6) {
                 try {
                     upgradeImportedDatabaseFromDBV6ToDBV7(toImportDatabase, fileName);
+                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase,fileName);
                 } catch (Exception e) {
                     showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
                     return;
@@ -379,6 +380,12 @@ public class ExportImportDatabase {
                 importFields(context, toImportDatabase, importUserUsageData );
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else if (databaseVersion == 7) {
+                try {
+                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase, fileName);
+                } catch (Exception e) {
+                    showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
+                    return;
+                }
                 importFields(context, toImportDatabase, importUserUsageData );
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else if (databaseVersion == 8 ) {
@@ -501,7 +508,7 @@ public class ExportImportDatabase {
                             Contract.String_Entry.COLUMN_FIELD, Contract.String_Entry.COLUMN_ASKED_COUNT,
                             Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.String_Entry.COLUMN_RANK,
                             Contract.CREATION_DATE, Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                            Contract.String_Entry.COLUMN_NOTIFY_AT},
+                            Contract.String_Entry.COLUMN_REMIND_AT},
                     Contract.COLUMN_ID + " NOT IN " + placeholders,
                     notImportedArray, null, null, null);
             for (toImportStringEntryCursor.moveToFirst(); toImportStringEntryCursor.getPosition() < toImportStringEntryCursor.getCount();
@@ -564,7 +571,7 @@ public class ExportImportDatabase {
                     contentValues1.put(Contract.String_Entry.COLUMN_RANK,toImportStringEntryCursor.getInt(5));
                     contentValues1.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,toImportStringEntryCursor.getString(8));
                     contentValues1.put(Contract.CREATION_DATE,toImportStringEntryCursor.getString(6));
-                    contentValues1.put(Contract.String_Entry.COLUMN_NOTIFY_AT,toImportStringEntryCursor.getLong(9));
+                    contentValues1.put(Contract.String_Entry.COLUMN_REMIND_AT,toImportStringEntryCursor.getLong(9));
                     try {
                         string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
                     } catch (Exception e) {
@@ -1016,6 +1023,99 @@ public class ExportImportDatabase {
             toImportDatabase.setVersion(7);
             toImportDatabase.setTransactionSuccessful();
 
+        } catch ( Exception sql) {
+            throw sql;
+        } finally {
+            toImportDatabase.endTransaction();
+            File exportDirectory = new File(Environment.getExternalStorageDirectory(), EXPORT_IMPORT_DIRECTORY_NAME);
+            if (!exportDirectory.exists()) {
+                exportDirectory.mkdir();
+            }
+            String journalFileName = fileName + "-journal";
+            File journalFile = new File(exportDirectory, journalFileName);
+            if (journalFile.exists()) {
+                journalFile.delete();
+            }
+        }
+    }
+    private static void upgradeImportedDatabaseFromDBV7ToDBV8(SQLiteDatabase toImportDatabase, String fileName ) throws Exception {
+        toImportDatabase.beginTransaction();
+        try {
+            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+            toImportDatabase.execSQL(rename);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
+            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Field.COLUMN_FIELD_NAME
+                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Field.COLUMN_LOCALE
+                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Field.COLUMN_SORT_BY
+                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Field.COLUMN_READ_ANSWER
+                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.CREATION_DATE
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.Field.COLUMN_FIELD_NAME
+                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Field.COLUMN_LOCALE
+                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Field.COLUMN_SORT_BY
+                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Field.COLUMN_READ_ANSWER
+                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.CREATION_DATE
+                    + " FROM " + "tempTable"
+                    + ";";
+            toImportDatabase.execSQL(copy);
+            String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            toImportDatabase.execSQL(drop);
+            rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
+            toImportDatabase.execSQL(rename);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE);
+            copy = "INSERT INTO " + Contract.String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.String_Entry.COLUMN_FIELD
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_RANK
+                    + " , " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.CREATION_DATE
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.String_Entry.COLUMN_FIELD
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_RANK
+                    + " , " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.CREATION_DATE
+                    + " FROM " + "tempTable"
+                    + ";";
+            toImportDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            toImportDatabase.execSQL(drop);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_EXCLUDED_TIME_TABLE);
+            toImportDatabase.setVersion(8);
+            toImportDatabase.setTransactionSuccessful();
         } catch ( Exception sql) {
             throw sql;
         } finally {

@@ -11,14 +11,15 @@ import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
-import com.ahmedsameha1.peninbin.activities.ShowNotificationDialogsActivity;
+import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
@@ -53,14 +54,35 @@ public class TestDialogFragment extends DialogFragment {
             public void onShow(DialogInterface dialog) {
                 final EditText enterTries = (EditText) alertDialog.findViewById(R.id.number_of_tries);
                 final EditText enterNumber = (EditText) alertDialog.findViewById(R.id.number);
-                final ToggleButton percentage_number = (ToggleButton) alertDialog.findViewById(R.id.percentage_number);
+                final Spinner number_or_percentage = (Spinner) alertDialog.findViewById(R.id.number_or_percentage);
+//                final ToggleButton percentage_number = (ToggleButton) alertDialog.findViewById(R.id.percentage_number);
                 final Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
                 final ImageButton percentage_or_number_help = (ImageButton) alertDialog.findViewById(R.id.percentage_or_number_help);
-                enterNumber.setHint(R.string.enter_percentage);
+                ArrayAdapter<String> number_or_percentage_array_adapter = new ArrayAdapter<String>(getActivity(),
+                        android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.number_or_percentage));
 //                final ImageButton enter_number_help = (ImageButton) alertDialog.findViewById(R.id.enter_number_help);
 //                final ImageButton number_of_questions_help = (ImageButton) alertDialog.findViewById(R.id.number_of_questions_help);
-                percentage_number.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                number_or_percentage.setAdapter(number_or_percentage_array_adapter);
+                number_or_percentage_array_adapter.setDropDownViewResource
+                        (android.R.layout.simple_spinner_dropdown_item);
+                number_or_percentage.setSelection(0);
+                number_or_percentage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        if ( i == 0 ) {
+                            enterNumber.setHint(R.string.enter_number_of_questions);
+                        } else {
+                            enterNumber.setHint(R.string.enter_percentage);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+                /*percentage_number.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (!isChecked) {
@@ -69,7 +91,7 @@ public class TestDialogFragment extends DialogFragment {
                             enterNumber.setHint(R.string.enter_number_of_questions);
                         }
                     }
-                });
+                });*/
                 /*enterQuestionPercentage.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -148,7 +170,7 @@ public class TestDialogFragment extends DialogFragment {
                                 if (trys > 0) {
                                     if ( enterNumber.getText().toString().length() > 0) {
                                         Double number = Double.parseDouble(enterNumber.getText().toString());
-                                        if (!percentage_number.isChecked()) {
+                                        if (number_or_percentage.getSelectedItemPosition() == 1) {
                                             if (number <= 100 && number > 0) {
                                                 Intent intent = new Intent(getActivity(), TestActivity.class);
                                                 intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.PERCENTAGE);
@@ -191,7 +213,7 @@ public class TestDialogFragment extends DialogFragment {
                                             }
                                         }
                                     } else {
-                                        if ( ! percentage_number.isChecked() ){
+                                        if ( number_or_percentage.getSelectedItemPosition() == 1 ){
                                             Toast toast = Toast.makeText(getActivity(), R.string.please_enter_percentage, Toast.LENGTH_SHORT);
                                             toast.setGravity(Gravity.TOP,0,400);
                                             toast.show();

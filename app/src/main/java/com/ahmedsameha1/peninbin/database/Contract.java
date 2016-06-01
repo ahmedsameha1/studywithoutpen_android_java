@@ -63,7 +63,8 @@ public final class Contract {
         public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
         public static final String COLUMN_RANK = "rank";
         public static final String COLUMN_CREATION_EMULATED_DATE = "creation_emulated_date";
-        public static final String COLUMN_NOTIFY_AT = "notify_at";
+        public static final String COLUMN_REMIND_AT = "remind_at";
+        public static final String COLUMN_REMIND_AT_PENDINGINTENT_REQUEST = "remind_at_pendingintent_request";
     }
     public static abstract class Not_String_Entry implements BaseColumns {
         public static final String TABLE_NAME = "not_string_entry";
@@ -123,8 +124,8 @@ public final class Contract {
         public static final String COLUMN_STARTS = "starts";
         public static final String COLUMN_ENDS = "ends";
     }
-    public static abstract class Scheduled_Time implements BaseColumns {
-        public static final String TABLE_NAME = "scheduled_time";
+    public static abstract class Scheduled_Time_Backup implements BaseColumns {
+        public static final String TABLE_NAME = "scheduled_time_backup";
         public static final String COLUMN_FIELD = "field";
         public static final String COLUMN_SESSION_TYPE = "session_type";
         public static final String COLUMN_TIME = "time";

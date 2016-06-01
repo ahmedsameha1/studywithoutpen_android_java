@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,6 +17,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -35,6 +38,7 @@ import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -62,6 +66,9 @@ public class AddEntryActivity extends AppCompatActivity implements
     private EditText enter_answer;
     private TextView showActionbar;
     private SimpleCursorAdapter simple_cursor_adapter;
+
+
+
     private DatabaseOperations databaseOperations;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
@@ -99,6 +106,10 @@ public class AddEntryActivity extends AppCompatActivity implements
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
+        final CardView show_actionbar_cardview = (CardView) findViewById(R.id.show_actionbar_card_view);
+        final CardView add_entry_cardview = (CardView) findViewById(R.id.add_entry_card_view);
+        final CardView add_entry_finish_cardview = (CardView) findViewById(R.id.add_entry_finish_card_view);
+        final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -126,6 +137,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         add_entry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                add_entry_cardview.startAnimation(animAlpha);
                 String question = enter_question.getText().toString();
                 String answer = enter_answer.getText().toString();
                 if ( question.length() > 0 && answer.length() > 0) {
@@ -202,6 +214,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         add_entry_finish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                add_entry_finish_cardview.startAnimation(animAlpha);
                 String question = enter_question.getText().toString();
                 String answer = enter_answer.getText().toString();
                 if (question.length() > 0 && answer.length() > 0) {
@@ -303,6 +316,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                show_actionbar_cardview.startAnimation(animAlpha);
                 if (actionBarShown) {
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
@@ -438,8 +452,13 @@ public class AddEntryActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName("Image~" + SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        UsageLastTime.updateUsageLastTime(this);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

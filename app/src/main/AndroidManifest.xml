@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
         android:name=".AnalyticsApplication"
@@ -85,13 +86,19 @@
             android:label="@string/app_name"
             android:launchMode="singleTop" />
         <activity
-            android:name=".dialogs.ExportSuccessfulActivity"
+            android:name=".secondary_activities.ExportSuccessfulActivity"
             android:excludeFromRecents="true"
             android:label="@string/app_name"
             android:taskAffinity=""
             android:theme="@android:style/Theme.Dialog" />
         <activity
-            android:name=".dialogs.NotImportedFieldsActivity"
+            android:name=".secondary_activities.RefreshingAppUsageActivity"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Dialog" />
+        <activity
+            android:name=".secondary_activities.NotImportedFieldsActivity"
             android:excludeFromRecents="true"
             android:label="@string/app_name"
             android:taskAffinity=""
@@ -110,16 +117,23 @@
         </activity>
 
         <receiver
-            android:name=".receivers_services.ScheduleInFieldReceiver"
+            android:name=".receivers_services.ShowScheduledNotificationsReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".receivers_services.SimpleWakefulReceiver"
             android:enabled="true"
             android:exported="false" />
         <receiver android:name=".receivers_services.BootCompletedReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
         </receiver>
 
-        <activity android:name=".activities.ShowNotificationDialogsActivity"></activity>
+        <activity android:name=".secondary_activities.ShowNotificationDialogsActivity"></activity>
         <service
             android:name=".receivers_services.RandomQuickTestsSchedulingService"
             android:exported="false"/>
