@@ -398,7 +398,10 @@ public class MainActivity extends AppCompatActivity implements
                         intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
                         startActivity(intent);
                 } else {
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE,tts_available);
                     CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
+                    fragment.setArguments(bundle);
                     fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
                 }
                 actionMenu.close(false);

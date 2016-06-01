@@ -403,7 +403,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             onUpgradeDatabaseToDBV7AppV33(sqLiteDatabase);
         }
         if ( oldVersion < 8 ) {
-            onUpgradeDatabaseToDBV8AppV37(sqLiteDatabase);
+            onUpgradeDatabaseToDBV8AppV38(sqLiteDatabase);
         }
     }
     
@@ -1188,7 +1188,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.endTransaction();
         }
     }
-    private void onUpgradeDatabaseToDBV8AppV37(SQLiteDatabase sqLiteDatabase) {
+    private void onUpgradeDatabaseToDBV8AppV38(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
