@@ -16,9 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -31,6 +33,7 @@ import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
@@ -84,6 +87,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         currentAnswer = getIntent().getStringExtra(StudyActivity.CURRENT_ANSWER);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         databaseOperations = new DatabaseOperations(this);
+        int rank = databaseOperations.getEntryRank(entry_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
         answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
@@ -91,6 +95,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         save = (TextView) findViewById(R.id.save);
+        final Spinner rank_spinner = (Spinner)findViewById(R.id.rank_spinner);
         editQuestion = (EditText) findViewById(R.id.question);
         editAnswer = (EditText) findViewById(R.id.answer);
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
@@ -105,6 +110,12 @@ public class EditEntryActivity extends AppCompatActivity implements
         }
         actionBarShown = getSupportActionBar().isShowing();
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
+        final ArrayAdapter rank_spinner_adapter = new ArrayAdapter(this,
+                android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.rank));
+        rank_spinner.setAdapter(rank_spinner_adapter);
+        rank_spinner_adapter.setDropDownViewResource
+                (android.R.layout.simple_spinner_dropdown_item);
+        rank_spinner.setSelection(rank);
         editAnswer.setText(currentAnswer);
         switch (fieldType) {
             case Contract.Field.DEFAULT_TYPE:
@@ -163,6 +174,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                                     intent.putExtra(FieldActivity.EDITED_ENTRY_ID,entry_id);
                                     intent.putExtra(FieldActivity.EDITED_QUESTION,editedQuestion);
                                     intent.putExtra(FieldActivity.EDITED_ANSWER,editedAnswer);
+                                    intent.putExtra(FieldActivity.EDITED_RANK,rank_spinner.getSelectedItemPosition());
                                     setResult(RESULT_OK,intent);
                                 } else {
                                 Toast toast = Toast.makeText(EditEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);

@@ -140,7 +140,15 @@ public class DatabaseOperations {
         cursor.close();
         return locale;
     }
-
+    public int getEntryRank( long entry_id ) {
+        int rank;
+        Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.String_Entry.COLUMN_RANK},
+                Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""},null,null,null);
+        cursor.moveToFirst();
+        rank = cursor.getInt(0);
+        cursor.close();
+        return rank;
+    }
     public boolean isReadAnswer(long field_id) {
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_READ_ANSWER},
                 Contract.COLUMN_ID + " = ? ",

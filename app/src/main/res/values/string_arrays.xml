@@ -30,6 +30,12 @@
         <item>Enter number of questions:</item>
         <item>Enter percentage of field entries:</item>
     </string-array>
+    <string-array name="rank">
+        <item>Low</item>
+        <item>Moderate</item>
+        <item>Important</item>
+        <item>Vital</item>
+    </string-array>
     <string-array name="refreshing_messages">
         <item>If you study 5 new words everyday.
 If you study it using study a period feature, assuming that the period is 10 days.

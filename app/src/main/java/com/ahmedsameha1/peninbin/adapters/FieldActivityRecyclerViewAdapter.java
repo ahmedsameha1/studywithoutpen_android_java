@@ -163,7 +163,7 @@ public class FieldActivityRecyclerViewAdapter extends
                         e1.printStackTrace();
                     }
                     String d = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(date) + ":00";
-                    mySQLiteCursorLoader.editEntry(entry_id, question_data_type,d,answer);
+                    mySQLiteCursorLoader.editEntry(entry_id, question_data_type,d,answer,databaseOperations.getEntryRank(entry_id));
                 }
         }
     }

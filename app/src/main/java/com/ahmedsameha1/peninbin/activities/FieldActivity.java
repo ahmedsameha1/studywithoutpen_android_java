@@ -94,6 +94,7 @@ public class FieldActivity extends AppCompatActivity implements
     private static final int MY_DATA_CHECK_CODE = 1234;
     private static final String FIELD_OPTIONS_DIALOG = "field_options_dialog";
     public static final String ANALYTICS_CATEGORY = "Field Activity Category";
+    public static final String EDITED_RANK = "edited_rank";
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     protected int fieldType = 0;
     private long current_field_id;
@@ -241,7 +242,8 @@ public class FieldActivity extends AppCompatActivity implements
                 long entry_id = data.getLongExtra(EDITED_ENTRY_ID, 1);
                 String question = data.getStringExtra(EDITED_QUESTION);
                 String answer = data.getStringExtra(EDITED_ANSWER);
-                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer);
+                int rank = data.getIntExtra(EDITED_RANK,0);
+                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer,rank);
             }
         } else if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {

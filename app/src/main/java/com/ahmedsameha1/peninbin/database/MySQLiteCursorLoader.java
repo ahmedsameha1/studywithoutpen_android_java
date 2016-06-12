@@ -121,7 +121,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
 
-    public void insertEntry(int question_data_type, String question, String answer, long field_id) {
+    public void insertEntry(int question_data_type, String question, String answer, long field_id,int rank) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
@@ -155,6 +155,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                 contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
                 contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
+                contentValues.put(Contract.String_Entry.COLUMN_RANK,rank);
                 sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
             }
@@ -301,8 +302,8 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
 
-    public void editEntry(long entry_id, int question_data_type, String question, String answer) {
-        buildEditEntryTask(this).execute(db, context, entry_id, question_data_type, question, answer);
+    public void editEntry(long entry_id, int question_data_type, String question, String answer, int rank) {
+        buildEditEntryTask(this).execute(db, context, entry_id, question_data_type, question, answer,rank);
     }
 
     protected ContentChangingTask buildEditEntryTask(MySQLiteCursorLoader loader) {
@@ -330,6 +331,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             int question_data_type = (int) params[3];
             String question = (String) params[4];
             String answer = (String) params[5];
+            int rank = (int) params[6];
             sqLiteDatabase.beginTransactionNonExclusive();
             try {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -365,6 +367,10 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                     sqLiteDatabase.updateWithOnConflict(Contract.String_Entry.TABLE_NAME, contentValues,
                             Contract.COLUMN_ID + " = ? ",
                             new String[]{entry_id + ""}, SQLiteDatabase.CONFLICT_IGNORE);
+                    contentValues = new ContentValues();
+                    contentValues.put(Contract.String_Entry.COLUMN_RANK,rank);
+                    sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME,contentValues,
+                            Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
                 } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
                 }
                 sqLiteDatabase.setTransactionSuccessful();
