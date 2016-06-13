@@ -809,4 +809,24 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                 + " ) as jjj"
                 + " );");
     }
+    public void increaseEntryAskedByOne( long entry_id ) {
+        Cursor cursor = db.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
+                new String[]{Contract.String_Entry.COLUMN_ASKED_COUNT}, Contract.COLUMN_ID + " = ? ",
+                new String[]{entry_id + ""}, null,null,null);
+        cursor.moveToFirst();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.String_Entry.COLUMN_ASKED_COUNT, cursor.getInt(0) + 1);
+        db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+                Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
+    }
+    public void increaseEntryWrongAnsweredCountByOne( long entry_id ) {
+        Cursor cursor = db.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
+                new String[]{Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT}, Contract.COLUMN_ID + " = ? ",
+                new String[]{entry_id + ""}, null,null,null);
+        cursor.moveToFirst();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, cursor.getInt(0) + 1);
+        db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+                Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
+    }
 }
