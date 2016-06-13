@@ -58,6 +58,7 @@ public class StudyActivity extends AppCompatActivity implements
         TextToSpeech.OnInitListener {
     public static final String SCREEN_NAME = "StudyActivity";
     public static final String CURRENT_FIELD_ID = "currentField";
+    public static final String ENTRY_ID = "entry_id";
     public static final String CURRENT_QUESTION = "currentQuestion";
     public static final String CURRENT_ANSWER = "currentAnswer";
     public static final String CORRECT_ANSWERS_COUNTER = "correctAnswerCounter";
@@ -76,7 +77,7 @@ public class StudyActivity extends AppCompatActivity implements
     private ToggleButton showCurrentEntry;
     private EditText enterQuestion, enterAnswer;
     private int correctAnswersCounter = 0;
-    private long current_field_id;
+    private long current_field_id, current_entry_id;
     private LinearLayout answerLinearlayout,questionLinearlayout, container;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private Cursor fieldEntriesCursor;
@@ -99,6 +100,11 @@ public class StudyActivity extends AppCompatActivity implements
         int question_area_size,answer_area_size,test_text_size,action_bar_shown;
         boolean isReadAnswer;
         current_field_id = getIntent().getLongExtra(CURRENT_FIELD_ID,0);
+        if ( savedInstanceState == null ) {
+            current_entry_id = getIntent().getLongExtra(ENTRY_ID, 0);
+        } else {
+            current_entry_id = savedInstanceState.getLong(ENTRY_ID);
+        }
         currentQuestion = getIntent().getStringExtra(CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(CURRENT_ANSWER);
         databaseOperations = new DatabaseOperations(this);
@@ -295,6 +301,7 @@ public class StudyActivity extends AppCompatActivity implements
                 String entered_question = enterQuestion.getText().toString();
                 String entered_answer = enterAnswer.getText().toString();
                 if (studyQuestion.isChecked() && studyAnswer.isChecked()) {
+                    mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
                     if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
                         if ( CompareUtility.nonStrictCompareIgnoreCase(currentQuestion,entered_question) ) {
                             questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
@@ -309,6 +316,7 @@ public class StudyActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         if ( CompareUtility.nonStrictCompareIgnoreCase(currentQuestion,entered_question) &&
                                 CompareUtility.nonStrictCompareIgnoreCase(currentAnswer,entered_answer)) {
@@ -348,6 +356,7 @@ public class StudyActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         if ( CompareUtility.nonStrictCompare(currentQuestion,entered_question) &&
                                 CompareUtility.nonStrictCompare(currentAnswer,entered_answer)) {
@@ -387,6 +396,7 @@ public class StudyActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         if ( entered_question.equalsIgnoreCase(currentQuestion) && entered_answer.equalsIgnoreCase(currentAnswer)) {
                             if ( locale_available ) {
@@ -425,6 +435,7 @@ public class StudyActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         if ( entered_question.equals(currentQuestion) && entered_answer.equals(currentAnswer)) {
                             if ( locale_available ) {
@@ -529,6 +540,7 @@ public class StudyActivity extends AppCompatActivity implements
                         mHandler.postDelayed(mRunnable, RETURN_TIME);
                     }
                 } else if (studyAnswer.isChecked()) {
+                    mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
                     if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
                         if ( CompareUtility.nonStrictCompareIgnoreCase(currentAnswer,entered_answer) ) {
                             if ( locale_available ) {
@@ -545,6 +557,7 @@ public class StudyActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         enterAnswer.setText("");
                         mRunnable = new Runnable() {
@@ -571,6 +584,7 @@ public class StudyActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         enterAnswer.setText("");
                         mRunnable = new Runnable() {
@@ -597,6 +611,7 @@ public class StudyActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         enterAnswer.setText("");
                         mRunnable = new Runnable() {
@@ -623,6 +638,7 @@ public class StudyActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         enterAnswer.setText("");
                         mRunnable = new Runnable() {
@@ -656,6 +672,7 @@ public class StudyActivity extends AppCompatActivity implements
                     fieldEntriesCursor.moveToPosition(position);
                     currentQuestion = fieldEntriesCursor.getString(1);
                     currentAnswer = fieldEntriesCursor.getString(2);
+                    current_entry_id = fieldEntriesCursor.getLong(0);
                     /*viewQuestion.setText(currentQuestion);
                     viewAnswer.setText(currentAnswer);*/
                     correctAnswersCounter = 0;
@@ -703,6 +720,7 @@ public class StudyActivity extends AppCompatActivity implements
                     fieldEntriesCursor.moveToPosition(position);
                     currentQuestion = fieldEntriesCursor.getString(1);
                     currentAnswer = fieldEntriesCursor.getString(2);
+                    current_entry_id = fieldEntriesCursor.getLong(0);
                     /*viewQuestion.setText(currentQuestion);
                     viewAnswer.setText(currentAnswer);*/
                     correctAnswersCounter = 0;
@@ -924,6 +942,7 @@ public class StudyActivity extends AppCompatActivity implements
 //        searchFor.setText("");
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putLong(CURRENT_FIELD_ID, current_field_id);
+        savedInstanceState.putLong(ENTRY_ID,current_entry_id);
         savedInstanceState.putString(CURRENT_QUESTION, currentQuestion);
         savedInstanceState.putString(CURRENT_ANSWER, currentAnswer);
         savedInstanceState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);

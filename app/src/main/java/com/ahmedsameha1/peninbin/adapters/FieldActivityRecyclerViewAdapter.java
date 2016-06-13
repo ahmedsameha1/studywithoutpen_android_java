@@ -69,10 +69,11 @@ public class FieldActivityRecyclerViewAdapter extends
         FieldActivityRecyclerViewViewHolder fieldActivityRecyclerViewViewHolder =
                 new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
-                    public void onClick(View v, String currentQuestion, String currentAnswer ) {
+                    public void onClick(View v, String currentQuestion, String currentAnswer, long entry_id ) {
                         if ( fieldType != Contract.Field.NOTEBOOK_TYPE) {
                             Intent intent = new Intent(context, StudyActivity.class);
                             intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                            intent.putExtra(StudyActivity.ENTRY_ID,entry_id);
                             intent.putExtra(StudyActivity.CURRENT_QUESTION,currentQuestion);
                             intent.putExtra(StudyActivity.CURRENT_ANSWER,currentAnswer);
                             context.startActivity(intent);
@@ -100,6 +101,7 @@ public class FieldActivityRecyclerViewAdapter extends
         final String question = data.getString(1);
         final String answer = data.getString(2);
         viewHolder.field_id = field_id;
+        viewHolder.entry_id = entry_id;
         viewHolder.currentQuestion = question;
         viewHolder.currentAnswer = answer;
         viewHolder.edit.setOnClickListener(new View.OnClickListener() {

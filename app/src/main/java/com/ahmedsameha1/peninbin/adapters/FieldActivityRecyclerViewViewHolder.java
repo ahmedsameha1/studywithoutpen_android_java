@@ -21,6 +21,7 @@ public class FieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder
     public LinearLayout toolbar;
     public IMyViewHolderClicks mListener;
     public long field_id;
+    public long entry_id;
 
     public FieldActivityRecyclerViewViewHolder(View view, IMyViewHolderClicks listener) {
         super(view);
@@ -40,11 +41,11 @@ public class FieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder
     }
     @Override
     public void onClick(View v) {
-        mListener.onClick(v,currentQuestion,currentAnswer);
+        mListener.onClick(v,currentQuestion,currentAnswer,entry_id);
     }
 
     public interface IMyViewHolderClicks {
         void onLongClick(View view);
-        void onClick(View view, String currentQuestion, String currentAnswer );
+        void onClick(View view, String currentQuestion, String currentAnswer, long entry_id );
     }
 }
