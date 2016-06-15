@@ -70,6 +70,7 @@ public class StudyActivity extends AppCompatActivity implements
     public static final int SELECT_ENTRY_REQUEST = 1;
     public static final int RETURN_TIME = 1000;
     public static final String ORDER_OF_ENTRIES = "order_of_entries";
+    private static final String CURRENT_ENTRY_ID = "current_entry_id";
     private boolean actionBarShown;
     private String currentQuestion, currentAnswer;
     private TextView correctAnswers, check,showActionbar;
@@ -946,6 +947,7 @@ public class StudyActivity extends AppCompatActivity implements
         savedInstanceState.putString(CURRENT_QUESTION, currentQuestion);
         savedInstanceState.putString(CURRENT_ANSWER, currentAnswer);
         savedInstanceState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
+        savedInstanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
         saveUserLayoutChanges(savedInstanceState);
     }
 
@@ -963,6 +965,7 @@ public class StudyActivity extends AppCompatActivity implements
         currentQuestion = savedInstanceState.getString(CURRENT_QUESTION);
         currentAnswer = savedInstanceState.getString(CURRENT_ANSWER);
         correctAnswersCounter = savedInstanceState.getInt(CORRECT_ANSWERS_COUNTER);
+        current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
         correctAnswers.setText(Integer.toString(correctAnswersCounter));
         restoreUserLayoutChanges(savedInstanceState);
         if ( showCurrentEntry.isChecked() ) {

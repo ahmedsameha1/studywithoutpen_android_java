@@ -63,6 +63,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
+    private static final String CURRENT_ENTRY_ID = "current_entry_id";
     private String currentQuestion, currentAnswer;
     private TextView correctAnswers,check,showActionbar;
     private ToggleButton showCurrentEntry;
@@ -831,6 +832,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         savedInstanceState.putString(CURRENT_QUESTION, currentQuestion);
         savedInstanceState.putString(CURRENT_ANSWER, currentAnswer);
         savedInstanceState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
+        savedInstanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
         saveUserLayoutChanges(savedInstanceState);
     }
 
@@ -851,6 +853,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         currentQuestion = savedInstanceState.getString(CURRENT_QUESTION);
         currentAnswer = savedInstanceState.getString(CURRENT_ANSWER);
         correctAnswersCounter = savedInstanceState.getInt(CORRECT_ANSWERS_COUNTER);
+        current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
         correctAnswers.setText(Integer.toString(correctAnswersCounter));
         restoreUserLayoutChanges(savedInstanceState);
         if ( showCurrentEntry.isChecked() ) {
