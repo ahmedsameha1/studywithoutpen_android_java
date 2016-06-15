@@ -1,6 +1,7 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -78,7 +79,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     private boolean tts_available = false;
     private boolean locale_available = false;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-    private long current_field_id;
+    private long current_field_id,current_entry_id;
     private int check_type;
     private Tracker mTracker;
 
@@ -128,6 +129,15 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         actionBarShown = getSupportActionBar().isShowing();
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show );
         enterQuestion.setText(currentQuestion);
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                current_entry_id = getEntry_id(currentQuestion,currentAnswer);
+                return null;
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        current_entry_id = getEntry_id(currentQuestion,currentAnswer);
         if ( isReadAnswer ) {
             Intent checkIntent = new Intent();
             checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
@@ -193,6 +203,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 String entered_question = enterQuestion.getText().toString();
                 String entered_answer = enterAnswer.getText().toString();
                 if (studyQuestion.isChecked() && studyAnswer.isChecked()) {
+                    mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
                     if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
                         if ( CompareUtility.nonStrictCompareIgnoreCase(currentQuestion,entered_question) ) {
                             questionLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
@@ -207,6 +218,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         if ( CompareUtility.nonStrictCompareIgnoreCase(currentQuestion,entered_question) &&
                                 CompareUtility.nonStrictCompareIgnoreCase(currentAnswer,entered_answer) ) {
@@ -246,6 +258,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         if ( CompareUtility.nonStrictCompare(currentQuestion,entered_question) &&
                                 CompareUtility.nonStrictCompare(currentAnswer,entered_answer) ) {
@@ -285,6 +298,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         if ( entered_question.equalsIgnoreCase(currentQuestion) && entered_answer.equalsIgnoreCase(currentAnswer) ) {
                             if ( locale_available ) {
@@ -323,6 +337,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         if ( entered_question.equals(currentQuestion) && entered_answer.equals(currentAnswer) ) {
                             if ( locale_available ) {
@@ -427,6 +442,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         mHandler.postDelayed(mRunnable, RETURN_TIME);
                     }
                 } else if (studyAnswer.isChecked()) {
+                    mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
                     if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
                         if ( CompareUtility.nonStrictCompareIgnoreCase(currentAnswer,entered_answer) ) {
                             if ( locale_available ) {
@@ -443,6 +459,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         enterAnswer.setText("");
                         mRunnable = new Runnable() {
@@ -469,6 +486,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         enterAnswer.setText("");
                         mRunnable = new Runnable() {
@@ -495,6 +513,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         enterAnswer.setText("");
                         mRunnable = new Runnable() {
@@ -521,6 +540,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         } else {
                             answerLinearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                             answerLinearlayout.setPadding(0, 0, 0, 0);
+                            mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                         }
                         enterAnswer.setText("");
                         mRunnable = new Runnable() {
@@ -628,7 +648,14 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         break;
                     }
                 }
+                new AsyncTask<Void, Void, Void>() {
 
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        current_entry_id = getEntry_id(currentQuestion,currentAnswer);
+                        return null;
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
             }
         });
         down.setOnClickListener(new View.OnClickListener() {
@@ -667,7 +694,14 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         break;
                     }
                 }
+                new AsyncTask<Void, Void, Void>() {
 
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        current_entry_id = getEntry_id(currentQuestion,currentAnswer);
+                        return null;
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
             }
         });
         enterQuestion.addTextChangedListener(new TextWatcher() {
@@ -866,6 +900,16 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         changeAreas(bundle.getFloat(QUESTION_LAYOUT),bundle.getFloat(ANSWER_LAYOUT));
         enterQuestion.setTextSize(TypedValue.COMPLEX_UNIT_PX,bundle.getFloat(TEXT_SIZE));
         enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
+    }
+    private long getEntry_id( String question, String answer ) {
+        long entry_id = 0;
+        for ( WrongItem wrongItem : wrongItemsList ) {
+            if ( wrongItem.getQuestion().equals(question) && wrongItem.getAnswer().equals(answer) ) {
+                entry_id = wrongItem.getEntry_id();
+                break;
+            }
+        }
+        return entry_id;
     }
     @Override
     public void onInit(int i) {

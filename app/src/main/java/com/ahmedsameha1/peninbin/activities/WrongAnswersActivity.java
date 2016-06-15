@@ -84,7 +84,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
                 }
             }
             if ( wrong_answers_arrayList.size() > 0 ) {
-                wrongItemsList.add(new WrongItem(cursor.getString(0), cursor.getString(1), wrong_answers_arrayList));
+                wrongItemsList.add(new WrongItem(cursor.getLong(2),cursor.getString(0), cursor.getString(1), wrong_answers_arrayList));
             }
         }
         return wrongItemsList;

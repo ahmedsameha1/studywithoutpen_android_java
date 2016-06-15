@@ -7,16 +7,23 @@ import java.util.ArrayList;
  * Created by ahmed on 9/7/2015.
  */
 public class WrongItem implements Serializable {
+    private long entry_id;
     private String question;
     private String answer;
     private ArrayList<String> wrongAnswers;
 
-    public WrongItem( String question, String answer, ArrayList<String> wrongAnswers ) {
+    public WrongItem( long entry_id, String question, String answer, ArrayList<String> wrongAnswers ) {
+        this.entry_id = entry_id;
         this.question = question;
         this.answer = answer;
         this.wrongAnswers = wrongAnswers;
 
     }
+
+    public long getEntry_id() {
+        return entry_id;
+    }
+
     public String getQuestion() {
         return question;
     }
