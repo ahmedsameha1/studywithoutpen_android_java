@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -85,7 +86,8 @@ public class QuickTestActivity extends AppCompatActivity implements
     private static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     private static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final String PAUSING = "pausing";
-    private long current_field_id;
+    private static final String CURRENT_ENTRY_ID = "current_entry_id";
+    private long current_field_id, current_entry_id;
     private String [][] listForTest;
     private ArrayList<String> hints;
     private boolean actionBarShown;
@@ -176,6 +178,14 @@ public class QuickTestActivity extends AppCompatActivity implements
                         result = checkAnAnswer();
                         if (triesCounter < permitedTriesNumber && !result) {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            new AsyncTask<Void, Void, Void>() {
+
+                                @Override
+                                protected Void doInBackground(Void... params) {
+                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                    return null;
+                                }
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
                             showTries.setText(Integer.toString(triesCounter + 1));
                         } else {
                             triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
@@ -206,6 +216,14 @@ public class QuickTestActivity extends AppCompatActivity implements
     //                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, TestActivity.this);
                             } else {
                                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                                new AsyncTask<Void, Void, Void>() {
+
+                                    @Override
+                                    protected Void doInBackground(Void... params) {
+                                        current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                        return null;
+                                    }
+                                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
                                 showQuestion.scrollTo(0,0);
                                 showTries.setText(Integer.toString(triesCounter + 1));
                                 ifMoreThanOnce();
@@ -457,6 +475,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     }
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
+        mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
         Runnable mRunnable;
         boolean result = false;
         if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
@@ -483,6 +502,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0,0,0,0);
+                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -522,6 +542,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0,0,0,0);
+                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -561,6 +582,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0,0,0,0);
+                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -600,6 +622,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0,0,0,0);
+                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -647,6 +670,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
+        savedInsatanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
         saveUserLayoutChanges(savedInsatanceState);
         super.onSaveInstanceState(savedInsatanceState);
     }
@@ -671,6 +695,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
+        current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
         restoreUserLayoutChanges(savedInstanceState);
         if ( testingNow ) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -730,18 +755,19 @@ public class QuickTestActivity extends AppCompatActivity implements
         showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
         enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
     }
+    private long getEntry_id( String queston, String answer ) {
+        long entry_id = 0;
+        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+              fieldEntriesCursor.moveToNext() ) {
+                if ( fieldEntriesCursor.getString(1).equals(queston) && fieldEntriesCursor.getString(2).equals(answer) ) {
+                    entry_id = fieldEntriesCursor.getLong(0);
+                    break;
+                }
+        }
+        return entry_id;
+    }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if ( id == CONTINUE_PREVIOUS_SESSION ) {
-            return new MySQLiteCursorLoader(QuickTestActivity.this,
-                    "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a , se." + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
-                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER + " >= ? ",
-                    new String[]{current_field_id + "", "0"});
-        } else {
             return new MySQLiteCursorLoader(QuickTestActivity.this,
                     "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a " + " FROM " + Contract.STring.TABLE_NAME
@@ -750,7 +776,6 @@ public class QuickTestActivity extends AppCompatActivity implements
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                             + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                     new String[]{current_field_id + ""});
-        }
     }
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
@@ -767,6 +792,14 @@ public class QuickTestActivity extends AppCompatActivity implements
                     remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                     showTries.setText(Integer.toString(triesCounter + 1));
                     showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                    new AsyncTask<Void, Void, Void>() {
+
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                            return null;
+                        }
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
                     enterAnswer.requestFocus();
                     testingNow = true;
                     ifMoreThanOnce();

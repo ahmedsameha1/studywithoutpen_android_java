@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -77,6 +78,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public static final String PAUSING = "pausing";
     private static final String CONTENT_VISIBILITY = "content_visibility";
     private static final String LOADING_VISIBILITY = "loading_visibility";
+    private static final String CURRENT_ENTRY_ID = "current_entry_id";
     private long startingTime;
     boolean boolean_continue, actionBarShown;
     private Cursor cursor;
@@ -112,7 +114,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment;
     private Handler mHandler = new Handler();
-    private long current_field_id;
+    private long current_field_id, current_entry_id;
     private TextToSpeech tts;
     private boolean tts_available = false;
     private boolean locale_available = false;
@@ -241,6 +243,14 @@ public class StudyDuringActivity extends AppCompatActivity implements
                     result = checkAnAnswer();
                     if (triesCounter < permitedTriesNumber && !result) {
                         showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        new AsyncTask<Void, Void, Void>() {
+
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                return null;
+                            }
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
                         showTries.setText(Integer.toString(triesCounter + 1));
                     } else if (!result) {
                         enterAnswer.setText(listForTest[currentQuestionCounter][1]);
@@ -263,6 +273,14 @@ public class StudyDuringActivity extends AppCompatActivity implements
                                 questionsNumber = listForTest.length;
                                 repeatedEntries.clear();
                                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                                new AsyncTask<Void, Void, Void>() {
+
+                                    @Override
+                                    protected Void doInBackground(Void... params) {
+                                        current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                        return null;
+                                    }
+                                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
                                 showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                                 ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
@@ -273,6 +291,14 @@ public class StudyDuringActivity extends AppCompatActivity implements
                             }
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            new AsyncTask<Void, Void, Void>() {
+
+                                @Override
+                                protected Void doInBackground(Void... params) {
+                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                    return null;
+                                }
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
                             showTries.setText(Integer.toString(triesCounter + 1));
                             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -521,6 +547,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     }
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
+        mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
         Runnable mRunnable;
         boolean result = false;
         if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
@@ -547,6 +574,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0, 0, 0, 0);
+                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -593,6 +621,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0, 0, 0, 0);
+                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -639,6 +668,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0, 0, 0, 0);
+                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -685,6 +715,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0, 0, 0, 0);
+                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -738,6 +769,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         savedInstanceState.putIntegerArrayList(REPEATED_ENTRIES, repeatedEntries);
         savedInstanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
         savedInstanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
+        savedInstanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
         saveUserLayoutChanges(savedInstanceState);
       /*  if (!isFinishing()) {
             pauseThread.start();
@@ -764,6 +796,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
+        current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
         restoreUserLayoutChanges(savedInstanceState);
         if (testingNow) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -824,6 +857,25 @@ public class StudyDuringActivity extends AppCompatActivity implements
         }
         return array;
     }
+    private long getEntry_id( String queston, String answer ) {
+        long entry_id = 0;
+        boolean which_cursor = boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
+        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+              cursor.moveToNext() ) {
+            if ( which_cursor ) { // continue previous session
+                if ( cursor.getString(0).equals(queston) && cursor.getString(1).equals(answer) ) {
+                    entry_id = cursor.getLong(3);
+                    break;
+                }
+            } else {
+                if ( cursor.getString(0).equals(queston) && cursor.getString(1).equals(answer) ) {
+                    entry_id = cursor.getLong(3);
+                    break;
+                }
+            }
+        }
+        return entry_id;
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
@@ -831,7 +883,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
 
             return new MySQLiteCursorLoader(StudyDuringActivity.this,
                     "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " FROM " + Contract.STring.TABLE_NAME
+                            + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
+                            + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                             + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
@@ -853,7 +906,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
         } else {
             return new MySQLiteCursorLoader(StudyDuringActivity.this,
                     "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a , se." + Contract.CREATION_DATE + " FROM " + Contract.STring.TABLE_NAME
+                            + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
+                            + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                             + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
@@ -883,6 +937,14 @@ public class StudyDuringActivity extends AppCompatActivity implements
         questionsNumber = listForTest.length;
         if (questionsNumber > 0) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
+            new AsyncTask<Void, Void, Void>() {
+
+                @Override
+                protected Void doInBackground(Void... params) {
+                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                    return null;
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
             showNumberOfQuetions.setText(Integer.toString(questionsNumber));
             if (boolean_continue) {
