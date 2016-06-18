@@ -137,7 +137,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 current_entry_id = getEntry_id(currentQuestion,currentAnswer);
                 return null;
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
         current_entry_id = getEntry_id(currentQuestion,currentAnswer);
         if ( isReadAnswer ) {
             Intent checkIntent = new Intent();
@@ -656,7 +656,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         current_entry_id = getEntry_id(currentQuestion,currentAnswer);
                         return null;
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
             }
         });
         down.setOnClickListener(new View.OnClickListener() {
@@ -702,7 +702,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                         current_entry_id = getEntry_id(currentQuestion,currentAnswer);
                         return null;
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
             }
         });
         enterQuestion.addTextChangedListener(new TextWatcher() {

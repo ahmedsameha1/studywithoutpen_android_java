@@ -185,7 +185,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                                     current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                                     return null;
                                 }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                             showTries.setText(Integer.toString(triesCounter + 1));
                         } else {
                             triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
@@ -223,7 +223,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                                         current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                                         return null;
                                     }
-                                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,(Void[]) null);
                                 showQuestion.scrollTo(0,0);
                                 showTries.setText(Integer.toString(triesCounter + 1));
                                 ifMoreThanOnce();
@@ -799,7 +799,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                             current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                             return null;
                         }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,(Void[]) null);
                     enterAnswer.requestFocus();
                     testingNow = true;
                     ifMoreThanOnce();

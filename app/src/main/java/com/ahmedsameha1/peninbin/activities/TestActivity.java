@@ -45,6 +45,7 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -91,6 +92,9 @@ public class TestActivity extends AppCompatActivity implements
     private static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final String PAUSING = "pausing";
     private static final String CURRENT_ENTRY_ID = "current_entry_id";
+    public static final String CONTROLLED_PORTION = "controlled_portion";
+    public static final String RANK_LEVEL = "importance_level";
+    public static final String WRONGNESS_LEVEL = "wrongness_level";
     private long current_field_id, current_entry_id;
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
@@ -132,7 +136,7 @@ public class TestActivity extends AppCompatActivity implements
         }
     });
     private int question_data_type;
-    private int check_type;
+    private int check_type, controlled_portion, rank_level, wrongness_level;
     private TextToSpeech tts;
     private boolean tts_available = false;
     private boolean locale_available = false;
@@ -159,6 +163,9 @@ public class TestActivity extends AppCompatActivity implements
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
         percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
+        controlled_portion = getIntent().getIntExtra(CONTROLLED_PORTION, -1);
+        rank_level = getIntent().getIntExtra(RANK_LEVEL, -1);
+        wrongness_level = getIntent().getIntExtra(WRONGNESS_LEVEL, -1);
         number = getIntent().getIntExtra(QUESTION_NUMBER, 0);
         percentage = getIntent().getDoubleExtra(QUESTION_PERCENTAGE, 0);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
@@ -256,7 +263,7 @@ public class TestActivity extends AppCompatActivity implements
                                 current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                                 return null;
                             }
-                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                         showTries.setText(Integer.toString(triesCounter + 1));
                     } else {
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
@@ -301,7 +308,7 @@ public class TestActivity extends AppCompatActivity implements
                                     current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                                     return null;
                                 }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                             showQuestion.scrollTo(0,0);
                             showTries.setText(Integer.toString(triesCounter + 1));
                             ifMoreThanOnce();
@@ -971,7 +978,8 @@ public class TestActivity extends AppCompatActivity implements
         } else {
             return new MySQLiteCursorLoader(TestActivity.this,
                     "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a " + " FROM " + Contract.STring.TABLE_NAME
+                            + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                            + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                             + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
@@ -1004,7 +1012,7 @@ public class TestActivity extends AppCompatActivity implements
                         current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                         return null;
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
 //                start.setEnabled(false);
 
 
@@ -1037,7 +1045,7 @@ public class TestActivity extends AppCompatActivity implements
                         current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                         return null;
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                 enterAnswer.requestFocus();
                  testingNow = true;
                 wrongAnswers = new ArrayList<String>(permitedTriesNumber);
@@ -1070,4 +1078,61 @@ public class TestActivity extends AppCompatActivity implements
         fieldEntriesCursor = null;
     }
 
+    private ArrayList<String[][]> prepareControlledAndUncontrolled( int rank, int wrongness_postion ) {
+        String[][] controlled = new String[fieldEntriesCursor.getCount()][2];
+        String[][] uncontrolled = new String[fieldEntriesCursor.getCount()][2];
+        double wrongness;
+        if ( wrongness_postion == 0 ) {
+            wrongness = 0;
+        } else if ( wrongness_postion == 1 ) {
+            wrongness = 0.2;
+        } else if ( wrongness_postion == 2 ) {
+            wrongness = 0.4;
+        } else if ( wrongness_postion == 3 ) {
+            wrongness = 0.6;
+        } else if ( wrongness_postion == 4 ) {
+            wrongness = 0.8;
+        } else  {
+            wrongness = 1;
+        }
+        int controlled_counter = 0, uncontrolled_counter = 0;
+        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+              fieldEntriesCursor.moveToNext() ) {
+            double entry_wrongness;
+            if ( fieldEntriesCursor.getInt(4) > 0 ) {
+                entry_wrongness = (double) fieldEntriesCursor.getInt(5) / fieldEntriesCursor.getInt(4);
+            } else {
+                entry_wrongness = -1;
+            }
+            if ( fieldEntriesCursor.getInt(3) >= rank && entry_wrongness >= wrongness ) {
+                controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
+                controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
+                controlled_counter++;
+            } else if ( fieldEntriesCursor.getInt(3) >= rank && wrongness <= 0 ) {
+                controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
+                controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
+                controlled_counter++;
+            } else if ( fieldEntriesCursor.getInt(3) >= rank ) {
+                uncontrolled[controlled_counter][0] = fieldEntriesCursor.getString(1);
+                uncontrolled[controlled_counter][1] = fieldEntriesCursor.getString(2);
+                uncontrolled_counter++;
+            } else {
+                uncontrolled[controlled_counter][0] = fieldEntriesCursor.getString(1);
+                uncontrolled[controlled_counter][1] = fieldEntriesCursor.getString(2);
+                uncontrolled_counter++;
+            }
+        }
+        ArrayList<String[][]> arrayList = new ArrayList<>();
+        if ( controlled_counter > 0 ) {
+            arrayList.add(Arrays.copyOfRange(controlled,0,controlled_counter));
+        } else {
+            arrayList.add(null);
+        }
+        if ( uncontrolled_counter > 0 ) {
+            arrayList.add(Arrays.copyOfRange(uncontrolled,0,uncontrolled_counter));
+        } else {
+            arrayList.add(null);
+        }
+        return arrayList;
+    }
 }

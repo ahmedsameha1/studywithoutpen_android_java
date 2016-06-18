@@ -250,7 +250,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                                 current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                                 return null;
                             }
-                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                         showTries.setText(Integer.toString(triesCounter + 1));
                     } else if (!result) {
                         enterAnswer.setText(listForTest[currentQuestionCounter][1]);
@@ -280,7 +280,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                                         current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                                         return null;
                                     }
-                                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                                 showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                                 ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
@@ -298,7 +298,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                                     current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                                     return null;
                                 }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void []) null);
                             showTries.setText(Integer.toString(triesCounter + 1));
                             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -944,7 +944,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                     current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
                     return null;
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
             ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
             showNumberOfQuetions.setText(Integer.toString(questionsNumber));
             if (boolean_continue) {
