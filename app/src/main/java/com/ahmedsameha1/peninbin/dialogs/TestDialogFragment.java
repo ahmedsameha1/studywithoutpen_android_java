@@ -105,14 +105,16 @@ public class TestDialogFragment extends DialogFragment {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         if ( position == 0 ) {
-                            controlled_portion.setSelection(4);
+                            controlled_portion.setSelection(5);
                         } else if ( position == 1 ) {
-                            controlled_portion.setSelection(3);
+                            controlled_portion.setSelection(4);
                         } else if ( position == 2 ) {
-                            controlled_portion.setSelection(2);
+                            controlled_portion.setSelection(3);
                         } else if ( position == 3 ) {
-                            controlled_portion.setSelection(1);
+                            controlled_portion.setSelection(2);
                         } else if ( position == 4 ) {
+                            controlled_portion.setSelection(1);
+                        } else if ( position == 5 ) {
                             controlled_portion.setSelection(0);
                         }
                     }
@@ -126,14 +128,16 @@ public class TestDialogFragment extends DialogFragment {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         if ( position == 0 ) {
-                            uncontrolled_portion.setSelection(4);
+                            uncontrolled_portion.setSelection(5);
                         } else if ( position == 1 ) {
-                            uncontrolled_portion.setSelection(3);
+                            uncontrolled_portion.setSelection(4);
                         } else if ( position == 2 ) {
-                            uncontrolled_portion.setSelection(2);
+                            uncontrolled_portion.setSelection(3);
                         } else if ( position == 3 ) {
-                            uncontrolled_portion.setSelection(1);
+                            uncontrolled_portion.setSelection(2);
                         } else if ( position == 4 ) {
+                            uncontrolled_portion.setSelection(1);
+                        } else if ( position == 5 ) {
                             uncontrolled_portion.setSelection(0);
                         }
                     }

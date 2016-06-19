@@ -1,5 +1,7 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -26,6 +28,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -95,6 +98,8 @@ public class TestActivity extends AppCompatActivity implements
     public static final String CONTROLLED_PORTION = "controlled_portion";
     public static final String RANK_LEVEL = "importance_level";
     public static final String WRONGNESS_LEVEL = "wrongness_level";
+    private static final String CONTENT_VISIBILITY = "content_visibility";
+    private static final String LOADING_VISIBILITY = "loading_visibility";
     private long current_field_id, current_entry_id;
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
@@ -142,6 +147,9 @@ public class TestActivity extends AppCompatActivity implements
     private boolean locale_available = false;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
+    private int mShortAnimationDuration;
+    private View mLoadingView;
+    private RelativeLayout content;
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
@@ -182,10 +190,20 @@ public class TestActivity extends AppCompatActivity implements
         showResult = (LinearLayout) findViewById(R.id.result);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
+        content = (RelativeLayout) findViewById(R.id.content);
+        mLoadingView = findViewById(R.id.loading);
         final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
         final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
+        if ( savedInstanceState == null ) {
+            content.setVisibility(View.GONE);
+            mShortAnimationDuration = getResources().getInteger(
+                    android.R.integer.config_shortAnimTime);
+        } else {
+            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
+            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
+        }
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         setSupportActionBar(toolbar);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -534,33 +552,155 @@ public class TestActivity extends AppCompatActivity implements
     private String [][] getListForTest ( double percent ) {
         int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
         String[][] listForTest = new String[numberOfQuestions][2];
-        String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
-            listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
-            listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+        if ( wrongness_level == -1 && rank_level == -1 && controlled_portion == -1 ) {
+            String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
+            for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+                  fieldEntriesCursor.moveToNext() ) {
+                listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
+                listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+            }
+            shuffleArray(listOfEntries);
+            for ( int n = 0; n < listForTest.length; n++ ) {
+                listForTest [n][0] = listOfEntries [n][0];
+                listForTest [n][1] = listOfEntries [n][1];
+            }
+            return listForTest;
+        } else {
+            int number_of_controlled_questions;
+            int number_of_uncontrolled_questions;
+            double controlled_percentage;
+            if ( controlled_portion == 0 ) {
+                controlled_percentage = 0.2;
+            } else if ( controlled_portion == 1 ) {
+                controlled_percentage = 0.4;
+            } else if ( controlled_portion == 2 ) {
+                controlled_percentage = 0.5;
+            } else if ( controlled_portion == 3 ) {
+                controlled_percentage = 0.6;
+            } else if ( controlled_portion == 4 ) {
+                controlled_percentage = 0.8;
+            } else  {
+                controlled_percentage = 1;
+            }
+            number_of_controlled_questions = (int) (numberOfQuestions * controlled_percentage);
+            number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
+            ArrayList<String[][]> arrayList = prepareControlledAndUncontrolled(rank_level,wrongness_level);
+            String[][] controlled_entries = arrayList.get(0);
+            String[][] uncontrolled_entries = arrayList.get(1);
+            if ( controlled_entries == null ) {
+                number_of_uncontrolled_questions = numberOfQuestions;
+                number_of_controlled_questions = 0;
+                shuffleArray(uncontrolled_entries);
+                for ( int n = 0; n < listForTest.length; n++ ) {
+                    listForTest [n][0] = uncontrolled_entries [n][0];
+                    listForTest [n][1] = uncontrolled_entries [n][1];
+                }
+            } else if ( uncontrolled_entries == null ) {
+                number_of_controlled_questions = numberOfQuestions;
+                number_of_uncontrolled_questions = 0;
+                shuffleArray(controlled_entries);
+                for ( int n = 0; n < listForTest.length; n++ ) {
+                    listForTest[n][0] = controlled_entries[n][0];
+                    listForTest[n][1] = controlled_entries[n][1];
+                }
+            } else {
+                if ( number_of_controlled_questions > controlled_entries.length ) {
+                    number_of_controlled_questions = controlled_entries.length;
+                    number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
+                } else if ( number_of_uncontrolled_questions > uncontrolled_entries.length ) {
+                    number_of_uncontrolled_questions = uncontrolled_entries.length;
+                    number_of_controlled_questions = numberOfQuestions - number_of_uncontrolled_questions;
+                }
+                shuffleArray(controlled_entries);
+                for ( int n = 0; n < number_of_controlled_questions; n++ ) {
+                    listForTest[n][0] = controlled_entries[n][0];
+                    listForTest[n][1] = controlled_entries[n][1];
+                }
+                shuffleArray(uncontrolled_entries);
+                for ( int n = number_of_controlled_questions; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++ ) {
+                    listForTest[n][0] = uncontrolled_entries[n][0];
+                    listForTest[n][1] = uncontrolled_entries[n][1];
+                }
+                shuffleArray(listForTest);
+            }
+            return listForTest;
         }
-        shuffleArray(listOfEntries);
-        for ( int n = 0; n < listForTest.length; n++ ) {
-            listForTest [n][0] = listOfEntries [n][0];
-            listForTest [n][1] = listOfEntries [n][1];
-        }
-        return listForTest;
     }
     private String [][] getListForTest ( int numberOfQuestions ) {
         String[][] listForTest = new String[numberOfQuestions][2];
-        String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
-            listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
-            listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+        if ( wrongness_level == -1 && rank_level == -1 && controlled_portion == -1 ) {
+            String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
+            for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+                  fieldEntriesCursor.moveToNext() ) {
+                listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
+                listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+            }
+            shuffleArray(listOfEntries);
+            for ( int n = 0; n < listForTest.length; n++ ) {
+                listForTest [n][0] = listOfEntries [n][0];
+                listForTest [n][1] = listOfEntries [n][1];
+            }
+            return listForTest;
+        } else {
+            int number_of_controlled_questions;
+            int number_of_uncontrolled_questions;
+            double controlled_percentage;
+            if ( controlled_portion == 0 ) {
+                controlled_percentage = 0.2;
+            } else if ( controlled_portion == 1 ) {
+                controlled_percentage = 0.4;
+            } else if ( controlled_portion == 2 ) {
+                controlled_percentage = 0.5;
+            } else if ( controlled_portion == 3 ) {
+                controlled_percentage = 0.6;
+            } else if ( controlled_portion == 4 ) {
+                controlled_percentage = 0.8;
+            } else  {
+                controlled_percentage = 1;
+            }
+            number_of_controlled_questions = (int) (numberOfQuestions * controlled_percentage);
+            number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
+            ArrayList<String[][]> arrayList = prepareControlledAndUncontrolled(rank_level,wrongness_level);
+            String[][] controlled_entries = arrayList.get(0);
+            String[][] uncontrolled_entries = arrayList.get(1);
+            if ( controlled_entries == null ) {
+                number_of_uncontrolled_questions = numberOfQuestions;
+                number_of_controlled_questions = 0;
+                shuffleArray(uncontrolled_entries);
+                for ( int n = 0; n < listForTest.length; n++ ) {
+                    listForTest [n][0] = uncontrolled_entries [n][0];
+                    listForTest [n][1] = uncontrolled_entries [n][1];
+                }
+            } else if ( uncontrolled_entries == null ) {
+                number_of_controlled_questions = numberOfQuestions;
+                number_of_uncontrolled_questions = 0;
+                shuffleArray(controlled_entries);
+                for ( int n = 0; n < listForTest.length; n++ ) {
+                    listForTest[n][0] = controlled_entries[n][0];
+                    listForTest[n][1] = controlled_entries[n][1];
+                }
+            } else {
+                if ( number_of_controlled_questions > controlled_entries.length ) {
+                    number_of_controlled_questions = controlled_entries.length;
+                    number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
+                } else if ( number_of_uncontrolled_questions > uncontrolled_entries.length ) {
+                    number_of_uncontrolled_questions = uncontrolled_entries.length;
+                    number_of_controlled_questions = numberOfQuestions - number_of_uncontrolled_questions;
+                }
+                shuffleArray(controlled_entries);
+                for ( int n = 0; n < number_of_controlled_questions; n++ ) {
+                    listForTest[n][0] = controlled_entries[n][0];
+                    listForTest[n][1] = controlled_entries[n][1];
+                }
+                shuffleArray(uncontrolled_entries);
+                for ( int n = number_of_controlled_questions; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++ ) {
+                    listForTest[n][0] = uncontrolled_entries[n][0];
+                    listForTest[n][1] = uncontrolled_entries[n][1];
+                }
+                shuffleArray(listForTest);
+            }
+            return listForTest;
         }
-        shuffleArray(listOfEntries);
-        for ( int n = 0; n < listForTest.length; n++ ) {
-            listForTest [n][0] = listOfEntries [n][0];
-            listForTest [n][1] = listOfEntries [n][1];
-        }
-        return listForTest;
     }
     private void shuffleArray( String [][] array )
     {
@@ -858,6 +998,8 @@ public class TestActivity extends AppCompatActivity implements
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         savedInsatanceState.putBoolean(BOOLEAN_CONTINUE,boolean_continue);
         savedInsatanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
+        savedInsatanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
+        savedInsatanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
         saveUserLayoutChanges(savedInsatanceState);
        /* if ( ! isFinishing() ) {
             pauseThread.start();
@@ -1053,7 +1195,14 @@ public class TestActivity extends AppCompatActivity implements
                 ifMoreThanOnce();
             }
         }
+        crossfade();
     }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        fieldEntriesCursor = null;
+    }
+
     @Override
     public void onInit(int i) {
         if ( tts_available ) {
@@ -1073,11 +1222,6 @@ public class TestActivity extends AppCompatActivity implements
             }
         }
     }
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        fieldEntriesCursor = null;
-    }
-
     private ArrayList<String[][]> prepareControlledAndUncontrolled( int rank, int wrongness_postion ) {
         String[][] controlled = new String[fieldEntriesCursor.getCount()][2];
         String[][] uncontrolled = new String[fieldEntriesCursor.getCount()][2];
@@ -1134,5 +1278,32 @@ public class TestActivity extends AppCompatActivity implements
             arrayList.add(null);
         }
         return arrayList;
+    }
+    private void crossfade() {
+
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        content.setAlpha(0f);
+        content.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        content.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
+
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        mLoadingView.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mLoadingView.setVisibility(View.GONE);
+                    }
+                });
     }
 }
