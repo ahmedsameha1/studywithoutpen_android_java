@@ -1257,12 +1257,12 @@ public class TestActivity extends AppCompatActivity implements
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;
             } else if ( fieldEntriesCursor.getInt(3) >= rank ) {
-                uncontrolled[controlled_counter][0] = fieldEntriesCursor.getString(1);
-                uncontrolled[controlled_counter][1] = fieldEntriesCursor.getString(2);
+                uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
+                uncontrolled[uncontrolled_counter][1] = fieldEntriesCursor.getString(2);
                 uncontrolled_counter++;
             } else {
-                uncontrolled[controlled_counter][0] = fieldEntriesCursor.getString(1);
-                uncontrolled[controlled_counter][1] = fieldEntriesCursor.getString(2);
+                uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
+                uncontrolled[uncontrolled_counter][1] = fieldEntriesCursor.getString(2);
                 uncontrolled_counter++;
             }
         }

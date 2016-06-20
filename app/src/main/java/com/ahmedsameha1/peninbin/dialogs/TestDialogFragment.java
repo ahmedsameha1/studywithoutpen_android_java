@@ -147,6 +147,32 @@ public class TestDialogFragment extends DialogFragment {
 
                     }
                 });
+                rank.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if ( position == 0 && wrongness.getSelectedItemPosition() == 0 ) {
+                           wrongness.setSelection(1);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+                wrongness.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if ( position == 0 && rank.getSelectedItemPosition() == 0 ) {
+                           rank.setSelection(1);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
                 /*percentage_number.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -316,4 +342,5 @@ public class TestDialogFragment extends DialogFragment {
         });
         return alertDialog;
     }
+    //// TODO: 6/19/16 when the rotation happen the shown liner layout unshown
 }

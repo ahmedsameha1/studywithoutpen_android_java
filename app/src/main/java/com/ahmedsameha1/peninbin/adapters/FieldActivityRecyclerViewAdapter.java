@@ -28,6 +28,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
 import java.sql.Timestamp;
@@ -70,18 +71,12 @@ public class FieldActivityRecyclerViewAdapter extends
                 new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
                     public void onClick(View v, String currentQuestion, String currentAnswer, long entry_id ) {
-                        if ( fieldType != Contract.Field.NOTEBOOK_TYPE) {
                             Intent intent = new Intent(context, StudyActivity.class);
                             intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                             intent.putExtra(StudyActivity.ENTRY_ID,entry_id);
                             intent.putExtra(StudyActivity.CURRENT_QUESTION,currentQuestion);
                             intent.putExtra(StudyActivity.CURRENT_ANSWER,currentAnswer);
                             context.startActivity(intent);
-                        } else {
-                            Toast toast = Toast.makeText(context, R.string.study_not_for_notebook,Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.TOP,0,400);
-                            toast.show();
-                        }
                     }
                     @Override
                     public void onLongClick(View view) {
@@ -142,12 +137,14 @@ public class FieldActivityRecyclerViewAdapter extends
                 }
             }
         });
-        switch (fieldType) {
-            case Contract.Field.DEFAULT_TYPE:
+        viewHolder.question.setText(question);
+        viewHolder.answer.setText(answer);
+        /*switch (fieldType) {
+            case Constants.FieldTypes.DEFAULT_TYPE:
                 viewHolder.question.setText(question);
                 viewHolder.answer.setText(answer);
                 break;
-            case Contract.Field.NOTEBOOK_TYPE:
+            case Constants.FieldTypes.NOTEBOOK_TYPE:
                 try {
                     Timestamp timestamp = Timestamp.valueOf(question);
                     Date date = new Date(timestamp.getTime());
@@ -167,6 +164,6 @@ public class FieldActivityRecyclerViewAdapter extends
                     String d = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(date) + ":00";
                     mySQLiteCursorLoader.editEntry(entry_id, question_data_type,d,answer,databaseOperations.getEntryRank(entry_id));
                 }
-        }
+        }*/
     }
 }

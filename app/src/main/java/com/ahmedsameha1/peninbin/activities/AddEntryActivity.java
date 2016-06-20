@@ -49,13 +49,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.StringTokenizer;
+
 /**
  * Created by Ahmed on 3/19/16.
  */
 public class AddEntryActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         ChangeAreasDialogFragment.ChangeAreas,
-        ChangeTextSizeDialogFragment.ChangeTextSize{
+        ChangeTextSizeDialogFragment.ChangeTextSize {
     public static final String SCREEN_NAME = "AddEntryActivity";
     public static final String FROM_FIELD_ACTIVITY = "from_field_activity";
     private static final String FIELD_CHOSEN = "field_chosen";
@@ -71,14 +72,13 @@ public class AddEntryActivity extends AppCompatActivity implements
     private SimpleCursorAdapter simple_cursor_adapter;
 
 
-
     private DatabaseOperations databaseOperations;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
     private int fieldType;
     private Cursor cursor;
     private boolean field_chosen;
-    private LinearLayout showResult,questionLinearlayout, container;
+    private LinearLayout showResult, questionLinearlayout, container;
     private long current_field_id;
     private int question_data_type;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
@@ -88,9 +88,9 @@ public class AddEntryActivity extends AppCompatActivity implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_entry);
-        int question_area_size,answer_area_size,test_text_size,action_bar_shown;
+        int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, true);
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
+        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         databaseOperations = new DatabaseOperations(this);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
@@ -101,7 +101,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         field_spinner = (Spinner) findViewById(R.id.field_spinner);
-        final Spinner rank_spinner = (Spinner)findViewById(R.id.rank_spinner);
+        final Spinner rank_spinner = (Spinner) findViewById(R.id.rank_spinner);
         enter_question = (EditText) findViewById(R.id.question);
         enter_answer = (EditText) findViewById(R.id.answer);
         final TextView add_entry = (TextView) findViewById(R.id.add_entry);
@@ -115,14 +115,14 @@ public class AddEntryActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
+        if (action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR) {
             getSupportActionBar().hide();
         }
         actionBarShown = getSupportActionBar().isShowing();
-        simple_cursor_adapter = new SimpleCursorAdapter(this,R.layout.field_spinner,null,
-                new String [] {Contract.Field.COLUMN_FIELD_NAME}, new int[] {R.id.list_item}, 0);
+        simple_cursor_adapter = new SimpleCursorAdapter(this, R.layout.field_spinner, null,
+                new String[]{Contract.Field.COLUMN_FIELD_NAME}, new int[]{R.id.list_item}, 0);
         final ArrayAdapter rank_spinner_adapter = new ArrayAdapter(this,
-                android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.rank));
+                android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.rank));
         field_spinner.setAdapter(simple_cursor_adapter);
         rank_spinner.setAdapter(rank_spinner_adapter);
         simple_cursor_adapter.setDropDownViewResource
@@ -132,14 +132,14 @@ public class AddEntryActivity extends AppCompatActivity implements
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         rank_spinner.setSelection(Constants.Rank.LOW);
         setHints(fieldType);
-        getLoaderManager().restartLoader(0,null,this);
+        getLoaderManager().restartLoader(0, null, this);
         enter_answer.requestFocus();
-        changeAreas(question_area_size,answer_area_size);
-        if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
+        changeAreas(question_area_size, answer_area_size);
+        if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
-        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE ) {
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
-        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
@@ -150,66 +150,31 @@ public class AddEntryActivity extends AppCompatActivity implements
                 add_entry_cardview.startAnimation(animAlpha);
                 String question = enter_question.getText().toString();
                 String answer = enter_answer.getText().toString();
-                if ( question.length() > 0 && answer.length() > 0) {
+                if (question.length() > 0 && answer.length() > 0) {
                     if (fromFieldActivity) {
-                        switch (fieldType) {
-                            case Contract.Field.DEFAULT_TYPE:
-                                if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                    mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,
-                                            current_field_id,rank_spinner.getSelectedItemPosition());
-                                } else {
-                                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
-                                }
-                                break;
-                            case Contract.Field.NOTEBOOK_TYPE:
-                                String dateTimeUserFormat = question;
-                                StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
-                                stringTokenizer.nextToken();
-                                String dateToSave = stringTokenizer.nextToken() + " "
-                                        + stringTokenizer.nextToken() + ":00";
-                                if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                    mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,
-                                            current_field_id,rank_spinner.getSelectedItemPosition());
-                                } else {
-                                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
-                                }
-                                break;
+
+                        if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                            mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                    current_field_id, rank_spinner.getSelectedItemPosition());
+                        } else {
+                            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
                         }
+
                         enter_question.setText("");
                         enter_answer.setText("");
                     } else {
-                        if ( field_chosen ) {
-                            switch (fieldType) {
-                                case Contract.Field.DEFAULT_TYPE:
-                                    if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                        mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,
-                                                current_field_id,rank_spinner.getSelectedItemPosition());
-                                    } else {
-                                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                    break;
-                                case Contract.Field.NOTEBOOK_TYPE:
-                                    String dateTimeUserFormat = question;
-                                    StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
-                                    stringTokenizer.nextToken();
-                                    String dateToSave = stringTokenizer.nextToken() + " "
-                                            + stringTokenizer.nextToken() + ":00";
-                                    if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                        mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,
-                                                current_field_id,rank_spinner.getSelectedItemPosition());
-                                    } else {
-                                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                    break;
+                        if (field_chosen) {
+                            if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                                mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                        current_field_id, rank_spinner.getSelectedItemPosition());
+                            } else {
+                                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
                             }
+
                             enter_question.setText("");
                             enter_answer.setText("");
                         } else {
@@ -240,11 +205,6 @@ public class AddEntryActivity extends AppCompatActivity implements
                 current_field_id = c.getLong(0);
                 fieldType = c.getInt(1);
                 setHints(fieldType);
-                if ( fieldType == Contract.Field.NOTEBOOK_TYPE) {
-                    enter_question.setText("");
-//                    enter_question.clearFocus();
-                    enter_answer.requestFocus();
-                }
             }
 
             @Override
@@ -261,40 +221,12 @@ public class AddEntryActivity extends AppCompatActivity implements
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
                     getSupportActionBar().show();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.SHOW_ACTION_BAR);
-                }
-            }
-        });
-        enter_question.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    switch (fieldType) {
-                        case Contract.Field.NOTEBOOK_TYPE:
-//                            enterQuestion.clearFocus();
-                            enter_answer.requestFocus();
-                            Calendar calendar = Calendar.getInstance();
-                            new DatePickerDialog(AddEntryActivity.this, new DatePickerDialog.OnDateSetListener() {
-                                @Override
-                                public void onDateSet(DatePicker view, final int year, final int monthOfYear, final int dayOfMonth) {
-                                    final Calendar calendar = Calendar.getInstance();
-                                    new TimePickerDialog(AddEntryActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                                        @Override
-                                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                            calendar.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                            enter_question.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.US).format(calendar.getTime()));
-//                                            enterAnswer.requestFocus();
-                                        }
-                                    }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();
-                                }
-                            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
-                            break;
-                    }
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
                 }
             }
         });
@@ -320,6 +252,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 enter_answer.setText("");
                 enter_answer.requestFocus();
             }
+
             @Override
             public void onSwipeRight() {
                 enter_answer.setText("");
@@ -332,6 +265,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 enter_question.setText("");
                 enter_question.requestFocus();
             }
+
             @Override
             public void onSwipeRight() {
                 enter_question.setText("");
@@ -341,14 +275,16 @@ public class AddEntryActivity extends AppCompatActivity implements
 
         enter_question.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if ( editable.length() > 0 && enter_answer.getText().length() > 0 ) {
+                if (editable.length() > 0 && enter_answer.getText().length() > 0) {
                     add_entry.setEnabled(true);
                 } else {
                     add_entry.setEnabled(false);
@@ -357,14 +293,16 @@ public class AddEntryActivity extends AppCompatActivity implements
         });
         enter_answer.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if ( editable.length() > 0 && enter_question.getText().length() > 0 ) {
+                if (editable.length() > 0 && enter_question.getText().length() > 0) {
                     add_entry.setEnabled(true);
                 } else {
                     add_entry.setEnabled(false);
@@ -374,34 +312,32 @@ public class AddEntryActivity extends AppCompatActivity implements
 
     }
 
-    private void setHints(int fieldType ) {
-        switch ( fieldType ) {
-            case Contract.Field.NOTEBOOK_TYPE:
-                enter_question.setHint(R.string.enter_date_time);
-                enter_answer.setHint(R.string.write_whatever);
-                break;
-            case Contract.Field.DEFAULT_TYPE:
-                enter_question.setHint(R.string.enter_a_question);
-                enter_answer.setHint(R.string.enter_an_answer);
-        }
+    private void setHints(int fieldType) {
+        enter_question.setHint(R.string.enter_a_question);
+        enter_answer.setHint(R.string.enter_an_answer);
+
     }
+
     @Override
     protected void onResume() {
         super.onResume();
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
+
     @Override
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.add_entry_activity_menu, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -413,37 +349,39 @@ public class AddEntryActivity extends AppCompatActivity implements
         switch (id) {
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                bundle.putFloat(QUESTION_LAYOUT,((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
-                bundle.putFloat(ANSWER_LAYOUT,((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
+                bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
                 changeAreasDialogFragment.setArguments(bundle);
-                changeAreasDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                changeAreasDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
-                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
-                bundle1.putFloat(TEXT_SIZE, (enter_question.getTextSize()/scaledDensity) );
+                bundle1.putFloat(TEXT_SIZE, (enter_question.getTextSize() / scaledDensity));
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
                 changeTextSizeDialogFragment.setArguments(bundle1);
-                changeTextSizeDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                changeTextSizeDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
 
     }
+
     @Override
-    public void onSaveInstanceState( Bundle savedInstanceState ) {
+    public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putLong(CURRENT_FIELD_ID,current_field_id);
+        savedInstanceState.putLong(CURRENT_FIELD_ID, current_field_id);
         savedInstanceState.putBoolean(FIELD_CHOSEN, field_chosen);
         savedInstanceState.putInt(SPINNER_POSITION, field_spinner.getSelectedItemPosition());
         saveUserLayoutChanges(savedInstanceState);
     }
+
     @Override
-    public void onRestoreInstanceState( Bundle savedInstanceState ) {
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
         field_chosen = savedInstanceState.getBoolean(FIELD_CHOSEN);
@@ -451,19 +389,20 @@ public class AddEntryActivity extends AppCompatActivity implements
     }
 
     private void setSpinnerPosition(long field_id) {
-        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-              cursor.moveToNext() ){
+        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+             cursor.moveToNext()) {
             long id = cursor.getLong(0);
-            if ( id == field_id ) {
+            if (id == field_id) {
                 field_spinner.setSelection(cursor.getPosition());
                 return;
             }
         }
     }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new MySQLiteCursorLoader(AddEntryActivity.this,
-                "SELECT " + Contract.COLUMN_ID + ", " +  Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
+                "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
                         + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                 null);
     }
@@ -479,6 +418,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     public void onLoaderReset(Loader<Cursor> loader) {
         simple_cursor_adapter.swapCursor(null);
     }
+
     @Override
     public void changeAreas(float questionArea, float answerArea) {
         LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams();
@@ -495,14 +435,16 @@ public class AddEntryActivity extends AppCompatActivity implements
         enter_question.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
         enter_answer.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
     }
+
     private void saveUserLayoutChanges(Bundle bundle) {
         bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
         bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
         bundle.putFloat(TEXT_SIZE, enter_question.getTextSize());
     }
+
     private void restoreUserLayoutChanges(Bundle bundle) {
-        changeAreas(bundle.getFloat(QUESTION_LAYOUT),bundle.getFloat(ANSWER_LAYOUT));
-        enter_question.setTextSize(TypedValue.COMPLEX_UNIT_PX,bundle.getFloat(TEXT_SIZE));
+        changeAreas(bundle.getFloat(QUESTION_LAYOUT), bundle.getFloat(ANSWER_LAYOUT));
+        enter_question.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
         enter_answer.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
     }
 }

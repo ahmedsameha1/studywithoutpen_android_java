@@ -42,11 +42,18 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                     quick_test_intent.putExtra(TestActivity.QUESTION_PERCENTAGE, intent.getIntExtra(TestActivity.QUESTION_PERCENTAGE,1));
                     quick_test_intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(TestActivity.PERMITED_TRIES_NUMBER,1));
                     quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    quick_test_intent.putExtra(TestActivity.CONTROLLED_PORTION, intent.getIntExtra(TestActivity.CONTROLLED_PORTION,-1));
+                    quick_test_intent.putExtra(TestActivity.RANK_LEVEL, intent.getIntExtra(TestActivity.RANK_LEVEL,-1));
+                    quick_test_intent.putExtra(TestActivity.WRONGNESS_LEVEL, intent.getIntExtra(TestActivity.WRONGNESS_LEVEL,-1));
+
                 } else {
                     quick_test_intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
                     quick_test_intent.putExtra(TestActivity.QUESTION_NUMBER, intent.getIntExtra(TestActivity.QUESTION_NUMBER,1));
                     quick_test_intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(TestActivity.PERMITED_TRIES_NUMBER,1));
                     quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    quick_test_intent.putExtra(TestActivity.CONTROLLED_PORTION, intent.getIntExtra(TestActivity.CONTROLLED_PORTION,-1));
+                    quick_test_intent.putExtra(TestActivity.RANK_LEVEL, intent.getIntExtra(TestActivity.RANK_LEVEL,-1));
+                    quick_test_intent.putExtra(TestActivity.WRONGNESS_LEVEL, intent.getIntExtra(TestActivity.WRONGNESS_LEVEL,-1));
                 }
                 contentIntent = PendingIntent.getActivity(context, 0, quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 notificationBuilder =

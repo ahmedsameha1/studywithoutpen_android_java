@@ -16,12 +16,15 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.activities.NotebookFieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
 /**
@@ -33,13 +36,14 @@ public class MainActivityRecyclerViewAdapter extends
     private Context context;
     private Cursor cursor;
     private SharedPreferences sharedPreferences;
-
+    private DatabaseOperations databaseOperations;
 
     public MainActivityRecyclerViewAdapter(Context context, Cursor data) {
         super(context, data);
         this.context = context;
         this.cursor = data;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        databaseOperations = new DatabaseOperations(context);
     }
 
     @Override
@@ -50,11 +54,19 @@ public class MainActivityRecyclerViewAdapter extends
                 new MainActivityRecyclerViewViewHolder(itemView, new MainActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
                     public void onClick(View v, long field_id,boolean isDeleting) {
+                        int field_type = databaseOperations.getFieldType(field_id);
                         if ( ! isDeleting ) {
-                            Intent intent = new Intent(context, FieldActivity.class);
-                            intent.putExtra(FieldActivity.FIELD_ID, field_id);
-                            context.startActivity(intent);
-                            new MySQLiteCursorLoader(context).incrementFieldUsage(field_id);
+                            if ( field_type == Constants.FieldTypes.DEFAULT_TYPE ) {
+                                Intent intent = new Intent(context, FieldActivity.class);
+                                intent.putExtra(FieldActivity.FIELD_ID, field_id);
+                                context.startActivity(intent);
+                                new MySQLiteCursorLoader(context).incrementFieldUsage(field_id);
+                            } else if ( field_type == Constants.FieldTypes.NOTEBOOK_TYPE ) {
+                                Intent intent = new Intent(context, NotebookFieldActivity.class);
+                                intent.putExtra(FieldActivity.FIELD_ID, field_id);
+                                context.startActivity(intent);
+                                new MySQLiteCursorLoader(context).incrementFieldUsage(field_id);
+                            }
                         }
                     }
 
@@ -104,9 +116,9 @@ public class MainActivityRecyclerViewAdapter extends
                 }
             }
         });
-        if (data.getInt(1) == Contract.Field.DEFAULT_TYPE) {
+        if (data.getInt(1) == Constants.FieldTypes.DEFAULT_TYPE) {
             viewHolder.type.setImageResource(R.drawable.books1);
-        } else if (data.getInt(1) == Contract.Field.NOTEBOOK_TYPE) {
+        } else if (data.getInt(1) == Constants.FieldTypes.NOTEBOOK_TYPE) {
             viewHolder.type.setImageResource(R.drawable.agenda1);
         }
         viewHolder.name.setText(fieldName);

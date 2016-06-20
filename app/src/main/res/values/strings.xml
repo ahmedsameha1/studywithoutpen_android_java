@@ -182,7 +182,7 @@
     <string name="control_the_entries_of_the_test">Control the entries of the test</string>
     <string name="select_wrongness_level">Select wrongness level:</string>
     <string name="select_rank">Select rank:</string>
-    <string name="select_percentage_of_controlled_portion">The uncontrolled portion is:</string>
+    <string name="select_percentage_of_controlled_portion">The controlled portion is:</string>
     <string name="select_percentage_of_uncontrolled_portion">The uncontrolled portion is:</string>
     <string name="select_rank_level">Select rank:</string>
 </resources>

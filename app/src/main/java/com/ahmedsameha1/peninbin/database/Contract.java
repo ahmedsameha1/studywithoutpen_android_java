@@ -11,8 +11,6 @@ public final class Contract {
     public static final String CREATION_DATE = "creation_date";
 
     public static abstract class Field implements BaseColumns {
-        public static final int DEFAULT_TYPE = 0;
-        public static final int NOTEBOOK_TYPE = 1;
         public static final int STRING_DATA_TYPE = 0;
         public static final int NOT_STRING_DATA_TYPE = 1;
         public static final int DO_NOT_READ_ANSWER = 0;
