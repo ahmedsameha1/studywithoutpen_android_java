@@ -116,17 +116,12 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
                 (android.R.layout.simple_spinner_dropdown_item);
         rank_spinner.setSelection(rank);
         editAnswer.setText(currentAnswer);
-        switch (fieldType) {
-            case Contract.Field.DEFAULT_TYPE:
-                editQuestion.setText(currentQuestion);
-                break;
-            case Contract.Field.NOTEBOOK_TYPE:
+
                 Timestamp timestamp = Timestamp.valueOf(currentQuestion);
                 Date date = new Date(timestamp.getTime());
                 editQuestion.setText(new SimpleDateFormat("EEEE\nyyyy-MM-dd\nHH:mm", Locale.US).format(date));
-                break;
-        }
-        setHints(fieldType);
+
+        setHints();
         editAnswer.requestFocus();
         changeAreas(question_area_size, answer_area_size);
         if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
@@ -162,37 +157,7 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
                 String editedQuestion = editQuestion.getText().toString();
                 String editedAnswer = editAnswer.getText().toString();
                 if (editedQuestion.length() > 0 && editedAnswer.length() > 0) {
-                    switch (fieldType) {
-                        case Contract.Field.DEFAULT_TYPE:
-                            editQuestion.setEnabled(false);
-                            editAnswer.setEnabled(false);
-                            if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)
-                                    || rank != rank_spinner.getSelectedItemPosition()) {
-                                if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
-                                    if (!databaseOperations.checkEntryDuplication(editedQuestion, editedAnswer, current_field_id, question_data_type)) {
-                                        //                                    mySQLiteCursorLoader.editEntry(entry_id,question_data_type,editedQuestion,editedAnswer);
-                                        Intent intent = new Intent();
-                                        intent.putExtra(FieldActivity.EDITED_ENTRY_ID, entry_id);
-                                        intent.putExtra(FieldActivity.EDITED_QUESTION, editedQuestion);
-                                        intent.putExtra(FieldActivity.EDITED_ANSWER, editedAnswer);
-                                        intent.putExtra(FieldActivity.EDITED_RANK, rank_spinner.getSelectedItemPosition());
-                                        setResult(RESULT_OK, intent);
-                                    } else {
-                                        Toast toast = Toast.makeText(EditNotebookEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                } else {
-                                    Intent intent = new Intent();
-                                    intent.putExtra(FieldActivity.EDITED_ENTRY_ID, entry_id);
-                                    intent.putExtra(FieldActivity.EDITED_QUESTION, editedQuestion);
-                                    intent.putExtra(FieldActivity.EDITED_ANSWER, editedAnswer);
-                                    intent.putExtra(FieldActivity.EDITED_RANK, rank_spinner.getSelectedItemPosition());
-                                    setResult(RESULT_OK, intent);
-                                }
-                            }
-                            break;
-                        case Contract.Field.NOTEBOOK_TYPE:
+
                             editQuestion.setEnabled(false);
                             editAnswer.setEnabled(false);
                             String dateTimeUserFormat = editedQuestion;
@@ -224,8 +189,6 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
                                     setResult(RESULT_OK, intent);
                                 }
                             }
-                            break;
-                    }
                     finish();
                 } else {
                     Toast toast = Toast.makeText(EditNotebookEntryActivity.this, R.string.something_both_question_answer, Toast.LENGTH_LONG);
@@ -239,8 +202,6 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    switch (fieldType) {
-                        case Contract.Field.NOTEBOOK_TYPE:
 //                            enterQuestion.clearFocus();
                             editAnswer.requestFocus();
                             Calendar calendar = Calendar.getInstance();
@@ -258,8 +219,7 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
                                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();
                                 }
                             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
-                            break;
-                    }
+
                 }
             }
         });
@@ -343,16 +303,10 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
         });
     }
 
-    private void setHints(int fieldType) {
-        switch (fieldType) {
-            case Contract.Field.NOTEBOOK_TYPE:
+    private void setHints() {
                 editQuestion.setHint(R.string.enter_date_time);
                 editAnswer.setHint(R.string.write_whatever);
-                break;
-            case Contract.Field.DEFAULT_TYPE:
-                editQuestion.setHint(R.string.enter_a_question);
-                editAnswer.setHint(R.string.enter_an_answer);
-        }
+
     }
 
     @Override

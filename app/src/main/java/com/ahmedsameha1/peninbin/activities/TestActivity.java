@@ -1163,10 +1163,11 @@ public class TestActivity extends AppCompatActivity implements
                 enterAnswer.requestFocus();
                 testingNow = true;
                 wrongAnswers = new ArrayList<String>(permitedTriesNumber);
-                boolean_continue = false;
+//                boolean_continue = false;
                 ifMoreThanOnce();
-                getLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
-                getLoaderManager().initLoader(START_NEW_SESSION,null,this);
+/*                getLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
+                getLoaderManager().initLoader(START_NEW_SESSION,null,this);*/
+                //// TODO: 6/20/16 test the pausing feature in test activity 
             }
         } else {
             if ( listForTest == null ) {

@@ -130,7 +130,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                 (android.R.layout.simple_spinner_dropdown_item);
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         rank_spinner.setSelection(Constants.Rank.LOW);
-        setHints(fieldType);
+        setHints();
         getLoaderManager().restartLoader(0,null,this);
         enter_answer.requestFocus();
         changeAreas(question_area_size,answer_area_size);
@@ -151,18 +151,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                 String answer = enter_answer.getText().toString();
                 if ( question.length() > 0 && answer.length() > 0) {
                     if (fromFieldActivity) {
-                        switch (fieldType) {
-                            case Contract.Field.DEFAULT_TYPE:
-                                if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                    mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,
-                                            current_field_id,rank_spinner.getSelectedItemPosition());
-                                } else {
-                                    Toast toast = Toast.makeText(AddNotebookEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
-                                }
-                                break;
-                            case Contract.Field.NOTEBOOK_TYPE:
+
                                 String dateTimeUserFormat = question;
                                 StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                 stringTokenizer.nextToken();
@@ -176,24 +165,12 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                                     toast.setGravity(Gravity.TOP, 0, 400);
                                     toast.show();
                                 }
-                                break;
-                        }
+
                         enter_question.setText("");
                         enter_answer.setText("");
                     } else {
                         if ( field_chosen ) {
-                            switch (fieldType) {
-                                case Contract.Field.DEFAULT_TYPE:
-                                    if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
-                                        mySQLiteCursorLoader.insertEntry(question_data_type,question,answer,
-                                                current_field_id,rank_spinner.getSelectedItemPosition());
-                                    } else {
-                                        Toast toast = Toast.makeText(AddNotebookEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                    break;
-                                case Contract.Field.NOTEBOOK_TYPE:
+
                                     String dateTimeUserFormat = question;
                                     StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
                                     stringTokenizer.nextToken();
@@ -207,8 +184,6 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                                         toast.setGravity(Gravity.TOP, 0, 400);
                                         toast.show();
                                     }
-                                    break;
-                            }
                             enter_question.setText("");
                             enter_answer.setText("");
                         } else {
@@ -238,12 +213,12 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                 Cursor c = (Cursor) parent.getSelectedItem();
                 current_field_id = c.getLong(0);
                 fieldType = c.getInt(1);
-                setHints(fieldType);
-                if ( fieldType == Contract.Field.NOTEBOOK_TYPE) {
+                setHints();
+
                     enter_question.setText("");
 //                    enter_question.clearFocus();
                     enter_answer.requestFocus();
-                }
+
             }
 
             @Override
@@ -273,8 +248,6 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    switch (fieldType) {
-                        case Contract.Field.NOTEBOOK_TYPE:
 //                            enterQuestion.clearFocus();
                             enter_answer.requestFocus();
                             Calendar calendar = Calendar.getInstance();
@@ -292,8 +265,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();
                                 }
                             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
-                            break;
-                    }
+
                 }
             }
         });
@@ -373,16 +345,9 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
 
     }
 
-    private void setHints(int fieldType ) {
-        switch ( fieldType ) {
-            case Contract.Field.NOTEBOOK_TYPE:
+    private void setHints() {
                 enter_question.setHint(R.string.enter_date_time);
                 enter_answer.setHint(R.string.write_whatever);
-                break;
-            case Contract.Field.DEFAULT_TYPE:
-                enter_question.setHint(R.string.enter_a_question);
-                enter_answer.setHint(R.string.enter_an_answer);
-        }
     }
     @Override
     protected void onResume() {

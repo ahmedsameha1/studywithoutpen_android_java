@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EditEntryActivity;
+import com.ahmedsameha1.peninbin.activities.EditNotebookEntryActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
@@ -97,7 +98,7 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
         viewHolder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, EditEntryActivity.class);
+                Intent intent = new Intent(context, EditNotebookEntryActivity.class);
                 intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
                 intent.putExtra(EditEntryActivity.FIELD_TYPE, fieldType );
@@ -132,18 +133,13 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
                 }
             }
         });
-        switch (fieldType) {
-            case Contract.Field.DEFAULT_TYPE:
-                viewHolder.question.setText(question);
-                viewHolder.answer.setText(answer);
-                break;
-            case Contract.Field.NOTEBOOK_TYPE:
+
                 try {
                     Timestamp timestamp = Timestamp.valueOf(question);
                     Date date = new Date(timestamp.getTime());
                     viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));
                     viewHolder.answer.setText(answer);
-                    break;
+
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                     String s = question.substring(0,question.length() - 3);
@@ -157,6 +153,6 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
                     String d = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(date) + ":00";
                     mySQLiteCursorLoader.editEntry(entry_id, question_data_type,d,answer,databaseOperations.getEntryRank(entry_id));
                 }
-        }
+
     }
 }

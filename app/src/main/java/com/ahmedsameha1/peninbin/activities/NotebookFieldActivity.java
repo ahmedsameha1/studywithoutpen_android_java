@@ -166,7 +166,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(NotebookFieldActivity.this, AddEntryActivity.class);
+                Intent intent = new Intent(NotebookFieldActivity.this, AddNotebookEntryActivity.class);
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, true);
                 startActivity(intent);
@@ -264,9 +264,9 @@ public class NotebookFieldActivity extends AppCompatActivity implements
             bundle.putString(QUERY_KEY, search_value);
             bundle.putInt(CURRENT_SORT, currentSort);
             getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
-            if (fieldType == Contract.Field.NOTEBOOK_TYPE) {
+
                 searchView.setQuery(search_value, false);
-            }
+
         }
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
@@ -313,30 +313,11 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         switch (position) {
             case TEST:
                 if (!sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + current_field_id)) {
-                    switch (fieldType) {
-                        case Contract.Field.DEFAULT_TYPE:
-                            if (number_of_entries > 0) {
-                                if (databaseOperations.isThisFieldTestPaused(current_field_id)) {
-                                    AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
-                                    fragment3.setArguments(bundle);
-                                    fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
-                                } else {
-                                    TestDialogFragment dialogFragment = new TestDialogFragment();
-                                    dialogFragment.setArguments(bundle);
-                                    dialogFragment.show(getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
-                                }
-                            } else {
-                                Toast toast = Toast.makeText(NotebookFieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
-                            }
-                            break;
-                        case Contract.Field.NOTEBOOK_TYPE:
+
                             Toast toast = Toast.makeText(NotebookFieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
-                            break;
-                    }
+
                 } else {
                     Toast toast = Toast.makeText(NotebookFieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -346,30 +327,11 @@ public class NotebookFieldActivity extends AppCompatActivity implements
 
             case STUDY_PERIOD:
                 if (!sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + current_field_id)) {
-                    switch (fieldType) {
-                        case Contract.Field.DEFAULT_TYPE:
-                            if (number_of_entries > 0) {
-                                if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
-                                    AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
-                                    fragment2.setArguments(bundle);
-                                    fragment2.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
-                                } else {
-                                    StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
-                                    fragment2.setArguments(bundle);
-                                    fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
-                                }
-                            } else {
-                                Toast toast = Toast.makeText(NotebookFieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
-                            }
-                            break;
-                        case Contract.Field.NOTEBOOK_TYPE:
+
                             Toast toast = Toast.makeText(NotebookFieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
-                            break;
-                    }
+
                 } else {
                     Toast toast = Toast.makeText(NotebookFieldActivity.this, R.string.wait_until_study_during_pausing_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -410,18 +372,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                         .setAction("field properties")
                         .build());
                 break;
-            case SCHEDULE_IN_FIELD:
-                if ( fieldType == Contract.Field.DEFAULT_TYPE ) {
-                    ScheduleInFieldDialogFragment scheduleInFieldDialogFragment = new ScheduleInFieldDialogFragment();
-                    Bundle bundle1 = new Bundle();
-                    bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                    scheduleInFieldDialogFragment.setArguments(bundle1);
-                    scheduleInFieldDialogFragment.show(getSupportFragmentManager(),ScheduleInFieldDialogFragment.SCHEDULE_IN_FIELD);
-                } else {
-                    Toast toast = Toast.makeText(NotebookFieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
+
                 /*Calendar calendar_current_date_time = Calendar.getInstance();
                 final Calendar calendar_picked_date_time = Calendar.getInstance();
                 new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
@@ -442,7 +393,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                     }
                 }, calendar_current_date_time.get(Calendar.YEAR), calendar_current_date_time.get(Calendar.MONTH),
                         calendar_current_date_time.get(Calendar.DAY_OF_MONTH)).show();*/
-                break;
+
         }
     }
 
@@ -465,10 +416,10 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                 new MenuItemCompat.OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionExpand(MenuItem menuItem) {
-                        if (fieldType == Contract.Field.NOTEBOOK_TYPE) {
+
                             SearchDateOrTextDialogFragment searchDateOrTextDialogFragment = new SearchDateOrTextDialogFragment();
                             searchDateOrTextDialogFragment.show(getSupportFragmentManager(), SEARCH_DATE_OR_TEXT);
-                        }
+
                         return true;
                     }
 
@@ -506,9 +457,9 @@ public class NotebookFieldActivity extends AppCompatActivity implements
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    if (fieldType == Contract.Field.NOTEBOOK_TYPE) {
+
                         searchItem.collapseActionView();
-                    }
+
                 }
             }
         });
@@ -525,10 +476,10 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         bundle.putString(QUERY_KEY, value);
         bundle.putInt(CURRENT_SORT, currentSort);
         getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
-        if (fieldType == Contract.Field.NOTEBOOK_TYPE) {
+
             searchView.setQuery(value, false);
             searchView.clearFocus();
-        }
+
     }
 
     @Override

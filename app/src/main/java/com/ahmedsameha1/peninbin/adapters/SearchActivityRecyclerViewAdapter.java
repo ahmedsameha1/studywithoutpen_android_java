@@ -26,6 +26,7 @@ import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
 import java.sql.Timestamp;
@@ -61,7 +62,7 @@ public class SearchActivityRecyclerViewAdapter extends
                 new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
                     public void onClick(View v, String currentQuestion, String currentAnswer, long entry_id ) {
-                        if ( fieldType != Contract.Field.NOTEBOOK_TYPE) {
+                        if ( fieldType != Constants.FieldTypes.NOTEBOOK_TYPE) {
                             Intent intent = new Intent(context, StudyActivity.class);
                             intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                             intent.putExtra(StudyActivity.ENTRY_ID,entry_id);
@@ -136,11 +137,11 @@ public class SearchActivityRecyclerViewAdapter extends
             }
         });
         switch (fieldType) {
-            case Contract.Field.DEFAULT_TYPE:
+            case Constants.FieldTypes.DEFAULT_TYPE:
                 viewHolder.question.setText(question);
                 viewHolder.answer.setText(answer);
                 break;
-            case Contract.Field.NOTEBOOK_TYPE:
+            case Constants.FieldTypes.NOTEBOOK_TYPE:
                 Timestamp timestamp = Timestamp.valueOf(question);
                 Date date = new Date(timestamp.getTime());
                 viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));

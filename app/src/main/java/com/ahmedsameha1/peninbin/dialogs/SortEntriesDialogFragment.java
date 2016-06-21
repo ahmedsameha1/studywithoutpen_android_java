@@ -18,6 +18,7 @@ import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 /**
  * Created by ahmed on 12/20/2015.
@@ -60,7 +61,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
                 Button sort_creation_desc = (Button) alertDialog.findViewById(R.id.sort_creation_desc);
                 Button sort_creation_asc = (Button) alertDialog.findViewById(R.id.sort_creation_asc);
 
-                if ( fieldType != Contract.Field.NOTEBOOK_TYPE ) {
+                if ( fieldType != Constants.FieldTypes.NOTEBOOK_TYPE ) {
                     sort_question_asc.setVisibility(View.VISIBLE);
                     sort_question_desc.setVisibility(View.VISIBLE);
                 } else {
