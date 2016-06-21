@@ -60,8 +60,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         SearchDateOrTextDialogFragment.Contact,
         SortEntriesDialogFragment.Contact,
         DeleteEntryDialogFragment.Contact,
-        FieldPropertiesDialogFragment.Contact,
-        TextToSpeech.OnInitListener {
+        FieldPropertiesDialogFragment.Contact {
     public static final String SCREEN_NAME = "FieldActivity";
     public static final int SORT = 0;
     public static final int STUDY_PERIOD = 1;
@@ -98,7 +97,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
     public static final String ANALYTICS_CATEGORY = "Field Activity Category";
     public static final String EDITED_RANK = "edited_rank";
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
-    protected int fieldType = 0;
     private long current_field_id;
     private int currentSort;
     public static final String[] SORT_STRINGS = {"datetime(" + Contract.CREATION_DATE + ") DESC",
@@ -115,7 +113,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
     private NotebookFieldActivityRecyclerViewAdapter mAdapter;
     private SearchView searchView;
     private MenuItem searchItem;
-    private boolean tts_available = false;
     private ArrayList<Locale> localeList = new ArrayList<Locale>();
     private ArrayList<String> locale_display_names = new ArrayList<String>();
     private TextToSpeech tts;
@@ -137,7 +134,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         }
         databaseOperations = new DatabaseOperations(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
-        fieldType = databaseOperations.getFieldType(current_field_id);
         currentSort = databaseOperations.getFieldSort(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_field_activity); // FieldActivity.this Toolbar will act as action bar of the activity
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
@@ -146,7 +142,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
         getSupportActionBar().setTitle(databaseOperations.getFieldName(current_field_id));
-        mAdapter = new NotebookFieldActivityRecyclerViewAdapter(NotebookFieldActivity.this, null, current_field_id, fieldType);
+        mAdapter = new NotebookFieldActivityRecyclerViewAdapter(NotebookFieldActivity.this, null, current_field_id);
         final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(NotebookFieldActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -154,7 +150,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
-        tts = new TextToSpeech(getApplicationContext(), this);
         Intent checkIntent = new Intent();
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
@@ -239,12 +234,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                 long entry_id = data.getLongExtra(EDITED_ENTRY_ID, 1);
                 String question = data.getStringExtra(EDITED_QUESTION);
                 String answer = data.getStringExtra(EDITED_ANSWER);
-                int rank = data.getIntExtra(EDITED_RANK,0);
-                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer,rank);
-            }
-        } else if (requestCode == MY_DATA_CHECK_CODE) {
-            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                tts_available = true;
+                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer);
             }
         }
     }
@@ -273,19 +263,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
     }
-    @Override
-    public void onInit(int status) {
-        Locale[] locales = Locale.getAvailableLocales();
-        for (Locale locale : locales) {
-            if (locale.toString().equals("en_US_POSIX")) continue;
-            int res = tts.isLanguageAvailable(locale);
-            if (res == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
-                localeList.add(locale);
-                locale_display_names.add(locale.getDisplayName());
-            }
-        }
-        locale_display_names.add(getString(R.string.select_locale));
-    }
+
 
     public void onNewIntent(Intent intent) {
         setIntent(intent);

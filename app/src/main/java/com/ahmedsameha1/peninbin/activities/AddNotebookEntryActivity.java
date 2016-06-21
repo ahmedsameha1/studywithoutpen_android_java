@@ -74,7 +74,6 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
     private DatabaseOperations databaseOperations;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
-    private int fieldType;
     private Cursor cursor;
     private boolean field_chosen;
     private LinearLayout showResult,questionLinearlayout, container;
@@ -86,7 +85,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_entry);
+        setContentView(R.layout.activity_add_notebook_entry);
         int question_area_size,answer_area_size,test_text_size,action_bar_shown;
         fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, true);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
@@ -94,13 +93,11 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
-        fieldType = databaseOperations.getFieldType(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
         answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
         test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         field_spinner = (Spinner) findViewById(R.id.field_spinner);
-        final Spinner rank_spinner = (Spinner)findViewById(R.id.rank_spinner);
         enter_question = (EditText) findViewById(R.id.question);
         enter_answer = (EditText) findViewById(R.id.answer);
         final TextView add_entry = (TextView) findViewById(R.id.add_entry);
@@ -120,16 +117,11 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
         actionBarShown = getSupportActionBar().isShowing();
         simple_cursor_adapter = new SimpleCursorAdapter(this,R.layout.field_spinner,null,
                 new String [] {Contract.Field.COLUMN_FIELD_NAME}, new int[] {R.id.list_item}, 0);
-        final ArrayAdapter rank_spinner_adapter = new ArrayAdapter(this,
-                android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.rank));
         field_spinner.setAdapter(simple_cursor_adapter);
-        rank_spinner.setAdapter(rank_spinner_adapter);
+
         simple_cursor_adapter.setDropDownViewResource
                 (android.R.layout.simple_spinner_dropdown_item);
-        rank_spinner_adapter.setDropDownViewResource
-                (android.R.layout.simple_spinner_dropdown_item);
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
-        rank_spinner.setSelection(Constants.Rank.LOW);
         setHints();
         getLoaderManager().restartLoader(0,null,this);
         enter_answer.requestFocus();
@@ -159,7 +151,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                                         + stringTokenizer.nextToken() + ":00";
                                 if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
                                     mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,
-                                            current_field_id,rank_spinner.getSelectedItemPosition());
+                                            current_field_id);
                                 } else {
                                     Toast toast = Toast.makeText(AddNotebookEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -178,7 +170,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                                             + stringTokenizer.nextToken() + ":00";
                                     if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
                                         mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,
-                                                current_field_id,rank_spinner.getSelectedItemPosition());
+                                                current_field_id);
                                     } else {
                                         Toast toast = Toast.makeText(AddNotebookEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -212,7 +204,6 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Cursor c = (Cursor) parent.getSelectedItem();
                 current_field_id = c.getLong(0);
-                fieldType = c.getInt(1);
                 setHints();
 
                     enter_question.setText("");

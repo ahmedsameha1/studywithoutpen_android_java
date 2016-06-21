@@ -45,16 +45,14 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
     public static final String GET_CONFIRMATION = "getConfirmation";
     private Context context;
     private long field_id;
-    private int fieldType;
     private int question_data_type;
     private SharedPreferences sharedPreferences;
     private DatabaseOperations databaseOperations;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-    public NotebookFieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, int fieldType ) {
+    public NotebookFieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id) {
         super(context,data);
         this.context = context;
         this.field_id = field_id;
-        this.fieldType = fieldType;
         databaseOperations = new DatabaseOperations(context);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -101,7 +99,6 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
                 Intent intent = new Intent(context, EditNotebookEntryActivity.class);
                 intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
-                intent.putExtra(EditEntryActivity.FIELD_TYPE, fieldType );
                 intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
                 intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
                 intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
@@ -151,7 +148,7 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
                         e1.printStackTrace();
                     }
                     String d = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(date) + ":00";
-                    mySQLiteCursorLoader.editEntry(entry_id, question_data_type,d,answer,databaseOperations.getEntryRank(entry_id));
+                    mySQLiteCursorLoader.editEntry(entry_id, question_data_type,d,answer);
                 }
 
     }

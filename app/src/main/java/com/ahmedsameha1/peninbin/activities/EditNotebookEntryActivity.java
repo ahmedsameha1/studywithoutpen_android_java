@@ -62,7 +62,6 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
     private TextView showActionbar;
     private DatabaseOperations databaseOperations;
     private boolean actionBarShown;
-    private int fieldType;
     private TextView save;
     private long current_field_id;
     private String currentQuestion;
@@ -76,10 +75,9 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_entry);
+        setContentView(R.layout.activity_edit_notebook_entry);
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
-        fieldType = getIntent().getIntExtra(FIELD_TYPE, 0);
         entry_id = getIntent().getLongExtra(ENTRY_ID, 0);
         question_data_type = getIntent().getIntExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE, 0);
         currentQuestion = getIntent().getStringExtra(StudyActivity.CURRENT_QUESTION);
@@ -94,7 +92,6 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         save = (TextView) findViewById(R.id.save);
-        final Spinner rank_spinner = (Spinner) findViewById(R.id.rank_spinner);
         editQuestion = (EditText) findViewById(R.id.question);
         editAnswer = (EditText) findViewById(R.id.answer);
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
@@ -109,12 +106,6 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
         }
         actionBarShown = getSupportActionBar().isShowing();
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
-        final ArrayAdapter rank_spinner_adapter = new ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.rank));
-        rank_spinner.setAdapter(rank_spinner_adapter);
-        rank_spinner_adapter.setDropDownViewResource
-                (android.R.layout.simple_spinner_dropdown_item);
-        rank_spinner.setSelection(rank);
         editAnswer.setText(currentAnswer);
 
                 Timestamp timestamp = Timestamp.valueOf(currentQuestion);
@@ -158,37 +149,28 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
                 String editedAnswer = editAnswer.getText().toString();
                 if (editedQuestion.length() > 0 && editedAnswer.length() > 0) {
 
-                            editQuestion.setEnabled(false);
-                            editAnswer.setEnabled(false);
-                            String dateTimeUserFormat = editedQuestion;
-                            StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
-                            stringTokenizer.nextToken();
-                            String dateToSave = stringTokenizer.nextToken() + " "
-                                    + stringTokenizer.nextToken() + ":00";
-                            if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)
-                                    || rank != rank_spinner.getSelectedItemPosition()) {
-                                if (!dateToSave.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
-                                    if (!databaseOperations.checkEntryDuplication(dateToSave, editedAnswer, current_field_id, question_data_type)) {
+                    editQuestion.setEnabled(false);
+                    editAnswer.setEnabled(false);
+                    String dateTimeUserFormat = editedQuestion;
+                    StringTokenizer stringTokenizer = new StringTokenizer(dateTimeUserFormat, "\n");
+                    stringTokenizer.nextToken();
+                    String dateToSave = stringTokenizer.nextToken() + " "
+                            + stringTokenizer.nextToken() + ":00";
+                    if (!dateToSave.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
+                        if ( ! databaseOperations.checkEntryDuplication(dateToSave,editedAnswer,current_field_id,question_data_type)) {
 //                                 mySQLiteCursorLoader.editEntry(entry_id,question_data_type,dateToSave,editedAnswer);
-                                        Intent intent = new Intent();
-                                        intent.putExtra(FieldActivity.EDITED_ENTRY_ID, entry_id);
-                                        intent.putExtra(FieldActivity.EDITED_QUESTION, dateToSave);
-                                        intent.putExtra(FieldActivity.EDITED_ANSWER, editedAnswer);
-                                        setResult(RESULT_OK, intent);
-                                    } else {
-                                        Toast toast = Toast.makeText(EditNotebookEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                } else {
-                                    Intent intent = new Intent();
-                                    intent.putExtra(FieldActivity.EDITED_ENTRY_ID, entry_id);
-                                    intent.putExtra(FieldActivity.EDITED_QUESTION, editedQuestion);
-                                    intent.putExtra(FieldActivity.EDITED_ANSWER, editedAnswer);
-                                    intent.putExtra(FieldActivity.EDITED_RANK, rank_spinner.getSelectedItemPosition());
-                                    setResult(RESULT_OK, intent);
-                                }
-                            }
+                            Intent intent = new Intent();
+                            intent.putExtra(FieldActivity.EDITED_ENTRY_ID,entry_id);
+                            intent.putExtra(FieldActivity.EDITED_QUESTION,dateToSave);
+                            intent.putExtra(FieldActivity.EDITED_ANSWER,editedAnswer);
+                            setResult(RESULT_OK,intent);
+                        } else {
+                            Toast toast = Toast.makeText(EditNotebookEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
+                    }
+
                     finish();
                 } else {
                     Toast toast = Toast.makeText(EditNotebookEntryActivity.this, R.string.something_both_question_answer, Toast.LENGTH_LONG);
