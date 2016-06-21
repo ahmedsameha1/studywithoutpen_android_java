@@ -25,6 +25,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -36,6 +37,8 @@ import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
@@ -54,7 +57,6 @@ import java.util.StringTokenizer;
 
 
 public class NotebookFieldActivity extends AppCompatActivity implements
-        FieldActivityFragmentDrawer.FragmentDrawerListener,
         SearchDateOrTextDialogFragment.Contact,
         SortEntriesDialogFragment.Contact,
         DeleteEntryDialogFragment.Contact,
@@ -126,8 +128,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_field);
-        FieldActivityFragmentDrawer drawerFragment;
+        setContentView(R.layout.notebook_activity_field);
         RecyclerView recyclerView;
         if (savedInstanceState != null) {
             current_field_id = savedInstanceState.getLong(FIELD_ID);
@@ -141,14 +142,10 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_field_activity); // FieldActivity.this Toolbar will act as action bar of the activity
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        drawerFragment = (FieldActivityFragmentDrawer)
-                getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         setSupportActionBar(toolbar);       // setting toolbar as the action bar of the activity
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
         getSupportActionBar().setTitle(databaseOperations.getFieldName(current_field_id));
-        drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
-        drawerFragment.setDrawerListener(NotebookFieldActivity.this);
         mAdapter = new NotebookFieldActivityRecyclerViewAdapter(NotebookFieldActivity.this, null, current_field_id, fieldType);
         final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(NotebookFieldActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -304,98 +301,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
     }
 
 
-    @Override
-    public void onDrawerItemSelected(View view, int position) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(NotebookFieldActivity.this);
-        int number_of_entries = databaseOperations.getEntriesNumber(current_field_id, question_data_type);
-        Bundle bundle = new Bundle();
-        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-        switch (position) {
-            case TEST:
-                if (!sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + current_field_id)) {
-
-                            Toast toast = Toast.makeText(NotebookFieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
-
-                } else {
-                    Toast toast = Toast.makeText(NotebookFieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
-                break;
-
-            case STUDY_PERIOD:
-                if (!sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + current_field_id)) {
-
-                            Toast toast = Toast.makeText(NotebookFieldActivity.this, R.string.notbook_feature_is_not_active, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
-
-                } else {
-                    Toast toast = Toast.makeText(NotebookFieldActivity.this, R.string.wait_until_study_during_pausing_finish, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
-                break;
-            case SORT:
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
-                sortEntriesDialogFragment.setArguments(bundle);
-                sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("sort")
-                        .build());
-                break;
-            case FIELD_PROPERTIES:
-                String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
-                if (locale_short_name != null) {
-                    StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
-                    String lang = stringTokenizer.nextToken();
-                    String country = stringTokenizer.nextToken();
-                    Locale locale = new Locale(lang, country);
-                    boolean locale_available = (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE);
-                    bundle.putBoolean(FieldPropertiesDialogFragment.LOCALE_AVAILABLE, locale_available);
-                    if (tts_available && locale_available) {
-                        bundle.putInt(FieldPropertiesDialogFragment.INDEX_OF_LOCALE, localeList.indexOf(locale));
-                    }
-                }
-                bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
-                bundle.putStringArrayList(FieldPropertiesDialogFragment.LOCALE_DISPLAY_NAMES, locale_display_names);
-                bundle.putSerializable(FieldPropertiesDialogFragment.LOCALE_LIST, localeList);
-                FieldPropertiesDialogFragment fieldPropertiesDialogFragment = new FieldPropertiesDialogFragment();
-                fieldPropertiesDialogFragment.setArguments(bundle);
-                fieldPropertiesDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("field properties")
-                        .build());
-                break;
-
-                /*Calendar calendar_current_date_time = Calendar.getInstance();
-                final Calendar calendar_picked_date_time = Calendar.getInstance();
-                new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, final int year, final int monthOfYear, final int dayOfMonth) {
-                        new TimePickerDialog(FieldActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                            @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                                Intent intent = new Intent(FieldActivity.this, ShowScheduledNotificationsReceiver.class);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                                int request = (int)System.currentTimeMillis();
-                                PendingIntent pendingIntent = PendingIntent.getBroadcast(FieldActivity.this,request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
-                            }
-                        }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
-                    }
-                }, calendar_current_date_time.get(Calendar.YEAR), calendar_current_date_time.get(Calendar.MONTH),
-                        calendar_current_date_time.get(Calendar.DAY_OF_MONTH)).show();*/
-
-        }
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
@@ -408,7 +313,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; FieldActivity.this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.field_activity_menu, menu);
+        getMenuInflater().inflate(R.menu.notebook_field_activity_menu, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchItem = menu.findItem(R.id.search);
         searchView = (SearchView) searchItem.getActionView();
@@ -468,7 +373,34 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         searchView.setIconifiedByDefault(false);
         return true;
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
 
+        //noinspection SimplifiableIfStatement
+        switch (id) {
+            case R.id.sort:
+                Bundle bundle = new Bundle();
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
+                sortEntriesDialogFragment.setArguments(bundle);
+                sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("sort")
+                        .build());
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+
+    }
 
     @Override
     public void search(String value) {
