@@ -12,12 +12,14 @@ import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -82,6 +84,12 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                 final LinearLayout excluded_time_5_layout = (LinearLayout) alertDialog.findViewById(R.id.exclude_time_5);
                 final EditText enter_excluded_time_1_start = (EditText) alertDialog.findViewById(R.id.excluded_time_1_start);
                 final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.root_view);
+                final Spinner controlled_portion = (Spinner) alertDialog.findViewById(R.id.controlled_portion);
+                final Spinner uncontrolled_portion = (Spinner) alertDialog.findViewById(R.id.uncontrolled_portion);
+                final Spinner rank = (Spinner) alertDialog.findViewById(R.id.spinner_rank);
+                final Spinner wrongness = (Spinner) alertDialog.findViewById(R.id.spinner_wrongness_percentage);
+                final CheckBox control_test_entries = (CheckBox) alertDialog.findViewById(R.id.control_test_entries);
+                final LinearLayout control_options = (LinearLayout) alertDialog.findViewById(R.id.control_options);
                 enter_excluded_time_1_start.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                     @Override
                     public void onFocusChange(View view, boolean hasFocus) {
@@ -309,6 +317,88 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                             excluded_time_2_layout.setVisibility(View.GONE);
                         } else {
                             enable_exclude_times.setChecked(false);
+                        }
+                    }
+                });
+                controlled_portion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if ( position == 0 ) {
+                            uncontrolled_portion.setSelection(5);
+                        } else if ( position == 1 ) {
+                            uncontrolled_portion.setSelection(4);
+                        } else if ( position == 2 ) {
+                            uncontrolled_portion.setSelection(3);
+                        } else if ( position == 3 ) {
+                            uncontrolled_portion.setSelection(2);
+                        } else if ( position == 4 ) {
+                            uncontrolled_portion.setSelection(1);
+                        } else if ( position == 5 ) {
+                            uncontrolled_portion.setSelection(0);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+                uncontrolled_portion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if ( position == 0 ) {
+                            controlled_portion.setSelection(5);
+                        } else if ( position == 1 ) {
+                            controlled_portion.setSelection(4);
+                        } else if ( position == 2 ) {
+                            controlled_portion.setSelection(3);
+                        } else if ( position == 3 ) {
+                            controlled_portion.setSelection(2);
+                        } else if ( position == 4 ) {
+                            controlled_portion.setSelection(1);
+                        } else if ( position == 5 ) {
+                            controlled_portion.setSelection(0);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+                rank.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if ( position == 0 && wrongness.getSelectedItemPosition() == 0 ) {
+                            wrongness.setSelection(1);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+                wrongness.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if ( position == 0 && rank.getSelectedItemPosition() == 0 ) {
+                            rank.setSelection(1);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+                control_test_entries.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if ( isChecked ) {
+                            control_options.setVisibility(View.VISIBLE);
+                        } else {
+                            control_options.setVisibility(View.GONE);
                         }
                     }
                 });

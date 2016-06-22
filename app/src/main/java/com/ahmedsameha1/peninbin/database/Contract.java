@@ -40,6 +40,9 @@ public final class Contract {
         public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES = "random_quick_test_number_of_tries";
         public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS = "random_quick_test_number_of_questions";
         public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS = "random_quick_test_number_of_tests";
+        public static final String COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL = "random_quick_test_wrongness_level";
+        public static final String COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL = "random_quick_test_rank_level";
+        public static final String COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION = "random_quick_test_controlled_portion";
     }
     public static abstract class STring implements BaseColumns {
         public static final String TABLE_NAME = "string";

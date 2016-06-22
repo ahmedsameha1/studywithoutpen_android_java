@@ -46,7 +46,7 @@ import java.util.StringTokenizer;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private final static String TAG = "DatabaseHelper";
-    public static final int DATABASE_VERSION = 8;
+    public static final int DATABASE_VERSION = 9;
     public static final String DATABASE_NAME = "data";
     private Context context;
     private static DatabaseHelper sInstance;
@@ -72,6 +72,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS + " INTEGER NOT NULL DEFAULT " + Field.ZERO_RANDOM_QUICK_TESTS + ", "
             + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION + " INTEGER NOT NULL DEFAULT -1, "
+            + Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
+            + Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'))"
             + " );";
 /*    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME
@@ -404,6 +407,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         if ( oldVersion < 8 ) {
             onUpgradeDatabaseToDBV8AppV38(sqLiteDatabase);
+        }
+        if ( oldVersion < 9 ) {
+            onUpgradeDatabaseToDBV9AppV39(sqLiteDatabase);
         }
     }
     
@@ -1265,6 +1271,61 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.execSQL(CREATE_EXCLUDED_TIME_TABLE);
             sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_BACKUP_TABLE);
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
+    }
+    private void onUpgradeDatabaseToDBV9AppV39(SQLiteDatabase sqLiteDatabase) {
+        sqLiteDatabase.beginTransaction();
+        try {
+            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+            sqLiteDatabase.execSQL(rename);
+            sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);
+            String copy = "INSERT INTO " + Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Field.COLUMN_FIELD_NAME
+                    + " , " + Field.COLUMN_FIELD_TYPE
+                    + " , " + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Field.COLUMN_LOCALE
+                    + " , " + Field.COLUMN_CHECK_TYPE
+                    + " , " + Field.COLUMN_SORT_BY
+                    + " , " + Field.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Field.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Field.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Field.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Field.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Field.COLUMN_READ_ANSWER
+                    + " , " + Field.COLUMN_USAGE_COUNT
+                    + " , " + Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                    + " , " + Contract.CREATION_DATE
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Field.COLUMN_FIELD_NAME
+                    + " , " + Field.COLUMN_FIELD_TYPE
+                    + " , " + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Field.COLUMN_LOCALE
+                    + " , " + Field.COLUMN_CHECK_TYPE
+                    + " , " + Field.COLUMN_SORT_BY
+                    + " , " + Field.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Field.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Field.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Field.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Field.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Field.COLUMN_READ_ANSWER
+                    + " , " + Field.COLUMN_USAGE_COUNT
+                    + " , " + Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                    + " , " + Contract.CREATION_DATE
+                    + " FROM " + "tempTable"
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();
