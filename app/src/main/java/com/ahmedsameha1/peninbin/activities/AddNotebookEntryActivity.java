@@ -118,9 +118,6 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
         simple_cursor_adapter = new SimpleCursorAdapter(this,R.layout.field_spinner,null,
                 new String [] {Contract.Field.COLUMN_FIELD_NAME}, new int[] {R.id.list_item}, 0);
         field_spinner.setAdapter(simple_cursor_adapter);
-
-        simple_cursor_adapter.setDropDownViewResource
-                (android.R.layout.simple_spinner_dropdown_item);
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         setHints();
         getLoaderManager().restartLoader(0,null,this);
@@ -419,8 +416,10 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new MySQLiteCursorLoader(AddNotebookEntryActivity.this,
                 "SELECT " + Contract.COLUMN_ID + ", " +  Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
-                        + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
-                null);
+                        + " FROM " + Contract.Field.TABLE_NAME
+                        + " WHERE " + Contract.Field.COLUMN_FIELD_TYPE + " = ? "
+                        + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
+                new String[]{Constants.FieldTypes.NOTEBOOK_TYPE + ""});
     }
 
     @Override

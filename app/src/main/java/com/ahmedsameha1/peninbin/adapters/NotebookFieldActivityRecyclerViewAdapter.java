@@ -21,6 +21,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EditEntryActivity;
 import com.ahmedsameha1.peninbin.activities.EditNotebookEntryActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.activities.NotebookFieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 import com.ahmedsameha1.peninbin.activities.TestActivity;
@@ -116,7 +117,7 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
                         bundle.putLong(DeleteEntryDialogFragment.TO_BE_DELETED_ENTRY_ID,entry_id);
                         bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
                         fragment.setArguments(bundle);
-                        FragmentManager fragmentManager = ((FieldActivity) context).getSupportFragmentManager();
+                        FragmentManager fragmentManager = ((NotebookFieldActivity) context).getSupportFragmentManager();
                         fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
                     } else {
                         Toast toast = Toast.makeText(context, R.string.complete_or_cancel_last_study_session, Toast.LENGTH_LONG);

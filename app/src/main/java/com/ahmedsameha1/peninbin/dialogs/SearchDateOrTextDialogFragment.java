@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -83,6 +84,21 @@ public class SearchDateOrTextDialogFragment extends DialogFragment {
             }
 
         });
+        alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    ( ( Contact) getActivity() ).search(null);
+                    dismiss();
+                    return false;
+                }
+
+                return true;
+
+            }
+        });
+        alertDialog.setCanceledOnTouchOutside(false);
         return alertDialog;
     }
 

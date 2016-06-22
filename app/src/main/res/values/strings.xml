@@ -186,4 +186,5 @@
     <string name="select_percentage_of_uncontrolled_portion">The uncontrolled portion is:</string>
     <string name="select_rank_level">Select rank:</string>
     <string name="sort">Sort</string>
+    <string name="change_field_name">Change field name</string>
 </resources>

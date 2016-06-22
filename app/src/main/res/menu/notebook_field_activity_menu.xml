@@ -13,4 +13,8 @@
         android:id="@+id/sort"
         android:title="@string/sort"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/update_field_name"
+        android:title="@string/change_field_name"
+        app:showAsAction="never" />
 </menu>

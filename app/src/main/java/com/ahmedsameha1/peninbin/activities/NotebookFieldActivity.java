@@ -41,6 +41,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.NotebookFieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SearchDateOrTextDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SortEntriesDialogFragment;
@@ -60,7 +61,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         SearchDateOrTextDialogFragment.Contact,
         SortEntriesDialogFragment.Contact,
         DeleteEntryDialogFragment.Contact,
-        FieldPropertiesDialogFragment.Contact {
+        NotebookFieldPropertiesDialogFragment.Contact {
     public static final String SCREEN_NAME = "FieldActivity";
     public static final int SORT = 0;
     public static final int STUDY_PERIOD = 1;
@@ -96,6 +97,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
     private static final String FIELD_OPTIONS_DIALOG = "field_options_dialog";
     public static final String ANALYTICS_CATEGORY = "Field Activity Category";
     public static final String EDITED_RANK = "edited_rank";
+    private static final String NOTEBOOK_FIELD_PROPERTIES = "notebook_field_properties";
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     private long current_field_id;
     private int currentSort;
@@ -299,7 +301,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                 new MenuItemCompat.OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionExpand(MenuItem menuItem) {
-
                             SearchDateOrTextDialogFragment searchDateOrTextDialogFragment = new SearchDateOrTextDialogFragment();
                             searchDateOrTextDialogFragment.show(getSupportFragmentManager(), SEARCH_DATE_OR_TEXT);
 
@@ -363,10 +364,20 @@ public class NotebookFieldActivity extends AppCompatActivity implements
             case R.id.sort:
                 Bundle bundle = new Bundle();
                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("sort")
+                        .build());
+                return true;
+            case R.id.update_field_name:
+                Bundle bundle1 = new Bundle();
+                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                NotebookFieldPropertiesDialogFragment notebookFieldPropertiesDialogFragment = new NotebookFieldPropertiesDialogFragment();
+                notebookFieldPropertiesDialogFragment.setArguments(bundle1);
+                notebookFieldPropertiesDialogFragment.show(getSupportFragmentManager(), NOTEBOOK_FIELD_PROPERTIES);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
                         .setAction("sort")
@@ -382,13 +393,17 @@ public class NotebookFieldActivity extends AppCompatActivity implements
 
     @Override
     public void search(String value) {
-        Bundle bundle = new Bundle();
-        bundle.putString(QUERY_KEY, value);
-        bundle.putInt(CURRENT_SORT, currentSort);
-        getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+        if ( value != null) {
+            Bundle bundle = new Bundle();
+            bundle.putString(QUERY_KEY, value);
+            bundle.putInt(CURRENT_SORT, currentSort);
+            getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
 
             searchView.setQuery(value, false);
             searchView.clearFocus();
+        } else {
+            searchItem.collapseActionView();
+        }
 
     }
 
