@@ -104,4 +104,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
         }
     }
+
+    private void rescheduleReminders()
 }

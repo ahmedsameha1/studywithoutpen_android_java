@@ -746,6 +746,19 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                     }
                 }
                 cursor.close();
+                cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                        new String[]{ Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST},
+                        Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " IS NOT NULL"
+                        , new String[]{field_id + ""}, null, null, null);
+                if (cursor.getCount() > 0) {
+                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
+                        Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.cancel(pendingIntent);
+                    }
+                }
+                cursor.close();
                 sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
                         Contract.COLUMN_ID + " = ? ",
                         new String[]{field_id + ""});
@@ -956,5 +969,11 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         contentValues.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, cursor.getInt(0) + 1);
         db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
+    }
+    public void setReminderData ( long entry_id, long time , int request ) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT, time);
+        contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST, request);
+        db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
     }
 }

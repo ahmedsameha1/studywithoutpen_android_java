@@ -40,6 +40,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
     public static final int TEST = 1;
     public static final int STUDY_A_PERIOD = 2;
     public static final int REFRESHING_USAGE_OF_APP = 3;
+    public static final int REMINDER = 4;
     public static final String TIME = "time";
     public static final String SCHEDULE_IN_FIELD = "schedule_in_field";
     public static final String SCHEDULE_WHAT = "schedule_what";

@@ -126,7 +126,7 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                         int request = (int)System.currentTimeMillis();
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(this,request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.set(AlarmManager.RTC, random, pendingIntent);
-                        mySQLiteCursorLoader.addScheduledTimeForBackup(field_id,ScheduleInFieldDialogFragment.QUICK_TEST,random,request);// TODO: 24/05/16 must do like this for all schduled sessions
+                        mySQLiteCursorLoader.addScheduledTimeForBackup(field_id,ScheduleInFieldDialogFragment.QUICK_TEST,random,request);
 
                         break;
                     }

@@ -2,10 +2,13 @@ package com.ahmedsameha1.peninbin.adapters;
 
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
@@ -29,12 +32,15 @@ import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
+import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -44,12 +50,14 @@ import java.util.Locale;
 public class NotebookFieldActivityRecyclerViewAdapter extends
         CursorRecyclerViewAdapter<NotebookFieldActivityRecyclerViewViewHolder> {
     public static final String GET_CONFIRMATION = "getConfirmation";
+    public static final String NOTE_TEXT = "note_text";
     private Context context;
     private long field_id;
     private int question_data_type;
     private SharedPreferences sharedPreferences;
     private DatabaseOperations databaseOperations;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
+    AlarmManager alarmManager;
     public NotebookFieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id) {
         super(context,data);
         this.context = context;
@@ -58,6 +66,7 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
         mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         this.question_data_type = databaseOperations.getQuestionDataType(field_id);
+        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
     @Override
     public NotebookFieldActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -66,9 +75,22 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
         NotebookFieldActivityRecyclerViewViewHolder NotebookFieldActivityRecyclerViewViewHolder =
                 new NotebookFieldActivityRecyclerViewViewHolder(itemView, new NotebookFieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
-                    public void onClick(View v, ImageView alarmImage ) {
+                    public void onClick(View v, ImageView alarmImage , String question , String answer, long entry_id ) {
                         if ( alarmImage.getVisibility() == View.GONE ) {
                             alarmImage.setVisibility(View.VISIBLE);
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTimeInMillis(Timestamp.valueOf(question).getTime());
+                            Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                            intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.REMINDER);
+                            intent.putExtra(NOTE_TEXT,answer);
+                            int request = (int) System.currentTimeMillis();
+                            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            if ( Build.VERSION.SDK_INT >= 19 ){
+                                alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+                            } else {
+                                alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+                            }
+                            mySQLiteCursorLoader.setReminderData(entry_id,calendar.getTimeInMillis(),request);
                         } else if ( alarmImage.getVisibility() == View.VISIBLE ){
                             alarmImage.setVisibility(View.GONE);
                         }

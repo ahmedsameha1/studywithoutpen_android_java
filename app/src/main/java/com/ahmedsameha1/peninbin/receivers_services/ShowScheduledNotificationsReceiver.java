@@ -12,6 +12,8 @@ import android.support.v4.app.NotificationCompat;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
+import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
+import com.ahmedsameha1.peninbin.secondary_activities.ReminderActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.TestActivity;
@@ -32,7 +34,9 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
         NotificationCompat.Builder notificationBuilder = null;
         PendingIntent contentIntent = null;
         int schedule_what = intent.getIntExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,0);
-        if ( schedule_what != ScheduleInFieldDialogFragment.REFRESHING_USAGE_OF_APP ) {
+        if ( schedule_what == ScheduleInFieldDialogFragment.QUICK_TEST
+                || schedule_what == ScheduleInFieldDialogFragment.STUDY_A_PERIOD
+                || schedule_what == ScheduleInFieldDialogFragment.TEST ) {
             long current_field_id = intent.getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
             String current_field_name = new DatabaseOperations(context).getFieldName(current_field_id);
             if ( schedule_what == ScheduleInFieldDialogFragment.QUICK_TEST ) {
@@ -102,7 +106,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
             // Send the notification to the system.
             ((NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE)).notify((int)System.currentTimeMillis(), notification);
             mySQLiteCursorLoader.deleteScheduledTimeForBackup(current_field_id,schedule_what,intent.getLongExtra(ScheduleInFieldDialogFragment.TIME,0));
-        } else {
+        } else if ( schedule_what == ScheduleInFieldDialogFragment.REFRESHING_USAGE_OF_APP ) {
             Intent refreshing_intent = new Intent(context, RefreshingAppUsageActivity.class);
             refreshing_intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -113,6 +117,31 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                             .setContentTitle(context.getString(R.string.app_name))
                             .setContentText(context.getString(R.string.studying_is_everyday_task))
                             .setTicker(context.getString(R.string.studying_is_everyday_task))
+                            .setSound(notification_sound)
+                            .setAutoCancel(true);
+            notificationBuilder.setContentIntent(contentIntent);
+            Notification notification = notificationBuilder.build();
+
+
+            // Clear the notification when it is pressed
+            notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+
+            // Send the notification to the system.
+            ((NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE)).notify((int)System.currentTimeMillis(), notification);
+        } else if ( schedule_what == ScheduleInFieldDialogFragment.REMINDER ) {
+            String notebook_text = intent.getStringExtra(NotebookFieldActivityRecyclerViewAdapter.NOTE_TEXT);
+            Intent reminder_intent = new Intent(context, ReminderActivity.class);
+            reminder_intent.putExtra(NotebookFieldActivityRecyclerViewAdapter.NOTE_TEXT,notebook_text);
+            reminder_intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            contentIntent = PendingIntent.getActivity(context, 0, reminder_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            notificationBuilder =
+                    new android.support.v4.app.NotificationCompat.Builder(context)
+                            .setSmallIcon(R.drawable.ic_launcher512)
+                            .setContentTitle(context.getString(R.string.app_name))
+                            .setContentText(context.getString(R.string.notebook_reminder))
+                            .setTicker(notebook_text)
                             .setSound(notification_sound)
                             .setAutoCancel(true);
             notificationBuilder.setContentIntent(contentIntent);
