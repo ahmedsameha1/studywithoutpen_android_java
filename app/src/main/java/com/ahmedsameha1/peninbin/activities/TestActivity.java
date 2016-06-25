@@ -1167,7 +1167,6 @@ public class TestActivity extends AppCompatActivity implements
                 ifMoreThanOnce();
 /*                getLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
                 getLoaderManager().initLoader(START_NEW_SESSION,null,this);*/
-                //// TODO: 6/20/16 test the pausing feature in test activity 
             }
         } else {
             if ( listForTest == null ) {

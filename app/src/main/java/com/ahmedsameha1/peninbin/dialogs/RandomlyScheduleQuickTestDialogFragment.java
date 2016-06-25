@@ -647,8 +647,15 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                                                 toast.show();
                                             }
                                         } else {
-                                            mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
-                                                    number_of_tries, number_of_questions, null);
+                                            if ( control_test_entries.isChecked() ) {
+                                                mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
+                                                        number_of_tries, number_of_questions, null,
+                                                        controlled_portion.getSelectedItemPosition(),wrongness.getSelectedItemPosition(),
+                                                        rank.getSelectedItemPosition());
+                                            } else {
+                                                mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
+                                                        number_of_tries, number_of_questions, null);
+                                            }
                                             final Snackbar snackbar = Snackbar
                                                     .make(coordinatorLayout, R.string.take_effect_next_midnight, Snackbar.LENGTH_INDEFINITE);
                                             snackbar.setAction(R.string.ok, new View.OnClickListener() {

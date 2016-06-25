@@ -70,7 +70,6 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
     private long entry_id;
     private int question_data_type, rank;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-    private Tracker mTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,8 +121,6 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
         } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
         }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -337,12 +334,6 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mTracker.setScreenName(SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
-    }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {

@@ -40,6 +40,7 @@ public class TestDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
+        setRetainInstance(true);
     }
 
     @NonNull
@@ -342,5 +343,4 @@ public class TestDialogFragment extends DialogFragment {
         });
         return alertDialog;
     }
-    //// TODO: 6/19/16 when the rotation happen the shown liner layout unshown
 }

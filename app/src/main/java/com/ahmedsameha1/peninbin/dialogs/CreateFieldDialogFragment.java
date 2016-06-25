@@ -54,6 +54,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
         databaseOperations = new DatabaseOperations(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
+        setRetainInstance(true);
     }
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {

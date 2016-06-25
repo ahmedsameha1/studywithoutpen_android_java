@@ -121,7 +121,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
     private boolean load_or_search = true;
     private String search_value;
     private int question_data_type;
-    private Tracker mTracker;
 
 
     @Override
@@ -155,8 +154,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         Intent checkIntent = new Intent();
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -259,8 +256,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                 searchView.setQuery(search_value, false);
 
         }
-        mTracker.setScreenName(SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
     @Override
     protected void onStop() {
@@ -369,10 +364,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("sort")
-                        .build());
                 return true;
             case R.id.update_field_name:
                 Bundle bundle1 = new Bundle();
@@ -380,10 +371,6 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                 NotebookFieldPropertiesDialogFragment notebookFieldPropertiesDialogFragment = new NotebookFieldPropertiesDialogFragment();
                 notebookFieldPropertiesDialogFragment.setArguments(bundle1);
                 notebookFieldPropertiesDialogFragment.show(getSupportFragmentManager(), NOTEBOOK_FIELD_PROPERTIES);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("sort")
-                        .build());
                 return true;
 
             default:

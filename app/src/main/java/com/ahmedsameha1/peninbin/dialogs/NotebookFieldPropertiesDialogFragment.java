@@ -54,7 +54,6 @@ public class NotebookFieldPropertiesDialogFragment extends DialogFragment {
     private Button positive_button;
     private int index_of_locale;
     private String field_name;
-    private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,8 +61,7 @@ public class NotebookFieldPropertiesDialogFragment extends DialogFragment {
         databaseOpertations = new DatabaseOperations(getActivity());
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
         field_name = databaseOpertations.getFieldName(current_field_id);
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
+        setRetainInstance(true);
     }
 
     @NonNull

@@ -80,7 +80,6 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
     private long current_field_id;
     private int question_data_type;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
-    private Tracker mTracker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -130,8 +129,6 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
         } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
             changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
         }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         add_entry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -337,12 +334,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                 enter_question.setHint(R.string.enter_date_time);
                 enter_answer.setHint(R.string.write_whatever);
     }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mTracker.setScreenName(SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
-    }
+
     @Override
     protected void onStop() {
         super.onStop();

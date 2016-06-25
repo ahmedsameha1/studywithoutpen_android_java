@@ -29,6 +29,12 @@ public class ImportFieldsDialogFragment extends DialogFragment {
     public static final String IMPORT_FIELD_DIALOG_FRAGMENT = "importFieldDialogFragment";
     private Context context;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

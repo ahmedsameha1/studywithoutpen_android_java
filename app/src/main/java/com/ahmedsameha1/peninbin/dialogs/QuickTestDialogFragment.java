@@ -71,6 +71,7 @@ public class QuickTestDialogFragment extends DialogFragment {
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
+        setRetainInstance(true);
     }
 
     @NonNull

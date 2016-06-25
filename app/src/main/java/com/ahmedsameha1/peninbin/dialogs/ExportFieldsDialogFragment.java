@@ -42,6 +42,13 @@ public class ExportFieldsDialogFragment extends DialogFragment {
     private ListView listView;
     private Context context;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+       setRetainInstance(true);
+    }
+
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

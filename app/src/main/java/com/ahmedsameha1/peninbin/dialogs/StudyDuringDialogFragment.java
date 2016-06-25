@@ -37,6 +37,7 @@ public class StudyDuringDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
+        setRetainInstance(true);
     }
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {

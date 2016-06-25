@@ -74,6 +74,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         field_name = databaseOpertations.getFieldName(current_field_id);
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
+        setRetainInstance(true);
     }
 
     @NonNull
