@@ -134,6 +134,9 @@ public final class Contract {
         public static final String COLUMN_NOT_RANDOM_QUICK_TEST_TRIES = "not_random_quick_test_tries";
         public static final String COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE = "not_random_quick_test_number_or_percentage";
         public static final String COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER = "not_random_quick_test_number";
+        public static final String COLUMN_NOT_RANDOM_QUICK_TEST_CONTROLLED_PORTION = "not_random_quick_test_controlled_portion";
+        public static final String COLUMN_NOT_RANDOM_QUICK_TEST_WRONGNESS_LEVEL = "not_random_quick_test_wrongness_level";
+        public static final String COLUMN_NOT_RANDOM_QUICK_TEST_RANK_LEVEL = "not_random_quick_test_rank_level";
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////

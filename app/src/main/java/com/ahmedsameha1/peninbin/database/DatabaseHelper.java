@@ -219,6 +219,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE + " INTEGER DEFAULT NULL, "
             + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER + " INTEGER DEFAULT NULL, "
             + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES + " INTEGER DEFAULT NULL, "
+            + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_CONTROLLED_PORTION + " INTEGER DEFAULT -1, "
+            + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_WRONGNESS_LEVEL + " INTEGER DEFAULT -1, "
+            + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_RANK_LEVEL + " INTEGER DEFAULT -1, "
             + "FOREIGN KEY(" + Contract.Scheduled_Time_Backup.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1325,6 +1328,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + ";";
             sqLiteDatabase.execSQL(copy);
             String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
+            rename = "ALTER TABLE " + Contract.Scheduled_Time_Backup.TABLE_NAME + " RENAME TO " + "tempTable";
+            sqLiteDatabase.execSQL(rename);
+            sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_BACKUP_TABLE);
+            copy = "INSERT INTO " + Contract.Scheduled_Time_Backup.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_FIELD
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_TIME
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_FIELD
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_TIME
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER
+                    + " , " + Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES
+                    + " FROM " + "tempTable"
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
             sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
