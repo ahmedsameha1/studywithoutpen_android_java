@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="visible">
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -47,15 +47,16 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_margin="3dp"
                         android:text="@string/select_percentage_of_controlled_portion" />
 
                     <Spinner
                         android:id="@+id/controlled_portion"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="7dp"
+                        android:layout_margin="3dp"
                         android:drawSelectorOnTop="true"
                         android:entries="@array/controlled_portion_percentages" />
                 </LinearLayout>
@@ -67,15 +68,16 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_margin="3dp"
                         android:text="@string/select_percentage_of_uncontrolled_portion" />
 
                     <Spinner
                         android:id="@+id/uncontrolled_portion"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="7dp"
+                        android:layout_margin="3dp"
                         android:drawSelectorOnTop="true"
                         android:entries="@array/uncontrolled_portion_percentages" />
                 </LinearLayout>
@@ -94,15 +96,16 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_margin="3dp"
                         android:text="@string/select_rank" />
 
                     <Spinner
                         android:id="@+id/spinner_rank"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="7dp"
+                        android:layout_margin="3dp"
 
                         android:drawSelectorOnTop="true"
                         android:entries="@array/rank" />
@@ -115,15 +118,16 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_margin="3dp"
                         android:text="@string/select_wrongness_level" />
 
                     <Spinner
                         android:id="@+id/spinner_wrongness_percentage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="7dp"
+                        android:layout_margin="3dp"
                         android:drawSelectorOnTop="true"
                         android:entries="@array/wrongness_percentages" />
                 </LinearLayout>
