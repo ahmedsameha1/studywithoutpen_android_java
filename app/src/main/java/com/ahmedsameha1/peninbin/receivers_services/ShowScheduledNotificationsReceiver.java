@@ -11,8 +11,10 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
+import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.secondary_activities.ReminderActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
@@ -154,6 +156,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
 
             // Send the notification to the system.
             ((NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE)).notify((int)System.currentTimeMillis(), notification);
+            mySQLiteCursorLoader.deleteReminderData(intent.getLongExtra(NotebookFieldActivityRecyclerViewAdapter.ENTRY_ID,0));
         }
     }
 }

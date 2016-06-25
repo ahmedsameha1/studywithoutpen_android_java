@@ -51,9 +51,11 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
         databaseOperations = new DatabaseOperations(getActivity());
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        setRetainInstance(true);
     }
 
-    //todo test disabling check button when there is no text on the fields
+
+
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -408,6 +410,12 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                     enter_number_of_quick_tests.setText(Integer.toString(data[0]));
                     enter_number_of_tries.setText(Integer.toString(data[1]));
                     enter_number_of_questions.setText(Integer.toString(data[2]));
+                    if ( data[3] > -1 && data[4] > -1 && data[5] > -1 ) {
+                        control_test_entries.setChecked(true);
+                        controlled_portion.setSelection(data[3]);
+                        wrongness.setSelection(data[4]);
+                        rank.setSelection(data[5]);
+                    }
                     String[][] excluded_times_array = databaseOperations.get_excluded_times(current_field_id);
                     for (int i = 0; i < excluded_times_array.length; i++) {
                         if (excluded_times_array[i] != null) {
@@ -607,8 +615,15 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                                                         String ends = enter_excluded_time_5_end.getText().toString();
                                                         excluded_times[4] = new String[]{starts, ends};
                                                     }
-                                                    mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
+                                                    if ( control_test_entries.isChecked() ) {
+                                                        mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
+                                                                number_of_tries, number_of_questions, excluded_times,
+                                                                controlled_portion.getSelectedItemPosition(),wrongness.getSelectedItemPosition(),
+                                                                rank.getSelectedItemPosition());
+                                                    } else {
+                                                        mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
                                                                 number_of_tries, number_of_questions, excluded_times);
+                                                    }
                                                     final Snackbar snackbar = Snackbar
                                                             .make(coordinatorLayout, R.string.take_effect_next_midnight, Snackbar.LENGTH_INDEFINITE);
                                                     snackbar.setAction(R.string.ok, new View.OnClickListener() {
@@ -681,5 +696,4 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
         });
         return alertDialog;
     }
-
 }

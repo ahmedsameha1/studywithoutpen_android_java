@@ -99,14 +99,19 @@ public class DatabaseOperations {
     public int[] getRandomQuickTestData(long field_id) {
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
                 new String[]{Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES,
-                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS}, Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""}, null, null, null);
+                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS,Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION,
+                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL}
+                , Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""}, null, null, null);
         cursor.moveToFirst();
         int number_of_quick_tests = cursor.getInt(0);
         int number_of_tries = cursor.getInt(1);
         int number_of_questions = cursor.getInt(2);
+        int controlled_portion = cursor.getInt(3);
+        int wrongness_level = cursor.getInt(4);
+        int rank_level = cursor.getInt(5);
         if (number_of_quick_tests > 0 && number_of_tries > 0 && number_of_questions > 0) {
             cursor.close();
-            return new int[]{number_of_quick_tests, number_of_tries, number_of_questions};
+            return new int[]{number_of_quick_tests, number_of_tries, number_of_questions,controlled_portion,wrongness_level,rank_level};
         } else {
             cursor.close();
             return null;
@@ -443,12 +448,15 @@ public class DatabaseOperations {
         ArrayList<long[]> data = new ArrayList<>();
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
                 new String[]{Contract.COLUMN_ID, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS,
-                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS},
+                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS,
+                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL,
+                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL},
                 null, null, null, null, null);
         for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
              cursor.moveToNext()) {
             if (cursor.getInt(1) > 0) {
-                data.add(new long[]{cursor.getLong(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)});
+                data.add(new long[]{cursor.getLong(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3),
+                cursor.getInt(4),cursor.getInt(5),cursor.getInt(6)});
             }
         }
         cursor.close();
@@ -473,5 +481,28 @@ public class DatabaseOperations {
         }
         cursor.close();
         return data;
+    }
+    public Cursor getReminderDataForRescheduling() {
+        return sqLiteDatabase.rawQuery("SELECT s." + Contract.STring.COLUMN_VALUE + " , se." + Contract.String_Entry.COLUMN_REMIND_AT
+        + " , se." + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " , se." + Contract.COLUMN_ID
+                + " FROM " + Contract.String_Entry.TABLE_NAME + " se INNER JOIN "
+        + Contract.STring.TABLE_NAME + " s ON s." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+        + " WHERE " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " IS NOT NULL ",null);
+        /*return sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                new String[]{Contract.String_Entry.COLUMN_ANSWER, Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST},
+                Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " IS NOT NULL",null,null,null,null);*/
+    }
+    public Integer getReminderRequest( long entry_id ) {
+        Integer request;
+        Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST},
+                Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""},null,null,null);
+        cursor.moveToFirst();
+        if ( cursor.isNull(0) ) {
+            request = null;
+        } else {
+            request = cursor.getInt(0);
+        }
+        cursor.close();
+        return request;
     }
 }

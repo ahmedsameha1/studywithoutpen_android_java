@@ -7,12 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.TestActivity;
+import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
@@ -28,8 +30,10 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.i("boot receiver","running");
         rescheduleMidnightService(context);
         rescheduleAllSessions(context);
+        rescheduleReminders(context);
     }
 
     private void rescheduleAllSessions(Context context) {
@@ -50,6 +54,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
+                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
                     }
@@ -63,6 +68,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
+                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
                     } else if ( session [4] == TestActivity.NUMBER ) {
@@ -73,6 +79,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
+                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
                     }
@@ -82,6 +89,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                 intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,(int) session[1]);
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,session[0]);
                 intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
+                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
             }
@@ -99,11 +107,30 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND,0);
             Intent intent = new Intent(context, SimpleWakefulReceiver.class);
+            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             PendingIntent pintent = PendingIntent.getBroadcast(context, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
         }
     }
 
-    private void rescheduleReminders()
+    private void rescheduleReminders(Context context) {
+        AlarmManager alarm_manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Cursor cursor = new DatabaseOperations(context).getReminderDataForRescheduling();
+        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+             cursor.moveToNext()) {
+            Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+            intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.REMINDER);
+            intent.putExtra(NotebookFieldActivityRecyclerViewAdapter.NOTE_TEXT,cursor.getString(0));
+            intent.putExtra(NotebookFieldActivityRecyclerViewAdapter.ENTRY_ID,cursor.getLong(3));
+            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(2), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            if ( Build.VERSION.SDK_INT >= 19 ){
+                alarm_manager.setExact(AlarmManager.RTC, cursor.getLong(1), pendingIntent);
+            } else {
+                alarm_manager.set(AlarmManager.RTC, cursor.getLong(1), pendingIntent);
+            }
+        }
+        cursor.close();
+    }
 }

@@ -24,6 +24,7 @@ public class NotebookFieldActivityRecyclerViewViewHolder extends RecyclerView.Vi
     public IMyViewHolderClicks mListener;
     public long field_id;
     public long entry_id;
+    public Integer request;
 
     public NotebookFieldActivityRecyclerViewViewHolder(View view, IMyViewHolderClicks listener) {
         super(view);
@@ -44,7 +45,7 @@ public class NotebookFieldActivityRecyclerViewViewHolder extends RecyclerView.Vi
     }
     @Override
     public void onClick(View v) {
-        mListener.onClick(v, alarmImage,currentQuestion, currentAnswer, entry_id);
+        mListener.onClick(v, alarmImage,currentQuestion, currentAnswer, entry_id );
     }
 
     public interface IMyViewHolderClicks {

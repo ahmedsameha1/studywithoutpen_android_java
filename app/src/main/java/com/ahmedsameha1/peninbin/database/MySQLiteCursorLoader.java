@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
 
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.commonsware.cwac.loaderex.AbstractCursorLoader;
 import com.commonsware.cwac.loaderex.ContentChangingTask;
 
@@ -81,6 +82,10 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         if (locale != null) {
             contentValues.put(Contract.Field.COLUMN_LOCALE, locale);
         }
+        if ( field_type == Constants.FieldTypes.NOTEBOOK_TYPE ) {
+            contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE,1);
+            contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE,4);
+        }
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
     public void createField(String field_name, int field_type, int question_data_type) {
@@ -89,6 +94,10 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
         contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
         contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
+        if ( field_type == Constants.FieldTypes.NOTEBOOK_TYPE ) {
+            contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE,1);
+            contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE,4);
+        }
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
 
@@ -102,6 +111,36 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, number_of_quick_tests);
             contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, number_of_tries);
             contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, number_of_question);
+            sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+            if (excluded_times != null) {
+                for (String[] temp : excluded_times) {
+                    if (temp != null) {
+                        contentValues = new ContentValues();
+                        contentValues.put(Contract.Excluded_Time.COLUMN_STARTS, temp[0]);
+                        contentValues.put(Contract.Excluded_Time.COLUMN_ENDS, temp[1]);
+                        contentValues.put(Contract.Excluded_Time.COLUMN_FIELD, field_id);
+                        sqLiteDatabase.insert(Contract.Excluded_Time.TABLE_NAME, null, contentValues);
+                    }
+                }
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
+    }
+    public void setRandomQuickTestData(long field_id, int number_of_quick_tests, int number_of_tries,
+                                       int number_of_question, String[][] excluded_times, int controlled_portion, int wrongness_level, int rank_level) {
+        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+        sqLiteDatabase.beginTransactionNonExclusive();
+        try {
+            int s = sqLiteDatabase.delete(Contract.Excluded_Time.TABLE_NAME, Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, number_of_quick_tests);
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, number_of_tries);
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, number_of_question);
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, controlled_portion);
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, wrongness_level);
+            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL, rank_level);
             sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
             if (excluded_times != null) {
                 for (String[] temp : excluded_times) {
@@ -741,6 +780,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                     for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.cancel(pendingIntent);
                     }
@@ -754,6 +794,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                     for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.cancel(pendingIntent);
                     }
@@ -976,4 +1017,11 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST, request);
         db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
     }
+    public void deleteReminderData ( long entry_id ) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.putNull(Contract.String_Entry.COLUMN_REMIND_AT);
+        contentValues.putNull(Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST);
+        db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
+    }
+
 }

@@ -16,6 +16,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="vertical">
         <CheckBox
             android:id="@+id/control_test_entries"
             android:layout_width="wrap_content"
@@ -123,7 +128,7 @@
                         android:entries="@array/wrongness_percentages" />
                 </LinearLayout>
             </LinearLayout>
-
+        </LinearLayout>
 
         </LinearLayout>
         <EditText

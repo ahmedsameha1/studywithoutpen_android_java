@@ -247,6 +247,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                 calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                                                 intent.putExtra(SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
                                                 intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
+                                                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                                                 int request = (int)System.currentTimeMillis();
                                                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                                 alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
@@ -291,6 +292,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                 calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                                                 intent.putExtra(SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
                                                 intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
+                                                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                                                 int request = (int)System.currentTimeMillis();
                                                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                                 alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);

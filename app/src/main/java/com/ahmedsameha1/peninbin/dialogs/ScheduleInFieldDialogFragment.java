@@ -144,6 +144,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         intent.putExtra(SCHEDULE_WHAT,TEST);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
+                                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                                         int request = (int)System.currentTimeMillis();
                                         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                         alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
@@ -186,6 +187,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         intent.putExtra(SCHEDULE_WHAT,STUDY_A_PERIOD);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
+                                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                                         int request = (int)System.currentTimeMillis();
                                         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                         alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);

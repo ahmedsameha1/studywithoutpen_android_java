@@ -50,6 +50,9 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                 int number_of_quick_tests = (int) field_data[1];
                 int number_of_tries = (int) field_data[2];
                 int number_of_questions = (int) field_data[3];
+                int controlled_portion = (int) field_data[4];
+                int wrongness_level = (int) field_data[5];
+                int rank_level = (int) field_data[6];
                 String [][] excluded_times = databaseOperations.get_excluded_times(field_id);
                 ArrayList<Long> long_excluded_times = new ArrayList<>();
                 for ( String[] excluded_time : excluded_times ) {
@@ -120,9 +123,13 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                         intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
                         intent.putExtra(TestActivity.QUESTION_NUMBER, number_of_questions);
                         intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, number_of_tries);
+                        intent.putExtra(TestActivity.CONTROLLED_PORTION, controlled_portion);
+                        intent.putExtra(TestActivity.RANK_LEVEL, rank_level);
+                        intent.putExtra(TestActivity.WRONGNESS_LEVEL, wrongness_level);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,random);
+                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         int request = (int)System.currentTimeMillis();
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(this,request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.set(AlarmManager.RTC, random, pendingIntent);
@@ -142,6 +149,7 @@ public class RandomQuickTestsSchedulingService extends IntentService {
             long random = calendar.getTimeInMillis() + random_object.nextInt((int) (AlarmManager.INTERVAL_DAY - AlarmManager.INTERVAL_HOUR));
             Intent intent = new Intent(this, ShowScheduledNotificationsReceiver.class);
             intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.REFRESHING_USAGE_OF_APP);
+            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this,(int)System.currentTimeMillis() , intent, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.set(AlarmManager.RTC, random, pendingIntent);
         }

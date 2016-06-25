@@ -51,6 +51,7 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
         CursorRecyclerViewAdapter<NotebookFieldActivityRecyclerViewViewHolder> {
     public static final String GET_CONFIRMATION = "getConfirmation";
     public static final String NOTE_TEXT = "note_text";
+    public static final String ENTRY_ID = "entry_id";
     private Context context;
     private long field_id;
     private int question_data_type;
@@ -76,13 +77,16 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
                 new NotebookFieldActivityRecyclerViewViewHolder(itemView, new NotebookFieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
                     public void onClick(View v, ImageView alarmImage , String question , String answer, long entry_id ) {
-                        if ( alarmImage.getVisibility() == View.GONE ) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTimeInMillis(Timestamp.valueOf(question).getTime());
+                        Integer request_from_database = databaseOperations.getReminderRequest(entry_id);
+                        if ( request_from_database == null && System.currentTimeMillis() < calendar.getTimeInMillis() ) {
                             alarmImage.setVisibility(View.VISIBLE);
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTimeInMillis(Timestamp.valueOf(question).getTime());
                             Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
                             intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.REMINDER);
                             intent.putExtra(NOTE_TEXT,answer);
+                            intent.putExtra(ENTRY_ID,entry_id);
+                            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                             int request = (int) System.currentTimeMillis();
                             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                             if ( Build.VERSION.SDK_INT >= 19 ){
@@ -91,8 +95,25 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
                                 alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
                             }
                             mySQLiteCursorLoader.setReminderData(entry_id,calendar.getTimeInMillis(),request);
-                        } else if ( alarmImage.getVisibility() == View.VISIBLE ){
+                            Toast toast = Toast.makeText(context, R.string.reminder_set, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP,0,400);
+                            toast.show();
+                        } if ( request_from_database == null && System.currentTimeMillis() >= calendar.getTimeInMillis() ) {
+                            Toast toast = Toast.makeText(context, R.string.time_in_past, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP,0,400);
+                            toast.show();
+                        } else if ( request_from_database != null ) {
                             alarmImage.setVisibility(View.GONE);
+
+                                Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, request_from_database, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                alarmManager.cancel(pendingIntent);
+                                mySQLiteCursorLoader.deleteReminderData(entry_id);
+
+                            Toast toast = Toast.makeText(context, R.string.reminder_canceled, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP,0,400);
+                            toast.show();
                         }
                     }
                     @Override
@@ -116,6 +137,9 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
         viewHolder.entry_id = entry_id;
         viewHolder.currentQuestion = question;
         viewHolder.currentAnswer = answer;
+        if ( ! data.isNull(3) ) {
+            viewHolder.alarmImage.setVisibility(View.VISIBLE);
+        }
         viewHolder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

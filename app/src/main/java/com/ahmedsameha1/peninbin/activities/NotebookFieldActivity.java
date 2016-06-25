@@ -175,7 +175,8 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                         String searchString = args.getString(QUERY_KEY);
                         mySQLiteCursorLoader = new MySQLiteCursorLoader(NotebookFieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + " a , se." + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
+                                        + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
@@ -188,7 +189,8 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                     } else if (id == GET_ENTRIES_LOADER_ID) {
                         mySQLiteCursorLoader = new MySQLiteCursorLoader(NotebookFieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + " a , se." + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
+                                        + " FROM "  + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "

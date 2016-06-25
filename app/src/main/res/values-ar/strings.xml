@@ -186,4 +186,7 @@
     <string name="sort">Sort</string>
     <string name="change_field_name">Change field name</string>
     <string name="notebook_reminder">Notebook reminder</string>
+    <string name="reminder_set">the reminder has been set</string>
+    <string name="time_in_past">This time is in past</string>
+    <string name="reminder_canceled">The reminder has been canceled</string>
 </resources>
