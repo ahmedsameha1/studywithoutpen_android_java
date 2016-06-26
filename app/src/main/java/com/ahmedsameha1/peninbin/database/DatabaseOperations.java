@@ -468,7 +468,8 @@ public class DatabaseOperations {
                 new String[]{Contract.Scheduled_Time_Backup.COLUMN_FIELD, Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE,
                 Contract.Scheduled_Time_Backup.COLUMN_TIME, Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST,
                         Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER,
-                        Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES},
+                        Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES, Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_CONTROLLED_PORTION,
+                        Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_RANK_LEVEL},
         null,null,null,null,null);
         if ( cursor.getCount() > 0 ) {
             for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
@@ -476,7 +477,7 @@ public class DatabaseOperations {
                 data.add(new long[]{cursor.getLong(0),cursor.getInt(1),cursor.getLong(2),cursor.getInt(3),
                         (cursor.isNull(4)? -1 : cursor.getInt(4)),
                         (cursor.isNull(5)? -1 : cursor.getInt(5)),
-                        (cursor.isNull(6)? -1 : cursor.getInt(6))});
+                        (cursor.isNull(6)? -1 : cursor.getInt(6)), cursor.getInt(7), cursor.getInt(8), cursor.getInt(9)});
             }
         }
         cursor.close();

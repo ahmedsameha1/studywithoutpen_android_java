@@ -252,9 +252,16 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                 int request = (int)System.currentTimeMillis();
                                                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                                 alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
-                                                mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
-                                                        ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                        TestActivity.PERCENTAGE,number,trys);
+                                                if ( control_test_entries.isChecked() ) {
+                                                    mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                                            ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
+                                                            TestActivity.PERCENTAGE,number,trys,controlled_portion.getSelectedItemPosition(),
+                                                            wrongness.getSelectedItemPosition(),rank.getSelectedItemPosition());
+                                                } else {
+                                                    mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                                            ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
+                                                            TestActivity.PERCENTAGE,number,trys, -1, -1, -1);
+                                                }
                                                 final Snackbar snackbar = Snackbar
                                                         .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
                                                 snackbar.setAction(R.string.ok, new View.OnClickListener() {
@@ -297,9 +304,13 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                 int request = (int)System.currentTimeMillis();
                                                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                                 alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
-                                                mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                                if ( control_test_entries.isChecked() ) {
+
+                                                } else {
+                                                    mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
                                                         ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                        TestActivity.NUMBER,number,trys);
+                                                        TestActivity.NUMBER,number,trys, -1, -1, -1);
+                                                }
                                                 final Snackbar snackbar = Snackbar
                                                         .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
                                                 snackbar.setAction(R.string.ok, new View.OnClickListener() {

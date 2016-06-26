@@ -958,7 +958,9 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST, pendingintent_request);
         sqLiteDatabase.insert(Contract.Scheduled_Time_Backup.TABLE_NAME, null, contentValues);
     }
-    public void addScheduledTimeForBackup(long field_id, int session_type, long time, int pendingintent_request,int percentage_or_number, int number, int number_of_tries) {
+    public void addScheduledTimeForBackup(long field_id, int session_type, long time,
+                                          int pendingintent_request,int percentage_or_number, int number, int number_of_tries,
+                                          int controlled_portion, int wrongness_level, int rank_level) {
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_FIELD, field_id);
@@ -968,6 +970,9 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, percentage_or_number);
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER, number);
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES, number_of_tries);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_CONTROLLED_PORTION, controlled_portion);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, wrongness_level);
+        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_RANK_LEVEL, rank_level);
         sqLiteDatabase.insert(Contract.Scheduled_Time_Backup.TABLE_NAME, null, contentValues);
     }
 
