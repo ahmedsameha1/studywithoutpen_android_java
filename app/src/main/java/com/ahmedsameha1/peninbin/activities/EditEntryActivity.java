@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
+import android.widget.Chronometer;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -58,6 +60,7 @@ public class EditEntryActivity extends AppCompatActivity implements
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final String FIELD_TYPE = "field_type";
     public static final String ENTRY_ID = "entry_id";
+    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private EditText editQuestion;
     private EditText editAnswer;
     private TextView showActionbar;
@@ -73,6 +76,8 @@ public class EditEntryActivity extends AppCompatActivity implements
     private int question_data_type, rank;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private Tracker mTracker;
+    private Chronometer timer;
+    private long lastPause;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +108,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         container = (LinearLayout) findViewById(R.id.container);
         final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView save_card_view = (CardView) findViewById(R.id.save_card_view);
+        timer = (Chronometer)findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         setSupportActionBar(toolbar);
         if (action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR) {
@@ -328,19 +334,30 @@ public class EditEntryActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        timer.setBase( SystemClock.elapsedRealtime() - lastPause);
+        timer.start();
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override
+    protected void onPause() {
+        lastPause = SystemClock.elapsedRealtime() - timer.getBase();
+        timer.stop();
+        super.onPause();
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
         saveUserLayoutChanges(savedInstanceState);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         restoreUserLayoutChanges(savedInstanceState);
     }
 

@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
 import android.content.Loader;
@@ -26,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -100,6 +102,7 @@ public class TestActivity extends AppCompatActivity implements
     public static final String WRONGNESS_LEVEL = "wrongness_level";
     private static final String CONTENT_VISIBILITY = "content_visibility";
     private static final String LOADING_VISIBILITY = "loading_visibility";
+    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private long current_field_id, current_entry_id;
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
@@ -116,6 +119,8 @@ public class TestActivity extends AppCompatActivity implements
     private LinearLayout showResult,questionLinearlayout, container;
     private Handler mHandler = new Handler();
     private Tracker mTracker;
+    private Chronometer timer;
+    private long lastPause;
     private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -195,6 +200,7 @@ public class TestActivity extends AppCompatActivity implements
         final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
         final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
+        timer = (Chronometer)findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         if ( savedInstanceState == null ) {
             content.setVisibility(View.GONE);
@@ -966,8 +972,11 @@ public class TestActivity extends AppCompatActivity implements
 
     @Override
     protected void onPause() {
-        super.onPause();
+        lastPause = SystemClock.elapsedRealtime() - timer.getBase();
+        timer.stop();
         retainedFragment.setListForTest_TestActivity(listForTest);
+        super.onPause();
+
     }
 
     @Override
@@ -1000,6 +1009,7 @@ public class TestActivity extends AppCompatActivity implements
         savedInsatanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
         savedInsatanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
         savedInsatanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
+        savedInsatanceState.putLong(TIMER_LAST_PAUSE,lastPause);
         saveUserLayoutChanges(savedInsatanceState);
        /* if ( ! isFinishing() ) {
             pauseThread.start();
@@ -1010,6 +1020,8 @@ public class TestActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        timer.setBase( SystemClock.elapsedRealtime() - lastPause);
+        timer.start();
         mTracker.setScreenName( SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
@@ -1034,6 +1046,7 @@ public class TestActivity extends AppCompatActivity implements
         current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
 //        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
         boolean_continue = savedInstanceState.getBoolean(BOOLEAN_CONTINUE);
+        lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         restoreUserLayoutChanges(savedInstanceState);
         if ( testingNow ) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);

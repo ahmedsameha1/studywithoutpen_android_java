@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -24,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -93,6 +95,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     private static final String CURRENT_ENTRY_ID = "current_entry_id";
     private static final String CONTENT_VISIBILITY = "content_visibility";
     private static final String LOADING_VISIBILITY = "loading_visibility";
+    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private int controlled_portion, rank_level, wrongness_level;
     private long current_field_id, current_entry_id;
     private String [][] listForTest;
@@ -120,6 +123,8 @@ public class QuickTestActivity extends AppCompatActivity implements
     private int mShortAnimationDuration;
     private View mLoadingView;
     private RelativeLayout content;
+    private Chronometer timer;
+    private long lastPause;
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
@@ -166,6 +171,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
             final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
             final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
+            timer = (Chronometer)findViewById(R.id.chronometer);
             final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
             if ( savedInstanceState == null ) {
                 content.setVisibility(View.GONE);
@@ -789,8 +795,10 @@ public class QuickTestActivity extends AppCompatActivity implements
 
     @Override
     protected void onPause() {
-        super.onPause();
+        lastPause = SystemClock.elapsedRealtime() - timer.getBase();
+        timer.stop();
         retainedFragment.setListForTest_QuickTestActivity(listForTest);
+        super.onPause();
     }
 
     @Override
@@ -817,6 +825,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         savedInsatanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
         savedInsatanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
         savedInsatanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
+        savedInsatanceState.putLong(TIMER_LAST_PAUSE,lastPause);
         saveUserLayoutChanges(savedInsatanceState);
         super.onSaveInstanceState(savedInsatanceState);
     }
@@ -824,6 +833,8 @@ public class QuickTestActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        timer.setBase( SystemClock.elapsedRealtime() - lastPause);
+        timer.start();
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
@@ -842,6 +853,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
+        lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         restoreUserLayoutChanges(savedInstanceState);
         if ( testingNow ) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);

@@ -1,324 +1,329 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <CheckBox
-        android:id="@+id/schedule_random_quick_test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/schedule_random_quick_tests" />
-
-    <LinearLayout
-        android:id="@+id/show_schedule_options"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="visible">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <CheckBox
-            android:id="@+id/control_test_entries"
+            android:id="@+id/schedule_random_quick_test"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/control_the_entries_of_the_test" />
+            android:text="@string/schedule_random_quick_tests" />
+
         <LinearLayout
-            android:id="@+id/control_options"
+            android:id="@+id/show_schedule_options"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="visible">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:weightSum="2">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="3dp"
-                        android:text="@string/select_percentage_of_controlled_portion" />
-
-                    <Spinner
-                        android:id="@+id/controlled_portion"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="3dp"
-                        android:drawSelectorOnTop="true"
-                        android:entries="@array/controlled_portion_percentages" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="3dp"
-                        android:text="@string/select_percentage_of_uncontrolled_portion" />
-
-                    <Spinner
-                        android:id="@+id/uncontrolled_portion"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="3dp"
-                        android:drawSelectorOnTop="true"
-                        android:entries="@array/uncontrolled_portion_percentages" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="3dp"
-                        android:text="@string/select_rank" />
-
-                    <Spinner
-                        android:id="@+id/spinner_rank"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="3dp"
-
-                        android:drawSelectorOnTop="true"
-                        android:entries="@array/rank" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="3dp"
-                        android:text="@string/select_wrongness_level" />
-
-                    <Spinner
-                        android:id="@+id/spinner_wrongness_percentage"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="3dp"
-                        android:drawSelectorOnTop="true"
-                        android:entries="@array/wrongness_percentages" />
-                </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        </LinearLayout>
-        <EditText
-            android:id="@+id/number_of_quick_tests"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="@string/the_number_of_quick_tests"/>
-
-        <EditText
-            android:id="@+id/number_of_tries"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="@string/the_number_of_tries"/>
-
-        <EditText
-            android:id="@+id/number_of_questions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="@string/the_number_of_questions"/>
-
-        <CheckBox
-            android:id="@+id/exclude_times"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/dont_schedule_tests_these_times" />
-
-        <LinearLayout
-            android:id="@+id/excluded_times"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="10"
             android:visibility="gone">
-
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_weight="9">
+                android:layout_margin="10dp"
+                android:orientation="vertical">
+                <CheckBox
+                    android:id="@+id/control_test_entries"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/control_the_entries_of_the_test" />
 
                 <LinearLayout
-                    android:id="@+id/exclude_time_1"
+                    android:id="@+id/control_options"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:padding="3dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center"
                         android:orientation="horizontal"
                         android:weightSum="2">
-                    <EditText
-                        android:id="@+id/excluded_time_1_start"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/from"/>
 
-                    <EditText
-                        android:id="@+id/excluded_time_1_end"
-                        android:layout_width="0dp"
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/select_percentage_of_controlled_portion" />
+
+                            <Spinner
+                                android:id="@+id/controlled_portion"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:drawSelectorOnTop="true"
+                                android:entries="@array/controlled_portion_percentages" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/select_percentage_of_uncontrolled_portion" />
+
+                            <Spinner
+                                android:id="@+id/uncontrolled_portion"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:drawSelectorOnTop="true"
+                                android:entries="@array/uncontrolled_portion_percentages" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/to"/>
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/select_rank" />
+
+                            <Spinner
+                                android:id="@+id/spinner_rank"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+
+                                android:drawSelectorOnTop="true"
+                                android:entries="@array/rank" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/select_wrongness_level" />
+
+                            <Spinner
+                                android:id="@+id/spinner_wrongness_percentage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:drawSelectorOnTop="true"
+                                android:entries="@array/wrongness_percentages" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+
+                </LinearLayout>
+            </LinearLayout>
+            <EditText
+                android:id="@+id/number_of_quick_tests"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:hint="@string/the_number_of_quick_tests"/>
+
+            <EditText
+                android:id="@+id/number_of_tries"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:hint="@string/the_number_of_tries"/>
+
+            <EditText
+                android:id="@+id/number_of_questions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:hint="@string/the_number_of_questions"/>
+
+            <CheckBox
+                android:id="@+id/exclude_times"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dont_schedule_tests_these_times" />
+
+            <LinearLayout
+                android:id="@+id/excluded_times"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="10"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="9">
+
+                    <LinearLayout
+                        android:id="@+id/exclude_time_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+                            <EditText
+                                android:id="@+id/excluded_time_1_start"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="@string/from"/>
+
+                            <EditText
+                                android:id="@+id/excluded_time_1_end"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="@string/to"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/exclude_time_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        android:weightSum="2">
+
+                        <EditText
+                            android:id="@+id/excluded_time_2_start"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/from"/>
+
+                        <EditText
+                            android:id="@+id/excluded_time_2_end"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/to"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/exclude_time_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        android:weightSum="2">
+
+                        <EditText
+                            android:id="@+id/excluded_time_3_start"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/from"/>
+
+                        <EditText
+                            android:id="@+id/excluded_time_3_end"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/to"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/exclude_time_4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        android:weightSum="2">
+
+                        <EditText
+                            android:id="@+id/excluded_time_4_start"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/from"/>
+
+                        <EditText
+                            android:id="@+id/excluded_time_4_end"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/to"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/exclude_time_5"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        android:weightSum="2">
+
+                        <EditText
+                            android:id="@+id/excluded_time_5_start"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/from"/>
+
+                        <EditText
+                            android:id="@+id/excluded_time_5_end"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/to"
+                            />
                     </LinearLayout>
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/exclude_time_2"
-                    android:layout_width="match_parent"
+                    android:id="@+id/show_add_excluded_time_button"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone"
-                    android:weightSum="2">
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
-                    <EditText
-                        android:id="@+id/excluded_time_2_start"
-                        android:layout_width="0dp"
+                    <ImageButton
+                        android:id="@+id/add_excluded_time"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/from"/>
+                        android:src="@drawable/ic_add_circle_black_24dp" />
+                    <ImageButton
+                        android:id="@+id/remove_excluded_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_remove_circle_black_24dp" />
 
-                    <EditText
-                        android:id="@+id/excluded_time_2_end"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/to"/>
                 </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/exclude_time_3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone"
-                    android:weightSum="2">
-
-                    <EditText
-                        android:id="@+id/excluded_time_3_start"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/from"/>
-
-                    <EditText
-                        android:id="@+id/excluded_time_3_end"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/to"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/exclude_time_4"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone"
-                    android:weightSum="2">
-
-                    <EditText
-                        android:id="@+id/excluded_time_4_start"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/from"/>
-
-                    <EditText
-                        android:id="@+id/excluded_time_4_end"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/to"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/exclude_time_5"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone"
-                    android:weightSum="2">
-
-                    <EditText
-                        android:id="@+id/excluded_time_5_start"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/from"/>
-
-                    <EditText
-                        android:id="@+id/excluded_time_5_end"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/to"
-                        />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/show_add_excluded_time_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <ImageButton
-                    android:id="@+id/add_excluded_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_add_circle_black_24dp" />
-                <ImageButton
-                    android:id="@+id/remove_excluded_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_remove_circle_black_24dp" />
-
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

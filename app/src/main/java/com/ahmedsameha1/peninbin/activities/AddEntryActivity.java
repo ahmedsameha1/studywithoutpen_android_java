@@ -1,11 +1,10 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -21,18 +20,16 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
-import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
@@ -44,11 +41,6 @@ import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.StringTokenizer;
 
 /**
  * Created by Ahmed on 3/19/16.
@@ -65,13 +57,14 @@ public class AddEntryActivity extends AppCompatActivity implements
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     private static final String CURRENT_FIELD_ID = "current_field_id";
+    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private Spinner field_spinner;
     private EditText enter_question;
     private EditText enter_answer;
     private TextView showActionbar;
     private SimpleCursorAdapter simple_cursor_adapter;
-
-
+    private Chronometer timer;
+    private long lastPause;
     private DatabaseOperations databaseOperations;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
@@ -83,6 +76,8 @@ public class AddEntryActivity extends AppCompatActivity implements
     private int question_data_type;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private Tracker mTracker;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -111,6 +106,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         container = (LinearLayout) findViewById(R.id.container);
         final CardView show_actionbar_cardview = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView add_entry_cardview = (CardView) findViewById(R.id.add_entry_card_view);
+        timer = (Chronometer)findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -319,10 +315,17 @@ public class AddEntryActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        timer.setBase( SystemClock.elapsedRealtime() - lastPause);
+        timer.start();
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
-
+    @Override
+    protected void onPause() {
+        lastPause = SystemClock.elapsedRealtime() - timer.getBase();
+        timer.stop();
+        super.onPause();
+    }
     @Override
     protected void onStop() {
         super.onStop();
@@ -375,6 +378,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         savedInstanceState.putLong(CURRENT_FIELD_ID, current_field_id);
         savedInstanceState.putBoolean(FIELD_CHOSEN, field_chosen);
         savedInstanceState.putInt(SPINNER_POSITION, field_spinner.getSelectedItemPosition());
+        savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
         saveUserLayoutChanges(savedInstanceState);
     }
 
@@ -383,6 +387,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         super.onRestoreInstanceState(savedInstanceState);
         current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
         field_chosen = savedInstanceState.getBoolean(FIELD_CHOSEN);
+        lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         restoreUserLayoutChanges(savedInstanceState);
     }
 

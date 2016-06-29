@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -20,6 +21,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
+import android.widget.Chronometer;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -61,6 +63,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
+    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
     private static final String CURRENT_ENTRY_ID = "current_entry_id";
@@ -83,6 +86,8 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     private long current_field_id,current_entry_id;
     private int check_type;
     private Tracker mTracker;
+    private Chronometer timer;
+    private long lastPause;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +127,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         final CardView show_current_study_entry_card_view = (CardView) findViewById(R.id.show_current_study_entry_card_view);
         final CardView up_card_view = (CardView) findViewById(R.id.up_card_view);
         final CardView down_card_view = (CardView) findViewById(R.id.down_card_view);
+        timer = (Chronometer)findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         setSupportActionBar(toolbar);
         if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
@@ -833,14 +839,23 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         savedInstanceState.putString(CURRENT_ANSWER, currentAnswer);
         savedInstanceState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
         savedInstanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
+        savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
         saveUserLayoutChanges(savedInstanceState);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        timer.setBase( SystemClock.elapsedRealtime() - lastPause);
+        timer.start();
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+    @Override
+    protected void onPause() {
+        lastPause = SystemClock.elapsedRealtime() - timer.getBase();
+        timer.stop();
+        super.onPause();
     }
 
     @Override
@@ -854,6 +869,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         currentAnswer = savedInstanceState.getString(CURRENT_ANSWER);
         correctAnswersCounter = savedInstanceState.getInt(CORRECT_ANSWERS_COUNTER);
         current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
+        lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         correctAnswers.setText(Integer.toString(correctAnswersCounter));
         restoreUserLayoutChanges(savedInstanceState);
         if ( showCurrentEntry.isChecked() ) {

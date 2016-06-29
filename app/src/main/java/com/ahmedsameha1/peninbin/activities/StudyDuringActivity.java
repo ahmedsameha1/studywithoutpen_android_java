@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
 import android.content.Loader;
@@ -27,6 +28,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -79,6 +81,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private static final String CONTENT_VISIBILITY = "content_visibility";
     private static final String LOADING_VISIBILITY = "loading_visibility";
     private static final String CURRENT_ENTRY_ID = "current_entry_id";
+    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private long startingTime;
     boolean boolean_continue, actionBarShown;
     private Cursor cursor;
@@ -123,6 +126,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
     private int mShortAnimationDuration;
     private View mLoadingView;
     private RelativeLayout content;
+    private Chronometer timer;
+    private long lastPause;
 
     private int question_data_type;private Thread pauseThread = new Thread(new Runnable() {
         @Override
@@ -186,6 +191,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         continue_card_view = (CardView) findViewById(R.id.continue_card_view);
         next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
         show_action_bar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
+        timer = (Chronometer)findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         if ( savedInstanceState == null ) {
             content.setVisibility(View.GONE);
@@ -481,10 +487,13 @@ public class StudyDuringActivity extends AppCompatActivity implements
 
     }
 
+
     @Override
     protected void onPause() {
-        super.onPause();
+        lastPause = SystemClock.elapsedRealtime() - timer.getBase();
+        timer.stop();
         retainedFragment.setListForTest_StudyDuringActivity(listForTest);
+        super.onPause();
     }
 
     private void toPause() {
@@ -770,6 +779,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         savedInstanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
         savedInstanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
         savedInstanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
+        savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
         saveUserLayoutChanges(savedInstanceState);
       /*  if (!isFinishing()) {
             pauseThread.start();
@@ -780,6 +790,8 @@ public class StudyDuringActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        timer.setBase( SystemClock.elapsedRealtime() - lastPause);
+        timer.start();
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
@@ -797,6 +809,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
         current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
+        lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         restoreUserLayoutChanges(savedInstanceState);
         if (testingNow) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
