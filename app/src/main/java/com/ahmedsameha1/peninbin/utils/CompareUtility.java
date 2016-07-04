@@ -88,6 +88,18 @@ public class CompareUtility {
         return text2.matches(toBeMatchedregex);
     }
 
+    public static int checkTextLineToImport( String text_line ) {
+        String pattern1 = ".###.~~~.[0123]";
+        String pattern2 = ".###.~~~.";
+        if ( text_line.matches(pattern1) ) {
+            return 1;
+        } else if ( text_line.matches(pattern2) ) {
+            return 2;
+        } else {
+            return 0;
+        }
+
+    }
 
 
 
