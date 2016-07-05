@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.StringTokenizer;
 
 /**
  * Created by Ahmed on 7/3/16.
@@ -64,6 +65,37 @@ public class ImportTextFile {
         }
         catch (IOException e) {
             showNotification(context);
+        }
+        try {
+            MySQLiteCursorLoader mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
+            DatabaseOperations databaseOperations = new DatabaseOperations(context);
+            bufferedReader = new BufferedReader(new FileReader(file));
+            String text_line = bufferedReader.readLine();
+            while ( text_line != null ) {
+                int field_separator_index = text_line.indexOf("@@@");
+                int question_separator_index = text_line.indexOf("~~~");
+                String field_name = text_line.substring(0,field_separator_index);
+                String question = text_line.substring(field_separator_index + 3,question_separator_index);
+                String answer = null;
+                int rank = -1;
+                if ( text_line.contains("%%%") ) {
+                    int answer_separator_index = text_line.indexOf("%%%");
+                    answer = text_line.substring(question_separator_index + 3, answer_separator_index);
+                    rank = Integer.parseInt(text_line.substring(answer_separator_index + 3));
+                } else {
+                    answer = text_line.substring(question_separator_index + 3);
+                }
+                ////////////
+                if ( databaseOperations.checkFieldDuplication(field_name) ) {
+                if (question.length() > 0 && answer.length() > 0) {
+                    if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+
+                    }
+                }
+            }
+        }
+        catch ( IOException e) {
+
         }
     }
     private static void showNotification(Context context, int notificationId, NotificationManager notificationManager) {
