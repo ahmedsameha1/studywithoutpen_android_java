@@ -506,4 +506,13 @@ public class DatabaseOperations {
         cursor.close();
         return request;
     }
+    public long getFieldId( String field_name ) {
+        long field_id = -1;
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                Contract.Field.COLUMN_FIELD_NAME + " = ? ", new String[]{field_name},null,null,null);
+        cursor.moveToFirst();
+        field_id = cursor.getLong(0);
+        cursor.close();
+        return field_id;
+    }
 }
