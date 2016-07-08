@@ -189,4 +189,7 @@
     <string name="time_in_past">هذا الوقت من الماضي</string>
     <string name="reminder_canceled">تم إلغاء المُذكِّر</string>
     <string name="change_field_name">عَدِّل اسم المجال</string>
+    <string name="import_fields_from">Import fields from:</string>
+    <string name="study_without_pen_file">Study Without Pen! File</string>
+    <string name="text_file">Text File</string>
 </resources>

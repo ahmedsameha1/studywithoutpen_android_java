@@ -1,10 +1,12 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -22,6 +24,7 @@ import android.support.v4.content.ContextCompat;
 import android.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
@@ -39,6 +42,9 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.ImportTextFile;
+import com.ahmedsameha1.peninbin.dialogs.ImportFieldsFromTextFileDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ImportFromWhatDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -235,14 +241,44 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         // Check which request we're responding to
-         if (requestCode == MY_DATA_CHECK_CODE) {
-            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
-            {
+         if ( requestCode == MY_DATA_CHECK_CODE ) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 tts_available = true;
             }
-        }
+        } else if ( requestCode == ImportFromWhatDialogFragment.TEXT_FILE_CODE && resultCode == Activity.RESULT_OK ) {
+             ImportTextFile.startImportThread(this, data.getData().getPath());
+         } else if ( requestCode == ImportFromWhatDialogFragment.APP_FILE_CODE && resultCode == Activity.RESULT_OK ) {
+             AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(this);
+             importUserUsageData
+                     .setMessage(R.string.import_user_usage)
+                     .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                         @Override
+                         public void onClick(DialogInterface dialog, int which) {
+                             Toast toast = Toast.makeText(MainActivity.this,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
+                             toast.setGravity(Gravity.TOP, 0, 400);
+                             toast.show();
+                             toast = Toast.makeText(MainActivity.this,R.string.shut_down_warning,Toast.LENGTH_LONG);
+                             toast.setGravity(Gravity.TOP, 0, 400);
+                             toast.show();
+                             ExportImportDatabase.startImportThread(MainActivity.this,data.getData(),false);
+                         }
+                     })
+                     .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                         @Override
+                         public void onClick(DialogInterface dialog, int which) {
+                             Toast toast = Toast.makeText(MainActivity.this,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
+                             toast.setGravity(Gravity.TOP, 0, 400);
+                             toast.show();
+                             toast = Toast.makeText(MainActivity.this,R.string.shut_down_warning,Toast.LENGTH_LONG);
+                             toast.setGravity(Gravity.TOP, 0, 400);
+                             toast.show();
+                             ExportImportDatabase.startImportThread(MainActivity.this,data.getData(),true);
+                         }
+                     })
+                     .create().show();
+         }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -292,6 +328,9 @@ public class MainActivity extends AppCompatActivity implements
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         Thread exportThread = ExportImportDatabase.getExportThread();
         Thread importThread = ExportImportDatabase.getImportThread();
+        final Thread app_export_thread = ExportImportDatabase.getExportThread();
+        final Thread app_import_thread = ExportImportDatabase.getImportThread();
+        final Thread text_import_thread = ImportTextFile.getImportThread();
         switch (position) {
             case EXPORT_FIELD:
                 if ((exportThread == null || !exportThread.isAlive()) &&
@@ -309,19 +348,20 @@ public class MainActivity extends AppCompatActivity implements
                         .build());
                 break;
             case IMPORT_FIELD:
-                if ((exportThread == null || !exportThread.isAlive()) &&
-                        (importThread == null || !importThread.isAlive())) {
-                    ImportFieldsDialogFragment importFieldsDialogFragment = new ImportFieldsDialogFragment();
-                    importFieldsDialogFragment.show(getSupportFragmentManager(), ImportFieldsDialogFragment.IMPORT_FIELD_DIALOG_FRAGMENT);
+                if ((app_export_thread == null || !app_export_thread.isAlive()) &&
+                        (app_import_thread == null || !app_import_thread.isAlive()) &&
+                        (text_import_thread == null || !text_import_thread.isAlive()) ) {
+                    ImportFromWhatDialogFragment importFromWhatDialogFragment = new ImportFromWhatDialogFragment();
+                    importFromWhatDialogFragment.show(getSupportFragmentManager(), importFromWhatDialogFragment.IMPORT_FROM_WHAT_DIALOG_FRAGMENT);
                 } else {
                     Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-                mTracker.send(new HitBuilders.EventBuilder()
+ /*               mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
                         .setAction("open import field")
-                        .build());
+                        .build());*/
                 break;
             case REVIEW:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());
@@ -354,6 +394,8 @@ public class MainActivity extends AppCompatActivity implements
                         .setAction("open dropbox page")
                         .build());
                 break;
+            //// TODO: 05/07/16 this is just a test you must finish the work properly
+
 
         }
     }

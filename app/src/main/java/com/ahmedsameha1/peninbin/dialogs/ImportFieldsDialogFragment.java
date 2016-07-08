@@ -112,7 +112,7 @@ public class ImportFieldsDialogFragment extends DialogFragment {
                                                 toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
                                                 toast.setGravity(Gravity.TOP, 0, 400);
                                                 toast.show();
-                                                ExportImportDatabase.startImportThread(context,fileName,false);
+//                                                ExportImportDatabase.startImportThread(context,fileName,false);
                                             }
                                         })
                                         .setPositiveButton("YES", new DialogInterface.OnClickListener() {
@@ -124,7 +124,7 @@ public class ImportFieldsDialogFragment extends DialogFragment {
                                                 toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
                                                 toast.setGravity(Gravity.TOP, 0, 400);
                                                 toast.show();
-                                                ExportImportDatabase.startImportThread(context,fileName,true);
+//                                                ExportImportDatabase.startImportThread(context,fileName,true);
                                             }
                                         })
                                     .create().show();

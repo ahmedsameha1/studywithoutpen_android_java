@@ -9,7 +9,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 40
-        versionName "2.3.0"
+        versionName "2.3.0nextupdate"
         multiDexEnabled true
     }
     buildTypes {
@@ -18,6 +18,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+repositories {
+    jcenter()
 }
 
 dependencies {
@@ -31,6 +35,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-appindexing:8.4.0'
     compile 'com.google.android.gms:play-services-analytics:8.4.0'
     compile 'com.android.support:multidex:1.0.1'
+    compile 'com.nononsenseapps:filepicker:3.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -89,8 +89,8 @@ public class CompareUtility {
     }
 
     public static int checkTextLineToImport( String text_line ) {
-        String pattern1 = "((?!@@@|~~~|%%%).)@@@((?!@@@|~~~|%%%).)~~~((?!@@@|~~~|%%%).)%%%([0123]{1})";
-        String pattern2 = "((?!@@@|~~~|%%%).)@@@((?!@@@|~~~|%%%).)~~~((?!@@@|~~~|%%%).)";
+        String pattern1 = "^(?!(.*(@@@).*){2,}|(.*(~~~).*){2,}|(.*(%%%).*){2,}).+@@@.+~~~.+%%%[0-3]$";
+        String pattern2 = "^(?!(.*(@@@).*){2,}|(.*(~~~).*){2,}|(.*(%%%).*){2,}).+@@@.+~~~.+$";
         if ( text_line.matches(pattern1) ) {
             return 1;
         } else if ( text_line.matches(pattern2) ) {
