@@ -36,7 +36,8 @@ public class ExportImportDatabase {
     public static final int FAILED_IMPORT_INVALID_FILE_NOTIFICATION = 4;
     public static final int SUCCESSFUL_IMPORT_NOTIFICATION = 5;
     public static final int NOT_IMPORTED_FIELDS = 6;
-    private static final int SUCCESFUL_EXPORT_NOTIFICATION = 7;
+    public static final int SUCCESFUL_EXPORT_NOTIFICATION = 7;
+    public static final String PATH = "path";
 
     private static Thread exportThread, importThread;
     private static ArrayList<Integer> notImportedFieldsIntegers;
@@ -48,12 +49,12 @@ public class ExportImportDatabase {
         return importThread;
     }
 
-    public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String fileName) {
+    public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String path, final String fileName) {
         exportThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                exportFields(context, selectedFields, fileName);
+                exportFields(context, selectedFields, path, fileName);
             }
         });
         exportThread.start();
@@ -70,7 +71,7 @@ public class ExportImportDatabase {
         importThread.start();
     }
 
-    private static void exportFields(Context context, ArrayList<String> fieldNames, String fileName) {
+    private static void exportFields(Context context, ArrayList<String> fieldNames, String path, String fileName) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         SQLiteDatabase appDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
         fileName = fileName.toLowerCase();
@@ -78,10 +79,7 @@ public class ExportImportDatabase {
         File exportDirectory = null;
         File exportedDatabaseFile = null;
         try {
-            exportDirectory = new File(Environment.getExternalStorageDirectory(), EXPORT_IMPORT_DIRECTORY_NAME);
-            if (!exportDirectory.exists()) {
-                exportDirectory.mkdir();
-            }
+            exportDirectory = new File(path);
             exportedDatabaseFile = new File(exportDirectory, fileName);
             toExportDatabase = SQLiteDatabase.openOrCreateDatabase(exportedDatabaseFile, null);
             toExportDatabase.beginTransactionNonExclusive();
@@ -332,13 +330,8 @@ public class ExportImportDatabase {
             contentValues.put(Contract.Check.COLUMN_CHECK_NUMBER, Contract.Check.CHECK_NUMBER);
             toExportDatabase.insert(Contract.Check.TABLE_NAME, null, contentValues);
             toExportDatabase.setTransactionSuccessful();
-            if (Environment.isExternalStorageRemovable()) {
-                showNotification(context, SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION, notificationManager);
-            } else if (Environment.isExternalStorageEmulated()) {
-                showNotification(context, SUCCESFUL_EMULATED_STORAGE_NOTIFICATION, notificationManager);
-            } else {
-                showNotification(context, SUCCESFUL_EXPORT_NOTIFICATION, notificationManager);
-            }
+            showNotification(context, path, SUCCESFUL_EXPORT_NOTIFICATION, notificationManager);
+
         } catch (SQLiteException e) {
             if (exportedDatabaseFile != null && exportedDatabaseFile.exists()) {
                 exportedDatabaseFile.delete();
@@ -814,68 +807,6 @@ public class ExportImportDatabase {
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
-            case SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.export_completed))
-                                .setContentText(context.getString(R.string.export_completed))
-                                .setTicker(context.getResources().getString(R.string.export_completed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, ExportSuccessfulActivity.class);
-                notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION);
-                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                resultPendingIntent =
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                notifyIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
-            case SUCCESFUL_EMULATED_STORAGE_NOTIFICATION:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.export_completed))
-                                .setContentText(context.getResources().getString(R.string.export_completed))
-                                .setTicker(context.getResources().getString(R.string.export_completed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, ExportSuccessfulActivity.class);
-                notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, SUCCESFUL_EMULATED_STORAGE_NOTIFICATION);
-                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                resultPendingIntent =
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                notifyIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
-            case SUCCESFUL_EXPORT_NOTIFICATION:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.export_completed))
-                                .setContentText(context.getResources().getString(R.string.export_completed))
-                                .setTicker(context.getResources().getString(R.string.export_completed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, MainActivity.class);
-                stackBuilder = TaskStackBuilder.create(context);
-                stackBuilder.addParentStack(MainActivity.class);
-                stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
             case FAILED_IMPORT_NOTIFICATION:
                 notificationBuilder =
                         new NotificationCompat.Builder(context)
@@ -947,6 +878,34 @@ public class ExportImportDatabase {
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
         }
+    }
+
+    private static void showNotification(Context context, String path, int notificationId, NotificationManager notificationManager) {
+        NotificationCompat.Builder notificationBuilder = null;
+        Intent notifyIntent = null;
+        PendingIntent resultPendingIntent = null;
+        notificationBuilder =
+                new NotificationCompat.Builder(context)
+                        .setSmallIcon(R.drawable.ic_launcher512)
+                        .setContentTitle(context.getResources().getString(R.string.export_completed))
+                        .setContentText(context.getResources().getString(R.string.export_completed))
+                        .setTicker(context.getResources().getString(R.string.export_completed))
+                        .setAutoCancel(true);
+        notifyIntent = new Intent(context, ExportSuccessfulActivity.class);
+        notifyIntent.putExtra(PATH, path);
+        notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, SUCCESFUL_EXPORT_NOTIFICATION);
+        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        resultPendingIntent =
+                PendingIntent.getActivity(
+                        context,
+                        0,
+                        notifyIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        notificationBuilder.setContentIntent(resultPendingIntent);
+        notificationManager.notify(notificationId, notificationBuilder.build());
     }
 
     private static void upgradeImportedDatabaseFromDBV6ToDBV7(SQLiteDatabase toImportDatabase, Uri fileName ) throws Exception {

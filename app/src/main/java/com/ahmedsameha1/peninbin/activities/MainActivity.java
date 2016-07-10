@@ -15,6 +15,7 @@ import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
@@ -63,6 +64,7 @@ import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.nononsenseapps.filepicker.FilePickerActivity;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
@@ -77,7 +79,8 @@ import java.util.TimeZone;
 public class MainActivity extends AppCompatActivity implements
         MainActivityFragmentDrawer.FragmentDrawerListener,
         DeleteFieldDialogFragment.Contact,
-        CreateFieldDialogFragment.Contact {
+        CreateFieldDialogFragment.Contact,
+        ExportFieldsDialogFragment.Contact {
     public static final String MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST = "mid_night_service_pendingintent_request";
     public static final String SCREEN_NAME = "MainActivity";
     private static final String RUN_FIRST_TIME = "run_first_time";
@@ -95,13 +98,20 @@ public class MainActivity extends AppCompatActivity implements
     private static final int FACEBOOK = 3;
     public static final int DROPBOX = 4;
     private static final int MY_DATA_CHECK_CODE = 1234;
+    private static final int DIRECTORY_CODE = 15;
+    private static final String TO_EXPORT_FIELDS = "to_export_fields";
+    private static final String TO_EXPORT_FILE_NAME = "to_export_file_name";
     private Handler mHandler = new Handler();
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private MainActivityRecyclerViewAdapter mAdapter;
+
+
     private LoaderManager.LoaderCallbacks<Cursor> getFields;
     private long first_field_id;
     private boolean tts_available = false;
     private Tracker mTracker;
+    private String to_export_file_name;
+    private ArrayList<String> to_export_fields;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,6 +192,8 @@ public class MainActivity extends AppCompatActivity implements
         getLoaderManager();
         fff();
     }
+
+
 
     @Override
     protected void onStop() {
@@ -278,6 +290,14 @@ public class MainActivity extends AppCompatActivity implements
                          }
                      })
                      .create().show();
+         } else if ( requestCode == DIRECTORY_CODE && resultCode == RESULT_OK && ( !isFinishing()) ) {
+             ExportImportDatabase.startExportThread(this, to_export_fields, data.getData().getPath(), to_export_file_name);
+             Toast toast = Toast.makeText(this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+             toast.setGravity(Gravity.TOP, 0, 400);
+             toast.show();
+             toast = Toast.makeText(this, R.string.shut_down_warning, Toast.LENGTH_LONG);
+             toast.setGravity(Gravity.TOP, 0, 400);
+             toast.show();
          }
     }
     @Override
@@ -333,8 +353,9 @@ public class MainActivity extends AppCompatActivity implements
         final Thread text_import_thread = ImportTextFile.getImportThread();
         switch (position) {
             case EXPORT_FIELD:
-                if ((exportThread == null || !exportThread.isAlive()) &&
-                        (importThread == null || !importThread.isAlive())) {
+                if ((app_export_thread == null || !app_export_thread.isAlive()) &&
+                        (app_import_thread == null || !app_import_thread.isAlive()) &&
+                        (text_import_thread == null || !text_import_thread.isAlive()) ) {
                     ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
                     exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
                 } else {
@@ -497,6 +518,41 @@ public class MainActivity extends AppCompatActivity implements
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
     }
 
+    @Override
+    public void exportFields(ArrayList<String> selectedFields, String file_name) {
+        to_export_fields = selectedFields;
+        to_export_file_name = file_name;
+        // This always works
+        Intent i = new Intent(this, FilePickerActivity.class);
+        // This works if you defined the intent filter
+        // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+
+        // Set these depending on your use case. These are the defaults.
+        i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, true);
+        i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR);
+
+        // Configure initial directory by specifying a String.
+        // You could specify a String like "/storage/emulated/0/", but that can
+        // dangerous. Always use Android's API calls to get paths to the SD-card or
+        // internal memory.
+        i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
+
+        startActivityForResult(i, DIRECTORY_CODE);
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putStringArrayList(TO_EXPORT_FIELDS,to_export_fields);
+        outState.putString(TO_EXPORT_FILE_NAME,to_export_file_name);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        to_export_fields = savedInstanceState.getStringArrayList(TO_EXPORT_FIELDS);
+        to_export_file_name = savedInstanceState.getString(TO_EXPORT_FILE_NAME);
+        super.onRestoreInstanceState(savedInstanceState);
+    }
 
     public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
 
@@ -532,6 +588,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
     }
+
     private void fff(){
         ArrayList<long[]> data = new DatabaseOperations(this).getBackupSchedulingData();
         Log.i("scheduled time number:",data.size()+"");

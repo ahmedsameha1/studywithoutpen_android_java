@@ -192,4 +192,5 @@
     <string name="import_fields_from">Import fields from:</string>
     <string name="study_without_pen_file">Study Without Pen! File</string>
     <string name="text_file">Text File</string>
+    <string name="exported_file_in">your exported file is in:</string>
 </resources>
