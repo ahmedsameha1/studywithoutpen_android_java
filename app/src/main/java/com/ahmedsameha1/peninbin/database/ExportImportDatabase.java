@@ -71,16 +71,16 @@ public class ExportImportDatabase {
         importThread.start();
     }
 
-    private static void exportFields(Context context, ArrayList<String> fieldNames, String path, String fileName) {
+    private static void exportFields(Context context, ArrayList<String> fieldNames, String path, String user_fileName) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         SQLiteDatabase appDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
-        fileName = fileName.toLowerCase();
         SQLiteDatabase toExportDatabase = null;
         File exportDirectory = null;
         File exportedDatabaseFile = null;
+        String file_name = user_fileName + ".swp";
         try {
             exportDirectory = new File(path);
-            exportedDatabaseFile = new File(exportDirectory, fileName);
+            exportedDatabaseFile = new File(exportDirectory, file_name);
             toExportDatabase = SQLiteDatabase.openOrCreateDatabase(exportedDatabaseFile, null);
             toExportDatabase.beginTransactionNonExclusive();
             toExportDatabase.setVersion(DatabaseHelper.DATABASE_VERSION);
@@ -342,7 +342,7 @@ public class ExportImportDatabase {
                 toExportDatabase.endTransaction();
                 toExportDatabase.close();
             }
-            String journalFileName = fileName + "-journal";
+            String journalFileName = file_name + "-journal";
             File journalFile = new File(exportDirectory, journalFileName);
             if (journalFile.exists()) {
                 journalFile.delete();

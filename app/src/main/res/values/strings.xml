@@ -195,4 +195,5 @@
     <string name="study_without_pen_file">Study Without Pen! File</string>
     <string name="text_file">Text File</string>
     <string name="exported_file_in">your exported file is in:</string>
+    <string name="ask_import_fields">Do you want to import fields from this file?</string>
 </resources>
