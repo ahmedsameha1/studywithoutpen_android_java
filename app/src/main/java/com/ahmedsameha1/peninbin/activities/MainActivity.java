@@ -44,6 +44,7 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
+import com.ahmedsameha1.peninbin.dialogs.AboutDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ImportFieldsFromTextFileDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ImportFromWhatDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
@@ -94,9 +95,10 @@ public class MainActivity extends AppCompatActivity implements
     private static final int SEARCH_FIELDS_ID = 1;
     private static final int EXPORT_FIELD = 0;
     private static final int IMPORT_FIELD = 1;
+    public static final int ABOUT = 3;
     private static final int REVIEW = 2;
-    private static final int FACEBOOK = 3;
-    public static final int DROPBOX = 4;
+/*    private static final int FACEBOOK = 3;
+    public static final int DROPBOX = 4;*/
     private static final int MY_DATA_CHECK_CODE = 1234;
     private static final int DIRECTORY_CODE = 15;
     private static final String TO_EXPORT_FIELDS = "to_export_fields";
@@ -261,6 +263,10 @@ public class MainActivity extends AppCompatActivity implements
             }
         } else if ( requestCode == ImportFromWhatDialogFragment.TEXT_FILE_CODE && resultCode == Activity.RESULT_OK ) {
              ImportTextFile.startImportThread(this, data.getData().getPath());
+             mTracker.send(new HitBuilders.EventBuilder()
+                     .setCategory(ANALYTICS_CATEGORY)
+                     .setAction("import field from text file")
+                     .build());
          } else if ( requestCode == ImportFromWhatDialogFragment.APP_FILE_CODE && resultCode == Activity.RESULT_OK ) {
              AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(this);
              importUserUsageData
@@ -275,6 +281,10 @@ public class MainActivity extends AppCompatActivity implements
                              toast.setGravity(Gravity.TOP, 0, 400);
                              toast.show();
                              ExportImportDatabase.startImportThread(MainActivity.this,data.getData(),false);
+                             mTracker.send(new HitBuilders.EventBuilder()
+                                     .setCategory(ANALYTICS_CATEGORY)
+                                     .setAction("import field from app file")
+                                     .build());
                          }
                      })
                      .setPositiveButton("YES", new DialogInterface.OnClickListener() {
@@ -287,11 +297,19 @@ public class MainActivity extends AppCompatActivity implements
                              toast.setGravity(Gravity.TOP, 0, 400);
                              toast.show();
                              ExportImportDatabase.startImportThread(MainActivity.this,data.getData(),true);
+                             mTracker.send(new HitBuilders.EventBuilder()
+                                     .setCategory(ANALYTICS_CATEGORY)
+                                     .setAction("import field from app file")
+                                     .build());
                          }
                      })
                      .create().show();
          } else if ( requestCode == DIRECTORY_CODE && resultCode == RESULT_OK && ( !isFinishing()) ) {
              ExportImportDatabase.startExportThread(this, to_export_fields, data.getData().getPath(), to_export_file_name);
+             mTracker.send(new HitBuilders.EventBuilder()
+                     .setCategory(ANALYTICS_CATEGORY)
+                     .setAction("export field")
+                     .build());
              Toast toast = Toast.makeText(this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
              toast.setGravity(Gravity.TOP, 0, 400);
              toast.show();
@@ -345,9 +363,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onDrawerItemSelected(View view, int position) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Thread exportThread = ExportImportDatabase.getExportThread();
-        Thread importThread = ExportImportDatabase.getImportThread();
         final Thread app_export_thread = ExportImportDatabase.getExportThread();
         final Thread app_import_thread = ExportImportDatabase.getImportThread();
         final Thread text_import_thread = ImportTextFile.getImportThread();
@@ -363,10 +378,6 @@ public class MainActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("open export field")
-                        .build());
                 break;
             case IMPORT_FIELD:
                 if ((app_export_thread == null || !app_export_thread.isAlive()) &&
@@ -379,10 +390,6 @@ public class MainActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
- /*               mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("open import field")
-                        .build());*/
                 break;
             case REVIEW:
                 Uri uri = Uri.parse("market://details?id=" + getPackageName());
@@ -399,7 +406,11 @@ public class MainActivity extends AppCompatActivity implements
                         .setAction("open review")
                         .build());
                 break;
-            case FACEBOOK:
+            case ABOUT:
+                AboutDialogFragment aboutDialogFragment = new AboutDialogFragment();
+                aboutDialogFragment.show(getSupportFragmentManager(),AboutDialogFragment.ABOUT_DIALOG_FRAGMENT);
+                break;
+/*            case FACEBOOK:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
                 startActivity(browserIntent);
                 mTracker.send(new HitBuilders.EventBuilder()
@@ -414,10 +425,7 @@ public class MainActivity extends AppCompatActivity implements
                         .setCategory(ANALYTICS_CATEGORY)
                         .setAction("open dropbox page")
                         .build());
-                break;
-            //// TODO: 05/07/16 this is just a test you must finish the work properly
-
-
+                break;*/
         }
     }
 
@@ -432,8 +440,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
-        mTracker.setScreenName(SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     private void addFab() {

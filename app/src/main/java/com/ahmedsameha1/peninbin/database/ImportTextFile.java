@@ -34,12 +34,12 @@ public class ImportTextFile {
     public static Thread getImportThread() {
         return importThread;
     }
-    public static void startImportThread( final Context context, final String fileName ) {
+    public static void startImportThread( final Context context, final String file_path ) {
         importThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                importFields(context, fileName );
+                importFields(context, file_path );
             }
         });
         importThread.start();

@@ -4,14 +4,13 @@
         <item>تصدير مجالات</item>
         <item>استيراد مجالات</item>
         <item>راجع التطبيق على متجر بلاي</item>
-        <item>صفحة facebook</item>
-        <item>مجلد Dropbox</item>
+        <item>عن التطبيق</item>
     </string-array>
     <string-array name="field_activity_features">
         <item>ترتيب</item>
         <item>مذاكرة فترة</item>
         <item>اختبار</item>
-        <item>حدد موعدا</item>
+        <item>جَدْوِل موعدا</item>
         <item>خصائص المجال</item>
     </string-array>
     <string-array name="field_type">

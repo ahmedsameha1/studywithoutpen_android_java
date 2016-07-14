@@ -45,5 +45,4 @@ public class ExportSuccessfulActivity extends Activity {
                 break;
         }
     }
-    //// TODO: 10/07/16 hardly test export import feature 
 }

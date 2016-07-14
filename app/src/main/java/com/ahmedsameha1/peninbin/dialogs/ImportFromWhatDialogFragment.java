@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
@@ -56,6 +57,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
             public void onShow(DialogInterface dialog) {
                 Button app_file = (Button) alertDialog.findViewById(R.id.app_file);
                 Button text_file = (Button) alertDialog.findViewById(R.id.text_file);
+                ImageButton text_file_help = (ImageButton) alertDialog.findViewById(R.id.text_file_help);
                 app_file.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -107,6 +109,14 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
 
                         getActivity().startActivityForResult(i, TEXT_FILE_CODE);
                         dismiss();
+                    }
+                });
+                text_file_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder text_file_help_dialog = new AlertDialog.Builder(getActivity());
+                        text_file_help_dialog
+                                .setMessage(R.string.import_from_text_file_help).create().show();
                     }
                 });
             }

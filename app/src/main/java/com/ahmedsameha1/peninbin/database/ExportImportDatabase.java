@@ -30,8 +30,6 @@ import java.util.ArrayList;
 public class ExportImportDatabase {
     public static final String EXPORT_IMPORT_DIRECTORY_NAME = "StudyWithoutPen";
     public static final int FAILED_EXPORT_NOTIFICATION = 0;
-    public static final int SUCCESFUL_REMOVABLE_STORAGE_NOTIFICATION = 1;
-    public static final int SUCCESFUL_EMULATED_STORAGE_NOTIFICATION = 2;
     public static final int FAILED_IMPORT_NOTIFICATION = 3;
     public static final int FAILED_IMPORT_INVALID_FILE_NOTIFICATION = 4;
     public static final int SUCCESSFUL_IMPORT_NOTIFICATION = 5;
@@ -60,12 +58,12 @@ public class ExportImportDatabase {
         exportThread.start();
     }
 
-    public static void startImportThread(final Context context, final Uri fileName, final boolean importUserUsageData ) {
+    public static void startImportThread(final Context context, final Uri file_uri, final boolean importUserUsageData ) {
         importThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                importFields(context, fileName, importUserUsageData );
+                importFields(context, file_uri, importUserUsageData );
             }
         });
         importThread.start();
@@ -350,11 +348,11 @@ public class ExportImportDatabase {
         }
     }
 
-    private static void importFields(Context context, Uri fileName, boolean importUserUsageData ) {
+    private static void importFields(Context context, Uri file_uri, boolean importUserUsageData ) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         SQLiteDatabase toImportDatabase = null;
         try {
-            String filePath = fileName.getPath();
+            String filePath = file_uri.getPath();
             toImportDatabase = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READWRITE);
             Cursor cursor = toImportDatabase.query(Contract.Check.TABLE_NAME, new String[]{Contract.Check.COLUMN_CHECK_NUMBER},
                     null, null, null, null, null);
@@ -367,9 +365,9 @@ public class ExportImportDatabase {
             int databaseVersion = toImportDatabase.getVersion();
             if (databaseVersion == 6) {
                 try {
-                    upgradeImportedDatabaseFromDBV6ToDBV7(toImportDatabase, fileName);
-                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase,fileName);
-                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase,fileName);
+                    upgradeImportedDatabaseFromDBV6ToDBV7(toImportDatabase, file_uri);
+                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase,file_uri);
+                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase,file_uri);
                 } catch (Exception e) {
                     showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
                     return;
@@ -378,8 +376,8 @@ public class ExportImportDatabase {
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else if (databaseVersion == 7) {
                 try {
-                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase, fileName);
-                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, fileName);
+                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase, file_uri);
+                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, file_uri);
                 } catch (Exception e) {
                     showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
                     return;
@@ -388,7 +386,7 @@ public class ExportImportDatabase {
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else if (databaseVersion == 8) {
                 try {
-                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, fileName);
+                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, file_uri);
                 } catch (Exception e) {
                     showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
                     return;
@@ -908,7 +906,7 @@ public class ExportImportDatabase {
         notificationManager.notify(notificationId, notificationBuilder.build());
     }
 
-    private static void upgradeImportedDatabaseFromDBV6ToDBV7(SQLiteDatabase toImportDatabase, Uri fileName ) throws Exception {
+    private static void upgradeImportedDatabaseFromDBV6ToDBV7(SQLiteDatabase toImportDatabase, Uri file_uri ) throws Exception {
         String rename = "ALTER TABLE " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
         toImportDatabase.beginTransaction();
         try {
@@ -1007,14 +1005,14 @@ public class ExportImportDatabase {
             if (!exportDirectory.exists()) {
                 exportDirectory.mkdir();
             }*/
-            String journalFileName = fileName.getPath() + "-journal";
+            String journalFileName = file_uri.getPath() + "-journal";
             File journalFile = new File( journalFileName);
             if (journalFile.exists()) {
                 journalFile.delete();
             }
         }
     }
-    private static void upgradeImportedDatabaseFromDBV7ToDBV8(SQLiteDatabase toImportDatabase, Uri fileName ) throws Exception {
+    private static void upgradeImportedDatabaseFromDBV7ToDBV8(SQLiteDatabase toImportDatabase, Uri file_uri ) throws Exception {
         toImportDatabase.beginTransaction();
         try {
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
@@ -1100,14 +1098,14 @@ public class ExportImportDatabase {
             if (!exportDirectory.exists()) {
                 exportDirectory.mkdir();
             }*/
-            String journalFileName = fileName.getPath() + "-journal";
+            String journalFileName = file_uri.getPath() + "-journal";
             File journalFile = new File( journalFileName);
             if (journalFile.exists()) {
                 journalFile.delete();
             }
         }
     }
-    private static void upgradeImportedDatabaseFromDBV8ToDBV9(SQLiteDatabase toImportDatabase, Uri fileName ) throws Exception {
+    private static void upgradeImportedDatabaseFromDBV8ToDBV9(SQLiteDatabase toImportDatabase, Uri file_uri ) throws Exception {
         toImportDatabase.beginTransaction();
         try {
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
@@ -1167,7 +1165,7 @@ public class ExportImportDatabase {
             if (!exportDirectory.exists()) {
                 exportDirectory.mkdir();
             }*/
-            String journalFileName = fileName.getPath() + "-journal";
+            String journalFileName = file_uri.getPath() + "-journal";
             File journalFile = new File( journalFileName);
             if (journalFile.exists()) {
                 journalFile.delete();

@@ -189,9 +189,14 @@
     <string name="time_in_past">هذا الوقت من الماضي</string>
     <string name="reminder_canceled">تم إلغاء المُذكِّر</string>
     <string name="change_field_name">عَدِّل اسم المجال</string>
-    <string name="import_fields_from">Import fields from:</string>
-    <string name="study_without_pen_file">Study Without Pen! File</string>
-    <string name="text_file">Text File</string>
-    <string name="exported_file_in">your exported file is in:</string>
-    <string name="ask_import_fields">Do you want to import fields from this file?</string>
+    <string name="import_fields_from">استورد مجالات من:</string>
+    <string name="study_without_pen_file">Study Without Pen ملف</string>
+    <string name="text_file">ملف نصي</string>
+    <string name="exported_file_in">ملفك المُصَدَّر في:</string>
+    <string name="ask_import_fields">هل تريد استيراد المجالات من هذا الملف؟</string>
+    <string name="import_from_text_file_help">يجب أن يكون الملف ملف نصي txt\nيجب أن يكون كل سطر في الملف النصي إما على هذه الهيئة:\nاسم المجال###السؤال~~~الجواب\nأو على هذه الهيئة:\nاسم المجال###السؤال~~~الجواب%%%مستوى أهمية المُدخَل\nحيث مستوى أهمية المُدخَل رقم واحد:\n0\tمنخفض\n1\tمتوسط\n2\tمهم\n3\tحيوي</string>
+    <string name="facebook_page">صفحة Facebook</string>
+    <string name="collect_data_about_usage">هذا التطبيق يجمع معلومات غير محدد  الهوية عن استخدامه.</string>
+    <string name="version">إصدار: 2.3.1</string>
+    <string name="about_app">عن التطبيق</string>
 </resources>

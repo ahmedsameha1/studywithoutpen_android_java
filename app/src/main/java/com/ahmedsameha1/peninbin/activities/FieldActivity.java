@@ -265,8 +265,6 @@ public class FieldActivity extends AppCompatActivity implements
             bundle.putInt(CURRENT_SORT, currentSort);
             getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
         }
-        mTracker.setScreenName(SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
     @Override
     protected void onStop() {
