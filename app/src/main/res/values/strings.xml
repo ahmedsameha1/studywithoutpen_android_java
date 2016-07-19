@@ -193,10 +193,10 @@
     <string name="reminder_canceled">The reminder has been canceled</string>
     <string name="import_fields_from">Import fields from:</string>
     <string name="study_without_pen_file">Study Without Pen File</string>
-    <string name="text_file">Text File</string>
+    <string name="text_file">specially formated text file</string>
     <string name="exported_file_in">your exported file is in:</string>
     <string name="ask_import_fields">Do you want to import the fields from this file?</string>
-    <string name="import_from_text_file_help">The file must be text file txt\nEvery line in the text file must be formated as: \nfield name###question~~~answer\nOr:\nfield name###question~~~answer%%%rank of entry \nRank of entry is one digit: \n0\tLow \n1\tModerate \n2\tImportant \n3\tVital</string>
+    <string name="import_from_text_file_help">The file must be text file txt\nEvery line in the text file must be formated as: \nfield name@@@question~~~answer\nOr:\nfield name@@@question~~~answer%%%rank of entry \nRank of entry is one digit: \n0\tLow \n1\tModerate \n2\tImportant \n3\tVital</string>
     <string name="facebook_page">Facebook Page</string>
     <string name="collect_data_about_usage">This app collects anonymous data about the usage of it.</string>
     <string name="version">Version:2.3.1</string>
