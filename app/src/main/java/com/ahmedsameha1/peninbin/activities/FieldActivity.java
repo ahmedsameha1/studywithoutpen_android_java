@@ -1,6 +1,7 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -158,9 +159,13 @@ public class FieldActivity extends AppCompatActivity implements
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
         tts = new TextToSpeech(getApplicationContext(), this);
-        Intent checkIntent = new Intent();
-        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        try {
+            Intent checkIntent = new Intent();
+            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+        }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
         fab.setOnClickListener(new View.OnClickListener() {

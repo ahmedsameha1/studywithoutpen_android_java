@@ -135,9 +135,13 @@ public class MainActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setDrawerListener(this);
-        Intent checkIntent = new Intent();
-        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        try {
+            Intent checkIntent = new Intent();
+            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+        }
         mAdapter = new MainActivityRecyclerViewAdapter(this, null);
         RecyclerView.LayoutManager mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(mLayoutManager);
