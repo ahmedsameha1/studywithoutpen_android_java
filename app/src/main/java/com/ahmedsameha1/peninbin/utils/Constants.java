@@ -16,4 +16,9 @@ public class Constants {
         public static final int MODERATE = 1;
         public static final int LOW = 0;
     }
+
+    public static abstract class TestRound {
+        public static final int ASKED_AT_CURRENT_ROUND = 1;
+        public static final int DID_NOT_ASKED_AT_CURRENT_ROUND = 0;
+    }
 }

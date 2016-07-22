@@ -1,8 +1,11 @@
 package com.ahmedsameha1.peninbin.database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.util.ArrayList;
 
@@ -514,5 +517,28 @@ public class DatabaseOperations {
         field_id = cursor.getLong(0);
         cursor.close();
         return field_id;
+    }
+
+    public void makeAskedCurrentTestRound( long [] ids ) {
+        for ( long temp: ids ) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.ASKED_AT_CURRENT_ROUND);
+            sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME,contentValues,
+                    Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
+        }
+    }
+    public void restWhetherAskedCurrentTestRound ( long field_id ) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
+        sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME,contentValues,
+                Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
+    }
+    public int countAskedCurrentTestRound( long field_id ) {
+        Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND + " = ? ",
+                new String[]{field_id + "", Constants.TestRound.ASKED_AT_CURRENT_ROUND + ""},null,null,null);
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
     }
 }

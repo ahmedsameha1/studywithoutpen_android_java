@@ -32,6 +32,7 @@ import com.ahmedsameha1.peninbin.database.Contract.Alternative_Answer_Not_String
 import com.ahmedsameha1.peninbin.database.Contract.Old_Question_DBV6_AppV32;
 import com.ahmedsameha1.peninbin.database.Contract.Old_Answer_DBV6_AppV32;
 import com.ahmedsameha1.peninbin.database.Contract.Old_Linker_DBV6_AppV32;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -111,6 +112,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + String_Entry.COLUMN_CREATION_EMULATED_DATE + " DATETIME DEFAULT NULL, "
             + String_Entry.COLUMN_REMIND_AT + " INTEGER DEFAULT NULL, "
             + String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " INTEGER DEFAULT NULL, "
+            + String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND + " INTEGER DEFAULT " + Constants.TestRound.ASKED_AT_CURRENT_ROUND + ", " //// TODO: 21/07/16 must complete all the operations of updating the database schema
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
             + "FOREIGN KEY(" + String_Entry.COLUMN_QUESTION + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
             + "FOREIGN KEY(" + String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "

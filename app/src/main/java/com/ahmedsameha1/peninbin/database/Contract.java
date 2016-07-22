@@ -66,6 +66,7 @@ public final class Contract {
         public static final String COLUMN_CREATION_EMULATED_DATE = "creation_emulated_date";
         public static final String COLUMN_REMIND_AT = "remind_at";
         public static final String COLUMN_REMIND_AT_PENDINGINTENT_REQUEST = "remind_at_pendingintent_request";
+        public static final String COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND = "whether_asked_at_current_test_round";
     }
     public static abstract class Not_String_Entry implements BaseColumns {
         public static final String TABLE_NAME = "not_string_entry";
