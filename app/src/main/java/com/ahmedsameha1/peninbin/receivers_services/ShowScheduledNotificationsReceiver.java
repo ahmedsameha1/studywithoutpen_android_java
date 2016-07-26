@@ -11,14 +11,12 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
-import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.secondary_activities.ReminderActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
@@ -43,23 +41,23 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
             String current_field_name = new DatabaseOperations(context).getFieldName(current_field_id);
             if ( schedule_what == ScheduleInFieldDialogFragment.QUICK_TEST ) {
                 Intent quick_test_intent = new Intent(context, QuickTestActivity.class);
-                if ( intent.hasExtra(TestActivity.QUESTION_PERCENTAGE) ) {
-                    quick_test_intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.PERCENTAGE);
-                    quick_test_intent.putExtra(TestActivity.QUESTION_PERCENTAGE, intent.getIntExtra(TestActivity.QUESTION_PERCENTAGE,1));
-                    quick_test_intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(TestActivity.PERMITED_TRIES_NUMBER,1));
+                if ( intent.hasExtra(EnhancedTestActivity.QUESTION_PERCENTAGE) ) {
+                    quick_test_intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
+                    quick_test_intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, intent.getIntExtra(EnhancedTestActivity.QUESTION_PERCENTAGE,1));
+                    quick_test_intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER,1));
                     quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                    quick_test_intent.putExtra(TestActivity.CONTROLLED_PORTION, intent.getIntExtra(TestActivity.CONTROLLED_PORTION,-1));
-                    quick_test_intent.putExtra(TestActivity.RANK_LEVEL, intent.getIntExtra(TestActivity.RANK_LEVEL,-1));
-                    quick_test_intent.putExtra(TestActivity.WRONGNESS_LEVEL, intent.getIntExtra(TestActivity.WRONGNESS_LEVEL,-1));
+                    quick_test_intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, intent.getIntExtra(EnhancedTestActivity.CONTROLLED_PORTION,-1));
+                    quick_test_intent.putExtra(EnhancedTestActivity.RANK_LEVEL, intent.getIntExtra(EnhancedTestActivity.RANK_LEVEL,-1));
+                    quick_test_intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, intent.getIntExtra(EnhancedTestActivity.WRONGNESS_LEVEL,-1));
 
                 } else {
-                    quick_test_intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
-                    quick_test_intent.putExtra(TestActivity.QUESTION_NUMBER, intent.getIntExtra(TestActivity.QUESTION_NUMBER,1));
-                    quick_test_intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(TestActivity.PERMITED_TRIES_NUMBER,1));
+                    quick_test_intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
+                    quick_test_intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, intent.getIntExtra(EnhancedTestActivity.QUESTION_NUMBER,1));
+                    quick_test_intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER,1));
                     quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                    quick_test_intent.putExtra(TestActivity.CONTROLLED_PORTION, intent.getIntExtra(TestActivity.CONTROLLED_PORTION,-1));
-                    quick_test_intent.putExtra(TestActivity.RANK_LEVEL, intent.getIntExtra(TestActivity.RANK_LEVEL,-1));
-                    quick_test_intent.putExtra(TestActivity.WRONGNESS_LEVEL, intent.getIntExtra(TestActivity.WRONGNESS_LEVEL,-1));
+                    quick_test_intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, intent.getIntExtra(EnhancedTestActivity.CONTROLLED_PORTION,-1));
+                    quick_test_intent.putExtra(EnhancedTestActivity.RANK_LEVEL, intent.getIntExtra(EnhancedTestActivity.RANK_LEVEL,-1));
+                    quick_test_intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, intent.getIntExtra(EnhancedTestActivity.WRONGNESS_LEVEL,-1));
                 }
                 contentIntent = PendingIntent.getActivity(context, 0, quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 notificationBuilder =

@@ -42,6 +42,7 @@ import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SearchDateOrTextDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TestDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.FieldActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
@@ -64,11 +65,13 @@ public class FieldActivity extends AppCompatActivity implements
     public static final String SCREEN_NAME = "FieldActivity";
     public static final int SORT = 0;
     public static final int STUDY_PERIOD = 1;
-    public static final int TEST = 2;
-    public static final int FIELD_PROPERTIES = 4;
+    public static final int ENHANCED_TEST = 2;
+    public static final int TEST = 3;
+    public static final int SCHEDULE_IN_FIELD = 4;
+    public static final int FIELD_PROPERTIES = 5;
 
 
-    public static final int SCHEDULE_IN_FIELD = 3;
+
     private static final String QUERY_KEY = "query_key";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int SEARCH_ENTRIES_LOADER_ID = 1;
@@ -311,8 +314,8 @@ public class FieldActivity extends AppCompatActivity implements
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         switch (position) {
-            case TEST:
-                if (!sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + current_field_id)) {
+            case ENHANCED_TEST:
+                if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)) {
 
                             if (number_of_entries > 0) {
                                 if (databaseOperations.isThisFieldTestPaused(current_field_id)) {
@@ -320,9 +323,9 @@ public class FieldActivity extends AppCompatActivity implements
                                     fragment3.setArguments(bundle);
                                     fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
                                 } else {
-                                    TestDialogFragment dialogFragment = new TestDialogFragment();
+                                    EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
                                     dialogFragment.setArguments(bundle);
-                                    dialogFragment.show(getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
+                                    dialogFragment.show(getSupportFragmentManager(), EnhancedTestDialogFragment.TEST_DIALOG_FRAGMENT);
                                 }
                             } else {
                                 Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
@@ -335,7 +338,23 @@ public class FieldActivity extends AppCompatActivity implements
                     toast.show();
                 }
                 break;
-
+            case TEST:
+                if (number_of_entries > 0) {
+                    if (databaseOperations.isThisFieldTestPaused(current_field_id)) {
+                        AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
+                        fragment3.setArguments(bundle);
+                        fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
+                    } else {
+                        TestDialogFragment dialogFragment = new TestDialogFragment();
+                        dialogFragment.setArguments(bundle);
+                        dialogFragment.show(getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
+                    }
+                } else {
+                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                break;
             case STUDY_PERIOD:
                 if (!sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + current_field_id)) {
                             if (number_of_entries > 0) {

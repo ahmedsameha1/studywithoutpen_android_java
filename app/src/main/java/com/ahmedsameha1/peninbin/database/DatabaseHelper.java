@@ -9,8 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
-import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.database.Contract.OldField;
 
 import android.preference.PreferenceManager;
@@ -1122,24 +1122,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
                             new String[]{"0", field},null,null,null);
                     if ( cursor.getCount() > 0 ) {
-                        int currentQuestionCounter = sharedPreferences.getInt(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.CURRENT_QUESTION_COUNTER
-                                + TestActivity.DASH + field,0);
-                        int wrongAnswersCounter = sharedPreferences.getInt(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.NUMBER_OF_WRONG_ANSWERS
-                                + TestActivity.DASH + field,0);
-                        int permitedTriesNumber = sharedPreferences.getInt(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.PERMITED_TRIES_NUMBER
-                                + TestActivity.DASH + field,0);
+                        int currentQuestionCounter = sharedPreferences.getInt(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.DASH + EnhancedTestActivity.CURRENT_QUESTION_COUNTER
+                                + EnhancedTestActivity.DASH + field,0);
+                        int wrongAnswersCounter = sharedPreferences.getInt(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.DASH + EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS
+                                + EnhancedTestActivity.DASH + field,0);
+                        int permitedTriesNumber = sharedPreferences.getInt(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.DASH + EnhancedTestActivity.PERMITED_TRIES_NUMBER
+                                + EnhancedTestActivity.DASH + field,0);
                         contentValues = new ContentValues();
                         contentValues.put(Test_Paused.COLUMN_FIELD,field_id);
                         contentValues.put(Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER,currentQuestionCounter);
                         contentValues.put(Test_Paused.COLUMN_WRONG_ANSWERS_COUNT,wrongAnswersCounter);
                         contentValues.put(Test_Paused.COLUMN_TRIES_NUMBER,permitedTriesNumber);
                         sqLiteDatabase.insert(Test_Paused.TABLE_NAME,null,contentValues);
-                        editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.CURRENT_QUESTION_COUNTER
-                                + TestActivity.DASH + field);
-                        editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.NUMBER_OF_WRONG_ANSWERS
-                                + TestActivity.DASH + field);
-                        editor.remove(TestActivity.ACTIVITY_NAME + TestActivity.DASH + TestActivity.PERMITED_TRIES_NUMBER
-                                + TestActivity.DASH + field);
+                        editor.remove(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.DASH + EnhancedTestActivity.CURRENT_QUESTION_COUNTER
+                                + EnhancedTestActivity.DASH + field);
+                        editor.remove(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.DASH + EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS
+                                + EnhancedTestActivity.DASH + field);
+                        editor.remove(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.DASH + EnhancedTestActivity.PERMITED_TRIES_NUMBER
+                                + EnhancedTestActivity.DASH + field);
                     }
                     cursor.close();
                 }

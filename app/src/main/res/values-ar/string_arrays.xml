@@ -9,7 +9,8 @@
     <string-array name="field_activity_features">
         <item>ترتيب</item>
         <item>مذاكرة فترة</item>
-        <item>اختبار</item>
+        <item>اختبار مُحَسَّن</item>
+        <item>اختبار عشوائي تماما</item>
         <item>جَدْوِل موعدا</item>
         <item>خصائص المجال</item>
     </string-array>

@@ -11,9 +11,9 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
@@ -51,13 +51,13 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                     if ( cursor.moveToFirst() ) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
-                        intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
-                        intent.putExtra(TestActivity.QUESTION_NUMBER, cursor.getInt(1));
-                        intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, cursor.getInt(0));
+                        intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
+                        intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, cursor.getInt(1));
+                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, cursor.getInt(0));
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
-                        intent.putExtra(TestActivity.CONTROLLED_PORTION, cursor.getInt(2));
-                        intent.putExtra(TestActivity.WRONGNESS_LEVEL, cursor.getInt(3));
-                        intent.putExtra(TestActivity.RANK_LEVEL, cursor.getInt(4));
+                        intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, cursor.getInt(2));
+                        intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, cursor.getInt(3));
+                        intent.putExtra(EnhancedTestActivity.RANK_LEVEL, cursor.getInt(4));
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -65,29 +65,29 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                     }
                     cursor.close();
                 } else {
-                    if ( session [4] == TestActivity.PERCENTAGE) {
+                    if ( session [4] == EnhancedTestActivity.PERCENTAGE) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
-                        intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.PERCENTAGE);
-                        intent.putExtra(TestActivity.QUESTION_PERCENTAGE, (int) session[5]);
-                        intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
-                        intent.putExtra(TestActivity.CONTROLLED_PORTION, (int) session[8]);
-                        intent.putExtra(TestActivity.WRONGNESS_LEVEL, (int) session[9]);
-                        intent.putExtra(TestActivity.RANK_LEVEL, (int) session[10]);
+                        intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
+                        intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, (int) session[5]);
+                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
+                        intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, (int) session[8]);
+                        intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, (int) session[9]);
+                        intent.putExtra(EnhancedTestActivity.RANK_LEVEL, (int) session[10]);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
-                    } else if ( session [4] == TestActivity.NUMBER ) {
+                    } else if ( session [4] == EnhancedTestActivity.NUMBER ) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
-                        intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
-                        intent.putExtra(TestActivity.QUESTION_NUMBER, (int) session[5]);
-                        intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
-                        intent.putExtra(TestActivity.CONTROLLED_PORTION, (int) session[8]);
-                        intent.putExtra(TestActivity.WRONGNESS_LEVEL, (int) session[9]);
-                        intent.putExtra(TestActivity.RANK_LEVEL, (int) session[10]);
+                        intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
+                        intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, (int) session[5]);
+                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
+                        intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, (int) session[8]);
+                        intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, (int) session[9]);
+                        intent.putExtra(EnhancedTestActivity.RANK_LEVEL, (int) session[10]);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,session[2]);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);

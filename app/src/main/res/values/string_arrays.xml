@@ -9,7 +9,8 @@
     <string-array name="field_activity_features">
         <item>Sort</item>
         <item>Study a Period</item>
-        <item>Test</item>
+        <item>Enhanced Test</item>
+        <item>Fully Random Test</item>
         <item>Schedule</item>
         <item>Field Properties</item>
     </string-array>

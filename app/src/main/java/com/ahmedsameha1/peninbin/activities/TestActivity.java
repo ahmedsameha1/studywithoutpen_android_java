@@ -1,15 +1,13 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
 import android.content.Loader;
@@ -27,10 +25,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,25 +40,22 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
-import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-/**
- * Created by ahmed on 8/3/2015.
- */
 public class TestActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener {
+
     public static final String SCREEN_NAME = "TestActivity";
     public static final String ACTIVITY_NAME = "TestActivity";
     public static final String PERCENTAGE_OR_NUMBER = "percentage_or_number";
@@ -96,14 +89,7 @@ public class TestActivity extends AppCompatActivity implements
     private static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     private static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final String PAUSING = "pausing";
-    private static final String CURRENT_ENTRY_ID = "current_entry_id";
-    public static final String CONTROLLED_PORTION = "controlled_portion";
-    public static final String RANK_LEVEL = "importance_level";
-    public static final String WRONGNESS_LEVEL = "wrongness_level";
-    private static final String CONTENT_VISIBILITY = "content_visibility";
-    private static final String LOADING_VISIBILITY = "loading_visibility";
-    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
-    private long current_field_id, current_entry_id;
+    private long current_field_id;
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
     private boolean boolean_continue = false, actionBarShown;
@@ -119,8 +105,6 @@ public class TestActivity extends AppCompatActivity implements
     private LinearLayout showResult,questionLinearlayout, container;
     private Handler mHandler = new Handler();
     private Tracker mTracker;
-    private Chronometer timer;
-    private long lastPause;
     private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -146,15 +130,12 @@ public class TestActivity extends AppCompatActivity implements
         }
     });
     private int question_data_type;
-    private int check_type, controlled_portion, rank_level, wrongness_level;
+    private int check_type;
     private TextToSpeech tts;
     private boolean tts_available = false;
     private boolean locale_available = false;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
-    private int mShortAnimationDuration;
-    private View mLoadingView;
-    private RelativeLayout content;
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
@@ -176,9 +157,6 @@ public class TestActivity extends AppCompatActivity implements
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
         percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
-        controlled_portion = getIntent().getIntExtra(CONTROLLED_PORTION, -1);
-        rank_level = getIntent().getIntExtra(RANK_LEVEL, -1);
-        wrongness_level = getIntent().getIntExtra(WRONGNESS_LEVEL, -1);
         number = getIntent().getIntExtra(QUESTION_NUMBER, 0);
         percentage = getIntent().getDoubleExtra(QUESTION_PERCENTAGE, 0);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
@@ -195,21 +173,10 @@ public class TestActivity extends AppCompatActivity implements
         showResult = (LinearLayout) findViewById(R.id.result);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
-        content = (RelativeLayout) findViewById(R.id.content);
-        mLoadingView = findViewById(R.id.loading);
         final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
         final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
-        timer = (Chronometer)findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
-        if ( savedInstanceState == null ) {
-            content.setVisibility(View.GONE);
-            mShortAnimationDuration = getResources().getInteger(
-                    android.R.integer.config_shortAnimTime);
-        } else {
-            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
-            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
-        }
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         setSupportActionBar(toolbar);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -244,7 +211,6 @@ public class TestActivity extends AppCompatActivity implements
                     } else if (j <= 0) {
                         numberOfTries.setText(Integer.toString(1));
                         Toast.makeText(TestActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
-
                     } else {
                         start.setEnabled(false);
                         permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
@@ -280,14 +246,6 @@ public class TestActivity extends AppCompatActivity implements
                     result = checkAnAnswer();
                     if (triesCounter < permitedTriesNumber && !result) {
                         showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                        new AsyncTask<Void, Void, Void>() {
-
-                            @Override
-                            protected Void doInBackground(Void... params) {
-                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
-                                return null;
-                            }
-                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                         showTries.setText(Integer.toString(triesCounter + 1));
                     } else {
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
@@ -325,14 +283,6 @@ public class TestActivity extends AppCompatActivity implements
                             mySQLiteCursorLoader.clearThisFieldFromTestPaused(current_field_id);
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                            new AsyncTask<Void, Void, Void>() {
-
-                                @Override
-                                protected Void doInBackground(Void... params) {
-                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
-                                    return null;
-                                }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                             showQuestion.scrollTo(0,0);
                             showTries.setText(Integer.toString(triesCounter + 1));
                             ifMoreThanOnce();
@@ -524,549 +474,67 @@ public class TestActivity extends AppCompatActivity implements
         array[2] = permitedTriesNumber;
         mySQLiteCursorLoader.putTestPausedData(current_field_id,array);
     }
-/*    private String [][] getListForTest ( double percent ) {
-        int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
-        String[][] listForTest = new String[numberOfQuestions][2];
-        for (int i = 0; i < listForTest.length; i++) {
-            Arrays.fill(listForTest[i], "");
-        }
-        int counter = 0;
-        while (counter < numberOfQuestions) {
-            String question = null;
-            String answer = null;
-            boolean newPair = false;
-            int random = (int) (Math.random() * fieldEntriesCursor.getCount());
-            while (! newPair) {
-                for (int i = 0; i < listForTest.length; i++) {
-                    fieldEntriesCursor.moveToPosition(random);
-                    question = fieldEntriesCursor.getString(1);
-                    answer = fieldEntriesCursor.getString(2);
-                    if ( listForTest[i][0].equals(question) && listForTest[i][1].equals(answer) ) {
-                        newPair = false;
-                        random = (int) (Math.random() * fieldEntriesCursor.getCount());
-                        break;
-                    }
-                    newPair = true;
-                }
+    /*    private String [][] getListForTest ( double percent ) {
+            int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
+            String[][] listForTest = new String[numberOfQuestions][2];
+            for (int i = 0; i < listForTest.length; i++) {
+                Arrays.fill(listForTest[i], "");
             }
-            listForTest[counter][0] = question;
-            listForTest[counter][1] = answer;
-            counter++;
-        }
-        return listForTest;
-    }*/
+            int counter = 0;
+            while (counter < numberOfQuestions) {
+                String question = null;
+                String answer = null;
+                boolean newPair = false;
+                int random = (int) (Math.random() * fieldEntriesCursor.getCount());
+                while (! newPair) {
+                    for (int i = 0; i < listForTest.length; i++) {
+                        fieldEntriesCursor.moveToPosition(random);
+                        question = fieldEntriesCursor.getString(1);
+                        answer = fieldEntriesCursor.getString(2);
+                        if ( listForTest[i][0].equals(question) && listForTest[i][1].equals(answer) ) {
+                            newPair = false;
+                            random = (int) (Math.random() * fieldEntriesCursor.getCount());
+                            break;
+                        }
+                        newPair = true;
+                    }
+                }
+                listForTest[counter][0] = question;
+                listForTest[counter][1] = answer;
+                counter++;
+            }
+            return listForTest;
+        }*/
     private String [][] getListForTest ( double percent ) {
         int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
         String[][] listForTest = new String[numberOfQuestions][2];
-        long [] list_for_test_ids = new long[numberOfQuestions];
-        if ( wrongness_level == -1 && rank_level == -1 && controlled_portion == -1 ) {
-            String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-            long [] list_of_entries_ids = new long[fieldEntriesCursor.getCount()];
-            int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
-            int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
-            String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
-            String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-            long [] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-            long [] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
-            int asked = 0, didnot_asked = 0;
-            for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-                  fieldEntriesCursor.moveToNext() ) {
-                if ( fieldEntriesCursor.getInt(6) == Constants.TestRound.ASKED_AT_CURRENT_ROUND ) {
-                    list_of_entries_asked_current_round [asked][0] = fieldEntriesCursor.getString(1);
-                    list_of_entries_asked_current_round [asked][1] = fieldEntriesCursor.getString(2);
-                    list_of_entries_asked_current_round_ids [asked] = fieldEntriesCursor.getLong(0);
-                    asked++;
-                } else {
-                    list_of_entries_did_not_asked_current_round [didnot_asked][0] = fieldEntriesCursor.getString(1);
-                    list_of_entries_did_not_asked_current_round [didnot_asked][1] = fieldEntriesCursor.getString(2);
-                    list_of_entries_did_not_asked_current_round_ids [didnot_asked] = fieldEntriesCursor.getLong(0);
-                    didnot_asked++;
-                }
-                /*listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
-                listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
-                list_of_entries_ids[fieldEntriesCursor.getPosition()] = fieldEntriesCursor.getLong(0);*/
-            }
-            if ( numberOfQuestions <= did_not_asked_current_round ) {
-                shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                for ( int n = 0; n < listForTest.length; n++ ) {
-                    listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                    listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                    list_for_test_ids [n] = list_of_entries_did_not_asked_current_round_ids [n];
-                }
-                final long [] final_list_for_test_ids = list_for_test_ids;
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                return listForTest;
-            } else {
-                shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                for ( int n = 0; n < did_not_asked_current_round; n++ ) {
-                    listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                    listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                }
-                shuffleArray(list_of_entries_asked_current_round,list_of_entries_asked_current_round_ids);
-                for ( int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++ ) {
-                    listForTest [n][0] = list_of_entries_asked_current_round [i][0];
-                    listForTest [n][1] = list_of_entries_asked_current_round [i][1];
-                    list_for_test_ids [i] = list_of_entries_asked_current_round_ids [i];
-                }
-                final long [] final_list_for_test_ids = list_for_test_ids;
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                        databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                return listForTest;
-            }
-        } else {
-            int number_of_controlled_questions;
-            int number_of_uncontrolled_questions;
-            double controlled_percentage;
-            if ( controlled_portion == 0 ) {
-                controlled_percentage = 0.2;
-            } else if ( controlled_portion == 1 ) {
-                controlled_percentage = 0.4;
-            } else if ( controlled_portion == 2 ) {
-                controlled_percentage = 0.5;
-            } else if ( controlled_portion == 3 ) {
-                controlled_percentage = 0.6;
-            } else if ( controlled_portion == 4 ) {
-                controlled_percentage = 0.8;
-            } else  {
-                controlled_percentage = 1;
-            }
-            number_of_controlled_questions = (int) (numberOfQuestions * controlled_percentage);
-            number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
-            ArrayList<Object> arrayList = prepareControlledAndUncontrolled(rank_level,wrongness_level);
-            String[][] controlled_entries = (String[][]) arrayList.get(0);
-            String[][] uncontrolled_entries = (String[][]) arrayList.get(1);
-            long [] uncontrolled_entries_ids = (long[]) arrayList.get(2);
-            int [] uncontrolled_entries_whether_asked = (int[]) arrayList.get(3);
-            if ( controlled_entries == null ) {
-                int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
-                int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
-                String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
-                String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-                long [] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-                long [] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
-                int asked = 0, didnot_asked = 0;
-                for ( int n = 0; n < uncontrolled_entries.length; n++ ) {
-                    if ( uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND ) {
-                        list_of_entries_asked_current_round [asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_asked_current_round [asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_asked_current_round_ids [asked] = uncontrolled_entries_ids[n];
-                        asked++;
-                    } else {
-                        list_of_entries_did_not_asked_current_round [didnot_asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_did_not_asked_current_round [didnot_asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_did_not_asked_current_round_ids [didnot_asked] = uncontrolled_entries_ids[n];
-                        didnot_asked++;
-                    }
-                }
-                if ( numberOfQuestions <= did_not_asked_current_round ) {
-                    shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                    for ( int n = 0; n < listForTest.length; n++ ) {
-                        listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                        listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                        list_for_test_ids [n] = list_of_entries_did_not_asked_current_round_ids [n];
-                    }
-                    final long [] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                    return listForTest;
-                } else {
-                    shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                    for ( int n = 0; n < did_not_asked_current_round; n++ ) {
-                        listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                        listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                    }
-                    shuffleArray(list_of_entries_asked_current_round,list_of_entries_asked_current_round_ids);
-                    for ( int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++ ) {
-                        listForTest [n][0] = list_of_entries_asked_current_round [i][0];
-                        listForTest [n][1] = list_of_entries_asked_current_round [i][1];
-                        list_for_test_ids [i] = list_of_entries_asked_current_round_ids [i];
-                    }
-                    final long [] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                    return listForTest;
-                }
-               /* shuffleArray(uncontrolled_entries,uncontrolled_entries_ids);
-                for ( int n = 0; n < listForTest.length; n++ ) {
-                    listForTest [n][0] = uncontrolled_entries [n][0];
-                    listForTest [n][1] = uncontrolled_entries [n][1];
-                    list_for_test_ids [n] = uncontrolled_entries_ids [n];
-                }*/
-            } else if ( uncontrolled_entries == null ) {
-                shuffleArray(controlled_entries);
-                for ( int n = 0; n < listForTest.length; n++ ) {
-                    listForTest[n][0] = controlled_entries[n][0];
-                    listForTest[n][1] = controlled_entries[n][1];
-                }
-                return listForTest;
-            } else {
-                if (number_of_controlled_questions > controlled_entries.length) {
-                    number_of_controlled_questions = controlled_entries.length;
-                    number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
-                } else if (number_of_uncontrolled_questions > uncontrolled_entries.length) {
-                    number_of_uncontrolled_questions = uncontrolled_entries.length;
-                    number_of_controlled_questions = numberOfQuestions - number_of_uncontrolled_questions;
-                }
-                shuffleArray(controlled_entries);
-                for (int n = 0; n < number_of_controlled_questions; n++) {
-                    listForTest[n][0] = controlled_entries[n][0];
-                    listForTest[n][1] = controlled_entries[n][1];
-                }
-                int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
-                int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
-                String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
-                String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-                long[] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-                long[] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
-                int asked = 0, didnot_asked = 0;
-                for (int n = 0; n < uncontrolled_entries.length; n++) {
-                    if (uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
-                        list_of_entries_asked_current_round[asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_asked_current_round[asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_asked_current_round_ids[asked] = uncontrolled_entries_ids[n];
-                        asked++;
-                    } else {
-                        list_of_entries_did_not_asked_current_round[didnot_asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_did_not_asked_current_round[didnot_asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_did_not_asked_current_round_ids[didnot_asked] = uncontrolled_entries_ids[n];
-                        didnot_asked++;
-                    }
-                }
-                did_not_asked_current_round = didnot_asked;
-                list_of_entries_did_not_asked_current_round = Arrays.copyOfRange(list_of_entries_did_not_asked_current_round,0,didnot_asked);
-                list_of_entries_asked_current_round = Arrays.copyOfRange(list_of_entries_asked_current_round,0,asked);
-                if (number_of_uncontrolled_questions <= did_not_asked_current_round) {
-                    shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
-                    for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++, i++) {
-                        listForTest[n][0] = list_of_entries_did_not_asked_current_round[i][0];
-                        listForTest[n][1] = list_of_entries_did_not_asked_current_round[i][1];
-                        list_for_test_ids[i] = list_of_entries_did_not_asked_current_round_ids[i];
-                    }
-                    final long[] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                } else {
-                    shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
-                    for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + did_not_asked_current_round; n++, i++) {
-                        listForTest[n][0] = list_of_entries_did_not_asked_current_round[i][0];
-                        listForTest[n][1] = list_of_entries_did_not_asked_current_round[i][1];
-                    }
-                    shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
-                    for (int n = number_of_controlled_questions + did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++) {
-                        listForTest[n][0] = list_of_entries_asked_current_round[i][0];
-                        listForTest[n][1] = list_of_entries_asked_current_round[i][1];
-                        list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
-                    }
-                    final long[] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                /*shuffleArray(uncontrolled_entries,uncontrolled_entries_ids);
-                for ( int n = number_of_controlled_questions; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++ ) {
-                    listForTest[n][0] = uncontrolled_entries[n][0];
-                    listForTest[n][1] = uncontrolled_entries[n][1];
-                    list_for_test_ids [n] = uncontrolled_entries_ids [n];
-                }*/
-                    shuffleArray(listForTest);
-                }
-                return listForTest;
-            }
+        String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
+        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+              fieldEntriesCursor.moveToNext() ) {
+            listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
+            listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
         }
+        shuffleArray(listOfEntries);
+        for ( int n = 0; n < listForTest.length; n++ ) {
+            listForTest [n][0] = listOfEntries [n][0];
+            listForTest [n][1] = listOfEntries [n][1];
+        }
+        return listForTest;
     }
     private String [][] getListForTest ( int numberOfQuestions ) {
         String[][] listForTest = new String[numberOfQuestions][2];
-        long [] list_for_test_ids = new long[numberOfQuestions];
-        if ( wrongness_level == -1 && rank_level == -1 && controlled_portion == -1 ) {
-            String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-            long [] list_of_entries_ids = new long[fieldEntriesCursor.getCount()];
-            int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
-            int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
-            String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
-            String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-            long [] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-            long [] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
-            int asked = 0, didnot_asked = 0;
-            for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-                  fieldEntriesCursor.moveToNext() ) {
-                if ( fieldEntriesCursor.getInt(6) == Constants.TestRound.ASKED_AT_CURRENT_ROUND ) {
-                    list_of_entries_asked_current_round [asked][0] = fieldEntriesCursor.getString(1);
-                    list_of_entries_asked_current_round [asked][1] = fieldEntriesCursor.getString(2);
-                    list_of_entries_asked_current_round_ids [asked] = fieldEntriesCursor.getLong(0);
-                    asked++;
-                } else {
-                    list_of_entries_did_not_asked_current_round [didnot_asked][0] = fieldEntriesCursor.getString(1);
-                    list_of_entries_did_not_asked_current_round [didnot_asked][1] = fieldEntriesCursor.getString(2);
-                    list_of_entries_did_not_asked_current_round_ids [didnot_asked] = fieldEntriesCursor.getLong(0);
-                    didnot_asked++;
-                }
-                /*listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
-                listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
-                list_of_entries_ids[fieldEntriesCursor.getPosition()] = fieldEntriesCursor.getLong(0);*/
-            }
-            if ( numberOfQuestions <= did_not_asked_current_round ) {
-                shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                for ( int n = 0; n < listForTest.length; n++ ) {
-                    listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                    listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                    list_for_test_ids [n] = list_of_entries_did_not_asked_current_round_ids [n];
-                }
-                final long [] final_list_for_test_ids = list_for_test_ids;
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                return listForTest;
-            } else {
-                shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                for ( int n = 0; n < did_not_asked_current_round; n++ ) {
-                    listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                    listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                }
-                shuffleArray(list_of_entries_asked_current_round,list_of_entries_asked_current_round_ids);
-                for ( int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++ ) {
-                    listForTest [n][0] = list_of_entries_asked_current_round [i][0];
-                    listForTest [n][1] = list_of_entries_asked_current_round [i][1];
-                    list_for_test_ids [i] = list_of_entries_asked_current_round_ids [i];
-                }
-                final long [] final_list_for_test_ids = list_for_test_ids;
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                        databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                return listForTest;
-            }
-        } else {
-            int number_of_controlled_questions;
-            int number_of_uncontrolled_questions;
-            double controlled_percentage;
-            if ( controlled_portion == 0 ) {
-                controlled_percentage = 0.2;
-            } else if ( controlled_portion == 1 ) {
-                controlled_percentage = 0.4;
-            } else if ( controlled_portion == 2 ) {
-                controlled_percentage = 0.5;
-            } else if ( controlled_portion == 3 ) {
-                controlled_percentage = 0.6;
-            } else if ( controlled_portion == 4 ) {
-                controlled_percentage = 0.8;
-            } else  {
-                controlled_percentage = 1;
-            }
-            number_of_controlled_questions = (int) (numberOfQuestions * controlled_percentage);
-            number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
-            ArrayList<Object> arrayList = prepareControlledAndUncontrolled(rank_level,wrongness_level);
-            String[][] controlled_entries = (String[][]) arrayList.get(0);
-            String[][] uncontrolled_entries = (String[][]) arrayList.get(1);
-            long [] uncontrolled_entries_ids = (long[]) arrayList.get(2);
-            int [] uncontrolled_entries_whether_asked = (int[]) arrayList.get(3);
-            if ( controlled_entries == null ) {
-                int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
-                int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
-                String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
-                String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-                long [] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-                long [] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
-                int asked = 0, didnot_asked = 0;
-                for ( int n = 0; n < uncontrolled_entries.length; n++ ) {
-                    if ( uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND ) {
-                        list_of_entries_asked_current_round [asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_asked_current_round [asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_asked_current_round_ids [asked] = uncontrolled_entries_ids[n];
-                        asked++;
-                    } else {
-                        list_of_entries_did_not_asked_current_round [didnot_asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_did_not_asked_current_round [didnot_asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_did_not_asked_current_round_ids [didnot_asked] = uncontrolled_entries_ids[n];
-                        didnot_asked++;
-                    }
-                }
-                if ( numberOfQuestions <= did_not_asked_current_round ) {
-                    shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                    for ( int n = 0; n < listForTest.length; n++ ) {
-                        listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                        listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                        list_for_test_ids [n] = list_of_entries_did_not_asked_current_round_ids [n];
-                    }
-                    final long [] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                    return listForTest;
-                } else {
-                    shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                    for ( int n = 0; n < did_not_asked_current_round; n++ ) {
-                        listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                        listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                    }
-                    shuffleArray(list_of_entries_asked_current_round,list_of_entries_asked_current_round_ids);
-                    for ( int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++ ) {
-                        listForTest [n][0] = list_of_entries_asked_current_round [i][0];
-                        listForTest [n][1] = list_of_entries_asked_current_round [i][1];
-                        list_for_test_ids [i] = list_of_entries_asked_current_round_ids [i];
-                    }
-                    final long [] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                    return listForTest;
-                }
-               /* shuffleArray(uncontrolled_entries,uncontrolled_entries_ids);
-                for ( int n = 0; n < listForTest.length; n++ ) {
-                    listForTest [n][0] = uncontrolled_entries [n][0];
-                    listForTest [n][1] = uncontrolled_entries [n][1];
-                    list_for_test_ids [n] = uncontrolled_entries_ids [n];
-                }*/
-            } else if ( uncontrolled_entries == null ) {
-                shuffleArray(controlled_entries);
-                for ( int n = 0; n < listForTest.length; n++ ) {
-                    listForTest[n][0] = controlled_entries[n][0];
-                    listForTest[n][1] = controlled_entries[n][1];
-                }
-                return listForTest;
-            } else {
-                if (number_of_controlled_questions > controlled_entries.length) {
-                    number_of_controlled_questions = controlled_entries.length;
-                    number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
-                } else if (number_of_uncontrolled_questions > uncontrolled_entries.length) {
-                    number_of_uncontrolled_questions = uncontrolled_entries.length;
-                    number_of_controlled_questions = numberOfQuestions - number_of_uncontrolled_questions;
-                }
-                shuffleArray(controlled_entries);
-                for (int n = 0; n < number_of_controlled_questions; n++) {
-                    listForTest[n][0] = controlled_entries[n][0];
-                    listForTest[n][1] = controlled_entries[n][1];
-                }
-                int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
-                int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
-                String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
-                String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-                long[] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-                long[] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
-                int asked = 0, didnot_asked = 0;
-                for (int n = 0; n < uncontrolled_entries.length; n++) {
-                    if (uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
-                        list_of_entries_asked_current_round[asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_asked_current_round[asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_asked_current_round_ids[asked] = uncontrolled_entries_ids[n];
-                        asked++;
-                    } else {
-                        list_of_entries_did_not_asked_current_round[didnot_asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_did_not_asked_current_round[didnot_asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_did_not_asked_current_round_ids[didnot_asked] = uncontrolled_entries_ids[n];
-                        didnot_asked++;
-                    }
-                }
-                did_not_asked_current_round = didnot_asked;
-                list_of_entries_did_not_asked_current_round = Arrays.copyOfRange(list_of_entries_did_not_asked_current_round,0,didnot_asked);
-                list_of_entries_asked_current_round = Arrays.copyOfRange(list_of_entries_asked_current_round,0,asked);
-                if (number_of_uncontrolled_questions <= did_not_asked_current_round) {
-                    shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
-                    for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++, i++) {
-                        listForTest[n][0] = list_of_entries_did_not_asked_current_round[i][0];
-                        listForTest[n][1] = list_of_entries_did_not_asked_current_round[i][1];
-                        list_for_test_ids[i] = list_of_entries_did_not_asked_current_round_ids[i];
-                    }
-                    final long[] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                } else {
-                    shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
-                    for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + did_not_asked_current_round; n++, i++) {
-                        listForTest[n][0] = list_of_entries_did_not_asked_current_round[i][0];
-                        listForTest[n][1] = list_of_entries_did_not_asked_current_round[i][1];
-                    }
-                    shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
-                    for (int n = number_of_controlled_questions + did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++) {
-                        listForTest[n][0] = list_of_entries_asked_current_round[i][0];
-                        listForTest[n][1] = list_of_entries_asked_current_round[i][1];
-                        list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
-                    }
-                    final long[] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                /*shuffleArray(uncontrolled_entries,uncontrolled_entries_ids);
-                for ( int n = number_of_controlled_questions; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++ ) {
-                    listForTest[n][0] = uncontrolled_entries[n][0];
-                    listForTest[n][1] = uncontrolled_entries[n][1];
-                    list_for_test_ids [n] = uncontrolled_entries_ids [n];
-                }*/
-                    shuffleArray(listForTest);
-                }
-                return listForTest;
-            }
+        String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
+        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+              fieldEntriesCursor.moveToNext() ) {
+            listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
+            listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
         }
+        shuffleArray(listOfEntries);
+        for ( int n = 0; n < listForTest.length; n++ ) {
+            listForTest [n][0] = listOfEntries [n][0];
+            listForTest [n][1] = listOfEntries [n][1];
+        }
+        return listForTest;
     }
     private void shuffleArray( String [][] array )
     {
@@ -1081,24 +549,6 @@ public class TestActivity extends AppCompatActivity implements
             array[index][1] = array[i][1];
             array[i][0] = question;
             array[i][1] = answer;
-        }
-    }
-    private void shuffleArray( String [][] strings_array, long [] ids )
-    {
-        Random rnd = new Random();
-        for (int i = strings_array.length - 1; i > 0; i--)
-        {
-            int index = rnd.nextInt(i + 1);
-            // Simple swap
-            String question = strings_array[index][0];
-            String answer = strings_array [index][1];
-            long id = ids [index];
-            strings_array[index][0] = strings_array[i][0];
-            strings_array[index][1] = strings_array[i][1];
-            ids [index] = ids [i];
-            strings_array[i][0] = question;
-            strings_array[i][1] = answer;
-            ids [i] = id;
         }
     }
     private void ifMoreThanOnce() {
@@ -1125,7 +575,6 @@ public class TestActivity extends AppCompatActivity implements
     }
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
-        mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
         Runnable mRunnable;
         boolean result = false;
         if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
@@ -1152,7 +601,6 @@ public class TestActivity extends AppCompatActivity implements
             else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0,0,0,0);
-                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1196,7 +644,6 @@ public class TestActivity extends AppCompatActivity implements
             else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0,0,0,0);
-                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1240,7 +687,6 @@ public class TestActivity extends AppCompatActivity implements
             else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0,0,0,0);
-                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1284,7 +730,6 @@ public class TestActivity extends AppCompatActivity implements
             else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
                 showResult.setPadding(0,0,0,0);
-                mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1328,33 +773,10 @@ public class TestActivity extends AppCompatActivity implements
         return listForTest;
     }
 
-    private long getEntry_id( String queston, String answer ) {
-        long entry_id = 0;
-        boolean which_cursor = boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
-            if ( which_cursor ) { // continue previous session
-                if ( fieldEntriesCursor.getString(0).equals(queston) && fieldEntriesCursor.getString(1).equals(answer) ) {
-                    entry_id = fieldEntriesCursor.getLong(3);
-                    break;
-                }
-            } else {
-                if ( fieldEntriesCursor.getString(1).equals(queston) && fieldEntriesCursor.getString(2).equals(answer) ) {
-                    entry_id = fieldEntriesCursor.getLong(0);
-                    break;
-                }
-            }
-        }
-        return entry_id;
-    }
-
     @Override
     protected void onPause() {
-        lastPause = SystemClock.elapsedRealtime() - timer.getBase();
-        timer.stop();
-        retainedFragment.setListForTest_TestActivity(listForTest);
         super.onPause();
-
+        retainedFragment.setListForTest_TestActivity(listForTest);
     }
 
     @Override
@@ -1384,10 +806,6 @@ public class TestActivity extends AppCompatActivity implements
         savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         savedInsatanceState.putBoolean(BOOLEAN_CONTINUE,boolean_continue);
-        savedInsatanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
-        savedInsatanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
-        savedInsatanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
-        savedInsatanceState.putLong(TIMER_LAST_PAUSE,lastPause);
         saveUserLayoutChanges(savedInsatanceState);
        /* if ( ! isFinishing() ) {
             pauseThread.start();
@@ -1398,8 +816,6 @@ public class TestActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        timer.setBase( SystemClock.elapsedRealtime() - lastPause);
-        timer.start();
         mTracker.setScreenName( SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
@@ -1421,10 +837,8 @@ public class TestActivity extends AppCompatActivity implements
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
-        current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
 //        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
         boolean_continue = savedInstanceState.getBoolean(BOOLEAN_CONTINUE);
-        lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         restoreUserLayoutChanges(savedInstanceState);
         if ( testingNow ) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -1493,8 +907,7 @@ public class TestActivity extends AppCompatActivity implements
         if ( id == CONTINUE_PREVIOUS_SESSION ) {
             return new MySQLiteCursorLoader(TestActivity.this,
                     "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a , se." + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER + " , se." + Contract.COLUMN_ID
-                            + " FROM " + Contract.STring.TABLE_NAME
+                            + " a , se." + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                             + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
@@ -1511,10 +924,7 @@ public class TestActivity extends AppCompatActivity implements
         } else {
             return new MySQLiteCursorLoader(TestActivity.this,
                     "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
-                            + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                            + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
-                            + " FROM " + Contract.STring.TABLE_NAME
+                            + " a " + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                             + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
@@ -1540,14 +950,6 @@ public class TestActivity extends AppCompatActivity implements
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                 showTries.setText(Integer.toString(triesCounter + 1));
                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
 //                start.setEnabled(false);
 
 
@@ -1556,10 +958,10 @@ public class TestActivity extends AppCompatActivity implements
                 enterAnswer.requestFocus();
                 testingNow = true;
                 wrongAnswers = new ArrayList<String>(permitedTriesNumber);
-//                boolean_continue = false;
+                boolean_continue = false;
                 ifMoreThanOnce();
-/*                getLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
-                getLoaderManager().initLoader(START_NEW_SESSION,null,this);*/
+                getLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
+                getLoaderManager().initLoader(START_NEW_SESSION,null,this);
             }
         } else {
             if ( listForTest == null ) {
@@ -1573,29 +975,14 @@ public class TestActivity extends AppCompatActivity implements
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                 showTries.setText(Integer.toString(triesCounter + 1));
                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                 enterAnswer.requestFocus();
-                 testingNow = true;
+                testingNow = true;
                 wrongAnswers = new ArrayList<String>(permitedTriesNumber);
                 boolean_continue = false;
                 ifMoreThanOnce();
             }
         }
-        crossfade();
     }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        fieldEntriesCursor = null;
-    }
-
     @Override
     public void onInit(int i) {
         if ( tts_available ) {
@@ -1615,98 +1002,8 @@ public class TestActivity extends AppCompatActivity implements
             }
         }
     }
-    private ArrayList<Object> prepareControlledAndUncontrolled( int rank, int wrongness_postion ) {
-        String[][] controlled = new String[fieldEntriesCursor.getCount()][2];
-        String[][] uncontrolled = new String[fieldEntriesCursor.getCount()][2];
-        long [] uncontrolled_ids = new long [fieldEntriesCursor.getCount()];
-        int [] uncontrolled_whether_asked = new int[fieldEntriesCursor.getCount()];
-        double wrongness;
-        if ( wrongness_postion == 0 ) {
-            wrongness = 0;
-        } else if ( wrongness_postion == 1 ) {
-            wrongness = 0.2;
-        } else if ( wrongness_postion == 2 ) {
-            wrongness = 0.4;
-        } else if ( wrongness_postion == 3 ) {
-            wrongness = 0.6;
-        } else if ( wrongness_postion == 4 ) {
-            wrongness = 0.8;
-        } else  {
-            wrongness = 1;
-        }
-        int controlled_counter = 0, uncontrolled_counter = 0;
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
-            double entry_wrongness;
-            if ( fieldEntriesCursor.getInt(4) > 0 ) {
-                entry_wrongness = (double) fieldEntriesCursor.getInt(5) / fieldEntriesCursor.getInt(4);
-            } else {
-                entry_wrongness = -1;
-            }
-            if ( fieldEntriesCursor.getInt(3) >= rank && entry_wrongness >= wrongness ) {
-                controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
-                controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
-                controlled_counter++;
-            } else if ( fieldEntriesCursor.getInt(3) >= rank && wrongness <= 0 ) {
-                controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
-                controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
-                controlled_counter++;
-            } else if ( fieldEntriesCursor.getInt(3) >= rank ) {
-                uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
-                uncontrolled[uncontrolled_counter][1] = fieldEntriesCursor.getString(2);
-                uncontrolled_ids[uncontrolled_counter] = fieldEntriesCursor.getLong(0);
-                uncontrolled_whether_asked[uncontrolled_counter] = fieldEntriesCursor.getInt(6);
-                uncontrolled_counter++;
-            } else {
-                uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
-                uncontrolled[uncontrolled_counter][1] = fieldEntriesCursor.getString(2);
-                uncontrolled_ids[uncontrolled_counter] = fieldEntriesCursor.getLong(0);
-                uncontrolled_whether_asked[uncontrolled_counter] = fieldEntriesCursor.getInt(6);
-                uncontrolled_counter++;
-            }
-        }
-        ArrayList<Object> arrayList = new ArrayList<>();
-        if ( controlled_counter > 0 ) {
-            arrayList.add(Arrays.copyOfRange(controlled,0,controlled_counter));
-        } else {
-            arrayList.add(null);
-        }
-        if ( uncontrolled_counter > 0 ) {
-            arrayList.add(Arrays.copyOfRange(uncontrolled,0,uncontrolled_counter));
-            arrayList.add(Arrays.copyOfRange(uncontrolled_ids,0,uncontrolled_counter));
-            arrayList.add(Arrays.copyOfRange(uncontrolled_whether_asked,0,uncontrolled_counter));
-        } else {
-            arrayList.add(null);
-            arrayList.add(null);
-            arrayList.add(null);
-        }
-        return arrayList;
-    }
-    private void crossfade() {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        content.setAlpha(0f);
-        content.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        content.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        mLoadingView.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLoadingView.setVisibility(View.GONE);
-                    }
-                });
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        fieldEntriesCursor = null;
     }
 }

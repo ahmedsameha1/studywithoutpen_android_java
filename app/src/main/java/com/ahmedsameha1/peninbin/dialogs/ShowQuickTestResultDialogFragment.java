@@ -2,24 +2,17 @@ package com.ahmedsameha1.peninbin.dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
-import android.view.View;
-import android.widget.Button;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.TestActivity;
-import com.ahmedsameha1.peninbin.activities.WrongAnswersActivity;
-import com.ahmedsameha1.peninbin.adapters.WrongItem;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 
 /**
  * Created by ahmed on 7/22/2015.
@@ -35,8 +28,8 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         databaseOperations = new DatabaseOperations(getActivity());
-        questionsNumber = getArguments().getInt(TestActivity.NUMBER_OF_QUESTIONS);
-        wrongAnswersNumber = getArguments().getInt(TestActivity.NUMBER_OF_WRONG_ANSWERS);
+        questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
+        wrongAnswersNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) /questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();

@@ -26,16 +26,14 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
-import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 
 import java.util.Calendar;
@@ -235,14 +233,14 @@ public class QuickTestDialogFragment extends DialogFragment {
                                         if (number_or_percentage.getSelectedItemPosition() == 1) {
                                             if (number <= 100 && number > 0) {
                                                 Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
-                                                intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.PERCENTAGE);
-                                                intent.putExtra(TestActivity.QUESTION_PERCENTAGE, number);
-                                                intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, trys);
+                                                intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
+                                                intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, number);
+                                                intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
                                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                                 if ( control_test_entries.isChecked() ) {
-                                                    intent.putExtra(TestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
-                                                    intent.putExtra(TestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
-                                                    intent.putExtra(TestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
+                                                    intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
+                                                    intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
+                                                    intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
                                                 }
                                                 final Calendar calendar_picked_date_time = Calendar.getInstance();
                                                 calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
@@ -255,12 +253,12 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                 if ( control_test_entries.isChecked() ) {
                                                     mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
                                                             ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                            TestActivity.PERCENTAGE,number,trys,controlled_portion.getSelectedItemPosition(),
+                                                            EnhancedTestActivity.PERCENTAGE,number,trys,controlled_portion.getSelectedItemPosition(),
                                                             wrongness.getSelectedItemPosition(),rank.getSelectedItemPosition());
                                                 } else {
                                                     mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
                                                             ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                            TestActivity.PERCENTAGE,number,trys, -1, -1, -1);
+                                                            EnhancedTestActivity.PERCENTAGE,number,trys, -1, -1, -1);
                                                 }
                                                 final Snackbar snackbar = Snackbar
                                                         .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
@@ -287,14 +285,14 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                     databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                                             if ( number > 0 && number <= currentNumberOfEntries) {
                                                 Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
-                                                intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
-                                                intent.putExtra(TestActivity.QUESTION_NUMBER, number);
-                                                intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, trys);
+                                                intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
+                                                intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, number);
+                                                intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
                                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                                 if ( control_test_entries.isChecked() ) {
-                                                    intent.putExtra(TestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
-                                                    intent.putExtra(TestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
-                                                    intent.putExtra(TestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
+                                                    intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
+                                                    intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
+                                                    intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
                                                 }
                                                 final Calendar calendar_picked_date_time = Calendar.getInstance();
                                                 calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
@@ -309,7 +307,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                 } else {
                                                     mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
                                                         ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                        TestActivity.NUMBER,number,trys, -1, -1, -1);
+                                                        EnhancedTestActivity.NUMBER,number,trys, -1, -1, -1);
                                                 }
                                                 final Snackbar snackbar = Snackbar
                                                         .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);

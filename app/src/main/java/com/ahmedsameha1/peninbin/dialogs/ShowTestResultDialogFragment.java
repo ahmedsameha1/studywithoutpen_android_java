@@ -10,10 +10,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.activities.WrongAnswersActivity;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
@@ -41,8 +41,8 @@ public class ShowTestResultDialogFragment extends DialogFragment {
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
 /*        wrongItemList = (ArrayList<WrongItem>) getArguments()
                 .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);*/
-        questionsNumber = getArguments().getInt(TestActivity.NUMBER_OF_QUESTIONS);
-        wrongAnswersNumber = getArguments().getInt(TestActivity.NUMBER_OF_WRONG_ANSWERS);
+        questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
+        wrongAnswersNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) /questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();

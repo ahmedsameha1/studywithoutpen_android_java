@@ -6,8 +6,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".AnalyticsApplication"
@@ -51,6 +51,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
+
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
@@ -64,7 +65,7 @@
                 android:value="com.ahmedsameha1.peninbin.activities.SearchActivity" />
         </activity>
         <activity
-            android:name=".activities.TestActivity"
+            android:name=".activities.EnhancedTestActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysVisible" />
@@ -73,6 +74,10 @@
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysVisible" />
+        <activity
+            android:name=".activities.TestActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateAlwaysVisible"/>
         <activity
             android:name=".activities.AddEntryActivity"
             android:label="@string/app_name"
@@ -148,6 +153,7 @@
             android:theme="@style/FilePickerTheme">
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -157,14 +163,17 @@
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="file" />
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\\.swp" />
                 <data android:host="*" />
             </intent-filter>
         </activity>
+
         <receiver
             android:name=".receivers_services.ShowScheduledNotificationsReceiver"
             android:enabled="true"
@@ -175,17 +184,19 @@
             android:exported="false" />
         <receiver android:name=".receivers_services.BootCompletedReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 
-        <activity android:name=".secondary_activities.ShowNotificationDialogsActivity"></activity>
+        <activity android:name=".secondary_activities.ShowNotificationDialogsActivity" />
+
         <service
             android:name=".receivers_services.RandomQuickTestsSchedulingService"
-            android:exported="false"/>
+            android:exported="false" />
+
 
     </application>
 

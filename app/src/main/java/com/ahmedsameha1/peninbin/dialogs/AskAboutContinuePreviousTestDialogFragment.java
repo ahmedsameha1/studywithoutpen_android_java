@@ -7,11 +7,11 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.TestActivity;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 
 /**
@@ -39,9 +39,9 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(getActivity(), TestActivity.class);
+                                Intent intent = new Intent(getActivity(), EnhancedTestActivity.class);
                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE,true);
+                                intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE,true);
                                 startActivity(intent);
                                 if ( from_notification ) {
                                     getActivity().finish();
@@ -58,9 +58,9 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                 mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,question_data_type);
                                 Bundle bundle = new Bundle();
                                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                                TestDialogFragment dialogFragment = new TestDialogFragment();
+                                EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
                                 dialogFragment.setArguments(bundle);
-                                dialogFragment.show(getActivity().getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
+                                dialogFragment.show(getActivity().getSupportFragmentManager(), EnhancedTestDialogFragment.TEST_DIALOG_FRAGMENT);
                                 dismiss();
                             }
                         }

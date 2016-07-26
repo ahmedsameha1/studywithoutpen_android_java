@@ -11,14 +11,13 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
-import com.ahmedsameha1.peninbin.activities.TestActivity;
-import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.QuickTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.TestDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 
 public class ShowNotificationDialogsActivity extends AppCompatActivity {
@@ -53,7 +52,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
 
                     break;
                 case TEST_DIALOG:
-                    if (!sharedPreferences.contains(TestActivity.ACTIVITY_NAME + TestActivity.PAUSING + current_field_id)) {
+                    if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)) {
 
                         if (number_of_entries > 0) {
                             if (databaseOperations.isThisFieldTestPaused(current_field_id)) {
@@ -61,9 +60,9 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                                 fragment3.setArguments(bundle);
                                 fragment3.show(getSupportFragmentManager(), FieldActivity.CHECK_IF_CONTINUE_TEST_SESSION);
                             } else {
-                                TestDialogFragment dialogFragment = new TestDialogFragment();
+                                EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
                                 dialogFragment.setArguments(bundle);
-                                dialogFragment.show(getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
+                                dialogFragment.show(getSupportFragmentManager(), EnhancedTestDialogFragment.TEST_DIALOG_FRAGMENT);
                             }
                         } else {
                             Toast toast = Toast.makeText(this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
