@@ -19,11 +19,11 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.TestActivity;
 
 /**
  * Created by a on 7/25/16.
@@ -167,12 +167,12 @@ public class TestDialogFragment extends DialogFragment {
                                         Double number = Double.parseDouble(enterNumber.getText().toString());
                                         if (number_or_percentage.getSelectedItemPosition() == 1) {
                                             if (number <= 100 && number > 0) {
-                                                Intent intent = new Intent(getActivity(), TestActivity.class);
-                                                intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.PERCENTAGE);
-                                                intent.putExtra(TestActivity.QUESTION_PERCENTAGE, number);
-                                                intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, trys);
+                                                Intent intent = new Intent(getActivity(), FullyRandomTestActivity.class);
+                                                intent.putExtra(FullyRandomTestActivity.PERCENTAGE_OR_NUMBER, FullyRandomTestActivity.PERCENTAGE);
+                                                intent.putExtra(FullyRandomTestActivity.QUESTION_PERCENTAGE, number);
+                                                intent.putExtra(FullyRandomTestActivity.PERMITED_TRIES_NUMBER, trys);
                                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                                intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE, false);
+                                                intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                                 startActivity(intent);
                                                 if ( from_notification ) {
                                                     getActivity().finish();
@@ -189,12 +189,12 @@ public class TestDialogFragment extends DialogFragment {
                                                     databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                                             int numberInt = Double.valueOf(number).intValue();
                                             if ( numberInt > 0 && numberInt <= currentNumberOfEntries) {
-                                                Intent intent = new Intent(getActivity(), TestActivity.class);
-                                                intent.putExtra(TestActivity.PERCENTAGE_OR_NUMBER, TestActivity.NUMBER);
-                                                intent.putExtra(TestActivity.QUESTION_NUMBER, numberInt);
-                                                intent.putExtra(TestActivity.PERMITED_TRIES_NUMBER, trys);
+                                                Intent intent = new Intent(getActivity(), FullyRandomTestActivity.class);
+                                                intent.putExtra(FullyRandomTestActivity.PERCENTAGE_OR_NUMBER, FullyRandomTestActivity.NUMBER);
+                                                intent.putExtra(FullyRandomTestActivity.QUESTION_NUMBER, numberInt);
+                                                intent.putExtra(FullyRandomTestActivity.PERMITED_TRIES_NUMBER, trys);
                                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                                intent.putExtra(TestActivity.LAST_SESSION_OR_NEW_ONE, false);
+                                                intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                                 startActivity(intent);
                                                 if ( from_notification ) {
                                                     getActivity().finish();

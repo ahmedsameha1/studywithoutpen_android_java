@@ -16,9 +16,9 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 
 import java.util.Date;
 
@@ -81,11 +81,11 @@ public class StudyDuringDialogFragment extends DialogFragment {
                                         //                            long nowInMilliseconds = now.getTime();
                                         long nowInMilliseconds = System.currentTimeMillis();
                                         long startingTime = nowInMilliseconds - duration;
-                                        Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
+                                        Intent intent = new Intent(getActivity(),StudyAPeriodActivity.class);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                                        intent.putExtra(StudyDuringActivity.STARTING_TIME,startingTime);
-                                        intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,false);
-                                        intent.putExtra(StudyDuringActivity.NUMBER_OF_TRIES,trys);
+                                        intent.putExtra(StudyAPeriodActivity.STARTING_TIME,startingTime);
+                                        intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE,false);
+                                        intent.putExtra(StudyAPeriodActivity.NUMBER_OF_TRIES,trys);
                                         startActivity(intent);
                                         if ( from_notification ) {
                                             getActivity().finish();

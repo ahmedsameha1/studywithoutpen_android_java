@@ -8,11 +8,11 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
 
+import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 
 /**
@@ -39,9 +39,9 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                             public void onClick(DialogInterface dialog, int which) {
 
 //                        ((Contact) getActivity()).continueStudyDuring(true);
-                                Intent intent = new Intent(getActivity(),StudyDuringActivity.class);
+                                Intent intent = new Intent(getActivity(),StudyAPeriodActivity.class);
                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,(current_field_id));
-                                intent.putExtra(StudyDuringActivity.LAST_SESSION_OR_NEW_ONE,true);
+                                intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE,true);
                                 startActivity(intent);
                                 if ( from_notification ) {
                                     getActivity().finish();

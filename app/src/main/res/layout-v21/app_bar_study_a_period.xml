@@ -75,7 +75,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_study_during" />
+    <include layout="@layout/content_study_a_period" />
     <ProgressBar android:id="@+id/loading"
         style="?android:progressBarStyleLarge"
         android:layout_width="wrap_content"

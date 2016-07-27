@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <include
-        layout="@layout/app_bar_study_during"
+        layout="@layout/app_bar_study_a_period"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

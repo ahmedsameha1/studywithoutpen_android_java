@@ -45,7 +45,6 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
-import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -59,13 +58,13 @@ import java.util.StringTokenizer;
 /**
  * Created by ahmed_000 on 9/23/2015.
  */
-public class StudyDuringActivity extends AppCompatActivity implements
+public class StudyAPeriodActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener {
-    public static final String SCREEN_NAME = "StudyDuringActivity";
-    public static final String ACTIVITY_NAME = "StudyDuringActivity";
+    public static final String SCREEN_NAME = "StudyAPeriodActivity";
+    public static final String ACTIVITY_NAME = "StudyAPeriodActivity";
     public static final String STARTING_TIME = "startingTime";
     public static final String REPEATED_ENTRIES = "repeatedEntries";
     public static final String STRING_REPRESENTING_REPEATED_ENTRIES = "strigRepresentingRepeatedEntries";
@@ -140,11 +139,11 @@ public class StudyDuringActivity extends AppCompatActivity implements
                 pauseRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyDuringActivity.this);
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyAPeriodActivity.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
                         editor.commit();
-                        Toast toast = Toast.makeText(StudyDuringActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
+                        Toast toast = Toast.makeText(StudyAPeriodActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
@@ -157,7 +156,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_study_during);
+        setContentView(R.layout.activity_study_a_period);
         boolean isReadAnswer;
         int question_area_size,answer_area_size,test_text_size,action_bar_shown;
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
@@ -313,7 +312,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                         }
                     }
                 } else {
-                    Toast toast = Toast.makeText(StudyDuringActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(StudyAPeriodActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
@@ -328,7 +327,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                     if (enterAnswer.getText().toString().length() <= 0) {
                         enterAnswer.setHint(hints.get(hintCounter++));
                     } else {
-                        Toast toast = Toast.makeText(StudyDuringActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(StudyAPeriodActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
@@ -400,7 +399,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(StudyDuringActivity.this,
+                Toast toast = Toast.makeText(StudyAPeriodActivity.this,
                         getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
@@ -410,7 +409,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(StudyDuringActivity.this,
+                Toast toast = Toast.makeText(StudyAPeriodActivity.this,
                         getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
@@ -420,7 +419,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(StudyDuringActivity.this,
+                Toast toast = Toast.makeText(StudyAPeriodActivity.this,
                         getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
@@ -894,7 +893,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
         if (id == CONTINUE_PREVIOUS_SESSION) {
 
-            return new MySQLiteCursorLoader(StudyDuringActivity.this,
+            return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
                     "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
                             + " FROM " + Contract.STring.TABLE_NAME
@@ -917,7 +916,7 @@ public class StudyDuringActivity extends AppCompatActivity implements
                     new String[] {current_field_name},
                     null);*/
         } else {
-            return new MySQLiteCursorLoader(StudyDuringActivity.this,
+            return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
                     "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
                             + " FROM " + Contract.STring.TABLE_NAME

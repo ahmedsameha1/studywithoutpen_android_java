@@ -9,8 +9,8 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
@@ -77,7 +77,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                     }
                     break;
                 case STUDY_PERIOD_DIALOG:
-                    if (!sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + current_field_id)) {
+                    if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id)) {
 
                         if (number_of_entries > 0) {
                             if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {

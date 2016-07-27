@@ -1,18 +1,18 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
 import android.content.Loader;
 import android.speech.tts.TextToSpeech;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -27,6 +27,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +41,6 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
-import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -50,14 +50,14 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-public class TestActivity extends AppCompatActivity implements
+public class FullyRandomTestActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener {
 
-    public static final String SCREEN_NAME = "TestActivity";
-    public static final String ACTIVITY_NAME = "TestActivity";
+    public static final String SCREEN_NAME = "FullyRandomTestActivity";
+    public static final String ACTIVITY_NAME = "FullyRandomTestActivity";
     public static final String PERCENTAGE_OR_NUMBER = "percentage_or_number";
     public static final String QUESTION_PERCENTAGE = "question_percentage";
     public static final String QUESTION_NUMBER = "question_number";
@@ -88,6 +88,8 @@ public class TestActivity extends AppCompatActivity implements
     private static final String QUESTION_LAYOUT = "user_defined_question_layout";
     private static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     private static final String TEXT_SIZE = "user_defined_question_text_size";
+    private static final String CONTENT_VISIBILITY = "content_visibility";
+    private static final String LOADING_VISIBILITY = "loading_visibility";
     public static final String PAUSING = "pausing";
     private long current_field_id;
     private String [][] listForTest;
@@ -116,11 +118,11 @@ public class TestActivity extends AppCompatActivity implements
                 pauseRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TestActivity.this);
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FullyRandomTestActivity.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
                         editor.commit();
-                        Toast toast = Toast.makeText(TestActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
+                        Toast toast = Toast.makeText(FullyRandomTestActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
@@ -136,6 +138,11 @@ public class TestActivity extends AppCompatActivity implements
     private boolean locale_available = false;
     private DatabaseOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
+    private RelativeLayout content;
+    private int mShortAnimationDuration;
+    private View mLoadingView;
+
+
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
@@ -173,10 +180,20 @@ public class TestActivity extends AppCompatActivity implements
         showResult = (LinearLayout) findViewById(R.id.result);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
+        content = (RelativeLayout) findViewById(R.id.content);
+        mLoadingView = findViewById(R.id.loading);
         final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
         final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
+        if ( savedInstanceState == null ) {
+            content.setVisibility(View.GONE);
+            mShortAnimationDuration = getResources().getInteger(
+                    android.R.integer.config_shortAnimTime);
+        } else {
+            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
+            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
+        }
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         setSupportActionBar(toolbar);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -207,10 +224,10 @@ public class TestActivity extends AppCompatActivity implements
                     if (enterPercent.getText().toString().equals("")
                             || Double.parseDouble(enterPercent.getText().toString()) <= 0 ||
                             Double.parseDouble(enterPercent.getText().toString()) > 100) {
-                        Toast.makeText(TestActivity.this, getString(R.string.percentage_between), Toast.LENGTH_LONG).show();
+                        Toast.makeText(FullyRandomTestActivity.this, getString(R.string.percentage_between), Toast.LENGTH_LONG).show();
                     } else if (j <= 0) {
                         numberOfTries.setText(Integer.toString(1));
-                        Toast.makeText(TestActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
+                        Toast.makeText(FullyRandomTestActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
                     } else {
                         start.setEnabled(false);
                         permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
@@ -234,7 +251,7 @@ public class TestActivity extends AppCompatActivity implements
     //                    wrongItems = new ArrayList<WrongItem>();
                     }
                 } else {
-                    Toast.makeText(TestActivity.this,R.string.wait_for_data_loading,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FullyRandomTestActivity.this,R.string.wait_for_data_loading,Toast.LENGTH_SHORT).show();
                 }
             }
         });*/
@@ -278,7 +295,7 @@ public class TestActivity extends AppCompatActivity implements
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
                             showResult.setBackgroundResource(R.drawable.enter_answer_background);
                             showResult.setPadding(0,0,0,0);
-//                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, TestActivity.this);
+//                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, FullyRandomTestActivity.this);
                             mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,question_data_type);
                             mySQLiteCursorLoader.clearThisFieldFromTestPaused(current_field_id);
                         } else {
@@ -293,7 +310,7 @@ public class TestActivity extends AppCompatActivity implements
                         }
                     }
                 } else {
-                    Toast toast = Toast.makeText(TestActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(FullyRandomTestActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
@@ -331,7 +348,7 @@ public class TestActivity extends AppCompatActivity implements
                     if (enterAnswer.getText().toString().length() <= 0) {
                         enterAnswer.setHint(hints.get(hintCounter++));
                     } else {
-                        Toast toast = Toast.makeText(TestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(FullyRandomTestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
@@ -360,7 +377,7 @@ public class TestActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(TestActivity.this,
+                Toast toast = Toast.makeText(FullyRandomTestActivity.this,
                         getString(R.string.number_of_questions, showNumberOfQuestions.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
@@ -370,7 +387,7 @@ public class TestActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(TestActivity.this,
+                Toast toast = Toast.makeText(FullyRandomTestActivity.this,
                         getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
@@ -380,7 +397,7 @@ public class TestActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(TestActivity.this,
+                Toast toast = Toast.makeText(FullyRandomTestActivity.this,
                         getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
@@ -430,7 +447,7 @@ public class TestActivity extends AppCompatActivity implements
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putBoolean(ACTIVITY_NAME + PAUSING + current_field_id, true);
                 editor.commit();
-                Toast toast = Toast.makeText(TestActivity.this, R.string.pause_do_not_shutdown, Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(FullyRandomTestActivity.this, R.string.pause_do_not_shutdown, Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
                 pauseThread.start();
@@ -804,6 +821,8 @@ public class TestActivity extends AppCompatActivity implements
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
         savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
+        savedInsatanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
+        savedInsatanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
         savedInsatanceState.putBoolean(BOOLEAN_CONTINUE,boolean_continue);
         saveUserLayoutChanges(savedInsatanceState);
@@ -905,7 +924,7 @@ public class TestActivity extends AppCompatActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if ( id == CONTINUE_PREVIOUS_SESSION ) {
-            return new MySQLiteCursorLoader(TestActivity.this,
+            return new MySQLiteCursorLoader(FullyRandomTestActivity.this,
                     "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a , se." + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -922,7 +941,7 @@ public class TestActivity extends AppCompatActivity implements
                     new String[] {"0", currentField},
                     null);*/
         } else {
-            return new MySQLiteCursorLoader(TestActivity.this,
+            return new MySQLiteCursorLoader(FullyRandomTestActivity.this,
                     "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a " + " FROM " + Contract.STring.TABLE_NAME
                             + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -982,6 +1001,7 @@ public class TestActivity extends AppCompatActivity implements
                 ifMoreThanOnce();
             }
         }
+        crossfade();
     }
     @Override
     public void onInit(int i) {
@@ -1005,5 +1025,32 @@ public class TestActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         fieldEntriesCursor = null;
+    }
+    private void crossfade() {
+
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        content.setAlpha(0f);
+        content.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        content.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
+
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        mLoadingView.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mLoadingView.setVisibility(View.GONE);
+                    }
+                });
     }
 }

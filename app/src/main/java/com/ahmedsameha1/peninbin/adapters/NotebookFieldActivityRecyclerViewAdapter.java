@@ -26,7 +26,7 @@ import com.ahmedsameha1.peninbin.activities.EditNotebookEntryActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.NotebookFieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
+import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
@@ -155,7 +155,7 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
             @Override
             public void onClick(View v) {
                 if ( (! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id)) &&
-                        (! sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + field_id))) {
+                        (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id))) {
                     if ( ! databaseOperations.checkIfIncludedInPausedOperations(field_id,entry_id) ) {
                         DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
                         Bundle bundle = new Bundle();

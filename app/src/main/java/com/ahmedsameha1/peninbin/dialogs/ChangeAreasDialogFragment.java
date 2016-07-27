@@ -18,8 +18,8 @@ import android.support.v7.app.AlertDialog;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -36,8 +36,8 @@ public class ChangeAreasDialogFragment extends DialogFragment{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
-        initialQuestionArea = getArguments().getFloat(StudyDuringActivity.QUESTION_LAYOUT);
-        initialAnsweArea = getArguments().getFloat(StudyDuringActivity.ANSWER_LAYOUT);
+        initialQuestionArea = getArguments().getFloat(StudyAPeriodActivity.QUESTION_LAYOUT);
+        initialAnsweArea = getArguments().getFloat(StudyAPeriodActivity.ANSWER_LAYOUT);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();

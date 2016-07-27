@@ -356,7 +356,7 @@ public class FieldActivity extends AppCompatActivity implements
                 }
                 break;
             case STUDY_PERIOD:
-                if (!sharedPreferences.contains(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.PAUSING + current_field_id)) {
+                if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id)) {
                             if (number_of_entries > 0) {
                                 if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
                                     AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();

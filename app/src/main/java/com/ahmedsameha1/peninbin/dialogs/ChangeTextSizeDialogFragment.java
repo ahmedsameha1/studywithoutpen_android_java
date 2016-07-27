@@ -16,7 +16,7 @@ import android.support.v7.app.AlertDialog;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
+import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -39,7 +39,7 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
-        textSize = (int) getArguments().getFloat(StudyDuringActivity.TEXT_SIZE);
+        textSize = (int) getArguments().getFloat(StudyAPeriodActivity.TEXT_SIZE);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();

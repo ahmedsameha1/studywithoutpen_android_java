@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:android.support.v7.cardview="http://schemas.android.com/apk/res-auto"
@@ -10,85 +8,94 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:showIn="@layout/app_bar_study_during">
+    tools:showIn="@layout/app_bar_study_a_period">
 
     <LinearLayout
-        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:weightSum="2">
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/question_linearlayout"
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_margin="0dp"
             android:layout_weight="1"
-            android:background="@drawable/show_question_background"
-            android:padding="0dp">
+            android:orientation="horizontal"
+            android:weightSum="2">
 
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/question_linearlayout"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android.support.v7.cardview:cardBackgroundColor="@android:color/transparent"
-                android.support.v7.cardview:cardCornerRadius="5dp"
-                android.support.v7.cardview:cardElevation="1dp">
+                android:layout_margin="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/show_question_background"
+                android:padding="0dp">
 
-                <TextView
-                    android:id="@+id/display_question"
+                <android.support.v7.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/text_bordered_transperant"
-                    android:gravity="center"
-                    android:minLines="1"
-                    android:padding="5dp"
-                    android:scrollbarAlwaysDrawVerticalTrack="true"
-                    android:scrollbars="vertical"
-                    android:textColor="#FFFFFF"
+                    android.support.v7.cardview:cardBackgroundColor="@android:color/transparent"
+                    android.support.v7.cardview:cardCornerRadius="5dp"
+                    android.support.v7.cardview:cardElevation="1dp">
 
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:typeface="monospace" />
-            </android.support.v7.widget.CardView>
-        </LinearLayout>
+                    <TextView
+                        android:id="@+id/display_question"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/text_bordered_transperant"
+                        android:gravity="center"
+                        android:minLines="1"
+                        android:padding="5dp"
+                        android:scrollbarAlwaysDrawVerticalTrack="true"
+                        android:scrollbars="vertical"
+                        android:textColor="#FFFFFF"
 
-        <LinearLayout
-            android:id="@+id/result"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_margin="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/enter_answer_background"
-            android:padding="0dp">
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:typeface="monospace" />
+                </android.support.v7.widget.CardView>
+            </LinearLayout>
 
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/result"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android.support.v7.cardview:cardBackgroundColor="@android:color/transparent"
-                android.support.v7.cardview:cardCornerRadius="5dp"
-                android.support.v7.cardview:cardElevation="1dp">
+                android:layout_margin="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/enter_answer_background"
+                android:padding="0dp">
 
-                <EditText
-                    android:id="@+id/enter_answer"
+                <android.support.v7.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:background="@drawable/text_bordered_transperant"
-                    android:enabled="true"
-                    android:gravity="center"
-                    android:hint="@string/enter_your_answer"
-                    android:imeOptions="flagNoExtractUi"
-                    android:inputType="textNoSuggestions|textMultiLine"
-                    android:minLines="1"
-                    android:padding="5dp"
-                    android:scrollbarAlwaysDrawVerticalTrack="true"
-                    android:textColor="#FFFFFF"
+                    android.support.v7.cardview:cardBackgroundColor="@android:color/transparent"
+                    android.support.v7.cardview:cardCornerRadius="5dp"
+                    android.support.v7.cardview:cardElevation="1dp">
 
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:typeface="monospace" />
-            </android.support.v7.widget.CardView>
+                    <EditText
+                        android:id="@+id/enter_answer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:background="@drawable/text_bordered_transperant"
+                        android:enabled="true"
+                        android:gravity="center"
+                        android:hint="@string/enter_your_answer"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="textNoSuggestions|textMultiLine"
+                        android:minLines="1"
+                        android:padding="5dp"
+                        android:scrollbarAlwaysDrawVerticalTrack="true"
+                        android:textColor="#FFFFFF"
+
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:typeface="monospace" />
+                </android.support.v7.widget.CardView>
+            </LinearLayout>
+
+
         </LinearLayout>
 
         <LinearLayout
@@ -97,7 +104,8 @@
             android:layout_marginBottom="5dp"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:layout_marginTop="2dp">
+            android:layout_marginTop="2dp"
+            android:layout_weight="0">
 
             <android.support.v7.widget.CardView
                 android:id="@+id/show_actionbar_card_view"
@@ -118,7 +126,6 @@
                     android:background="@drawable/text_bordered_colored"
                     android:gravity="center"
                     android:padding="2dp"
-                    android:text="@string/show"
                     android:textColor="@drawable/textview_enabled_disabled_selector" />
             </android.support.v7.widget.CardView>
 
@@ -193,9 +200,6 @@
                     android:textColor="@drawable/textview_enabled_disabled_selector" />
             </android.support.v7.widget.CardView>
         </LinearLayout>
-
     </LinearLayout>
 
 </RelativeLayout>
-
-

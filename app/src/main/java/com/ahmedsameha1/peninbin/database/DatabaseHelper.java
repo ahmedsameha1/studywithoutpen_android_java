@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.activities.StudyDuringActivity;
+import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.Contract.OldField;
 
 import android.preference.PreferenceManager;
@@ -1151,9 +1151,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
                             new String[]{"0", field},null,null,null);
                     if ( cursor.getCount() > 0 ) {
-                        String string = sharedPreferences.getString(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
-                                StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES
-                                + StudyDuringActivity.DASH + field, null);
+                        String string = sharedPreferences.getString(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.DASH +
+                                StudyAPeriodActivity.STRING_REPRESENTING_REPEATED_ENTRIES
+                                + StudyAPeriodActivity.DASH + field, null);
                         if ( string != null ) {
                             StringTokenizer stringTokenizer = new StringTokenizer(string, "-");
                             while (stringTokenizer.hasMoreTokens()) {
@@ -1163,24 +1163,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                                 sqLiteDatabase.insert(Study_Period_Repeated_Entry.TABLE_NAME,null,contentValues);
                             }
                         }
-                        int currentQuestionCounter = sharedPreferences.getInt(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
-                                StudyDuringActivity.CURRENT_QUESTION_COUNTER
-                                + StudyDuringActivity.DASH + field, 0);
-                        int permitedTriesNumber = sharedPreferences.getInt(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
-                                StudyDuringActivity.NUMBER_OF_TRIES + StudyDuringActivity.DASH + field, 0);
+                        int currentQuestionCounter = sharedPreferences.getInt(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.DASH +
+                                StudyAPeriodActivity.CURRENT_QUESTION_COUNTER
+                                + StudyAPeriodActivity.DASH + field, 0);
+                        int permitedTriesNumber = sharedPreferences.getInt(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.DASH +
+                                StudyAPeriodActivity.NUMBER_OF_TRIES + StudyAPeriodActivity.DASH + field, 0);
                         contentValues = new ContentValues();
                         contentValues.put(Study_Period_Paused.COLUMN_FIELD,field_id);
                         contentValues.put(Study_Period_Paused.COLUMN_CURRENT_QUESTION_COUNTER,currentQuestionCounter);
                         contentValues.put(Study_Period_Paused.COLUMN_TRIES_NUMBER,permitedTriesNumber);
                         sqLiteDatabase.insert(Study_Period_Paused.TABLE_NAME,null,contentValues);
-                        editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
-                                StudyDuringActivity.STRING_REPRESENTING_REPEATED_ENTRIES
-                                + StudyDuringActivity.DASH + field);
-                        editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
-                                StudyDuringActivity.CURRENT_QUESTION_COUNTER
-                                + StudyDuringActivity.DASH + field);
-                        editor.remove(StudyDuringActivity.ACTIVITY_NAME + StudyDuringActivity.DASH +
-                                StudyDuringActivity.NUMBER_OF_TRIES + StudyDuringActivity.DASH + field);
+                        editor.remove(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.DASH +
+                                StudyAPeriodActivity.STRING_REPRESENTING_REPEATED_ENTRIES
+                                + StudyAPeriodActivity.DASH + field);
+                        editor.remove(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.DASH +
+                                StudyAPeriodActivity.CURRENT_QUESTION_COUNTER
+                                + StudyAPeriodActivity.DASH + field);
+                        editor.remove(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.DASH +
+                                StudyAPeriodActivity.NUMBER_OF_TRIES + StudyAPeriodActivity.DASH + field);
                     }
                     cursor.close();
                 }
