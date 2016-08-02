@@ -139,6 +139,25 @@ public final class Contract {
         public static final String COLUMN_NOT_RANDOM_QUICK_TEST_WRONGNESS_LEVEL = "not_random_quick_test_wrongness_level";
         public static final String COLUMN_NOT_RANDOM_QUICK_TEST_RANK_LEVEL = "not_random_quick_test_rank_level";
     }
+    public static abstract class Field_Note implements BaseColumns {
+        public static final String TABLE_NAME = "field_note";
+        public static final String COLUMN_FIELD = "field";
+        public static final String COLUMN_NOTE = "note";
+    }
+    public static abstract class Field_Type implements BaseColumns {
+        public static final String TABLE_NAME = "field_type";
+        public static final String COLUMN_TYPE_NAME = "type_name";
+    }
+    public static abstract class Symbol implements BaseColumns {
+        public static final String TABLE_NAME = "symbol";
+        public static final String COLUMN_VALUE= "value";
+    }
+    public static abstract class Field_Type_Symbol implements BaseColumns {
+        public static final String TABLE_NAME = "field_type_symbol";
+        public static final String COLUMN_FIELD_TYPE = "field_type";
+        public static final String COLUMN_SYMBOL = "symbol";
+        public static final String COLUMN_USER_CUSTOMIZED_STRING = "user_customized_string";
+    }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public static final String Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 = "created_at";
