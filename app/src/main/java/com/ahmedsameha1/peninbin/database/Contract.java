@@ -67,6 +67,7 @@ public final class Contract {
         public static final String COLUMN_REMIND_AT = "remind_at";
         public static final String COLUMN_REMIND_AT_PENDINGINTENT_REQUEST = "remind_at_pendingintent_request";
         public static final String COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND = "whether_asked_at_current_test_round";
+        public static final String COLUMN_ORDER_OF_ENTRY = "order_of_entry";
     }
     public static abstract class Not_String_Entry implements BaseColumns {
         public static final String TABLE_NAME = "not_string_entry";
@@ -79,6 +80,10 @@ public final class Contract {
         public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
         public static final String COLUMN_RANK = "rank";
         public static final String COLUMN_CREATION_EMULATED_DATE = "creation_emulated_date";
+        public static final String COLUMN_REMIND_AT = "remind_at";
+        public static final String COLUMN_REMIND_AT_PENDINGINTENT_REQUEST = "remind_at_pendingintent_request";
+        public static final String COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND = "whether_asked_at_current_test_round";
+        public static final String COLUMN_ORDER_OF_ENTRY = "order_of_entry";
     }
     public static abstract class Test_Wrong_Answer_String implements BaseColumns {
         public static final String TABLE_NAME = "test_wrong_answer_string";
