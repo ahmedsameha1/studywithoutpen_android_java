@@ -106,7 +106,7 @@ public class ModifyDatabaseSchema {
             String rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
             sqLiteDatabase.execSQL(rename);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE);
-            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
+            String copy = "INSERT INTO " + Contract.String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
                     + " , " + Contract.String_Entry.COLUMN_FIELD
