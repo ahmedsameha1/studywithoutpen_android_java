@@ -222,7 +222,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + "FOREIGN KEY(" + Contract.Scheduled_Time_Backup.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
 
-    public static final String CREATE_FIELD_NOTES_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Field_Note.TABLE_NAME
+    public static final String CREATE_FIELD_NOTE_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Field_Note.TABLE_NAME
             + " ( "
             + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Contract.Field_Note.COLUMN_FIELD + " INTEGER NOT NULL, "
@@ -358,7 +358,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_EXCLUDED_TIME_TABLE);
         sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_BACKUP_TABLE);
-        sqLiteDatabase.execSQL(CREATE_FIELD_NOTES_TABLE);
+        sqLiteDatabase.execSQL(CREATE_FIELD_NOTE_TABLE);
         sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_TABLE);
         sqLiteDatabase.execSQL(CREATE_SYMBOL_TABLE);
         sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_SYMBOL_TABLE);

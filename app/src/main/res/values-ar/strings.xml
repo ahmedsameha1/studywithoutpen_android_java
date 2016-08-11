@@ -199,4 +199,8 @@
     <string name="collect_data_about_usage">هذا التطبيق يجمع معلومات غير محدد  الهوية عن استخدامه.</string>
     <string name="version">إصدار: 2.3.1</string>
     <string name="about_app">عن التطبيق</string>
+    <string name="where_is_field_name">Where is the field name?!</string>
+    <string name="field_with_same_name">There is a field with the same name!</string>
+    <string name="where_is_note">Where is the note name?!</string>
+    <string name="add_field_note">Add Field Note</string>
 </resources>

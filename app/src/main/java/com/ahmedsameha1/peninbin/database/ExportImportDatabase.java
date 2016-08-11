@@ -10,7 +10,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
-import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
@@ -90,7 +89,7 @@ public class ExportImportDatabase {
             toExportDatabase.execSQL(DatabaseHelper.CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);//
             toExportDatabase.execSQL(DatabaseHelper.CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);
             toExportDatabase.execSQL(DatabaseHelper.CREATE_EXCLUDED_TIME_TABLE);
-            toExportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_NOTES_TABLE);
+            toExportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_NOTE_TABLE);
             toExportDatabase.execSQL("PRAGMA foreign_keys=ON;");
             for (String tempFieldName : fieldNames) {
                 Cursor fieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,
@@ -1256,7 +1255,7 @@ public class ExportImportDatabase {
             drop = "DROP TABLE IF EXISTS " + Contract.Not_String_Entry.TABLE_NAME + ";";
             toImportDatabase.execSQL(drop);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_ENTRY_TABLE);
-            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_NOTES_TABLE);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_NOTE_TABLE);
             toImportDatabase.setVersion(10);
             toImportDatabase.setTransactionSuccessful();
         } catch ( Exception sql) {

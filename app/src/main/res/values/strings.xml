@@ -201,4 +201,8 @@
     <string name="collect_data_about_usage">This app collects anonymous data about the usage of it.</string>
     <string name="version">Version:2.3.1</string>
     <string name="about_app">About the app</string>
+    <string name="where_is_field_name">Where is the field name?!</string>
+    <string name="field_with_same_name">There is a field with the same name!</string>
+    <string name="where_is_note">Where is the note?!</string>
+    <string name="add_field_note">Add Field Note</string>
 </resources>

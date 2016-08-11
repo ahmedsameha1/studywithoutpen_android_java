@@ -138,11 +138,11 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                         String fieldName = enterFieldName.getText().toString();
                         if ( select_field_type.getSelectedItemPosition() == 0 ) {
                             if (fieldName.equals("")) {
-                                Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);
+                                Toast toast = Toast.makeText(getActivity(), R.string.where_is_field_name, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
                             } else if (databaseOperations.checkFieldDuplication(fieldName)) {
-                                Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
+                                Toast toast = Toast.makeText(getActivity(), R.string.field_with_same_name, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
                             } else if ( select_field_type.getSelectedItemPosition() == field_type_adapter.getCount() ) {

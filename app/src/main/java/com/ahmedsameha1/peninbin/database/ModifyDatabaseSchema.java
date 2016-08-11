@@ -10,8 +10,6 @@ import android.util.Log;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseHelper;
-import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -141,7 +139,7 @@ public class ModifyDatabaseSchema {
             drop = "DROP TABLE IF EXISTS " + Contract.Not_String_Entry.TABLE_NAME + ";";
             sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_ENTRY_TABLE);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_NOTES_TABLE);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_NOTE_TABLE);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TYPE_TABLE);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_SYMBOL_TABLE);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TYPE_SYMBOL_TABLE);

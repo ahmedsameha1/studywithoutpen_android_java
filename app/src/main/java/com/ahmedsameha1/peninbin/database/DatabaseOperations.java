@@ -541,4 +541,11 @@ public class DatabaseOperations {
         cursor.close();
         return count;
     }
+
+    public void addFieldNote( long field_id, String note ) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field_Note.COLUMN_FIELD, field_id);
+        contentValues.put(Contract.Field_Note.COLUMN_NOTE, note);
+        sqLiteDatabase.insertWithOnConflict(Contract.Field_Note.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+    }
 }
