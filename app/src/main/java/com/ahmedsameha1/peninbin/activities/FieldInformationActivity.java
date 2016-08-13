@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -22,8 +23,12 @@ import com.ahmedsameha1.peninbin.dialogs.AddFieldNoteDialogFragment;
 /**
  * Created by ahmed on 07/08/16.
  */
-public class FieldInformationActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
-    private EditText number_of_entries;
+public class FieldInformationActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        AddFieldNoteDialogFragment.Contact {
+    private DatabaseOperations databaseOperations;
+    private TextView number_of_entries;
+    private TextView number_of_moderate_or_higher_entries;
     private ListView list_of_notes;
     private SimpleCursorAdapter simpleCursorAdapter;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
@@ -34,11 +39,16 @@ public class FieldInformationActivity extends AppCompatActivity implements Loade
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_field_information);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,-1);
+        databaseOperations = new DatabaseOperations(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        number_of_entries = (EditText) findViewById(R.id.number_of_entries);
+        number_of_entries = (TextView) findViewById(R.id.number_of_entries);
+        number_of_moderate_or_higher_entries = (TextView) findViewById(R.id.moderate_or_higher_entries);
         list_of_notes = (ListView) findViewById(R.id.notes_list_view);
         setSupportActionBar(toolbar);
-        number_of_entries.setText(Integer.toString((new DatabaseOperations(this)).getEntriesNumber(current_field_id,Contract.Field.STRING_DATA_TYPE)));
+        number_of_entries.setText(Integer.toString(databaseOperations
+                .getEntriesNumber(current_field_id,Contract.Field.STRING_DATA_TYPE)));
+        number_of_moderate_or_higher_entries.setText(Integer.toString(databaseOperations
+                .countModerateOrHigherEntries(current_field_id)));
         simpleCursorAdapter = new SimpleCursorAdapter(this,android.R.layout.simple_list_item_1,null,
                 new String[]{Contract.Field_Note.COLUMN_NOTE}, new int[]{android.R.id.text1},0);
         list_of_notes.setAdapter(simpleCursorAdapter);
@@ -87,5 +97,10 @@ public class FieldInformationActivity extends AppCompatActivity implements Loade
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         simpleCursorAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void addFieldNote(String note) {
+        mySQLiteCursorLoader.addFieldNote(current_field_id,note);
     }
 }

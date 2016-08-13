@@ -199,10 +199,13 @@
     <string name="import_from_text_file_help">The file must be text file txt\nEvery line in the text file must be formated as: \nfield name@@@question~~~answer\nOr:\nfield name@@@question~~~answer%%%rank of entry \nRank of entry is one digit: \n0\tLow \n1\tModerate \n2\tImportant \n3\tVital</string>
     <string name="facebook_page">Facebook Page</string>
     <string name="collect_data_about_usage">This app collects anonymous data about the usage of it.</string>
-    <string name="version">Version:2.3.1</string>
+    <string name="version">Version:</string>
     <string name="about_app">About the app</string>
     <string name="where_is_field_name">Where is the field name?!</string>
     <string name="field_with_same_name">There is a field with the same name!</string>
     <string name="where_is_note">Where is the note?!</string>
     <string name="add_field_note">Add Field Note</string>
+    <string name="number_of_entries">number of entries</string>
+    <string name="field_notes">Field Notes</string>
+    <string name="number_of_moderate_or_higher_entries">Number of\n(Moderate or higher)\nentries</string>
 </resources>

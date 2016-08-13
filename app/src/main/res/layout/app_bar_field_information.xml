@@ -24,6 +24,6 @@
             android:background="@drawable/toolbar_drop_shadow"/>
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_about_field" />
+    <include layout="@layout/content_field_information" />
 
 </android.support.design.widget.CoordinatorLayout>

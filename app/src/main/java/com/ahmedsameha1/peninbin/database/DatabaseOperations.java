@@ -541,11 +541,14 @@ public class DatabaseOperations {
         cursor.close();
         return count;
     }
-
-    public void addFieldNote( long field_id, String note ) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Field_Note.COLUMN_FIELD, field_id);
-        contentValues.put(Contract.Field_Note.COLUMN_NOTE, note);
-        sqLiteDatabase.insertWithOnConflict(Contract.Field_Note.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+    public int countModerateOrHigherEntries( long field_id ) {
+        Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                Contract.String_Entry.COLUMN_FIELD + " = ? AND "
+                        + Contract.String_Entry.COLUMN_RANK + " > ? " ,
+                new String[]{field_id + "", Constants.Rank.LOW +""},null,null,null);
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
     }
+
 }

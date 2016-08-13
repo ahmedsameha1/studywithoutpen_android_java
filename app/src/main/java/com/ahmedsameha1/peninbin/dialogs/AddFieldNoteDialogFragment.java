@@ -20,6 +20,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -32,7 +33,7 @@ import java.util.Locale;
  */
 public class AddFieldNoteDialogFragment extends DialogFragment  {
     public static final String ADD_FIELD_NOTE_DIALOG_FRAGMENT = "add_field_note_dialog_fragment";
-    private DatabaseOperations databaseOperations;
+
     private Tracker mTracker;
     private long current_field_id;
 
@@ -40,8 +41,8 @@ public class AddFieldNoteDialogFragment extends DialogFragment  {
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
-        databaseOperations = new DatabaseOperations(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
+
         mTracker = application.getDefaultTracker();
         setRetainInstance(true);
     }
@@ -68,7 +69,7 @@ public class AddFieldNoteDialogFragment extends DialogFragment  {
                     public void onClick(View view) {
                         String note = enter_note.getText().toString();
                         if ( note.length() > 0 ) {
-                            databaseOperations.addFieldNote(current_field_id,note);
+                            ((Contact) getActivity()).addFieldNote(note);
                             mTracker.send(new HitBuilders.EventBuilder()
                                     .setCategory(MainActivity.ANALYTICS_CATEGORY)
                                     .setAction("add field note")
@@ -84,6 +85,9 @@ public class AddFieldNoteDialogFragment extends DialogFragment  {
             }
         });
         return alertDialog;
+    }
+    public interface Contact {
+        public void addFieldNote(String note);
     }
 }
 

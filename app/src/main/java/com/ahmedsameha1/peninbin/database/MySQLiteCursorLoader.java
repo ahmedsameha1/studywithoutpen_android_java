@@ -1029,4 +1029,29 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
     }
 
+    protected ContentChangingTask buildAddFieldNoteTask(MySQLiteCursorLoader loader) {
+        return (new AddFieldNote(loader));
+    }
+    public void addFieldNote(long field_id, String note) {
+        buildAddFieldNoteTask(this).execute(db, field_id, note);
+    }
+    protected static class AddFieldNote extends ContentChangingTask {
+        AddFieldNote(MySQLiteCursorLoader loader) {
+            super(loader);
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+            long field_id = (long) params[1];
+            String note = (String) params[2];
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Field_Note.COLUMN_FIELD, field_id);
+            contentValues.put(Contract.Field_Note.COLUMN_NOTE, note);
+            sqLiteDatabase.insertWithOnConflict(Contract.Field_Note.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+            return null;
+        }
+    }
+
 }
