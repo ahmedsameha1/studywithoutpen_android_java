@@ -1304,7 +1304,18 @@ public class QuickTestActivity extends AppCompatActivity implements
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            return new MySQLiteCursorLoader(QuickTestActivity.this,
+        return new MySQLiteCursorLoader(QuickTestActivity.this,
+                "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                        + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                        + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                        + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                        + " FROM " + Contract.STring.TABLE_NAME
+                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                new String[]{current_field_id + ""});
+            /*return new MySQLiteCursorLoader(QuickTestActivity.this,
                     "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
                             + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " FROM " + Contract.STring.TABLE_NAME
@@ -1312,7 +1323,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                             + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                             + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{current_field_id + ""});
+                    new String[]{current_field_id + ""});*/
     }
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
