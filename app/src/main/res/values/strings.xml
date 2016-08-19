@@ -204,8 +204,8 @@
     <string name="where_is_field_name">Where is the field name?!</string>
     <string name="field_with_same_name">There is a field with the same name!</string>
     <string name="where_is_note">Where is the note?!</string>
-    <string name="add_field_note">Add Field Note</string>
-    <string name="number_of_entries">number of entries</string>
-    <string name="field_notes">Field Notes</string>
-    <string name="number_of_moderate_or_higher_entries">Number of\n(Moderate or higher)\nentries</string>
+    <string name="add_field_note">Add Note</string>
+    <string name="number_of_entries">Number of Entries</string>
+    <string name="field_notes">Notes</string>
+    <string name="number_of_moderate_or_higher_entries">Number of\n(moderate or higher)\nEntries</string>
 </resources>

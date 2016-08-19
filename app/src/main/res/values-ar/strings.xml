@@ -197,13 +197,13 @@
     <string name="import_from_text_file_help">يجب أن يكون الملف ملف نصي txt\nيجب أن يكون كل سطر في الملف النصي إما على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب\nأو على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب%%%مستوى أهمية المُدخَل\nحيث مستوى أهمية المُدخَل رقم واحد:\n0\tمنخفض\n1\tمتوسط\n2\tمهم\n3\tحيوي</string>
     <string name="facebook_page">صفحة Facebook</string>
     <string name="collect_data_about_usage">هذا التطبيق يجمع معلومات غير محدد  الهوية عن استخدامه.</string>
-    <string name="version">إصدار: 2.3.1</string>
+    <string name="version">إصدار:</string>
     <string name="about_app">عن التطبيق</string>
-    <string name="where_is_field_name">Where is the field name?!</string>
-    <string name="field_with_same_name">There is a field with the same name!</string>
-    <string name="where_is_note">Where is the note name?!</string>
-    <string name="add_field_note">Add Field Note</string>
-    <string name="number_of_entries">number of entries</string>
-    <string name="field_notes">Field Notes</string>
-    <string name="number_of_moderate_or_higher_entries">Number of (Moderate or higher) entries</string>
+    <string name="where_is_field_name">أين اسم المجال؟!</string>
+    <string name="field_with_same_name">هناك مجال بنفس اﻻسم!</string>
+    <string name="where_is_note">أين الملحوظة؟!</string>
+    <string name="number_of_entries">عدد المدخﻻت</string>
+    <string name="field_notes">مﻻحظات</string>
+    <string name="number_of_moderate_or_higher_entries">عدد  المُدخﻻت\n(المتوسطة أو أعلى)</string>
+    <string name="add_field_note">أضف ملحوظة</string>
 </resources>

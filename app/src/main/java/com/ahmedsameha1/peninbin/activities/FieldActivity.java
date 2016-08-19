@@ -477,6 +477,7 @@ public class FieldActivity extends AppCompatActivity implements
                         Bundle bundle = new Bundle();
                         bundle.putInt(CURRENT_SORT, currentSort);
                         getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+                        load_or_search = true;
                         return true;
                     }
                 });
