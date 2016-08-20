@@ -282,16 +282,20 @@ public class FieldActivity extends AppCompatActivity implements
     }
     @Override
     public void onInit(int status) {
-        Locale[] locales = Locale.getAvailableLocales();
-        for (Locale locale : locales) {
-            if (locale.toString().equals("en_US_POSIX")) continue;
-            int res = tts.isLanguageAvailable(locale);
-            if (res == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
-                localeList.add(locale);
-                locale_display_names.add(locale.getDisplayName());
+        try {
+            Locale[] locales = Locale.getAvailableLocales();
+            for (Locale locale : locales) {
+                if (locale.toString().equals("en_US_POSIX")) continue;
+                int res = tts.isLanguageAvailable(locale);
+                if (res == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
+                    localeList.add(locale);
+                    locale_display_names.add(locale.getDisplayName());
+                }
             }
+            locale_display_names.add(getString(R.string.select_locale));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        locale_display_names.add(getString(R.string.select_locale));
     }
 
     public void onNewIntent(Intent intent) {

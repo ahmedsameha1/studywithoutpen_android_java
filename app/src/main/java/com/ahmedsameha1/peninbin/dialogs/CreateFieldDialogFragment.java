@@ -36,7 +36,7 @@ import com.google.android.gms.analytics.Tracker;
  */
 public class CreateFieldDialogFragment extends DialogFragment implements TextToSpeech.OnInitListener {
     private boolean tts_available;
-    private TextToSpeech tts;
+    private TextToSpeech textToSpeech;
     private List<Locale> localeList = new ArrayList<Locale>();
     private List<String> locale_display_names = new ArrayList<String>();
     private DatabaseOperations databaseOperations;
@@ -50,7 +50,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         tts_available = getArguments().getBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE);
-        tts = new TextToSpeech(getActivity().getApplicationContext(), this);
+        textToSpeech = new TextToSpeech(getActivity().getApplicationContext(), this);
         databaseOperations = new DatabaseOperations(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
@@ -75,7 +75,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                 final EditText enterFieldName = (EditText) alertDialog.findViewById(R.id.enter_field_name);
                 final Spinner select_check_type = (Spinner) alertDialog.findViewById(R.id.check_type_spinner);
                 final Spinner select_field_type = (Spinner) alertDialog.findViewById(R.id.field_type_spinner);
-                final CheckBox read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
+                read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
                 final Spinner select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
                 final LinearLayout show_default_field_options = (LinearLayout) alertDialog.findViewById(R.id.show_default_field_options);
                 final SpinnerWithHintAdapter field_type_adapter = new SpinnerWithHintAdapter(getActivity(),
@@ -218,16 +218,20 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     void createField(String field_name, int field_type, int question_data_type);
 }
     public void onInit(int status) {
-        Locale[] locales = Locale.getAvailableLocales();
-        for (Locale locale : locales) {
-            if (locale.toString().equals("en_US_POSIX")) continue;
-            int res = tts.isLanguageAvailable(locale);
-            if (res == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
-                localeList.add(locale);
-                locale_display_names.add(locale.getDisplayName());
+        try {
+            Locale[] locales = Locale.getAvailableLocales();
+            for (Locale locale : locales) {
+                if (locale.toString().equals("en_US_POSIX")) continue;
+                int res = textToSpeech.isLanguageAvailable(locale);
+                if (res == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
+                    localeList.add(locale);
+                    locale_display_names.add(locale.getDisplayName());
+                }
             }
+            locale_display_names.add(getString(R.string.select_locale));
+        } catch (NullPointerException e) {
+            read_answer.setVisibility(View.GONE);
         }
-        locale_display_names.add(getString(R.string.select_locale));
     }
 }
 
