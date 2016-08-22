@@ -208,4 +208,7 @@
     <string name="number_of_entries">Number of Entries</string>
     <string name="field_notes">Notes</string>
     <string name="number_of_moderate_or_higher_entries">Number of\n(moderate or higher)\nEntries</string>
+    <string name="copy_field">Copy Field</string>
+    <string name="copy_entries">Copy Entries</string>
+    <string name="move_entries">Move Entries</string>
 </resources>

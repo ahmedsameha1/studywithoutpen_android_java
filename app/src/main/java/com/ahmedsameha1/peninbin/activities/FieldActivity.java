@@ -68,8 +68,9 @@ public class FieldActivity extends AppCompatActivity implements
     public static final int ENHANCED_TEST = 2;
     public static final int TEST = 3;
     public static final int SCHEDULE_IN_FIELD = 4;
-    public static final int FIELD_PROPERTIES = 5;
-    public static final int Field_INFORMATION = 6;
+    public static final int COPY_MOVE = 5;
+    public static final int FIELD_PROPERTIES = 6;
+    public static final int Field_INFORMATION = 7;
 
 
 
