@@ -86,9 +86,10 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements Loader
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.copy:
-                for ( long l : list_of_entries ) {
-                    Log.i("fff", l + "");
-                }
+
+                    mySQLiteCursorLoader.copyEntries(list_of_entries,1);//todo complete the task
+                finish();
+
                 return true;
             case R.id.move:
                 for ( long l : list_of_entries ) {
