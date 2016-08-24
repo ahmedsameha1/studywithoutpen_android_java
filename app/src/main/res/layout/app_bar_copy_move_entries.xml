@@ -15,7 +15,8 @@
             android:layout_width="fill_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:minHeight="?attr/actionBarSize">
+            android:minHeight="?attr/actionBarSize"
+            android:layout_gravity="">
 
         </android.support.v7.widget.Toolbar>
 
