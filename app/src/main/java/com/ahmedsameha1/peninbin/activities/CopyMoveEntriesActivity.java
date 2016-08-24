@@ -1,8 +1,11 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.LoaderManager;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Loader;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -13,6 +16,8 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +28,9 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.CopyMoveEntriesActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.FieldActivityRecyclerViewAdapter;
+import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 
@@ -31,15 +39,24 @@ import java.util.ArrayList;
 /**
  * Created by ahmed on 22/08/16.
  */
-public class CopyMoveEntriesActivity extends AppCompatActivity {
+public class CopyMoveEntriesActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private CopyMoveEntriesActivityRecyclerViewAdapter mAdapter;
     private ArrayList<Long> list_of_entries = new ArrayList<>();
+    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private long current_field_id;
+    private int currentSort;
+    private DatabaseOperations databaseOperations;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_copy_move_entries);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
+        current_field_id = getIntent().getLongExtra(FieldActivity.FIELD_ID, 0);
+        databaseOperations = new DatabaseOperations(this);
+        currentSort = databaseOperations.getFieldSort(current_field_id);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
+        setSupportActionBar(toolbar);
         mAdapter = new CopyMoveEntriesActivityRecyclerViewAdapter(CopyMoveEntriesActivity.this, null, list_of_entries);
         final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(CopyMoveEntriesActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -48,6 +65,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity {
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
+        getLoaderManager().restartLoader(0,null,this);
     }
 
 
@@ -68,10 +86,14 @@ public class CopyMoveEntriesActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.copy:
-
+                for ( long l : list_of_entries ) {
+                    Log.i("fff", l + "");
+                }
                 return true;
             case R.id.move:
-
+                for ( long l : list_of_entries ) {
+                    Log.i("fff", l + "");
+                }
                 return true;
 
             default:
@@ -79,6 +101,28 @@ public class CopyMoveEntriesActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        mySQLiteCursorLoader = new MySQLiteCursorLoader(CopyMoveEntriesActivity.this,
+                "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                        + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                new String[]{current_field_id + ""});
+        return mySQLiteCursorLoader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
     }
 
     public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {

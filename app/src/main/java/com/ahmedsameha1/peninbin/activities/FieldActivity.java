@@ -452,6 +452,13 @@ public class FieldActivity extends AppCompatActivity implements
                 Intent intent = new Intent(this,FieldInformationActivity.class);
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                 startActivity(intent);
+                break;
+
+            case COPY_MOVE:
+                Intent intent1 = new Intent(this,CopyMoveEntriesActivity.class);
+                intent1.putExtra(FieldActivity.FIELD_ID, current_field_id);
+                startActivity(intent1);
+                break;
         }
     }
 

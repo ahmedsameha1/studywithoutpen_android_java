@@ -48,7 +48,7 @@ public class CopyMoveEntriesActivityRecyclerViewAdapter extends
         databaseOperations = new DatabaseOperations(context);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        this.question_data_type = databaseOperations.getQuestionDataType(field_id);
+//        this.question_data_type = databaseOperations.getQuestionDataType(field_id);
     }
     @Override
     public CopyMoveEntriesActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
