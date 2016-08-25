@@ -5,11 +5,11 @@
 
     <item
         android:id="@+id/copy"
-        android:title="@string/copy_entries"
+        android:title="@string/copy"
         app:showAsAction="always"/>
     <item
         android:id="@+id/move"
-        android:title="@string/move_entries"
+        android:title="@string/move"
         app:showAsAction="always"/>
 
 

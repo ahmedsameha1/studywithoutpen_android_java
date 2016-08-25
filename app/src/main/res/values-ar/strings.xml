@@ -209,4 +209,7 @@
     <string name="copy_field">Copy Field</string>
     <string name="copy_entries">Copy Entries</string>
     <string name="move_entries">Move Entries</string>
+    <string name="move">Copy</string>
+    <string name="copy">Copy</string>
+    <string name="copy_move_entries">Copy/Move Entries</string>
 </resources>

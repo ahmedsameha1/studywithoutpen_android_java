@@ -652,6 +652,54 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             return (null);
         }
     }
+
+    public void copyField(  long from_field_id, long to_field_id) {
+        buildCopyEntries(this).execute(db, from_field_id, to_field_id);
+    }
+
+    protected ContentChangingTask buildCopyField(MySQLiteCursorLoader loader) {
+        return (new CopyField(loader));
+    }
+
+
+    protected static class CopyField extends ContentChangingTask {
+        CopyField(MySQLiteCursorLoader loader) {
+            super(loader);
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
+            long from_field_id = (long) params[1];
+            long to_field_id = (long) params[2];
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+            sqLiteDatabase.beginTransaction();
+            try {
+                Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                        new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
+                                Contract.String_Entry.COLUMN_RANK},
+                        Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{from_field_id + ""},null,null,null);
+                for ( long entry_id : list_of_entries ) {
+                    Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                            new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
+                                   Contract.String_Entry.COLUMN_RANK},
+                            Contract.COLUMN_ID + " = ?",
+                            new String[]{entry_id + ""}, null, null, null, null);
+                    cursor.moveToFirst();
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(Contract.String_Entry.COLUMN_FIELD,field_id);
+                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION,cursor.getLong(0));
+                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER,cursor.getLong(1));
+                    contentValues.put(Contract.String_Entry.COLUMN_RANK,cursor.getInt(2));
+                    sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+                }
+                sqLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sqLiteDatabase.endTransaction();
+            }
+            return (null);
+        }
+    }
     public void moveEntries( ArrayList<Long> list_of_entries,  long to_field_id) {
         buildMoveEntries(this).execute(db, list_of_entries, to_field_id);
     }

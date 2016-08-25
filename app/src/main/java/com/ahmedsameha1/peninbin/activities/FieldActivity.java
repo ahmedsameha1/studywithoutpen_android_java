@@ -36,6 +36,8 @@ import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.CopyFieldDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.CopyMoveDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
@@ -61,6 +63,7 @@ public class FieldActivity extends AppCompatActivity implements
         SortEntriesDialogFragment.Contact,
         DeleteEntryDialogFragment.Contact,
         FieldPropertiesDialogFragment.Contact,
+        CopyFieldDialogFragment.Contact,
         TextToSpeech.OnInitListener {
     public static final String SCREEN_NAME = "FieldActivity";
     public static final int SORT = 0;
@@ -455,9 +458,11 @@ public class FieldActivity extends AppCompatActivity implements
                 break;
 
             case COPY_MOVE:
-                Intent intent1 = new Intent(this,CopyMoveEntriesActivity.class);
-                intent1.putExtra(FieldActivity.FIELD_ID, current_field_id);
-                startActivity(intent1);
+                CopyMoveDialogFragment copyMoveDialogFragment = new CopyMoveDialogFragment();
+                Bundle bundle2 = new Bundle();
+                bundle2.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                copyMoveDialogFragment.setArguments(bundle2);
+                copyMoveDialogFragment.show(getSupportFragmentManager(),CopyMoveDialogFragment.COPY_MOVE_DIALOG_FRAGMENT);
                 break;
         }
     }
@@ -545,6 +550,11 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     public void deleteEntry(long entry_id, int question_data_type) {
         mySQLiteCursorLoader.deleteEntry(entry_id, question_data_type);
+    }
+
+    @Override
+    public void copyEntries(long field_id) {
+        mySQLiteCursorLoader.copyEntries(null,current_field_id);
     }
 
     public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {

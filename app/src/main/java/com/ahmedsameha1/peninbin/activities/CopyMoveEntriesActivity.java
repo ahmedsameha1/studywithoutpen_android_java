@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
@@ -40,7 +41,9 @@ import java.util.ArrayList;
 /**
  * Created by ahmed on 22/08/16.
  */
-public class CopyMoveEntriesActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class CopyMoveEntriesActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        CopyFieldDialogFragment.Contact{
     private CopyMoveEntriesActivityRecyclerViewAdapter mAdapter;
     private ArrayList<Long> list_of_entries = new ArrayList<>();
     private MySQLiteCursorLoader mySQLiteCursorLoader;
@@ -87,13 +90,11 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements Loader
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.copy:
-//                mySQLiteCursorLoader.copyEntries(list_of_entries,1);//todo complete the task
                 CopyFieldDialogFragment copyFieldDialogFragment = new CopyFieldDialogFragment();
                 copyFieldDialogFragment.show(getSupportFragmentManager(),CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
-
                 return true;
             case R.id.move:
-                mySQLiteCursorLoader.moveEntries(list_of_entries,1);
+                mySQLiteCursorLoader.moveEntries(list_of_entries,1);//// TODO: 25/08/16  
                 finish();
                 return true;
 
@@ -111,10 +112,13 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements Loader
                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
+                        + "ORDER BY " + FieldActivity.SORT_STRINGS[currentSort],
                 new String[]{current_field_id + ""});
         return mySQLiteCursorLoader;
     }
+
+
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
@@ -124,6 +128,11 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements Loader
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void copyEntries(long field_id) {
+        mySQLiteCursorLoader.copyEntries(list_of_entries,field_id);
     }
 
     public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {

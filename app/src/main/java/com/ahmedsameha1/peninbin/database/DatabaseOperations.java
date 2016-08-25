@@ -28,6 +28,14 @@ public class DatabaseOperations {
         return cursor;
     }
 
+    public Cursor getNonNotebookFieldList() {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                new String[]{Contract.COLUMN_ID, Contract.Field.COLUMN_FIELD_NAME, Contract.Field.COLUMN_FIELD_TYPE}
+                , Contract.Field.COLUMN_FIELD_TYPE + " != ? ", new String[]{Constants.FieldTypes.NOTEBOOK_TYPE + ""},
+                null, null, null);
+        return cursor;
+    }
+
     public boolean checkFieldExists( long field_id ) {
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
                 new String[]{Contract.COLUMN_ID},Contract.COLUMN_ID + " = ? ",new String[]{field_id +""},null,null,null);

@@ -13,16 +13,10 @@
         android:text="@string/copy_field" />
 
     <Button
-        android:id="@+id/copy_entries"
+        android:id="@+id/copy_move_entries"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/copy_entries" />
-
-    <Button
-        android:id="@+id/move_entries"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/move_entries" />
+        android:text="@string/copy_move_entries" />
 
 
 </LinearLayout>

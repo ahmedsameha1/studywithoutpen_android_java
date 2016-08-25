@@ -41,10 +41,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     private List<String> locale_display_names = new ArrayList<String>();
     private DatabaseOperations databaseOperations;
     private String locale_short_name;
-    private boolean isReadAnswer;
-    private int check_type;
     private CheckBox read_answer;
-    private Spinner select_locale;
     private Tracker mTracker;
     @Override
     public void onCreate( Bundle savedInstanceState ) {
