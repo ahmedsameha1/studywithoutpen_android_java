@@ -9,12 +9,14 @@
         android:orientation="horizontal"
         android:weightSum="2">
         <RadioButton
+            android:id="@+id/new_field"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="start"
             android:text="New Field"/>
         <RadioButton
+            android:id="@+id/existing_field"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

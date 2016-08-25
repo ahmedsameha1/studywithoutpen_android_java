@@ -33,6 +33,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.CopyFieldDialogFragment;
 
 import java.util.ArrayList;
 
@@ -86,15 +87,14 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements Loader
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.copy:
-
-                    mySQLiteCursorLoader.copyEntries(list_of_entries,1);//todo complete the task
-                finish();
+//                mySQLiteCursorLoader.copyEntries(list_of_entries,1);//todo complete the task
+                CopyFieldDialogFragment copyFieldDialogFragment = new CopyFieldDialogFragment();
+                copyFieldDialogFragment.show(getSupportFragmentManager(),CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
 
                 return true;
             case R.id.move:
-                for ( long l : list_of_entries ) {
-                    Log.i("fff", l + "");
-                }
+                mySQLiteCursorLoader.moveEntries(list_of_entries,1);
+                finish();
                 return true;
 
             default:

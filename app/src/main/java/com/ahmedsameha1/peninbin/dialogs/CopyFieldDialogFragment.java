@@ -14,14 +14,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RadioButton;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 
@@ -30,136 +34,64 @@ import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsAct
  */
 public class CopyFieldDialogFragment extends DialogFragment {
     public static final String TEST_DIALOG_FRAGMENT = "test_dialog_fragment";
+    public static final String COPY_FIELD_DIALOG_FRAGMENT = "copy_field_dialog_fragment";
     private long current_field_id;
     private boolean from_notification;
+    private DatabaseOperations databaseOperations;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
-        from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
+
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        databaseOperations = new DatabaseOperations(getActivity());
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
-                builder.setTitle(R.string.start_a_test)
-                        .setView(inflater.inflate(R.layout.test_dialog_fragment, null))
+                builder
+                        .setView(inflater.inflate(R.layout.copy_field_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                final EditText enterTries = (EditText) alertDialog.findViewById(R.id.number_of_tries);
-                final EditText enterNumber = (EditText) alertDialog.findViewById(R.id.number);
-                final Spinner number_or_percentage = (Spinner) alertDialog.findViewById(R.id.number_or_percentage);
-//                final ToggleButton percentage_number = (ToggleButton) alertDialog.findViewById(R.id.percentage_number);
+                final RadioButton new_field = (RadioButton) alertDialog.findViewById(R.id.new_field);
+                final RadioButton existing_field = (RadioButton) alertDialog.findViewById(R.id.existing_field);
+                final EditText enter_new_field_name = (EditText) alertDialog.findViewById(R.id.new_field_name);
+                final Spinner existing_fields = (Spinner) alertDialog.findViewById(R.id.existing_fields);
                 final Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
-                final ImageButton percentage_or_number_help = (ImageButton) alertDialog.findViewById(R.id.percentage_or_number_help);
-                ArrayAdapter<String> number_or_percentage_array_adapter = new ArrayAdapter<String>(getActivity(),
-                        android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.number_or_percentage));
-//                final ImageButton enter_number_help = (ImageButton) alertDialog.findViewById(R.id.enter_number_help);
-//                final ImageButton number_of_questions_help = (ImageButton) alertDialog.findViewById(R.id.number_of_questions_help);
-                number_or_percentage.setAdapter(number_or_percentage_array_adapter);
-                number_or_percentage_array_adapter.setDropDownViewResource
+                SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(getActivity(),
+                        android.R.layout.simple_list_item_1,databaseOperations.getFieldList(),
+                        new String[]{Contract.Field.COLUMN_FIELD_NAME}, new int[]{android.R.id.text1},0);
+                simpleCursorAdapter.setDropDownViewResource
                         (android.R.layout.simple_spinner_dropdown_item);
-                number_or_percentage.setSelection(0);
-                number_or_percentage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                existing_fields.setAdapter(simpleCursorAdapter);
+                new_field.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        if ( i == 0 ) {
-                            enterNumber.setHint(R.string.enter_number_of_questions);
-                        } else {
-                            enterNumber.setHint(R.string.enter_percentage);
-                        }
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
-
-                    }
-                });
-                /*percentage_number.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (!isChecked) {
-                            enterNumber.setHint(R.string.enter_percentage);
-                        } else {
-                            enterNumber.setHint(R.string.enter_number_of_questions);
-                        }
-                    }
-                });*/
-                /*enterQuestionPercentage.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {}
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        if ( enterQuestionPercentage.getText().toString().length() >= 1 ) {
-                            enterNumberOfQuestions.setEnabled(false);
-                        } else {
-                            enterNumberOfQuestions.setEnabled(true);
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                        if ( checked ) {
+                            enter_new_field_name.setVisibility(View.VISIBLE);
+                            existing_fields.setVisibility(View.GONE);
                         }
                     }
                 });
-                enterNumberOfQuestions.addTextChangedListener(new TextWatcher() {
+                existing_field.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    }
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    }
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        if (enterNumberOfQuestions.getText().toString().length() >= 1) {
-                            enterQuestionPercentage.setEnabled(false);
-                        } else {
-                            enterQuestionPercentage.setEnabled(true);
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                        if ( checked ) {
+                            existing_fields.setVisibility(View.VISIBLE);
+                            enter_new_field_name.setVisibility(View.GONE);
                         }
                     }
-                });*/
-                number_of_tries_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.enter_number_of_tries_help).create().show();/*(textView).create().show();*/
-
-                    }
                 });
-                percentage_or_number_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
 
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.percentage_or_number_help).create().show();
-                    }
-                });
-                /*enter_number_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.enter_number_help).create().show();
-                    }
-                });*/
-                /*number_of_questions_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.enter_number_of_questions_help).create().show();
-                    }
-                });*/
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        try {
+                        /*try {
                             if (enterTries.getText().toString().length() > 0) {
                                 int trys = Integer.parseInt(enterTries.getText().toString());
                                 if (trys > 0) {
@@ -234,7 +166,7 @@ public class CopyFieldDialogFragment extends DialogFragment {
                             toast.show();
                         } catch (Resources.NotFoundException e) {
                             e.printStackTrace();
-                        }
+                        }*/
                     }
                 });
             }
