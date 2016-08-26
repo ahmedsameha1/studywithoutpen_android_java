@@ -679,15 +679,10 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                         new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
                                 Contract.String_Entry.COLUMN_RANK},
                         Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{from_field_id + ""},null,null,null);
-                for ( long entry_id : list_of_entries ) {
-                    Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
-                            new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
-                                   Contract.String_Entry.COLUMN_RANK},
-                            Contract.COLUMN_ID + " = ?",
-                            new String[]{entry_id + ""}, null, null, null, null);
-                    cursor.moveToFirst();
+                for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                      cursor.moveToNext() ) {
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_FIELD,field_id);
+                    contentValues.put(Contract.String_Entry.COLUMN_FIELD, to_field_id);
                     contentValues.put(Contract.String_Entry.COLUMN_QUESTION,cursor.getLong(0));
                     contentValues.put(Contract.String_Entry.COLUMN_ANSWER,cursor.getLong(1));
                     contentValues.put(Contract.String_Entry.COLUMN_RANK,cursor.getInt(2));

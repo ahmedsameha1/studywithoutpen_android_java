@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
@@ -23,22 +24,29 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 /**
  * Created by a on 7/25/16.
  */
 public class CopyFieldDialogFragment extends DialogFragment {
     public static final String COPY_FIELD_DIALOG_FRAGMENT = "copy_field_dialog_fragment";
-
+    public static final String WHAT_TO_DO = "what_to_do";
     private DatabaseOperations databaseOperations;
+    private int what_to_do;
 
-
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        what_to_do = getArguments().getInt(WHAT_TO_DO);
+    }
 
     @NonNull
     @Override
@@ -65,7 +73,13 @@ public class CopyFieldDialogFragment extends DialogFragment {
                 positive_button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ( (Contact) getActivity()).copyEntries(existing_fields.getSelectedItemId());
+                        if ( what_to_do == Constants.CopyMove.COPY_FIELD) {
+                            ( (CopyField) getActivity()).copyField(existing_fields.getSelectedItemId());
+                        } else if ( what_to_do == Constants.CopyMove.COPY_ENTRIES ){
+                            ( (CopyEntries) getActivity()).copyEntries(existing_fields.getSelectedItemId());
+                        } else if ( what_to_do == Constants.CopyMove.MOVE_ENTRIES ) {
+                            ( (MoveEntries) getActivity()).moveEntries(existing_fields.getSelectedItemId());
+                        }
                         dismiss();
                         getActivity().finish();
                     }
@@ -74,7 +88,14 @@ public class CopyFieldDialogFragment extends DialogFragment {
         });
         return alertDialog;
     }
-    public interface Contact {
+    public interface CopyEntries {
        void copyEntries(long field_id );
     }
+    public interface MoveEntries {
+       void moveEntries(long field_id );
+    }
+    public interface CopyField {
+       void copyField(long field_id );
+    }
+
 }

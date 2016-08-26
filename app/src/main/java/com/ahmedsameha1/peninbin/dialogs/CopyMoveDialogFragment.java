@@ -53,6 +53,9 @@ public class CopyMoveDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         CopyFieldDialogFragment copyFieldDialogFragment = new CopyFieldDialogFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.COPY_FIELD);
+                        copyFieldDialogFragment.setArguments(bundle);
                         copyFieldDialogFragment.show(getActivity().getSupportFragmentManager(),
                                 CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
                         dismiss();

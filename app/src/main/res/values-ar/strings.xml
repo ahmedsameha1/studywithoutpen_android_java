@@ -206,10 +206,10 @@
     <string name="field_notes">مﻻحظات</string>
     <string name="number_of_moderate_or_higher_entries">عدد  المُدخﻻت\n(المتوسطة أو أعلى)</string>
     <string name="add_field_note">أضف ملحوظة</string>
-    <string name="copy_field">Copy Field</string>
-    <string name="copy_entries">Copy Entries</string>
-    <string name="move_entries">Move Entries</string>
-    <string name="move">Copy</string>
-    <string name="copy">Copy</string>
-    <string name="copy_move_entries">Copy/Move Entries</string>
+    <string name="copy_field">نسخ مجال</string>
+    <string name="copy_entries">نسخ مُدخلات</string>
+    <string name="move_entries">نقل مُدخلات</string>
+    <string name="move">نقل</string>
+    <string name="copy">نسخ</string>
+    <string name="copy_move_entries">نسخ/نقل مُدخلات</string>
 </resources>

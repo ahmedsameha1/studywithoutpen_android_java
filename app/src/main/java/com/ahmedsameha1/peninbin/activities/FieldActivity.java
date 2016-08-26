@@ -63,7 +63,7 @@ public class FieldActivity extends AppCompatActivity implements
         SortEntriesDialogFragment.Contact,
         DeleteEntryDialogFragment.Contact,
         FieldPropertiesDialogFragment.Contact,
-        CopyFieldDialogFragment.Contact,
+        CopyFieldDialogFragment.CopyField,
         TextToSpeech.OnInitListener {
     public static final String SCREEN_NAME = "FieldActivity";
     public static final int SORT = 0;
@@ -553,8 +553,8 @@ public class FieldActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void copyEntries(long field_id) {
-        mySQLiteCursorLoader.copyEntries(null,current_field_id);
+    public void copyField(long field_id) {
+        mySQLiteCursorLoader.copyField(current_field_id,field_id);
     }
 
     public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {

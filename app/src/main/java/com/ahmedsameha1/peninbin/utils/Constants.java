@@ -21,4 +21,10 @@ public class Constants {
         public static final int ASKED_AT_CURRENT_ROUND = 1;
         public static final int DID_NOT_ASKED_AT_CURRENT_ROUND = 0;
     }
+
+    public static abstract class CopyMove {
+        public static final int COPY_FIELD = 0;
+        public static final int COPY_ENTRIES = 1;
+        public static final int MOVE_ENTRIES = 2;
+    }
 }

@@ -35,6 +35,7 @@ import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.CopyFieldDialogFragment;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.util.ArrayList;
 
@@ -43,7 +44,8 @@ import java.util.ArrayList;
  */
 public class CopyMoveEntriesActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
-        CopyFieldDialogFragment.Contact{
+        CopyFieldDialogFragment.CopyEntries,
+        CopyFieldDialogFragment.MoveEntries {
     private CopyMoveEntriesActivityRecyclerViewAdapter mAdapter;
     private ArrayList<Long> list_of_entries = new ArrayList<>();
     private MySQLiteCursorLoader mySQLiteCursorLoader;
@@ -86,16 +88,19 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+        CopyFieldDialogFragment copyFieldDialogFragment = new CopyFieldDialogFragment();
+        Bundle bundle = new Bundle();
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.copy:
-                CopyFieldDialogFragment copyFieldDialogFragment = new CopyFieldDialogFragment();
+                bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.COPY_ENTRIES);
+                copyFieldDialogFragment.setArguments(bundle);
                 copyFieldDialogFragment.show(getSupportFragmentManager(),CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
                 return true;
             case R.id.move:
-                mySQLiteCursorLoader.moveEntries(list_of_entries,1);//// TODO: 25/08/16  
-                finish();
+                bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.MOVE_ENTRIES);
+                copyFieldDialogFragment.setArguments(bundle);
+                copyFieldDialogFragment.show(getSupportFragmentManager(),CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
                 return true;
 
             default:
@@ -133,6 +138,11 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
     @Override
     public void copyEntries(long field_id) {
         mySQLiteCursorLoader.copyEntries(list_of_entries,field_id);
+    }
+
+    @Override
+    public void moveEntries(long field_id) {
+        mySQLiteCursorLoader.moveEntries(list_of_entries,field_id);
     }
 
     public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {
