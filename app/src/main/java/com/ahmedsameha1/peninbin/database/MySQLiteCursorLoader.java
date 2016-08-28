@@ -654,7 +654,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
     public void copyField(  long from_field_id, long to_field_id) {
-        buildCopyEntries(this).execute(db, from_field_id, to_field_id);
+        buildCopyField(this).execute(db, from_field_id, to_field_id);
     }
 
     protected ContentChangingTask buildCopyField(MySQLiteCursorLoader loader) {

@@ -12,6 +12,7 @@ import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -63,6 +64,9 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
+        getSupportActionBar().setTitle(databaseOperations.getFieldName(current_field_id));
         mAdapter = new CopyMoveEntriesActivityRecyclerViewAdapter(CopyMoveEntriesActivity.this, null, list_of_entries);
         final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(CopyMoveEntriesActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
