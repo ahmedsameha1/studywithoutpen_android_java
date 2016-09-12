@@ -42,6 +42,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.AboutDialogFragment;
@@ -509,8 +510,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void deleteField(long field_id) {
-        mySQLiteCursorLoader.deleteField(field_id,mHandler);
+    public void deleteField(long field_id, MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder) {
+        mySQLiteCursorLoader.deleteField(field_id,mHandler, mainActivityRecyclerViewViewHolder);
         mTracker.send(new HitBuilders.EventBuilder()
                 .setCategory(ANALYTICS_CATEGORY)
                 .setAction("delete field")

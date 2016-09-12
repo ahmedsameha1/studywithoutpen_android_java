@@ -148,7 +148,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                                 stringTokenizer.nextToken();
                                 String dateToSave = stringTokenizer.nextToken() + " "
                                         + stringTokenizer.nextToken() + ":00";
-                                if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                if ( ! databaseOperations.checkEntryDuplication(dateToSave,answer,current_field_id,question_data_type ) ) {
                                     mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,
                                             current_field_id);
                                 } else {
@@ -167,7 +167,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
                                     stringTokenizer.nextToken();
                                     String dateToSave = stringTokenizer.nextToken() + " "
                                             + stringTokenizer.nextToken() + ":00";
-                                    if ( ! databaseOperations.checkEntryDuplication(question,answer,current_field_id,question_data_type ) ) {
+                                    if ( ! databaseOperations.checkEntryDuplication(dateToSave,answer,current_field_id,question_data_type ) ) {
                                         mySQLiteCursorLoader.insertEntry(question_data_type,dateToSave,answer,
                                                 current_field_id);
                                     } else {

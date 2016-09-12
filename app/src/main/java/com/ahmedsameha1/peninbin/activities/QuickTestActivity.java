@@ -57,7 +57,6 @@ import java.util.StringTokenizer;
  * Created by ahmed on 8/3/2015.
  */
 public class QuickTestActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<Cursor>,
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener {
@@ -96,6 +95,8 @@ public class QuickTestActivity extends AppCompatActivity implements
     private static final String CONTENT_VISIBILITY = "content_visibility";
     private static final String LOADING_VISIBILITY = "loading_visibility";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
+    private static final String SYMBOL = "symbol";
+    private static final String CUSTOMABLE_TEXT = "customable_text";
     private int controlled_portion, rank_level, wrongness_level;
     private long current_field_id, current_entry_id;
     private String [][] listForTest;
@@ -125,6 +126,11 @@ public class QuickTestActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private Chronometer timer;
     private long lastPause;
+    private LoaderManager.LoaderCallbacks<Cursor> get_entries, get_symbol_string;
+    private String[] symbol, customable_text;
+    private int current_field_type;
+
+
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
@@ -141,8 +147,8 @@ public class QuickTestActivity extends AppCompatActivity implements
                 retainedFragment = new RetainedFragment();
                 getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
             }
-            databaseOperations = new DatabaseOperations(this);
             mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+            current_field_type = databaseOperations.getFieldType(current_field_id);
             listForTest = retainedFragment.getListForTest_QuickTestActivity();
             toolbar = (Toolbar) findViewById(R.id.toolbar);
             content = (RelativeLayout) findViewById(R.id.content);
@@ -198,6 +204,98 @@ public class QuickTestActivity extends AppCompatActivity implements
             question_data_type = databaseOperations.getQuestionDataType(current_field_id);
             AnalyticsApplication application = (AnalyticsApplication) getApplication();
             mTracker = application.getDefaultTracker();
+            get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
+                @Override
+                public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                    return new MySQLiteCursorLoader(QuickTestActivity.this,
+                            "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                                    + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                    + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                            new String[]{current_field_id + ""});
+            /*return new MySQLiteCursorLoader(QuickTestActivity.this,
+                    "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                            + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                            + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " FROM " + Contract.STring.TABLE_NAME
+                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                    new String[]{current_field_id + ""});*/
+                }
+                @Override
+                public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                    fieldEntriesCursor = data;
+                    if ( listForTest == null ) {
+                        if ( percent_or_number == PERCENTAGE ) {
+                            listForTest = getListForTest(percentage);
+                        } else if ( percent_or_number == NUMBER ) {
+                            listForTest = getListForTest(number);
+                        }
+                        if ( listForTest != null ) {
+                            questionsNumber = listForTest.length;
+                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                            showTries.setText(Integer.toString(triesCounter + 1));
+                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            new AsyncTask<Void, Void, Void>() {
+
+                                @Override
+                                protected Void doInBackground(Void... params) {
+                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                    return null;
+                                }
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,(Void[]) null);
+                            enterAnswer.requestFocus();
+                            testingNow = true;
+                            ifMoreThanOnce();
+                        } else {
+                            finish();
+                        }
+                    }
+                    crossfade();
+                }
+
+                @Override
+                public void onLoaderReset(Loader<Cursor> loader) {
+                    fieldEntriesCursor = null;
+                }
+            };
+            get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
+                @Override
+                public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                    return new MySQLiteCursorLoader(QuickTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                            new String[]{current_field_type + ""});
+
+                }
+
+                @Override
+                public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+                    if (symbol == null && customable_text == null) {
+                        symbol = new String[data.getCount()];
+                        customable_text = new String[data.getCount()];
+                        for (data.moveToFirst(); data.getPosition() < data.getCount();
+                             data.moveToNext()) {
+                            symbol[data.getPosition()] = data.getString(1);
+                            customable_text[data.getPosition()] = data.getString(2);
+                        }
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(android.content.Loader<Cursor> loader) {
+
+                }
+            };
             check.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -219,16 +317,25 @@ public class QuickTestActivity extends AppCompatActivity implements
                             triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                             currentQuestionCounter++;
                             if (currentQuestionCounter >= questionsNumber) {
-                                showQuestion.setText(R.string.quick_test_has_completed);
-                                enterAnswer.setText(R.string.quick_test_has_completed);
                                 check.setEnabled(false);
-                                ShowQuickTestResultDialogFragment fragment = new ShowQuickTestResultDialogFragment();
+                                final ShowQuickTestResultDialogFragment fragment = new ShowQuickTestResultDialogFragment();
                                 Bundle bundle = new Bundle();
                                 bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
                                 bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
                                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                 fragment.setArguments(bundle);
-                                fragment.show(getSupportFragmentManager(), ShowQuickTestResultDialogFragment.SHOW_QUICK_TEST_RESULT_DIALOG_FRAGMENT);
+                                Runnable mRunnable;
+                                mRunnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showQuestion.setText(R.string.test_has_completed);
+                                        enterAnswer.setText(R.string.test_has_completed);
+                                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
+                                        showResult.setPadding(0,0,0,0);
+                                        fragment.show(getSupportFragmentManager(), ShowQuickTestResultDialogFragment.SHOW_QUICK_TEST_RESULT_DIALOG_FRAGMENT);
+                                    }
+                                };
+                                mHandler.postDelayed(mRunnable, RETURN_TIME);
                                 currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
                                 questionsNumber = 0;
                                 wrongAnswersCounter = 0;
@@ -239,8 +346,6 @@ public class QuickTestActivity extends AppCompatActivity implements
                                 showTries.setText("");
                                 enterAnswer.setHint(R.string.enter_your_answer);
                                 hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                                showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                                showResult.setPadding(0,0,0,0);
     //                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, EnhancedTestActivity.this);
                             } else {
                                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -288,6 +393,15 @@ public class QuickTestActivity extends AppCompatActivity implements
                     }
                     if ( s.length() <= 0 ) {
                         check.setEnabled(false);
+                    }
+                    if (symbol != null && customable_text != null) {
+                        for (int i = 0; i < symbol.length; i++) {
+                            String text = s.toString();
+                            if (customable_text[i] != null && text.contains(customable_text[i])) {
+                                enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
+                                enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                            }
+                        }
                     }
                 }
             });
@@ -354,7 +468,8 @@ public class QuickTestActivity extends AppCompatActivity implements
                     toast.show();
                 }
             });
-            getLoaderManager().initLoader(START_NEW_SESSION,null,this);
+            getLoaderManager().initLoader(START_NEW_SESSION,null, get_entries);
+            getLoaderManager().restartLoader(0, null, get_symbol_string);
             check_type = databaseOperations.getFieldCheckType(current_field_id);
             question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
             answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
@@ -669,8 +784,9 @@ public class QuickTestActivity extends AppCompatActivity implements
                     listForTest[n][1] = uncontrolled_entries[n][1];
                     list_for_test_ids [n] = uncontrolled_entries_ids [n];
                 }*/
-                        shuffleArray(listForTest);
+
                     }
+                    shuffleArray(listForTest);
                     return listForTest;
                 }
             }
@@ -933,8 +1049,9 @@ public class QuickTestActivity extends AppCompatActivity implements
                     listForTest[n][1] = uncontrolled_entries[n][1];
                     list_for_test_ids [n] = uncontrolled_entries_ids [n];
                 }*/
-                        shuffleArray(listForTest);
+
                     }
+                    shuffleArray(listForTest);
                     return listForTest;
                 }
             }
@@ -1204,6 +1321,8 @@ public class QuickTestActivity extends AppCompatActivity implements
         savedInsatanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
         savedInsatanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
         savedInsatanceState.putLong(TIMER_LAST_PAUSE,lastPause);
+        savedInsatanceState.putStringArray(SYMBOL, symbol);
+        savedInsatanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         saveUserLayoutChanges(savedInsatanceState);
         super.onSaveInstanceState(savedInsatanceState);
     }
@@ -1232,6 +1351,8 @@ public class QuickTestActivity extends AppCompatActivity implements
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
         lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
+        customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
+        symbol = savedInstanceState.getStringArray(SYMBOL);
         restoreUserLayoutChanges(savedInstanceState);
         if ( testingNow ) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -1302,66 +1423,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         }
         return entry_id;
     }
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new MySQLiteCursorLoader(QuickTestActivity.this,
-                "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                        + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
-                        + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                        + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
-                        + " FROM " + Contract.STring.TABLE_NAME
-                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                new String[]{current_field_id + ""});
-            /*return new MySQLiteCursorLoader(QuickTestActivity.this,
-                    "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
-                            + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " FROM " + Contract.STring.TABLE_NAME
-                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{current_field_id + ""});*/
-    }
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        fieldEntriesCursor = data;
-            if ( listForTest == null ) {
-                if ( percent_or_number == PERCENTAGE ) {
-                    listForTest = getListForTest(percentage);
-                } else if ( percent_or_number == NUMBER ) {
-                    listForTest = getListForTest(number);
-                }
-                if ( listForTest != null ) {
-                    questionsNumber = listForTest.length;
-                    showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                    remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                    showTries.setText(Integer.toString(triesCounter + 1));
-                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                    new AsyncTask<Void, Void, Void>() {
 
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,(Void[]) null);
-                    enterAnswer.requestFocus();
-                    testingNow = true;
-                    ifMoreThanOnce();
-                } else {
-                    finish();
-                }
-            }
-        crossfade();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        fieldEntriesCursor = null;
-    }
 
     @Override
     public void onInit(int i) {
@@ -1379,6 +1441,11 @@ public class QuickTestActivity extends AppCompatActivity implements
                 Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP,0,400);
                 toast.show();
+            }
+            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null,null);
+            } else {
+                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null);
             }
         }
     }
@@ -1410,7 +1477,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             } else {
                 entry_wrongness = -1;
             }
-            if ( fieldEntriesCursor.getInt(3) >= rank && entry_wrongness >= wrongness ) {
+            if ( fieldEntriesCursor.getInt(3) >= rank || entry_wrongness >= wrongness ) {
                 controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;
@@ -1418,12 +1485,6 @@ public class QuickTestActivity extends AppCompatActivity implements
                 controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;
-            } else if ( fieldEntriesCursor.getInt(3) >= rank ) {
-                uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
-                uncontrolled[uncontrolled_counter][1] = fieldEntriesCursor.getString(2);
-                uncontrolled_ids[uncontrolled_counter] = fieldEntriesCursor.getLong(0);
-                uncontrolled_whether_asked[uncontrolled_counter] = fieldEntriesCursor.getInt(6);
-                uncontrolled_counter++;
             } else {
                 uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
                 uncontrolled[uncontrolled_counter][1] = fieldEntriesCursor.getString(2);

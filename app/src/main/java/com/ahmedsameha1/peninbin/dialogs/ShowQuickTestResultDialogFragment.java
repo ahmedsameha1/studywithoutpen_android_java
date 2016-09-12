@@ -2,6 +2,7 @@ package com.ahmedsameha1.peninbin.dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -9,6 +10,7 @@ import android.view.KeyEvent;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 
@@ -45,6 +47,9 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         getActivity().finish();
+                        Intent intent = new Intent(getActivity(), FieldActivity.class);
+                        intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
+                        getActivity().startActivity(intent);
                     }
                 })
                 .create();
@@ -54,6 +59,9 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
                         getActivity().finish();
+                        Intent intent = new Intent(getActivity(), FieldActivity.class);
+                        intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
+                        getActivity().startActivity(intent);
                         return false;
                     }
 

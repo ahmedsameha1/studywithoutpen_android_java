@@ -55,7 +55,7 @@ public class MainActivityRecyclerViewAdapter extends
                     public void onClick(View v, long field_id,boolean isDeleting) {
                         int field_type = databaseOperations.getFieldType(field_id);
                         if ( ! isDeleting ) {
-                            if ( field_type == Constants.FieldTypes.DEFAULT_TYPE ) {
+                            if ( field_type != Constants.FieldTypes.NOTEBOOK_TYPE ) {
                                 Intent intent = new Intent(context, FieldActivity.class);
                                 intent.putExtra(FieldActivity.FIELD_ID, field_id);
                                 context.startActivity(intent);
@@ -115,7 +115,7 @@ public class MainActivityRecyclerViewAdapter extends
                 }
             }
         });
-        if (data.getInt(1) == Constants.FieldTypes.DEFAULT_TYPE) {
+        if (data.getInt(1) != Constants.FieldTypes.NOTEBOOK_TYPE) {
             viewHolder.type.setImageResource(R.drawable.books1);
         } else if (data.getInt(1) == Constants.FieldTypes.NOTEBOOK_TYPE) {
             viewHolder.type.setImageResource(R.drawable.agenda1);

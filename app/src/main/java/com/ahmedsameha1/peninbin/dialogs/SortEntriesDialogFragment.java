@@ -60,13 +60,17 @@ public class SortEntriesDialogFragment extends DialogFragment {
                 Button sort_date_asc = (Button) alertDialog.findViewById(R.id.sort_date_asc);
                 Button sort_creation_desc = (Button) alertDialog.findViewById(R.id.sort_creation_desc);
                 Button sort_creation_asc = (Button) alertDialog.findViewById(R.id.sort_creation_asc);
+                Button sort_entry_order = (Button) alertDialog.findViewById(R.id.sort_entry_order);
 
                 if ( fieldType != Constants.FieldTypes.NOTEBOOK_TYPE ) {
                     sort_question_asc.setVisibility(View.VISIBLE);
                     sort_question_desc.setVisibility(View.VISIBLE);
-                } else {
+                } else if ( fieldType == Constants.FieldTypes.NOTEBOOK_TYPE ){
                     sort_date_asc.setVisibility(View.VISIBLE);
                     sort_date_desc.setVisibility(View.VISIBLE);
+                }
+                if ( databaseOperations.isThereEntryOrder(current_field_id) ){
+                    sort_entry_order.setVisibility(View.VISIBLE);
                 }
 
                 sort_answer_desc.setOnClickListener(new View.OnClickListener() {
@@ -130,6 +134,14 @@ public class SortEntriesDialogFragment extends DialogFragment {
                     public void onClick(View v) {
                         contact.sort(FieldActivity.SORT_CREATION_DATE_ASC);
                         mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_CREATION_DATE_ASC);
+                        dismiss();
+                    }
+                });
+                sort_entry_order.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        contact.sort(FieldActivity.SORT_ENTRY_ORDER_ASC);
+                        mySQLiteCursorLoader.updateFieldSort(current_field_id,FieldActivity.SORT_ENTRY_ORDER_ASC);
                         dismiss();
                     }
                 });

@@ -28,8 +28,8 @@ import com.ahmedsameha1.peninbin.R;
 /**
  * Created by a on 7/25/16.
  */
-public class TestDialogFragment extends DialogFragment {
-    public static final String TEST_DIALOG_FRAGMENT = "test_dialog_fragment";
+public class FullyRandomTestDialogFragment extends DialogFragment {
+    public static final String FULLY_RANDOM_TEST_DIALOG_FRAGMENT = "fully_random_test_dialog_fragment";
     private long current_field_id;
     private boolean from_notification;
     @Override
@@ -46,7 +46,7 @@ public class TestDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
                 builder.setTitle(R.string.start_a_test)
-                        .setView(inflater.inflate(R.layout.test_dialog_fragment, null))
+                        .setView(inflater.inflate(R.layout.fully_random_test_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {

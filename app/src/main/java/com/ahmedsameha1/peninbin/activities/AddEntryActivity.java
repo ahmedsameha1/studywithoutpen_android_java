@@ -46,7 +46,6 @@ import com.google.android.gms.analytics.Tracker;
  * Created by Ahmed on 3/19/16.
  */
 public class AddEntryActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<Cursor>,
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize {
     public static final String SCREEN_NAME = "AddEntryActivity";
@@ -58,6 +57,8 @@ public class AddEntryActivity extends AppCompatActivity implements
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     private static final String CURRENT_FIELD_ID = "current_field_id";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
+    private static final String SYMBOL = "symbol";
+    private static final String CUSTOMABLE_TEXT = "customable_text";
     private Spinner field_spinner;
     private EditText enter_question;
     private EditText enter_answer;
@@ -76,6 +77,9 @@ public class AddEntryActivity extends AppCompatActivity implements
     private int question_data_type;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private Tracker mTracker;
+    private LoaderManager.LoaderCallbacks<Cursor> get_entries, get_symbol_string;
+    private String[] symbol, customable_text;
+    private int current_field_type;
 
 
 
@@ -88,6 +92,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         databaseOperations = new DatabaseOperations(this);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         fieldType = databaseOperations.getFieldType(current_field_id);
@@ -115,6 +120,60 @@ public class AddEntryActivity extends AppCompatActivity implements
             getSupportActionBar().hide();
         }
         actionBarShown = getSupportActionBar().isShowing();
+        get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                return new MySQLiteCursorLoader(AddEntryActivity.this,
+                        "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
+                                + " FROM " + Contract.Field.TABLE_NAME
+                                + " WHERE " + Contract.Field.COLUMN_FIELD_TYPE + " != ? "
+                                + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
+                        new String[]{Constants.FieldTypes.NOTEBOOK_TYPE + ""});
+            }
+
+            @Override
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+                simple_cursor_adapter.swapCursor(data);
+                cursor = data;
+                setSpinnerPosition(current_field_id);
+            }
+
+            @Override
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+                simple_cursor_adapter.swapCursor(null);
+            }
+        };
+        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                return new MySQLiteCursorLoader(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                        new String[]{current_field_type + ""});
+
+            }
+
+            @Override
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+                if (symbol == null && customable_text == null) {
+                    symbol = new String[data.getCount()];
+                    customable_text = new String[data.getCount()];
+                    for (data.moveToFirst(); data.getPosition() < data.getCount();
+                         data.moveToNext()) {
+                        symbol[data.getPosition()] = data.getString(1);
+                        customable_text[data.getPosition()] = data.getString(2);
+                    }
+                }
+            }
+
+            @Override
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+
+            }
+        };
+
         simple_cursor_adapter = new SimpleCursorAdapter(this, R.layout.field_spinner, null,
                 new String[]{Contract.Field.COLUMN_FIELD_NAME}, new int[]{R.id.list_item}, 0);
         final ArrayAdapter rank_spinner_adapter = new ArrayAdapter(this,
@@ -126,7 +185,8 @@ public class AddEntryActivity extends AppCompatActivity implements
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         rank_spinner.setSelection(Constants.Rank.LOW);
         setHints(fieldType);
-        getLoaderManager().restartLoader(0, null, this);
+        getLoaderManager().restartLoader(0, null, get_entries);
+        getLoaderManager().restartLoader(0, null, get_symbol_string);
         enter_answer.requestFocus();
         changeAreas(question_area_size, answer_area_size);
         if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
@@ -148,7 +208,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                     if (fromFieldActivity) {
 
                         if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
-                            mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                            mySQLiteCursorLoader.insertEntryWithRank(question_data_type, question, answer,
                                     current_field_id, rank_spinner.getSelectedItemPosition());
                         } else {
                             Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
@@ -161,7 +221,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                     } else {
                         if (field_chosen) {
                             if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
-                                mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                mySQLiteCursorLoader.insertEntryWithRank(question_data_type, question, answer,
                                         current_field_id, rank_spinner.getSelectedItemPosition());
                             } else {
                                 Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
@@ -283,6 +343,15 @@ public class AddEntryActivity extends AppCompatActivity implements
                 } else {
                     add_entry.setEnabled(false);
                 }
+                if (symbol != null && customable_text != null) {
+                    for (int i = 0; i < symbol.length; i++) {
+                        String text = editable.toString();
+                        if (customable_text[i] != null && text.contains(customable_text[i])) {
+                            enter_question.setText(text.replaceAll(customable_text[i], symbol[i]));
+                            enter_question.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                        }
+                    }
+                }
             }
         });
         enter_answer.addTextChangedListener(new TextWatcher() {
@@ -300,6 +369,15 @@ public class AddEntryActivity extends AppCompatActivity implements
                     add_entry.setEnabled(true);
                 } else {
                     add_entry.setEnabled(false);
+                }
+                if (symbol != null && customable_text != null) {
+                    for (int i = 0; i < symbol.length; i++) {
+                        String text = editable.toString();
+                        if (customable_text[i] != null && text.contains(customable_text[i])) {
+                            enter_answer.setText(text.replaceAll(customable_text[i], symbol[i]));
+                            enter_answer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                        }
+                    }
                 }
             }
         });
@@ -379,6 +457,8 @@ public class AddEntryActivity extends AppCompatActivity implements
         savedInstanceState.putBoolean(FIELD_CHOSEN, field_chosen);
         savedInstanceState.putInt(SPINNER_POSITION, field_spinner.getSelectedItemPosition());
         savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
+        savedInstanceState.putStringArray(SYMBOL, symbol);
+        savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         saveUserLayoutChanges(savedInstanceState);
     }
 
@@ -388,6 +468,8 @@ public class AddEntryActivity extends AppCompatActivity implements
         current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
         field_chosen = savedInstanceState.getBoolean(FIELD_CHOSEN);
         lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
+        customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
+        symbol = savedInstanceState.getStringArray(SYMBOL);
         restoreUserLayoutChanges(savedInstanceState);
     }
 
@@ -402,27 +484,6 @@ public class AddEntryActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new MySQLiteCursorLoader(AddEntryActivity.this,
-                "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
-                        + " FROM " + Contract.Field.TABLE_NAME
-                        + " WHERE " + Contract.Field.COLUMN_FIELD_TYPE + " != ? "
-                        + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
-                new String[]{Constants.FieldTypes.NOTEBOOK_TYPE + ""});
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        simple_cursor_adapter.swapCursor(data);
-        cursor = data;
-        setSpinnerPosition(current_field_id);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        simple_cursor_adapter.swapCursor(null);
-    }
 
     @Override
     public void changeAreas(float questionArea, float answerArea) {

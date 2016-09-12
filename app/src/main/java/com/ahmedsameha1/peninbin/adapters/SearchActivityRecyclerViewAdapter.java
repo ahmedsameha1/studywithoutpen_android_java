@@ -136,14 +136,14 @@ public class SearchActivityRecyclerViewAdapter extends
             }
         });
         switch (fieldType) {
-            case Constants.FieldTypes.DEFAULT_TYPE:
-                viewHolder.question.setText(question);
-                viewHolder.answer.setText(answer);
-                break;
             case Constants.FieldTypes.NOTEBOOK_TYPE:
                 Timestamp timestamp = Timestamp.valueOf(question);
                 Date date = new Date(timestamp.getTime());
                 viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));
+                viewHolder.answer.setText(answer);
+                break;
+            default:
+                viewHolder.question.setText(question);
                 viewHolder.answer.setText(answer);
                 break;
         }

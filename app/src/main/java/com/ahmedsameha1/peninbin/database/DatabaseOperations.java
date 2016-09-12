@@ -92,8 +92,8 @@ public class DatabaseOperations {
         Cursor cursor = null;
         if (getQuestionDataType(field_id) == Contract.Field.STRING_DATA_TYPE) {
             cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
-                    new String[]{Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER},
-                    Contract.COLUMN_ID + " = ? AND ( " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER + " >= ? OR "
+                    new String[]{Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER},
+                    Contract.COLUMN_ID + " = ? AND ( " + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? OR "
                             + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? )",
                     new String[]{entry_id + "", "0", "0"}, null, null, null);
         } else if (getQuestionDataType(field_id) == Contract.Field.NOT_STRING_DATA_TYPE) {
@@ -187,13 +187,39 @@ public class DatabaseOperations {
         return i;
     }
 
-    public String[][] getWrongAnswers(long field_id, int question_data_type) {
+    public String[][] getWrongAnswersEnhancedTest(long field_id, int question_data_type) {
         String[][] wrong_answers;
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             Cursor wrong_answers_cursor = sqLiteDatabase.rawQuery("SELECT " + Contract.Test_Wrong_Answer_String.COLUMN_ENTRY + ","
                     + Contract.Test_Wrong_Answer_String.COLUMN_WRONG_ANSWER + " FROM " + Contract.Test_Wrong_Answer_String.TABLE_NAME
                     + " WHERE " + Contract.Test_Wrong_Answer_String.COLUMN_ENTRY + " IN ( SELECT " + Contract.COLUMN_ID + " FROM "
-                    + Contract.String_Entry.TABLE_NAME + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? )", new String[]{field_id + ""});
+                    + Contract.String_Entry.TABLE_NAME + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? )"
+                    + " AND " + Contract.Test_Wrong_Answer_String.COLUMN_TEST_TYPE + " = ? "
+                    , new String[]{field_id + "", Constants.TestType.ENHANCED_TEST + ""});
+            wrong_answers = new String[wrong_answers_cursor.getCount()][2];
+            for (wrong_answers_cursor.moveToFirst(); wrong_answers_cursor.getPosition() < wrong_answers_cursor.getCount();
+                 wrong_answers_cursor.moveToNext()) {
+                wrong_answers[wrong_answers_cursor.getPosition()][0] = Long.toString(wrong_answers_cursor.getLong(0));
+                wrong_answers[wrong_answers_cursor.getPosition()][1] = wrong_answers_cursor.getString(1);
+            }
+            wrong_answers_cursor.close();
+            return wrong_answers;
+        } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+            return null;
+        } else {
+            return null;
+        }
+    }
+
+    public String[][] getWrongAnswersFullyRandomTest(long field_id, int question_data_type) {
+        String[][] wrong_answers;
+        if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+            Cursor wrong_answers_cursor = sqLiteDatabase.rawQuery("SELECT " + Contract.Test_Wrong_Answer_String.COLUMN_ENTRY + ","
+                    + Contract.Test_Wrong_Answer_String.COLUMN_WRONG_ANSWER + " FROM " + Contract.Test_Wrong_Answer_String.TABLE_NAME
+                    + " WHERE " + Contract.Test_Wrong_Answer_String.COLUMN_ENTRY + " IN ( SELECT " + Contract.COLUMN_ID + " FROM "
+                    + Contract.String_Entry.TABLE_NAME + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? )"
+                    + " AND " + Contract.Test_Wrong_Answer_String.COLUMN_TEST_TYPE + " = ? "
+                    , new String[]{field_id + "", Constants.TestType.FULLY_RANDOM_TEST + ""});
             wrong_answers = new String[wrong_answers_cursor.getCount()][2];
             for (wrong_answers_cursor.moveToFirst(); wrong_answers_cursor.getPosition() < wrong_answers_cursor.getCount();
                  wrong_answers_cursor.moveToNext()) {
@@ -301,11 +327,24 @@ public class DatabaseOperations {
     }
 
 
-    public boolean checkEntriesForAnyTestOrder(long field_id, int question_data_type) {
+    public boolean checkEntriesForAnyTestOrderEnhancedTest(long field_id, int question_data_type) {
         boolean result = false;
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
-                    + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ?  AND " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ?  AND " + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER
+                    + " >= ? ", new String[]{field_id + "", "0"});
+            cursor.moveToFirst();
+            int number = cursor.getInt(0);
+            cursor.close();
+            result = number > 0;
+        }
+        return result;
+    }
+    public boolean checkEntriesForAnyTestOrderFullyRandomTest(long field_id, int question_data_type) {
+        boolean result = false;
+        if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+            Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
+                    + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ?  AND " + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER
                     + " >= ? ", new String[]{field_id + "", "0"});
             cursor.moveToFirst();
             int number = cursor.getInt(0);
@@ -315,10 +354,20 @@ public class DatabaseOperations {
         return result;
     }
 
-    public boolean isThisFieldTestPaused(long field_id) {
+    public boolean isThisFieldTestPausedEnhancedTest(long field_id) {
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.Test_Paused.TABLE_NAME
-                        + " WHERE " + Contract.Test_Paused.COLUMN_FIELD + " = ? ",
-                new String[]{field_id + ""});
+                        + " WHERE " + Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
+                new String[]{field_id + "", Constants.TestType.ENHANCED_TEST + ""});
+        cursor.moveToFirst();
+        int number = cursor.getInt(0);
+        cursor.close();
+        return number == 1;
+    }
+
+    public boolean isThisFieldTestPausedFullyRandomTest(long field_id) {
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.Test_Paused.TABLE_NAME
+                        + " WHERE " + Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
+                new String[]{field_id + "", Constants.TestType.FULLY_RANDOM_TEST + ""});
         cursor.moveToFirst();
         int number = cursor.getInt(0);
         cursor.close();
@@ -416,13 +465,28 @@ public class DatabaseOperations {
         return action_bar_shown;
     }
 
-    public int[] getDataFromTestPaused(long field_id) {
+    public int[] getDataFromTestPausedEnhancedTest(long field_id) {
         int[] array = new int[3];
         Cursor cursor = sqLiteDatabase.query(Contract.Test_Paused.TABLE_NAME,
                 new String[]{Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER,
                         Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT, Contract.Test_Paused.COLUMN_TRIES_NUMBER},
-                Contract.Test_Paused.COLUMN_FIELD + " = ? ",
-                new String[]{field_id + ""}, null, null, null);
+                Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
+                new String[]{field_id + "", Constants.TestType.ENHANCED_TEST + ""}, null, null, null);
+        cursor.moveToFirst();
+        array[0] = cursor.getInt(0);
+        array[1] = cursor.getInt(1);
+        array[2] = cursor.getInt(2);
+        cursor.close();
+        return array;
+    }
+
+    public int[] getDataFromTestPausedFullyRandomTest(long field_id) {
+        int[] array = new int[3];
+        Cursor cursor = sqLiteDatabase.query(Contract.Test_Paused.TABLE_NAME,
+                new String[]{Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER,
+                        Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT, Contract.Test_Paused.COLUMN_TRIES_NUMBER},
+                Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
+                new String[]{field_id + "", Constants.TestType.FULLY_RANDOM_TEST + ""}, null, null, null);
         cursor.moveToFirst();
         array[0] = cursor.getInt(0);
         array[1] = cursor.getInt(1);
@@ -559,4 +623,35 @@ public class DatabaseOperations {
         return count;
     }
 
+    public boolean isThereEntryOrder( long field_id ) {
+        boolean there_is_entry_order = false;
+        Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,new String[] {Contract.COLUMN_ID},
+                Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " IS NOT NULL",
+                new String[]{ field_id + ""},null,null,null);
+        there_is_entry_order = cursor.getCount() > 0;
+        cursor.close();
+        return there_is_entry_order;
+    }
+
+    public boolean checkCustomableText( int field_type, String text ) {
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT s."
+                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                new String[]{ field_type + ""});
+        boolean contained = false;
+        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+             cursor.moveToNext()) {
+            if ( cursor.getString(0).contains(text) || ( cursor.getString(1) != null && cursor.getString(1).contains(text)) ) {
+                contained = true;
+                break;
+            }
+        }
+        cursor.close();
+        return contained;
+    }
+
+
 }
+

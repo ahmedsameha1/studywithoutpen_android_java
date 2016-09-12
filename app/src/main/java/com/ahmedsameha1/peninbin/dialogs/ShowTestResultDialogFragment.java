@@ -17,6 +17,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.WrongAnswersActivity;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
  */
 public class ShowTestResultDialogFragment extends DialogFragment {
     public static final String SHOW_TEST_RESULT_DIALOG_FRAGMENT = "showTestResultDialogFragment";
+    public static final String TEST_TYPE = "test_type";
     private int questionsNumber, wrongAnswersNumber;
     private double correctAnswersPercent;
     private String message;
@@ -33,6 +35,7 @@ public class ShowTestResultDialogFragment extends DialogFragment {
     private int question_data_type;
     ArrayList<WrongItem> wrongItemList;
     private DatabaseOperations databaseOperations;
+    private int test_type;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,7 @@ public class ShowTestResultDialogFragment extends DialogFragment {
         questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
         wrongAnswersNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        test_type = getArguments().getInt(TEST_TYPE);
         correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) /questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();
         message = getString(R.string.Your_correct_answers_was) + " " + numberFormat.format(correctAnswersPercent)+ " " +
@@ -68,7 +72,11 @@ public class ShowTestResultDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,question_data_type);
+                        if ( test_type == Constants.TestType.ENHANCED_TEST) {
+                            mySQLiteCursorLoader.clearThisFieldFromWrongAnswersEnhancedTest(current_field_id, question_data_type);
+                        } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                            mySQLiteCursorLoader.clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id, question_data_type);
+                        }
                         getActivity().finish();
                     }
                 })
@@ -78,7 +86,11 @@ public class ShowTestResultDialogFragment extends DialogFragment {
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,question_data_type);
+                        if ( test_type == Constants.TestType.ENHANCED_TEST) {
+                            mySQLiteCursorLoader.clearThisFieldFromWrongAnswersEnhancedTest(current_field_id, question_data_type);
+                        } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                            mySQLiteCursorLoader.clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id, question_data_type);
+                        }
                         getActivity().finish();
                         return false;
                     }
@@ -98,6 +110,7 @@ public class ShowTestResultDialogFragment extends DialogFragment {
                     public void onClick(View view) {
                         Bundle bundle = new Bundle();
                         bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                        bundle.putInt(TEST_TYPE, test_type);
                         bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItemList);
                         Intent intent = new Intent(getActivity(),WrongAnswersActivity.class);
                         intent.putExtra(WrongAnswersActivity.WRONG_ITEM_LIST,bundle);
@@ -109,7 +122,11 @@ public class ShowTestResultDialogFragment extends DialogFragment {
                 if ( wrongAnswersNumber <= 0 ) {
                     b.setEnabled(false);
                 }
-                mySQLiteCursorLoader.resetEntriesTestOrder(current_field_id,question_data_type);
+                if ( test_type == Constants.TestType.ENHANCED_TEST) {
+                    mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id,question_data_type);
+                } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                    mySQLiteCursorLoader.resetEntriesTestOrderFullyRandomTest(current_field_id,question_data_type);
+                }
             }
         });
 

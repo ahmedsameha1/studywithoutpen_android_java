@@ -59,7 +59,6 @@ import java.util.StringTokenizer;
  * Created by ahmed_000 on 9/23/2015.
  */
 public class StudyAPeriodActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<Cursor>,
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener {
@@ -81,6 +80,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private static final String LOADING_VISIBILITY = "loading_visibility";
     private static final String CURRENT_ENTRY_ID = "current_entry_id";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
+    private static final String SYMBOL = "symbol";
+    private static final String CUSTOMABLE_TEXT = "customable_text";
     private long startingTime;
     boolean boolean_continue, actionBarShown;
     private Cursor cursor;
@@ -127,7 +128,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private Chronometer timer;
     private long lastPause;
-
+    private LoaderManager.LoaderCallbacks<Cursor> get_entries, get_symbol_string;
+    private String[] symbol, customable_text;
+    private int current_field_type;
     private int question_data_type;private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -164,6 +167,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         databaseOperations = new DatabaseOperations(this);
+        current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
@@ -192,6 +196,127 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         show_action_bar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         timer = (Chronometer)findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
+        get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+                if (id == CONTINUE_PREVIOUS_SESSION) {
+
+                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
+                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
+                            new String[]{current_field_id + "", "0"});
+           /* return new CursorLoader(this, uri,
+                    new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK,
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK,
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_STUDY_DURING_ORDER},
+                    Contract.Old_Linker_DBV6_AppV32.COLUMN_STUDY_DURING_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
+                    new String[]{"0", current_field_name},
+                    null);*/
+            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME);
+            return new CursorLoader(this,uri,
+                    new String[] {Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_QUESTION, Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_ANSWER},
+                    Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_FIELD + " = ?",
+                    new String[] {current_field_name},
+                    null);*/
+                } else {
+                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
+                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                            new String[]{current_field_id + ""});
+           /* Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
+            return new CursorLoader(this,
+                    uri,
+                    new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK, Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32},
+                    Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
+                    new String[]{current_field_name},
+                    null);*/
+                }
+            }
+
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                StudyAPeriodActivity.this.cursor = cursor;
+                listForTest = retainedFragment.getListForTest_StudyDuringActivity();
+                if (listForTest == null) {
+                    if (boolean_continue) {
+                        listForTest = readFromLinkerTableStudyDuringColumn();
+                    } else {
+                        listForTest = prepareListForStudyFirstTime();
+                    }
+                }
+                questionsNumber = listForTest.length;
+                if (questionsNumber > 0) {
+                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                    new AsyncTask<Void, Void, Void>() {
+
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                            return null;
+                        }
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                    ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+                    showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+                    if (boolean_continue) {
+                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                    } else {
+                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
+                    }
+
+                } else if (questionsNumber <= 0 && loader.getId() == START_NEW_SESSION) {
+                    Toast toast = Toast.makeText(StudyAPeriodActivity.this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                    finish();
+                }
+                crossfade();
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Cursor> loader) {
+
+            }
+        };
+        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                return new MySQLiteCursorLoader(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                        new String[]{current_field_type + ""});
+
+            }
+
+            @Override
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+                if (symbol == null && customable_text == null) {
+                    symbol = new String[data.getCount()];
+                    customable_text = new String[data.getCount()];
+                    for (data.moveToFirst(); data.getPosition() < data.getCount();
+                         data.moveToNext()) {
+                        symbol[data.getPosition()] = data.getString(1);
+                        customable_text[data.getPosition()] = data.getString(2);
+                    }
+                }
+            }
+
+            @Override
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+
+            }
+        };
         if ( savedInstanceState == null ) {
             content.setVisibility(View.GONE);
             mShortAnimationDuration = getResources().getInteger(
@@ -223,10 +348,10 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             currentQuestionCounter = array[0];
             permitedTriesNumber = array[1];
             repeatedEntries = databaseOperations.getStudyPeriodRepeatedEntries(current_field_id);
-            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION, null, this);
+            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION, null, get_entries);
         } else {
             permitedTriesNumber = getIntent().getExtras().getInt(NUMBER_OF_TRIES);
-            getLoaderManager().initLoader(START_NEW_SESSION, null, this);
+            getLoaderManager().initLoader(START_NEW_SESSION, null, get_entries);
         }
         changeAreas(question_area_size,answer_area_size);
         if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
@@ -238,6 +363,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
+        getLoaderManager().restartLoader(0, null, get_symbol_string);
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -292,7 +418,23 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                             } else {
                                 mySQLiteCursorLoader.resetEntriesStudyPeriodOrder(current_field_id, question_data_type);
                                 mySQLiteCursorLoader.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
-                                finish();
+                                if ( tts_available ) {
+                                    new AsyncTask<Void, Void, Void>() {
+
+                                        @Override
+                                        protected Void doInBackground(Void... params) {
+                                            while ( true ) {
+                                                if ( !tts.isSpeaking() ) {
+                                                    finish();
+                                                    break;
+                                                }
+                                            }
+                                            return null;
+                                        }
+                                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                                } else {
+                                    finish();
+                                }
                             }
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -356,6 +498,15 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                     check.setEnabled(true);
                 } else {
                     check.setEnabled(false);
+                }
+                if (symbol != null && customable_text != null) {
+                    for (int i = 0; i < symbol.length; i++) {
+                        String text = s.toString();
+                        if (customable_text[i] != null && text.contains(customable_text[i])) {
+                            enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
+                            enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                        }
+                    }
                 }
             }
         });
@@ -779,6 +930,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         savedInstanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
         savedInstanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
         savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
+        savedInstanceState.putStringArray(SYMBOL, symbol);
+        savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         saveUserLayoutChanges(savedInstanceState);
       /*  if (!isFinishing()) {
             pauseThread.start();
@@ -809,6 +962,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
         current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
         lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
+        customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
+        symbol = savedInstanceState.getStringArray(SYMBOL);
         restoreUserLayoutChanges(savedInstanceState);
         if (testingNow) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -889,95 +1044,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         return entry_id;
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-        if (id == CONTINUE_PREVIOUS_SESSION) {
 
-            return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
-                    "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
-                            + " FROM " + Contract.STring.TABLE_NAME
-                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
-                    new String[]{current_field_id + "", "0"});
-           /* return new CursorLoader(this, uri,
-                    new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK,
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK,
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_STUDY_DURING_ORDER},
-                    Contract.Old_Linker_DBV6_AppV32.COLUMN_STUDY_DURING_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
-                    new String[]{"0", current_field_name},
-                    null);*/
-            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME);
-            return new CursorLoader(this,uri,
-                    new String[] {Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_QUESTION, Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_ANSWER},
-                    Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_FIELD + " = ?",
-                    new String[] {current_field_name},
-                    null);*/
-        } else {
-            return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
-                    "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
-                            + " FROM " + Contract.STring.TABLE_NAME
-                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{current_field_id + ""});
-           /* Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-            return new CursorLoader(this,
-                    uri,
-                    new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK, Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32},
-                    Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
-                    new String[]{current_field_name},
-                    null);*/
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        this.cursor = cursor;
-        listForTest = retainedFragment.getListForTest_StudyDuringActivity();
-        if (listForTest == null) {
-            if (boolean_continue) {
-                listForTest = readFromLinkerTableStudyDuringColumn();
-            } else {
-                listForTest = prepareListForStudyFirstTime();
-            }
-        }
-        questionsNumber = listForTest.length;
-        if (questionsNumber > 0) {
-            showQuestion.setText(listForTest[currentQuestionCounter][0]);
-            new AsyncTask<Void, Void, Void>() {
-
-                @Override
-                protected Void doInBackground(Void... params) {
-                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
-                    return null;
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-            ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
-            showNumberOfQuetions.setText(Integer.toString(questionsNumber));
-            if (boolean_continue) {
-                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-            } else {
-                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
-            }
-
-        } else if (questionsNumber <= 0 && loader.getId() == START_NEW_SESSION) {
-            Toast toast = Toast.makeText(this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
-            finish();
-        }
-        crossfade();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1039,6 +1106,11 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP,0,400);
                 toast.show();
+            }
+            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null,null);
+            } else {
+                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null);
             }
         }
     }

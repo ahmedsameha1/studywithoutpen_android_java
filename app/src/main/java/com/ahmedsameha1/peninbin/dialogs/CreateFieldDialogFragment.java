@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -29,6 +30,8 @@ import com.ahmedsameha1.peninbin.R;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 /**
@@ -75,9 +78,9 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                 read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
                 final Spinner select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
                 final LinearLayout show_default_field_options = (LinearLayout) alertDialog.findViewById(R.id.show_default_field_options);
-                final SpinnerWithHintAdapter field_type_adapter = new SpinnerWithHintAdapter(getActivity(),
+                final ArrayAdapter<String> field_type_adapter = new ArrayAdapter<String>(getActivity(),
                         android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.field_type));
-                final SpinnerWithHintAdapter check_type_adapter = new SpinnerWithHintAdapter(getActivity(),
+                final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(getActivity(),
                         android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.check_type));
                 field_type_adapter.setDropDownViewResource
                         (android.R.layout.simple_spinner_dropdown_item);
@@ -85,18 +88,16 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                         (android.R.layout.simple_spinner_dropdown_item);
                 select_field_type.setAdapter(field_type_adapter);
                 select_check_type.setAdapter(check_type_adapter);
-                select_field_type.setSelection(field_type_adapter.getCount());
-                select_check_type.setSelection(check_type_adapter.getCount());
                 final SpinnerWithHintAdapter select_locale_adapter =
                         new SpinnerWithHintAdapter(getActivity(),android.R.layout.simple_spinner_item,locale_display_names);
                 Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 select_field_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                        if ( position == 0) {
-                            show_default_field_options.setVisibility(View.VISIBLE);
-                        } else {
+                        if ( position == Constants.FieldTypes.NOTEBOOK_TYPE ) {
                             show_default_field_options.setVisibility(View.GONE);
+                        } else {
+                            show_default_field_options.setVisibility(View.VISIBLE);
                         }
                     }
 
@@ -133,7 +134,26 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
 //                        CheckBox notebookCheckbox = (CheckBox) alertDialog.findViewById(R.id.notebook_field_checkbox);
 //                        int type = notebookCheckbox.isChecked()? Contract.Old_Field_DBV6_AppV32.NOTEBOOK_TYPE : Contract.Old_Field_DBV6_AppV32.DEFAULT_TYPE;
                         String fieldName = enterFieldName.getText().toString();
-                        if ( select_field_type.getSelectedItemPosition() == 0 ) {
+                        if ( select_field_type.getSelectedItemPosition() == Constants.FieldTypes.NOTEBOOK_TYPE ) {
+                            if (fieldName.equals("")) {
+                                Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } else if (databaseOperations.checkFieldDuplication(fieldName)) {
+                                Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            } /*else if ( select_field_type.getSelectedItemPosition() == field_type_adapter.getCount() ) {
+                                Toast toast = Toast.makeText(getActivity(), R.string.select_a_field_type, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.show();
+                            }*/ else {
+                                int field_type = select_field_type.getSelectedItemPosition();
+                                ((Contact)getActivity())
+                                        .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE);
+                                alertDialog.dismiss();
+                            }
+                        } else {
                             if (fieldName.equals("")) {
                                 Toast toast = Toast.makeText(getActivity(), R.string.where_is_field_name, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
@@ -142,7 +162,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                 Toast toast = Toast.makeText(getActivity(), R.string.field_with_same_name, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
-                            } else if ( select_field_type.getSelectedItemPosition() == field_type_adapter.getCount() ) {
+                            }/* else if ( select_field_type.getSelectedItemPosition() == field_type_adapter.getCount() ) {
                                 Toast toast = Toast.makeText(getActivity(), R.string.select_a_field_type, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
@@ -150,7 +170,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                 Toast toast = Toast.makeText(getActivity(), R.string.select_a_check_type, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
-                            } else if ( read_answer.isChecked() && select_locale.getSelectedItemPosition() == select_locale_adapter.getCount() ) {
+                            }*/ else if ( read_answer.isChecked() && select_locale.getSelectedItemPosition() == select_locale_adapter.getCount() ) {
                                 Toast toast = Toast.makeText(getActivity(), R.string.select_locale, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
@@ -174,25 +194,6 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                             .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE,
                                                     check_type,read_answer.isChecked(),null);
                                 }
-                                alertDialog.dismiss();
-                            }
-                        } else {
-                            if (fieldName.equals("")) {
-                                Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
-                                toast.show();
-                            } else if (databaseOperations.checkFieldDuplication(fieldName)) {
-                                Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
-                                toast.show();
-                            } else if ( select_field_type.getSelectedItemPosition() == field_type_adapter.getCount() ) {
-                                Toast toast = Toast.makeText(getActivity(), R.string.select_a_field_type, Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
-                                toast.show();
-                            } else {
-                                int field_type = select_field_type.getSelectedItemPosition();
-                                ((Contact)getActivity())
-                                        .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE);
                                 alertDialog.dismiss();
                             }
                         }

@@ -8,6 +8,8 @@ public class Constants {
     public static abstract class FieldTypes {
         public static final int DEFAULT_TYPE = 0;
         public static final int NOTEBOOK_TYPE = 1;
+        public static final int KORAN_TYPE = 2;
+        public static final int ENGLISH_TYPE = 3;
     }
 
     public static abstract class Rank {
@@ -26,5 +28,10 @@ public class Constants {
         public static final int COPY_FIELD = 0;
         public static final int COPY_ENTRIES = 1;
         public static final int MOVE_ENTRIES = 2;
+    }
+
+    public static abstract class TestType {
+        public static final int ENHANCED_TEST = 0;
+        public static final int FULLY_RANDOM_TEST = 1;
     }
 }

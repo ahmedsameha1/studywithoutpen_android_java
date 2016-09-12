@@ -32,7 +32,7 @@ import com.ahmedsameha1.peninbin.R;
  * Created by ahmed on 2/8/2016.
  */
 public class EnhancedTestDialogFragment extends DialogFragment {
-    public static final String TEST_DIALOG_FRAGMENT = "test_dialog_fragment";
+    public static final String ENHANCED_TEST_DIALOG_FRAGMENT = "enhanced_test_dialog_fragment";
     private long current_field_id;
     private boolean from_notification;
     @Override

@@ -1,6 +1,8 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -64,6 +66,8 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
+    private static final String SYMBOL = "symbol";
+    private static final String CUSTOMABLE_TEXT = "customable_text";
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
     private String currentQuestion, currentAnswer;
@@ -87,6 +91,9 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     private Tracker mTracker;
     private Chronometer timer;
     private long lastPause;
+    private LoaderManager.LoaderCallbacks<Cursor> get_symbol_string;
+    private String[] symbol, customable_text;
+    private int current_field_type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +108,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
         databaseOperations = new DatabaseOperations(this);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        current_field_type = databaseOperations.getFieldType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
         check_type = databaseOperations.getFieldCheckType(current_field_id);
@@ -152,6 +160,37 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
+        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                return new MySQLiteCursorLoader(StudyWrongAnswersActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                        new String[]{current_field_type + ""});
+
+            }
+
+            @Override
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+                if (symbol == null && customable_text == null) {
+                    symbol = new String[data.getCount()];
+                    customable_text = new String[data.getCount()];
+                    for (data.moveToFirst(); data.getPosition() < data.getCount();
+                         data.moveToNext()) {
+                        symbol[data.getPosition()] = data.getString(1);
+                        customable_text[data.getPosition()] = data.getString(2);
+                    }
+                }
+            }
+
+            @Override
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+
+            }
+        };
+        getLoaderManager().restartLoader(0, null, get_symbol_string);
         showCurrentEntry.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -699,6 +738,15 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 } else{
                     check.setEnabled(false);
                 }
+                if (symbol != null && customable_text != null) {
+                    for (int i = 0; i < symbol.length; i++) {
+                        String text = s.toString();
+                        if (customable_text[i] != null && text.contains(customable_text[i])) {
+                            enterQuestion.setText(text.replaceAll(customable_text[i], symbol[i]));
+                            enterQuestion.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                        }
+                    }
+                }
             }
         });
         enterAnswer.addTextChangedListener(new TextWatcher() {
@@ -724,6 +772,15 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                     }
                 }else {
                     check.setEnabled(false);
+                }
+                if (symbol != null && customable_text != null) {
+                    for (int i = 0; i < symbol.length; i++) {
+                        String text = s.toString();
+                        if (customable_text[i] != null && text.contains(customable_text[i])) {
+                            enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
+                            enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                        }
+                    }
                 }
             }
         });
@@ -803,6 +860,8 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         savedInstanceState.putString(CURRENT_ANSWER, currentAnswer);
         savedInstanceState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
         savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
+        savedInstanceState.putStringArray(SYMBOL, symbol);
+        savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         saveUserLayoutChanges(savedInstanceState);
     }
 
@@ -832,6 +891,8 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         currentAnswer = savedInstanceState.getString(CURRENT_ANSWER);
         correctAnswersCounter = savedInstanceState.getInt(CORRECT_ANSWERS_COUNTER);
         lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
+        customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
+        symbol = savedInstanceState.getStringArray(SYMBOL);
         correctAnswers.setText(Integer.toString(correctAnswersCounter));
         restoreUserLayoutChanges(savedInstanceState);
         if ( showCurrentEntry.isChecked() ) {
@@ -908,6 +969,11 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                 Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP,0,400);
                 toast.show();
+            }
+            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null,null);
+            } else {
+                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null);
             }
         }
     }

@@ -7,7 +7,6 @@
         <item>About</item>
     </string-array>
     <string-array name="field_activity_features">
-        <item>Sort</item>
         <item>Study a Period</item>
         <item>Enhanced Test</item>
         <item>Fully Random Test</item>
@@ -19,14 +18,14 @@
     <string-array name="field_type">
         <item>Default</item>
         <item>Notebook</item>
-        <item>Select a field type</item>
+        <item>Koran</item>
+        <item>English Dictionary</item>
     </string-array>
     <string-array name="check_type">
-        <item>Ignore either letters case and spaces</item>
+        <item>Ignore either letter case and spaces</item>
         <item>Ignore spaces</item>
         <item>Ignore letters case</item>
         <item>Don\'t ignore either letters case or spaces</item>
-        <item>Select a check type</item>
     </string-array>
     <string-array name="number_or_percentage">
         <item>Enter number of questions:</item>

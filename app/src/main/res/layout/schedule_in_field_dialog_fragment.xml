@@ -13,10 +13,17 @@
          />
 
     <Button
-        android:id="@+id/schedule_test"
+        android:id="@+id/schedule_enhanced_test"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/schedule_text"
+        android:text="@string/schedule_enhanced_test"
+        />
+
+    <Button
+        android:id="@+id/schedule_fully_random_test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/schedule_fully_random_test"
         />
 
     <Button

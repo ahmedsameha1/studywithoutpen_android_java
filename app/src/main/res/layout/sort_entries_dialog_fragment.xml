@@ -6,6 +6,13 @@
     android:padding="15dp">
 
     <Button
+        android:id="@+id/sort_entry_order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sort_by_entry_order"
+        android:visibility="gone" />
+
+    <Button
         android:id="@+id/sort_question_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

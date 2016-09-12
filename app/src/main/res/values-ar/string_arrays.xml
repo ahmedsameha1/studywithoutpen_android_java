@@ -7,7 +7,6 @@
         <item>عن التطبيق</item>
     </string-array>
     <string-array name="field_activity_features">
-        <item>ترتيب</item>
         <item>مذاكرة فترة</item>
         <item>اختبار مُحَسَّن</item>
         <item>اختبار عشوائي تماما</item>
@@ -19,14 +18,14 @@
     <string-array name="field_type">
         <item>عاديّ</item>
         <item>مُفَكِّرَة</item>
-        <item>اختر نوعا للمجال</item>
+        <item>قرآن</item>
+        <item>معجم إنجليزية</item>
     </string-array>
     <string-array name="check_type">
         <item>تجاهل كل من حالة الأحرف والمسافات</item>
         <item>تجاهل المسافات</item>
         <item>تجاهل حالة الأحرف</item>
         <item>لا تتجاهل حالة الأحرف والمسافات</item>
-        <item>اختر نوع التَّحَقُّق</item>
     </string-array>
     <string-array name="number_or_percentage">
         <item>أدخل عدد الأسئلة:</item>

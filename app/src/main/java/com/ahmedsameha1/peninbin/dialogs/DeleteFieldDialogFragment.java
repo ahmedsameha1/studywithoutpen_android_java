@@ -39,7 +39,7 @@ public class DeleteFieldDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ((Contact) getActivity()).deleteField(field_id);
+                        ((Contact) getActivity()).deleteField(field_id, mainActivityRecyclerViewViewHolder);
                         mainActivityRecyclerViewViewHolder.progressBar.setVisibility(View.VISIBLE);
                         mainActivityRecyclerViewViewHolder.isDeleting = true;
                     }
@@ -52,6 +52,6 @@ public class DeleteFieldDialogFragment extends DialogFragment {
                 }).create();
     }
     public interface Contact {
-        public void deleteField(long field_id);
+        public void deleteField(long field_id, MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder);
     }
 }

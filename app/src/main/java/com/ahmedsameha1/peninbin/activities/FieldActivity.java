@@ -26,7 +26,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
@@ -45,9 +44,10 @@ import com.ahmedsameha1.peninbin.dialogs.SearchDateOrTextDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.TestDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.FieldActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -66,14 +66,13 @@ public class FieldActivity extends AppCompatActivity implements
         CopyFieldDialogFragment.CopyField,
         TextToSpeech.OnInitListener {
     public static final String SCREEN_NAME = "FieldActivity";
-    public static final int SORT = 0;
-    public static final int STUDY_PERIOD = 1;
-    public static final int ENHANCED_TEST = 2;
-    public static final int TEST = 3;
-    public static final int SCHEDULE_IN_FIELD = 4;
-    public static final int COPY_MOVE = 5;
-    public static final int FIELD_PROPERTIES = 6;
-    public static final int Field_INFORMATION = 7;
+    public static final int STUDY_PERIOD = 0;
+    public static final int ENHANCED_TEST = 1;
+    public static final int FULLY_RANDOM_TEST = 2;
+    public static final int SCHEDULE_IN_FIELD = 3;
+    public static final int COPY_MOVE = 4;
+    public static final int FIELD_PROPERTIES = 5;
+    public static final int Field_INFORMATION = 6;
 
 
 
@@ -88,6 +87,7 @@ public class FieldActivity extends AppCompatActivity implements
     public static final int SORT_DATE_ASC = 5;
     public static final int SORT_QUESTION_DESC = 6;
     public static final int SORT_CREATION_DATE_ASC = 7;
+    public static final int SORT_ENTRY_ORDER_ASC = 8;
     public static final String CURRENT_FIELD_NAME = "currentField";
     public static final String CHECK_IF_CONTINUE_STUDY_DURING_SESSION = "checkIfContinueStudyDuringSession";
     public static final String CHECK_IF_CONTINUE_TEST_SESSION = "checkIfContinueTestSession";
@@ -115,8 +115,8 @@ public class FieldActivity extends AppCompatActivity implements
             "date( q ) DESC",
             "date( q ) ASC",
             " q DESC",
-            "datetime(" + Contract.CREATION_DATE + ") ASC"};
-    private Spinner fieldsListSpinner;
+            "datetime(" + Contract.CREATION_DATE + ") ASC",
+            Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC" };
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private DatabaseOperations databaseOperations;
     private FieldActivityRecyclerViewAdapter mAdapter;
@@ -327,14 +327,15 @@ public class FieldActivity extends AppCompatActivity implements
                 if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)) {
 
                             if (number_of_entries > 0) {
-                                if (databaseOperations.isThisFieldTestPaused(current_field_id)) {
+                                if (databaseOperations.isThisFieldTestPausedEnhancedTest(current_field_id)) {
                                     AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
+                                    bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
                                     fragment3.setArguments(bundle);
                                     fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
                                 } else {
                                     EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
                                     dialogFragment.setArguments(bundle);
-                                    dialogFragment.show(getSupportFragmentManager(), EnhancedTestDialogFragment.TEST_DIALOG_FRAGMENT);
+                                    dialogFragment.show(getSupportFragmentManager(), EnhancedTestDialogFragment.ENHANCED_TEST_DIALOG_FRAGMENT);
                                 }
                             } else {
                                 Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
@@ -347,19 +348,26 @@ public class FieldActivity extends AppCompatActivity implements
                     toast.show();
                 }
                 break;
-            case TEST:
-                if (number_of_entries > 0) {
-                    if (databaseOperations.isThisFieldTestPaused(current_field_id)) {
-                        AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
-                        fragment3.setArguments(bundle);
-                        fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
+            case FULLY_RANDOM_TEST:
+                if (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + current_field_id)) {
+                    if (number_of_entries > 0) {
+                        if (databaseOperations.isThisFieldTestPausedFullyRandomTest(current_field_id)) {
+                            AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
+                            bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                            fragment3.setArguments(bundle);
+                            fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
+                        } else {
+                            FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
+                            dialogFragment.setArguments(bundle);
+                            dialogFragment.show(getSupportFragmentManager(), FullyRandomTestDialogFragment.FULLY_RANDOM_TEST_DIALOG_FRAGMENT);
+                        }
                     } else {
-                        TestDialogFragment dialogFragment = new TestDialogFragment();
-                        dialogFragment.setArguments(bundle);
-                        dialogFragment.show(getSupportFragmentManager(), TestDialogFragment.TEST_DIALOG_FRAGMENT);
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                     }
                 } else {
-                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
@@ -388,7 +396,7 @@ public class FieldActivity extends AppCompatActivity implements
                     toast.show();
                 }
                 break;
-            case SORT:
+/*            case SORT:
                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
@@ -397,7 +405,7 @@ public class FieldActivity extends AppCompatActivity implements
                         .setCategory(ANALYTICS_CATEGORY)
                         .setAction("sort")
                         .build());
-                break;
+                break;*/
             case FIELD_PROPERTIES:
                 String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
                 if (locale_short_name != null) {
@@ -527,6 +535,31 @@ public class FieldActivity extends AppCompatActivity implements
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+        Bundle bundle = new Bundle();
+
+        switch (id) {
+            case R.id.sort:
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
+                sortEntriesDialogFragment.setArguments(bundle);
+                sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("sort")
+                        .build());
+                return true;
+            case R.id.text_shortcuts:
+                Intent intent = new Intent(this,SymbolActivity.class);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                startActivity(intent);
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     public void search(String value) {

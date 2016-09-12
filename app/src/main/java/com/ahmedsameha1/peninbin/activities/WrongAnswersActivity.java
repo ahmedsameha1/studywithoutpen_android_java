@@ -19,6 +19,8 @@ import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -38,6 +40,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     private WrongAnswersActivityRecyclerViewAdapter mAdapter;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private DatabaseOperations databaseOperations;
+    private int test_type;
     private int question_data_type;
     private Tracker mTracker;
 
@@ -54,6 +57,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         setContentView(R.layout.activity_wrong_answers);
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
         current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
+        test_type = bundle.getInt(ShowTestResultDialogFragment.TEST_TYPE);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         databaseOperations = new DatabaseOperations(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
@@ -74,7 +78,12 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     }
     private ArrayList<WrongItem> getWrongItems() {
         ArrayList<WrongItem> wrongItemsList = new ArrayList<WrongItem>();
-        String[][] wrong_answers = databaseOperations.getWrongAnswers(current_field_id,question_data_type);
+        String[][] wrong_answers = new String[1][1];
+        if ( test_type == Constants.TestType.ENHANCED_TEST ) {
+            wrong_answers = databaseOperations.getWrongAnswersEnhancedTest(current_field_id,question_data_type);
+        } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
+            wrong_answers = databaseOperations.getWrongAnswersFullyRandomTest(current_field_id,question_data_type);
+        }
         for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
             long entry_id = cursor.getLong(2);
             ArrayList<String> wrong_answers_arrayList = new ArrayList<>();
@@ -131,7 +140,11 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
             try {
                 wrongItemList = getWrongItems();
             } finally {
-                mySQLiteCursorLoader.clearThisFieldFromWrongAnswers(current_field_id,question_data_type);
+                if ( test_type == Constants.TestType.ENHANCED_TEST) {
+                    mySQLiteCursorLoader.clearThisFieldFromWrongAnswersEnhancedTest(current_field_id,question_data_type);
+                } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                    mySQLiteCursorLoader.clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id,question_data_type);
+                }
             }
         }
         mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this,wrongItemList,current_field_id);

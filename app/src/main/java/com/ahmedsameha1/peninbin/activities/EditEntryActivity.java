@@ -1,8 +1,10 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.DatePickerDialog;
+import android.app.LoaderManager;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
@@ -61,6 +63,8 @@ public class EditEntryActivity extends AppCompatActivity implements
     public static final String FIELD_TYPE = "field_type";
     public static final String ENTRY_ID = "entry_id";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
+    private static final String SYMBOL = "symbol";
+    private static final String CUSTOMABLE_TEXT = "customable_text";
     private EditText editQuestion;
     private EditText editAnswer;
     private TextView showActionbar;
@@ -78,6 +82,9 @@ public class EditEntryActivity extends AppCompatActivity implements
     private Tracker mTracker;
     private Chronometer timer;
     private long lastPause;
+    private LoaderManager.LoaderCallbacks<Cursor> get_symbol_string;
+    private String[] symbol, customable_text;
+    private int current_field_type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +99,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         currentAnswer = getIntent().getStringExtra(StudyActivity.CURRENT_ANSWER);
         mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
         databaseOperations = new DatabaseOperations(this);
+        current_field_type = databaseOperations.getFieldType(current_field_id);
         rank = databaseOperations.getEntryRank(entry_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
@@ -137,6 +145,37 @@ public class EditEntryActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
+        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                return new MySQLiteCursorLoader(EditEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                        new String[]{current_field_type + ""});
+
+            }
+
+            @Override
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+                if (symbol == null && customable_text == null) {
+                    symbol = new String[data.getCount()];
+                    customable_text = new String[data.getCount()];
+                    for (data.moveToFirst(); data.getPosition() < data.getCount();
+                         data.moveToNext()) {
+                        symbol[data.getPosition()] = data.getString(1);
+                        customable_text[data.getPosition()] = data.getString(2);
+                    }
+                }
+            }
+
+            @Override
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+
+            }
+        };
+        getLoaderManager().restartLoader(0, null, get_symbol_string);
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -256,6 +295,15 @@ public class EditEntryActivity extends AppCompatActivity implements
                 } else {
                     save.setEnabled(false);
                 }
+                if (symbol != null && customable_text != null) {
+                    for (int i = 0; i < symbol.length; i++) {
+                        String text = editable.toString();
+                        if (customable_text[i] != null && text.contains(customable_text[i])) {
+                            editQuestion.setText(text.replaceAll(customable_text[i], symbol[i]));
+                            editQuestion.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                        }
+                    }
+                }
             }
         });
         editAnswer.addTextChangedListener(new TextWatcher() {
@@ -273,6 +321,15 @@ public class EditEntryActivity extends AppCompatActivity implements
                     save.setEnabled(true);
                 } else {
                     save.setEnabled(false);
+                }
+                if (symbol != null && customable_text != null) {
+                    for (int i = 0; i < symbol.length; i++) {
+                        String text = editable.toString();
+                        if (customable_text[i] != null && text.contains(customable_text[i])) {
+                            editAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
+                            editAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                        }
+                    }
                 }
             }
         });
@@ -351,6 +408,8 @@ public class EditEntryActivity extends AppCompatActivity implements
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
+        savedInstanceState.putStringArray(SYMBOL, symbol);
+        savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         saveUserLayoutChanges(savedInstanceState);
     }
 
@@ -358,6 +417,8 @@ public class EditEntryActivity extends AppCompatActivity implements
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
+        customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
+        symbol = savedInstanceState.getStringArray(SYMBOL);
         restoreUserLayoutChanges(savedInstanceState);
     }
 

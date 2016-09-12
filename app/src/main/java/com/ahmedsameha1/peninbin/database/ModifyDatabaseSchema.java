@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -18,6 +19,109 @@ import java.util.StringTokenizer;
  * Created by ahmed on 30/07/16.
  */
 public class ModifyDatabaseSchema {
+
+    public static final String CREATE_OLD_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Old_Field_Type.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+            + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " TEXT NOT NULL, "
+            + " UNIQUE ( " + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " )"
+            + " );";
+
+    public static void onUpgradeDatabaseToDBV11AppV46( SQLiteDatabase sqLiteDatabase ) {
+        sqLiteDatabase.beginTransaction();
+        try {
+            String drop = "DROP TABLE IF EXISTS " + Contract.Field_Type_Symbol.TABLE_NAME + ";";
+            sqLiteDatabase.execSQL(drop);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TYPE_SYMBOL_TABLE);
+            drop = "DROP TABLE IF EXISTS " + Contract.Old_Field_Type.TABLE_NAME + ";";
+            sqLiteDatabase.execSQL(drop);
+            ////
+            String rename = "ALTER TABLE " + Contract.Old_String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
+            sqLiteDatabase.execSQL(rename);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE);
+            String copy = "INSERT INTO " + Contract.String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.String_Entry.COLUMN_FIELD
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_RANK
+                    + " , " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT
+                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
+                    + " , " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                    + " , " + Contract.String_Entry.COLUMN_ORDER_OF_ENTRY
+                    + " , " + Contract.CREATION_DATE
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.Old_String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.Old_String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.Old_String_Entry.COLUMN_FIELD
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_RANK
+                    + " , " + Contract.Old_String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.Old_String_Entry.COLUMN_REMIND_AT
+                    + " , " + Contract.Old_String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
+                    + " , " + Contract.Old_String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                    + " , " + Contract.Old_String_Entry.COLUMN_ORDER_OF_ENTRY
+                    + " , " + Contract.CREATION_DATE
+                    + " FROM " + "tempTable"
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
+            drop = "DROP TABLE IF EXISTS " + Contract.Old_Not_String_Entry.TABLE_NAME + ";";
+            sqLiteDatabase.execSQL(drop);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_ENTRY_TABLE);
+            /////
+            rename = "ALTER TABLE " + Contract.Test_Wrong_Answer_String.TABLE_NAME + " RENAME TO " + "tempTable";
+            sqLiteDatabase.execSQL(rename);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_TEST_WRONG_ANSWER_STRING_TABLE);
+            copy = "INSERT INTO " + Contract.Test_Wrong_Answer_String.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Test_Wrong_Answer_String.COLUMN_ENTRY
+                    + " , " + Contract.Test_Wrong_Answer_String.COLUMN_WRONG_ANSWER
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.Test_Wrong_Answer_String.COLUMN_ENTRY
+                    + " , " + Contract.Test_Wrong_Answer_String.COLUMN_WRONG_ANSWER
+                    + " FROM " + "tempTable"
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
+            drop = "DROP TABLE IF EXISTS " + Contract.Test_Wrong_Answer_Not_String.TABLE_NAME + ";";
+            sqLiteDatabase.execSQL(drop);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_TEST_WRONG_ANSWER_NOT_STRING_TABLE);
+            ////
+            rename = "ALTER TABLE " + Contract.Test_Paused.TABLE_NAME + " RENAME TO " + "tempTable";
+            sqLiteDatabase.execSQL(rename);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_TEST_PAUSED_TABLE);
+            copy = "INSERT INTO " + Contract.Test_Paused.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Test_Paused.COLUMN_FIELD
+                    + " , " + Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER
+                    + " , " + Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT
+                    + " , " + Contract.Test_Paused.COLUMN_TRIES_NUMBER
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.Test_Paused.COLUMN_FIELD
+                    + " , " + Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER
+                    + " , " + Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT
+                    + " , " + Contract.Test_Paused.COLUMN_TRIES_NUMBER
+                    + " FROM " + "tempTable"
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
+    }
     public static void onUpgradeDatabaseToDBV9AppV40(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
@@ -108,7 +212,7 @@ public class ModifyDatabaseSchema {
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
                     + " , " + Contract.String_Entry.COLUMN_FIELD
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
                     + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
                     + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
                     + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -122,7 +226,7 @@ public class ModifyDatabaseSchema {
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
                     + " , " + Contract.String_Entry.COLUMN_FIELD
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
                     + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
                     + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
                     + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -140,7 +244,7 @@ public class ModifyDatabaseSchema {
             sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_ENTRY_TABLE);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_NOTE_TABLE);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TYPE_TABLE);
+            sqLiteDatabase.execSQL(CREATE_OLD_FIELD_TYPE_TABLE);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_SYMBOL_TABLE);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TYPE_SYMBOL_TABLE);
             sqLiteDatabase.setTransactionSuccessful();
@@ -269,7 +373,7 @@ public class ModifyDatabaseSchema {
                 contentValues.put(Contract.String_Entry.COLUMN_QUESTION,question_id);
                 contentValues.put(Contract.String_Entry.COLUMN_ANSWER,answer_id);
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD,field_id);
-                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER,linkerCursor.getInt(3));
+                contentValues.put(Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER,linkerCursor.getInt(3));
                 contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER,linkerCursor.getInt(4));
                 contentValues.put(Contract.CREATION_DATE,linkerCursor.getString(6));
                 long entry_id = sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME,null,contentValues);
@@ -418,7 +522,7 @@ public class ModifyDatabaseSchema {
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
                     + " , " + Contract.String_Entry.COLUMN_FIELD
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
                     + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
                     + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
                     + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -430,7 +534,7 @@ public class ModifyDatabaseSchema {
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
                     + " , " + Contract.String_Entry.COLUMN_FIELD
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
                     + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
                     + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
                     + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -731,4 +835,5 @@ public class ModifyDatabaseSchema {
         Cursor cursor = sqLiteDatabase.query(Contract.OldField.TABLE_NAME, string,null,null,null,null,null);
         return cursor;
     }
+
 }

@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
+import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -65,7 +66,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                     }
                     cursor.close();
                 } else {
-                    if ( session [4] == EnhancedTestActivity.PERCENTAGE) {
+                    if ( session [4] == QuickTestActivity.PERCENTAGE) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
@@ -79,7 +80,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,(int) session[3] , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.set(AlarmManager.RTC, session[2], pendingIntent);
-                    } else if ( session [4] == EnhancedTestActivity.NUMBER ) {
+                    } else if ( session [4] == QuickTestActivity.NUMBER ) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);

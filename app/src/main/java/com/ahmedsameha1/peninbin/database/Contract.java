@@ -58,7 +58,8 @@ public final class Contract {
         public static final String COLUMN_QUESTION = "question";
         public static final String COLUMN_ANSWER = "answer";
         public static final String COLUMN_FIELD = "field";
-        public static final String COLUMN_PAUSED_TEST_ORDER = "paused_test_order";
+        public static final String COLUMN_PAUSED_ENHANCED_TEST_ORDER = "paused_enhanced_test_order";
+        public static final String COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER = "paused_fully_random_test_order";
         public static final String COLUMN_PAUSED_STUDY_PERIOD_ORDER = "paused_study_period_order";
         public static final String COLUMN_ASKED_COUNT = "asked_count";
         public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
@@ -74,7 +75,8 @@ public final class Contract {
         public static final String COLUMN_QUESTION = "question";
         public static final String COLUMN_ANSWER = "answer";
         public static final String COLUMN_FIELD = "field";
-        public static final String COLUMN_PAUSED_TEST_ORDER = "paused_test_order";
+        public static final String COLUMN_PAUSED_ENHANCED_TEST_ORDER = "paused_enhanced_test_order";
+        public static final String COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER = "paused_fully_random_test_order";
         public static final String COLUMN_PAUSED_STUDY_PERIOD_ORDER = "paused_study_period_order";
         public static final String COLUMN_ASKED_COUNT = "asked_count";
         public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
@@ -87,16 +89,19 @@ public final class Contract {
     }
     public static abstract class Test_Wrong_Answer_String implements BaseColumns {
         public static final String TABLE_NAME = "test_wrong_answer_string";
+        public static final String COLUMN_TEST_TYPE = "test_type";
         public static final String COLUMN_ENTRY = "entry";
         public static final String COLUMN_WRONG_ANSWER = "wrong_answer";
     }
     public static abstract class Test_Wrong_Answer_Not_String implements BaseColumns {
         public static final String TABLE_NAME = "test_wrong_answer_not_string";
+        public static final String COLUMN_TEST_TYPE = "test_type";
         public static final String COLUMN_ENTRY = "entry";
         public static final String COLUMN_WRONG_ANSWER = "wrong_answer";
     }
     public static abstract class Test_Paused implements BaseColumns {
         public static final String TABLE_NAME = "test_paused";
+        public static final String COLUMN_TEST_TYPE = "test_type";
         public static final String COLUMN_FIELD = "field";
         public static final String COLUMN_CURRENT_QUESTION_COUNTER = "current_question_counter";
         public static final String COLUMN_WRONG_ANSWERS_COUNT = "wrong_answers_count";
@@ -148,10 +153,6 @@ public final class Contract {
         public static final String TABLE_NAME = "field_note";
         public static final String COLUMN_FIELD = "field";
         public static final String COLUMN_NOTE = "note";
-    }
-    public static abstract class Field_Type implements BaseColumns {
-        public static final String TABLE_NAME = "field_type";
-        public static final String COLUMN_TYPE_NAME = "type_name";
     }
     public static abstract class Symbol implements BaseColumns {
         public static final String TABLE_NAME = "symbol";
@@ -235,5 +236,42 @@ public final class Contract {
         public static final String COLUMN_ANSWER_LINK_SUFFIX = "_answer_link_entry";
         // this column will hold the timestamp of the addition of the row
         public static final String COLUMN_CREATED_AT = "created_at";
+    }
+    public static abstract class Old_Field_Type implements BaseColumns {
+        public static final String TABLE_NAME = "field_type";
+        public static final String COLUMN_TYPE_NAME = "type_name";
+    }
+    public static abstract class Old_String_Entry implements BaseColumns {
+        public static final int NO_NOTIFICATION = -1;
+        public static final String TABLE_NAME = "string_entry";
+        public static final String COLUMN_QUESTION = "question";
+        public static final String COLUMN_ANSWER = "answer";
+        public static final String COLUMN_FIELD = "field";
+        public static final String COLUMN_PAUSED_TEST_ORDER = "paused_test_order";
+        public static final String COLUMN_PAUSED_STUDY_PERIOD_ORDER = "paused_study_period_order";
+        public static final String COLUMN_ASKED_COUNT = "asked_count";
+        public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
+        public static final String COLUMN_RANK = "rank";
+        public static final String COLUMN_CREATION_EMULATED_DATE = "creation_emulated_date";
+        public static final String COLUMN_REMIND_AT = "remind_at";
+        public static final String COLUMN_REMIND_AT_PENDINGINTENT_REQUEST = "remind_at_pendingintent_request";
+        public static final String COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND = "whether_asked_at_current_test_round";
+        public static final String COLUMN_ORDER_OF_ENTRY = "order_of_entry";
+    }
+    public static abstract class Old_Not_String_Entry implements BaseColumns {
+        public static final String TABLE_NAME = "not_string_entry";
+        public static final String COLUMN_QUESTION = "question";
+        public static final String COLUMN_ANSWER = "answer";
+        public static final String COLUMN_FIELD = "field";
+        public static final String COLUMN_PAUSED_TEST_ORDER = "paused_test_order";
+        public static final String COLUMN_PAUSED_STUDY_PERIOD_ORDER = "paused_study_period_order";
+        public static final String COLUMN_ASKED_COUNT = "asked_count";
+        public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
+        public static final String COLUMN_RANK = "rank";
+        public static final String COLUMN_CREATION_EMULATED_DATE = "creation_emulated_date";
+        public static final String COLUMN_REMIND_AT = "remind_at";
+        public static final String COLUMN_REMIND_AT_PENDINGINTENT_REQUEST = "remind_at_pendingintent_request";
+        public static final String COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND = "whether_asked_at_current_test_round";
+        public static final String COLUMN_ORDER_OF_ENTRY = "order_of_entry";
     }
 }

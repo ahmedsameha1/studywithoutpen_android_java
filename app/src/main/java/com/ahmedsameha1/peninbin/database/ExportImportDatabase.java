@@ -136,7 +136,8 @@ public class ExportImportDatabase {
                                     Contract.String_Entry.COLUMN_FIELD, Contract.String_Entry.COLUMN_ASKED_COUNT,
                                     Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.String_Entry.COLUMN_RANK,
                                     Contract.CREATION_DATE, Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                                    Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND},
+                                    Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,
+                                    Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
                             Contract.String_Entry.COLUMN_FIELD + " = ?",
                             new String[]{temp_field_id + ""}, null, null, null, null);
                     for (stringEntryCursor.moveToFirst(); stringEntryCursor.getPosition() < stringEntryCursor.getCount();
@@ -189,6 +190,7 @@ public class ExportImportDatabase {
                         contentValues.put(Contract.CREATION_DATE,stringEntryCursor.getString(6));
                         contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT,stringEntryCursor.getLong(9));
                         contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,stringEntryCursor.getInt(10));
+                        contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,stringEntryCursor.getInt(11));
                         long stringEntry_id = toExportDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
                         Cursor alternativeStringCursor = appDatabase.query(Contract.Alternative_Answer_String.TABLE_NAME,
                                 new String[]{Contract.Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER,
@@ -554,7 +556,8 @@ public class ExportImportDatabase {
                             Contract.String_Entry.COLUMN_FIELD, Contract.String_Entry.COLUMN_ASKED_COUNT,
                             Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.String_Entry.COLUMN_RANK,
                             Contract.CREATION_DATE, Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                            Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND},
+                            Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,
+                            Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
                     Contract.COLUMN_ID + " NOT IN " + placeholders,
                     notImportedArray, null, null, null);
             for (toImportStringEntryCursor.moveToFirst(); toImportStringEntryCursor.getPosition() < toImportStringEntryCursor.getCount();
@@ -619,6 +622,7 @@ public class ExportImportDatabase {
                     contentValues1.put(Contract.CREATION_DATE,toImportStringEntryCursor.getString(6));
                     contentValues1.put(Contract.String_Entry.COLUMN_REMIND_AT,toImportStringEntryCursor.getLong(9));
                     contentValues1.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,toImportStringEntryCursor.getInt(10));
+                    contentValues1.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,toImportStringEntryCursor.getInt(11));
                     try {
                         string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
                     } catch (Exception e) {
@@ -636,6 +640,7 @@ public class ExportImportDatabase {
                     contentValues1.put(Contract.String_Entry.COLUMN_QUESTION,question_id);
                     contentValues1.put(Contract.String_Entry.COLUMN_ANSWER,answer_id);
                     contentValues1.put(Contract.String_Entry.COLUMN_FIELD,field_id);
+                    contentValues1.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, toImportStringEntryCursor.getInt(11));
                     try {
                         string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
                     } catch (Exception e) {
@@ -1029,7 +1034,7 @@ public class ExportImportDatabase {
                 contentValues.put(Contract.String_Entry.COLUMN_QUESTION,question_id);
                 contentValues.put(Contract.String_Entry.COLUMN_ANSWER,answer_id);
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD,field_id);
-                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER,linkerCursor.getInt(3));
+                contentValues.put(Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER,linkerCursor.getInt(3));
                 contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER,linkerCursor.getInt(4));
                 contentValues.put(Contract.CREATION_DATE,linkerCursor.getString(6));
                 toImportDatabase.insert(Contract.String_Entry.TABLE_NAME,null,contentValues);
@@ -1105,7 +1110,7 @@ public class ExportImportDatabase {
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
                     + " , " + Contract.String_Entry.COLUMN_FIELD
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
                     + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
                     + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
                     + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -1117,7 +1122,7 @@ public class ExportImportDatabase {
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
                     + " , " + Contract.String_Entry.COLUMN_FIELD
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
                     + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
                     + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
                     + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -1224,7 +1229,7 @@ public class ExportImportDatabase {
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
                     + " , " + Contract.String_Entry.COLUMN_FIELD
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
                     + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
                     + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
                     + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -1238,7 +1243,7 @@ public class ExportImportDatabase {
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
                     + " , " + Contract.String_Entry.COLUMN_FIELD
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_TEST_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
                     + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
                     + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
                     + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT

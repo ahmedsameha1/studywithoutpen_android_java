@@ -3,6 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activities.MainActivity">
     <item
+        android:id="@+id/sort"
+        android:title="@string/sort"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/text_shortcuts"
+        android:title="@string/special_text"
+        app:showAsAction="never"/>
+
+
+    <item
         android:id="@+id/search"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="@string/search"

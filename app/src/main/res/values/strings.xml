@@ -154,7 +154,7 @@
     <string name="quick_test_time">Quick Test Time</string>
     <string name="quick_test_time_text">Always Be Prepared</string>
     <string name="schedule_quick_test">Schedule for a Quick Test</string>
-    <string name="schedule_text">Schedule for a Test</string>
+    <string name="schedule_text">Schedule  Test</string>
     <string name="schedule_study_perioid">Schedule for Study a Peroid</string>
     <string name="test_time">Test Time</string>
     <string name="study_period_time">Study a Peroid Time</string>
@@ -192,11 +192,10 @@
     <string name="time_in_past">This time is in past</string>
     <string name="reminder_canceled">The reminder has been canceled</string>
     <string name="import_fields_from">Import fields from:</string>
-    <string name="study_without_pen_file">Study Without Pen File</string>
-    <string name="text_file">specially formated text file</string>
+    <string name="study_without_pen_file">swp File</string>
+    <string name="text_file">specially formated txt file</string>
     <string name="exported_file_in">your exported file is in:</string>
     <string name="ask_import_fields">Do you want to import the fields from this file?</string>
-    <string name="import_from_text_file_help">The file must be text file txt\nEvery line in the text file must be formated as: \nfield name@@@question~~~answer\nOr:\nfield name@@@question~~~answer%%%rank of entry \nRank of entry is one digit: \n0\tLow \n1\tModerate \n2\tImportant \n3\tVital</string>
     <string name="facebook_page">Facebook Page</string>
     <string name="collect_data_about_usage">This app collects anonymous data about the usage of it.</string>
     <string name="version">Version:</string>
@@ -214,4 +213,15 @@
     <string name="move">Move</string>
     <string name="copy">Copy</string>
     <string name="copy_move_entries">Copy/Move Entries</string>
+    <string name="sort_by_entry_order">Sort By Entry Order</string>
+    <string name="cannot_import_entries_to_notebook_fields_using_text_files">Cannot import entries to notebook fields using text file method</string>
+    <string name="some_entries_have_not_imported">At least, one entry has not imported</string>
+    <string name="import_from_text_file_help">The file must be text file txt\nYou cannot import entries to notebook fields\nEvery line in the text file must be formated as: \nfield name@@@question~~~answer\nOr:\nfield name@@@question~~~answer%%%rank of entry \nRank of entry is one digit: \n0\tLow \n1\tModerate \n2\tImportant \n3\tVital\nOr:\nfield name@@@question~~~answer###order of entry\nOrder of entry is a number which is larger than or equals zero and lower than billion</string>
+    <string name="text_shortcuts">Text Shortcuts</string>
+    <string name="text_contained_in_special_text">Type a text that is not contained of any other special text</string>
+    <string name="special_text">Special Text</string>
+    <string name="schedule_enhanced_test">schedule an enhanced test</string>
+    <string name="schedule_fully_random_test">schedule a fully random test</string>
+    <string name="fully_random_test_time">Fully random test time</string>
+    <string name="enhanced_test_time">Enhanced test time</string>
 </resources>

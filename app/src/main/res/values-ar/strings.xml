@@ -190,11 +190,11 @@
     <string name="reminder_canceled">تم إلغاء المُذكِّر</string>
     <string name="change_field_name">عَدِّل اسم المجال</string>
     <string name="import_fields_from">استورد مجالات من:</string>
-    <string name="study_without_pen_file">Study Without Pen ملف</string>
-    <string name="text_file">ملف نصي منسق بشكل خاص</string>
+    <string name="study_without_pen_file">swp ملف</string>
+    <string name="text_file">ملف txt منسق بشكل خاص</string>
     <string name="exported_file_in">ملفك المُصَدَّر في:</string>
     <string name="ask_import_fields">هل تريد استيراد المجالات من هذا الملف؟</string>
-    <string name="import_from_text_file_help">يجب أن يكون الملف ملف نصي txt\nيجب أن يكون كل سطر في الملف النصي إما على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب\nأو على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب%%%مستوى أهمية المُدخَل\nحيث مستوى أهمية المُدخَل رقم واحد:\n0\tمنخفض\n1\tمتوسط\n2\tمهم\n3\tحيوي</string>
+    <string name="import_from_text_file_help">يجب أن يكون الملف ملف نصي txt\nﻻ يمكنك استيراد مدخﻻت إلى المجاﻻت من نوع مفكرة\nيجب أن يكون كل سطر في الملف النصي إما على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب\nأو على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب%%%مستوى أهمية المُدخَل\nحيث مستوى أهمية المُدخَل رقم واحد:\n0\tمنخفض\n1\tمتوسط\n2\tمهم\n3\tحيوي\nأو على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب###ترتيب المُدخَل\nحيث ترتيب المُدخَل هو رقم  أكبر من أو يساوي صفر وأصغر من مليار</string>
     <string name="facebook_page">صفحة Facebook</string>
     <string name="collect_data_about_usage">هذا التطبيق يجمع معلومات غير محدد  الهوية عن استخدامه.</string>
     <string name="version">إصدار:</string>
@@ -212,4 +212,14 @@
     <string name="move">نقل</string>
     <string name="copy">نسخ</string>
     <string name="copy_move_entries">نسخ/نقل مُدخلات</string>
+    <string name="sort_by_entry_order">رتب على حسب ترتيب المُدخَل</string>
+    <string name="cannot_import_entries_to_notebook_fields_using_text_files">ﻻ يمكن استيراد مدخﻻت للمجاﻻت من نوع مفكرة باستخدام طريقة الملف النصي</string>
+    <string name="some_entries_have_not_imported">على اﻷقل، مُدخَل واحد لم يتم استيراده</string>
+    <string name="text_shortcuts">Text Shortcuts</string>
+    <string name="text_contained_in_special_text">Type a text that is not contained of any other special text</string>
+    <string name="special_text">Special Text</string>
+    <string name="schedule_enhanced_test">schedule an enhanced test</string>
+    <string name="schedule_fully_random_test">schedule a fully random test</string>
+    <string name="fully_random_test_time">Fully random test time</string>
+    <string name="enhanced_test_time">Enhanced test time</string>
 </resources>

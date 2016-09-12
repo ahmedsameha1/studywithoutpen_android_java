@@ -24,7 +24,6 @@ import android.widget.TimePicker;
 import com.google.android.gms.analytics.HitBuilders;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
-import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.R;
@@ -37,13 +36,14 @@ import com.google.android.gms.analytics.Tracker;
  */
 public class ScheduleInFieldDialogFragment extends DialogFragment {
     public static final int QUICK_TEST = 0;
-    public static final int TEST = 1;
+    public static final int ENHANCED_TEST = 1;
     public static final int STUDY_A_PERIOD = 2;
     public static final int REFRESHING_USAGE_OF_APP = 3;
     public static final int REMINDER = 4;
     public static final String TIME = "time";
     public static final String SCHEDULE_IN_FIELD = "schedule_in_field";
     public static final String SCHEDULE_WHAT = "schedule_what";
+    public static final int FULLY_RANDOM_TEST = 5;
 
     private Context context;
     private long current_field_id;
@@ -72,7 +72,8 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
             @Override
             public void onShow(DialogInterface dialog) {
                 Button schedule_quick_test = (Button) alertDialog.findViewById(R.id.schedule_quick_test);
-                Button schedule_test = (Button) alertDialog.findViewById(R.id.schedule_test);
+                Button schedule_enhanced_test = (Button) alertDialog.findViewById(R.id.schedule_enhanced_test);
+                Button schedule_fully_random_test = (Button) alertDialog.findViewById(R.id.schedule_fully_random_test);
                 Button schedule_study_period = (Button) alertDialog.findViewById(R.id.schedule_study_period);
                 Button randomly_schedule_quick_test = (Button) alertDialog.findViewById(R.id.schedule_random_quick_test);
                 final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.root_view);
@@ -128,7 +129,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                 calendar_current_date_time.get(Calendar.DAY_OF_MONTH)).show();
                     }
                 });
-                schedule_test.setOnClickListener(new View.OnClickListener() {
+                schedule_enhanced_test.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         Calendar calendar_current_date_time = Calendar.getInstance();
@@ -141,7 +142,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                         calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                                         Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
-                                        intent.putExtra(SCHEDULE_WHAT,TEST);
+                                        intent.putExtra(SCHEDULE_WHAT, ENHANCED_TEST);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                         intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
                                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
@@ -149,9 +150,9 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                         alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
                                         mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
-                                                ScheduleInFieldDialogFragment.TEST,calendar_picked_date_time.getTimeInMillis(),request);
+                                                ScheduleInFieldDialogFragment.ENHANCED_TEST,calendar_picked_date_time.getTimeInMillis(),request);
                                         final Snackbar snackbar = Snackbar
-                                                .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
+                                                .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_LONG);
                                         snackbar.setAction(R.string.ok, new View.OnClickListener() {
                                             @Override
                                             public void onClick(View view) {
@@ -162,7 +163,50 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         ScheduleInFieldDialogFragment.this.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction("schedule a test")
+                                                .setAction("schedule an enhanced test")
+                                                .build());
+                                    }
+                                }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
+                            }
+                        }, calendar_current_date_time.get(Calendar.YEAR), calendar_current_date_time.get(Calendar.MONTH),
+                                calendar_current_date_time.get(Calendar.DAY_OF_MONTH)).show();
+                    }
+                });
+                schedule_fully_random_test.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Calendar calendar_current_date_time = Calendar.getInstance();
+                        final Calendar calendar_picked_date_time = Calendar.getInstance();
+                        new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, final int year, final int monthOfYear, final int dayOfMonth) {
+                                new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
+                                    @Override
+                                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                        calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
+                                        Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
+                                        intent.putExtra(SCHEDULE_WHAT, FULLY_RANDOM_TEST);
+                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                                        intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
+                                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                                        int request = (int)System.currentTimeMillis();
+                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                        alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
+                                        mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                                ScheduleInFieldDialogFragment.FULLY_RANDOM_TEST,calendar_picked_date_time.getTimeInMillis(),request);
+                                        final Snackbar snackbar = Snackbar
+                                                .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_LONG);
+                                        snackbar.setAction(R.string.ok, new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                snackbar.dismiss();
+                                            }
+                                        });
+                                        snackbar.show();
+                                        ScheduleInFieldDialogFragment.this.dismiss();
+                                        mTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
+                                                .setAction("schedule a fully random test")
                                                 .build());
                                     }
                                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
@@ -194,7 +238,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
                                                 ScheduleInFieldDialogFragment.STUDY_A_PERIOD,calendar_picked_date_time.getTimeInMillis(),request);
                                         final Snackbar snackbar = Snackbar
-                                                .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
+                                                .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_LONG);
                                         snackbar.setAction(R.string.ok, new View.OnClickListener() {
                                             @Override
                                             public void onClick(View view) {

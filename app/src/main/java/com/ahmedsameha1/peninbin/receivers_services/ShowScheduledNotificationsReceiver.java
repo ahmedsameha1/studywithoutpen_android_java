@@ -36,7 +36,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
         int schedule_what = intent.getIntExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,0);
         if ( schedule_what == ScheduleInFieldDialogFragment.QUICK_TEST
                 || schedule_what == ScheduleInFieldDialogFragment.STUDY_A_PERIOD
-                || schedule_what == ScheduleInFieldDialogFragment.TEST ) {
+                || schedule_what == ScheduleInFieldDialogFragment.ENHANCED_TEST) {
             long current_field_id = intent.getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
             String current_field_name = new DatabaseOperations(context).getFieldName(current_field_id);
             if ( schedule_what == ScheduleInFieldDialogFragment.QUICK_TEST ) {
@@ -68,17 +68,30 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                                 .setTicker(context.getString(R.string.quick_test_time))
                                 .setSound(notification_sound)
                                 .setAutoCancel(true);
-            } else if ( schedule_what == ScheduleInFieldDialogFragment.TEST ) {
+            } else if ( schedule_what == ScheduleInFieldDialogFragment.ENHANCED_TEST) {
                 Intent quick_test_intent = new Intent(context, ShowNotificationDialogsActivity.class);
-                quick_test_intent.putExtra(ShowNotificationDialogsActivity.DIALOG_TYPE, ShowNotificationDialogsActivity.TEST_DIALOG);
+                quick_test_intent.putExtra(ShowNotificationDialogsActivity.DIALOG_TYPE, ShowNotificationDialogsActivity.ENHANCED_TEST_DIALOG);
                 quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 contentIntent = PendingIntent.getActivity(context, 0, quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 notificationBuilder =
                         new android.support.v4.app.NotificationCompat.Builder(context)
                                 .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getString(R.string.test_time))
+                                .setContentTitle(context.getString(R.string.enhanced_test_time))
                                 .setContentText(current_field_name)
-                                .setTicker(context.getString(R.string.test_time))
+                                .setTicker(context.getString(R.string.enhanced_test_time))
+                                .setSound(notification_sound)
+                                .setAutoCancel(true);
+            } else if ( schedule_what == ScheduleInFieldDialogFragment.FULLY_RANDOM_TEST) {
+                Intent fully_random_test_intent = new Intent(context, ShowNotificationDialogsActivity.class);
+                fully_random_test_intent.putExtra(ShowNotificationDialogsActivity.DIALOG_TYPE, ShowNotificationDialogsActivity.FULLY_RANDOM_TEST_DIALOG);
+                fully_random_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                contentIntent = PendingIntent.getActivity(context, 0, fully_random_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                notificationBuilder =
+                        new android.support.v4.app.NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setContentTitle(context.getString(R.string.fully_random_test_time))
+                                .setContentText(current_field_name)
+                                .setTicker(context.getString(R.string.fully_random_test_time))
                                 .setSound(notification_sound)
                                 .setAutoCancel(true);
             } else if ( schedule_what == ScheduleInFieldDialogFragment.STUDY_A_PERIOD ) {
