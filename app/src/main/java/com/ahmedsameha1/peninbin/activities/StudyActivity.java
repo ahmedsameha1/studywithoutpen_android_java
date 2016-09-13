@@ -78,6 +78,8 @@ public class StudyActivity extends AppCompatActivity implements
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private static final String SYMBOL = "symbol";
     private static final String CUSTOMABLE_TEXT = "customable_text";
+    public static final int GET_ENTRIES_LOADER_ID = 0;
+    public static final int GET_SPECIAL_TEXT_LOADER_ID = 1;
     private boolean actionBarShown;
     private String currentQuestion, currentAnswer;
     private TextView correctAnswers, check, showActionbar;
@@ -91,6 +93,7 @@ public class StudyActivity extends AppCompatActivity implements
     private Cursor fieldEntriesCursor;
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     private LoaderManager.LoaderCallbacks<Cursor> get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private int currentSort;
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
@@ -173,6 +176,58 @@ public class StudyActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
+        loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                if ( id == GET_ENTRIES_LOADER_ID ) {
+                    if (databaseOperations.getQuestionDataType(current_field_id) == Contract.Field.STRING_DATA_TYPE) {
+                        int sort = args.getInt(CURRENT_SORT);
+
+                        mySQLiteCursorLoader1 = new MySQLiteCursorLoader(StudyActivity.this,
+                                "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                        + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
+                                        + "ORDER BY " + FieldActivity.SORT_STRINGS[sort],
+                                new String[]{current_field_id + ""});
+                        return mySQLiteCursorLoader1;
+                    }
+                } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
+                    return new MySQLiteCursorLoader(StudyActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                            new String[]{current_field_type + ""});
+                }
+                return null;
+            }
+
+            @Override
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+                if ( loader.getId() == GET_ENTRIES_LOADER_ID ) {
+                    fieldEntriesCursor = data;
+                } else if ( loader.getId() == GET_SPECIAL_TEXT_LOADER_ID ) {
+                    if (symbol == null && customable_text == null) {
+                        symbol = new String[data.getCount()];
+                        customable_text = new String[data.getCount()];
+                        for (data.moveToFirst(); data.getPosition() < data.getCount();
+                             data.moveToNext()) {
+                            symbol[data.getPosition()] = data.getString(1);
+                            customable_text[data.getPosition()] = data.getString(2);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+                if ( loader.getId() == GET_ENTRIES_LOADER_ID ) {
+                    fieldEntriesCursor = null;
+                }
+            }
+        };
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -240,8 +295,8 @@ public class StudyActivity extends AppCompatActivity implements
         };
         Bundle bundle = new Bundle();
         bundle.putInt(CURRENT_SORT, currentSort);
-        getLoaderManager().restartLoader(0, bundle, getFieldEntries);
-        getLoaderManager().restartLoader(0, bundle, get_symbol_string);
+        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, loader);
+        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, bundle, loader);
         showCurrentEntry.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -966,7 +1021,7 @@ public class StudyActivity extends AppCompatActivity implements
                 this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                 Bundle bundle = new Bundle();
                 bundle.putInt(CURRENT_SORT, currentSort);
-                getLoaderManager().restartLoader(0, bundle, getFieldEntries);
+                getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, loader);
             }
         } else if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {

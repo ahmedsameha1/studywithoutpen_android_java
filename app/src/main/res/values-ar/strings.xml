@@ -215,11 +215,10 @@
     <string name="sort_by_entry_order">رتب على حسب ترتيب المُدخَل</string>
     <string name="cannot_import_entries_to_notebook_fields_using_text_files">ﻻ يمكن استيراد مدخﻻت للمجاﻻت من نوع مفكرة باستخدام طريقة الملف النصي</string>
     <string name="some_entries_have_not_imported">على اﻷقل، مُدخَل واحد لم يتم استيراده</string>
-    <string name="text_shortcuts">Text Shortcuts</string>
-    <string name="text_contained_in_special_text">Type a text that is not contained of any other special text</string>
-    <string name="special_text">Special Text</string>
-    <string name="schedule_enhanced_test">schedule an enhanced test</string>
-    <string name="schedule_fully_random_test">schedule a fully random test</string>
-    <string name="fully_random_test_time">Fully random test time</string>
-    <string name="enhanced_test_time">Enhanced test time</string>
+    <string name="text_contained_in_special_text">أدخِل نص غير مُتَضَمَّن في أي نص خاص آخر</string>
+    <string name="special_text">نَص خاص</string>
+    <string name="schedule_enhanced_test">جَدْوِل اختبار مُحَسَّن</string>
+    <string name="schedule_fully_random_test">جَدْوِل اختبار عشوائي تماما</string>
+    <string name="fully_random_test_time">وقت اختبار عشوائي تماما</string>
+    <string name="enhanced_test_time">وقت اختبار مُحَسَّن</string>
 </resources>

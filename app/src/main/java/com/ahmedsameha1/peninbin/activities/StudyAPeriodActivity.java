@@ -82,6 +82,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private static final String SYMBOL = "symbol";
     private static final String CUSTOMABLE_TEXT = "customable_text";
+    public static final int GET_ENTRIES_LOADER_ID = 0;
+    public static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 1;
+    public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
     private long startingTime;
     boolean boolean_continue, actionBarShown;
     private Cursor cursor;
@@ -128,7 +131,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private Chronometer timer;
     private long lastPause;
-    private LoaderManager.LoaderCallbacks<Cursor> get_entries, get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
     private String[] symbol, customable_text;
     private int current_field_type;
     private int question_data_type;private Thread pauseThread = new Thread(new Runnable() {
@@ -196,6 +199,97 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         show_action_bar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         timer = (Chronometer)findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
+        loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+                if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID ) {
+                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
+                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
+                            new String[]{current_field_id + "", "0"});
+                } else if ( id == GET_ENTRIES_LOADER_ID ){
+                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
+                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                            new String[]{current_field_id + ""});
+                } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
+                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                            new String[]{current_field_type + ""});
+                }
+                return null;
+            }
+
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                int id = loader.getId();
+                if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                    StudyAPeriodActivity.this.cursor = cursor;
+                    listForTest = retainedFragment.getListForTest_StudyDuringActivity();
+                    if (listForTest == null) {
+                        if (boolean_continue) {
+                            listForTest = readFromLinkerTableStudyDuringColumn();
+                        } else {
+                            listForTest = prepareListForStudyFirstTime();
+                        }
+                    }
+                    questionsNumber = listForTest.length;
+                    if (questionsNumber > 0) {
+                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        new AsyncTask<Void, Void, Void>() {
+
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+                                return null;
+                            }
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+                        ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+                        showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+                        if (boolean_continue) {
+                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                        } else {
+                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
+                        }
+
+                    } else if (questionsNumber <= 0 && loader.getId() == START_NEW_SESSION) {
+                        Toast toast = Toast.makeText(StudyAPeriodActivity.this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        finish();
+                    }
+                    crossfade();
+                } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
+                    if (symbol == null && customable_text == null) {
+                        symbol = new String[cursor.getCount()];
+                        customable_text = new String[cursor.getCount()];
+                        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                             cursor.moveToNext()) {
+                            symbol[cursor.getPosition()] = cursor.getString(1);
+                            customable_text[cursor.getPosition()] = cursor.getString(2);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Cursor> loader) {
+
+            }
+        };
         get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
@@ -348,10 +442,10 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             currentQuestionCounter = array[0];
             permitedTriesNumber = array[1];
             repeatedEntries = databaseOperations.getStudyPeriodRepeatedEntries(current_field_id);
-            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION, null, get_entries);
+            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
         } else {
             permitedTriesNumber = getIntent().getExtras().getInt(NUMBER_OF_TRIES);
-            getLoaderManager().initLoader(START_NEW_SESSION, null, get_entries);
+            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
         }
         changeAreas(question_area_size,answer_area_size);
         if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
@@ -363,7 +457,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        getLoaderManager().restartLoader(0, null, get_symbol_string);
+        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

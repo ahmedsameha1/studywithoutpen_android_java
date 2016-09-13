@@ -72,7 +72,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
-    public static final int CONTINUE_PREVIOUS_SESSION = 1;
+    public static final int GET_ENTRIES_LOADER_ID = 0;
+    public static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 1;
+    public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
     public static final String DASH = "-";
@@ -156,7 +158,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private int mShortAnimationDuration;
     private View mLoadingView;
     private RelativeLayout content;
-    private LoaderManager.LoaderCallbacks<Cursor> get_entries,get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries,get_symbol_string;
     private String[] symbol, customable_text;
     private int current_field_type;
 
@@ -234,55 +236,123 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        /*start.setOnClickListener(new View.OnClickListener() {
+        loader = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
-            public void onClick(View v) {
-                if ( fieldEntriesCursor != null && fieldEntriesCursor.getCount() > 0 ) {
-                    int j = 0;
-                    try {
-                        j = Integer.parseInt(numberOfTries.getText().toString());
-                    } catch ( NumberFormatException nfe ) {
-                        numberOfTries.setText(Integer.toString(1));
-                    }
-                    if (enterPercent.getText().toString().equals("")
-                            || Double.parseDouble(enterPercent.getText().toString()) <= 0 ||
-                            Double.parseDouble(enterPercent.getText().toString()) > 100) {
-                        Toast.makeText(EnhancedTestActivity.this, getString(R.string.percentage_between), Toast.LENGTH_LONG).show();
-                    } else if (j <= 0) {
-                        numberOfTries.setText(Integer.toString(1));
-                        Toast.makeText(EnhancedTestActivity.this, getString(R.string.tries_at_least), Toast.LENGTH_LONG).show();
+            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                if ( id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                    return new MySQLiteCursorLoader(EnhancedTestActivity.this,
+                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " , se." + Contract.COLUMN_ID
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? ",
+                            new String[]{current_field_id + "", "0"});
+                } else if ( id == GET_ENTRIES_LOADER_ID) {
+                    return new MySQLiteCursorLoader(EnhancedTestActivity.this,
+                            "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                                    + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                    + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                            new String[]{current_field_id + ""});
+                } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
+                    return new MySQLiteCursorLoader(EnhancedTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                            new String[]{current_field_type + ""});
+                }
+                return null;
+            }
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                int id = loader.getId();
+                if ( id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID ) {
+                    fieldEntriesCursor = data;
+                    if ( boolean_continue ) {
+                        if ( listForTest == null ) {
+                            listForTest = readTestDataFromLinkerTable();
+                            questionsNumber = listForTest.length;
+                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                            showTries.setText(Integer.toString(triesCounter + 1));
+                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            new AsyncTask<Void, Void, Void>() {
 
+                                @Override
+                                protected Void doInBackground(Void... params) {
+                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                    return null;
+                                }
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                            enterAnswer.setEnabled(true);
+                            enterAnswer.requestFocus();
+                            testingNow = true;
+                            wrongAnswers = new ArrayList<String>(permitedTriesNumber);
+                            ifMoreThanOnce();
+
+                        }
                     } else {
-                        start.setEnabled(false);
-                        permitedTriesNumber = Integer.parseInt(numberOfTries.getText().toString());
-                        listForTest = getListForTest(Double.parseDouble(enterPercent.getText().toString()));
-                        questionsNumber = listForTest.length;
-                        showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                        enterAnswer.setEnabled(true);
-                        enterAnswer.requestFocus();
-                        next.setEnabled(true);
-                        enterPercent.setText("");
-                        currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                        triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                        ifMoreThanOnce();
-                        showTries.setText(Integer.toString(triesCounter + 1));
-                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
-                        testingNow = true;
-                        numberOfTries.setEnabled(false);
-                        enterPercent.setEnabled(false);
-                        wrongAnswers = new ArrayList<String>(permitedTriesNumber);
-    //                    wrongItems = new ArrayList<WrongItem>();
+                        if ( listForTest == null ) {
+                            if ( percent_or_number == PERCENTAGE ) {
+                                listForTest = getListForTest(percentage);
+                            } else if ( percent_or_number == NUMBER ) {
+                                listForTest = getListForTest(number);
+                            }
+                            questionsNumber = listForTest.length;
+                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                            showTries.setText(Integer.toString(triesCounter + 1));
+                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            new AsyncTask<Void, Void, Void>() {
+
+                                @Override
+                                protected Void doInBackground(Void... params) {
+                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                    return null;
+                                }
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                            enterAnswer.requestFocus();
+                            testingNow = true;
+                            wrongAnswers = new ArrayList<String>(permitedTriesNumber);
+                            boolean_continue = false;
+                            ifMoreThanOnce();
+                        }
                     }
-                } else {
-                    Toast.makeText(EnhancedTestActivity.this,R.string.wait_for_data_loading,Toast.LENGTH_SHORT).show();
+                    crossfade();
+                } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
+                    if (symbol == null && customable_text == null) {
+                        symbol = new String[data.getCount()];
+                        customable_text = new String[data.getCount()];
+                        for (data.moveToFirst(); data.getPosition() < data.getCount();
+                             data.moveToNext()) {
+                            symbol[data.getPosition()] = data.getString(1);
+                            customable_text[data.getPosition()] = data.getString(2);
+                        }
+                    }
                 }
             }
-        });*/
+
+            @Override
+            public void onLoaderReset(Loader<Cursor> loader) {
+                int id = loader.getId();
+                if ( id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID ) {
+                    fieldEntriesCursor = null;
+                }
+            }
+
+        };
         get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if ( id == CONTINUE_PREVIOUS_SESSION ) {
+                if ( id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     return new MySQLiteCursorLoader(EnhancedTestActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " , se." + Contract.COLUMN_ID
@@ -340,18 +410,12 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-//                start.setEnabled(false);
-
-
-
                         enterAnswer.setEnabled(true);
                         enterAnswer.requestFocus();
                         testingNow = true;
                         wrongAnswers = new ArrayList<String>(permitedTriesNumber);
-//                boolean_continue = false;
+
                         ifMoreThanOnce();
-/*                getLoaderManager().destroyLoader(CONTINUE_PREVIOUS_SESSION);
-                getLoaderManager().initLoader(START_NEW_SESSION,null,this);*/
                     }
                 } else {
                     if ( listForTest == null ) {
@@ -419,7 +483,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
             }
         };
-        getLoaderManager().restartLoader(0, null, get_symbol_string);
+        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -602,13 +666,13 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             }
         });
         if ( boolean_continue ) {
-            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION,null,get_entries);
+            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID,null,loader);
             int[] array = databaseOperations.getDataFromTestPausedEnhancedTest(current_field_id);
             currentQuestionCounter = array[0];
             wrongAnswersCounter = array[1];
             permitedTriesNumber = array[2];
         } else {
-            getLoaderManager().initLoader(START_NEW_SESSION,null,get_entries);
+            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID,null,loader);
         }
         check_type = databaseOperations.getFieldCheckType(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);

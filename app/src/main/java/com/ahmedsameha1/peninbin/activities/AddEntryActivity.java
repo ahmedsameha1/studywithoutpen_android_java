@@ -59,6 +59,8 @@ public class AddEntryActivity extends AppCompatActivity implements
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private static final String SYMBOL = "symbol";
     private static final String CUSTOMABLE_TEXT = "customable_text";
+    public static final int GET_FIELDS_LOADER_ID = 0;
+    public static final int GET_SPECIAL_TEXT_ID = 1;
     private Spinner field_spinner;
     private EditText enter_question;
     private EditText enter_answer;
@@ -77,7 +79,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private int question_data_type;
     private MySQLiteCursorLoader mySQLiteCursorLoader;
     private Tracker mTracker;
-    private LoaderManager.LoaderCallbacks<Cursor> get_entries, get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
     private String[] symbol, customable_text;
     private int current_field_type;
 
@@ -120,6 +122,54 @@ public class AddEntryActivity extends AppCompatActivity implements
             getSupportActionBar().hide();
         }
         actionBarShown = getSupportActionBar().isShowing();
+        loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                if ( id == GET_FIELDS_LOADER_ID ) {
+                    return new MySQLiteCursorLoader(AddEntryActivity.this,
+                            "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
+                                    + " FROM " + Contract.Field.TABLE_NAME
+                                    + " WHERE " + Contract.Field.COLUMN_FIELD_TYPE + " != ? "
+                                    + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
+                            new String[]{Constants.FieldTypes.NOTEBOOK_TYPE + ""});
+                } else if ( id == GET_SPECIAL_TEXT_ID ){
+                    return new MySQLiteCursorLoader(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                            new String[]{current_field_type + ""});
+                }
+                return null;
+            }
+
+            @Override
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+                if ( loader.getId() == GET_FIELDS_LOADER_ID ) {
+                    simple_cursor_adapter.swapCursor(data);
+                    cursor = data;
+                    setSpinnerPosition(current_field_id);
+                } else if ( loader.getId() == GET_SPECIAL_TEXT_ID ) {
+                    if (symbol == null && customable_text == null) {
+                        symbol = new String[data.getCount()];
+                        customable_text = new String[data.getCount()];
+                        for (data.moveToFirst(); data.getPosition() < data.getCount();
+                             data.moveToNext()) {
+                            symbol[data.getPosition()] = data.getString(1);
+                            customable_text[data.getPosition()] = data.getString(2);
+                        }
+
+                    }
+                }
+            }
+
+            @Override
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+                if ( loader.getId() == GET_FIELDS_LOADER_ID ) {
+                    simple_cursor_adapter.swapCursor(null);
+                }
+            }
+        };
         get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -185,8 +235,8 @@ public class AddEntryActivity extends AppCompatActivity implements
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         rank_spinner.setSelection(Constants.Rank.LOW);
         setHints(fieldType);
-        getLoaderManager().restartLoader(0, null, get_entries);
-        getLoaderManager().restartLoader(0, null, get_symbol_string);
+        getLoaderManager().restartLoader(GET_FIELDS_LOADER_ID, null, loader);
+        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_ID, null, loader);
         enter_answer.requestFocus();
         changeAreas(question_area_size, answer_area_size);
         if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {

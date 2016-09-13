@@ -70,7 +70,8 @@ public class QuickTestActivity extends AppCompatActivity implements
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
-    public static final int CONTINUE_PREVIOUS_SESSION = 1;
+    public static final int GET_ENTRIES_LOADER_ID = 0;
+    public static final int GET_SPECIAL_TEXT_LOADER_ID = 1;
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
     public static final int START_NEW_SESSION = 2;
@@ -126,7 +127,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private Chronometer timer;
     private long lastPause;
-    private LoaderManager.LoaderCallbacks<Cursor> get_entries, get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
     private String[] symbol, customable_text;
     private int current_field_type;
 
@@ -204,6 +205,83 @@ public class QuickTestActivity extends AppCompatActivity implements
             question_data_type = databaseOperations.getQuestionDataType(current_field_id);
             AnalyticsApplication application = (AnalyticsApplication) getApplication();
             mTracker = application.getDefaultTracker();
+            loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+                @Override
+                public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                    if ( id == GET_ENTRIES_LOADER_ID ) {
+                        return new MySQLiteCursorLoader(QuickTestActivity.this,
+                                "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                        + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                                        + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                        + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                                        + " FROM " + Contract.STring.TABLE_NAME
+                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                                new String[]{current_field_id + ""});
+                    } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
+                        return new MySQLiteCursorLoader(QuickTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                                + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                                + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                                " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                                + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                                new String[]{current_field_type + ""});
+                    }
+                    return null;
+                }
+                @Override
+                public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                    if ( loader.getId() == GET_ENTRIES_LOADER_ID) {
+                        fieldEntriesCursor = data;
+                        if (listForTest == null) {
+                            if (percent_or_number == PERCENTAGE) {
+                                listForTest = getListForTest(percentage);
+                            } else if (percent_or_number == NUMBER) {
+                                listForTest = getListForTest(number);
+                            }
+                            if (listForTest != null) {
+                                questionsNumber = listForTest.length;
+                                showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                                showTries.setText(Integer.toString(triesCounter + 1));
+                                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                                new AsyncTask<Void, Void, Void>() {
+
+                                    @Override
+                                    protected Void doInBackground(Void... params) {
+                                        current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+                                        return null;
+                                    }
+                                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+                                enterAnswer.requestFocus();
+                                testingNow = true;
+                                ifMoreThanOnce();
+                            } else {
+                                finish();
+                            }
+                        }
+                        crossfade();
+                    } else if ( loader.getId() == GET_SPECIAL_TEXT_LOADER_ID ) {
+                        if (symbol == null && customable_text == null) {
+                            symbol = new String[data.getCount()];
+                            customable_text = new String[data.getCount()];
+                            for (data.moveToFirst(); data.getPosition() < data.getCount();
+                                 data.moveToNext()) {
+                                symbol[data.getPosition()] = data.getString(1);
+                                customable_text[data.getPosition()] = data.getString(2);
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(Loader<Cursor> loader) {
+                    if ( loader.getId() == GET_ENTRIES_LOADER_ID ) {
+                        fieldEntriesCursor = null;
+                    }
+                }
+            };
             get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
                 @Override
                 public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -468,8 +546,8 @@ public class QuickTestActivity extends AppCompatActivity implements
                     toast.show();
                 }
             });
-            getLoaderManager().initLoader(START_NEW_SESSION,null, get_entries);
-            getLoaderManager().restartLoader(0, null, get_symbol_string);
+            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID,null, loader);
+            getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
             check_type = databaseOperations.getFieldCheckType(current_field_id);
             question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
             answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);

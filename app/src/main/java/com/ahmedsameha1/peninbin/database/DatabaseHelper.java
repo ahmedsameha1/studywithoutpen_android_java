@@ -158,10 +158,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " ( "
             + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + Test_Paused.COLUMN_TEST_TYPE + " INTEGER NOT NULL DEFAULT " + Constants.TestType.ENHANCED_TEST + " , "
-            + Test_Paused.COLUMN_FIELD + " INTEGER UNIQUE NOT NULL, "
+            + Test_Paused.COLUMN_FIELD + " INTEGER NOT NULL, "
             + Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
             + Test_Paused.COLUMN_WRONG_ANSWERS_COUNT + " INTEGER NOT NULL, "
             + Test_Paused.COLUMN_TRIES_NUMBER + " INTEGER NOT NULL, "
+            + " UNIQUE ( " + Test_Paused.COLUMN_TEST_TYPE + ", " + Test_Paused.COLUMN_FIELD + " ), "
             + "FOREIGN KEY(" + Test_Paused.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
     public static final String CREATE_STUDY_PERIOD_REPEATED_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + Study_Period_Repeated_Entry.TABLE_NAME

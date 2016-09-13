@@ -3,7 +3,6 @@ package com.ahmedsameha1.peninbin.activities;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,7 +40,6 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
-import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -91,7 +89,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     private Tracker mTracker;
     private Chronometer timer;
     private long lastPause;
-    private LoaderManager.LoaderCallbacks<Cursor> get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
 
@@ -160,7 +158,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
+        loader = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 return new MySQLiteCursorLoader(StudyWrongAnswersActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
@@ -190,7 +188,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
 
             }
         };
-        getLoaderManager().restartLoader(0, null, get_symbol_string);
+        getLoaderManager().restartLoader(0, null, loader);
         showCurrentEntry.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
