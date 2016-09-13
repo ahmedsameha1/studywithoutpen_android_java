@@ -36,7 +36,8 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
         int schedule_what = intent.getIntExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,0);
         if ( schedule_what == ScheduleInFieldDialogFragment.QUICK_TEST
                 || schedule_what == ScheduleInFieldDialogFragment.STUDY_A_PERIOD
-                || schedule_what == ScheduleInFieldDialogFragment.ENHANCED_TEST) {
+                || schedule_what == ScheduleInFieldDialogFragment.ENHANCED_TEST
+                || schedule_what == ScheduleInFieldDialogFragment.FULLY_RANDOM_TEST ) {
             long current_field_id = intent.getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
             String current_field_name = new DatabaseOperations(context).getFieldName(current_field_id);
             if ( schedule_what == ScheduleInFieldDialogFragment.QUICK_TEST ) {

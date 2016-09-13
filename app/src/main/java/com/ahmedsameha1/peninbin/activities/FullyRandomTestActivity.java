@@ -266,7 +266,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 if ( id == CONTINUE_PREVIOUS_SESSION ) {
                     return new MySQLiteCursorLoader(FullyRandomTestActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
+                                    + " a , se." + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
                                     + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                     + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                     + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
