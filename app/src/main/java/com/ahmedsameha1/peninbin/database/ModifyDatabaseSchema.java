@@ -75,7 +75,7 @@ public class ModifyDatabaseSchema {
             sqLiteDatabase.execSQL(copy);
             drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
             sqLiteDatabase.execSQL(drop);
-            drop = "DROP TABLE IF EXISTS " + Contract.Old_Not_String_Entry.TABLE_NAME + ";";
+            drop = "DROP TABLE IF EXISTS " + Contract.Not_String_Entry.TABLE_NAME + ";";
             sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_ENTRY_TABLE);
             /////

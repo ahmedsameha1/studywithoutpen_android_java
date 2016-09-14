@@ -265,6 +265,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             " ( " + OldField._ID + " INTEGER PRIMARY KEY , "
             +  OldField.COLUMN_FIELD_NAME + " TEXT , " +
              OldField.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + " DATETIME DEFAULT CURRENT_TIMESTAMP );";*/
+    public static final String CREATE_STRING_ENTRY_TABLE_OLD = "CREATE TABLE IF NOT EXISTS " + Contract.Old_String_Entry.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+            + Contract.Old_String_Entry.COLUMN_QUESTION + " INTEGER NOT NULL, "
+            + Contract.Old_String_Entry.COLUMN_ANSWER + " INTEGER NOT NULL, "
+            + Contract.Old_String_Entry.COLUMN_FIELD + " INTEGER NOT NULL, "
+            + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + Contract.Old_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + Contract.Old_String_Entry.COLUMN_ASKED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_String_Entry.COLUMN_RANK + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_String_Entry.COLUMN_CREATION_EMULATED_DATE + " DATETIME DEFAULT NULL, "
+            + Contract.Old_String_Entry.COLUMN_REMIND_AT + " INTEGER DEFAULT NULL, "
+            + Contract.Old_String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " INTEGER DEFAULT NULL, "
+            + Contract.Old_String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND + " INTEGER DEFAULT " + Constants.TestRound.ASKED_AT_CURRENT_ROUND + ", "
+            + Contract.Old_String_Entry.COLUMN_ORDER_OF_ENTRY + " INTEGER DEFAULT NULL, "
+            + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
+            + "FOREIGN KEY(" + Contract.Old_String_Entry.COLUMN_QUESTION + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + Contract.Old_String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
+            + "FOREIGN KEY(" + Contract.Old_String_Entry.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + " UNIQUE ( " + Contract.Old_String_Entry.COLUMN_QUESTION + ", "
+            + Contract.Old_String_Entry.COLUMN_ANSWER + ", "
+            + Contract.Old_String_Entry.COLUMN_FIELD + " )"
+            + " );";
+
+
     public static final String DBV6_APPV32_CREATE_FIELD_TABLE = "CREATE TABLE " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME
             + " ( "
             + Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME + " TEXT PRIMARY KEY NOT NULL, "

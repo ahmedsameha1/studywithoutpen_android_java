@@ -258,20 +258,4 @@ public final class Contract {
         public static final String COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND = "whether_asked_at_current_test_round";
         public static final String COLUMN_ORDER_OF_ENTRY = "order_of_entry";
     }
-    public static abstract class Old_Not_String_Entry implements BaseColumns {
-        public static final String TABLE_NAME = "not_string_entry";
-        public static final String COLUMN_QUESTION = "question";
-        public static final String COLUMN_ANSWER = "answer";
-        public static final String COLUMN_FIELD = "field";
-        public static final String COLUMN_PAUSED_TEST_ORDER = "paused_test_order";
-        public static final String COLUMN_PAUSED_STUDY_PERIOD_ORDER = "paused_study_period_order";
-        public static final String COLUMN_ASKED_COUNT = "asked_count";
-        public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
-        public static final String COLUMN_RANK = "rank";
-        public static final String COLUMN_CREATION_EMULATED_DATE = "creation_emulated_date";
-        public static final String COLUMN_REMIND_AT = "remind_at";
-        public static final String COLUMN_REMIND_AT_PENDINGINTENT_REQUEST = "remind_at_pendingintent_request";
-        public static final String COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND = "whether_asked_at_current_test_round";
-        public static final String COLUMN_ORDER_OF_ENTRY = "order_of_entry";
-    }
 }

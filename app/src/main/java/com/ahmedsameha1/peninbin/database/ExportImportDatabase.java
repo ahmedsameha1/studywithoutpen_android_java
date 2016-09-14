@@ -961,7 +961,7 @@ public class ExportImportDatabase {
             toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_TABLE);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_TABLE);
-            toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE_OLD);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_ENTRY_TABLE);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);
@@ -1031,13 +1031,13 @@ public class ExportImportDatabase {
                 answer_id_cursor.close();
                 field_id_cursor.close();
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(Contract.String_Entry.COLUMN_QUESTION,question_id);
-                contentValues.put(Contract.String_Entry.COLUMN_ANSWER,answer_id);
-                contentValues.put(Contract.String_Entry.COLUMN_FIELD,field_id);
+                contentValues.put(Contract.Old_String_Entry.COLUMN_QUESTION,question_id);
+                contentValues.put(Contract.Old_String_Entry.COLUMN_ANSWER,answer_id);
+                contentValues.put(Contract.Old_String_Entry.COLUMN_FIELD,field_id);
                 contentValues.put(Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER,linkerCursor.getInt(3));
-                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER,linkerCursor.getInt(4));
+                contentValues.put(Contract.Old_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER,linkerCursor.getInt(4));
                 contentValues.put(Contract.CREATION_DATE,linkerCursor.getString(6));
-                toImportDatabase.insert(Contract.String_Entry.TABLE_NAME,null,contentValues);
+                toImportDatabase.insert(Contract.Old_String_Entry.TABLE_NAME,null,contentValues);
             }
             drop = "DROP TABLE IF EXISTS " + Contract.Old_Linker_DBV6_AppV32.TABLE_NAME + ";";
             toImportDatabase.execSQL(drop);
@@ -1103,31 +1103,31 @@ public class ExportImportDatabase {
             toImportDatabase.execSQL(copy);
             String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
             toImportDatabase.execSQL(drop);
-            rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
+            rename = "ALTER TABLE " + Contract.Old_String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
             toImportDatabase.execSQL(rename);
-            toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE);
-            copy = "INSERT INTO " + Contract.String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
-                    + " , " + Contract.String_Entry.COLUMN_QUESTION
-                    + " , " + Contract.String_Entry.COLUMN_ANSWER
-                    + " , " + Contract.String_Entry.COLUMN_FIELD
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE_OLD);
+            copy = "INSERT INTO " + Contract.Old_String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Old_String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.Old_String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.Old_String_Entry.COLUMN_FIELD
                     + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
-                    + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
-                    + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                    + " , " + Contract.String_Entry.COLUMN_RANK
-                    + " , " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_RANK
+                    + " , " + Contract.Old_String_Entry.COLUMN_CREATION_EMULATED_DATE
                     + " , " + Contract.CREATION_DATE
                     + " ) "
                     + "SELECT " + Contract.COLUMN_ID
-                    + " , " + Contract.String_Entry.COLUMN_QUESTION
-                    + " , " + Contract.String_Entry.COLUMN_ANSWER
-                    + " , " + Contract.String_Entry.COLUMN_FIELD
+                    + " , " + Contract.Old_String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.Old_String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.Old_String_Entry.COLUMN_FIELD
                     + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
-                    + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
-                    + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                    + " , " + Contract.String_Entry.COLUMN_RANK
-                    + " , " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_RANK
+                    + " , " + Contract.Old_String_Entry.COLUMN_CREATION_EMULATED_DATE
                     + " , " + Contract.CREATION_DATE
                     + " FROM " + "tempTable"
                     + ";";
@@ -1222,35 +1222,35 @@ public class ExportImportDatabase {
     private static void upgradeImportedDatabaseFromDBV9ToDBV10(SQLiteDatabase toImportDatabase, Uri file_uri ) throws Exception {
         toImportDatabase.beginTransaction();
         try {
-            String rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
+            String rename = "ALTER TABLE " + Contract.Old_String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
             toImportDatabase.execSQL(rename);
-            toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE);
-            String copy = "INSERT INTO " + Contract.String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
-                    + " , " + Contract.String_Entry.COLUMN_QUESTION
-                    + " , " + Contract.String_Entry.COLUMN_ANSWER
-                    + " , " + Contract.String_Entry.COLUMN_FIELD
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE_OLD);
+            String copy = "INSERT INTO " + Contract.Old_String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Old_String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.Old_String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.Old_String_Entry.COLUMN_FIELD
                     + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
-                    + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
-                    + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                    + " , " + Contract.String_Entry.COLUMN_RANK
-                    + " , " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
-                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT
-                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_RANK
+                    + " , " + Contract.Old_String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.Old_String_Entry.COLUMN_REMIND_AT
+                    + " , " + Contract.Old_String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
                     + " , " + Contract.CREATION_DATE
                     + " ) "
                     + "SELECT " + Contract.COLUMN_ID
-                    + " , " + Contract.String_Entry.COLUMN_QUESTION
-                    + " , " + Contract.String_Entry.COLUMN_ANSWER
-                    + " , " + Contract.String_Entry.COLUMN_FIELD
+                    + " , " + Contract.Old_String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.Old_String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.Old_String_Entry.COLUMN_FIELD
                     + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER
-                    + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
-                    + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
-                    + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                    + " , " + Contract.String_Entry.COLUMN_RANK
-                    + " , " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
-                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT
-                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
+                    + " , " + Contract.Old_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.Old_String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.Old_String_Entry.COLUMN_RANK
+                    + " , " + Contract.Old_String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.Old_String_Entry.COLUMN_REMIND_AT
+                    + " , " + Contract.Old_String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
                     + " , " + Contract.CREATION_DATE
                     + " FROM " + "tempTable"
                     + ";";
