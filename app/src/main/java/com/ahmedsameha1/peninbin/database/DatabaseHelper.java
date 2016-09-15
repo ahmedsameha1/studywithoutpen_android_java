@@ -480,7 +480,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ModifyDatabaseSchema.onUpgradeDatabaseToDBV10AppV43(sqLiteDatabase);
         }
         if ( oldVersion < 11 ) {
-            ModifyDatabaseSchema.onUpgradeDatabaseToDBV11AppV46(sqLiteDatabase);
+            ModifyDatabaseSchema.onUpgradeDatabaseToDBV11AppV47(sqLiteDatabase);
             SpecialText.addSpecialTextToDBV11(sqLiteDatabase);
         }
     }

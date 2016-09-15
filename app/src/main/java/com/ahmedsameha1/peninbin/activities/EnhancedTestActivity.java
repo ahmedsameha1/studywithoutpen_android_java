@@ -1776,7 +1776,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             } else {
                 entry_wrongness = -1;
             }
-            if ( fieldEntriesCursor.getInt(3) >= rank || entry_wrongness >= wrongness ) {
+            if ( fieldEntriesCursor.getInt(3) >= rank && entry_wrongness >= wrongness ) {
                 controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;

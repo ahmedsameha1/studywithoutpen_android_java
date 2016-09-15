@@ -27,7 +27,7 @@ public class ModifyDatabaseSchema {
             + " UNIQUE ( " + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " )"
             + " );";
 
-    public static void onUpgradeDatabaseToDBV11AppV46( SQLiteDatabase sqLiteDatabase ) {
+    public static void onUpgradeDatabaseToDBV11AppV47(SQLiteDatabase sqLiteDatabase ) {
         sqLiteDatabase.beginTransaction();
         try {
             String drop = "DROP TABLE IF EXISTS " + Contract.Field_Type_Symbol.TABLE_NAME + ";";
