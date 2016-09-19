@@ -9,11 +9,11 @@ import android.support.v7.app.AlertDialog;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.utils.Constants;
 
 /**
@@ -22,7 +22,7 @@ import com.ahmedsameha1.peninbin.utils.Constants;
 public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
     public static final String TEST_TYPE = "test_type";
     private long current_field_id;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private int question_data_type;
     private boolean from_notification;
     private int test_type;
@@ -32,7 +32,7 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         test_type = getArguments().getInt(TEST_TYPE);
-        databaseOperations = new DatabaseOperations(getActivity());
+        databaseOperations = new DatabaseReadOperations(getActivity());
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
     }
@@ -64,7 +64,7 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                MySQLiteCursorLoader mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+                                CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
                                 if ( test_type == Constants.TestType.ENHANCED_TEST ) {
                                     mySQLiteCursorLoader.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
                                     mySQLiteCursorLoader.clearThisFieldFromWrongAnswersEnhancedTest(current_field_id,question_data_type);

@@ -65,8 +65,8 @@ public class ImportTextFile {
             if (!valid_structure) {
                 throw new InvalidTextFileFormatException();
             }
-            MySQLiteCursorLoader mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
-            DatabaseOperations databaseOperations = new DatabaseOperations(context);
+            CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
+            DatabaseReadOperations databaseOperations = new DatabaseReadOperations(context);
             bufferedReader = new BufferedReader(new FileReader(file));
             String text_line = bufferedReader.readLine();
             while (text_line != null) {
@@ -136,8 +136,8 @@ public class ImportTextFile {
             showNotification(context, FAILED_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
         }
         /*try {
-            MySQLiteCursorLoader mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
-            DatabaseOperations databaseOperations = new DatabaseOperations(context);
+            CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
+            DatabaseReadOperations databaseOperations = new DatabaseReadOperations(context);
             bufferedReader = new BufferedReader(new FileReader(file));
             String text_line = bufferedReader.readLine();
             while ( text_line != null ) {

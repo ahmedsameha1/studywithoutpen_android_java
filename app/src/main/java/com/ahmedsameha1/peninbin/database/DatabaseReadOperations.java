@@ -12,12 +12,12 @@ import java.util.ArrayList;
 /**
  * Created by ahmed_000 on 8/31/2015.
  */
-public class DatabaseOperations {
+public class DatabaseReadOperations {
     public static final String EXPORT_DIRECTORY_NAME = "StudyWithoutPen";
     private Context context;
     private SQLiteDatabase sqLiteDatabase;
 
-    public DatabaseOperations(Context context) {
+    public DatabaseReadOperations(Context context) {
         this.context = context;
         sqLiteDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
     }
@@ -310,21 +310,7 @@ public class DatabaseOperations {
     }
 
 
-    public Cursor searchExactlyFor(long field_id, int question_data_type, String searchString) {
-        Cursor cursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                Contract.STring.COLUMN_VALUE + " = ? ",
-                new String[]{searchString}, null, null, null);
-        cursor.moveToFirst();
-        long searchString_id = cursor.getLong(0);
-        cursor.close();
-        if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
-            return sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                    Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{searchString_id + "", field_id + ""}, null, null, null);
-        } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
-        }
-        return null;
-    }
+
 
 
     public boolean checkEntriesForAnyTestOrderEnhancedTest(long field_id, int question_data_type) {
@@ -650,6 +636,27 @@ public class DatabaseOperations {
         }
         cursor.close();
         return contained;
+    }
+
+    public Cursor searchExactlyFor(long field_id, int question_data_type, String searchString) {
+        Cursor cursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                Contract.STring.COLUMN_VALUE + " = ? ",
+                new String[]{searchString}, null, null, null);
+        cursor.moveToFirst();
+        long searchString_id = cursor.getLong(0);
+        cursor.close();
+        if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+            /*return sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                    Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                    new String[]{searchString_id + "", field_id + ""}, null, null, null);*/
+            return sqLiteDatabase.rawQuery("SELECT a." + Contract.STring.COLUMN_VALUE
+            + " FROM " + Contract.STring.TABLE_NAME + " a INNER JOIN " + Contract.String_Entry.TABLE_NAME
+            + " ON a." + Contract.COLUMN_ID + " = " + Contract.String_Entry.COLUMN_ANSWER
+            + " WHERE " + Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                    new String[]{ searchString_id + "", field_id + ""});
+        } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+        }
+        return null;
     }
 
 

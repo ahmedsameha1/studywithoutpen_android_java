@@ -3,7 +3,6 @@ package com.ahmedsameha1.peninbin.activities;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.app.LoaderManager;
-import android.content.Loader;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -31,9 +30,9 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
@@ -68,7 +67,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private SimpleCursorAdapter simple_cursor_adapter;
     private Chronometer timer;
     private long lastPause;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
     private int fieldType;
@@ -77,7 +76,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private LinearLayout showResult, questionLinearlayout, container;
     private long current_field_id;
     private int question_data_type;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
     private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
     private String[] symbol, customable_text;
@@ -92,8 +91,8 @@ public class AddEntryActivity extends AppCompatActivity implements
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, true);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
-        databaseOperations = new DatabaseOperations(this);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        databaseOperations = new DatabaseReadOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -126,14 +125,14 @@ public class AddEntryActivity extends AppCompatActivity implements
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 if ( id == GET_FIELDS_LOADER_ID ) {
-                    return new MySQLiteCursorLoader(AddEntryActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this,
                             "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
                                     + " FROM " + Contract.Field.TABLE_NAME
                                     + " WHERE " + Contract.Field.COLUMN_FIELD_TYPE + " != ? "
                                     + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                             new String[]{Constants.FieldTypes.NOTEBOOK_TYPE + ""});
                 } else if ( id == GET_SPECIAL_TEXT_ID ){
-                    return new MySQLiteCursorLoader(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                    return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                             + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                             " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
@@ -173,7 +172,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new MySQLiteCursorLoader(AddEntryActivity.this,
+                return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this,
                         "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
                                 + " FROM " + Contract.Field.TABLE_NAME
                                 + " WHERE " + Contract.Field.COLUMN_FIELD_TYPE + " != ? "
@@ -196,7 +195,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new MySQLiteCursorLoader(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                         + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                         + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                         " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL

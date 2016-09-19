@@ -2,9 +2,7 @@ package com.ahmedsameha1.peninbin.dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -12,21 +10,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -46,11 +36,11 @@ public class NotebookFieldPropertiesDialogFragment extends DialogFragment {
     private boolean locale_available;
     private ArrayList<Locale> localeList = new ArrayList<Locale>();
     private ArrayList<String> locale_display_names = new ArrayList<String>();
-    private DatabaseOperations databaseOpertations;
+    private DatabaseReadOperations databaseOpertations;
     private String locale_short_name;
     private boolean isReadAnswer;
     private int check_type;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Button positive_button;
     private int index_of_locale;
     private String field_name;
@@ -58,8 +48,8 @@ public class NotebookFieldPropertiesDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
-        databaseOpertations = new DatabaseOperations(getActivity());
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        databaseOpertations = new DatabaseReadOperations(getActivity());
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         field_name = databaseOpertations.getFieldName(current_field_id);
         setRetainInstance(true);
     }

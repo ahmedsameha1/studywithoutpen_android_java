@@ -223,4 +223,8 @@
     <string name="schedule_fully_random_test">schedule a fully random test</string>
     <string name="fully_random_test_time">Fully random test time</string>
     <string name="enhanced_test_time">Enhanced test time</string>
+    <string name="letter_number">Letter number:</string>
+    <string name="number_of_letters">Number of letters:</string>
+    <string name="first_letters">First letter:</string>
+    <string name="last_letter">Last letter:</string>
 </resources>

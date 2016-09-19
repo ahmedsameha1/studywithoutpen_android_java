@@ -9,18 +9,18 @@ import android.support.v7.app.AlertDialog;
 
 
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 
 /**
  * Created by ahmed_000 on 10/13/2015.
  */
 public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFragment {
     private long current_field_id;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private boolean from_notification;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,8 +54,8 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 //                                ((Contact) getActivity()).continueStudyDuring(false);
-                                mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
-                                DatabaseOperations databaseOperations = new DatabaseOperations(getActivity());
+                                mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
+                                DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
                                 mySQLiteCursorLoader
                                         .resetEntriesStudyPeriodOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                                 mySQLiteCursorLoader.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);

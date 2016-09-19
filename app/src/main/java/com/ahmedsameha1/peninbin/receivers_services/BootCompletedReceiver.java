@@ -18,7 +18,7 @@ import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
     private void rescheduleAllSessions(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        ArrayList<long[]> data = new DatabaseOperations(context).getBackupSchedulingData();
+        ArrayList<long[]> data = new DatabaseReadOperations(context).getBackupSchedulingData();
         for ( long[] session : data ) {
             Log.i("reschedule","time");
             if ( session[1] == ScheduleInFieldDialogFragment.QUICK_TEST ) {
@@ -128,7 +128,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
     private void rescheduleReminders(Context context) {
         AlarmManager alarm_manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Cursor cursor = new DatabaseOperations(context).getReminderDataForRescheduling();
+        Cursor cursor = new DatabaseReadOperations(context).getReminderDataForRescheduling();
         for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
              cursor.moveToNext()) {
             Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);

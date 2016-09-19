@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -32,18 +31,15 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -75,7 +71,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
     private long lastPause;
 
 
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
     private Cursor cursor;
@@ -83,7 +79,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
     private LinearLayout showResult,questionLinearlayout, container;
     private long current_field_id;
     private int question_data_type;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -92,8 +88,8 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
         int question_area_size,answer_area_size,test_text_size,action_bar_shown;
         fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, true);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
-        databaseOperations = new DatabaseOperations(this);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        databaseOperations = new DatabaseReadOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
@@ -425,7 +421,7 @@ public class AddNotebookEntryActivity extends AppCompatActivity implements
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new MySQLiteCursorLoader(AddNotebookEntryActivity.this,
+        return new CursorLoaderAndUpdateDatabase(AddNotebookEntryActivity.this,
                 "SELECT " + Contract.COLUMN_ID + ", " +  Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
                         + " FROM " + Contract.Field.TABLE_NAME
                         + " WHERE " + Contract.Field.COLUMN_FIELD_TYPE + " = ? "

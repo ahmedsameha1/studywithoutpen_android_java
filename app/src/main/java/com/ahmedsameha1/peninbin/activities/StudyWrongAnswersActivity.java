@@ -32,10 +32,10 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
@@ -79,11 +79,11 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     private boolean actionBarShown;
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private TextToSpeech tts;
     private boolean tts_available = false;
     private boolean locale_available = false;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
     private int check_type;
     private Tracker mTracker;
@@ -104,8 +104,8 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         currentAnswer = bundle.getString(CURRENT_ANSWER);
         wrongItemsList = (ArrayList<WrongItem>) bundle.getSerializable(WRONG_ITEM_LIST);
         current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
-        databaseOperations = new DatabaseOperations(this);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        databaseOperations = new DatabaseReadOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
@@ -161,7 +161,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
         loader = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new MySQLiteCursorLoader(StudyWrongAnswersActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                return new CursorLoaderAndUpdateDatabase(StudyWrongAnswersActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                         + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                         + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                         " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
@@ -882,7 +882,7 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
     public void onRestoreInstanceState( Bundle savedInstanceState ) {
 //        databaseHelper = new DatabaseHelper(this);
 //        sqLiteDatabase = databaseHelper.getWritableDatabase();
-//        databaseOperations = new DatabaseOperations(getContentResolver());
+//        databaseOperations = new DatabaseReadOperations(getContentResolver());
 //        currentField = savedInstanceState.getString(CURRENT_FIELD);
         super.onRestoreInstanceState(savedInstanceState);
         currentQuestion = savedInstanceState.getString(CURRENT_QUESTION);

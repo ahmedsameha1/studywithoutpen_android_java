@@ -20,9 +20,9 @@ import android.view.View;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.adapters.SearchActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
@@ -42,7 +42,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private static final String CURRENT_FIELD_ID = "current_field_id";
     private SearchActivityRecyclerViewAdapter mAdapter;
     private long current_field_id;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private int currentSort;
     private Tracker mTracker;
 
@@ -57,7 +57,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
         }
         currentSort = getIntent().getIntExtra(StudyActivity.ORDER_OF_ENTRIES,DEFAULT_SORT);
-        fieldType = new DatabaseOperations(this).getFieldType(current_field_id);
+        fieldType = new DatabaseReadOperations(this).getFieldType(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.search_activity_recyclerview);
         setSupportActionBar(toolbar);
@@ -133,7 +133,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         int sort = args.getInt(CURRENT_SORT);
         String searchString = args.getString(QUERY_KEY);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(SearchActivity.this,
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "

@@ -1,8 +1,6 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.app.DatePickerDialog;
 import android.app.LoaderManager;
-import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -21,34 +19,24 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.StringTokenizer;
 
 /**
  * Created by Ahmed on 3/25/16.
@@ -68,7 +56,7 @@ public class EditEntryActivity extends AppCompatActivity implements
     private EditText editQuestion;
     private EditText editAnswer;
     private TextView showActionbar;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private boolean actionBarShown;
     private int fieldType;
     private TextView save;
@@ -78,7 +66,7 @@ public class EditEntryActivity extends AppCompatActivity implements
     private LinearLayout showResult, questionLinearlayout, container;
     private long entry_id;
     private int question_data_type, rank;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
     private Chronometer timer;
     private long lastPause;
@@ -97,8 +85,8 @@ public class EditEntryActivity extends AppCompatActivity implements
         question_data_type = getIntent().getIntExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE, 0);
         currentQuestion = getIntent().getStringExtra(StudyActivity.CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(StudyActivity.CURRENT_ANSWER);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
-        databaseOperations = new DatabaseOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
+        databaseOperations = new DatabaseReadOperations(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         rank = databaseOperations.getEntryRank(entry_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -148,7 +136,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new MySQLiteCursorLoader(EditEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                return new CursorLoaderAndUpdateDatabase(EditEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                         + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                         + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                         " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL

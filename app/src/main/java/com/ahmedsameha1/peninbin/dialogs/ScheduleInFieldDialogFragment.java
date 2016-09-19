@@ -21,10 +21,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
+
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.google.android.gms.analytics.HitBuilders;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
@@ -48,7 +49,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
     private Context context;
     private long current_field_id;
     private AlarmManager alarmManager;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
 
     @Override
@@ -56,7 +57,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         alarmManager = (AlarmManager) getActivity().getSystemService(AppCompatActivity.ALARM_SERVICE);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
     }

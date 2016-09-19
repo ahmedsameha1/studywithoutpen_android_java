@@ -17,28 +17,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -63,7 +58,7 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
     private EditText editQuestion;
     private EditText editAnswer;
     private TextView showActionbar;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private boolean actionBarShown;
     private TextView save;
     private long current_field_id;
@@ -72,7 +67,7 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
     private LinearLayout showResult, questionLinearlayout, container;
     private long entry_id;
     private int question_data_type, rank;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Chronometer timer;
     private long lastPause;
 
@@ -86,8 +81,8 @@ public class EditNotebookEntryActivity extends AppCompatActivity implements
         question_data_type = getIntent().getIntExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE, 0);
         currentQuestion = getIntent().getStringExtra(StudyActivity.CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(StudyActivity.CURRENT_ANSWER);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
-        databaseOperations = new DatabaseOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
+        databaseOperations = new DatabaseReadOperations(this);
         rank = databaseOperations.getEntryRank(entry_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);

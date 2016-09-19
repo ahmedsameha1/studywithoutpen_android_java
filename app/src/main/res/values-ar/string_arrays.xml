@@ -16,7 +16,7 @@
         <item>معلومات المجال</item>
     </string-array>
     <string-array name="field_type">
-        <item>عاديّ</item>
+        <item>افتراضي</item>
         <item>مُفَكِّرَة</item>
         <item>قرآن</item>
         <item>معجم إنجليزية</item>

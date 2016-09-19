@@ -17,7 +17,7 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 /**
@@ -33,14 +33,14 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
     public static final int SAVE_SMALL_SIZE = 1;
     private int textSize;
     private long current_field_id;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         textSize = (int) getArguments().getFloat(StudyAPeriodActivity.TEXT_SIZE);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
         setRetainInstance(true);

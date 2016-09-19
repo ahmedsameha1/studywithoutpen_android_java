@@ -35,10 +35,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
@@ -51,6 +52,7 @@ import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -107,19 +109,19 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private static final String SYMBOL = "symbol";
     private static final String CUSTOMABLE_TEXT = "customable_text";
     private long current_field_id, current_entry_id;
-    private String [][] listForTest;
+    private String[][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
     private boolean boolean_continue = false, actionBarShown;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private boolean result, testingNow = false;
-    private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber,wrongAnswersCounter , percent_or_number,number;
+    private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber, wrongAnswersCounter, percent_or_number, number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private double percentage;
     private Cursor fieldEntriesCursor, searchForCursor;
     private Toolbar toolbar;
     private EditText enterAnswer;
-    private TextView showQuestion, remainingQuestionCounter,showTries, showNumberOfQuestions,check,nextHint,showActionbar;
-    private LinearLayout showResult,questionLinearlayout, container;
+    private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuestions, check, nextHint, showActionbar;
+    private LinearLayout showResult, questionLinearlayout, container;
     private Handler mHandler = new Handler();
     private Tracker mTracker;
     private Chronometer timer;
@@ -153,34 +155,34 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private TextToSpeech tts;
     private boolean tts_available = false;
     private boolean locale_available = false;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
     private int mShortAnimationDuration;
     private View mLoadingView;
     private RelativeLayout content;
-    private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries,get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader, get_entries, get_symbol_string;
     private String[] symbol, customable_text;
     private int current_field_type;
 
 
     @Override
-    protected void onCreate( Bundle savedInstanceState ) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        int question_area_size,answer_area_size,test_text_size,action_bar_shown;
+        int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         boolean isReadAnswer;
         // getting the reference of the fragment that holds the reference of list for test array
         retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
         // if the reference to the fragment was null we create a new fragment object and add it to the activity
-        if ( retainedFragment == null ) {
+        if (retainedFragment == null) {
             retainedFragment = new RetainedFragment();
-            getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
+            getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
         }
-        databaseOperations = new DatabaseOperations(this);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        databaseOperations = new DatabaseReadOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
         listForTest = retainedFragment.getListForTest_TestActivity();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
+        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
@@ -209,26 +211,26 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
         final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
-        timer = (Chronometer)findViewById(R.id.chronometer);
+        timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
-        if ( savedInstanceState == null ) {
+        if (savedInstanceState == null) {
             content.setVisibility(View.GONE);
             mShortAnimationDuration = getResources().getInteger(
                     android.R.integer.config_shortAnimTime);
         } else {
-            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
-            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
+            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
+            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
         }
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         setSupportActionBar(toolbar);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
-        if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
+        if (action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR) {
             getSupportActionBar().hide();
         }
         actionBarShown = getSupportActionBar().isShowing();
-        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show );
+        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
-        if ( isReadAnswer ) {
+        if (isReadAnswer) {
             Intent checkIntent = new Intent();
             checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
             startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
@@ -239,8 +241,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         loader = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if ( id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    return new MySQLiteCursorLoader(EnhancedTestActivity.this,
+                if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " , se." + Contract.COLUMN_ID
                                     + " FROM " + Contract.STring.TABLE_NAME
@@ -249,8 +251,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                                     + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? ",
                             new String[]{current_field_id + "", "0"});
-                } else if ( id == GET_ENTRIES_LOADER_ID) {
-                    return new MySQLiteCursorLoader(EnhancedTestActivity.this,
+                } else if (id == GET_ENTRIES_LOADER_ID) {
+                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
                             "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
                                     + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -261,8 +263,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                                     + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                             new String[]{current_field_id + ""});
-                } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
-                    return new MySQLiteCursorLoader(EnhancedTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
+                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                             + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                             " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
@@ -271,13 +273,14 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 }
                 return null;
             }
+
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 int id = loader.getId();
-                if ( id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID ) {
+                if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     fieldEntriesCursor = data;
-                    if ( boolean_continue ) {
-                        if ( listForTest == null ) {
+                    if (boolean_continue) {
+                        if (listForTest == null) {
                             listForTest = readTestDataFromLinkerTable();
                             questionsNumber = listForTest.length;
                             showNumberOfQuestions.setText(Integer.toString(questionsNumber));
@@ -288,10 +291,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
                                 @Override
                                 protected Void doInBackground(Void... params) {
-                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                                     return null;
                                 }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                             enterAnswer.setEnabled(true);
                             enterAnswer.requestFocus();
                             testingNow = true;
@@ -300,10 +303,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
                         }
                     } else {
-                        if ( listForTest == null ) {
-                            if ( percent_or_number == PERCENTAGE ) {
+                        if (listForTest == null) {
+                            if (percent_or_number == PERCENTAGE) {
                                 listForTest = getListForTest(percentage);
-                            } else if ( percent_or_number == NUMBER ) {
+                            } else if (percent_or_number == NUMBER) {
                                 listForTest = getListForTest(number);
                             }
                             questionsNumber = listForTest.length;
@@ -315,10 +318,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
                                 @Override
                                 protected Void doInBackground(Void... params) {
-                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                                     return null;
                                 }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                             enterAnswer.requestFocus();
                             testingNow = true;
                             wrongAnswers = new ArrayList<String>(permitedTriesNumber);
@@ -327,7 +330,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         }
                     }
                     crossfade();
-                } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
+                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     if (symbol == null && customable_text == null) {
                         symbol = new String[data.getCount()];
                         customable_text = new String[data.getCount()];
@@ -343,7 +346,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             @Override
             public void onLoaderReset(Loader<Cursor> loader) {
                 int id = loader.getId();
-                if ( id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID ) {
+                if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     fieldEntriesCursor = null;
                 }
             }
@@ -352,8 +355,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if ( id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    return new MySQLiteCursorLoader(EnhancedTestActivity.this,
+                if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " , se." + Contract.COLUMN_ID
                                     + " FROM " + Contract.STring.TABLE_NAME
@@ -371,7 +374,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     new String[] {"0", currentField},
                     null);*/
                 } else {
-                    return new MySQLiteCursorLoader(EnhancedTestActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
                             "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
                                     + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -391,11 +394,12 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     null);*/
                 }
             }
+
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 fieldEntriesCursor = data;
-                if ( boolean_continue ) {
-                    if ( listForTest == null ) {
+                if (boolean_continue) {
+                    if (listForTest == null) {
                         listForTest = readTestDataFromLinkerTable();
                         questionsNumber = listForTest.length;
                         showNumberOfQuestions.setText(Integer.toString(questionsNumber));
@@ -406,10 +410,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                                 return null;
                             }
-                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                         enterAnswer.setEnabled(true);
                         enterAnswer.requestFocus();
                         testingNow = true;
@@ -418,10 +422,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         ifMoreThanOnce();
                     }
                 } else {
-                    if ( listForTest == null ) {
-                        if ( percent_or_number == PERCENTAGE ) {
+                    if (listForTest == null) {
+                        if (percent_or_number == PERCENTAGE) {
                             listForTest = getListForTest(percentage);
-                        } else if ( percent_or_number == NUMBER ) {
+                        } else if (percent_or_number == NUMBER) {
                             listForTest = getListForTest(number);
                         }
                         questionsNumber = listForTest.length;
@@ -433,10 +437,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                                 return null;
                             }
-                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                         enterAnswer.requestFocus();
                         testingNow = true;
                         wrongAnswers = new ArrayList<String>(permitedTriesNumber);
@@ -456,7 +460,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new MySQLiteCursorLoader(EnhancedTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                         + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                         + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                         " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
@@ -496,10 +500,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                                 return null;
                             }
-                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                         showTries.setText(Integer.toString(triesCounter + 1));
                     } else {
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
@@ -525,7 +529,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                                     showQuestion.setText(R.string.test_has_completed);
                                     enterAnswer.setText(R.string.test_has_completed);
                                     showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                                    showResult.setPadding(0,0,0,0);
+                                    showResult.setPadding(0, 0, 0, 0);
                                     fragment.show(getSupportFragmentManager(), ShowTestResultDialogFragment.SHOW_TEST_RESULT_DIALOG_FRAGMENT);
                                 }
                             };
@@ -541,7 +545,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             enterAnswer.setHint(R.string.enter_your_answer);
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
 //                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, EnhancedTestActivity.this);
-                            mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id,question_data_type);
+                            mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
                             mySQLiteCursorLoader.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -549,11 +553,11 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
                                 @Override
                                 protected Void doInBackground(Void... params) {
-                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
                                     return null;
                                 }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                            showQuestion.scrollTo(0,0);
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+                            showQuestion.scrollTo(0, 0);
                             showTries.setText(Integer.toString(triesCounter + 1));
                             ifMoreThanOnce();
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -588,7 +592,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     showResult.setBackgroundResource(R.drawable.enter_answer_background);
                     showResult.setPadding(0, 0, 0, 0);
                 }
-                if ( s.length() <= 0 ) {
+                if (s.length() <= 0) {
                     check.setEnabled(false);
                 }
                 if (symbol != null && customable_text != null) {
@@ -622,16 +626,16 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 show_actionbar_card_view.startAnimation(animAlpha);
-                if ( actionBarShown ) {
+                if (actionBarShown) {
                     getSupportActionBar().hide();
-                    actionBarShown = (! actionBarShown);
+                    actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
                     getSupportActionBar().show();
-                    actionBarShown = (! actionBarShown);
+                    actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.SHOW_ACTION_BAR);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
                 }
             }
         });
@@ -665,25 +669,25 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 toast.show();
             }
         });
-        if ( boolean_continue ) {
-            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID,null,loader);
+        if (boolean_continue) {
+            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
             int[] array = databaseOperations.getDataFromTestPausedEnhancedTest(current_field_id);
             currentQuestionCounter = array[0];
             wrongAnswersCounter = array[1];
             permitedTriesNumber = array[2];
         } else {
-            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID,null,loader);
+            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
         }
         check_type = databaseOperations.getFieldCheckType(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
         answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
-        changeAreas(question_area_size,answer_area_size);
+        changeAreas(question_area_size, answer_area_size);
         test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
-        if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
+        if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
-        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE ) {
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
-        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
         }
     }
@@ -714,24 +718,25 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 toast.show();
                 pauseThread.start();
                 finish();
+                ExitActivity.exit(EnhancedTestActivity.this);
                 return true;
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                bundle.putFloat(QUESTION_LAYOUT,((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
-                bundle.putFloat(ANSWER_LAYOUT,((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
+                bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
                 changeAreasDialogFragment.setArguments(bundle);
-                changeAreasDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                changeAreasDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
-                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
-                bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize()/scaledDensity) );
+                bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize() / scaledDensity));
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
                 changeTextSizeDialogFragment.setArguments(bundle1);
-                changeTextSizeDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                changeTextSizeDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
 
             default:
@@ -742,87 +747,88 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     }
 
     private void toPause() {
-        if ( ! databaseOperations.checkEntriesForAnyTestOrderEnhancedTest(current_field_id,question_data_type) ) {
+        if (!databaseOperations.checkEntriesForAnyTestOrderEnhancedTest(current_field_id, question_data_type)) {
             mySQLiteCursorLoader.putEntriesTestOrderEnhancedTest(current_field_id,
-                    question_data_type,listForTest);
+                    question_data_type, listForTest);
         }
         mySQLiteCursorLoader.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
         int[] array = new int[3];
         array[0] = currentQuestionCounter;
         array[1] = wrongAnswersCounter;
         array[2] = permitedTriesNumber;
-        mySQLiteCursorLoader.putTestPausedDataEnhancedTest(current_field_id,array);
+        mySQLiteCursorLoader.putTestPausedDataEnhancedTest(current_field_id, array);
     }
-/*    private String [][] getListForTest ( double percent ) {
-        int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
-        String[][] listForTest = new String[numberOfQuestions][2];
-        for (int i = 0; i < listForTest.length; i++) {
-            Arrays.fill(listForTest[i], "");
-        }
-        int counter = 0;
-        while (counter < numberOfQuestions) {
-            String question = null;
-            String answer = null;
-            boolean newPair = false;
-            int random = (int) (Math.random() * fieldEntriesCursor.getCount());
-            while (! newPair) {
-                for (int i = 0; i < listForTest.length; i++) {
-                    fieldEntriesCursor.moveToPosition(random);
-                    question = fieldEntriesCursor.getString(1);
-                    answer = fieldEntriesCursor.getString(2);
-                    if ( listForTest[i][0].equals(question) && listForTest[i][1].equals(answer) ) {
-                        newPair = false;
-                        random = (int) (Math.random() * fieldEntriesCursor.getCount());
-                        break;
-                    }
-                    newPair = true;
-                }
+
+    /*    private String [][] getListForTest ( double percent ) {
+            int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
+            String[][] listForTest = new String[numberOfQuestions][2];
+            for (int i = 0; i < listForTest.length; i++) {
+                Arrays.fill(listForTest[i], "");
             }
-            listForTest[counter][0] = question;
-            listForTest[counter][1] = answer;
-            counter++;
-        }
-        return listForTest;
-    }*/
-    private String [][] getListForTest ( double percent ) {
+            int counter = 0;
+            while (counter < numberOfQuestions) {
+                String question = null;
+                String answer = null;
+                boolean newPair = false;
+                int random = (int) (Math.random() * fieldEntriesCursor.getCount());
+                while (! newPair) {
+                    for (int i = 0; i < listForTest.length; i++) {
+                        fieldEntriesCursor.moveToPosition(random);
+                        question = fieldEntriesCursor.getString(1);
+                        answer = fieldEntriesCursor.getString(2);
+                        if ( listForTest[i][0].equals(question) && listForTest[i][1].equals(answer) ) {
+                            newPair = false;
+                            random = (int) (Math.random() * fieldEntriesCursor.getCount());
+                            break;
+                        }
+                        newPair = true;
+                    }
+                }
+                listForTest[counter][0] = question;
+                listForTest[counter][1] = answer;
+                counter++;
+            }
+            return listForTest;
+        }*/
+    private String[][] getListForTest(double percent) {
         int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
         String[][] listForTest = new String[numberOfQuestions][2];
-        long [] list_for_test_ids = new long[numberOfQuestions];
-        if ( wrongness_level == -1 && rank_level == -1 && controlled_portion == -1 ) {
+        long[] list_for_test_ids = new long[numberOfQuestions];
+        if (wrongness_level == -1 && rank_level == -1 && controlled_portion == -1) {
             String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-            long [] list_of_entries_ids = new long[fieldEntriesCursor.getCount()];
+            long[] list_of_entries_ids = new long[fieldEntriesCursor.getCount()];
             int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
             int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
             String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
             String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-            long [] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-            long [] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
+            long[] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
+            long[] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
             int asked = 0, didnot_asked = 0;
-            for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-                  fieldEntriesCursor.moveToNext() ) {
-                if ( fieldEntriesCursor.getInt(6) == Constants.TestRound.ASKED_AT_CURRENT_ROUND ) {
-                    list_of_entries_asked_current_round [asked][0] = fieldEntriesCursor.getString(1);
-                    list_of_entries_asked_current_round [asked][1] = fieldEntriesCursor.getString(2);
-                    list_of_entries_asked_current_round_ids [asked] = fieldEntriesCursor.getLong(0);
+            for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+                 fieldEntriesCursor.moveToNext()) {
+                if (fieldEntriesCursor.getInt(6) == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
+                    list_of_entries_asked_current_round[asked][0] = fieldEntriesCursor.getString(1);
+                    list_of_entries_asked_current_round[asked][1] = fieldEntriesCursor.getString(2);
+                    list_of_entries_asked_current_round_ids[asked] = fieldEntriesCursor.getLong(0);
                     asked++;
                 } else {
-                    list_of_entries_did_not_asked_current_round [didnot_asked][0] = fieldEntriesCursor.getString(1);
-                    list_of_entries_did_not_asked_current_round [didnot_asked][1] = fieldEntriesCursor.getString(2);
-                    list_of_entries_did_not_asked_current_round_ids [didnot_asked] = fieldEntriesCursor.getLong(0);
+                    list_of_entries_did_not_asked_current_round[didnot_asked][0] = fieldEntriesCursor.getString(1);
+                    list_of_entries_did_not_asked_current_round[didnot_asked][1] = fieldEntriesCursor.getString(2);
+                    list_of_entries_did_not_asked_current_round_ids[didnot_asked] = fieldEntriesCursor.getLong(0);
                     didnot_asked++;
                 }
                 /*listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
                 listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
                 list_of_entries_ids[fieldEntriesCursor.getPosition()] = fieldEntriesCursor.getLong(0);*/
             }
-            if ( numberOfQuestions <= did_not_asked_current_round ) {
-                shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                for ( int n = 0; n < listForTest.length; n++ ) {
-                    listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                    listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                    list_for_test_ids [n] = list_of_entries_did_not_asked_current_round_ids [n];
+            if (numberOfQuestions <= did_not_asked_current_round) {
+                shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
+                for (int n = 0; n < listForTest.length; n++) {
+                    listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
+                    listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
+                    list_for_test_ids[n] = list_of_entries_did_not_asked_current_round_ids[n];
                 }
-                final long [] final_list_for_test_ids = list_for_test_ids;
+                final long[] final_list_for_test_ids = list_for_test_ids;
                 new AsyncTask<Void, Void, Void>() {
 
                     @Override
@@ -830,21 +836,21 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
                         return null;
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                 return listForTest;
             } else {
-                shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                for ( int n = 0; n < did_not_asked_current_round; n++ ) {
-                    listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                    listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
+                shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
+                for (int n = 0; n < did_not_asked_current_round; n++) {
+                    listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
+                    listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
                 }
-                shuffleArray(list_of_entries_asked_current_round,list_of_entries_asked_current_round_ids);
-                for ( int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++ ) {
-                    listForTest [n][0] = list_of_entries_asked_current_round [i][0];
-                    listForTest [n][1] = list_of_entries_asked_current_round [i][1];
-                    list_for_test_ids [i] = list_of_entries_asked_current_round_ids [i];
+                shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
+                for (int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++) {
+                    listForTest[n][0] = list_of_entries_asked_current_round[i][0];
+                    listForTest[n][1] = list_of_entries_asked_current_round[i][1];
+                    list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                 }
-                final long [] final_list_for_test_ids = list_for_test_ids;
+                final long[] final_list_for_test_ids = list_for_test_ids;
                 new AsyncTask<Void, Void, Void>() {
 
                     @Override
@@ -853,62 +859,62 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
                         return null;
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                 return listForTest;
             }
         } else {
             int number_of_controlled_questions;
             int number_of_uncontrolled_questions;
             double controlled_percentage;
-            if ( controlled_portion == 0 ) {
+            if (controlled_portion == 0) {
                 controlled_percentage = 0.2;
-            } else if ( controlled_portion == 1 ) {
+            } else if (controlled_portion == 1) {
                 controlled_percentage = 0.4;
-            } else if ( controlled_portion == 2 ) {
+            } else if (controlled_portion == 2) {
                 controlled_percentage = 0.5;
-            } else if ( controlled_portion == 3 ) {
+            } else if (controlled_portion == 3) {
                 controlled_percentage = 0.6;
-            } else if ( controlled_portion == 4 ) {
+            } else if (controlled_portion == 4) {
                 controlled_percentage = 0.8;
-            } else  {
+            } else {
                 controlled_percentage = 1;
             }
             number_of_controlled_questions = (int) (numberOfQuestions * controlled_percentage);
             number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
-            ArrayList<Object> arrayList = prepareControlledAndUncontrolled(rank_level,wrongness_level);
+            ArrayList<Object> arrayList = prepareControlledAndUncontrolled(rank_level, wrongness_level);
             String[][] controlled_entries = (String[][]) arrayList.get(0);
             String[][] uncontrolled_entries = (String[][]) arrayList.get(1);
-            long [] uncontrolled_entries_ids = (long[]) arrayList.get(2);
-            int [] uncontrolled_entries_whether_asked = (int[]) arrayList.get(3);
-            if ( controlled_entries == null ) {
+            long[] uncontrolled_entries_ids = (long[]) arrayList.get(2);
+            int[] uncontrolled_entries_whether_asked = (int[]) arrayList.get(3);
+            if (controlled_entries == null) {
                 int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
                 int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
                 String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
                 String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-                long [] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-                long [] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
+                long[] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
+                long[] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
                 int asked = 0, didnot_asked = 0;
-                for ( int n = 0; n < uncontrolled_entries.length; n++ ) {
-                    if ( uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND ) {
-                        list_of_entries_asked_current_round [asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_asked_current_round [asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_asked_current_round_ids [asked] = uncontrolled_entries_ids[n];
+                for (int n = 0; n < uncontrolled_entries.length; n++) {
+                    if (uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
+                        list_of_entries_asked_current_round[asked][0] = uncontrolled_entries[n][0];
+                        list_of_entries_asked_current_round[asked][1] = uncontrolled_entries[n][1];
+                        list_of_entries_asked_current_round_ids[asked] = uncontrolled_entries_ids[n];
                         asked++;
                     } else {
-                        list_of_entries_did_not_asked_current_round [didnot_asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_did_not_asked_current_round [didnot_asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_did_not_asked_current_round_ids [didnot_asked] = uncontrolled_entries_ids[n];
+                        list_of_entries_did_not_asked_current_round[didnot_asked][0] = uncontrolled_entries[n][0];
+                        list_of_entries_did_not_asked_current_round[didnot_asked][1] = uncontrolled_entries[n][1];
+                        list_of_entries_did_not_asked_current_round_ids[didnot_asked] = uncontrolled_entries_ids[n];
                         didnot_asked++;
                     }
                 }
-                if ( numberOfQuestions <= did_not_asked_current_round ) {
-                    shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                    for ( int n = 0; n < listForTest.length; n++ ) {
-                        listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                        listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                        list_for_test_ids [n] = list_of_entries_did_not_asked_current_round_ids [n];
+                if (numberOfQuestions <= did_not_asked_current_round) {
+                    shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
+                    for (int n = 0; n < listForTest.length; n++) {
+                        listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
+                        listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
+                        list_for_test_ids[n] = list_of_entries_did_not_asked_current_round_ids[n];
                     }
-                    final long [] final_list_for_test_ids = list_for_test_ids;
+                    final long[] final_list_for_test_ids = list_for_test_ids;
                     new AsyncTask<Void, Void, Void>() {
 
                         @Override
@@ -916,21 +922,21 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
                             return null;
                         }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                     return listForTest;
                 } else {
-                    shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                    for ( int n = 0; n < did_not_asked_current_round; n++ ) {
-                        listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                        listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
+                    shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
+                    for (int n = 0; n < did_not_asked_current_round; n++) {
+                        listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
+                        listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
                     }
-                    shuffleArray(list_of_entries_asked_current_round,list_of_entries_asked_current_round_ids);
-                    for ( int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++ ) {
-                        listForTest [n][0] = list_of_entries_asked_current_round [i][0];
-                        listForTest [n][1] = list_of_entries_asked_current_round [i][1];
-                        list_for_test_ids [i] = list_of_entries_asked_current_round_ids [i];
+                    shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
+                    for (int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++) {
+                        listForTest[n][0] = list_of_entries_asked_current_round[i][0];
+                        listForTest[n][1] = list_of_entries_asked_current_round[i][1];
+                        list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                     }
-                    final long [] final_list_for_test_ids = list_for_test_ids;
+                    final long[] final_list_for_test_ids = list_for_test_ids;
                     new AsyncTask<Void, Void, Void>() {
 
                         @Override
@@ -939,7 +945,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
                             return null;
                         }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                     return listForTest;
                 }
                /* shuffleArray(uncontrolled_entries,uncontrolled_entries_ids);
@@ -948,9 +954,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     listForTest [n][1] = uncontrolled_entries [n][1];
                     list_for_test_ids [n] = uncontrolled_entries_ids [n];
                 }*/
-            } else if ( uncontrolled_entries == null ) {
+            } else if (uncontrolled_entries == null) {
                 shuffleArray(controlled_entries);
-                for ( int n = 0; n < listForTest.length; n++ ) {
+                for (int n = 0; n < listForTest.length; n++) {
                     listForTest[n][0] = controlled_entries[n][0];
                     listForTest[n][1] = controlled_entries[n][1];
                 }
@@ -989,8 +995,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     }
                 }
                 did_not_asked_current_round = didnot_asked;
-                list_of_entries_did_not_asked_current_round = Arrays.copyOfRange(list_of_entries_did_not_asked_current_round,0,didnot_asked);
-                list_of_entries_asked_current_round = Arrays.copyOfRange(list_of_entries_asked_current_round,0,asked);
+                list_of_entries_did_not_asked_current_round = Arrays.copyOfRange(list_of_entries_did_not_asked_current_round, 0, didnot_asked);
+                list_of_entries_asked_current_round = Arrays.copyOfRange(list_of_entries_asked_current_round, 0, asked);
                 if (number_of_uncontrolled_questions <= did_not_asked_current_round) {
                     shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
                     for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++, i++) {
@@ -1042,44 +1048,45 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             }
         }
     }
-    private String [][] getListForTest ( int numberOfQuestions ) {
+
+    private String[][] getListForTest(int numberOfQuestions) {
         String[][] listForTest = new String[numberOfQuestions][2];
-        long [] list_for_test_ids = new long[numberOfQuestions];
-        if ( wrongness_level == -1 && rank_level == -1 && controlled_portion == -1 ) {
+        long[] list_for_test_ids = new long[numberOfQuestions];
+        if (wrongness_level == -1 && rank_level == -1 && controlled_portion == -1) {
             String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-            long [] list_of_entries_ids = new long[fieldEntriesCursor.getCount()];
+            long[] list_of_entries_ids = new long[fieldEntriesCursor.getCount()];
             int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
             int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
             String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
             String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-            long [] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-            long [] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
+            long[] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
+            long[] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
             int asked = 0, didnot_asked = 0;
-            for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-                  fieldEntriesCursor.moveToNext() ) {
-                if ( fieldEntriesCursor.getInt(6) == Constants.TestRound.ASKED_AT_CURRENT_ROUND ) {
-                    list_of_entries_asked_current_round [asked][0] = fieldEntriesCursor.getString(1);
-                    list_of_entries_asked_current_round [asked][1] = fieldEntriesCursor.getString(2);
-                    list_of_entries_asked_current_round_ids [asked] = fieldEntriesCursor.getLong(0);
+            for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+                 fieldEntriesCursor.moveToNext()) {
+                if (fieldEntriesCursor.getInt(6) == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
+                    list_of_entries_asked_current_round[asked][0] = fieldEntriesCursor.getString(1);
+                    list_of_entries_asked_current_round[asked][1] = fieldEntriesCursor.getString(2);
+                    list_of_entries_asked_current_round_ids[asked] = fieldEntriesCursor.getLong(0);
                     asked++;
                 } else {
-                    list_of_entries_did_not_asked_current_round [didnot_asked][0] = fieldEntriesCursor.getString(1);
-                    list_of_entries_did_not_asked_current_round [didnot_asked][1] = fieldEntriesCursor.getString(2);
-                    list_of_entries_did_not_asked_current_round_ids [didnot_asked] = fieldEntriesCursor.getLong(0);
+                    list_of_entries_did_not_asked_current_round[didnot_asked][0] = fieldEntriesCursor.getString(1);
+                    list_of_entries_did_not_asked_current_round[didnot_asked][1] = fieldEntriesCursor.getString(2);
+                    list_of_entries_did_not_asked_current_round_ids[didnot_asked] = fieldEntriesCursor.getLong(0);
                     didnot_asked++;
                 }
                 /*listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
                 listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
                 list_of_entries_ids[fieldEntriesCursor.getPosition()] = fieldEntriesCursor.getLong(0);*/
             }
-            if ( numberOfQuestions <= did_not_asked_current_round ) {
-                shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                for ( int n = 0; n < listForTest.length; n++ ) {
-                    listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                    listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                    list_for_test_ids [n] = list_of_entries_did_not_asked_current_round_ids [n];
+            if (numberOfQuestions <= did_not_asked_current_round) {
+                shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
+                for (int n = 0; n < listForTest.length; n++) {
+                    listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
+                    listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
+                    list_for_test_ids[n] = list_of_entries_did_not_asked_current_round_ids[n];
                 }
-                final long [] final_list_for_test_ids = list_for_test_ids;
+                final long[] final_list_for_test_ids = list_for_test_ids;
                 new AsyncTask<Void, Void, Void>() {
 
                     @Override
@@ -1087,21 +1094,21 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
                         return null;
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                 return listForTest;
             } else {
-                shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                for ( int n = 0; n < did_not_asked_current_round; n++ ) {
-                    listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                    listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
+                shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
+                for (int n = 0; n < did_not_asked_current_round; n++) {
+                    listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
+                    listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
                 }
-                shuffleArray(list_of_entries_asked_current_round,list_of_entries_asked_current_round_ids);
-                for ( int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++ ) {
-                    listForTest [n][0] = list_of_entries_asked_current_round [i][0];
-                    listForTest [n][1] = list_of_entries_asked_current_round [i][1];
-                    list_for_test_ids [i] = list_of_entries_asked_current_round_ids [i];
+                shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
+                for (int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++) {
+                    listForTest[n][0] = list_of_entries_asked_current_round[i][0];
+                    listForTest[n][1] = list_of_entries_asked_current_round[i][1];
+                    list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                 }
-                final long [] final_list_for_test_ids = list_for_test_ids;
+                final long[] final_list_for_test_ids = list_for_test_ids;
                 new AsyncTask<Void, Void, Void>() {
 
                     @Override
@@ -1110,62 +1117,62 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
                         return null;
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                 return listForTest;
             }
         } else {
             int number_of_controlled_questions;
             int number_of_uncontrolled_questions;
             double controlled_percentage;
-            if ( controlled_portion == 0 ) {
+            if (controlled_portion == 0) {
                 controlled_percentage = 0.2;
-            } else if ( controlled_portion == 1 ) {
+            } else if (controlled_portion == 1) {
                 controlled_percentage = 0.4;
-            } else if ( controlled_portion == 2 ) {
+            } else if (controlled_portion == 2) {
                 controlled_percentage = 0.5;
-            } else if ( controlled_portion == 3 ) {
+            } else if (controlled_portion == 3) {
                 controlled_percentage = 0.6;
-            } else if ( controlled_portion == 4 ) {
+            } else if (controlled_portion == 4) {
                 controlled_percentage = 0.8;
-            } else  {
+            } else {
                 controlled_percentage = 1;
             }
             number_of_controlled_questions = (int) (numberOfQuestions * controlled_percentage);
             number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
-            ArrayList<Object> arrayList = prepareControlledAndUncontrolled(rank_level,wrongness_level);
+            ArrayList<Object> arrayList = prepareControlledAndUncontrolled(rank_level, wrongness_level);
             String[][] controlled_entries = (String[][]) arrayList.get(0);
             String[][] uncontrolled_entries = (String[][]) arrayList.get(1);
-            long [] uncontrolled_entries_ids = (long[]) arrayList.get(2);
-            int [] uncontrolled_entries_whether_asked = (int[]) arrayList.get(3);
-            if ( controlled_entries == null ) {
+            long[] uncontrolled_entries_ids = (long[]) arrayList.get(2);
+            int[] uncontrolled_entries_whether_asked = (int[]) arrayList.get(3);
+            if (controlled_entries == null) {
                 int count_asked_current_round = databaseOperations.countAskedCurrentTestRound(current_field_id);
                 int did_not_asked_current_round = fieldEntriesCursor.getCount() - count_asked_current_round;
                 String[][] list_of_entries_asked_current_round = new String[count_asked_current_round][2];
                 String[][] list_of_entries_did_not_asked_current_round = new String[did_not_asked_current_round][2];
-                long [] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
-                long [] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
+                long[] list_of_entries_asked_current_round_ids = new long[count_asked_current_round];
+                long[] list_of_entries_did_not_asked_current_round_ids = new long[did_not_asked_current_round];
                 int asked = 0, didnot_asked = 0;
-                for ( int n = 0; n < uncontrolled_entries.length; n++ ) {
-                    if ( uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND ) {
-                        list_of_entries_asked_current_round [asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_asked_current_round [asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_asked_current_round_ids [asked] = uncontrolled_entries_ids[n];
+                for (int n = 0; n < uncontrolled_entries.length; n++) {
+                    if (uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
+                        list_of_entries_asked_current_round[asked][0] = uncontrolled_entries[n][0];
+                        list_of_entries_asked_current_round[asked][1] = uncontrolled_entries[n][1];
+                        list_of_entries_asked_current_round_ids[asked] = uncontrolled_entries_ids[n];
                         asked++;
                     } else {
-                        list_of_entries_did_not_asked_current_round [didnot_asked][0] = uncontrolled_entries[n][0];
-                        list_of_entries_did_not_asked_current_round [didnot_asked][1] = uncontrolled_entries[n][1];
-                        list_of_entries_did_not_asked_current_round_ids [didnot_asked] = uncontrolled_entries_ids[n];
+                        list_of_entries_did_not_asked_current_round[didnot_asked][0] = uncontrolled_entries[n][0];
+                        list_of_entries_did_not_asked_current_round[didnot_asked][1] = uncontrolled_entries[n][1];
+                        list_of_entries_did_not_asked_current_round_ids[didnot_asked] = uncontrolled_entries_ids[n];
                         didnot_asked++;
                     }
                 }
-                if ( numberOfQuestions <= did_not_asked_current_round ) {
-                    shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                    for ( int n = 0; n < listForTest.length; n++ ) {
-                        listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                        listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
-                        list_for_test_ids [n] = list_of_entries_did_not_asked_current_round_ids [n];
+                if (numberOfQuestions <= did_not_asked_current_round) {
+                    shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
+                    for (int n = 0; n < listForTest.length; n++) {
+                        listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
+                        listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
+                        list_for_test_ids[n] = list_of_entries_did_not_asked_current_round_ids[n];
                     }
-                    final long [] final_list_for_test_ids = list_for_test_ids;
+                    final long[] final_list_for_test_ids = list_for_test_ids;
                     new AsyncTask<Void, Void, Void>() {
 
                         @Override
@@ -1173,21 +1180,21 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
                             return null;
                         }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                     return listForTest;
                 } else {
-                    shuffleArray(list_of_entries_did_not_asked_current_round,list_of_entries_did_not_asked_current_round_ids);
-                    for ( int n = 0; n < did_not_asked_current_round; n++ ) {
-                        listForTest [n][0] = list_of_entries_did_not_asked_current_round [n][0];
-                        listForTest [n][1] = list_of_entries_did_not_asked_current_round [n][1];
+                    shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
+                    for (int n = 0; n < did_not_asked_current_round; n++) {
+                        listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
+                        listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
                     }
-                    shuffleArray(list_of_entries_asked_current_round,list_of_entries_asked_current_round_ids);
-                    for ( int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++ ) {
-                        listForTest [n][0] = list_of_entries_asked_current_round [i][0];
-                        listForTest [n][1] = list_of_entries_asked_current_round [i][1];
-                        list_for_test_ids [i] = list_of_entries_asked_current_round_ids [i];
+                    shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
+                    for (int n = did_not_asked_current_round, i = 0; n < listForTest.length; n++, i++) {
+                        listForTest[n][0] = list_of_entries_asked_current_round[i][0];
+                        listForTest[n][1] = list_of_entries_asked_current_round[i][1];
+                        list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                     }
-                    final long [] final_list_for_test_ids = list_for_test_ids;
+                    final long[] final_list_for_test_ids = list_for_test_ids;
                     new AsyncTask<Void, Void, Void>() {
 
                         @Override
@@ -1196,7 +1203,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
                             return null;
                         }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                     return listForTest;
                 }
                /* shuffleArray(uncontrolled_entries,uncontrolled_entries_ids);
@@ -1205,9 +1212,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     listForTest [n][1] = uncontrolled_entries [n][1];
                     list_for_test_ids [n] = uncontrolled_entries_ids [n];
                 }*/
-            } else if ( uncontrolled_entries == null ) {
+            } else if (uncontrolled_entries == null) {
                 shuffleArray(controlled_entries);
-                for ( int n = 0; n < listForTest.length; n++ ) {
+                for (int n = 0; n < listForTest.length; n++) {
                     listForTest[n][0] = controlled_entries[n][0];
                     listForTest[n][1] = controlled_entries[n][1];
                 }
@@ -1246,8 +1253,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     }
                 }
                 did_not_asked_current_round = didnot_asked;
-                list_of_entries_did_not_asked_current_round = Arrays.copyOfRange(list_of_entries_did_not_asked_current_round,0,didnot_asked);
-                list_of_entries_asked_current_round = Arrays.copyOfRange(list_of_entries_asked_current_round,0,asked);
+                list_of_entries_did_not_asked_current_round = Arrays.copyOfRange(list_of_entries_did_not_asked_current_round, 0, didnot_asked);
+                list_of_entries_asked_current_round = Arrays.copyOfRange(list_of_entries_asked_current_round, 0, asked);
                 if (number_of_uncontrolled_questions <= did_not_asked_current_round) {
                     shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
                     for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++, i++) {
@@ -1299,77 +1306,111 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             }
         }
     }
-    private void shuffleArray( String [][] array )
-    {
+
+    private void shuffleArray(String[][] array) {
         Random rnd = new Random();
-        for (int i = array.length - 1; i > 0; i--)
-        {
+        for (int i = array.length - 1; i > 0; i--) {
             int index = rnd.nextInt(i + 1);
             // Simple swap
             String question = array[index][0];
-            String answer = array [index][1];
+            String answer = array[index][1];
             array[index][0] = array[i][0];
             array[index][1] = array[i][1];
             array[i][0] = question;
             array[i][1] = answer;
         }
     }
-    private void shuffleArray( String [][] strings_array, long [] ids )
-    {
+
+    private void shuffleArray(String[][] strings_array, long[] ids) {
         Random rnd = new Random();
-        for (int i = strings_array.length - 1; i > 0; i--)
-        {
+        for (int i = strings_array.length - 1; i > 0; i--) {
             int index = rnd.nextInt(i + 1);
             // Simple swap
             String question = strings_array[index][0];
-            String answer = strings_array [index][1];
-            long id = ids [index];
+            String answer = strings_array[index][1];
+            long id = ids[index];
             strings_array[index][0] = strings_array[i][0];
             strings_array[index][1] = strings_array[i][1];
-            ids [index] = ids [i];
+            ids[index] = ids[i];
             strings_array[i][0] = question;
             strings_array[i][1] = answer;
-            ids [i] = id;
+            ids[i] = id;
         }
     }
+
     private void ifMoreThanOnce() {
-        if ( searchForCursor != null ) {
+        if (searchForCursor != null) {
             searchForCursor.close();
         }
         searchForCursor = databaseOperations.searchExactlyFor(current_field_id,
                 question_data_type, listForTest[currentQuestionCounter][0]);
-        if ( searchForCursor.getCount() > 1 ) {
-            hints = new ArrayList<String>(3);
-            hints.add( getString(R.string.first_character) + listForTest[currentQuestionCounter][1].charAt(0));
-            hints.add( getString(R.string.number_of_characters) + Integer.toString(listForTest[currentQuestionCounter][1].length()));
-            hints.add(getString(R.string.last_character) + listForTest[currentQuestionCounter][1]
-                    .charAt(listForTest[currentQuestionCounter][1].length() - 1));
+        if (searchForCursor.getCount() > 1) {
+            hints = new ArrayList<>();
+            int number_of_matches = 0;
+            for (searchForCursor.moveToFirst(); searchForCursor.getPosition() < searchForCursor.getCount();
+                 searchForCursor.moveToNext()) {
+                String temp = searchForCursor.getString(0);
+                if (listForTest[currentQuestionCounter][1].charAt(0) == temp.charAt(0) &&
+                        listForTest[currentQuestionCounter][1].length() == temp.length() &&
+                        listForTest[currentQuestionCounter][1].charAt(listForTest[currentQuestionCounter][1].length() - 1)
+                                == temp.charAt(temp.length() - 1)) {
+                    number_of_matches++;
+                }
+            }
+            if ( number_of_matches <= 1 || listForTest[currentQuestionCounter][1].length() <= 2 ) {
+                hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
+                hints.add(getString(R.string.number_of_letters)  + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
+                hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
+                        .charAt(listForTest[currentQuestionCounter][1].length() - 1));
+                Collections.shuffle(hints);
+            } else {
+                int three_parts = listForTest[currentQuestionCounter][1].length() / 3;
+                if ( listForTest[currentQuestionCounter][1].length() > 3 ) {
+                    for ( int i = 2, k = 0; k < three_parts; i += 3, k++) {
+                        hints.add(getString(R.string.letter_number) + " " + ( i + 1 ) + " : " +
+                                listForTest[currentQuestionCounter][1].charAt(i));
+                    }
+                    hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
+                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
+                    hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
+                            .charAt(listForTest[currentQuestionCounter][1].length() - 1));
+                    Collections.shuffle(hints);
+                } else {
+                    hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
+                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
+                    hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
+                            .charAt(listForTest[currentQuestionCounter][1].length() - 1));
+                    hints.add(getString(R.string.letter_number) + " " + 2 + " : "
+                            + listForTest[currentQuestionCounter][1].charAt(1));
+                    Collections.shuffle(hints);
+                }
+            }
             nextHint.setEnabled(true);
-//            hintTableRow.setBackgroundResource(R.color.enabled_color);
-        }
-        else {
+
+        } else {
             hints = null;
             nextHint.setEnabled(false);
-//            hintTableRow.setBackgroundResource(R.color.default_background_color);
+
         }
         searchForCursor.close();
     }
+
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
         mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
         Runnable mRunnable;
         boolean result = false;
-        if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
-            if ( CompareUtility.nonStrictCompareIgnoreCase(listForTest [currentQuestionCounter][1],enterAnswer.getText().toString()) ) {
-                if ( locale_available ) {
-                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+        if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
+            if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
+                if (locale_available) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
                     } else {
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
                 showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1379,10 +1420,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 };
                 mHandler.postDelayed(mRunnable, RETURN_TIME);
                 result = true;
-            }
-            else {
+            } else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
@@ -1397,23 +1437,23 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             }
             enterAnswer.setText("");
             triesCounter++;
-            if ( triesCounter == permitedTriesNumber && !result ) {
+            if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersEnhancedTest(listForTest [currentQuestionCounter][0],
-                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                mySQLiteCursorLoader.putEntryWrongAnswersEnhancedTest(listForTest[currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
-        } else if ( check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE ) {
-            if ( CompareUtility.nonStrictCompare(listForTest [currentQuestionCounter][1],enterAnswer.getText().toString()) ) {
-                if ( locale_available ) {
-                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+        } else if (check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE) {
+            if (CompareUtility.nonStrictCompare(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
+                if (locale_available) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
                     } else {
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
                 showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1423,10 +1463,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 };
                 mHandler.postDelayed(mRunnable, RETURN_TIME);
                 result = true;
-            }
-            else {
+            } else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
@@ -1441,23 +1480,23 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             }
             enterAnswer.setText("");
             triesCounter++;
-            if ( triesCounter == permitedTriesNumber && !result ) {
+            if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersEnhancedTest(listForTest [currentQuestionCounter][0],
-                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                mySQLiteCursorLoader.putEntryWrongAnswersEnhancedTest(listForTest[currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
-        } else if ( check_type == Contract.Field.IGNORE_CASE ) {
-            if ( enterAnswer.getText().toString().equalsIgnoreCase(listForTest [currentQuestionCounter][1]) ) {
-                if ( locale_available ) {
-                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+        } else if (check_type == Contract.Field.IGNORE_CASE) {
+            if (enterAnswer.getText().toString().equalsIgnoreCase(listForTest[currentQuestionCounter][1])) {
+                if (locale_available) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
                     } else {
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
                 showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1467,10 +1506,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 };
                 mHandler.postDelayed(mRunnable, RETURN_TIME);
                 result = true;
-            }
-            else {
+            } else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
@@ -1485,23 +1523,23 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             }
             enterAnswer.setText("");
             triesCounter++;
-            if ( triesCounter == permitedTriesNumber && !result ) {
+            if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersEnhancedTest(listForTest [currentQuestionCounter][0],
-                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                mySQLiteCursorLoader.putEntryWrongAnswersEnhancedTest(listForTest[currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
-        } else if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
-            if ( enterAnswer.getText().toString().equals(listForTest [currentQuestionCounter][1]) ) {
-                if ( locale_available ) {
-                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+        } else if (check_type == Contract.Field.DO_NOT_IGNORE_CASE) {
+            if (enterAnswer.getText().toString().equals(listForTest[currentQuestionCounter][1])) {
+                if (locale_available) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
                     } else {
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
                 showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1511,10 +1549,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 };
                 mHandler.postDelayed(mRunnable, RETURN_TIME);
                 result = true;
-            }
-            else {
+            } else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
                 mRunnable = new Runnable() {
                     @Override
@@ -1529,48 +1566,50 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             }
             enterAnswer.setText("");
             triesCounter++;
-            if ( triesCounter == permitedTriesNumber && !result ) {
+            if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersEnhancedTest(listForTest [currentQuestionCounter][0],
-                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                mySQLiteCursorLoader.putEntryWrongAnswersEnhancedTest(listForTest[currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
         }
         return result;
     }
-    private String convertWrongAnswersArrayListToString( ArrayList<String> arrayList ) {
+
+    private String convertWrongAnswersArrayListToString(ArrayList<String> arrayList) {
         String s = "";
-        for ( int i = 0; i < arrayList.size(); i++ ) {
+        for (int i = 0; i < arrayList.size(); i++) {
             s += arrayList.get(i);
-            if ( i < arrayList.size() - 1) {
+            if (i < arrayList.size() - 1) {
                 s += "\t";
             }
         }
         return s;
     }
-    private String [][] readTestDataFromLinkerTable() {
-        String [][] listForTest = new String[fieldEntriesCursor.getCount()][2];
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
+
+    private String[][] readTestDataFromLinkerTable() {
+        String[][] listForTest = new String[fieldEntriesCursor.getCount()][2];
+        for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+             fieldEntriesCursor.moveToNext()) {
             int order = fieldEntriesCursor.getInt(2);
-            listForTest [order][0] = fieldEntriesCursor.getString(0);
-            listForTest [order][1] = fieldEntriesCursor.getString(1);
+            listForTest[order][0] = fieldEntriesCursor.getString(0);
+            listForTest[order][1] = fieldEntriesCursor.getString(1);
         }
         return listForTest;
     }
 
-    private long getEntry_id( String queston, String answer ) {
+    private long getEntry_id(String queston, String answer) {
         long entry_id = 0;
         boolean which_cursor = boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
-            if ( which_cursor ) { // continue previous session
-                if ( fieldEntriesCursor.getString(0).equals(queston) && fieldEntriesCursor.getString(1).equals(answer) ) {
+        for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+             fieldEntriesCursor.moveToNext()) {
+            if (which_cursor) { // continue previous session
+                if (fieldEntriesCursor.getString(0).equals(queston) && fieldEntriesCursor.getString(1).equals(answer)) {
                     entry_id = fieldEntriesCursor.getLong(3);
                     break;
                 }
             } else {
-                if ( fieldEntriesCursor.getString(1).equals(queston) && fieldEntriesCursor.getString(2).equals(answer) ) {
+                if (fieldEntriesCursor.getString(1).equals(queston) && fieldEntriesCursor.getString(2).equals(answer)) {
                     entry_id = fieldEntriesCursor.getLong(0);
                     break;
                 }
@@ -1591,17 +1630,17 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        if ( tts_available && isFinishing() ) {
+        if (tts_available && isFinishing()) {
             tts.stop();
         }
         UsageLastTime.updateUsageLastTime(this);
     }
 
     @Override
-    public void onSaveInstanceState ( Bundle savedInsatanceState ) {
-        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER,currentQuestionCounter);
-        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS,wrongAnswersCounter);
-        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER,permitedTriesNumber);
+    public void onSaveInstanceState(Bundle savedInsatanceState) {
+        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
+        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
+        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
 //        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInsatanceState.putBoolean(RESULT, result);
@@ -1614,11 +1653,11 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putStringArrayList(HINTS, hints);
         savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
 //        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
-        savedInsatanceState.putBoolean(BOOLEAN_CONTINUE,boolean_continue);
-        savedInsatanceState.putLong(CURRENT_ENTRY_ID,current_entry_id);
-        savedInsatanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
-        savedInsatanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
-        savedInsatanceState.putLong(TIMER_LAST_PAUSE,lastPause);
+        savedInsatanceState.putBoolean(BOOLEAN_CONTINUE, boolean_continue);
+        savedInsatanceState.putLong(CURRENT_ENTRY_ID, current_entry_id);
+        savedInsatanceState.putInt(CONTENT_VISIBILITY, content.getVisibility());
+        savedInsatanceState.putInt(LOADING_VISIBILITY, mLoadingView.getVisibility());
+        savedInsatanceState.putLong(TIMER_LAST_PAUSE, lastPause);
         savedInsatanceState.putStringArray(SYMBOL, symbol);
         savedInsatanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         saveUserLayoutChanges(savedInsatanceState);
@@ -1631,14 +1670,14 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        timer.setBase( SystemClock.elapsedRealtime() - lastPause);
+        timer.setBase(SystemClock.elapsedRealtime() - lastPause);
         timer.start();
-        mTracker.setScreenName( SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override
-    public void onRestoreInstanceState( Bundle savedInstanceState ) {
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
@@ -1661,7 +1700,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
         symbol = savedInstanceState.getStringArray(SYMBOL);
         restoreUserLayoutChanges(savedInstanceState);
-        if ( testingNow ) {
+        if (testingNow) {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
             showTries.setText(Integer.toString(triesCounter + 1));
             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -1673,9 +1712,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             enterAnswer.setEnabled(true);
             ifMoreThanOnce();
         }
-        if ( hintCounter > 0 ) {
+        if (hintCounter > 0) {
 //            hintIfMoreThanOneAnswer.setText(hints.get(hintCounter - 1));
-            if ( enterAnswer.getText().toString().length() <= 0 ) {
+            if (enterAnswer.getText().toString().length() <= 0) {
                 enterAnswer.setHint(hints.get(hintCounter - 1));
             }
         }
@@ -1689,9 +1728,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 tts = new TextToSpeech(getApplicationContext(), this);
                 tts_available = true;
             } else {
-                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
+                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id, false);
                 Toast toast = Toast.makeText(this, R.string.tts_not_available, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP,0,400);
+                toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
         }
@@ -1710,14 +1749,16 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
     @Override
     public void changeTextSize(float textSize) {
-        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_SP,textSize);
-        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP,textSize);
+        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
     }
+
     private void saveUserLayoutChanges(Bundle bundle) {
         bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
         bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
         bundle.putFloat(TEXT_SIZE, showQuestion.getTextSize());
     }
+
     private void restoreUserLayoutChanges(Bundle bundle) {
         changeAreas(bundle.getFloat(QUESTION_LAYOUT), bundle.getFloat(ANSWER_LAYOUT));
         showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
@@ -1726,61 +1767,62 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
     @Override
     public void onInit(int i) {
-        if ( tts_available ) {
+        if (tts_available) {
             String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
             StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
             String lang = stringTokenizer.nextToken();
             String country = stringTokenizer.nextToken();
             Locale locale = new Locale(lang, country);
-            if ( tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE ) {
+            if (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
                 tts.setLanguage(locale);
                 locale_available = true;
             } else {
-                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
+                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id, false);
                 Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP,0,400);
+                toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
-            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null,null);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                tts.speak("Hello", TextToSpeech.QUEUE_ADD, null, null);
             } else {
-                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null);
+                tts.speak("Hello", TextToSpeech.QUEUE_ADD, null);
             }
         }
     }
-    private ArrayList<Object> prepareControlledAndUncontrolled( int rank, int wrongness_postion ) {
+
+    private ArrayList<Object> prepareControlledAndUncontrolled(int rank, int wrongness_postion) {
         String[][] controlled = new String[fieldEntriesCursor.getCount()][2];
         String[][] uncontrolled = new String[fieldEntriesCursor.getCount()][2];
-        long [] uncontrolled_ids = new long [fieldEntriesCursor.getCount()];
-        int [] uncontrolled_whether_asked = new int[fieldEntriesCursor.getCount()];
+        long[] uncontrolled_ids = new long[fieldEntriesCursor.getCount()];
+        int[] uncontrolled_whether_asked = new int[fieldEntriesCursor.getCount()];
         double wrongness;
-        if ( wrongness_postion == 0 ) {
+        if (wrongness_postion == 0) {
             wrongness = 0;
-        } else if ( wrongness_postion == 1 ) {
+        } else if (wrongness_postion == 1) {
             wrongness = 0.2;
-        } else if ( wrongness_postion == 2 ) {
+        } else if (wrongness_postion == 2) {
             wrongness = 0.4;
-        } else if ( wrongness_postion == 3 ) {
+        } else if (wrongness_postion == 3) {
             wrongness = 0.6;
-        } else if ( wrongness_postion == 4 ) {
+        } else if (wrongness_postion == 4) {
             wrongness = 0.8;
-        } else  {
+        } else {
             wrongness = 1;
         }
         int controlled_counter = 0, uncontrolled_counter = 0;
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
+        for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+             fieldEntriesCursor.moveToNext()) {
             double entry_wrongness;
-            if ( fieldEntriesCursor.getInt(4) > 0 ) {
+            if (fieldEntriesCursor.getInt(4) > 0) {
                 entry_wrongness = (double) fieldEntriesCursor.getInt(5) / fieldEntriesCursor.getInt(4);
             } else {
                 entry_wrongness = -1;
             }
-            if ( fieldEntriesCursor.getInt(3) >= rank && entry_wrongness >= wrongness ) {
+            if (fieldEntriesCursor.getInt(3) >= rank && entry_wrongness >= wrongness) {
                 controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;
-            } else if ( fieldEntriesCursor.getInt(3) >= rank && wrongness <= 0 ) {
+            } else if (fieldEntriesCursor.getInt(3) >= rank && wrongness <= 0) {
                 controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;
@@ -1793,15 +1835,15 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             }
         }
         ArrayList<Object> arrayList = new ArrayList<>();
-        if ( controlled_counter > 0 ) {
-            arrayList.add(Arrays.copyOfRange(controlled,0,controlled_counter));
+        if (controlled_counter > 0) {
+            arrayList.add(Arrays.copyOfRange(controlled, 0, controlled_counter));
         } else {
             arrayList.add(null);
         }
-        if ( uncontrolled_counter > 0 ) {
-            arrayList.add(Arrays.copyOfRange(uncontrolled,0,uncontrolled_counter));
-            arrayList.add(Arrays.copyOfRange(uncontrolled_ids,0,uncontrolled_counter));
-            arrayList.add(Arrays.copyOfRange(uncontrolled_whether_asked,0,uncontrolled_counter));
+        if (uncontrolled_counter > 0) {
+            arrayList.add(Arrays.copyOfRange(uncontrolled, 0, uncontrolled_counter));
+            arrayList.add(Arrays.copyOfRange(uncontrolled_ids, 0, uncontrolled_counter));
+            arrayList.add(Arrays.copyOfRange(uncontrolled_whether_asked, 0, uncontrolled_counter));
         } else {
             arrayList.add(null);
             arrayList.add(null);
@@ -1809,6 +1851,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
         return arrayList;
     }
+
     private void crossfade() {
 
         // Set the content view to 0% opacity but visible, so that it is visible

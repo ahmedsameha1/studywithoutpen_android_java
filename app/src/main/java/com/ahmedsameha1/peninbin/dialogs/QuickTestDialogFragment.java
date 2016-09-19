@@ -31,10 +31,10 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 import java.util.Calendar;
 import com.google.android.gms.analytics.Tracker;
@@ -54,7 +54,7 @@ public class QuickTestDialogFragment extends DialogFragment {
     private long current_field_id;
     private int year,monthOfYear,dayOfMonth,hourOfDay,minute;
     private AlarmManager alarmManager;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,7 +66,7 @@ public class QuickTestDialogFragment extends DialogFragment {
         hourOfDay = getArguments().getInt(HOUR_OF_DAY);
         minute = getArguments().getInt(MINUTE);
         alarmManager = (AlarmManager) getActivity().getSystemService(AppCompatActivity.ALARM_SERVICE);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
         setRetainInstance(true);
@@ -280,7 +280,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                                 toast.show();
                                             }
                                         } else {
-                                            DatabaseOperations databaseOperations = new DatabaseOperations(getActivity());
+                                            DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
                                             int currentNumberOfEntries =
                                                     databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                                             if ( number > 0 && number <= currentNumberOfEntries) {

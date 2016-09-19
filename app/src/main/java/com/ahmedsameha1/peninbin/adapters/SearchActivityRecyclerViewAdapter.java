@@ -22,7 +22,7 @@ import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.SearchActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Constants;
@@ -38,7 +38,7 @@ import java.util.Date;
 public class SearchActivityRecyclerViewAdapter extends
         CursorRecyclerViewAdapter<FieldActivityRecyclerViewViewHolder> {
     public static final String GET_CONFIRMATION = "getConfirmation";
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private Context context;
     private long field_id;
     private int fieldType;
@@ -49,7 +49,7 @@ public class SearchActivityRecyclerViewAdapter extends
         this.context = context;
         this.fieldType = fieldType;
         this.field_id = field_id;
-        databaseOperations = new DatabaseOperations(context);
+        databaseOperations = new DatabaseReadOperations(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         question_data_type = databaseOperations.getQuestionDataType(field_id);
     }

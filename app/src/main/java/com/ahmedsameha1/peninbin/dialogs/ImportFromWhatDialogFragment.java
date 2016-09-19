@@ -10,22 +10,12 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.FieldActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
-import com.ahmedsameha1.peninbin.database.ImportTextFile;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
-import com.ahmedsameha1.peninbin.utils.Constants;
-import com.google.android.gms.analytics.HitBuilders;
 import com.nononsenseapps.filepicker.FilePickerActivity;
 
 /**

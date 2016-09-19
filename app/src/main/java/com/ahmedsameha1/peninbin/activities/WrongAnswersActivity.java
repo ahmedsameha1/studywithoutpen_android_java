@@ -15,11 +15,12 @@ import android.view.View;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.adapters.WrongAnswersActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
+import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
@@ -38,18 +39,13 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     private Cursor cursor;
     private RecyclerView recyclerView;
     private WrongAnswersActivityRecyclerViewAdapter mAdapter;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
-    private DatabaseOperations databaseOperations;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
+    private DatabaseReadOperations databaseOperations;
     private int test_type;
     private int question_data_type;
     private Tracker mTracker;
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mTracker.setScreenName(SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +54,8 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
         current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
         test_type = bundle.getInt(ShowTestResultDialogFragment.TEST_TYPE);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
-        databaseOperations = new DatabaseOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
+        databaseOperations = new DatabaseReadOperations(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
@@ -99,6 +95,18 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         return wrongItemsList;
     }
     @Override
+    protected void onResume() {
+        super.onResume();
+        mTracker.setScreenName(SCREEN_NAME);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        ExitActivity.exit(this);
+    }
+    @Override
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
@@ -115,7 +123,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new MySQLiteCursorLoader(WrongAnswersActivity.this,
+        return new CursorLoaderAndUpdateDatabase(WrongAnswersActivity.this,
                 "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                         + " a , se." + Contract.COLUMN_ID + " FROM " + Contract.STring.TABLE_NAME
                         + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."

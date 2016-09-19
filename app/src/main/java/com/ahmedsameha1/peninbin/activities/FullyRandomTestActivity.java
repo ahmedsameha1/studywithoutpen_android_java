@@ -32,10 +32,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
@@ -47,6 +48,7 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -99,7 +101,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     private String [][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
     private boolean boolean_continue = false, actionBarShown;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private boolean result, testingNow = false;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber,wrongAnswersCounter , percent_or_number,number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
@@ -140,7 +142,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     private TextToSpeech tts;
     private boolean tts_available = false;
     private boolean locale_available = false;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
     private RelativeLayout content;
     private int mShortAnimationDuration;
@@ -162,8 +164,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             retainedFragment = new RetainedFragment();
             getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
         }
-        databaseOperations = new DatabaseOperations(this);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
+        databaseOperations = new DatabaseReadOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
         listForTest = retainedFragment.getListForTest_TestActivity();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
@@ -222,7 +224,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 if ( id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    return new MySQLiteCursorLoader(FullyRandomTestActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
                                     + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -231,7 +233,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " >= ? ",
                             new String[]{current_field_id + "", "0"});
                 } else if ( id == GET_ENTRIES_LOADER_ID ){
-                    return new MySQLiteCursorLoader(FullyRandomTestActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
                             "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a " + " FROM " + Contract.STring.TABLE_NAME
                                     + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -240,7 +242,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                             new String[]{current_field_id + ""});
                 } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
-                    return new MySQLiteCursorLoader(FullyRandomTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                    return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                             + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                             " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
@@ -314,7 +316,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 if ( id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    return new MySQLiteCursorLoader(FullyRandomTestActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
                                     + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -331,7 +333,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                     new String[] {"0", currentField},
                     null);*/
                 } else {
-                    return new MySQLiteCursorLoader(FullyRandomTestActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
                             "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a " + " FROM " + Contract.STring.TABLE_NAME
                                     + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -396,7 +398,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new MySQLiteCursorLoader(FullyRandomTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                         + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                         + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                         " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
@@ -638,6 +640,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 toast.show();
                 pauseThread.start();
                 finish();
+                ExitActivity.exit(FullyRandomTestActivity.this);
                 return true;
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
@@ -755,24 +758,58 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         }
     }
     private void ifMoreThanOnce() {
-        if ( searchForCursor != null ) {
+        if (searchForCursor != null) {
             searchForCursor.close();
         }
         searchForCursor = databaseOperations.searchExactlyFor(current_field_id,
                 question_data_type, listForTest[currentQuestionCounter][0]);
-        if ( searchForCursor.getCount() > 1 ) {
-            hints = new ArrayList<String>(3);
-            hints.add( getString(R.string.first_character) + listForTest[currentQuestionCounter][1].charAt(0));
-            hints.add( getString(R.string.number_of_characters) + Integer.toString(listForTest[currentQuestionCounter][1].length()));
-            hints.add(getString(R.string.last_character) + listForTest[currentQuestionCounter][1]
-                    .charAt(listForTest[currentQuestionCounter][1].length() - 1));
+        if (searchForCursor.getCount() > 1) {
+            hints = new ArrayList<>();
+            int number_of_matches = 0;
+            for (searchForCursor.moveToFirst(); searchForCursor.getPosition() < searchForCursor.getCount();
+                 searchForCursor.moveToNext()) {
+                String temp = searchForCursor.getString(0);
+                if (listForTest[currentQuestionCounter][1].charAt(0) == temp.charAt(0) &&
+                        listForTest[currentQuestionCounter][1].length() == temp.length() &&
+                        listForTest[currentQuestionCounter][1].charAt(listForTest[currentQuestionCounter][1].length() - 1)
+                                == temp.charAt(temp.length() - 1)) {
+                    number_of_matches++;
+                }
+            }
+            if ( number_of_matches <= 1 || listForTest[currentQuestionCounter][1].length() <= 2 ) {
+                hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
+                hints.add(getString(R.string.number_of_letters)  + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
+                hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
+                        .charAt(listForTest[currentQuestionCounter][1].length() - 1));
+                Collections.shuffle(hints);
+            } else {
+                int three_parts = listForTest[currentQuestionCounter][1].length() / 3;
+                if ( listForTest[currentQuestionCounter][1].length() > 3 ) {
+                    for ( int i = 2, k = 0; k < three_parts; i += 3, k++) {
+                        hints.add(getString(R.string.letter_number) + " " + ( i + 1 ) + " : " +
+                                listForTest[currentQuestionCounter][1].charAt(i));
+                    }
+                    hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
+                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
+                    hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
+                            .charAt(listForTest[currentQuestionCounter][1].length() - 1));
+                    Collections.shuffle(hints);
+                } else {
+                    hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
+                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
+                    hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
+                            .charAt(listForTest[currentQuestionCounter][1].length() - 1));
+                    hints.add(getString(R.string.letter_number) + " " + 2 + " : "
+                            + listForTest[currentQuestionCounter][1].charAt(1));
+                    Collections.shuffle(hints);
+                }
+            }
             nextHint.setEnabled(true);
-//            hintTableRow.setBackgroundResource(R.color.enabled_color);
-        }
-        else {
+
+        } else {
             hints = null;
             nextHint.setEnabled(false);
-//            hintTableRow.setBackgroundResource(R.color.default_background_color);
+
         }
         searchForCursor.close();
     }

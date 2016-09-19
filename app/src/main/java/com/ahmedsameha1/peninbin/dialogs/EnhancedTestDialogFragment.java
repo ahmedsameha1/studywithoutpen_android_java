@@ -23,9 +23,9 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
 import com.ahmedsameha1.peninbin.R;
 
 /**
@@ -281,7 +281,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                                                 toast.show();
                                             }
                                         } else {
-                                            DatabaseOperations databaseOperations = new DatabaseOperations(getActivity());
+                                            DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
                                             int currentNumberOfEntries =
                                                     databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                                             int numberInt = Double.valueOf(number).intValue();

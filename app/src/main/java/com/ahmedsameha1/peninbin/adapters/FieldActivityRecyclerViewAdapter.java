@@ -22,8 +22,8 @@ import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
@@ -39,15 +39,15 @@ public class FieldActivityRecyclerViewAdapter extends
     private int fieldType;
     private int question_data_type;
     private SharedPreferences sharedPreferences;
-    private DatabaseOperations databaseOperations;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private DatabaseReadOperations databaseOperations;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     public FieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, int fieldType ) {
         super(context,data);
         this.context = context;
         this.field_id = field_id;
         this.fieldType = fieldType;
-        databaseOperations = new DatabaseOperations(context);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
+        databaseOperations = new DatabaseReadOperations(context);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         this.question_data_type = databaseOperations.getQuestionDataType(field_id);
     }

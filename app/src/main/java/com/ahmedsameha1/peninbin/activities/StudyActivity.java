@@ -18,7 +18,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,19 +36,17 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
@@ -89,7 +86,7 @@ public class StudyActivity extends AppCompatActivity implements
     private int correctAnswersCounter = 0;
     private long current_field_id, current_entry_id;
     private LinearLayout answerLinearlayout, questionLinearlayout, container;
-    private MySQLiteCursorLoader mySQLiteCursorLoader1;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader1;
     private Cursor fieldEntriesCursor;
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     private LoaderManager.LoaderCallbacks<Cursor> get_symbol_string;
@@ -97,7 +94,7 @@ public class StudyActivity extends AppCompatActivity implements
     private int currentSort;
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private TextToSpeech tts;
     private boolean tts_available = false;
     private boolean locale_available = false;
@@ -122,7 +119,7 @@ public class StudyActivity extends AppCompatActivity implements
         }
         currentQuestion = getIntent().getStringExtra(CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(CURRENT_ANSWER);
-        databaseOperations = new DatabaseOperations(this);
+        databaseOperations = new DatabaseReadOperations(this);
         currentSort = databaseOperations.getFieldSort(current_field_id);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -183,7 +180,7 @@ public class StudyActivity extends AppCompatActivity implements
                     if (databaseOperations.getQuestionDataType(current_field_id) == Contract.Field.STRING_DATA_TYPE) {
                         int sort = args.getInt(CURRENT_SORT);
 
-                        mySQLiteCursorLoader1 = new MySQLiteCursorLoader(StudyActivity.this,
+                        mySQLiteCursorLoader1 = new CursorLoaderAndUpdateDatabase(StudyActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
@@ -194,7 +191,7 @@ public class StudyActivity extends AppCompatActivity implements
                         return mySQLiteCursorLoader1;
                     }
                 } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
-                    return new MySQLiteCursorLoader(StudyActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                    return new CursorLoaderAndUpdateDatabase(StudyActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                             + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                             " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
@@ -234,7 +231,7 @@ public class StudyActivity extends AppCompatActivity implements
                 if (databaseOperations.getQuestionDataType(current_field_id) == Contract.Field.STRING_DATA_TYPE) {
                     int sort = args.getInt(CURRENT_SORT);
 
-                    mySQLiteCursorLoader1 = new MySQLiteCursorLoader(StudyActivity.this,
+                    mySQLiteCursorLoader1 = new CursorLoaderAndUpdateDatabase(StudyActivity.this,
                             "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                     + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
@@ -266,7 +263,7 @@ public class StudyActivity extends AppCompatActivity implements
         get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new MySQLiteCursorLoader(StudyActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                return new CursorLoaderAndUpdateDatabase(StudyActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                         + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                         + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                         " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL

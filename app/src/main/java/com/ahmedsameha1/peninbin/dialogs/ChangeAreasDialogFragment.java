@@ -20,7 +20,7 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 /**
@@ -29,7 +29,7 @@ import com.google.android.gms.analytics.Tracker;
 public class ChangeAreasDialogFragment extends DialogFragment{
     public static final String CHANGE_AREAS_DIALOG_FRAGMENT = "change_areas_dialog_fragment";
     private float initialQuestionArea,initialAnsweArea;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
     private Tracker mTracker;
     @Override
@@ -38,7 +38,7 @@ public class ChangeAreasDialogFragment extends DialogFragment{
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         initialQuestionArea = getArguments().getFloat(StudyAPeriodActivity.QUESTION_LAYOUT);
         initialAnsweArea = getArguments().getFloat(StudyAPeriodActivity.ANSWER_LAYOUT);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
         setRetainInstance(true);

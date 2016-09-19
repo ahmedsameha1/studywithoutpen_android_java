@@ -24,7 +24,7 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     private TextToSpeech textToSpeech;
     private List<Locale> localeList = new ArrayList<Locale>();
     private List<String> locale_display_names = new ArrayList<String>();
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private String locale_short_name;
     private CheckBox read_answer;
     private Tracker mTracker;
@@ -51,7 +51,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
         super.onCreate(savedInstanceState);
         tts_available = getArguments().getBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE);
         textToSpeech = new TextToSpeech(getActivity().getApplicationContext(), this);
-        databaseOperations = new DatabaseOperations(getActivity());
+        databaseOperations = new DatabaseReadOperations(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
         setRetainInstance(true);

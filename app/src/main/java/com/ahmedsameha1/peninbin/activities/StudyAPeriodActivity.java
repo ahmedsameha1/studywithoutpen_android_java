@@ -37,10 +37,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
@@ -51,6 +52,7 @@ import com.google.android.gms.analytics.Tracker;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -88,7 +90,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private long startingTime;
     boolean boolean_continue, actionBarShown;
     private Cursor cursor;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private ArrayList<String> questions = new ArrayList<String>(), answers = new ArrayList<String>();
     private ArrayList<Integer> repeatedEntries = new ArrayList<Integer>();
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
@@ -117,7 +119,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private TextView nextHint, check, _continue;
     private LinearLayout showResult, questionLinearlayout, container;
     private CardView check_card_view, next_hint_card_view, show_action_bar_card_view,continue_card_view;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private RetainedFragment retainedFragment;
     private Handler mHandler = new Handler();
     private long current_field_id, current_entry_id;
@@ -168,8 +170,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         startingTime = getIntent().getLongExtra(STARTING_TIME, 0);
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
-        databaseOperations = new DatabaseOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
+        databaseOperations = new DatabaseReadOperations(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -203,7 +205,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
                 if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID ) {
-                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
                                     + " FROM " + Contract.STring.TABLE_NAME
@@ -213,7 +215,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
                             new String[]{current_field_id + "", "0"});
                 } else if ( id == GET_ENTRIES_LOADER_ID ){
-                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
                                     + " FROM " + Contract.STring.TABLE_NAME
@@ -223,7 +225,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                             new String[]{current_field_id + ""});
                 } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
-                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                             + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                             " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
@@ -270,6 +272,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                         finish();
+                        ExitActivity.exit(StudyAPeriodActivity.this);
                     }
                     crossfade();
                 } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
@@ -295,7 +298,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
                 if (id == CONTINUE_PREVIOUS_SESSION) {
 
-                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
                                     + " FROM " + Contract.STring.TABLE_NAME
@@ -318,7 +321,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                     new String[] {current_field_name},
                     null);*/
                 } else {
-                    return new MySQLiteCursorLoader(StudyAPeriodActivity.this,
+                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
                                     + " FROM " + Contract.STring.TABLE_NAME
@@ -372,6 +375,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                     finish();
+                    ExitActivity.exit(StudyAPeriodActivity.this);
                 }
                 crossfade();
             }
@@ -384,7 +388,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new MySQLiteCursorLoader(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                         + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                         + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                         " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
@@ -520,6 +524,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                             while ( true ) {
                                                 if ( !tts.isSpeaking() ) {
                                                     finish();
+                                                    ExitActivity.exit(StudyAPeriodActivity.this);
                                                     break;
                                                 }
                                             }
@@ -528,6 +533,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                                 } else {
                                     finish();
+                                    ExitActivity.exit(StudyAPeriodActivity.this);
                                 }
                             }
                         } else {
@@ -705,6 +711,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 toast.show();
                 pauseThread.start();
                 finish();
+                ExitActivity.exit(StudyAPeriodActivity.this);
                 return true;
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
@@ -779,7 +786,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         return temp;
     }
 
-    private void ifMoreThanOnce(String currentQuestion, String currentAnswer) {
+/*    private void ifMoreThanOnce(String currentQuestion, String currentAnswer) {
         if (searchForCursor != null) {
             searchForCursor.close();
         }
@@ -789,6 +796,62 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             hints.add(getString(R.string.first_character) + currentAnswer.charAt(0));
             hints.add(getString(R.string.number_of_characters) + Integer.toString(currentAnswer.length()));
             hints.add(getString(R.string.last_character) + currentAnswer.charAt(currentAnswer.length() - 1));
+            nextHint.setEnabled(true);
+
+        } else {
+            hints = null;
+            nextHint.setEnabled(false);
+
+        }
+        searchForCursor.close();
+    }*/
+    private void ifMoreThanOnce(String currentQuestion, String currentAnswer) {
+        if (searchForCursor != null) {
+            searchForCursor.close();
+        }
+        searchForCursor = databaseOperations.searchExactlyFor(current_field_id,
+                question_data_type, currentQuestion);
+        if (searchForCursor.getCount() > 1) {
+            hints = new ArrayList<>();
+            int number_of_matches = 0;
+            for (searchForCursor.moveToFirst(); searchForCursor.getPosition() < searchForCursor.getCount();
+                 searchForCursor.moveToNext()) {
+                String temp = searchForCursor.getString(0);
+                if (currentAnswer.charAt(0) == temp.charAt(0) &&
+                        currentAnswer.length() == temp.length() &&
+                        currentAnswer.charAt(currentAnswer.length() - 1)
+                                == temp.charAt(temp.length() - 1)) {
+                    number_of_matches++;
+                }
+            }
+            if ( number_of_matches <= 1 || currentAnswer.length() <= 2 ) {
+                hints.add(getString(R.string.first_letters) + " " + currentAnswer.charAt(0));
+                hints.add(getString(R.string.number_of_letters)  + " " + Integer.toString(currentAnswer.length()));
+                hints.add(getString(R.string.last_letter) + " " + currentAnswer
+                        .charAt(currentAnswer.length() - 1));
+                Collections.shuffle(hints);
+            } else {
+                int three_parts = currentAnswer.length() / 3;
+                if ( currentAnswer.length() > 3 ) {
+                    for ( int i = 2, k = 0; k < three_parts; i += 3, k++) {
+                        hints.add(getString(R.string.letter_number) + " " + ( i + 1 ) + " : " +
+                                currentAnswer.charAt(i));
+                    }
+                    hints.add(getString(R.string.first_letters) + " " + currentAnswer.charAt(0));
+                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(currentAnswer.length()));
+                    hints.add(getString(R.string.last_letter) + " " + currentAnswer
+                            .charAt(currentAnswer.length() - 1));
+                    Collections.shuffle(hints);
+                } else {
+                    hints.add(getString(R.string.first_letters) + " " + currentAnswer.charAt(0));
+                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(currentAnswer.length()));
+                    hints.add(getString(R.string.last_letter) + " " + currentAnswer
+                            .charAt(currentAnswer.length() - 1));
+                    hints.add(getString(R.string.letter_number) + " " + 2 + " : "
+                            + currentAnswer.charAt(1));
+                    Collections.shuffle(hints);
+                }
+            }
             nextHint.setEnabled(true);
 
         } else {

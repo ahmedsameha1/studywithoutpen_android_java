@@ -24,15 +24,15 @@ import java.util.Arrays;
 /**
  * Created by Ahmed on 4/9/16.
  */
-public class MySQLiteCursorLoader extends AbstractCursorLoader {
+public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     SQLiteOpenHelper db = null;
     String rawQuery = null;
     String[] args = null;
     Context context;
 
 
-    public MySQLiteCursorLoader(Context context,
-                                String rawQuery, String[] args) {
+    public CursorLoaderAndUpdateDatabase(Context context,
+                                         String rawQuery, String[] args) {
         super(context);
         this.db = DatabaseHelper.getInstance(context);
         this.rawQuery = rawQuery;
@@ -40,7 +40,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         this.context = context;
     }
 
-    public MySQLiteCursorLoader(Context context) {
+    public CursorLoaderAndUpdateDatabase(Context context) {
         super(context);
         this.db = DatabaseHelper.getInstance(context);
         this.context = context;
@@ -324,12 +324,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
 
-    protected ContentChangingTask buildDeleteEntryTask(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildDeleteEntryTask(CursorLoaderAndUpdateDatabase loader) {
         return (new DeleteEntryTask(loader));
     }
 
 
-    protected ContentChangingTask buildIncrementFieldUsageTask(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildIncrementFieldUsageTask(CursorLoaderAndUpdateDatabase loader) {
         return (new IncrementFieldUsageTask(loader));
     }
 
@@ -556,7 +556,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         }
     }
 
-    protected ContentChangingTask buildEditEntryTask(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildEditEntryTask(CursorLoaderAndUpdateDatabase loader) {
         return (new EditEntryTask(loader));
     }
 
@@ -568,7 +568,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
     protected static class EditEntryTask extends ContentChangingTask {
-        EditEntryTask(MySQLiteCursorLoader loader) {
+        EditEntryTask(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -636,13 +636,13 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildUpdateFieldSortTask(this).execute(db, field_id, sort);
     }
 
-    protected ContentChangingTask buildUpdateFieldSortTask(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildUpdateFieldSortTask(CursorLoaderAndUpdateDatabase loader) {
         return (new UpdateFieldSort(loader));
     }
 
 
     protected static class UpdateFieldSort extends ContentChangingTask {
-        UpdateFieldSort(MySQLiteCursorLoader loader) {
+        UpdateFieldSort(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -664,13 +664,13 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildUpdateFieldAreasSize(this).execute(db, field_id, question_area_size, answer_area_size);
     }
 
-    protected ContentChangingTask buildUpdateFieldAreasSize(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildUpdateFieldAreasSize(CursorLoaderAndUpdateDatabase loader) {
         return (new UpdateFieldAreasSize(loader));
     }
 
 
     protected static class UpdateFieldAreasSize extends ContentChangingTask {
-        UpdateFieldAreasSize(MySQLiteCursorLoader loader) {
+        UpdateFieldAreasSize(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -694,13 +694,13 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildCopyEntries(this).execute(db, list_of_entries, field_id);
     }
 
-    protected ContentChangingTask buildCopyEntries(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildCopyEntries(CursorLoaderAndUpdateDatabase loader) {
         return (new CopyEntries(loader));
     }
 
 
     protected static class CopyEntries extends ContentChangingTask {
-        CopyEntries(MySQLiteCursorLoader loader) {
+        CopyEntries(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -739,13 +739,13 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildCopyField(this).execute(db, from_field_id, to_field_id);
     }
 
-    protected ContentChangingTask buildCopyField(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildCopyField(CursorLoaderAndUpdateDatabase loader) {
         return (new CopyField(loader));
     }
 
 
     protected static class CopyField extends ContentChangingTask {
-        CopyField(MySQLiteCursorLoader loader) {
+        CopyField(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -782,13 +782,13 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildMoveEntries(this).execute(db, list_of_entries, to_field_id);
     }
 
-    protected ContentChangingTask buildMoveEntries(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildMoveEntries(CursorLoaderAndUpdateDatabase loader) {
         return (new MoveEntries(loader));
     }
 
 
     protected static class MoveEntries extends ContentChangingTask {
-        MoveEntries(MySQLiteCursorLoader loader) {
+        MoveEntries(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -829,13 +829,13 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildUpdateFieldAnswerAreaSize(this).execute(db, field_id, question_area_size);
     }
 
-    protected ContentChangingTask buildUpdateFieldAnswerAreaSize(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildUpdateFieldAnswerAreaSize(CursorLoaderAndUpdateDatabase loader) {
         return (new UpdateFieldAnswerAreaSize(loader));
     }
 
 
     protected static class UpdateFieldAnswerAreaSize extends ContentChangingTask {
-        UpdateFieldAnswerAreaSize(MySQLiteCursorLoader loader) {
+        UpdateFieldAnswerAreaSize(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -857,13 +857,13 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildUpdateFieldTestTextSize(this).execute(db, field_id, test_text_size);
     }
 
-    protected ContentChangingTask buildUpdateFieldTestTextSize(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildUpdateFieldTestTextSize(CursorLoaderAndUpdateDatabase loader) {
         return (new UpdateFieldTestTextSize(loader));
     }
 
 
     protected static class UpdateFieldTestTextSize extends ContentChangingTask {
-        UpdateFieldTestTextSize(MySQLiteCursorLoader loader) {
+        UpdateFieldTestTextSize(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -885,13 +885,13 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildUpdateFieldActionBarShown(this).execute(db, field_id, action_bar_shown);
     }
 
-    protected ContentChangingTask buildUpdateFieldActionBarShown(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildUpdateFieldActionBarShown(CursorLoaderAndUpdateDatabase loader) {
         return (new UpdateFieldActionBarShown(loader));
     }
 
 
     protected static class UpdateFieldActionBarShown extends ContentChangingTask {
-        UpdateFieldActionBarShown(MySQLiteCursorLoader loader) {
+        UpdateFieldActionBarShown(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -910,7 +910,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
     }
 
     protected static class IncrementFieldUsageTask extends ContentChangingTask {
-        IncrementFieldUsageTask(MySQLiteCursorLoader loader) {
+        IncrementFieldUsageTask(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -933,7 +933,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
 
 
     protected static class DeleteEntryTask extends ContentChangingTask {
-        DeleteEntryTask(MySQLiteCursorLoader loader) {
+        DeleteEntryTask(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -1035,7 +1035,7 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
-                        MySQLiteCursorLoader.this.onContentChanged();
+                        CursorLoaderAndUpdateDatabase.this.onContentChanged();
                         mainActivityRecyclerViewViewHolder.isDeleting = false;
                     }
                 };
@@ -1090,12 +1090,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildClearThisFieldFromWrongAnswersEnhancedTest(this).execute(db, field_id, question_data_type);
     }
 
-    protected ContentChangingTask buildClearThisFieldFromWrongAnswersEnhancedTest(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildClearThisFieldFromWrongAnswersEnhancedTest(CursorLoaderAndUpdateDatabase loader) {
         return (new ClearThisFieldFromWrongAnswersEnhancedTest(loader));
     }
 
     protected static class ClearThisFieldFromWrongAnswersEnhancedTest extends ContentChangingTask {
-        ClearThisFieldFromWrongAnswersEnhancedTest(MySQLiteCursorLoader loader) {
+        ClearThisFieldFromWrongAnswersEnhancedTest(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -1133,12 +1133,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildClearThisFieldFromWrongAnswersFullyRandomTest(this).execute(db, field_id, question_data_type);
     }
 
-    protected ContentChangingTask buildClearThisFieldFromWrongAnswersFullyRandomTest(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildClearThisFieldFromWrongAnswersFullyRandomTest(CursorLoaderAndUpdateDatabase loader) {
         return (new ClearThisFieldFromWrongAnswersFullyRandomTest(loader));
     }
 
     protected static class ClearThisFieldFromWrongAnswersFullyRandomTest extends ContentChangingTask {
-        ClearThisFieldFromWrongAnswersFullyRandomTest(MySQLiteCursorLoader loader) {
+        ClearThisFieldFromWrongAnswersFullyRandomTest(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -1177,12 +1177,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildPutEntryWrongAnswersEnhancedTest(this).execute(db, question, answer, field_id, wrongAnswer, question_data_type);
     }
 
-    protected ContentChangingTask buildPutEntryWrongAnswersEnhancedTest(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildPutEntryWrongAnswersEnhancedTest(CursorLoaderAndUpdateDatabase loader) {
         return (new PutEntryWrongAnswersEnhancedTest(loader));
     }
 
     protected static class PutEntryWrongAnswersEnhancedTest extends ContentChangingTask {
-        PutEntryWrongAnswersEnhancedTest(MySQLiteCursorLoader loader) {
+        PutEntryWrongAnswersEnhancedTest(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -1238,12 +1238,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         buildPutEntryWrongAnswersFullyRandomTest(this).execute(db, question, answer, field_id, wrongAnswer, question_data_type);
     }
 
-    protected ContentChangingTask buildPutEntryWrongAnswersFullyRandomTest(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildPutEntryWrongAnswersFullyRandomTest(CursorLoaderAndUpdateDatabase loader) {
         return (new PutEntryWrongAnswersFullyRandomTest(loader));
     }
 
     protected static class PutEntryWrongAnswersFullyRandomTest extends ContentChangingTask {
-        PutEntryWrongAnswersFullyRandomTest(MySQLiteCursorLoader loader) {
+        PutEntryWrongAnswersFullyRandomTest(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -1375,14 +1375,14 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
     }
 
-    protected ContentChangingTask buildAddFieldNoteTask(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildAddFieldNoteTask(CursorLoaderAndUpdateDatabase loader) {
         return (new AddFieldNote(loader));
     }
     public void addFieldNote(long field_id, String note) {
         buildAddFieldNoteTask(this).execute(db, field_id, note);
     }
     protected static class AddFieldNote extends ContentChangingTask {
-        AddFieldNote(MySQLiteCursorLoader loader) {
+        AddFieldNote(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -1399,14 +1399,14 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
             return null;
         }
     }
-    protected ContentChangingTask buildUpdateCustomableText(MySQLiteCursorLoader loader) {
+    protected ContentChangingTask buildUpdateCustomableText(CursorLoaderAndUpdateDatabase loader) {
         return (new UpdateCustomableText(loader));
     }
     public void updateCustomableText(long id, String text) {
         buildUpdateCustomableText(this).execute(db, id, text);
     }
     protected static class UpdateCustomableText extends ContentChangingTask {
-        UpdateCustomableText(MySQLiteCursorLoader loader) {
+        UpdateCustomableText(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
         }
 
@@ -1425,5 +1425,12 @@ public class MySQLiteCursorLoader extends AbstractCursorLoader {
         }
     }
 
-
+    public void updateFieldType(long field_id, int field_type ) {
+        if ( field_type != Constants.FieldTypes.NOTEBOOK_TYPE ) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
+            db.getWritableDatabase().update(Contract.Field.TABLE_NAME,contentValues,
+                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+        }
+    }
 }

@@ -1,70 +1,42 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.app.DatePickerDialog;
 import android.app.LoaderManager;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.Chronometer;
 import android.widget.CursorAdapter;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
-import com.ahmedsameha1.peninbin.dialogs.AddFieldNoteDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
-import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
-import com.ahmedsameha1.peninbin.utils.UsageLastTime;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.StringTokenizer;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 /**
  * Created by Ahmed on 3/19/16.
  */
 public class SymbolActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private ListView list_of_symbols;
     private SimpleCursorAdapter simpleCursorAdapter;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
     private int current_field_type;
     private CustomCursorAdapter customCursorAdapter;
@@ -74,7 +46,7 @@ public class SymbolActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_symbol);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,-1);
-        databaseOperations = new DatabaseOperations(this);
+        databaseOperations = new DatabaseReadOperations(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         list_of_symbols = (ListView) findViewById(R.id.list_view_symbol);
         current_field_type = databaseOperations.getFieldType(current_field_id);
@@ -93,7 +65,7 @@ public class SymbolActivity extends AppCompatActivity implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this,"SELECT ts." + Contract.COLUMN_ID + ", s."
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this,"SELECT ts." + Contract.COLUMN_ID + ", s."
                 + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                 + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                 " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL

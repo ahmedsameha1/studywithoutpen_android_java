@@ -9,8 +9,8 @@ import android.util.Log;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 
@@ -25,7 +25,7 @@ import java.util.StringTokenizer;
  */
 public class RandomQuickTestsSchedulingService extends IntentService {
     private AlarmManager alarmManager;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
 
     public RandomQuickTestsSchedulingService(){
         super("RandomQuickTestsSchedulingService");
@@ -40,8 +40,8 @@ public class RandomQuickTestsSchedulingService extends IntentService {
     }
     private void scheduleRandomQuickTest() {
         alarmManager = (AlarmManager) this.getSystemService(AppCompatActivity.ALARM_SERVICE);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this);
-        DatabaseOperations databaseOperations = new DatabaseOperations(this);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
+        DatabaseReadOperations databaseOperations = new DatabaseReadOperations(this);
         ArrayList<long[]> scheduling_data = databaseOperations.getRandomQuickTestsSchedulingData();
         if ( scheduling_data.size() > 0 ) {
             for ( long [] field_data : scheduling_data ) {

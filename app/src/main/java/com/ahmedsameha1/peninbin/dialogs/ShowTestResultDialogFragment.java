@@ -12,11 +12,12 @@ import android.widget.Button;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.WrongAnswersActivity;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.text.NumberFormat;
@@ -34,14 +35,14 @@ public class ShowTestResultDialogFragment extends DialogFragment {
     private long current_field_id;
     private int question_data_type;
     ArrayList<WrongItem> wrongItemList;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private int test_type;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseOperations = new DatabaseOperations(getActivity());
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        databaseOperations = new DatabaseReadOperations(getActivity());
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
 /*        wrongItemList = (ArrayList<WrongItem>) getArguments()
                 .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);*/
         questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
@@ -78,6 +79,7 @@ public class ShowTestResultDialogFragment extends DialogFragment {
                             mySQLiteCursorLoader.clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id, question_data_type);
                         }
                         getActivity().finish();
+                        ExitActivity.exit(getActivity());
                     }
                 })
                 .create();
@@ -92,6 +94,7 @@ public class ShowTestResultDialogFragment extends DialogFragment {
                             mySQLiteCursorLoader.clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id, question_data_type);
                         }
                         getActivity().finish();
+                        ExitActivity.exit(getActivity());
                         return false;
                     }
 

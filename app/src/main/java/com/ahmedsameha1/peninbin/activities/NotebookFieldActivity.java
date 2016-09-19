@@ -26,8 +26,8 @@ import android.widget.Spinner;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.NotebookFieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SearchDateOrTextDialogFragment;
@@ -91,8 +91,8 @@ public class NotebookFieldActivity extends AppCompatActivity implements
             " q DESC",
             "datetime(" + Contract.CREATION_DATE + ") ASC"};
     private Spinner fieldsListSpinner;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
-    private DatabaseOperations databaseOperations;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
+    private DatabaseReadOperations databaseOperations;
     private NotebookFieldActivityRecyclerViewAdapter mAdapter;
     private SearchView searchView;
     private MenuItem searchItem;
@@ -114,7 +114,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
         } else {
             current_field_id = getIntent().getLongExtra(FIELD_ID, 0);
         }
-        databaseOperations = new DatabaseOperations(this);
+        databaseOperations = new DatabaseReadOperations(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         currentSort = databaseOperations.getFieldSort(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_field_activity); // FieldActivity.this Toolbar will act as action bar of the activity
@@ -151,7 +151,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                     int sort = args.getInt(CURRENT_SORT);
                     if (id == SEARCH_ENTRIES_LOADER_ID) {
                         String searchString = args.getString(QUERY_KEY);
-                        mySQLiteCursorLoader = new MySQLiteCursorLoader(NotebookFieldActivity.this,
+                        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(NotebookFieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a , se." + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
                                         + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -165,7 +165,7 @@ public class NotebookFieldActivity extends AppCompatActivity implements
                         return mySQLiteCursorLoader;
 
                     } else if (id == GET_ENTRIES_LOADER_ID) {
-                        mySQLiteCursorLoader = new MySQLiteCursorLoader(NotebookFieldActivity.this,
+                        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(NotebookFieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a , se." + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
                                         + " FROM "  + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."

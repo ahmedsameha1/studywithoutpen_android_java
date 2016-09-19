@@ -19,7 +19,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -32,7 +32,7 @@ public class SearchDateOrTextDialogFragment extends DialogFragment {
     public static final String EXPORT_FIELD_DIALOG_FRAGMENT = "exportFieldDialogFragment";
     private static final int TEXT = 0;
     public static final int DATE = 1;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private Context context;
     private EditText enterText;
     private String text;
@@ -48,7 +48,7 @@ public class SearchDateOrTextDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                databaseOperations = new DatabaseOperations(context);
+                databaseOperations = new DatabaseReadOperations(context);
                 Button search_date = (Button) alertDialog.findViewById(R.id.search_date);
                 enterText = (EditText) alertDialog.findViewById(R.id.search_text);
                 Button positiveButton = alertDialog.getButton(Dialog.BUTTON_POSITIVE);

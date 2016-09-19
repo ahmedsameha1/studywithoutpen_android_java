@@ -19,8 +19,8 @@ import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.NotebookFieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Constants;
@@ -35,14 +35,14 @@ public class MainActivityRecyclerViewAdapter extends
     private Context context;
     private Cursor cursor;
     private SharedPreferences sharedPreferences;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
 
     public MainActivityRecyclerViewAdapter(Context context, Cursor data) {
         super(context, data);
         this.context = context;
         this.cursor = data;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        databaseOperations = new DatabaseOperations(context);
+        databaseOperations = new DatabaseReadOperations(context);
     }
 
     @Override
@@ -59,12 +59,12 @@ public class MainActivityRecyclerViewAdapter extends
                                 Intent intent = new Intent(context, FieldActivity.class);
                                 intent.putExtra(FieldActivity.FIELD_ID, field_id);
                                 context.startActivity(intent);
-                                new MySQLiteCursorLoader(context).incrementFieldUsage(field_id);
+                                new CursorLoaderAndUpdateDatabase(context).incrementFieldUsage(field_id);
                             } else if ( field_type == Constants.FieldTypes.NOTEBOOK_TYPE ) {
                                 Intent intent = new Intent(context, NotebookFieldActivity.class);
                                 intent.putExtra(FieldActivity.FIELD_ID, field_id);
                                 context.startActivity(intent);
-                                new MySQLiteCursorLoader(context).incrementFieldUsage(field_id);
+                                new CursorLoaderAndUpdateDatabase(context).incrementFieldUsage(field_id);
                             }
                         }
                     }

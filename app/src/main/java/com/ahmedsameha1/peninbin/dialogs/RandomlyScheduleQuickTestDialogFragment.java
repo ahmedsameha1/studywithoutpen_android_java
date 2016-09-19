@@ -25,8 +25,8 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -42,14 +42,14 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
     public static final String RANDOMLY_SCHEDULE_QUICK_TEST = "randomly_schedule_quick_test";
     private long current_field_id;
     private boolean from_notification;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
-    private DatabaseOperations databaseOperations;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
+    private DatabaseReadOperations databaseOperations;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
-        databaseOperations = new DatabaseOperations(getActivity());
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
+        databaseOperations = new DatabaseReadOperations(getActivity());
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         setRetainInstance(true);
     }

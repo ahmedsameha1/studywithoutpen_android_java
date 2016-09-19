@@ -15,9 +15,8 @@ import android.widget.Button;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.Constants;
 
 /**
@@ -25,20 +24,20 @@ import com.ahmedsameha1.peninbin.utils.Constants;
  */
 public class SortEntriesDialogFragment extends DialogFragment {
     public static final String EXPORT_FIELD_DIALOG_FRAGMENT = "exportFieldDialogFragment";
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private Context context;
     private int fieldType;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseOperations = new DatabaseOperations(getActivity());
+        databaseOperations = new DatabaseReadOperations(getActivity());
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         fieldType = databaseOperations.getFieldType(current_field_id);
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
     }
     @NonNull
     @Override

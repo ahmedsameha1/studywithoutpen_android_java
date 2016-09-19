@@ -9,15 +9,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.AddFieldNoteDialogFragment;
 
 /**
@@ -26,12 +25,12 @@ import com.ahmedsameha1.peninbin.dialogs.AddFieldNoteDialogFragment;
 public class FieldInformationActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         AddFieldNoteDialogFragment.Contact {
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private TextView number_of_entries;
     private TextView number_of_moderate_or_higher_entries;
     private ListView list_of_notes;
     private SimpleCursorAdapter simpleCursorAdapter;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
 
     @Override
@@ -39,7 +38,7 @@ public class FieldInformationActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_field_information);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,-1);
-        databaseOperations = new DatabaseOperations(this);
+        databaseOperations = new DatabaseReadOperations(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         number_of_entries = (TextView) findViewById(R.id.number_of_entries);
         number_of_moderate_or_higher_entries = (TextView) findViewById(R.id.moderate_or_higher_entries);
@@ -82,7 +81,7 @@ public class FieldInformationActivity extends AppCompatActivity implements
     }
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(this,"SELECT " + Contract.COLUMN_ID + ", "
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this,"SELECT " + Contract.COLUMN_ID + ", "
                 + Contract.Field_Note.COLUMN_NOTE
                 + " FROM " + Contract.Field_Note.TABLE_NAME + " WHERE " + Contract.Field_Note.COLUMN_FIELD + " = ?",
                 new String[]{current_field_id + ""});

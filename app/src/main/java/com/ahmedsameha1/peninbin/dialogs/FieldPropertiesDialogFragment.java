@@ -11,24 +11,30 @@ import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
-import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 /**
@@ -46,13 +52,13 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
     private boolean locale_available;
     private ArrayList<Locale> localeList = new ArrayList<Locale>();
     private ArrayList<String> locale_display_names = new ArrayList<String>();
-    private DatabaseOperations databaseOpertations;
+    private DatabaseReadOperations databaseReadOperations;
     private String locale_short_name;
     private boolean isReadAnswer;
-    private int check_type;
+    private int check_type, field_type;
     private CheckBox read_answer;
     private Spinner select_locale;
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private Button positive_button;
     private int index_of_locale;
     private String field_name;
@@ -66,12 +72,13 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         tts_available = getArguments().getBoolean(TTS_AVAILABLE);
         locale_available = getArguments().getBoolean(LOCALE_AVAILABLE,false);
         index_of_locale = getArguments().getInt(INDEX_OF_LOCALE,-1);
-        databaseOpertations = new DatabaseOperations(getActivity());
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(getActivity());
-        isReadAnswer = databaseOpertations.isReadAnswer(current_field_id);
-        locale_short_name = databaseOpertations.getFieldLocale(current_field_id);
-        check_type = databaseOpertations.getFieldCheckType(current_field_id);
-        field_name = databaseOpertations.getFieldName(current_field_id);
+        databaseReadOperations = new DatabaseReadOperations(getActivity());
+        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
+        isReadAnswer = databaseReadOperations.isReadAnswer(current_field_id);
+        locale_short_name = databaseReadOperations.getFieldLocale(current_field_id);
+        check_type = databaseReadOperations.getFieldCheckType(current_field_id);
+        field_type = databaseReadOperations.getFieldType(current_field_id);
+        field_name = databaseReadOperations.getFieldName(current_field_id);
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
         setRetainInstance(true);
@@ -93,17 +100,35 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
             public void onShow(DialogInterface dialog) {
                 final EditText new_field_name = (EditText) alertDialog.findViewById(R.id.enter_new_field_name);
                 final Spinner select_check_type = (Spinner) alertDialog.findViewById(R.id.check_type_spinner);
+                final Spinner select_field_type = (Spinner) alertDialog.findViewById(R.id.field_type_spinner);
                 read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
                 select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
                 positive_button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 new_field_name.setText(field_name);
                 read_answer.setChecked(isReadAnswer);
-                final SpinnerWithHintAdapter check_type_adapter = new SpinnerWithHintAdapter(getActivity(),
+                final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(getActivity(),
                         android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.check_type));
+                String[] field_type_names = getResources().getStringArray(R.array.field_type);
+                List<String> list = new ArrayList<String>(Arrays.asList(field_type_names));
+                list.removeAll(Arrays.asList(field_type_names[Constants.FieldTypes.NOTEBOOK_TYPE]));
+                String [] allowed_field_types = list.toArray(new String[0]);
+                final ArrayAdapter<String> field_type_adapter = new ArrayAdapter<String>(getActivity(),
+                        android.R.layout.simple_spinner_item,allowed_field_types);
                 check_type_adapter.setDropDownViewResource
                         (android.R.layout.simple_spinner_dropdown_item);
+                field_type_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 select_check_type.setAdapter(check_type_adapter);
+                select_field_type.setAdapter(field_type_adapter);
                 select_check_type.setSelection(check_type);
+                final int effective_field_type;
+                if ( field_type == 0 ) {
+                    select_field_type.setSelection(field_type);
+                    effective_field_type = 0;
+                } else {
+                    select_field_type.setSelection(field_type - 1);
+                    effective_field_type = field_type - 1;
+                }
+
                 final SpinnerWithHintAdapter spinnerWithHintAdapter =
                         new SpinnerWithHintAdapter(getActivity(),android.R.layout.simple_spinner_item,locale_display_names);
 
@@ -150,29 +175,38 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                 Toast toast = Toast.makeText(getActivity(), R.string.select_a_check_type, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
-                            } else if ( (! new_field_name.getText().toString().equals(field_name)) && databaseOpertations.checkFieldDuplication(new_field_name.getText().toString())) {
+                            } else if ( (! new_field_name.getText().toString().equals(field_name)) && databaseReadOperations.checkFieldDuplication(new_field_name.getText().toString())) {
                                 Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
                             } else {
                                 if ( ! new_field_name.getText().toString().equals(field_name) ) {
-                                    mySQLiteCursorLoader.updateFieldName(current_field_id,new_field_name.getText().toString());
+                                    cursorLoaderAndUpdateDatabase.updateFieldName(current_field_id,new_field_name.getText().toString());
                                     ((Contact) getActivity()).updateFieldName(new_field_name.getText().toString());
                                 }
-                                mySQLiteCursorLoader.updateFieldCheckType(current_field_id,select_check_type.getSelectedItemPosition());
-                                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,read_answer.isChecked());
+                                if ( select_field_type.getSelectedItemPosition() != effective_field_type ) {
+                                    if ( select_field_type.getSelectedItemPosition() == 0 ) {
+                                        cursorLoaderAndUpdateDatabase.updateFieldType(current_field_id,
+                                                select_field_type.getSelectedItemPosition());
+                                    } else {
+                                        cursorLoaderAndUpdateDatabase.updateFieldType(current_field_id,
+                                                select_field_type.getSelectedItemPosition() + 1 );
+                                    }
+                                }
+                                cursorLoaderAndUpdateDatabase.updateFieldCheckType(current_field_id,select_check_type.getSelectedItemPosition());
+                                cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id,read_answer.isChecked());
                                 int selected_locale_position = select_locale.getSelectedItemPosition();
                                 if ( selected_locale_position < spinnerWithHintAdapter.getCount()
                                         && selected_locale_position >= 0 ) {
                                     Locale locale = localeList.get(selected_locale_position);
                                     locale_short_name = locale.getLanguage() + "," + locale.getCountry();
-                                    mySQLiteCursorLoader.updateFieldLocale(current_field_id,locale_short_name);
+                                    cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id,locale_short_name);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(FieldActivity.ANALYTICS_CATEGORY)
                                             .setAction("selecting locale")
                                             .build());
                                 } else {
-                                    mySQLiteCursorLoader.updateFieldLocale(current_field_id,null);
+                                    cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id,null);
                                 }
                                 dismiss();
                             }

@@ -43,23 +43,20 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.AboutDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ImportFieldsFromTextFileDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ImportFromWhatDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 
-import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
 import com.ahmedsameha1.peninbin.dialogs.CreateFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ExportFieldsDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ImportFieldsDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
@@ -105,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TO_EXPORT_FIELDS = "to_export_fields";
     private static final String TO_EXPORT_FILE_NAME = "to_export_file_name";
     private Handler mHandler = new Handler();
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private MainActivityRecyclerViewAdapter mAdapter;
 
 
@@ -161,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (id == GET_FIELDS_ID) {
                     /*return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME}, null, null,
                             "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
-                    mySQLiteCursorLoader = new MySQLiteCursorLoader(MainActivity.this,
+                    mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(MainActivity.this,
                             "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
                                     + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                             null);
@@ -173,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements
                             Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME + " LIKE ? ",
                             new String[] {"%" + query + "%"},
                             "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
-                    mySQLiteCursorLoader = new MySQLiteCursorLoader(MainActivity.this,
+                    mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(MainActivity.this,
                             "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", "
                                     + Contract.Field.COLUMN_FIELD_NAME
                                     + " FROM " + Contract.Field.TABLE_NAME + " WHERE " + Contract.Field.COLUMN_FIELD_NAME + " LIKE ? "
@@ -601,7 +598,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void fff(){
-        ArrayList<long[]> data = new DatabaseOperations(this).getBackupSchedulingData();
+        ArrayList<long[]> data = new DatabaseReadOperations(this).getBackupSchedulingData();
         Log.i("scheduled time number:",data.size()+"");
         for ( long[] session : data ) {
             if ( session[1] == ScheduleInFieldDialogFragment.QUICK_TEST ) {

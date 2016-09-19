@@ -12,7 +12,8 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 
 import java.text.NumberFormat;
 
@@ -25,11 +26,11 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
     private double correctAnswersPercent;
     private String message;
     private long current_field_id;
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseOperations = new DatabaseOperations(getActivity());
+        databaseOperations = new DatabaseReadOperations(getActivity());
         questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
         wrongAnswersNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
@@ -47,9 +48,7 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         getActivity().finish();
-                        Intent intent = new Intent(getActivity(), FieldActivity.class);
-                        intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
-                        getActivity().startActivity(intent);
+                        ExitActivity.exit(getActivity());
                     }
                 })
                 .create();
@@ -59,9 +58,7 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
                         getActivity().finish();
-                        Intent intent = new Intent(getActivity(), FieldActivity.class);
-                        intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
-                        getActivity().startActivity(intent);
+                        ExitActivity.exit(getActivity());
                         return false;
                     }
 

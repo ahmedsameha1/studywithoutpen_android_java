@@ -13,7 +13,7 @@ import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
@@ -35,7 +35,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_notification_dialogs);
-        DatabaseOperations databaseOperations = new DatabaseOperations(this);
+        DatabaseReadOperations databaseOperations = new DatabaseReadOperations(this);
         long current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, -1);
         if ( databaseOperations.checkFieldExists(current_field_id) ) {
             int dialog_type = getIntent().getIntExtra(DIALOG_TYPE, -1);

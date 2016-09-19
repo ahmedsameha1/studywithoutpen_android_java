@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Environment;
 
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -24,11 +23,9 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -38,7 +35,7 @@ public class ExportFieldsDialogFragment extends DialogFragment {
     public static final String EXPORT_FIELD_DIALOG_FRAGMENT = "exportFieldDialogFragment";
     public static final String PATH = "path";
 
-    private DatabaseOperations databaseOperations;
+    private DatabaseReadOperations databaseOperations;
     private EditText enterFileName;
     private ListView listView;
     private Context context;
@@ -62,7 +59,7 @@ public class ExportFieldsDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                databaseOperations = new DatabaseOperations(context);
+                databaseOperations = new DatabaseReadOperations(context);
                 enterFileName = (EditText) alertDialog.findViewById(R.id.file_name);
                 listView = (ListView) alertDialog.findViewById(R.id.export_fields_list_view);
 

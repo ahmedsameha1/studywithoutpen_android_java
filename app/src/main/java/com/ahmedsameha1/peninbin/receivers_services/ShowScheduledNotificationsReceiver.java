@@ -14,22 +14,22 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.secondary_activities.ReminderActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.database.DatabaseOperations;
-import com.ahmedsameha1.peninbin.database.MySQLiteCursorLoader;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.RefreshingAppUsageActivity;
 
 public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
-    private MySQLiteCursorLoader mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     public ShowScheduledNotificationsReceiver() {
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        mySQLiteCursorLoader = new MySQLiteCursorLoader(context);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
         Uri notification_sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = null;
         PendingIntent contentIntent = null;
@@ -39,7 +39,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                 || schedule_what == ScheduleInFieldDialogFragment.ENHANCED_TEST
                 || schedule_what == ScheduleInFieldDialogFragment.FULLY_RANDOM_TEST ) {
             long current_field_id = intent.getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
-            String current_field_name = new DatabaseOperations(context).getFieldName(current_field_id);
+            String current_field_name = new DatabaseReadOperations(context).getFieldName(current_field_id);
             if ( schedule_what == ScheduleInFieldDialogFragment.QUICK_TEST ) {
                 Intent quick_test_intent = new Intent(context, QuickTestActivity.class);
                 if ( intent.hasExtra(EnhancedTestActivity.QUESTION_PERCENTAGE) ) {

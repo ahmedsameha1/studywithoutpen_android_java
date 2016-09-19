@@ -221,4 +221,8 @@
     <string name="schedule_fully_random_test">جَدْوِل اختبار عشوائي تماما</string>
     <string name="fully_random_test_time">وقت اختبار عشوائي تماما</string>
     <string name="enhanced_test_time">وقت اختبار مُحَسَّن</string>
+    <string name="letter_number">الحرف رقم:</string>
+    <string name="number_of_letters">عدد الحروف:</string>
+    <string name="last_letter">الحرف الأخير:</string>
+    <string name="first_letters">الحرف الأول:</string>
 </resources>
