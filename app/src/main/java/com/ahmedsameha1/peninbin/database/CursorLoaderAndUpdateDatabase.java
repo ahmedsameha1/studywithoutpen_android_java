@@ -567,6 +567,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 Contract.COLUMN_ID + " = ? ", new String[]{current_field_id + ""});
     }
 
+
+
     protected static class EditEntryTask extends ContentChangingTask {
         EditEntryTask(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
@@ -1432,5 +1434,22 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             db.getWritableDatabase().update(Contract.Field.TABLE_NAME,contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
         }
+    }
+    public void disableEmulation(final long field_id) {
+        final ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field.COLUMN_CREATION_EMULATION_NUMBER, Constants.NOT_EMULATED);
+        db.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
+                Contract.COLUMN_ID + " = ? ", new String[] {field_id + ""});
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                ContentValues contentValues1 = new ContentValues();
+                contentValues1.putNull(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE);
+                db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues1,
+                        Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[] {field_id + ""});
+            }
+        });
+        thread.start();
     }
 }

@@ -63,6 +63,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
     private int index_of_locale;
     private String field_name;
     private Tracker mTracker;
+    private boolean emulated;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,13 +82,14 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         field_name = databaseReadOperations.getFieldName(current_field_id);
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
+        emulated = databaseReadOperations.isEmulated(current_field_id);
         setRetainInstance(true);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
                 builder.setTitle(R.string.field_properties)
@@ -103,9 +105,12 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                 final Spinner select_field_type = (Spinner) alertDialog.findViewById(R.id.field_type_spinner);
                 read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
                 select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
+                Button emulate_field = (Button) alertDialog.findViewById(R.id.emulate_field);
                 positive_button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 new_field_name.setText(field_name);
                 read_answer.setChecked(isReadAnswer);
+                emulate_field.setText( emulated ? getResources().getString(R.string.disable_emulation)
+                        : getResources().getString(R.string.enable_emulation));
                 final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(getActivity(),
                         android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.check_type));
                 String[] field_type_names = getResources().getStringArray(R.array.field_type);
@@ -161,6 +166,25 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                 select_locale.setVisibility(View.VISIBLE);
                             }
                         }
+                    }
+                });
+                emulate_field.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if ( emulated ) {
+                            builder.setMessage(getString(R.string.sure_disable_emulation))
+                                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            cursorLoaderAndUpdateDatabase.disableEmulation(current_field_id);
+                                            alertDialog.dismiss();
+                                            dismiss();
+                                        }
+                                    });
+                        } else {
+
+                        }
+
                     }
                 });
                 positive_button.setOnClickListener(new View.OnClickListener() {

@@ -4,6 +4,7 @@ package com.ahmedsameha1.peninbin.utils;
  * Created by ahmed on 6/11/2016.
  */
 public class Constants {
+    public static final int NOT_EMULATED = 0;
 
     public static abstract class FieldTypes {
         public static final int DEFAULT_TYPE = 0;
@@ -34,4 +35,5 @@ public class Constants {
         public static final int ENHANCED_TEST = 0;
         public static final int FULLY_RANDOM_TEST = 1;
     }
+
 }

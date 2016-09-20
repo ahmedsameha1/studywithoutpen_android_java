@@ -227,4 +227,7 @@
     <string name="number_of_letters">Number of letters:</string>
     <string name="first_letters">First letter:</string>
     <string name="last_letter">Last letter:</string>
+    <string name="enable_emulation">Enable Emulation</string>
+    <string name="disable_emulation">Disable Emulation</string>
+    <string name="sure_disable_emulation">Are you sure that you want to disable the emulation in this field?</string>
 </resources>

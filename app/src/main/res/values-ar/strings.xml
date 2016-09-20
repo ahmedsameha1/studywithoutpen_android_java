@@ -225,4 +225,7 @@
     <string name="number_of_letters">عدد الحروف:</string>
     <string name="last_letter">الحرف الأخير:</string>
     <string name="first_letters">الحرف الأول:</string>
+    <string name="enable_emulation">فَعِّل المُحاكاة</string>
+    <string name="disable_emulation">ألْغِ المُحاكاة</string>
+    <string name="sure_disable_emulation">Are you sure that you want to disable the emulation in this field?</string>
 </resources>
