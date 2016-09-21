@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.EmulateFieldActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
@@ -182,7 +183,10 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                         }
                                     });
                         } else {
-
+                            Intent intent = new Intent(getActivity(), EmulateFieldActivity.class);
+                            intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
+                            getActivity().startActivity(intent);
+                            dismiss();
                         }
 
                     }

@@ -230,4 +230,6 @@
     <string name="enable_emulation">Enable Emulation</string>
     <string name="disable_emulation">Disable Emulation</string>
     <string name="sure_disable_emulation">Are you sure that you want to disable the emulation in this field?</string>
+    <string name="emulate_field">Emulate Field</string>
+    <string name="enter_the_number_of_the_new_entries_that_will_be_added_everyday_to_the_field_by_emulation">Enter the number of the new entries that will be added everyday to the field by emulation</string>
 </resources>

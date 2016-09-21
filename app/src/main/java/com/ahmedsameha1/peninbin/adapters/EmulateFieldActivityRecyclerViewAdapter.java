@@ -1,0 +1,77 @@
+package com.ahmedsameha1.peninbin.adapters;
+
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+
+import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+
+import java.util.ArrayList;
+
+/**
+ * Created by ahmed on 3/13/2016.
+ */
+public class EmulateFieldActivityRecyclerViewAdapter extends
+        CursorRecyclerViewAdapter<EmulateFieldActivityRecyclerViewViewHolder> {
+    private Context context;
+    private long field_id;
+    private int question_data_type;
+    private SharedPreferences sharedPreferences;
+    private DatabaseReadOperations databaseOperations;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
+    private ArrayList<Long> list_of_entries;
+    private Long starting_entry_id;
+    public EmulateFieldActivityRecyclerViewAdapter(Context context, Cursor data, Long starting_entry_id ) {
+        super(context,data);
+        this.context = context;
+        this.starting_entry_id = starting_entry_id;
+        list_of_entries = new ArrayList<>();
+        databaseOperations = new DatabaseReadOperations(context);
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+//        this.question_data_type = databaseOperations.getQuestionDataType(field_id);
+    }
+    @Override
+    public EmulateFieldActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.copy_move_entries_activity_recyclerview_row, parent, false);
+        EmulateFieldActivityRecyclerViewViewHolder emulateFieldActivityRecyclerViewViewHolder =
+                new EmulateFieldActivityRecyclerViewViewHolder(itemView, new EmulateFieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
+                    @Override
+                    public void onCheckChanged(long entry_id, boolean checked) {
+                        if ( checked ) {
+                            list_of_entries.add(entry_id);
+                            if ( list_of_entries.size() > 1 ) {
+                                ((CheckBox)itemView.findViewById(R.id.copy)).setChecked(false);
+                                list_of_entries.remove(entry_id);
+                            }
+                        } else {
+                            list_of_entries.remove(entry_id);
+                        }
+                    }
+                });
+        return emulateFieldActivityRecyclerViewViewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(EmulateFieldActivityRecyclerViewViewHolder viewHolder, Cursor data) {
+        final long entry_id = data.getLong(0);
+        final String question = data.getString(1);
+        final String answer = data.getString(2);
+        viewHolder.field_id = field_id;
+        viewHolder.entry_id = entry_id;
+        viewHolder.currentQuestion = question;
+        viewHolder.currentAnswer = answer;
+        viewHolder.question.setText(question);
+        viewHolder.answer.setText(answer);
+
+    }
+}
