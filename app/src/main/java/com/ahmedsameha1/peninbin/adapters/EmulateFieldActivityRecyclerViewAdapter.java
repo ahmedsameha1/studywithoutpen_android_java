@@ -5,12 +5,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.EmulateFieldActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
@@ -52,6 +55,9 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
                             if ( list_of_entries.size() > 1 ) {
                                 ((CheckBox)itemView.findViewById(R.id.copy)).setChecked(false);
                                 list_of_entries.remove(entry_id);
+                                Toast toast = Toast.makeText(context, R.string.only_one, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
                             }
                         } else {
                             list_of_entries.remove(entry_id);

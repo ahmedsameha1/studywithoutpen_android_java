@@ -229,5 +229,6 @@
     <string name="disable_emulation">ألْغِ المُحاكاة</string>
     <string name="sure_disable_emulation">Are you sure that you want to disable the emulation in this field?</string>
     <string name="emulate_field">Emulate Field</string>
-    <string name="enter_the_number_of_the_new_entries_that_will_be_added_everyday_to_the_field_by_emulation">Enter the number of the new entries that will be added everyday to the field by emulation</string>
+    <string name="enter_the_number_of__everyday_entries">Enter the number of the new entries that will be added everyday to the field by emulation</string>
+    <string name="only_one">Select only one!</string>
 </resources>

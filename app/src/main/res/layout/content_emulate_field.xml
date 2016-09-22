@@ -25,7 +25,7 @@
             android:layout_weight="9"
             android:gravity="center"
             android:imeOptions="flagNoExtractUi"
-            android:hint="@string/enter_the_number_of_the_new_entries_that_will_be_added_everyday_to_the_field_by_emulation"
+            android:hint="@string/enter_the_number_of__everyday_entries"
             android:inputType="number"
             />
 
@@ -49,7 +49,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="9"
-            android:gravity="center" />
+            android:gravity="center"
+            android:text="IF YOU WANT, select the starting entry"/>
 
         <ImageButton
             android:id="@+id/starting_entry_help"

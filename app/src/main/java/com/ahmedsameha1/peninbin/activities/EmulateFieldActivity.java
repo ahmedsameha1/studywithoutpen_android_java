@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
@@ -52,6 +54,8 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         databaseOperations = new DatabaseReadOperations(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         final EditText enter_number_of_entries = (EditText) findViewById(R.id.enter_number_of_entries);
+        ImageButton number_of_entries_help = (ImageButton) findViewById(R.id.number_of_entries_help);
+        ImageButton starting_entry_help = (ImageButton) findViewById(R.id.starting_entry_help);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -95,6 +99,22 @@ public class EmulateFieldActivity extends AppCompatActivity implements
                         toast.show();
                     }
                 }
+            }
+        });
+        number_of_entries_help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                number_of_tries_help_dialog_builder
+                        .setMessage(R.string.percentage_or_number_help).create().show(); //// TODO: 9/22/16 write the real help message
+            }
+        });
+        starting_entry_help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                number_of_tries_help_dialog_builder
+                        .setMessage(R.string.percentage_or_number_help).create().show();//// TODO: 9/22/16 write the real help message
             }
         });
     }

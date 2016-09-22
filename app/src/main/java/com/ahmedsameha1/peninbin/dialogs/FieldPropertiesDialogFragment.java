@@ -83,7 +83,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         field_name = databaseReadOperations.getFieldName(current_field_id);
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
-        emulated = databaseReadOperations.isEmulated(current_field_id);
+        emulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         setRetainInstance(true);
     }
 

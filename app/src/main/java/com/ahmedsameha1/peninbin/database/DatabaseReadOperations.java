@@ -659,13 +659,14 @@ public class DatabaseReadOperations {
         return null;
     }
 
-    public boolean isEmulated(long field_id ) {
+    public int isEmulated(long field_id ) {
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_CREATION_EMULATION_NUMBER},
-                Contract.COLUMN_ID + " = ? AND " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER + " > ? ",
-                new String[]{field_id + "", Integer.toString(Constants.NOT_EMULATED)},null,null,null);
-        int count = cursor.getCount();
+                Contract.COLUMN_ID + " = ? ",
+                new String[]{field_id + ""},null,null,null);
+        cursor.moveToFirst();
+        int number = cursor.getInt(0);
         cursor.close();
-        return count == 1;
+        return number;
     }
 }
 
