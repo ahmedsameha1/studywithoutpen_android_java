@@ -52,15 +52,18 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
                     public void onCheckChanged(long entry_id, boolean checked) {
                         if ( checked ) {
                             list_of_entries.add(entry_id);
+                            starting_entry_id = entry_id;
                             if ( list_of_entries.size() > 1 ) {
                                 ((CheckBox)itemView.findViewById(R.id.copy)).setChecked(false);
                                 list_of_entries.remove(entry_id);
+                                starting_entry_id = 0L;
                                 Toast toast = Toast.makeText(context, R.string.only_one, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                             }
                         } else {
                             list_of_entries.remove(entry_id);
+                            starting_entry_id = 0L;
                         }
                     }
                 });

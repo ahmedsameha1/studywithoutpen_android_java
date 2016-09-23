@@ -1,6 +1,7 @@
 package com.ahmedsameha1.peninbin.database;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,10 +10,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 
+import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
+import com.ahmedsameha1.peninbin.secondary_activities.ExportSuccessfulActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.PartitionEntries;
 import com.commonsware.cwac.loaderex.AbstractCursorLoader;
 import com.commonsware.cwac.loaderex.ContentChangingTask;
 
@@ -566,6 +573,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         db.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{current_field_id + ""});
     }
+
 
 
 
@@ -1448,6 +1456,101 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 contentValues1.putNull(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE);
                 db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues1,
                         Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[] {field_id + ""});
+            }
+        });
+        thread.start();
+    }
+
+    public void emulate(final Context context, final long field_id, final int number_of_entries) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Contract.Field.COLUMN_CREATION_EMULATION_NUMBER, number_of_entries);
+                db.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
+                        Contract.COLUMN_ID + " = ? ", new String[] {field_id + ""});
+                Cursor cursor = db.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                        Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[] {field_id + ""},null,null,
+                        Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
+                                + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
+                PartitionEntries.partition(number_of_entries, cursor, db.getWritableDatabase());
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                NotificationCompat.Builder notificationBuilder = null;
+                Intent notifyIntent = null;
+                PendingIntent resultPendingIntent = null;
+                        notificationBuilder =
+                                new NotificationCompat.Builder(context)
+                                        .setSmallIcon(R.drawable.ic_launcher512)
+                                        .setContentTitle(context.getResources().getString(R.string.emulation_completed))
+                                        .setContentText(context.getResources().getString(R.string.emulation_has_completed))
+                                        .setTicker(context.getResources().getString(R.string.emulation_has_completed))
+                                        .setAutoCancel(true);
+                        notifyIntent = new Intent(context, FieldActivity.class);
+                        notifyIntent.putExtra(FieldActivity.FIELD_ID, field_id);
+                        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        resultPendingIntent =
+                                PendingIntent.getActivity(
+                                        context,
+                                        0,
+                                        notifyIntent,
+                                        PendingIntent.FLAG_UPDATE_CURRENT
+                                );
+                        notificationBuilder.setContentIntent(resultPendingIntent);
+                        notificationManager.notify(0, notificationBuilder.build());
+            }
+        });
+        thread.start();
+    }
+
+    public void emulate(final Context context, final long field_id, final int number_of_entries, final long starting_entry ) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Contract.Field.COLUMN_CREATION_EMULATION_NUMBER, number_of_entries);
+                db.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
+                        Contract.COLUMN_ID + " = ? ", new String[] {field_id + ""});
+                Cursor cursor = db.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                        Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[] {field_id + ""},null,null,
+                        Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
+                                + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
+                ArrayList<Long> list_of_entries_from_starting_entry = new ArrayList<>();
+                boolean start = false;
+                for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                     cursor.moveToNext()) {
+                    if ( cursor.getLong(0) == starting_entry ) {
+                        start = true;
+                    }
+                    if ( start ) {
+                        list_of_entries_from_starting_entry.add(cursor.getLong(0));
+                    }
+                }
+                PartitionEntries.partition(number_of_entries, list_of_entries_from_starting_entry, db.getWritableDatabase());
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                NotificationCompat.Builder notificationBuilder = null;
+                Intent notifyIntent = null;
+                PendingIntent resultPendingIntent = null;
+                        notificationBuilder =
+                                new NotificationCompat.Builder(context)
+                                        .setSmallIcon(R.drawable.ic_launcher512)
+                                        .setContentTitle(context.getResources().getString(R.string.emulation_completed))
+                                        .setContentText(context.getResources().getString(R.string.emulation_has_completed))
+                                        .setTicker(context.getResources().getString(R.string.emulation_has_completed))
+                                        .setAutoCancel(true);
+                        notifyIntent = new Intent(context, FieldActivity.class);
+                        notifyIntent.putExtra(FieldActivity.FIELD_ID, field_id);
+                        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        resultPendingIntent =
+                                PendingIntent.getActivity(
+                                        context,
+                                        0,
+                                        notifyIntent,
+                                        PendingIntent.FLAG_UPDATE_CURRENT
+                                );
+                        notificationBuilder.setContentIntent(resultPendingIntent);
+                        notificationManager.notify(0, notificationBuilder.build());
             }
         });
         thread.start();

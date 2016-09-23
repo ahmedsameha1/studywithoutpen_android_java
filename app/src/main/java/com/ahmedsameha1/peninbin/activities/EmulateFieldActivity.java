@@ -2,9 +2,11 @@ package com.ahmedsameha1.peninbin.activities;
 
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -39,8 +41,10 @@ import java.util.ArrayList;
  */
 public class EmulateFieldActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String EMULATING = "emulating field: ";
     private EmulateFieldActivityRecyclerViewAdapter mAdapter;
     private int number_of_entries;
+    private EditText enter_number_of_entries;
     private Long starting_entry_id = 0L;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
@@ -53,7 +57,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         current_field_id = getIntent().getLongExtra(FieldActivity.FIELD_ID, 0);
         databaseOperations = new DatabaseReadOperations(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        final EditText enter_number_of_entries = (EditText) findViewById(R.id.enter_number_of_entries);
+        enter_number_of_entries = (EditText) findViewById(R.id.enter_number_of_entries);
         ImageButton number_of_entries_help = (ImageButton) findViewById(R.id.number_of_entries_help);
         ImageButton starting_entry_help = (ImageButton) findViewById(R.id.starting_entry_help);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
@@ -104,7 +108,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         number_of_entries_help.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(EmulateFieldActivity.this);
                 number_of_tries_help_dialog_builder
                         .setMessage(R.string.percentage_or_number_help).create().show(); //// TODO: 9/22/16 write the real help message
             }
@@ -112,7 +116,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         starting_entry_help.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(EmulateFieldActivity.this);
                 number_of_tries_help_dialog_builder
                         .setMessage(R.string.percentage_or_number_help).create().show();//// TODO: 9/22/16 write the real help message
             }
@@ -136,7 +140,26 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.emulate:
+                    if ( enter_number_of_entries.getText().length() > 0 ) {
+                        number_of_entries = Integer.parseInt(enter_number_of_entries.getText().toString());
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean( EMULATING + current_field_id, true);
+                        editor.commit();
+                        Toast toast = Toast.makeText(EmulateFieldActivity.this, "This operation may take some time", Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        if ( starting_entry_id == 0 ) {
+                            mySQLiteCursorLoader.emulate(this, current_field_id,number_of_entries);
+                        } else {
+                            mySQLiteCursorLoader.emulate(this, current_field_id, number_of_entries, starting_entry_id);
+                        }
 
+                    } else {
+                        Toast toast = Toast.makeText(EmulateFieldActivity.this, R.string.enter_the_number_of__everyday_entries, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
                 return true;
 
             default:

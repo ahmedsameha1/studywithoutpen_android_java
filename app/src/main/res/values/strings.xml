@@ -233,4 +233,6 @@
     <string name="emulate_field">Emulate Field</string>
     <string name="enter_the_number_of__everyday_entries">Enter the number of everyday entries</string>
     <string name="only_one">Only one!</string>
+    <string name="emulation_has_completed">The emulation of the field has completed</string>
+    <string name="emulation_completed">Emulation Completed</string>
 </resources>
