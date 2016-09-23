@@ -32,7 +32,9 @@ import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.CopyFieldDialogFragment;
+import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 
 import java.util.ArrayList;
 
@@ -142,17 +144,13 @@ public class EmulateFieldActivity extends AppCompatActivity implements
             case R.id.emulate:
                     if ( enter_number_of_entries.getText().length() > 0 ) {
                         number_of_entries = Integer.parseInt(enter_number_of_entries.getText().toString());
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean( EMULATING + current_field_id, true);
-                        editor.commit();
                         Toast toast = Toast.makeText(EmulateFieldActivity.this, "This operation may take some time", Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                         if ( starting_entry_id == 0 ) {
-                            mySQLiteCursorLoader.emulate(this, current_field_id,number_of_entries);
+                            Emulation.startEmulateThread(this, current_field_id,number_of_entries);
                         } else {
-                            mySQLiteCursorLoader.emulate(this, current_field_id, number_of_entries, starting_entry_id);
+                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id);
                         }
 
                     } else {
@@ -160,6 +158,8 @@ public class EmulateFieldActivity extends AppCompatActivity implements
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
+                ExitActivity.exit(this);
+                finish();
                 return true;
 
             default:

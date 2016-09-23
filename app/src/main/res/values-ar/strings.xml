@@ -233,4 +233,5 @@
     <string name="only_one">Select only one!</string>
     <string name="emulation_has_completed">The emulation of the field has completed</string>
     <string name="emulation_completed">Emulation Completed</string>
+    <string name="emulation_runing">Wait till the current enabling/disabling emulation process finishes</string>
 </resources>

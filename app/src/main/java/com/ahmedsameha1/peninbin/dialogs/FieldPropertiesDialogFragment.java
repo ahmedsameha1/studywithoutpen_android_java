@@ -36,8 +36,10 @@ import java.util.List;
 import java.util.Locale;
 
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+
 /**
  * Created by ahmed on 28/04/16.
  */
@@ -65,6 +67,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
     private String field_name;
     private Tracker mTracker;
     private boolean emulated;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,8 +75,8 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         locale_display_names = getArguments().getStringArrayList(LOCALE_DISPLAY_NAMES);
         localeList = (ArrayList<Locale>) getArguments().getSerializable(LOCALE_LIST);
         tts_available = getArguments().getBoolean(TTS_AVAILABLE);
-        locale_available = getArguments().getBoolean(LOCALE_AVAILABLE,false);
-        index_of_locale = getArguments().getInt(INDEX_OF_LOCALE,-1);
+        locale_available = getArguments().getBoolean(LOCALE_AVAILABLE, false);
+        index_of_locale = getArguments().getInt(INDEX_OF_LOCALE, -1);
         databaseReadOperations = new DatabaseReadOperations(getActivity());
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
         isReadAnswer = databaseReadOperations.isReadAnswer(current_field_id);
@@ -110,16 +113,16 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                 positive_button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 new_field_name.setText(field_name);
                 read_answer.setChecked(isReadAnswer);
-                emulate_field.setText( emulated ? getResources().getString(R.string.disable_emulation)
+                emulate_field.setText(emulated ? getResources().getString(R.string.disable_emulation)
                         : getResources().getString(R.string.enable_emulation));
                 final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(getActivity(),
-                        android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.check_type));
+                        android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.check_type));
                 String[] field_type_names = getResources().getStringArray(R.array.field_type);
                 List<String> list = new ArrayList<String>(Arrays.asList(field_type_names));
                 list.removeAll(Arrays.asList(field_type_names[Constants.FieldTypes.NOTEBOOK_TYPE]));
-                String [] allowed_field_types = list.toArray(new String[0]);
+                String[] allowed_field_types = list.toArray(new String[0]);
                 final ArrayAdapter<String> field_type_adapter = new ArrayAdapter<String>(getActivity(),
-                        android.R.layout.simple_spinner_item,allowed_field_types);
+                        android.R.layout.simple_spinner_item, allowed_field_types);
                 check_type_adapter.setDropDownViewResource
                         (android.R.layout.simple_spinner_dropdown_item);
                 field_type_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -127,7 +130,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                 select_field_type.setAdapter(field_type_adapter);
                 select_check_type.setSelection(check_type);
                 final int effective_field_type;
-                if ( field_type == 0 ) {
+                if (field_type == 0) {
                     select_field_type.setSelection(field_type);
                     effective_field_type = 0;
                 } else {
@@ -136,18 +139,18 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                 }
 
                 final SpinnerWithHintAdapter spinnerWithHintAdapter =
-                        new SpinnerWithHintAdapter(getActivity(),android.R.layout.simple_spinner_item,locale_display_names);
+                        new SpinnerWithHintAdapter(getActivity(), android.R.layout.simple_spinner_item, locale_display_names);
 
 
-                    if ( tts_available && locale_available) {
-                        spinnerWithHintAdapter.setDropDownViewResource
-                                (android.R.layout.simple_spinner_dropdown_item);
-                        select_locale.setAdapter(spinnerWithHintAdapter);
-                        select_locale.setSelection(index_of_locale);
-                        select_locale.setVisibility(View.VISIBLE);
-                    } else {
-                        read_answer.setChecked(false);
-                    }
+                if (tts_available && locale_available) {
+                    spinnerWithHintAdapter.setDropDownViewResource
+                            (android.R.layout.simple_spinner_dropdown_item);
+                    select_locale.setAdapter(spinnerWithHintAdapter);
+                    select_locale.setSelection(index_of_locale);
+                    select_locale.setVisibility(View.VISIBLE);
+                } else {
+                    read_answer.setChecked(false);
+                }
 
                 read_answer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
@@ -172,75 +175,82 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                 emulate_field.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if ( emulated ) {
-                            builder.setMessage(getString(R.string.sure_disable_emulation))
-                                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            cursorLoaderAndUpdateDatabase.disableEmulation(current_field_id);
-                                            alertDialog.dismiss();
-                                            dismiss();
-                                        }
-                                    });
-                        } else {
-                            Intent intent = new Intent(getActivity(), EmulateFieldActivity.class);
-                            intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
-                            getActivity().startActivity(intent);
-                            dismiss();
-                        }
+                        if (!Emulation.isAnyThreadRunning()) {
+                            if (emulated) {
+                                builder.setMessage(getString(R.string.sure_disable_emulation))
+                                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Emulation.startUnemulateThread(getActivity(),current_field_id);
+                                                alertDialog.dismiss();
+                                                dismiss();
+                                            }
+                                        });
 
+                            } else {
+                                Intent intent = new Intent(getActivity(), EmulateFieldActivity.class);
+                                intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
+                                getActivity().startActivity(intent);
+                                dismiss();
+                            }
+                        } else {
+                            Toast toast = Toast.makeText(getActivity(), R.string.emulation_runing, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
                     }
+
                 });
                 positive_button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if ( new_field_name.getText().toString().length() > 0 ) {
-                            if ( read_answer.isChecked() && select_locale.getSelectedItemPosition() == spinnerWithHintAdapter.getCount() ) {
+                        if (new_field_name.getText().toString().length() > 0) {
+                            if (read_answer.isChecked() && select_locale.getSelectedItemPosition() == spinnerWithHintAdapter.getCount()) {
                                 Toast toast = Toast.makeText(getActivity(), R.string.select_locale, Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
-                            } else if ( select_check_type.getSelectedItemPosition() == check_type_adapter.getCount() ) {
+                            } else if (select_check_type.getSelectedItemPosition() == check_type_adapter.getCount()) {
                                 Toast toast = Toast.makeText(getActivity(), R.string.select_a_check_type, Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
-                            } else if ( (! new_field_name.getText().toString().equals(field_name)) && databaseReadOperations.checkFieldDuplication(new_field_name.getText().toString())) {
+                            } else if ((!new_field_name.getText().toString().equals(field_name)) && databaseReadOperations.checkFieldDuplication(new_field_name.getText().toString())) {
                                 Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
+                                toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                             } else {
-                                if ( ! new_field_name.getText().toString().equals(field_name) ) {
-                                    cursorLoaderAndUpdateDatabase.updateFieldName(current_field_id,new_field_name.getText().toString());
+                                if (!new_field_name.getText().toString().equals(field_name)) {
+                                    cursorLoaderAndUpdateDatabase.updateFieldName(current_field_id, new_field_name.getText().toString());
                                     ((Contact) getActivity()).updateFieldName(new_field_name.getText().toString());
                                 }
-                                if ( select_field_type.getSelectedItemPosition() != effective_field_type ) {
-                                    if ( select_field_type.getSelectedItemPosition() == 0 ) {
+                                if (select_field_type.getSelectedItemPosition() != effective_field_type) {
+                                    if (select_field_type.getSelectedItemPosition() == 0) {
                                         cursorLoaderAndUpdateDatabase.updateFieldType(current_field_id,
                                                 select_field_type.getSelectedItemPosition());
                                     } else {
                                         cursorLoaderAndUpdateDatabase.updateFieldType(current_field_id,
-                                                select_field_type.getSelectedItemPosition() + 1 );
+                                                select_field_type.getSelectedItemPosition() + 1);
                                     }
                                 }
-                                cursorLoaderAndUpdateDatabase.updateFieldCheckType(current_field_id,select_check_type.getSelectedItemPosition());
-                                cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id,read_answer.isChecked());
+                                cursorLoaderAndUpdateDatabase.updateFieldCheckType(current_field_id, select_check_type.getSelectedItemPosition());
+                                cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id, read_answer.isChecked());
                                 int selected_locale_position = select_locale.getSelectedItemPosition();
-                                if ( selected_locale_position < spinnerWithHintAdapter.getCount()
-                                        && selected_locale_position >= 0 ) {
+                                if (selected_locale_position < spinnerWithHintAdapter.getCount()
+                                        && selected_locale_position >= 0) {
                                     Locale locale = localeList.get(selected_locale_position);
                                     locale_short_name = locale.getLanguage() + "," + locale.getCountry();
-                                    cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id,locale_short_name);
+                                    cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, locale_short_name);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(FieldActivity.ANALYTICS_CATEGORY)
                                             .setAction("selecting locale")
                                             .build());
                                 } else {
-                                    cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id,null);
+                                    cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, null);
                                 }
                                 dismiss();
                             }
                         } else {
                             Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,400);
+                            toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
                         }
                     }
@@ -249,7 +259,8 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         });
         return alertDialog;
     }
+
     public interface Contact {
-        void updateFieldName (String name ) ;
+        void updateFieldName(String name);
     }
 }

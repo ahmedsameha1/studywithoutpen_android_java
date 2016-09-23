@@ -48,6 +48,7 @@ import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.FieldActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -324,8 +325,8 @@ public class FieldActivity extends AppCompatActivity implements
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         switch (position) {
             case ENHANCED_TEST:
-                if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)) {
-
+                if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)
+                        && !Emulation.isAnyThreadRunning() ) {
                             if (number_of_entries > 0) {
                                 if (databaseOperations.isThisFieldTestPausedEnhancedTest(current_field_id)) {
                                     AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
@@ -349,7 +350,8 @@ public class FieldActivity extends AppCompatActivity implements
                 }
                 break;
             case FULLY_RANDOM_TEST:
-                if (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + current_field_id)) {
+                if (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + current_field_id)
+                        && !Emulation.isAnyThreadRunning() ) {
                     if (number_of_entries > 0) {
                         if (databaseOperations.isThisFieldTestPausedFullyRandomTest(current_field_id)) {
                             AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
@@ -373,7 +375,8 @@ public class FieldActivity extends AppCompatActivity implements
                 }
                 break;
             case STUDY_PERIOD:
-                if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id)) {
+                if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id)
+                        && !Emulation.isAnyThreadRunning() ) {
                             if (number_of_entries > 0) {
                                 if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
                                     AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
