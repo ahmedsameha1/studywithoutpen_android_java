@@ -46,6 +46,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -136,6 +137,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
     private String[] symbol, customable_text;
     private int current_field_type;
+    private boolean isEmulated;
     private int question_data_type;private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -174,6 +176,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         databaseOperations = new DatabaseReadOperations(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
+        isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
         check_type = databaseOperations.getFieldCheckType(current_field_id);
@@ -215,15 +218,27 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
                             new String[]{current_field_id + "", "0"});
                 } else if ( id == GET_ENTRIES_LOADER_ID ){
-                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
-                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
-                                    + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                            new String[]{current_field_id + ""});
+                    if ( isEmulated ) {
+                        return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
+                                "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                        + " a , se." + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " , se." + Contract.COLUMN_ID
+                                        + " FROM " + Contract.STring.TABLE_NAME
+                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                                new String[]{current_field_id + ""});
+                    } else {
+                        return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
+                                "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                        + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
+                                        + " FROM " + Contract.STring.TABLE_NAME
+                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                                new String[]{current_field_id + ""});
+                    }
                 } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
                     return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING

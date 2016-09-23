@@ -50,8 +50,10 @@ import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Random;
@@ -126,6 +128,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private Tracker mTracker;
     private Chronometer timer;
     private long lastPause;
+    private boolean isEmulated;
     private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -184,6 +187,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         current_field_type = databaseOperations.getFieldType(current_field_id);
+        isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
         percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
@@ -252,17 +256,35 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? ",
                             new String[]{current_field_id + "", "0"});
                 } else if (id == GET_ENTRIES_LOADER_ID) {
-                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
-                            "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
-                                    + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                                    + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
-                                    + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                            new String[]{current_field_id + ""});
+                    if ( isEmulated ) {
+                        Calendar calendar = Calendar.getInstance(Locale.US);
+                        calendar.setTimeInMillis(System.currentTimeMillis());
+                        String date_string = new SimpleDateFormat("YYYY-MM-DD HH:MM:SS", Locale.US).format(calendar.getTime());
+                        return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
+                                "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                        + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                                        + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                        + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                                        + " FROM " + Contract.STring.TABLE_NAME
+                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                                        + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL )",
+                                new String[]{current_field_id + "", date_string });
+                    } else {
+                        return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
+                                "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                        + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                                        + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                        + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                                        + " FROM " + Contract.STring.TABLE_NAME
+                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                                new String[]{current_field_id + ""});
+                    }
                 } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING

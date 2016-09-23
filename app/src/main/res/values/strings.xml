@@ -75,7 +75,7 @@
     <string name="import_completed">Fields import has been completed</string>
     <string name="file_with_same_name">Enter another name for the file. Currently, the folder has a file with the same name!</string>
     <string name="select_fields_export">Select all the fields that you want to export:</string>
-    <string name="wait_until_current_export_import_finish">Wait until the current export/import process finishes!</string>
+    <string name="wait_until_current_export_import_emulation_finish">Wait until the current export/import/emulation process finishes!</string>
     <string name="export_import_file_path" translatable="false">%1$s%2$s%3$s</string>
     <string name="not_imported_fields_notification">The following fields cannot be imported because you have fields with the same name but with different field type : %1$s.</string>
     <string name="show">Show</string>
@@ -236,4 +236,6 @@
     <string name="emulation_has_completed">The emulation of the field has completed</string>
     <string name="emulation_completed">Emulation Completed</string>
     <string name="emulation_runing">Wait till the current enabling/disabling emulation process finishes</string>
+    <string name="session_cancelation">Session cancelation</string>
+    <string name="due_emulation_session_cancelation">Due emulation process, some scheduled session has been canceled</string>
 </resources>

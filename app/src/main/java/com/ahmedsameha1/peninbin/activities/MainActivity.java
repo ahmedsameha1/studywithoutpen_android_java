@@ -60,6 +60,7 @@ import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -365,30 +366,26 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onDrawerItemSelected(View view, int position) {
-        final Thread app_export_thread = ExportImportDatabase.getExportThread();
-        final Thread app_import_thread = ExportImportDatabase.getImportThread();
-        final Thread text_import_thread = ImportTextFile.getImportThread();
+
         switch (position) {
             case EXPORT_FIELD:
-                if ((app_export_thread == null || !app_export_thread.isAlive()) &&
-                        (app_import_thread == null || !app_import_thread.isAlive()) &&
-                        (text_import_thread == null || !text_import_thread.isAlive()) ) {
+                if ( !ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                        && !Emulation.isAnyThreadRunning() ) {
                     ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
                     exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
                 } else {
-                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_finish, Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
                 break;
             case IMPORT_FIELD:
-                if ((app_export_thread == null || !app_export_thread.isAlive()) &&
-                        (app_import_thread == null || !app_import_thread.isAlive()) &&
-                        (text_import_thread == null || !text_import_thread.isAlive()) ) {
+                if ( !ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                        && !Emulation.isAnyThreadRunning() ) {
                     ImportFromWhatDialogFragment importFromWhatDialogFragment = new ImportFromWhatDialogFragment();
                     importFromWhatDialogFragment.show(getSupportFragmentManager(), importFromWhatDialogFragment.IMPORT_FROM_WHAT_DIALOG_FRAGMENT);
                 } else {
-                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_finish, Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }

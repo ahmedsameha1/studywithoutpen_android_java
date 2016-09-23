@@ -75,7 +75,7 @@
     <string name="import_completed">اكتمل استيراد المجالات</string>
     <string name="file_with_same_name">أدخل اسم آخر للملف. حاليا المجلد به ملف بنفس الاسم!</string>
     <string name="select_fields_export">اختر كل المجالات التي ترغب في تصديرها:</string>
-    <string name="wait_until_current_export_import_finish">انتظر حتي تنتهي عملية التصدير/الاستيراد الحالية!</string>
+    <string name="wait_until_current_export_import_emulation_finish">انتظر حتي تنتهي عملية التصدير/الاستيراد/المحاكاة الحالية!</string>
     <string name="not_imported_fields_notification">المجالات التالية لا يمكن استيرادها بسبب وجود مجالات لديك لها نفس الأسماء ولكن لها أنواع مجالات مختلفة: %1$s.</string>
     <string name="show">أظهِر</string>
     <string name="hide">أخْفِ</string>
@@ -234,4 +234,6 @@
     <string name="emulation_has_completed">The emulation of the field has completed</string>
     <string name="emulation_completed">Emulation Completed</string>
     <string name="emulation_runing">Wait till the current enabling/disabling emulation process finishes</string>
+    <string name="session_cancelation">Session cancelation</string>
+    <string name="due_emulation_session_cancelation">Due emulation process, some scheduled session has been canceled</string>
 </resources>

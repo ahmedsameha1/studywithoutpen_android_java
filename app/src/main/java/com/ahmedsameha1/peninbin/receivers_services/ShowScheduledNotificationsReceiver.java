@@ -9,9 +9,11 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -111,19 +113,36 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                                     .setSound(notification_sound)
                                     .setAutoCancel(true);
                 }
-                notificationBuilder.setContentIntent(contentIntent);
-                Notification notification = notificationBuilder.build();
 
-
-                // Clear the notification when it is pressed
-                notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-
-                // Send the notification to the system.
-                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify((int)System.currentTimeMillis(), notification);
             } else {
-                //// TODO: 23/09/16 make notification of the cancelation of the scheduled session due the emulation running thread 
+                TaskStackBuilder stackBuilder = null;
+                Intent notifyIntent = new Intent(context, MainActivity.class);
+                notificationBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setContentTitle(context.getResources().getString(R.string.session_cancelation))
+                                .setContentText(context.getResources().getString(R.string.due_emulation_session_cancelation))
+                                .setTicker(context.getResources().getString(R.string.due_emulation_session_cancelation))
+                                .setAutoCancel(true);
+
+                stackBuilder = TaskStackBuilder.create(context);
+                stackBuilder.addParentStack(MainActivity.class);
+                stackBuilder.addNextIntent(notifyIntent);
+                contentIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+
             }
+            notificationBuilder.setContentIntent(contentIntent);
+            Notification notification = notificationBuilder.build();
+
+
+            // Clear the notification when it is pressed
+            notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+
+            // Send the notification to the system.
+            ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify((int)System.currentTimeMillis(), notification);
             mySQLiteCursorLoader.deleteScheduledTimeForBackup(current_field_id,schedule_what,intent.getLongExtra(ScheduleInFieldDialogFragment.TIME,0));
         } else if ( schedule_what == ScheduleInFieldDialogFragment.REFRESHING_USAGE_OF_APP ) {
             Intent refreshing_intent = new Intent(context, RefreshingAppUsageActivity.class);

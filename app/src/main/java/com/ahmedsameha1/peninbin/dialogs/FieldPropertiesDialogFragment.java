@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
+import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.google.android.gms.analytics.HitBuilders;
@@ -175,9 +177,11 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                 emulate_field.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (!Emulation.isAnyThreadRunning()) {
+                        if (!Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                                && !ImportTextFile.isThreadRunning() ) {
                             if (emulated) {
-                                builder.setMessage(getString(R.string.sure_disable_emulation))
+                                AlertDialog.Builder builder2 = new AlertDialog.Builder(getActivity());
+                                builder2.setMessage(getString(R.string.sure_disable_emulation))
                                         .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
@@ -185,7 +189,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                                 alertDialog.dismiss();
                                                 dismiss();
                                             }
-                                        });
+                                        }).create().show();
 
                             } else {
                                 Intent intent = new Intent(getActivity(), EmulateFieldActivity.class);
@@ -194,7 +198,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                 dismiss();
                             }
                         } else {
-                            Toast toast = Toast.makeText(getActivity(), R.string.emulation_runing, Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(getActivity(), R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
                         }

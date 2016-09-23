@@ -48,8 +48,10 @@ import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Random;
@@ -132,6 +134,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
     private String[] symbol, customable_text;
     private int current_field_type;
+    private boolean isEmulated;
 
 
     @Override
@@ -152,6 +155,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             }
             mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
             current_field_type = databaseOperations.getFieldType(current_field_id);
+            isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
             listForTest = retainedFragment.getListForTest_QuickTestActivity();
             toolbar = (Toolbar) findViewById(R.id.toolbar);
             content = (RelativeLayout) findViewById(R.id.content);
@@ -211,17 +215,35 @@ public class QuickTestActivity extends AppCompatActivity implements
                 @Override
                 public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                     if ( id == GET_ENTRIES_LOADER_ID ) {
-                        return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this,
-                                "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
-                                        + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                                        + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
-                                        + " FROM " + Contract.STring.TABLE_NAME
-                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                                new String[]{current_field_id + ""});
+                        if ( isEmulated ) {
+                            Calendar calendar = Calendar.getInstance(Locale.US);
+                            calendar.setTimeInMillis(System.currentTimeMillis());
+                            String date_string = new SimpleDateFormat("YYYY-MM-DD HH:MM:SS", Locale.US).format(calendar.getTime());
+                            return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this,
+                                    "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                            + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                                            + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                            + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                                            + " FROM " + Contract.STring.TABLE_NAME
+                                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                                            + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL )",
+                                    new String[]{current_field_id + "", date_string });
+                        } else {
+                            return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this,
+                                    "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                            + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                                            + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                            + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                                            + " FROM " + Contract.STring.TABLE_NAME
+                                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                                    new String[]{current_field_id + ""});
+                        }
                     } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
                         return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                                 + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING

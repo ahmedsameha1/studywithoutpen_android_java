@@ -39,12 +39,6 @@ public class ExportImportDatabase {
     private static Thread exportThread, importThread;
     private static ArrayList<Integer> notImportedFieldsIntegers;
     private static ArrayList<String> notImportedFieldsStrings;
-    public static Thread getExportThread() {
-        return exportThread;
-    }
-    public static Thread getImportThread() {
-        return importThread;
-    }
 
     public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String path, final String fileName) {
         exportThread = new Thread(new Runnable() {
@@ -66,6 +60,13 @@ public class ExportImportDatabase {
             }
         });
         importThread.start();
+    }
+
+    public static boolean isAnyThreadRunning () {
+        if ( ( exportThread == null || !exportThread.isAlive() ) && ( importThread == null || !importThread.isAlive() ) ) {
+            return false;
+        }
+        return true;
     }
 
     private static void exportFields(Context context, ArrayList<String> fieldNames, String path, String user_fileName) {

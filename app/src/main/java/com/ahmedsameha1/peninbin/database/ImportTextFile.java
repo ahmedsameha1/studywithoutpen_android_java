@@ -30,9 +30,6 @@ public class ImportTextFile {
     private static final int IMPORT_NOTEBOOK_FIELD_FROM_TEXT_FILE = 3;
     private static Thread importThread;
 
-    public static Thread getImportThread() {
-        return importThread;
-    }
 
     public static void startImportThread(final Context context, final String file_path) {
         importThread = new Thread(new Runnable() {
@@ -43,6 +40,13 @@ public class ImportTextFile {
             }
         });
         importThread.start();
+    }
+
+    public static boolean isThreadRunning () {
+        if ( importThread == null || !importThread.isAlive() ) {
+            return false;
+        }
+        return true;
     }
 
     public static void importFields(Context context, String file_path) {

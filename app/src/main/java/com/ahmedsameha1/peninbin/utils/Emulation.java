@@ -62,7 +62,7 @@ public class Emulation {
                 disableEmulation(context, field_id);
             }
         });
-        emulate_thread.start();
+        unemulate_thread.start();
     }
 
     private static void partition(int number_of_everyday_entries, Cursor cursor, SQLiteDatabase sqLiteDatabase) {
@@ -72,7 +72,7 @@ public class Emulation {
                 time_at_start + (AlarmManager.INTERVAL_DAY - (time_at_start % AlarmManager.INTERVAL_DAY)) + 10;
         Calendar calendar = Calendar.getInstance(Locale.US);
         calendar.setTimeInMillis(emulated_creation_time_millis);
-        String emulated_creation_time_string = new SimpleDateFormat("YYYY-MM-DD HH:MM:SS", Locale.US).format(calendar.getTime());
+        String emulated_creation_time_string = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(calendar.getTime());
         int number_of_days = cursor.getCount() / number_of_everyday_entries;
         sqLiteDatabase.beginTransaction();
         try {
