@@ -24,6 +24,7 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EmulateFieldActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -192,10 +193,17 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                         }).create().show();
 
                             } else {
-                                Intent intent = new Intent(getActivity(), EmulateFieldActivity.class);
-                                intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
-                                getActivity().startActivity(intent);
-                                dismiss();
+                                if ( databaseReadOperations.getEntriesNumber(current_field_id,
+                                        Contract.Field.STRING_DATA_TYPE) > 0 ) {
+                                    Intent intent = new Intent(getActivity(), EmulateFieldActivity.class);
+                                    intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
+                                    getActivity().startActivity(intent);
+                                    dismiss();
+                                } else {
+                                    Toast toast = Toast.makeText(getActivity(), R.string.no_entries_in_field, Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
                             }
                         } else {
                             Toast toast = Toast.makeText(getActivity(), R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);

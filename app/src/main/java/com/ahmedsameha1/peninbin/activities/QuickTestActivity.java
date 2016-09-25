@@ -44,6 +44,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowQuickTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -53,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -216,9 +218,8 @@ public class QuickTestActivity extends AppCompatActivity implements
                 public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                     if ( id == GET_ENTRIES_LOADER_ID ) {
                         if ( isEmulated ) {
-                            Calendar calendar = Calendar.getInstance(Locale.US);
-                            calendar.setTimeInMillis(System.currentTimeMillis());
-                            String date_string = new SimpleDateFormat("YYYY-MM-DD HH:MM:SS", Locale.US).format(calendar.getTime());
+                            String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                                    .format(new Date(System.currentTimeMillis()));
                             return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this,
                                     "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                             + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT

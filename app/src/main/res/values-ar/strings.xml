@@ -236,4 +236,6 @@
     <string name="emulation_runing">Wait till the current enabling/disabling emulation process finishes</string>
     <string name="session_cancelation">Session cancelation</string>
     <string name="due_emulation_session_cancelation">Due emulation process, some scheduled session has been canceled</string>
+    <string name="emulation_disabled">Emulation Disabled</string>
+    <string name="emulation_has_disabled">Emulation has been disabled</string>
 </resources>

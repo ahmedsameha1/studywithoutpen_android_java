@@ -226,7 +226,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                         + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
+                                        + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NOT NULL",
                                 new String[]{current_field_id + ""});
                     } else {
                         return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,

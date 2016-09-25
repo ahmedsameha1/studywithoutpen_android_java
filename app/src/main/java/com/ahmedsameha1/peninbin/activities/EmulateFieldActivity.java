@@ -47,7 +47,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
     private EmulateFieldActivityRecyclerViewAdapter mAdapter;
     private int number_of_entries;
     private EditText enter_number_of_entries;
-    private Long starting_entry_id = 0L;
+    private long [] starting_entry_id = {0};
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
     private DatabaseReadOperations databaseOperations;
@@ -147,10 +147,10 @@ public class EmulateFieldActivity extends AppCompatActivity implements
                         Toast toast = Toast.makeText(EmulateFieldActivity.this, "This operation may take some time", Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
-                        if ( starting_entry_id == 0 ) {
+                        if ( starting_entry_id [0] == 0 ) {
                             Emulation.startEmulateThread(this, current_field_id,number_of_entries);
                         } else {
-                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id);
+                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id [0]);
                         }
 
                     } else {

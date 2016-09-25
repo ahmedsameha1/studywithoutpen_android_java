@@ -560,7 +560,8 @@ public class ExportImportDatabase {
                             Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,
                             Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
                     Contract.COLUMN_ID + " NOT IN " + placeholders,
-                    notImportedArray, null, null, null);
+                    notImportedArray, null, null, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
+                            + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
             for (toImportStringEntryCursor.moveToFirst(); toImportStringEntryCursor.getPosition() < toImportStringEntryCursor.getCount();
                  toImportStringEntryCursor.moveToNext()) {
                 Cursor questionCursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},

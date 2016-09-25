@@ -43,6 +43,7 @@ import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -51,6 +52,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -238,9 +240,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                             new String[]{current_field_id + "", "0"});
                 } else if ( id == GET_ENTRIES_LOADER_ID ){
                     if ( isEmulated ) {
-                        Calendar calendar = Calendar.getInstance(Locale.US);
-                        calendar.setTimeInMillis(System.currentTimeMillis());
-                        String date_string = new SimpleDateFormat("YYYY-MM-DD HH:MM:SS", Locale.US).format(calendar.getTime());
+                        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                                .format(new Date(System.currentTimeMillis()));
                         return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
                                 "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a " + " FROM " + Contract.STring.TABLE_NAME
