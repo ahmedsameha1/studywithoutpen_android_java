@@ -18,6 +18,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Ahmed on 7/3/16.
@@ -28,6 +31,8 @@ public class ImportTextFile {
     private static final int FAILED_IMPORT_INVALID_FILE_NOTIFICATION = 1;
     private static final int SUCCESSFUL_IMPORT_NOTIFICATION = 2;
     private static final int IMPORT_NOTEBOOK_FIELD_FROM_TEXT_FILE = 3;
+    private static final int ORDER = 4;
+    private static final int RANK = 3;
     private static Thread importThread;
 
 
@@ -42,57 +47,104 @@ public class ImportTextFile {
         importThread.start();
     }
 
-    public static boolean isThreadRunning () {
-        if ( importThread == null || !importThread.isAlive() ) {
+    public static boolean isThreadRunning() {
+        if (importThread == null || !importThread.isAlive()) {
             return false;
         }
         return true;
     }
 
-    public static void importFields(Context context, String file_path) {
-        /*String filePath = Environment.getExternalStorageDirectory().getPath()
-                + File.separator + EXPORT_IMPORT_DIRECTORY_NAME + File.separator + fileName;*/
+    private static ArrayList<Object[]> checkSort(String file_path) throws
+            InvalidTextFileFormatException, IOException {
+        ArrayList<Object[]> arrayList = new ArrayList<>();
         File file = new File(file_path);
         BufferedReader bufferedReader = null;
         boolean valid_structure = true;
-        try {
-            bufferedReader = new BufferedReader(new FileReader(file));
-            String line = bufferedReader.readLine();
-            while (line != null) {
-                int result = CompareUtility.checkTextLineToImport(line);
-                if (result == 0) {
-                    valid_structure = false;
-                    break;
+
+        bufferedReader = new BufferedReader(new FileReader(file));
+        String line = bufferedReader.readLine();
+        while (line != null) {
+            int result = CompareUtility.checkTextLineToImport(line);
+            if (result == 0) {
+                valid_structure = false;
+                break;
+            }
+            line = bufferedReader.readLine();
+        }
+        if (!valid_structure) {
+            throw new InvalidTextFileFormatException();
+        }
+        bufferedReader = new BufferedReader(new FileReader(file));
+        String text_line = bufferedReader.readLine();
+        while (text_line != null) {
+            int field_separator_index = text_line.indexOf("@@@");
+            int question_separator_index = text_line.indexOf("~~~");
+            String field_name = text_line.substring(0, field_separator_index);
+            String question = text_line.substring(field_separator_index + 3, question_separator_index);
+            String answer = null;
+            int order = -1;
+            int rank = -1;
+            if (text_line.contains("%%%")) {
+                int answer_separator_index = text_line.indexOf("%%%");
+                answer = text_line.substring(question_separator_index + 3, answer_separator_index);
+                rank = Integer.parseInt(text_line.substring(answer_separator_index + 3));
+            } else if (text_line.contains("###")) {
+                int answer_separator_index = text_line.indexOf("###");
+                answer = text_line.substring(question_separator_index + 3, answer_separator_index);
+                order = Integer.parseInt(text_line.substring(answer_separator_index + 3));
+            } else {
+                answer = text_line.substring(question_separator_index + 3);
+            }
+            arrayList.add(new Object[]{field_name, question, answer, rank, order});
+            text_line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
+        Collections.sort(arrayList, new Comparator<Object[]>() {
+            @Override
+            public int compare(Object[] entry1, Object[] entry2) {
+                if ((Integer) entry1[ORDER] == -1 && (Integer) entry2[ORDER] == -1) {
+                    if ((Integer) entry1[RANK] == -1 && (Integer) entry2[RANK] == -1) {
+                        return 0;
+                    } else if ((Integer) entry1[RANK] == -1) {
+                        return 1;
+                    } else if ((Integer) entry2[RANK] == -1) {
+                        return -1;
+                    }
+                } else {
+                    if ((Integer) entry1[ORDER] == -1) {
+                        return 1;
+                    } else if ((Integer) entry2[ORDER] == -1) {
+                        return -1;
+                    }
                 }
-                line = bufferedReader.readLine();
+
+                if ((Integer) entry1[ORDER] < (Integer) entry2[ORDER]) {
+                    return -1;
+                } else if ((Integer) entry1[ORDER] > (Integer) entry2[ORDER]) {
+                    return 1;
+                } else if ((Integer) entry1[RANK] > (Integer) entry2[RANK]) {
+                    return -1;
+                } else if ((Integer) entry1[RANK] < (Integer) entry2[RANK]) {
+                    return 1;
+                } else {
+                    return 0;
+                }
             }
-            if (!valid_structure) {
-                throw new InvalidTextFileFormatException();
-            }
+        });
+        return arrayList;
+    }
+
+    public static void importFields(Context context, String file_path) {
+        try {
+            ArrayList<Object[]> arrayList = checkSort(file_path);
             CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
             DatabaseReadOperations databaseOperations = new DatabaseReadOperations(context);
-            bufferedReader = new BufferedReader(new FileReader(file));
-            String text_line = bufferedReader.readLine();
-            while (text_line != null) {
-                int field_separator_index = text_line.indexOf("@@@");
-                int question_separator_index = text_line.indexOf("~~~");
-                String field_name = text_line.substring(0, field_separator_index);
-                String question = text_line.substring(field_separator_index + 3, question_separator_index);
-                String answer = null;
-                int order = -1;
-                int rank = -1;
-                if (text_line.contains("%%%")) {
-                    int answer_separator_index = text_line.indexOf("%%%");
-                    answer = text_line.substring(question_separator_index + 3, answer_separator_index);
-                    rank = Integer.parseInt(text_line.substring(answer_separator_index + 3));
-                } else if (text_line.contains("###")) {
-                    int answer_separator_index = text_line.indexOf("###");
-                    answer = text_line.substring(question_separator_index + 3, answer_separator_index);
-                    order = Integer.parseInt(text_line.substring(answer_separator_index + 3));
-                } else {
-                    answer = text_line.substring(question_separator_index + 3);
-                }
-                ////////////
+            for (Object[] temp : arrayList) {
+                String field_name = (String) temp[0];
+                String question = (String) temp[1];
+                String answer = (String) temp[2];
+                int order = (int) temp[ORDER];
+                int rank = (int) temp[RANK];
                 long field_id = -1;
                 if (databaseOperations.checkFieldDuplication(field_name)) {
                     field_id = databaseOperations.getFieldId(field_name);
@@ -128,9 +180,7 @@ public class ImportTextFile {
                         }
                     }
                 }
-                text_line = bufferedReader.readLine();
             }
-            bufferedReader.close();
             showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
         } catch (InvalidTextFileFormatException e) {
             showNotification(context, FAILED_IMPORT_INVALID_FILE_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
@@ -139,59 +189,6 @@ public class ImportTextFile {
         } catch (IOException e) {
             showNotification(context, FAILED_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
         }
-        /*try {
-            CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
-            DatabaseReadOperations databaseOperations = new DatabaseReadOperations(context);
-            bufferedReader = new BufferedReader(new FileReader(file));
-            String text_line = bufferedReader.readLine();
-            while ( text_line != null ) {
-                int field_separator_index = text_line.indexOf("@@@");
-                int question_separator_index = text_line.indexOf("~~~");
-                String field_name = text_line.substring(0,field_separator_index);
-                String question = text_line.substring(field_separator_index + 3,question_separator_index);
-                String answer = null;
-                int rank = -1;
-                if ( text_line.contains("%%%") ) {
-                    int answer_separator_index = text_line.indexOf("%%%");
-                    answer = text_line.substring(question_separator_index + 3, answer_separator_index);
-                    rank = Integer.parseInt(text_line.substring(answer_separator_index + 3));
-                } else {
-                    answer = text_line.substring(question_separator_index + 3);
-                }
-                ////////////
-                long field_id = -1;
-                if ( databaseOperations.checkFieldDuplication(field_name) ) {
-                    field_id = databaseOperations.getFieldId(field_name);
-                    if (question.length() > 0 && answer.length() > 0) {
-                        if (!databaseOperations.checkEntryDuplication(question, answer, field_id, Contract.Field.STRING_DATA_TYPE) ) {
-                            if ( rank == -1 ) {
-                                mySQLiteCursorLoader.insertEntry(Contract.Field.STRING_DATA_TYPE,question,answer,field_id);
-                            } else {
-                                mySQLiteCursorLoader.insertEntry(Contract.Field.STRING_DATA_TYPE,question,answer,field_id,rank);
-                            }
-                        }
-                    }
-                } else {
-                    if ( ! field_name.equals("") ) {
-                        mySQLiteCursorLoader.createField(field_name, Constants.FieldTypes.DEFAULT_TYPE, Contract.Field.STRING_DATA_TYPE);
-                        field_id = databaseOperations.getFieldId(field_name);
-                        if (question.length() > 0 && answer.length() > 0) {
-                            if (!databaseOperations.checkEntryDuplication(question, answer, field_id, Contract.Field.STRING_DATA_TYPE) ) {
-                                if ( rank == -1 ) {
-                                    mySQLiteCursorLoader.insertEntry(Contract.Field.STRING_DATA_TYPE,question,answer,field_id);
-                                } else {
-                                    mySQLiteCursorLoader.insertEntry(Contract.Field.STRING_DATA_TYPE,question,answer,field_id,rank);
-                                }
-                            }
-                        }
-                    }
-                }
-                text_line = bufferedReader.readLine();
-            }
-        }
-        catch ( IOException e) {
-            showNotification(context,FAILED_IMPORT_NOTIFICATION,(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
-        }*/
     }
 
     private static void showNotification(Context context, int notificationId, NotificationManager notificationManager) {
