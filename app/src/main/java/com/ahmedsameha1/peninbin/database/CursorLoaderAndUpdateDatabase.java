@@ -13,6 +13,7 @@ import android.os.Handler;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.commonsware.cwac.loaderex.AbstractCursorLoader;
 import com.commonsware.cwac.loaderex.ContentChangingTask;
 
@@ -160,6 +161,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
     public void insertEntry(int question_data_type, String question, String answer, long field_id) {
+        DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
@@ -193,6 +195,11 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
                 contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
+                int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
+                if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                    contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                            Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, sqLiteDatabase));
+                }
                 sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
             }
@@ -203,6 +210,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void insertEntryWithRank(int question_data_type, String question, String answer, long field_id, int rank) {
+        DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
@@ -237,6 +245,11 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
                 contentValues.put(Contract.String_Entry.COLUMN_RANK,rank);
+                int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
+                if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                    contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                            Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, sqLiteDatabase));
+                }
                 sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
             }
@@ -247,6 +260,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void insertEntryWithOrder(int question_data_type, String question, String answer, long field_id, int order) {
+        DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
@@ -281,6 +295,11 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
                 contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, order);
+                int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
+                if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                    contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                            Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, sqLiteDatabase));
+                }
                 sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
             }

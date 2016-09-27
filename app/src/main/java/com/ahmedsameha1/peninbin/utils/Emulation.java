@@ -163,29 +163,32 @@ public class Emulation {
     }
 
     public static String getEmulationCreationDate(long field_id, int number_of_everyday_entries, SQLiteDatabase sqLiteDatabase) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
         Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
                 new String[]{Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
                 Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NOT NULL",
-                new String[]{field_id + ""}, null, null, "datetime(" + Contract.CREATION_DATE + ") DESC");
+                new String[]{field_id + ""}, null, null, "datetime(" + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + ") DESC");
         int count = cursor.getCount();
-        cursor.moveToFirst();
-        String date_string = cursor.getString(0);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
         if (count > 0) {
+            cursor.moveToFirst();
+            String date_string = cursor.getString(0);
+            Cursor cursor1 = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
+                    Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " = ? ", new String[]{date_string}, null, null, null);
+            int number_of_entries_last_date = cursor1.getCount();
             Calendar calendar = Calendar.getInstance(Locale.getDefault());
             long date_millis = Timestamp.valueOf(date_string).getTime();
             long now_millis = System.currentTimeMillis();
             Calendar calendar_date = Calendar.getInstance(Locale.getDefault());
             calendar_date.setTimeInMillis(date_millis);
             Calendar calendar_now = Calendar.getInstance(Locale.getDefault());
-            calendar_date.setTimeInMillis(now_millis);
+            calendar_now.setTimeInMillis(now_millis);
             SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
-            int remaining_this_day = count % number_of_everyday_entries;
+            int remaining_this_day = number_of_everyday_entries - number_of_entries_last_date;
+            long date_millis_one_day_after = Timestamp.valueOf(date_string).getTime() + AlarmManager.INTERVAL_DAY;
             if (now_millis >= date_millis) {
-                date_millis = Timestamp.valueOf(date_string).getTime() + AlarmManager.INTERVAL_DAY;
-                if (fmt.format(calendar_date).equals(fmt.format(calendar_now))) {
+                if (fmt.format(calendar_date.getTime()).equals(fmt.format(calendar_now.getTime()))) {
                     if (remaining_this_day == 0) {
-                        calendar.setTimeInMillis(date_millis);
+                        calendar.setTimeInMillis(date_millis_one_day_after);
                         return simpleDateFormat.format(calendar.getTime());
                     } else {
                         return date_string;
@@ -196,7 +199,7 @@ public class Emulation {
                 }
             } else {
                 if (remaining_this_day == 0) {
-                    calendar.setTimeInMillis(date_millis);
+                    calendar.setTimeInMillis(date_millis_one_day_after);
                     return simpleDateFormat.format(calendar.getTime());
                 } else {
                     return date_string;

@@ -17,6 +17,8 @@ import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ExportSuccessfulActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.NotImportedFieldsActivity;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.InvalidStudyWithoutPenFileException;
 
 import java.io.File;
@@ -423,7 +425,7 @@ public class ExportImportDatabase {
                 }
                 importFields(context, toImportDatabase, importUserUsageData );
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            } else if (databaseVersion == 10 ) {
+            } else if ( databaseVersion == 10  || databaseVersion == 11 ) {
                 importFields(context, toImportDatabase, importUserUsageData );
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else {
@@ -443,6 +445,7 @@ public class ExportImportDatabase {
 
     private static void importFields(Context context, SQLiteDatabase toImportDatabase, boolean importUserUsageData )
             throws IOException, SQLiteException, InvalidStudyWithoutPenFileException {
+        DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notImportedFieldsIntegers = new ArrayList<Integer>();
         SQLiteDatabase appDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
@@ -625,6 +628,11 @@ public class ExportImportDatabase {
                     contentValues1.put(Contract.String_Entry.COLUMN_REMIND_AT,toImportStringEntryCursor.getLong(9));
                     contentValues1.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,toImportStringEntryCursor.getInt(10));
                     contentValues1.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,toImportStringEntryCursor.getInt(11));
+                    int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
+                    if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                        contentValues1.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                                Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, appDatabase));
+                    }
                     try {
                         string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
                     } catch (Exception e) {
@@ -643,6 +651,11 @@ public class ExportImportDatabase {
                     contentValues1.put(Contract.String_Entry.COLUMN_ANSWER,answer_id);
                     contentValues1.put(Contract.String_Entry.COLUMN_FIELD,field_id);
                     contentValues1.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, toImportStringEntryCursor.getInt(11));
+                    int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
+                    if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                        contentValues1.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                                Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, appDatabase));
+                    }
                     try {
                         string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
                     } catch (Exception e) {
