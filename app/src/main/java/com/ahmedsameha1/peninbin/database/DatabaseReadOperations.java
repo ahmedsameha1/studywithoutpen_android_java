@@ -6,8 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by ahmed_000 on 8/31/2015.
@@ -483,10 +487,20 @@ public class DatabaseReadOperations {
 
     public int getEntriesNumber(long field_id, int question_data_type) {
         int number = 0;
+        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                .format(new Date(System.currentTimeMillis()));
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
-            Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
-                            + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{field_id + ""});
+            Cursor cursor;
+            if ( isEmulated(field_id) <= Constants.NOT_EMULATED ) {
+                cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
+                                + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                        new String[]{field_id + ""});
+            } else {
+                cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
+                                + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? AND ? > "
+                        + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                        new String[]{field_id + "", date_string});
+            }
             cursor.moveToFirst();
             number = cursor.getInt(0);
             cursor.close();
@@ -592,9 +606,19 @@ public class DatabaseReadOperations {
                 Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
     }
     public int countAskedCurrentTestRound( long field_id ) {
-        Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
-                Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND + " = ? ",
-                new String[]{field_id + "", Constants.TestRound.ASKED_AT_CURRENT_ROUND + ""},null,null,null);
+        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                .format(new Date(System.currentTimeMillis()));
+        Cursor cursor;
+        if ( isEmulated(field_id) <= Constants.NOT_EMULATED ) {
+            cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                    Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND + " = ? ",
+                    new String[]{field_id + "", Constants.TestRound.ASKED_AT_CURRENT_ROUND + ""}, null, null, null);
+        } else {
+            cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                    Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                            + " = ? AND ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                    new String[]{field_id + "", Constants.TestRound.ASKED_AT_CURRENT_ROUND + "", date_string}, null, null, null);
+        }
         int count = cursor.getCount();
         cursor.close();
         return count;

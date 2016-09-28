@@ -47,13 +47,16 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -219,6 +222,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                             new String[]{current_field_id + "", "0"});
                 } else if ( id == GET_ENTRIES_LOADER_ID ){
                     if ( isEmulated ) {
+                        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                                .format(new Date(System.currentTimeMillis()));
                         return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
                                 "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a , se." + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " , se." + Contract.COLUMN_ID
@@ -226,9 +231,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                         + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
-                                        + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NOT NULL",
-                                new String[]{current_field_id + ""});
+                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND ? > "
+                                        + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE ,
+                                new String[]{current_field_id + "", date_string });
                     } else {
                         return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
                                 "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
