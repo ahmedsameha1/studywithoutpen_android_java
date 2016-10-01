@@ -65,6 +65,10 @@ public class CopyMoveEntriesActivityRecyclerViewAdapter extends
         viewHolder.currentAnswer = answer;
         viewHolder.question.setText(question);
         viewHolder.answer.setText(answer);
-
+        if ( list_of_entries.contains(entry_id) ) {
+            viewHolder.checkBox.setChecked(true);
+        } else {
+            viewHolder.checkBox.setChecked(false);
+        }
     }
 }

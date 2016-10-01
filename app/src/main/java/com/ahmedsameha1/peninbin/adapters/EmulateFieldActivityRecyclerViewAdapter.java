@@ -31,8 +31,11 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
     private DatabaseReadOperations databaseOperations;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private ArrayList<Long> list_of_entries;
-    private long [] starting_entry_id;
-    public EmulateFieldActivityRecyclerViewAdapter(Context context, Cursor data, long [] starting_entry_id ) {
+    private ArrayList<Long> starting_entry_id;
+    private static CheckBox lastChecked = null;
+
+
+    public EmulateFieldActivityRecyclerViewAdapter(Context context, Cursor data, ArrayList<Long> starting_entry_id ) {
         super(context,data);
         this.context = context;
         this.starting_entry_id = starting_entry_id;
@@ -51,19 +54,29 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
                     @Override
                     public void onCheckChanged(long entry_id, boolean checked) {
                         if ( checked ) {
-                            list_of_entries.add(entry_id);
-                            starting_entry_id [0] = entry_id;
-                            if ( list_of_entries.size() > 1 ) {
+//                            list_of_entries.add(entry_id);
+
+                            if( lastChecked != null )
+                            {
+                                lastChecked.setChecked(false);
+
+                            }
+                            starting_entry_id.clear();
+                                starting_entry_id.add(entry_id);
+                                lastChecked = ((CheckBox) itemView.findViewById(R.id.copy));
+
+                            /*if ( list_of_entries.size() > 1 ) {
                                 ((CheckBox)itemView.findViewById(R.id.copy)).setChecked(false);
                                 list_of_entries.remove(entry_id);
                                 starting_entry_id [0] = 0;
                                 Toast toast = Toast.makeText(context, R.string.only_one, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
-                            }
+                            }*/
                         } else {
-                            list_of_entries.remove(entry_id);
-                            starting_entry_id [0] = 0;
+//                            list_of_entries.remove(entry_id);
+                            starting_entry_id.clear();
+                            lastChecked = null;
                         }
                     }
                 });
@@ -81,6 +94,39 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
         viewHolder.currentAnswer = answer;
         viewHolder.question.setText(question);
         viewHolder.answer.setText(answer);
+        viewHolder.checkBox.setOnCheckedChangeListener(null);
+        if ( starting_entry_id.contains( entry_id) ) {
+            viewHolder.checkBox.setChecked(true);
+        } else {
+            viewHolder.checkBox.setChecked(false);
+        }
+        viewHolder.checkBox.setOnCheckedChangeListener(viewHolder);
+        if ( viewHolder.checkBox.isChecked())
+        {
+            lastChecked = viewHolder.checkBox;
 
+        }
+    /*    viewHolder.checkBox.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                CheckBox cb = (CheckBox)v;
+
+
+                if(cb.isChecked() )
+                {
+                    if(lastChecked != null)
+                    {
+                        lastChecked.setChecked(false);
+                    }
+
+                    lastChecked = cb;
+
+                }
+                else
+                    lastChecked = null;
+            }
+        });*/
     }
 }

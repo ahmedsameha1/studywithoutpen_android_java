@@ -3,22 +3,33 @@ package com.ahmedsameha1.peninbin.receivers_services;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
+import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 /**
  * Created by ahmed on 22/05/16.
@@ -27,35 +38,39 @@ public class RandomQuickTestsSchedulingService extends IntentService {
     private AlarmManager alarmManager;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
 
-    public RandomQuickTestsSchedulingService(){
+    public RandomQuickTestsSchedulingService() {
         super("RandomQuickTestsSchedulingService");
     }
+
     @Override
     protected void onHandleIntent(Intent workIntent) {
-        Log.i("service:","service running");
+        Toast.makeText(this," here we are ", Toast.LENGTH_LONG);
+        Log.i("service:", "service running");
         scheduleRandomQuickTest();
         tryRefreshingAppUsage();
+        reorderEmulatedFields();
         SimpleWakefulReceiver.completeWakefulIntent(workIntent);
-        Log.i("service:","service end");
+        Log.i("service:", "service end");
     }
+
     private void scheduleRandomQuickTest() {
         alarmManager = (AlarmManager) this.getSystemService(AppCompatActivity.ALARM_SERVICE);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
         DatabaseReadOperations databaseOperations = new DatabaseReadOperations(this);
         ArrayList<long[]> scheduling_data = databaseOperations.getRandomQuickTestsSchedulingData();
-        if ( scheduling_data.size() > 0 ) {
-            for ( long [] field_data : scheduling_data ) {
-                long field_id = field_data [0];
+        if (scheduling_data.size() > 0) {
+            for (long[] field_data : scheduling_data) {
+                long field_id = field_data[0];
                 int number_of_quick_tests = (int) field_data[1];
                 int number_of_tries = (int) field_data[2];
                 int number_of_questions = (int) field_data[3];
                 int controlled_portion = (int) field_data[4];
                 int wrongness_level = (int) field_data[5];
                 int rank_level = (int) field_data[6];
-                String [][] excluded_times = databaseOperations.get_excluded_times(field_id);
+                String[][] excluded_times = databaseOperations.get_excluded_times(field_id);
                 ArrayList<Long> long_excluded_times = new ArrayList<>();
-                for ( String[] excluded_time : excluded_times ) {
-                    if ( excluded_time != null ) {
+                for (String[] excluded_time : excluded_times) {
+                    if (excluded_time != null) {
                         String text;
                         Calendar calendar;
                         StringTokenizer stringTokenizer;
@@ -77,47 +92,47 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                 }
                 ArrayList<Long> randoms = new ArrayList<>();
                 Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR_OF_DAY,0);
-                calendar.set(Calendar.MINUTE,5);
-                calendar.set(Calendar.SECOND,0);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 5);
+                calendar.set(Calendar.SECOND, 0);
                 Random random_opject = new Random();
-                for ( int i = 0; i < number_of_quick_tests; i++ ) {
+                for (int i = 0; i < number_of_quick_tests; i++) {
                     rrr:
-                    for ( int t = 0; t < 10000; t++ ) {
-                        Log.i("service:","try a time");
+                    for (int t = 0; t < 10000; t++) {
+                        Log.i("service:", "try a time");
                         long random = calendar.getTimeInMillis() + 15 * 60 * 1000 * random_opject.nextInt(94);
-                        if ( long_excluded_times.size() >= 2 ) {
-                            if ( random >= long_excluded_times.get(0) && random <= long_excluded_times.get(1) ) {
+                        if (long_excluded_times.size() >= 2) {
+                            if (random >= long_excluded_times.get(0) && random <= long_excluded_times.get(1)) {
                                 continue;
                             }
                         }
-                        if ( long_excluded_times.size() >= 4 ) {
-                            if ( random >= long_excluded_times.get(2) && random <= long_excluded_times.get(3) ) {
+                        if (long_excluded_times.size() >= 4) {
+                            if (random >= long_excluded_times.get(2) && random <= long_excluded_times.get(3)) {
                                 continue;
                             }
                         }
-                        if ( long_excluded_times.size() >= 6 ) {
-                            if ( random >= long_excluded_times.get(4) && random <= long_excluded_times.get(5) ) {
+                        if (long_excluded_times.size() >= 6) {
+                            if (random >= long_excluded_times.get(4) && random <= long_excluded_times.get(5)) {
                                 continue;
                             }
                         }
-                        if ( long_excluded_times.size() >= 8 ) {
-                            if ( random >= long_excluded_times.get(6) && random <= long_excluded_times.get(7) ) {
+                        if (long_excluded_times.size() >= 8) {
+                            if (random >= long_excluded_times.get(6) && random <= long_excluded_times.get(7)) {
                                 continue;
                             }
                         }
-                        if ( long_excluded_times.size() >= 10 ) {
-                            if ( random >= long_excluded_times.get(8) && random <= long_excluded_times.get(9) ) {
+                        if (long_excluded_times.size() >= 10) {
+                            if (random >= long_excluded_times.get(8) && random <= long_excluded_times.get(9)) {
                                 continue;
                             }
                         }
-                        for ( Long r : randoms ) {
-                            if ( r == random ) {
+                        for (Long r : randoms) {
+                            if (r == random) {
                                 continue rrr;
                             }
                         }
                         randoms.add(random);
-                        Log.i("service:","time");
+                        Log.i("service:", "time");
                         Intent intent = new Intent(this, ShowScheduledNotificationsReceiver.class);
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
                         intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, number_of_questions);
@@ -127,12 +142,12 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                         intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness_level);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
-                        intent.putExtra(ScheduleInFieldDialogFragment.TIME,random);
+                        intent.putExtra(ScheduleInFieldDialogFragment.TIME, random);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                        int request = (int)System.currentTimeMillis();
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(this,request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        int request = (int) System.currentTimeMillis();
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.set(AlarmManager.RTC, random, pendingIntent);
-                        mySQLiteCursorLoader.addScheduledTimeForBackup(field_id,ScheduleInFieldDialogFragment.QUICK_TEST,random,request);
+                        mySQLiteCursorLoader.addScheduledTimeForBackup(field_id, ScheduleInFieldDialogFragment.QUICK_TEST, random, request);
 
                         break;
                     }
@@ -140,8 +155,9 @@ public class RandomQuickTestsSchedulingService extends IntentService {
             }
         }
     }
+
     private void tryRefreshingAppUsage() {
-        if ( System.currentTimeMillis() - UsageLastTime.getUsageLastTime(this) > AlarmManager.INTERVAL_DAY ) {
+        if (System.currentTimeMillis() - UsageLastTime.getUsageLastTime(this) > AlarmManager.INTERVAL_DAY) {
             Random random_object = new Random();
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
@@ -149,8 +165,52 @@ public class RandomQuickTestsSchedulingService extends IntentService {
             Intent intent = new Intent(this, ShowScheduledNotificationsReceiver.class);
             intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.REFRESHING_USAGE_OF_APP);
             intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this,(int)System.currentTimeMillis() , intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.set(AlarmManager.RTC, random, pendingIntent);
         }
     }
+
+    private void reorderEmulatedFields() {
+        Log.i("on reorder", "on reorder");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.DAY_OF_MONTH,calendar.get(Calendar.DAY_OF_MONTH) + 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND,0);
+        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                .format(calendar.getTime());
+        SQLiteDatabase sqLiteDatabase = DatabaseHelper.getInstance(this).getWritableDatabase();
+        Cursor all_emulated_entries_cursor = sqLiteDatabase.rawQuery("SELECT " + Contract.COLUMN_ID
+                + ", " + Contract.String_Entry.COLUMN_FIELD + ", " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                + ", " + Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + ", " + Contract.String_Entry.COLUMN_RANK
+                + " FROM " + Contract.String_Entry.TABLE_NAME + " WHERE " + Contract.String_Entry.COLUMN_FIELD
+                + " IN ( SELECT " + Contract.COLUMN_ID + " FROM " +
+                Contract.Field.TABLE_NAME + " WHERE " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER + " > ? ) AND "
+                + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " >= ? ", new String[]{Constants.NOT_EMULATED + "", date_string});
+        for (all_emulated_entries_cursor.moveToFirst(); all_emulated_entries_cursor.getPosition() < all_emulated_entries_cursor.getCount();
+             all_emulated_entries_cursor.moveToNext()) {
+            Log.i("working", "outer");
+            Cursor entry_cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[] { Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
+                    Contract.String_Entry.COLUMN_FIELD + " = ? AND ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                            + " AND ( " + Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " < ? OR ( " + Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " = ? AND "
+                            + Contract.String_Entry.COLUMN_RANK + " > ? ) ) ", new String[] { all_emulated_entries_cursor.getLong(1) + "", all_emulated_entries_cursor.getString(2),
+                            all_emulated_entries_cursor.getInt(3) + "", all_emulated_entries_cursor.getInt(3) + "", all_emulated_entries_cursor.getInt(4) + ""},null, null,
+                    Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, " + Contract.String_Entry.COLUMN_RANK + " DESC ");
+            Log.i("working", "inner");
+            if ( entry_cursor.moveToFirst() ) {
+                String temp = all_emulated_entries_cursor.getString(2);
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, entry_cursor.getString(1));
+                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",
+                        new String[]{all_emulated_entries_cursor.getLong(0) + ""} );
+                contentValues = new ContentValues();
+                contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, temp);
+                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",
+                        new String[]{entry_cursor.getLong(0) + ""});
+            }
+        }
+    }
+
+
 }

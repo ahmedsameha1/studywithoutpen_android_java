@@ -47,7 +47,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
     private EmulateFieldActivityRecyclerViewAdapter mAdapter;
     private int number_of_entries;
     private EditText enter_number_of_entries;
-    private long [] starting_entry_id = {0};
+    private ArrayList<Long> starting_entry_id = new ArrayList<>();
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
     private DatabaseReadOperations databaseOperations;
@@ -112,7 +112,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(EmulateFieldActivity.this);
                 number_of_tries_help_dialog_builder
-                        .setMessage(R.string.percentage_or_number_help).create().show(); //// TODO: 9/22/16 write the real help message
+                        .setMessage(R.string.everyday_entries_help).create().show();
             }
         });
         starting_entry_help.setOnClickListener(new View.OnClickListener() {
@@ -120,7 +120,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(EmulateFieldActivity.this);
                 number_of_tries_help_dialog_builder
-                        .setMessage(R.string.percentage_or_number_help).create().show();//// TODO: 9/22/16 write the real help message
+                        .setMessage(R.string.starting_entry_help).create().show();
             }
         });
     }
@@ -147,10 +147,10 @@ public class EmulateFieldActivity extends AppCompatActivity implements
                         Toast toast = Toast.makeText(EmulateFieldActivity.this, "This operation may take some time", Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
-                        if ( starting_entry_id [0] == 0 ) {
+                        if ( starting_entry_id.size() == 0 ) {
                             Emulation.startEmulateThread(this, current_field_id,number_of_entries);
                         } else {
-                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id [0]);
+                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id.get(0));
                         }
 
                     } else {

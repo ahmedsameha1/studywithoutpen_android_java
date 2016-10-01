@@ -23,6 +23,7 @@ import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * Created by ahmed on 24/05/16.
@@ -113,7 +114,9 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         if ( sharedPreferences.contains(MainActivity.MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST) ) {
             int request = sharedPreferences.getInt(MainActivity.MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST,0);
             Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
+            long long_utc = System.currentTimeMillis();
+            long offset = TimeZone.getDefault().getOffset(long_utc);
+            calendar.setTimeInMillis(long_utc + offset);
             calendar.set(Calendar.DAY_OF_MONTH,calendar.get(Calendar.DAY_OF_MONTH) + 1);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);

@@ -43,6 +43,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_below="@id/number_of_entries_linearlayout"
+        android:gravity="center"
         android:weightSum="10">
 
         <TextView
@@ -50,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="9"
             android:gravity="center"
-            android:text="IF YOU WANT, select the starting entry"/>
+            android:text="@string/if_you_want_select_the_starting_entry"/>
 
         <ImageButton
             android:id="@+id/starting_entry_help"
