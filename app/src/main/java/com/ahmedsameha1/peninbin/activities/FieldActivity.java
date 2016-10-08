@@ -133,6 +133,7 @@ public class FieldActivity extends AppCompatActivity implements
     private Tracker mTracker;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -320,14 +321,14 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     public void onDrawerItemSelected(View view, int position) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
-        int number_of_entries = databaseOperations.getEntriesNumber(current_field_id, question_data_type);
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        boolean isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         switch (position) {
             case ENHANCED_TEST:
                 if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)
                         && !Emulation.isAnyThreadRunning() ) {
-                            if (number_of_entries > 0) {
+                            if (databaseOperations.getEntriesNumberForTests(current_field_id,question_data_type) > 0) {
                                 if (databaseOperations.isThisFieldTestPausedEnhancedTest(current_field_id)) {
                                     AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
                                     bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
@@ -342,6 +343,11 @@ public class FieldActivity extends AppCompatActivity implements
                                 Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
+                                if ( isEmulated ) {
+                                    Toast toast1 = Toast.makeText(FieldActivity.this, R.string.field_emulated, Toast.LENGTH_SHORT);
+                                    toast1.setGravity(Gravity.TOP, 0, 400);
+                                    toast1.show();
+                                }
                             }
                 } else {
                     Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
@@ -352,7 +358,7 @@ public class FieldActivity extends AppCompatActivity implements
             case FULLY_RANDOM_TEST:
                 if (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + current_field_id)
                         && !Emulation.isAnyThreadRunning() ) {
-                    if (number_of_entries > 0) {
+                    if (databaseOperations.getEntriesNumberForTests(current_field_id,question_data_type) > 0) {
                         if (databaseOperations.isThisFieldTestPausedFullyRandomTest(current_field_id)) {
                             AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
                             bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
@@ -367,6 +373,11 @@ public class FieldActivity extends AppCompatActivity implements
                         Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
+                        if ( isEmulated ) {
+                            Toast toast1 = Toast.makeText(FieldActivity.this, R.string.field_emulated, Toast.LENGTH_SHORT);
+                            toast1.setGravity(Gravity.TOP, 0, 400);
+                            toast1.show();
+                        }
                     }
                 } else {
                     Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
@@ -377,7 +388,7 @@ public class FieldActivity extends AppCompatActivity implements
             case STUDY_PERIOD:
                 if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id)
                         && !Emulation.isAnyThreadRunning() ) {
-                            if (number_of_entries > 0) {
+                            if (databaseOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
                                 if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
                                     AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
                                     fragment2.setArguments(bundle);
@@ -391,6 +402,11 @@ public class FieldActivity extends AppCompatActivity implements
                                 Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
+                                if ( isEmulated ) {
+                                    Toast toast1 = Toast.makeText(FieldActivity.this, R.string.field_emulated, Toast.LENGTH_SHORT);
+                                    toast1.setGravity(Gravity.TOP, 0, 400);
+                                    toast1.show();
+                                }
                             }
 
                 } else {

@@ -282,7 +282,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                         } else {
                                             DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
                                             int currentNumberOfEntries =
-                                                    databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+                                                    databaseOperations.getEntriesNumberForTests(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                                             if ( number > 0 && number <= currentNumberOfEntries) {
                                                 Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                                                 intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);

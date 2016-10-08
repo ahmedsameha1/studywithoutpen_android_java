@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
+import android.provider.ContactsContract;
 
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
@@ -713,7 +714,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void copyEntries( ArrayList<Long> list_of_entries, long field_id) {
-        buildCopyEntries(this).execute(db, list_of_entries, field_id);
+        buildCopyEntries(this).execute(db, list_of_entries, field_id, context);
     }
 
     protected ContentChangingTask buildCopyEntries(CursorLoaderAndUpdateDatabase loader) {
@@ -731,6 +732,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
             ArrayList<Long> list_of_entries = (ArrayList<Long>) params[1];
             long field_id = (long) params[2];
+            Context context = (Context) params[3];
+            int number_of_everyday_entries = new DatabaseReadOperations(context).isEmulated(field_id);
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             sqLiteDatabase.beginTransaction();
             try {
@@ -747,6 +750,10 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                     contentValues.put(Contract.String_Entry.COLUMN_ANSWER,cursor.getLong(1));
                     contentValues.put(Contract.String_Entry.COLUMN_RANK,cursor.getInt(2));
                     contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,cursor.getInt(3));
+                    if ( number_of_everyday_entries > Constants.NOT_EMULATED ) {
+                        contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                                Emulation.getEmulationCreationDate(field_id,number_of_everyday_entries,sqLiteDatabase));
+                    }
                     sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
                 }
                 sqLiteDatabase.setTransactionSuccessful();
@@ -758,7 +765,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void copyField(  long from_field_id, long to_field_id) {
-        buildCopyField(this).execute(db, from_field_id, to_field_id);
+        buildCopyField(this).execute(db, from_field_id, to_field_id, context);
     }
 
     protected ContentChangingTask buildCopyField(CursorLoaderAndUpdateDatabase loader) {
@@ -776,6 +783,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
             long from_field_id = (long) params[1];
             long to_field_id = (long) params[2];
+            Context context = (Context) params[3];
+            int number_of_everyday_entries = new DatabaseReadOperations(context).isEmulated(to_field_id);
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             sqLiteDatabase.beginTransaction();
             try {
@@ -791,6 +800,10 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                     contentValues.put(Contract.String_Entry.COLUMN_ANSWER,cursor.getLong(1));
                     contentValues.put(Contract.String_Entry.COLUMN_RANK,cursor.getInt(2));
                     contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,cursor.getInt(3));
+                    if ( number_of_everyday_entries > Constants.NOT_EMULATED ) {
+                        contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                                Emulation.getEmulationCreationDate(to_field_id,number_of_everyday_entries,sqLiteDatabase));
+                    }
                     sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
                 }
                 sqLiteDatabase.setTransactionSuccessful();
@@ -801,7 +814,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
     public void moveEntries( ArrayList<Long> list_of_entries,  long to_field_id) {
-        buildMoveEntries(this).execute(db, list_of_entries, to_field_id);
+        buildMoveEntries(this).execute(db, list_of_entries, to_field_id, context);
     }
 
     protected ContentChangingTask buildMoveEntries(CursorLoaderAndUpdateDatabase loader) {
@@ -819,6 +832,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
             ArrayList<Long> list_of_entries = (ArrayList<Long>) params[1];
             long to_field_id = (long) params[2];
+            Context context = (Context) params[3];
+            int number_of_everyday_entries = new DatabaseReadOperations(context).isEmulated(to_field_id);
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             sqLiteDatabase.beginTransaction();
             try {
@@ -835,6 +850,10 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                     contentValues.put(Contract.String_Entry.COLUMN_ANSWER,cursor.getLong(1));
                     contentValues.put(Contract.String_Entry.COLUMN_RANK,cursor.getInt(2));
                     contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,cursor.getInt(3));
+                    if ( number_of_everyday_entries > Constants.NOT_EMULATED ) {
+                        contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                                Emulation.getEmulationCreationDate(to_field_id,number_of_everyday_entries,sqLiteDatabase));
+                    }
                     sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME,null,
                             contentValues,SQLiteDatabase.CONFLICT_IGNORE);
                     sqLiteDatabase.delete(Contract.String_Entry.TABLE_NAME, Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});

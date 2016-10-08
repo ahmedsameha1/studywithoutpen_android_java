@@ -283,7 +283,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                                         } else {
                                             DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
                                             int currentNumberOfEntries =
-                                                    databaseOperations.getEntriesNumber(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
+                                                    databaseOperations.getEntriesNumberForTests(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
                                             int numberInt = Double.valueOf(number).intValue();
                                             if ( numberInt > 0 && numberInt <= currentNumberOfEntries) {
                                                 Intent intent = new Intent(getActivity(), EnhancedTestActivity.class);

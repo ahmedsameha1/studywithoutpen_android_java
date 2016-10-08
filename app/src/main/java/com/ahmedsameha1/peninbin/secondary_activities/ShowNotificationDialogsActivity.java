@@ -20,6 +20,7 @@ import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.QuickTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 
 public class ShowNotificationDialogsActivity extends AppCompatActivity {
@@ -40,7 +41,8 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
         if ( databaseOperations.checkFieldExists(current_field_id) ) {
             int dialog_type = getIntent().getIntExtra(DIALOG_TYPE, -1);
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            int number_of_entries = databaseOperations.getEntriesNumber(current_field_id, databaseOperations.getQuestionDataType(current_field_id));
+            int question_data_type = databaseOperations.getQuestionDataType(current_field_id);
+            boolean isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
             int field_type = databaseOperations.getFieldType(current_field_id);
             Bundle bundle = new Bundle();
             bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
@@ -57,7 +59,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                 case ENHANCED_TEST_DIALOG:
                     if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)) {
 
-                        if (number_of_entries > 0) {
+                        if (databaseOperations.getEntriesNumberForTests(current_field_id,question_data_type) > 0) {
                             if (databaseOperations.isThisFieldTestPausedEnhancedTest(current_field_id)) {
                                 AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
                                 fragment3.setArguments(bundle);
@@ -71,6 +73,11 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                             Toast toast = Toast.makeText(this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
+                            if ( isEmulated ) {
+                                Toast toast1 = Toast.makeText(this, R.string.field_emulated, Toast.LENGTH_SHORT);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                            }
                         }
 
                     } else {
@@ -82,7 +89,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                 case FULLY_RANDOM_TEST_DIALOG:
                     if (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + current_field_id)) {
 
-                        if (number_of_entries > 0) {
+                        if (databaseOperations.getEntriesNumberForTests(current_field_id,question_data_type) > 0) {
                             if (databaseOperations.isThisFieldTestPausedFullyRandomTest(current_field_id)) {
                                 AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
                                 fragment3.setArguments(bundle);
@@ -96,6 +103,11 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                             Toast toast = Toast.makeText(this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
+                            if ( isEmulated ) {
+                                Toast toast1 = Toast.makeText(this, R.string.field_emulated, Toast.LENGTH_SHORT);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                            }
                         }
 
                     } else {
@@ -107,7 +119,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                 case STUDY_PERIOD_DIALOG:
                     if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id)) {
 
-                        if (number_of_entries > 0) {
+                        if (databaseOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
                             if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
                                 AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
                                 fragment2.setArguments(bundle);
@@ -121,6 +133,11 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                             Toast toast = Toast.makeText(this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
+                            if ( isEmulated ) {
+                                Toast toast1 = Toast.makeText(this, R.string.field_emulated, Toast.LENGTH_SHORT);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                            }
                         }
                     } else {
                         Toast toast = Toast.makeText(this, R.string.wait_until_study_during_pausing_finish, Toast.LENGTH_SHORT);

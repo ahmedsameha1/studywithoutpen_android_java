@@ -62,12 +62,16 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
+import com.github.angads25.filepicker.controller.DialogSelectionListener;
+import com.github.angads25.filepicker.model.DialogConfigs;
+import com.github.angads25.filepicker.model.DialogProperties;
+import com.github.angads25.filepicker.view.FilePickerDialog;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-import com.nononsenseapps.filepicker.FilePickerActivity;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -96,8 +100,8 @@ public class MainActivity extends AppCompatActivity implements
     private static final int IMPORT_FIELD = 1;
     public static final int ABOUT = 3;
     private static final int REVIEW = 2;
-/*    private static final int FACEBOOK = 3;
-    public static final int DROPBOX = 4;*/
+    /*    private static final int FACEBOOK = 3;
+        public static final int DROPBOX = 4;*/
     private static final int MY_DATA_CHECK_CODE = 1234;
     private static final int DIRECTORY_CODE = 15;
     private static final String TO_EXPORT_FIELDS = "to_export_fields";
@@ -199,12 +203,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-
     @Override
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
     }
+
     private void runFirstTimeAppRunOnly() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -214,25 +218,19 @@ public class MainActivity extends AppCompatActivity implements
             long long_utc = System.currentTimeMillis();
             long offset = TimeZone.getDefault().getOffset(long_utc);
             calendar.setTimeInMillis(long_utc + offset);
-            calendar.set(Calendar.DAY_OF_MONTH,calendar.get(Calendar.DAY_OF_MONTH) + 1);
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND,0);
+            calendar.set(Calendar.SECOND, 0);
             Intent intent = new Intent(this, SimpleWakefulReceiver.class);
             int request = (int) System.currentTimeMillis();
             intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             PendingIntent pintent = PendingIntent.getBroadcast(this, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+            AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
-            Log.i("time of service", calendar.getTimeInMillis()+"");
-            Log.i("Time Zone",calendar.getTimeZone().getDisplayName());
-            editor.putInt(MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST,request);
-
-
-
-
-
-
+            Log.i("time of service", calendar.getTimeInMillis() + "");
+            Log.i("Time Zone", calendar.getTimeZone().getDisplayName());
+            editor.putInt(MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST, request);
 
 
             editor.putBoolean(RUN_FIRST_TIME, false);
@@ -259,14 +257,15 @@ public class MainActivity extends AppCompatActivity implements
             editor.commit();
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         // Check which request we're responding to
-         if ( requestCode == MY_DATA_CHECK_CODE ) {
+        if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 tts_available = true;
             }
-        } else if ( requestCode == ImportFromWhatDialogFragment.TEXT_FILE_CODE && resultCode == Activity.RESULT_OK ) {
+        } /*else if ( requestCode == ImportFromWhatDialogFragment.TEXT_FILE_CODE && resultCode == Activity.RESULT_OK ) {
              ImportTextFile.startImportThread(this, data.getData().getPath());
              mTracker.send(new HitBuilders.EventBuilder()
                      .setCategory(ANALYTICS_CATEGORY)
@@ -321,8 +320,9 @@ public class MainActivity extends AppCompatActivity implements
              toast = Toast.makeText(this, R.string.shut_down_warning, Toast.LENGTH_LONG);
              toast.setGravity(Gravity.TOP, 0, 400);
              toast.show();
-         }
+         }*/
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -371,23 +371,36 @@ public class MainActivity extends AppCompatActivity implements
 
         switch (position) {
             case EXPORT_FIELD:
-                if ( !ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
-                        && !Emulation.isAnyThreadRunning() ) {
-                    ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
-                    exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                    if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                            && !Emulation.isAnyThreadRunning()) {
+                        ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                        exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
                 } else {
-                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(this, R.string.external_storage_not_ready, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
                 break;
             case IMPORT_FIELD:
-                if ( !ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
-                        && !Emulation.isAnyThreadRunning() ) {
-                    ImportFromWhatDialogFragment importFromWhatDialogFragment = new ImportFromWhatDialogFragment();
-                    importFromWhatDialogFragment.show(getSupportFragmentManager(), importFromWhatDialogFragment.IMPORT_FROM_WHAT_DIALOG_FRAGMENT);
+                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY) ||
+                        Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                    if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                            && !Emulation.isAnyThreadRunning()) {
+                        ImportFromWhatDialogFragment importFromWhatDialogFragment = new ImportFromWhatDialogFragment();
+                        importFromWhatDialogFragment.show(getSupportFragmentManager(), importFromWhatDialogFragment.IMPORT_FROM_WHAT_DIALOG_FRAGMENT);
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
                 } else {
-                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(this, R.string.external_storage_not_ready, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
@@ -409,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case ABOUT:
                 AboutDialogFragment aboutDialogFragment = new AboutDialogFragment();
-                aboutDialogFragment.show(getSupportFragmentManager(),AboutDialogFragment.ABOUT_DIALOG_FRAGMENT);
+                aboutDialogFragment.show(getSupportFragmentManager(), AboutDialogFragment.ABOUT_DIALOG_FRAGMENT);
                 break;
 /*            case FACEBOOK:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
@@ -464,13 +477,13 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 if (mAdapter.getItemCount() > 0) {
-                        Intent intent = new Intent(MainActivity.this, AddEntryActivity.class);
-                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, first_field_id);
-                        intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
-                        startActivity(intent);
+                    Intent intent = new Intent(MainActivity.this, AddEntryActivity.class);
+                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, first_field_id);
+                    intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
+                    startActivity(intent);
                 } else {
                     Bundle bundle = new Bundle();
-                    bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE,tts_available);
+                    bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
                     CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
                     fragment.setArguments(bundle);
                     fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
@@ -486,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 Bundle bundle = new Bundle();
-                bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE,tts_available);
+                bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
                 CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
                 fragment.setArguments(bundle);
                 fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
@@ -507,7 +520,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void deleteField(long field_id, MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder) {
-        mySQLiteCursorLoader.deleteField(field_id,mHandler, mainActivityRecyclerViewViewHolder);
+        mySQLiteCursorLoader.deleteField(field_id, mHandler, mainActivityRecyclerViewViewHolder);
         mTracker.send(new HitBuilders.EventBuilder()
                 .setCategory(ANALYTICS_CATEGORY)
                 .setAction("delete field")
@@ -515,10 +528,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void createField(String field_name, int field_type, int question_data_type,int check_type, boolean read_answer, String locale) {
-        mySQLiteCursorLoader.createField(field_name, field_type, question_data_type,check_type,read_answer,locale);
+    public void createField(String field_name, int field_type, int question_data_type, int check_type, boolean read_answer, String locale) {
+        mySQLiteCursorLoader.createField(field_name, field_type, question_data_type, check_type, read_answer, locale);
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
     }
+
     @Override
     public void createField(String field_name, int field_type, int question_data_type) {
         mySQLiteCursorLoader.createField(field_name, field_type, question_data_type);
@@ -530,27 +544,43 @@ public class MainActivity extends AppCompatActivity implements
         to_export_fields = selectedFields;
         to_export_file_name = file_name;
         // This always works
-        Intent i = new Intent(this, FilePickerActivity.class);
-        // This works if you defined the intent filter
-        // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+        DialogProperties properties = new DialogProperties();
 
-        // Set these depending on your use case. These are the defaults.
-        i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
-        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, true);
-        i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR);
+        properties.selection_mode = DialogConfigs.SINGLE_MODE;
+        properties.selection_type = DialogConfigs.DIR_SELECT;
+        properties.root = Environment.getExternalStorageDirectory();
+        properties.error_dir = Environment.getExternalStorageDirectory();
+        properties.extensions = null;
 
-        // Configure initial directory by specifying a String.
-        // You could specify a String like "/storage/emulated/0/", but that can
-        // dangerous. Always use Android's API calls to get paths to the SD-card or
-        // internal memory.
-        i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
+        FilePickerDialog dialog = new FilePickerDialog(MainActivity.this, properties);
 
-        startActivityForResult(i, DIRECTORY_CODE);
+        dialog.setDialogSelectionListener(new DialogSelectionListener() {
+            @Override
+            public void onSelectedFilePaths(String[] files) {
+                //files is the array of the paths of files selected by the Application User.
+                if (files.length > 0) {
+                    ExportImportDatabase.startExportThread(MainActivity.this, to_export_fields, files[0], to_export_file_name);
+                    mTracker.send(new HitBuilders.EventBuilder()
+                            .setCategory(ANALYTICS_CATEGORY)
+                            .setAction("export field")
+                            .build());
+                    Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                    toast = Toast.makeText(MainActivity.this, R.string.shut_down_warning, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            }
+        });
+
+        dialog.show();
     }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putStringArrayList(TO_EXPORT_FIELDS,to_export_fields);
-        outState.putString(TO_EXPORT_FILE_NAME,to_export_file_name);
+        outState.putStringArrayList(TO_EXPORT_FIELDS, to_export_fields);
+        outState.putString(TO_EXPORT_FILE_NAME, to_export_file_name);
         super.onSaveInstanceState(outState);
     }
 
@@ -596,20 +626,20 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void fff(){
+    private void fff() {
         ArrayList<long[]> data = new DatabaseReadOperations(this).getBackupSchedulingData();
-        Log.i("scheduled time number:",data.size()+"");
-        for ( long[] session : data ) {
-            if ( session[1] == ScheduleInFieldDialogFragment.QUICK_TEST ) {
-                Log.i("scheduled time:",session[2]+"");
+        Log.i("scheduled time number:", data.size() + "");
+        for (long[] session : data) {
+            if (session[1] == ScheduleInFieldDialogFragment.QUICK_TEST) {
+                Log.i("scheduled time:", session[2] + "");
             }
-            }
+        }
         Calendar cal = new GregorianCalendar(TimeZone.getDefault());
         cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH) + 1);
-        cal.set(Calendar.HOUR_OF_DAY,0);
-        cal.set(Calendar.MINUTE,0);
-        cal.set(Calendar.SECOND,0);
-        Log.i("Time Zone",cal.getTimeZone().getDisplayName());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        Log.i("Time Zone", cal.getTimeZone().getDisplayName());
 
     }
 }

@@ -152,14 +152,13 @@ public class EmulateFieldActivity extends AppCompatActivity implements
                         } else {
                             Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id.get(0));
                         }
-
+                        ExitActivity.exit(this);
+                        finish();
                     } else {
                         Toast toast = Toast.makeText(EmulateFieldActivity.this, R.string.enter_the_number_of__everyday_entries, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
-                ExitActivity.exit(this);
-                finish();
                 return true;
 
             default:

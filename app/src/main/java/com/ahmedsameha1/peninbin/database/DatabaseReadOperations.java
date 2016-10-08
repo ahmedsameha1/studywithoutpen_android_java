@@ -485,22 +485,63 @@ public class DatabaseReadOperations {
         return array;
     }
 
-    public int getEntriesNumber(long field_id, int question_data_type) {
+    public int getEntriesNumberForStudyAPeriod (long field_id, int question_data_type) {
         int number = 0;
         String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
                 .format(new Date(System.currentTimeMillis()));
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             Cursor cursor;
-            if ( isEmulated(field_id) <= Constants.NOT_EMULATED ) {
+            if (isEmulated(field_id) <= Constants.NOT_EMULATED) {
                 cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
                                 + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                         new String[]{field_id + ""});
             } else {
                 cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
                                 + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? AND ? > "
-                        + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                                + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
                         new String[]{field_id + "", date_string});
             }
+            cursor.moveToFirst();
+            number = cursor.getInt(0);
+            cursor.close();
+        } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+        }
+
+        return number;
+    }
+
+    public int getEntriesNumberForTests(long field_id, int question_data_type) {
+        int number = 0;
+        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                .format(new Date(System.currentTimeMillis()));
+        if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+            Cursor cursor;
+            if (isEmulated(field_id) <= Constants.NOT_EMULATED) {
+                cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
+                                + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                        new String[]{field_id + ""});
+            } else {
+                cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
+                                + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > "
+                                + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " OR "
+                        + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL ) ",
+                        new String[]{field_id + "", date_string});
+            }
+            cursor.moveToFirst();
+            number = cursor.getInt(0);
+            cursor.close();
+        } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+        }
+
+        return number;
+    }
+
+    public int getRealEntriesNumber (long field_id, int question_data_type) {
+        int number = 0;
+        if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+            Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.String_Entry.TABLE_NAME
+                            + " WHERE " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                    new String[]{field_id + ""});
             cursor.moveToFirst();
             number = cursor.getInt(0);
             cursor.close();

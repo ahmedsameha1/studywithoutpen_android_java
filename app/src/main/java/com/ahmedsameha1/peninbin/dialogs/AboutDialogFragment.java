@@ -34,7 +34,6 @@ public class AboutDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
-
     }
 
     @Override
@@ -49,6 +48,9 @@ public class AboutDialogFragment extends DialogFragment {
             public void onShow(DialogInterface dialog) {
                 final Button facebook = (Button) alertDialog.findViewById(R.id.facebook);
                 final TextView version_textview = (TextView) alertDialog.findViewById(R.id.version);
+                final TextView cwac_loaderex_license = (TextView) alertDialog.findViewById(R.id.cwac_loaderex);
+                final TextView android_filepicker_license = (TextView) alertDialog.findViewById(R.id.android_filepicker);
+                final TextView circular_floating_action_menu_license = (TextView) alertDialog.findViewById(R.id.circular_floating_action_menu);
                 PackageInfo pInfo = null;
                 String version = null;
                 try {
@@ -68,6 +70,33 @@ public class AboutDialogFragment extends DialogFragment {
                                 .setAction("open facebook page")
                                 .build());
                         dismiss();
+                    }
+                });
+                cwac_loaderex_license.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.cwac_loaderex_apache_license_version_2_0).create().show();
+                    }
+                });
+                android_filepicker_license.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.android_filepicker_apache_license_version_2_0).create().show();
+                    }
+                });
+                circular_floating_action_menu_license.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.circular_floating_action_menu_mit_license).create().show();
                     }
                 });
             }

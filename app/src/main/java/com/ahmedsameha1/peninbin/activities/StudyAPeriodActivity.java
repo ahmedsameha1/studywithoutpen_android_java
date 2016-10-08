@@ -76,8 +76,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     public static final String LAST_SESSION_OR_NEW_ONE = "lastSessionOrNewOne";
     public static final String DASH = "-";
     public static final String NUMBER_OF_TRIES = "numberOftries";
-    public static final int CONTINUE_PREVIOUS_SESSION = 1;
-    public static final int START_NEW_SESSION = 2;
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
@@ -137,7 +135,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private Chronometer timer;
     private long lastPause;
-    private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
     private boolean isEmulated;
@@ -288,7 +286,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
                         }
 
-                    } else if (questionsNumber <= 0 && loader.getId() == START_NEW_SESSION) {
+                    } else {
                         Toast toast = Toast.makeText(StudyAPeriodActivity.this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
@@ -311,128 +309,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
 
             @Override
             public void onLoaderReset(Loader<Cursor> loader) {
-
-            }
-        };
-        get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-                if (id == CONTINUE_PREVIOUS_SESSION) {
-
-                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
-                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
-                                    + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
-                            new String[]{current_field_id + "", "0"});
-           /* return new CursorLoader(this, uri,
-                    new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK,
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK,
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_STUDY_DURING_ORDER},
-                    Contract.Old_Linker_DBV6_AppV32.COLUMN_STUDY_DURING_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
-                    new String[]{"0", current_field_name},
-                    null);*/
-            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Study_During_Temp_DBV6_AppV32.TABLE_NAME);
-            return new CursorLoader(this,uri,
-                    new String[] {Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_QUESTION, Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_ANSWER},
-                    Contract.Old_Study_During_Temp_DBV6_AppV32.COLUMN_FIELD + " = ?",
-                    new String[] {current_field_name},
-                    null);*/
-                } else {
-                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
-                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
-                                    + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                            new String[]{current_field_id + ""});
-           /* Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-            return new CursorLoader(this,
-                    uri,
-                    new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK, Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32},
-                    Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
-                    new String[]{current_field_name},
-                    null);*/
-                }
-            }
-
-            @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-                StudyAPeriodActivity.this.cursor = cursor;
-                listForTest = retainedFragment.getListForTest_StudyDuringActivity();
-                if (listForTest == null) {
-                    if (boolean_continue) {
-                        listForTest = readFromLinkerTableStudyDuringColumn();
-                    } else {
-                        listForTest = prepareListForStudyFirstTime();
-                    }
-                }
-                questionsNumber = listForTest.length;
-                if (questionsNumber > 0) {
-                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-                    ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
-                    showNumberOfQuetions.setText(Integer.toString(questionsNumber));
-                    if (boolean_continue) {
-                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                    } else {
-                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
-                    }
-
-                } else if (questionsNumber <= 0 && loader.getId() == START_NEW_SESSION) {
-                    Toast toast = Toast.makeText(StudyAPeriodActivity.this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                    finish();
-                    ExitActivity.exit(StudyAPeriodActivity.this);
-                }
-                crossfade();
-            }
-
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-
-            }
-        };
-        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                        new String[]{current_field_type + ""});
-
-            }
-
-            @Override
-            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-                if (symbol == null && customable_text == null) {
-                    symbol = new String[data.getCount()];
-                    customable_text = new String[data.getCount()];
-                    for (data.moveToFirst(); data.getPosition() < data.getCount();
-                         data.moveToNext()) {
-                        symbol[data.getPosition()] = data.getString(1);
-                        customable_text[data.getPosition()] = data.getString(2);
-                    }
-                }
-            }
-
-            @Override
-            public void onLoaderReset(android.content.Loader<Cursor> loader) {
 
             }
         };

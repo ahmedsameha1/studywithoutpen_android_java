@@ -193,7 +193,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                         }).create().show();
 
                             } else {
-                                if ( databaseReadOperations.getEntriesNumber(current_field_id,
+                                if ( databaseReadOperations.getRealEntriesNumber(current_field_id,
                                         Contract.Field.STRING_DATA_TYPE) > 0 ) {
                                     Intent intent = new Intent(getActivity(), EmulateFieldActivity.class);
                                     intent.putExtra(FieldActivity.FIELD_ID, current_field_id);

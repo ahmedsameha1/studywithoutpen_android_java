@@ -45,7 +45,7 @@ public class ExportFileDirectlyActivity extends AppCompatActivity {
                                         toast.setGravity(Gravity.TOP, 0, 400);
                                         toast.show();
                                         finish();
-                                        ExportImportDatabase.startImportThread(ExportFileDirectlyActivity.this,intent.getData(),false);
+                                        ExportImportDatabase.startImportThread(ExportFileDirectlyActivity.this,intent.getData().getPath(),false);
                                     }
                                 })
                                 .setPositiveButton("YES", new DialogInterface.OnClickListener() {
@@ -58,7 +58,7 @@ public class ExportFileDirectlyActivity extends AppCompatActivity {
                                         toast.setGravity(Gravity.TOP, 0, 400);
                                         toast.show();
                                         finish();
-                                        ExportImportDatabase.startImportThread(ExportFileDirectlyActivity.this,intent.getData(),true);
+                                        ExportImportDatabase.startImportThread(ExportFileDirectlyActivity.this,intent.getData().getPath(),true);
                                     }
                                 })
                                 .create().show();

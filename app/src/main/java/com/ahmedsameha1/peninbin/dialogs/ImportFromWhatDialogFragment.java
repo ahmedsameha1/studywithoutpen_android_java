@@ -10,13 +10,24 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
-import com.nononsenseapps.filepicker.FilePickerActivity;
+import com.ahmedsameha1.peninbin.activities.MainActivity;
+import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
+import com.ahmedsameha1.peninbin.database.ImportTextFile;
+import com.github.angads25.filepicker.controller.DialogSelectionListener;
+import com.github.angads25.filepicker.model.DialogConfigs;
+import com.github.angads25.filepicker.model.DialogProperties;
+import com.github.angads25.filepicker.view.FilePickerDialog;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 /**
  * Created by ahmed on 12/20/2015.
@@ -27,6 +38,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
     public static final int TEXT_FILE_CODE = 0;
     public static final int APP_FILE_CODE = 1;
     private Context context;
+    private Tracker mTracker;
 
 
 
@@ -38,6 +50,8 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         context = getActivity();
+        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
+        mTracker = application.getDefaultTracker();
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = ((Activity) context).getLayoutInflater();
         final AlertDialog alertDialog = builder.setView(inflater.inflate(R.layout.import_from_what_dialog_fragment, null))
@@ -52,7 +66,63 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         // This always works
-                        Intent i = new Intent(context, FilePickerActivity.class);
+                        DialogProperties properties=new DialogProperties();
+
+                        properties.selection_mode= DialogConfigs.SINGLE_MODE;
+                        properties.selection_type= DialogConfigs.FILE_SELECT;
+                        properties.root=Environment.getExternalStorageDirectory();
+                        properties.error_dir=Environment.getExternalStorageDirectory();
+                        properties.extensions=null;
+
+                        FilePickerDialog dialog = new FilePickerDialog(context,properties);
+
+                        dialog.setDialogSelectionListener(new DialogSelectionListener() {
+                            @Override
+                            public void onSelectedFilePaths(final String[] files) {
+                                //files is the array of the paths of files selected by the Application User.
+                                if ( files.length > 0 ) {
+                                    AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(context);
+                                    importUserUsageData
+                                            .setMessage(R.string.import_user_usage)
+                                            .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
+                                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                                    toast.show();
+                                                    toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
+                                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                                    toast.show();
+                                                    ExportImportDatabase.startImportThread(context, files [0],false);
+                                                    mTracker.send(new HitBuilders.EventBuilder()
+                                                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                                            .setAction("import field from app file")
+                                                            .build());
+                                                }
+                                            })
+                                            .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
+                                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                                    toast.show();
+                                                    toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
+                                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                                    toast.show();
+                                                    ExportImportDatabase.startImportThread(context,files [0],true);
+                                                    mTracker.send(new HitBuilders.EventBuilder()
+                                                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                                            .setAction("import field from app file")
+                                                            .build());
+                                                }
+                                            })
+                                            .create().show();
+                                }
+                            }
+                        });
+
+                        dialog.show();
+                        /*Intent i = new Intent(context, FilePickerActivity.class);
                         // This works if you defined the intent filter
                         // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
 
@@ -67,7 +137,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                         // internal memory.
                         i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
 
-                        getActivity().startActivityForResult(i, APP_FILE_CODE);
+                        getActivity().startActivityForResult(i, APP_FILE_CODE);*/
                         dismiss();
                      /*       ImportFieldsDialogFragment importFieldsDialogFragment = new ImportFieldsDialogFragment();
                             importFieldsDialogFragment.show(getActivity().getSupportFragmentManager(), ImportFieldsDialogFragment.IMPORT_FIELD_DIALOG_FRAGMENT);
@@ -81,8 +151,33 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                 text_file.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        DialogProperties properties=new DialogProperties();
+
+                        properties.selection_mode= DialogConfigs.SINGLE_MODE;
+                        properties.selection_type= DialogConfigs.FILE_SELECT;
+                        properties.root=Environment.getExternalStorageDirectory();
+                        properties.error_dir=Environment.getExternalStorageDirectory();
+                        properties.extensions=null;
+
+                        FilePickerDialog dialog = new FilePickerDialog(context,properties);
+
+                        dialog.setDialogSelectionListener(new DialogSelectionListener() {
+                            @Override
+                            public void onSelectedFilePaths(final String[] files) {
+                                //files is the array of the paths of files selected by the Application User.
+                                if ( files.length > 0 ) {
+                                    ImportTextFile.startImportThread(context, files [0]);
+                                    mTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                            .setAction("import field from text file")
+                                            .build());
+                                }
+                            }
+                        });
+
+                        dialog.show();
                         // This always works
-                        Intent i = new Intent(context, FilePickerActivity.class);
+                        /*Intent i = new Intent(context, FilePickerActivity.class);
                         // This works if you defined the intent filter
                         // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
 
@@ -97,14 +192,14 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                         // internal memory.
                         i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
 
-                        getActivity().startActivityForResult(i, TEXT_FILE_CODE);
+                        getActivity().startActivityForResult(i, TEXT_FILE_CODE);*/
                         dismiss();
                     }
                 });
                 text_file_help.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        AlertDialog.Builder text_file_help_dialog = new AlertDialog.Builder(getActivity());
+                        AlertDialog.Builder text_file_help_dialog = new AlertDialog.Builder(context);
                         text_file_help_dialog
                                 .setMessage(R.string.import_from_text_file_help).create().show();
                     }

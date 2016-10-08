@@ -45,7 +45,7 @@ public class FieldInformationActivity extends AppCompatActivity implements
         list_of_notes = (ListView) findViewById(R.id.notes_list_view);
         setSupportActionBar(toolbar);
         number_of_entries.setText(Integer.toString(databaseOperations
-                .getEntriesNumber(current_field_id,Contract.Field.STRING_DATA_TYPE)));
+                .getRealEntriesNumber(current_field_id,Contract.Field.STRING_DATA_TYPE)));
         number_of_moderate_or_higher_entries.setText(Integer.toString(databaseOperations
                 .countModerateOrHigherEntries(current_field_id)));
         simpleCursorAdapter = new SimpleCursorAdapter(this,android.R.layout.simple_list_item_1,null,
