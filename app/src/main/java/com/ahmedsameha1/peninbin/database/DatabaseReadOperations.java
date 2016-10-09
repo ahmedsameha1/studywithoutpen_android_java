@@ -657,7 +657,8 @@ public class DatabaseReadOperations {
         } else {
             cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                     Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
-                            + " = ? AND ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                            + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                            + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL ) ",
                     new String[]{field_id + "", Constants.TestRound.ASKED_AT_CURRENT_ROUND + "", date_string}, null, null, null);
         }
         int count = cursor.getCount();
