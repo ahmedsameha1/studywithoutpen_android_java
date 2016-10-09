@@ -22,7 +22,9 @@
             android:layout_weight="1"
             android:gravity="center"
             android:textSize="22sp"
-            android:padding="3dp"/>
+            android:padding="3dp"
+            android:ellipsize="none"
+            android:scrollHorizontally="false"/>
 
         <EditText
             android:id="@+id/user_customized_string"

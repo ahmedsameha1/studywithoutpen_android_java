@@ -33,7 +33,9 @@
                 android:textColor="#000000"
                 android:textColorHint="#000000"
                 android:textSize="15sp"
-                android:typeface="monospace" />
+                android:typeface="monospace"
+                android:ellipsize="none"
+                android:scrollHorizontally="false"/>
         </android.support.v7.widget.CardView>
 
 
@@ -60,7 +62,9 @@
                 android:textColorHint="#000000"
                 android:textSize="15sp"
                 android:textStyle="italic"
-                android:typeface="monospace" />
+                android:typeface="monospace"
+                android:ellipsize="none"
+                android:scrollHorizontally="false"/>
         </android.support.v7.widget.CardView>
     </LinearLayout>
     <LinearLayout

@@ -48,7 +48,7 @@ public class RandomQuickTestsSchedulingService extends IntentService {
         Log.i("service:", "service running");
         scheduleRandomQuickTest();
         tryRefreshingAppUsage();
-        reorderEmulatedFields();
+//        reorderEmulatedFields();
         SimpleWakefulReceiver.completeWakefulIntent(workIntent);
         Log.i("service:", "service end");
     }
@@ -170,6 +170,9 @@ public class RandomQuickTestsSchedulingService extends IntentService {
         }
     }
 
+    /**
+     * Not tested
+     */
     private void reorderEmulatedFields() {
         Log.i("on reorder", "on reorder");
         Calendar calendar = Calendar.getInstance();
