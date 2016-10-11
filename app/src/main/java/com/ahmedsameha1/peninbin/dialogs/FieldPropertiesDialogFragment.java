@@ -190,7 +190,9 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                                 alertDialog.dismiss();
                                                 dismiss();
                                             }
-                                        }).create().show();
+                                        })
+                                        .setNegativeButton(R.string.cancel,null)
+                                        .create().show();
 
                             } else {
                                 if ( databaseReadOperations.getRealEntriesNumber(current_field_id,

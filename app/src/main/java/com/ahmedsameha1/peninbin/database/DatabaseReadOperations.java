@@ -705,6 +705,8 @@ public class DatabaseReadOperations {
     }
 
     public Cursor searchExactlyFor(long field_id, int question_data_type, String searchString) {
+        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                .format(new Date(System.currentTimeMillis()));
         Cursor cursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                 Contract.STring.COLUMN_VALUE + " = ? ",
                 new String[]{searchString}, null, null, null);
@@ -712,14 +714,21 @@ public class DatabaseReadOperations {
         long searchString_id = cursor.getLong(0);
         cursor.close();
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
-            /*return sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                    Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{searchString_id + "", field_id + ""}, null, null, null);*/
-            return sqLiteDatabase.rawQuery("SELECT a." + Contract.STring.COLUMN_VALUE
-            + " FROM " + Contract.STring.TABLE_NAME + " a INNER JOIN " + Contract.String_Entry.TABLE_NAME
-            + " ON a." + Contract.COLUMN_ID + " = " + Contract.String_Entry.COLUMN_ANSWER
-            + " WHERE " + Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{ searchString_id + "", field_id + ""});
+            if ( isEmulated(field_id) <= Constants.NOT_EMULATED ) {
+                return sqLiteDatabase.rawQuery("SELECT a." + Contract.STring.COLUMN_VALUE
+                                + " FROM " + Contract.STring.TABLE_NAME + " a INNER JOIN " + Contract.String_Entry.TABLE_NAME
+                                + " ON a." + Contract.COLUMN_ID + " = " + Contract.String_Entry.COLUMN_ANSWER
+                                + " WHERE " + Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                        new String[]{searchString_id + "", field_id + ""});
+            } else {
+                return sqLiteDatabase.rawQuery("SELECT a." + Contract.STring.COLUMN_VALUE
+                                + " FROM " + Contract.STring.TABLE_NAME + " a INNER JOIN " + Contract.String_Entry.TABLE_NAME
+                                + " ON a." + Contract.COLUMN_ID + " = " + Contract.String_Entry.COLUMN_ANSWER
+                                + " WHERE " + Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_FIELD
+                        + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                                + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL ) ",
+                        new String[]{searchString_id + "", field_id + "", date_string});
+            }
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
         return null;

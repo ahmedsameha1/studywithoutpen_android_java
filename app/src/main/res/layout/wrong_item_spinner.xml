@@ -12,6 +12,7 @@
         android:layout_gravity="center"
         android:textColor="#000000"
         android:ellipsize="none"
-        android:scrollHorizontally="false"/>
+        android:scrollHorizontally="false"
+        android:maxLines="1000"/>
 
 </LinearLayout>

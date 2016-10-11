@@ -24,7 +24,8 @@
             android:textSize="22sp"
             android:padding="3dp"
             android:ellipsize="none"
-            android:scrollHorizontally="false"/>
+            android:scrollHorizontally="false"
+            android:maxLines="1000"/>
 
         <EditText
             android:id="@+id/user_customized_string"
