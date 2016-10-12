@@ -164,6 +164,16 @@ public final class Contract {
         public static final String COLUMN_SYMBOL = "symbol";
         public static final String COLUMN_USER_CUSTOMIZED_STRING = "user_customized_string";
     }
+
+    public static abstract class DeveloperPayload implements BaseColumns {
+        public static final String TABLE_NAME = "developer_payload";
+        public static final String COLUMN_STRING_TOKEN = "string_token";
+    }
+
+    public static abstract class GooglePaymentOrderID implements BaseColumns {
+        public static final String TABLE_NAME = "google_payment_order_id";
+        public static final String COLUMN_ORDER_ID = "order_id";
+    }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public static final String Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 = "created_at";
