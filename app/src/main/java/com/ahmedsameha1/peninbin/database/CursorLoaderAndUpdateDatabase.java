@@ -1475,6 +1475,10 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-
+    public void addOrderId( String order_id ) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.GooglePaymentOrderID.COLUMN_ORDER_ID, order_id);
+        db.getWritableDatabase().insert(Contract.GooglePaymentOrderID.TABLE_NAME,null,contentValues);
+    }
 
 }

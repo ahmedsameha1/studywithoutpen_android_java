@@ -743,5 +743,11 @@ public class DatabaseReadOperations {
         cursor.close();
         return number;
     }
+
+    public boolean isOrderIdUnique( String order_id ) {
+        Cursor cursor = sqLiteDatabase.query(Contract.GooglePaymentOrderID.TABLE_NAME, new String[] {Contract.GooglePaymentOrderID.COLUMN_ORDER_ID},
+                Contract.GooglePaymentOrderID.COLUMN_ORDER_ID + " = ? ", new String[] {order_id},null,null,null);
+        return ! cursor.moveToFirst();
+    }
 }
 

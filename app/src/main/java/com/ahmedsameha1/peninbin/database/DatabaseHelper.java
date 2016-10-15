@@ -258,13 +258,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING + " )"
             + " );";
 
-    public static final String CREATE_DEVELOPER_PAYLOAD_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.DeveloperPayload.TABLE_NAME
-            + " ( "
-            + Contract.DeveloperPayload.COLUMN_STRING_TOKEN + " TEXT NOT NULL ) WITHOUT ROWID;";
 
     public static final String CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.GooglePaymentOrderID.TABLE_NAME
             + " ( "
-            + Contract.GooglePaymentOrderID.COLUMN_ORDER_ID + " TEXT NOT NULL ) WITHOUT ROWID;";
+            + Contract.GooglePaymentOrderID.COLUMN_ORDER_ID + " TEXT NOT NULL UNIQUE ) WITHOUT ROWID;";
 
     //// TODO: 10/13/16 the database updated so make the nessecary changes in all the app
 
@@ -398,7 +395,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_FIELD_NOTE_TABLE);
         sqLiteDatabase.execSQL(CREATE_SYMBOL_TABLE);
         sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_SYMBOL_TABLE);
-        sqLiteDatabase.execSQL(CREATE_DEVELOPER_PAYLOAD_TABLE);
         sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
         SpecialText.addSpecialTextToDBV11(sqLiteDatabase);
     }
@@ -497,7 +493,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SpecialText.addSpecialTextToDBV11(sqLiteDatabase);
         }
         if ( oldVersion < 12 ) {
-            sqLiteDatabase.execSQL(CREATE_DEVELOPER_PAYLOAD_TABLE);
             sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
         }
     }
