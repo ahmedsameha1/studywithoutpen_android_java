@@ -207,7 +207,7 @@ public class ModifyDatabaseSchema {
         try {
             String rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
             sqLiteDatabase.execSQL(rename);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE_OLD);
             String copy = "INSERT INTO " + Contract.String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
@@ -517,7 +517,7 @@ public class ModifyDatabaseSchema {
             sqLiteDatabase.execSQL(drop);
             rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
             sqLiteDatabase.execSQL(rename);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE_OLD);
             copy = "INSERT INTO " + Contract.String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
                     + " , " + Contract.String_Entry.COLUMN_QUESTION
                     + " , " + Contract.String_Entry.COLUMN_ANSWER
