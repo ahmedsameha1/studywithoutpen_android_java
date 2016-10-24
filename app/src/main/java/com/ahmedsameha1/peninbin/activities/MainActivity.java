@@ -5,9 +5,13 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -17,6 +21,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
@@ -59,9 +65,13 @@ import com.ahmedsameha1.peninbin.dialogs.ExportFieldsDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
 import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
 import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.Money;
+import com.ahmedsameha1.peninbin.utils.PayloadString;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
+import com.android.vending.billing.IInAppBillingService;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
@@ -70,6 +80,9 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -106,6 +119,10 @@ public class MainActivity extends AppCompatActivity implements
     private static final int DIRECTORY_CODE = 15;
     private static final String TO_EXPORT_FIELDS = "to_export_fields";
     private static final String TO_EXPORT_FILE_NAME = "to_export_file_name";
+    private static final int SUBSCRIBE = 2;
+    private static final String PAY_LOAD_STRING = "pay_load_string";
+    private static final String BUY_INTENT = "BUY_INTENT";
+    private static final int BUY_FLOW_REQUEST_CODE = 6475;
     private Handler mHandler = new Handler();
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private MainActivityRecyclerViewAdapter mAdapter;
@@ -117,6 +134,10 @@ public class MainActivity extends AppCompatActivity implements
     private Tracker mTracker;
     private String to_export_file_name;
     private ArrayList<String> to_export_fields;
+    private IInAppBillingService mService;
+    private ServiceConnection mServiceConn;
+    private NetworkReceiver networkReceiver;
+    private String pay_load;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +178,18 @@ public class MainActivity extends AppCompatActivity implements
         runFirstTimeAppRunOnly();
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
+        mServiceConn = new ServiceConnection() {
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                mService = null;
+            }
+
+            @Override
+            public void onServiceConnected(ComponentName name,
+                                           IBinder service) {
+                mService = IInAppBillingService.Stub.asInterface(service);
+            }
+        };
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -199,6 +232,11 @@ public class MainActivity extends AppCompatActivity implements
             }
         };
         getLoaderManager();
+        Intent serviceIntent =
+                new Intent("com.android.vending.billing.InAppBillingService.BIND");
+        serviceIntent.setPackage("com.android.vending");
+        bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
+        Money.checkSubscription(this, mService);
         fff();
     }
 
@@ -265,62 +303,50 @@ public class MainActivity extends AppCompatActivity implements
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 tts_available = true;
             }
-        } /*else if ( requestCode == ImportFromWhatDialogFragment.TEXT_FILE_CODE && resultCode == Activity.RESULT_OK ) {
-             ImportTextFile.startImportThread(this, data.getData().getPath());
-             mTracker.send(new HitBuilders.EventBuilder()
-                     .setCategory(ANALYTICS_CATEGORY)
-                     .setAction("import field from text file")
-                     .build());
-         } else if ( requestCode == ImportFromWhatDialogFragment.APP_FILE_CODE && resultCode == Activity.RESULT_OK ) {
-             AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(this);
-             importUserUsageData
-                     .setMessage(R.string.import_user_usage)
-                     .setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                         @Override
-                         public void onClick(DialogInterface dialog, int which) {
-                             Toast toast = Toast.makeText(MainActivity.this,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
-                             toast.setGravity(Gravity.TOP, 0, 400);
-                             toast.show();
-                             toast = Toast.makeText(MainActivity.this,R.string.shut_down_warning,Toast.LENGTH_LONG);
-                             toast.setGravity(Gravity.TOP, 0, 400);
-                             toast.show();
-                             ExportImportDatabase.startImportThread(MainActivity.this,data.getData(),false);
-                             mTracker.send(new HitBuilders.EventBuilder()
-                                     .setCategory(ANALYTICS_CATEGORY)
-                                     .setAction("import field from app file")
-                                     .build());
-                         }
-                     })
-                     .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                         @Override
-                         public void onClick(DialogInterface dialog, int which) {
-                             Toast toast = Toast.makeText(MainActivity.this,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
-                             toast.setGravity(Gravity.TOP, 0, 400);
-                             toast.show();
-                             toast = Toast.makeText(MainActivity.this,R.string.shut_down_warning,Toast.LENGTH_LONG);
-                             toast.setGravity(Gravity.TOP, 0, 400);
-                             toast.show();
-                             ExportImportDatabase.startImportThread(MainActivity.this,data.getData(),true);
-                             mTracker.send(new HitBuilders.EventBuilder()
-                                     .setCategory(ANALYTICS_CATEGORY)
-                                     .setAction("import field from app file")
-                                     .build());
-                         }
-                     })
-                     .create().show();
-         } else if ( requestCode == DIRECTORY_CODE && resultCode == RESULT_OK && ( !isFinishing()) ) {
-             ExportImportDatabase.startExportThread(this, to_export_fields, data.getData().getPath(), to_export_file_name);
-             mTracker.send(new HitBuilders.EventBuilder()
-                     .setCategory(ANALYTICS_CATEGORY)
-                     .setAction("export field")
-                     .build());
-             Toast toast = Toast.makeText(this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
-             toast.setGravity(Gravity.TOP, 0, 400);
-             toast.show();
-             toast = Toast.makeText(this, R.string.shut_down_warning, Toast.LENGTH_LONG);
-             toast.setGravity(Gravity.TOP, 0, 400);
-             toast.show();
-         }*/
+        } else if (requestCode == BUY_FLOW_REQUEST_CODE) {
+            int response_code = data.getIntExtra(Money.RESPONSE_CODE, 0);
+            String purchaseData = data.getStringExtra(Money.RESPONSE_INAPP_PURCHASE_DATA);
+            String dataSignature = data.getStringExtra(Money.RESPONSE_INAPP_SIGNATURE);
+            if (resultCode == RESULT_OK && response_code == Money.BILLING_RESPONSE_RESULT_OK) {
+                if (purchaseData != null && dataSignature != null) {
+                    try {
+                        if (Money.Security.verifyPurchase(Money.get64(Money.piece1 + Money.piece2 + Money.piece3 + Money.piece4 + Money.piece5 + Money.piece6
+                                        + Money.piece7 + Money.piece8 + Money.piece9 + Money.piece10 + Money.piece11, getResources().getIntArray(R.array.values))
+                                , purchaseData, dataSignature)) {
+                            JSONObject jo = new JSONObject(purchaseData);
+                            String pay_load = jo.getString("developerPayload");
+                            String order_id = jo.getString("orderId");
+                            if ( pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id) ) {
+                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_success), Toast.LENGTH_LONG);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                            } else {
+                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                            }
+                        } else {
+                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                            toast1.setGravity(Gravity.TOP, 0, 400);
+                            toast1.show();
+                        }
+                    } catch (JSONException e) {
+                        Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                        toast1.setGravity(Gravity.TOP, 0, 400);
+                        toast1.show();
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                    toast1.setGravity(Gravity.TOP, 0, 400);
+                    toast1.show();
+                }
+            } else {
+                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                toast1.setGravity(Gravity.TOP, 0, 400);
+                toast1.show();
+            }
+        }
     }
 
     @Override
@@ -405,8 +431,43 @@ public class MainActivity extends AppCompatActivity implements
                     toast.show();
                 }
                 break;
-            case REVIEW:
-                Uri uri = Uri.parse("market://details?id=" + getPackageName());
+            case SUBSCRIBE:
+                if (NetworkReceiver.isOnline(this)) {
+                    Toast toast = Toast.makeText(this, R.string.free_trial_announcement, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                    pay_load = PayloadString.getString();
+                    try {
+                        //// TODO: 24/10/16 add the real sku
+                        Bundle bundle = mService.getBuyIntent(3, this.getPackageName(), "99", Money.SUBSCRIPTION_TYPE,
+                                pay_load);
+                        int response_code = bundle.getInt(Money.RESPONSE_CODE);
+                        if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
+                            PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
+                            startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
+                        } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
+                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                            toast1.setGravity(Gravity.TOP, 0, 400);
+                            toast1.show();
+                        } else {
+                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                            toast1.setGravity(Gravity.TOP, 0, 400);
+                            toast1.show();
+                        }
+                    } catch (IntentSender.SendIntentException | RemoteException e) {
+                        Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                        toast1.setGravity(Gravity.TOP, 0, 400);
+                        toast1.show();
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.need_internet_try_again, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+
+
+              /*  Uri uri = Uri.parse("market://details?id=" + getPackageName());
                 Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
                 try {
                     startActivity(myAppLinkToMarket);
@@ -418,28 +479,12 @@ public class MainActivity extends AppCompatActivity implements
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
                         .setAction("open review")
-                        .build());
+                        .build());*/
                 break;
             case ABOUT:
                 AboutDialogFragment aboutDialogFragment = new AboutDialogFragment();
                 aboutDialogFragment.show(getSupportFragmentManager(), AboutDialogFragment.ABOUT_DIALOG_FRAGMENT);
                 break;
-/*            case FACEBOOK:
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
-                startActivity(browserIntent);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("open facebook page")
-                        .build());
-                break;
-            case DROPBOX:
-                browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.dropbox.com/sh/qq4rzots8vrb1mi/AAA6loAcxX6edP5bnHflXSFSa?dl=0"));
-                startActivity(browserIntent);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("open dropbox page")
-                        .build());
-                break;*/
         }
     }
 
@@ -454,6 +499,17 @@ public class MainActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
+        if (Money.getNetworkDownGetPurchasesesStatus(this)) {
+            IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+            networkReceiver = new NetworkReceiver(mService);
+            registerReceiver(networkReceiver, intentFilter);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(networkReceiver);
     }
 
     private void addFab() {
@@ -516,6 +572,9 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         mySQLiteCursorLoader.cleanDatabase();
+        if (mService != null) {
+            unbindService(mServiceConn);
+        }
     }
 
     @Override
@@ -581,6 +640,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         outState.putStringArrayList(TO_EXPORT_FIELDS, to_export_fields);
         outState.putString(TO_EXPORT_FILE_NAME, to_export_file_name);
+        outState.putString(PAY_LOAD_STRING, pay_load);
         super.onSaveInstanceState(outState);
     }
 
@@ -588,6 +648,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         to_export_fields = savedInstanceState.getStringArrayList(TO_EXPORT_FIELDS);
         to_export_file_name = savedInstanceState.getString(TO_EXPORT_FILE_NAME);
+        pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
         super.onRestoreInstanceState(savedInstanceState);
     }
 

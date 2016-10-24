@@ -1,18 +1,26 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -47,9 +55,12 @@ import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.FieldActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
+import com.android.vending.billing.IInAppBillingService;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -65,7 +76,8 @@ public class FieldActivity extends AppCompatActivity implements
         DeleteEntryDialogFragment.Contact,
         FieldPropertiesDialogFragment.Contact,
         CopyFieldDialogFragment.CopyField,
-        TextToSpeech.OnInitListener {
+        TextToSpeech.OnInitListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String SCREEN_NAME = "FieldActivity";
     public static final int STUDY_PERIOD = 0;
     public static final int ENHANCED_TEST = 1;
@@ -74,7 +86,6 @@ public class FieldActivity extends AppCompatActivity implements
     public static final int COPY_MOVE = 4;
     public static final int FIELD_PROPERTIES = 5;
     public static final int Field_INFORMATION = 6;
-
 
 
     private static final String QUERY_KEY = "query_key";
@@ -117,7 +128,7 @@ public class FieldActivity extends AppCompatActivity implements
             "date( q ) ASC",
             " q DESC",
             "datetime(" + Contract.CREATION_DATE + ") ASC",
-            Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC" };
+            Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC"};
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private DatabaseReadOperations databaseOperations;
     private FieldActivityRecyclerViewAdapter mAdapter;
@@ -131,7 +142,10 @@ public class FieldActivity extends AppCompatActivity implements
     private String search_value;
     private int question_data_type;
     private Tracker mTracker;
-
+    private IInAppBillingService mService;
+    private ServiceConnection mServiceConn;
+    private NetworkReceiver networkReceiver;
+    private SharedPreferences sharedPreferences;
 
 
     @Override
@@ -187,6 +201,18 @@ public class FieldActivity extends AppCompatActivity implements
                 startActivity(intent);
             }
         });
+        mServiceConn = new ServiceConnection() {
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                mService = null;
+            }
+
+            @Override
+            public void onServiceConnected(ComponentName name,
+                                           IBinder service) {
+                mService = IInAppBillingService.Stub.asInterface(service);
+            }
+        };
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -234,14 +260,17 @@ public class FieldActivity extends AppCompatActivity implements
             }
         };
         getLoaderManager();
+        Intent serviceIntent =
+                new Intent("com.android.vending.billing.InAppBillingService.BIND");
+        serviceIntent.setPackage("com.android.vending");
+        bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
     }
 
-/*    @Override
+    @Override
     protected void onPause() {
         super.onPause();
-        getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
-        getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
-    }*/
+        unregisterReceiver(networkReceiver);
+    }
 
     /*
         Because the database related objects should close as soon as the activity does not use it, I put all database work on onResume()
@@ -257,8 +286,8 @@ public class FieldActivity extends AppCompatActivity implements
                 long entry_id = data.getLongExtra(EDITED_ENTRY_ID, 1);
                 String question = data.getStringExtra(EDITED_QUESTION);
                 String answer = data.getStringExtra(EDITED_ANSWER);
-                int rank = data.getIntExtra(EDITED_RANK,0);
-                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer,rank);
+                int rank = data.getIntExtra(EDITED_RANK, 0);
+                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer, rank);
             }
         } else if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
@@ -280,12 +309,19 @@ public class FieldActivity extends AppCompatActivity implements
             bundle.putInt(CURRENT_SORT, currentSort);
             getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
         }
+        if (Money.getNetworkDownGetPurchasesesStatus(this)) {
+            IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+            networkReceiver = new NetworkReceiver(mService);
+            registerReceiver(networkReceiver, intentFilter);
+        }
     }
+
     @Override
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
     }
+
     @Override
     public void onInit(int status) {
         try {
@@ -320,111 +356,46 @@ public class FieldActivity extends AppCompatActivity implements
 
     @Override
     public void onDrawerItemSelected(View view, int position) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-        boolean isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        boolean user_eligible = Money.getUserSubscriptionStatus(this);
         switch (position) {
             case ENHANCED_TEST:
-                if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)
-                        && !Emulation.isAnyThreadRunning() ) {
-                            if (databaseOperations.getEntriesNumberForTests(current_field_id,question_data_type) > 0) {
-                                if (databaseOperations.isThisFieldTestPausedEnhancedTest(current_field_id)) {
-                                    AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
-                                    bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
-                                    fragment3.setArguments(bundle);
-                                    fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
-                                } else {
-                                    EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
-                                    dialogFragment.setArguments(bundle);
-                                    dialogFragment.show(getSupportFragmentManager(), EnhancedTestDialogFragment.ENHANCED_TEST_DIALOG_FRAGMENT);
-                                }
-                            } else {
-                                Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
-                                if ( isEmulated ) {
-                                    Toast toast1 = Toast.makeText(FieldActivity.this, R.string.field_emulated, Toast.LENGTH_SHORT);
-                                    toast1.setGravity(Gravity.TOP, 0, 400);
-                                    toast1.show();
-                                }
-                            }
-                } else {
-                    Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
+                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
+                    startEnhancedTest();
+                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
+                    if (NetworkReceiver.isOnline(this)) {
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    } else {
+                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
+                        toast1.setGravity(Gravity.TOP, 0, 400);
+                        toast1.show();
+                    }
+                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
+                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
+                } else {
+
                 }
                 break;
             case FULLY_RANDOM_TEST:
-                if (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + current_field_id)
-                        && !Emulation.isAnyThreadRunning() ) {
-                    if (databaseOperations.getEntriesNumberForTests(current_field_id,question_data_type) > 0) {
-                        if (databaseOperations.isThisFieldTestPausedFullyRandomTest(current_field_id)) {
-                            AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
-                            bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
-                            fragment3.setArguments(bundle);
-                            fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
-                        } else {
-                            FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
-                            dialogFragment.setArguments(bundle);
-                            dialogFragment.show(getSupportFragmentManager(), FullyRandomTestDialogFragment.FULLY_RANDOM_TEST_DIALOG_FRAGMENT);
-                        }
-                    } else {
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        if ( isEmulated ) {
-                            Toast toast1 = Toast.makeText(FieldActivity.this, R.string.field_emulated, Toast.LENGTH_SHORT);
-                            toast1.setGravity(Gravity.TOP, 0, 400);
-                            toast1.show();
-                        }
-                    }
-                } else {
-                    Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
+                if (Money.getUserSubscriptionStatus(this) || (!Money.getUserSubscriptionStatus(this) && Money.getUserAllowedDueAnError(this))) {
+                    startFulllyRandomTest();
                 }
                 break;
             case STUDY_PERIOD:
-                if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id)
-                        && !Emulation.isAnyThreadRunning() ) {
-                            if (databaseOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
-                                if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
-                                    AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
-                                    fragment2.setArguments(bundle);
-                                    fragment2.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
-                                } else {
-                                    StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
-                                    fragment2.setArguments(bundle);
-                                    fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
-                                }
-                            } else {
-                                Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
-                                if ( isEmulated ) {
-                                    Toast toast1 = Toast.makeText(FieldActivity.this, R.string.field_emulated, Toast.LENGTH_SHORT);
-                                    toast1.setGravity(Gravity.TOP, 0, 400);
-                                    toast1.show();
-                                }
-                            }
-
-                } else {
-                    Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_study_during_pausing_finish, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
+                if (Money.getUserSubscriptionStatus(this) || (!Money.getUserSubscriptionStatus(this) && Money.getUserAllowedDueAnError(this))) {
+                    startStudyAPeriod();
                 }
                 break;
-/*            case SORT:
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
-                sortEntriesDialogFragment.setArguments(bundle);
-                sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("sort")
-                        .build());
-                break;*/
             case FIELD_PROPERTIES:
                 String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
                 if (locale_short_name != null) {
@@ -450,46 +421,28 @@ public class FieldActivity extends AppCompatActivity implements
                         .build());
                 break;
             case SCHEDULE_IN_FIELD:
-
+                if (Money.getUserSubscriptionStatus(this) || (!Money.getUserSubscriptionStatus(this) && Money.getUserAllowedDueAnError(this))) {
                     ScheduleInFieldDialogFragment scheduleInFieldDialogFragment = new ScheduleInFieldDialogFragment();
                     Bundle bundle1 = new Bundle();
-                    bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                    bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                     scheduleInFieldDialogFragment.setArguments(bundle1);
-                    scheduleInFieldDialogFragment.show(getSupportFragmentManager(),ScheduleInFieldDialogFragment.SCHEDULE_IN_FIELD);
-
-                /*Calendar calendar_current_date_time = Calendar.getInstance();
-                final Calendar calendar_picked_date_time = Calendar.getInstance();
-                new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, final int year, final int monthOfYear, final int dayOfMonth) {
-                        new TimePickerDialog(FieldActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                            @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                                Intent intent = new Intent(FieldActivity.this, ShowScheduledNotificationsReceiver.class);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                                int request = (int)System.currentTimeMillis();
-                                PendingIntent pendingIntent = PendingIntent.getBroadcast(FieldActivity.this,request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
-                            }
-                        }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
-                    }
-                }, calendar_current_date_time.get(Calendar.YEAR), calendar_current_date_time.get(Calendar.MONTH),
-                        calendar_current_date_time.get(Calendar.DAY_OF_MONTH)).show();*/
+                    scheduleInFieldDialogFragment.show(getSupportFragmentManager(), ScheduleInFieldDialogFragment.SCHEDULE_IN_FIELD);
+                }
                 break;
             case Field_INFORMATION:
-                Intent intent = new Intent(this,FieldInformationActivity.class);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                Intent intent = new Intent(this, FieldInformationActivity.class);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 startActivity(intent);
                 break;
 
             case COPY_MOVE:
-                CopyMoveDialogFragment copyMoveDialogFragment = new CopyMoveDialogFragment();
-                Bundle bundle2 = new Bundle();
-                bundle2.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                copyMoveDialogFragment.setArguments(bundle2);
-                copyMoveDialogFragment.show(getSupportFragmentManager(),CopyMoveDialogFragment.COPY_MOVE_DIALOG_FRAGMENT);
+                if (Money.getUserSubscriptionStatus(this) || (!Money.getUserSubscriptionStatus(this) && Money.getUserAllowedDueAnError(this))) {
+                    CopyMoveDialogFragment copyMoveDialogFragment = new CopyMoveDialogFragment();
+                    Bundle bundle2 = new Bundle();
+                    bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    copyMoveDialogFragment.setArguments(bundle2);
+                    copyMoveDialogFragment.show(getSupportFragmentManager(), CopyMoveDialogFragment.COPY_MOVE_DIALOG_FRAGMENT);
+                }
                 break;
         }
     }
@@ -572,8 +525,8 @@ public class FieldActivity extends AppCompatActivity implements
                         .build());
                 return true;
             case R.id.text_shortcuts:
-                Intent intent = new Intent(this,SymbolActivity.class);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                Intent intent = new Intent(this, SymbolActivity.class);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 startActivity(intent);
             default:
                 return super.onOptionsItemSelected(item);
@@ -595,10 +548,12 @@ public class FieldActivity extends AppCompatActivity implements
         bundle.putInt(CURRENT_SORT, currentSort);
         getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
     }
+
     @Override
-    public void updateFieldName( String name) {
+    public void updateFieldName(String name) {
         getSupportActionBar().setTitle(name);
     }
+
     @Override
     public void deleteEntry(long entry_id, int question_data_type) {
         mySQLiteCursorLoader.deleteEntry(entry_id, question_data_type);
@@ -606,7 +561,142 @@ public class FieldActivity extends AppCompatActivity implements
 
     @Override
     public void copyField(long field_id) {
-        mySQLiteCursorLoader.copyField(current_field_id,field_id);
+        mySQLiteCursorLoader.copyField(current_field_id, field_id);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(Money.NETWORK_DOWN_GET_PURCHASES_STATUS)) {
+            if (!Money.getNetworkDownGetPurchasesesStatus(this)) {
+                if (Money.getUserSubscriptionStatus(this)) {
+                    unregisterReceiver(networkReceiver);
+                    sharedPreferences.registerOnSharedPreferenceChangeListener(null);
+                    NotificationCompat.Builder notificationBuilder = null;
+                    Intent notifyIntent = null;
+                    PendingIntent resultPendingIntent = null;
+                    TaskStackBuilder stackBuilder = null;
+                    notificationBuilder =
+                            new NotificationCompat.Builder(this)
+                                    .setSmallIcon(R.drawable.ic_launcher512)
+                                    .setContentTitle(this.getResources().getString(R.string.proceed_now))
+                                    .setContentText(this.getResources().getString(R.string.have_the_right))
+                                    .setTicker(this.getResources().getString(R.string.have_the_right))
+                                    .setAutoCancel(true);
+                    notifyIntent = new Intent(this, MainActivity.class);
+                    stackBuilder = TaskStackBuilder.create(this);
+                    stackBuilder.addParentStack(MainActivity.class);
+                    stackBuilder.addNextIntent(notifyIntent);
+                    resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                    notificationBuilder.setContentIntent(resultPendingIntent);
+                    ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify((int) System.currentTimeMillis(), notificationBuilder.build());
+                }
+            }
+        }
+    }
+
+    private void startEnhancedTest() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
+        Bundle bundle = new Bundle();
+        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        boolean isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)
+                && !Emulation.isAnyThreadRunning()) {
+            if (databaseOperations.getEntriesNumberForTests(current_field_id, question_data_type) > 0) {
+                if (databaseOperations.isThisFieldTestPausedEnhancedTest(current_field_id)) {
+                    AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
+                    bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                    fragment3.setArguments(bundle);
+                    fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
+                } else {
+                    EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
+                    dialogFragment.setArguments(bundle);
+                    dialogFragment.show(getSupportFragmentManager(), EnhancedTestDialogFragment.ENHANCED_TEST_DIALOG_FRAGMENT);
+                }
+            } else {
+                Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                if (isEmulated) {
+                    Toast toast1 = Toast.makeText(FieldActivity.this, R.string.field_emulated, Toast.LENGTH_SHORT);
+                    toast1.setGravity(Gravity.TOP, 0, 400);
+                    toast1.show();
+                }
+            }
+        } else {
+            Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+    }
+
+    private void startFulllyRandomTest() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
+        Bundle bundle = new Bundle();
+        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        boolean isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        if (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + current_field_id)
+                && !Emulation.isAnyThreadRunning()) {
+            if (databaseOperations.getEntriesNumberForTests(current_field_id, question_data_type) > 0) {
+                if (databaseOperations.isThisFieldTestPausedFullyRandomTest(current_field_id)) {
+                    AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
+                    bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                    fragment3.setArguments(bundle);
+                    fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
+                } else {
+                    FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
+                    dialogFragment.setArguments(bundle);
+                    dialogFragment.show(getSupportFragmentManager(), FullyRandomTestDialogFragment.FULLY_RANDOM_TEST_DIALOG_FRAGMENT);
+                }
+            } else {
+                Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                if (isEmulated) {
+                    Toast toast1 = Toast.makeText(FieldActivity.this, R.string.field_emulated, Toast.LENGTH_SHORT);
+                    toast1.setGravity(Gravity.TOP, 0, 400);
+                    toast1.show();
+                }
+            }
+        } else {
+            Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+    }
+
+    private void startStudyAPeriod() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
+        Bundle bundle = new Bundle();
+        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        boolean isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id)
+                && !Emulation.isAnyThreadRunning()) {
+            if (databaseOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
+                if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
+                    AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
+                    fragment2.setArguments(bundle);
+                    fragment2.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
+                } else {
+                    StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                    fragment2.setArguments(bundle);
+                    fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
+                }
+            } else {
+                Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.no_entries_in_field), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                if (isEmulated) {
+                    Toast toast1 = Toast.makeText(FieldActivity.this, R.string.field_emulated, Toast.LENGTH_SHORT);
+                    toast1.setGravity(Gravity.TOP, 0, 400);
+                    toast1.show();
+                }
+            }
+
+        } else {
+            Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_study_during_pausing_finish, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
     }
 
     public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {

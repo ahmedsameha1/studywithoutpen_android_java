@@ -243,4 +243,14 @@
     <string name="starting_entry_help" >إذا أردت، يمكنك اختيار مدخل واحد ليبدأ تفعيل المحاكاة ابتداء منه. هذا المدخل والمدخلات التالية له سيتم محاكاتها، المدخلات السابقة لن يتم محاكاتها.\n فقط المدخلات التي تم محاكاتها ستظهر في  وظيفة مذاكرة فترة، كل مدخل في تاريخ محاكاته.</string>
     <string name="field_emulated">This field has be emulated!</string>
     <string name="external_storage_not_ready">التخزين الخارجي الخاص بجهازك غير جاهز، ربما توجد مشكلة مع sdcard</string>
+    <string name="proceed_now">Proceed now</string>
+    <string name="have_the_right">You are eligible to use that feature.</string>
+    <string name="error">There is an error</string>
+    <string name="need_internet">Please, enable an Internet connection</string>
+    <string name="notified_if_eligible">You will be notified IF you are eligible to use this feature</string>
+    <string name="cannot_reach_service">Cannot reach service</string>
+    <string name="free_trial_announcement">You have free ONE time (3 months) trial peroid. You just need to provide your payment method.</string>
+    <string name="need_internet_try_again">Please, enable an Internet connection then try again</string>
+    <string name="purchase_error">There is a purchase error</string>
+    <string name="purchase_success">You have successfully bought a subscription. Thank you for you trust.</string>
 </resources>

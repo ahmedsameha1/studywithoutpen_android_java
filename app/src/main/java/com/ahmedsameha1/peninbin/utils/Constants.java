@@ -36,4 +36,8 @@ public class Constants {
         public static final int FULLY_RANDOM_TEST = 1;
     }
 
+    public static abstract class Money {
+        public static final long NOT_SUBSCRIBED = -1L;
+        public static final int PERIOD_OF_SUBSCRIBTION_INCLUDING_GRACE_PERIOD = 99;
+    }
 }

@@ -3,7 +3,7 @@
     <string-array name="main_activity_features">
         <item>Export Fields</item>
         <item>Import Fields</item>
-        <item>Review on Play Store</item>
+        <item>Subscribe</item>
         <item>About</item>
     </string-array>
     <string-array name="field_activity_features">
