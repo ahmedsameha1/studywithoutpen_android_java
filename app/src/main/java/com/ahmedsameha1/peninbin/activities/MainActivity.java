@@ -317,6 +317,8 @@ public class MainActivity extends AppCompatActivity implements
                             String pay_load = jo.getString("developerPayload");
                             String order_id = jo.getString("orderId");
                             if ( pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id) ) {
+                                Money.putUserSubscriptionStatus(this, true);
+                                Money.removeAllGetPurchasesErrors(this);
                                 Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_success), Toast.LENGTH_LONG);
                                 toast1.setGravity(Gravity.TOP, 0, 400);
                                 toast1.show();

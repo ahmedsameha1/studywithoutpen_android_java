@@ -8,12 +8,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
@@ -59,10 +61,14 @@ import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
+import com.ahmedsameha1.peninbin.utils.PayloadString;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.android.vending.billing.IInAppBillingService;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -116,6 +122,10 @@ public class FieldActivity extends AppCompatActivity implements
     private static final String FIELD_OPTIONS_DIALOG = "field_options_dialog";
     public static final String ANALYTICS_CATEGORY = "Field Activity Category";
     public static final String EDITED_RANK = "edited_rank";
+    private static final int SUBSCRIBE = 2;
+    private static final String PAY_LOAD_STRING = "pay_load_string";
+    private static final String BUY_INTENT = "BUY_INTENT";
+    private static final int BUY_FLOW_REQUEST_CODE = 6475;
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     protected int fieldType = 0;
     private long current_field_id;
@@ -142,10 +152,11 @@ public class FieldActivity extends AppCompatActivity implements
     private String search_value;
     private int question_data_type;
     private Tracker mTracker;
-    private IInAppBillingService mService;
+    private IInAppBillingService billingService;
     private ServiceConnection mServiceConn;
     private NetworkReceiver networkReceiver;
     private SharedPreferences sharedPreferences;
+    private String pay_load;
 
 
     @Override
@@ -204,13 +215,13 @@ public class FieldActivity extends AppCompatActivity implements
         mServiceConn = new ServiceConnection() {
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                mService = null;
+                billingService = null;
             }
 
             @Override
             public void onServiceConnected(ComponentName name,
                                            IBinder service) {
-                mService = IInAppBillingService.Stub.asInterface(service);
+                billingService = IInAppBillingService.Stub.asInterface(service);
             }
         };
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -293,9 +304,54 @@ public class FieldActivity extends AppCompatActivity implements
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 tts_available = true;
             }
+        } else if (requestCode == BUY_FLOW_REQUEST_CODE) {
+            int response_code = data.getIntExtra(Money.RESPONSE_CODE, 0);
+            String purchaseData = data.getStringExtra(Money.RESPONSE_INAPP_PURCHASE_DATA);
+            String dataSignature = data.getStringExtra(Money.RESPONSE_INAPP_SIGNATURE);
+            if (resultCode == RESULT_OK && response_code == Money.BILLING_RESPONSE_RESULT_OK) {
+                if (purchaseData != null && dataSignature != null) {
+                    try {
+                        if (Money.Security.verifyPurchase(Money.get64(Money.piece1 + Money.piece2 + Money.piece3 + Money.piece4 + Money.piece5 + Money.piece6
+                                        + Money.piece7 + Money.piece8 + Money.piece9 + Money.piece10 + Money.piece11, getResources().getIntArray(R.array.values))
+                                , purchaseData, dataSignature)) {
+                            JSONObject jo = new JSONObject(purchaseData);
+                            String pay_load = jo.getString("developerPayload");
+                            String order_id = jo.getString("orderId");
+                            if ( pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id) ) {
+                                Money.putUserSubscriptionStatus(this, true);
+                                Money.removeAllGetPurchasesErrors(this);
+                                Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_success), Toast.LENGTH_LONG);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                            } else {
+                                Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                            }
+                        } else {
+                            Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                            toast1.setGravity(Gravity.TOP, 0, 400);
+                            toast1.show();
+                        }
+                    } catch (JSONException e) {
+                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                        toast1.setGravity(Gravity.TOP, 0, 400);
+                        toast1.show();
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                    toast1.setGravity(Gravity.TOP, 0, 400);
+                    toast1.show();
+                }
+            } else {
+                Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
+                toast1.setGravity(Gravity.TOP, 0, 400);
+                toast1.show();
+            }
         }
     }
-
+///// TODO: 25/10/16 make proguard work
     @Override
     protected void onResume() {
         super.onResume();
@@ -311,7 +367,7 @@ public class FieldActivity extends AppCompatActivity implements
         }
         if (Money.getNetworkDownGetPurchasesesStatus(this)) {
             IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
-            networkReceiver = new NetworkReceiver(mService);
+            networkReceiver = new NetworkReceiver(billingService);
             registerReceiver(networkReceiver, intentFilter);
         }
     }
@@ -383,17 +439,59 @@ public class FieldActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 } else {
-
+                    startPurchaseFlow();
                 }
                 break;
             case FULLY_RANDOM_TEST:
-                if (Money.getUserSubscriptionStatus(this) || (!Money.getUserSubscriptionStatus(this) && Money.getUserAllowedDueAnError(this))) {
+                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
                     startFulllyRandomTest();
+                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
+                    if (NetworkReceiver.isOnline(this)) {
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    } else {
+                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
+                        toast1.setGravity(Gravity.TOP, 0, 400);
+                        toast1.show();
+                    }
+                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
+                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                } else {
+                    startPurchaseFlow();
                 }
                 break;
             case STUDY_PERIOD:
-                if (Money.getUserSubscriptionStatus(this) || (!Money.getUserSubscriptionStatus(this) && Money.getUserAllowedDueAnError(this))) {
-                    startStudyAPeriod();
+                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
+                   startStudyAPeriod();
+                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
+                    if (NetworkReceiver.isOnline(this)) {
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    } else {
+                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
+                        toast1.setGravity(Gravity.TOP, 0, 400);
+                        toast1.show();
+                    }
+                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
+                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                } else {
+                    startPurchaseFlow();
                 }
                 break;
             case FIELD_PROPERTIES:
@@ -421,12 +519,33 @@ public class FieldActivity extends AppCompatActivity implements
                         .build());
                 break;
             case SCHEDULE_IN_FIELD:
-                if (Money.getUserSubscriptionStatus(this) || (!Money.getUserSubscriptionStatus(this) && Money.getUserAllowedDueAnError(this))) {
+                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
                     ScheduleInFieldDialogFragment scheduleInFieldDialogFragment = new ScheduleInFieldDialogFragment();
                     Bundle bundle1 = new Bundle();
                     bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                     scheduleInFieldDialogFragment.setArguments(bundle1);
                     scheduleInFieldDialogFragment.show(getSupportFragmentManager(), ScheduleInFieldDialogFragment.SCHEDULE_IN_FIELD);
+                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
+                    if (NetworkReceiver.isOnline(this)) {
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    } else {
+                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
+                        toast1.setGravity(Gravity.TOP, 0, 400);
+                        toast1.show();
+                    }
+                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
+                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                } else {
+                    startPurchaseFlow();
                 }
                 break;
             case Field_INFORMATION:
@@ -436,12 +555,33 @@ public class FieldActivity extends AppCompatActivity implements
                 break;
 
             case COPY_MOVE:
-                if (Money.getUserSubscriptionStatus(this) || (!Money.getUserSubscriptionStatus(this) && Money.getUserAllowedDueAnError(this))) {
+                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
                     CopyMoveDialogFragment copyMoveDialogFragment = new CopyMoveDialogFragment();
                     Bundle bundle2 = new Bundle();
                     bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                     copyMoveDialogFragment.setArguments(bundle2);
                     copyMoveDialogFragment.show(getSupportFragmentManager(), CopyMoveDialogFragment.COPY_MOVE_DIALOG_FRAGMENT);
+                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
+                    if (NetworkReceiver.isOnline(this)) {
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    } else {
+                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
+                        toast1.setGravity(Gravity.TOP, 0, 400);
+                        toast1.show();
+                    }
+                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
+                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                } else {
+                    startPurchaseFlow();
                 }
                 break;
         }
@@ -452,9 +592,15 @@ public class FieldActivity extends AppCompatActivity implements
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt(CURRENT_SORT, currentSort);
         savedInstanceState.putLong(FIELD_ID, current_field_id);
+        savedInstanceState.putString(PAY_LOAD_STRING, pay_load);
     }
 
-
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; FieldActivity.this adds items to the action bar if it is present.
@@ -532,7 +678,41 @@ public class FieldActivity extends AppCompatActivity implements
                 return super.onOptionsItemSelected(item);
         }
     }
-
+    private void startPurchaseFlow() {
+        if (NetworkReceiver.isOnline(this)) {
+            Toast toast = Toast.makeText(this, R.string.free_trial_announcement, Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+            pay_load = PayloadString.getString();
+            try {
+                //// TODO: 24/10/16 add the real sku
+                Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "99", Money.SUBSCRIPTION_TYPE,
+                        pay_load);
+                int response_code = bundle.getInt(Money.RESPONSE_CODE);
+                if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
+                    PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
+                    startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
+                } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
+                    Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                    toast1.setGravity(Gravity.TOP, 0, 400);
+                    toast1.show();
+                } else {
+                    Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                    toast1.setGravity(Gravity.TOP, 0, 400);
+                    toast1.show();
+                }
+            } catch (IntentSender.SendIntentException | RemoteException e) {
+                Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                toast1.setGravity(Gravity.TOP, 0, 400);
+                toast1.show();
+                e.printStackTrace();
+            }
+        } else {
+            Toast toast = Toast.makeText(this, R.string.need_internet_try_again, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+    }
     @Override
     public void search(String value) {
         Bundle bundle = new Bundle();

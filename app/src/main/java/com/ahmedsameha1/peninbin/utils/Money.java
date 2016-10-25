@@ -186,14 +186,14 @@ public class Money {
         return sharedPreferences.getBoolean(USER_SUBSCRIPTION_STATUS, false);
     }
 
-    private static void putUserSubscriptionStatus( Context context, boolean status ) {
+    public static void putUserSubscriptionStatus( Context context, boolean status ) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(USER_SUBSCRIPTION_STATUS, status);
         editor.commit();
     }
 
-    private static void removeAllGetPurchasesErrors(Context context) {
+    public static void removeAllGetPurchasesErrors(Context context) {
         disallowUserDueAnError(context);
         putNetworkDownGetPurchasesesStatus(context, false);
         putUnsolvableErrorGetPurchases(context, false);
