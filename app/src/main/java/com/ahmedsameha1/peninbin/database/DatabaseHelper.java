@@ -261,7 +261,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.GooglePaymentOrderID.TABLE_NAME
             + " ( "
-            + Contract.GooglePaymentOrderID.COLUMN_ORDER_ID + " TEXT NOT NULL UNIQUE ) WITHOUT ROWID;";
+            + Contract.GooglePaymentOrderID.COLUMN_ORDER_ID + " TEXT NOT NULL PRIMARY KEY );";
 
     //// TODO: 10/13/16 the database updated so make the nessecary changes in all the app
 

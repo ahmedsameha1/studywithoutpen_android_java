@@ -126,6 +126,7 @@ public class FieldActivity extends AppCompatActivity implements
     private static final String PAY_LOAD_STRING = "pay_load_string";
     private static final String BUY_INTENT = "BUY_INTENT";
     private static final int BUY_FLOW_REQUEST_CODE = 6475;
+    private static final String INITIAL_CHECK_SUPSCRIPTION = "intial_check_supscription";
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     protected int fieldType = 0;
     private long current_field_id;
@@ -157,6 +158,7 @@ public class FieldActivity extends AppCompatActivity implements
     private NetworkReceiver networkReceiver;
     private SharedPreferences sharedPreferences;
     private String pay_load;
+    private boolean initialCheckSubscription = true;
 
 
     @Override
@@ -222,6 +224,12 @@ public class FieldActivity extends AppCompatActivity implements
             public void onServiceConnected(ComponentName name,
                                            IBinder service) {
                 billingService = IInAppBillingService.Stub.asInterface(service);
+                if ( Money.getNetworkDownGetPurchasesesStatus(FieldActivity.this) &&
+                        NetworkReceiver.isOnline(FieldActivity.this) ) {
+                    Money.checkSubscription(FieldActivity.this, billingService);
+                    sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
+                    sharedPreferences.registerOnSharedPreferenceChangeListener(FieldActivity.this);
+                }
             }
         };
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -280,7 +288,11 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(networkReceiver);
+        try {
+            unregisterReceiver(networkReceiver);
+        } catch ( IllegalArgumentException e ) {
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -320,6 +332,7 @@ public class FieldActivity extends AppCompatActivity implements
                             if ( pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id) ) {
                                 Money.putUserSubscriptionStatus(this, true);
                                 Money.removeAllGetPurchasesErrors(this);
+                                new CursorLoaderAndUpdateDatabase(this).addOrderId(order_id);
                                 Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_success), Toast.LENGTH_LONG);
                                 toast1.setGravity(Gravity.TOP, 0, 400);
                                 toast1.show();
@@ -425,6 +438,7 @@ public class FieldActivity extends AppCompatActivity implements
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     } else {
+                        initialCheckSubscription = false;
                         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
                         Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
@@ -451,6 +465,7 @@ public class FieldActivity extends AppCompatActivity implements
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     } else {
+                        initialCheckSubscription = false;
                         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
                         Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
@@ -477,6 +492,7 @@ public class FieldActivity extends AppCompatActivity implements
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     } else {
+                        initialCheckSubscription = false;
                         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
                         Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
@@ -531,6 +547,7 @@ public class FieldActivity extends AppCompatActivity implements
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     } else {
+                        initialCheckSubscription = false;
                         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
                         Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
@@ -567,6 +584,7 @@ public class FieldActivity extends AppCompatActivity implements
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     } else {
+                        initialCheckSubscription = false;
                         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
                         Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
@@ -593,11 +611,13 @@ public class FieldActivity extends AppCompatActivity implements
         savedInstanceState.putInt(CURRENT_SORT, currentSort);
         savedInstanceState.putLong(FIELD_ID, current_field_id);
         savedInstanceState.putString(PAY_LOAD_STRING, pay_load);
+        savedInstanceState.putBoolean(INITIAL_CHECK_SUPSCRIPTION, initialCheckSubscription);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
+        initialCheckSubscription = savedInstanceState.getBoolean(INITIAL_CHECK_SUPSCRIPTION);
         super.onRestoreInstanceState(savedInstanceState);
     }
     
@@ -680,13 +700,10 @@ public class FieldActivity extends AppCompatActivity implements
     }
     private void startPurchaseFlow() {
         if (NetworkReceiver.isOnline(this)) {
-            Toast toast = Toast.makeText(this, R.string.free_trial_announcement, Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
             pay_load = PayloadString.getString();
             try {
                 //// TODO: 24/10/16 add the real sku
-                Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "99", Money.SUBSCRIPTION_TYPE,
+                Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "test_app_subscription1", Money.SUBSCRIPTION_TYPE,
                         pay_load);
                 int response_code = bundle.getInt(Money.RESPONSE_CODE);
                 if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
@@ -701,7 +718,7 @@ public class FieldActivity extends AppCompatActivity implements
                     toast1.setGravity(Gravity.TOP, 0, 400);
                     toast1.show();
                 }
-            } catch (IntentSender.SendIntentException | RemoteException e) {
+            } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
                 Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
                 toast1.setGravity(Gravity.TOP, 0, 400);
                 toast1.show();
@@ -750,25 +767,27 @@ public class FieldActivity extends AppCompatActivity implements
             if (!Money.getNetworkDownGetPurchasesesStatus(this)) {
                 if (Money.getUserSubscriptionStatus(this)) {
                     unregisterReceiver(networkReceiver);
-                    sharedPreferences.registerOnSharedPreferenceChangeListener(null);
-                    NotificationCompat.Builder notificationBuilder = null;
-                    Intent notifyIntent = null;
-                    PendingIntent resultPendingIntent = null;
-                    TaskStackBuilder stackBuilder = null;
-                    notificationBuilder =
-                            new NotificationCompat.Builder(this)
-                                    .setSmallIcon(R.drawable.ic_launcher512)
-                                    .setContentTitle(this.getResources().getString(R.string.proceed_now))
-                                    .setContentText(this.getResources().getString(R.string.have_the_right))
-                                    .setTicker(this.getResources().getString(R.string.have_the_right))
-                                    .setAutoCancel(true);
-                    notifyIntent = new Intent(this, MainActivity.class);
-                    stackBuilder = TaskStackBuilder.create(this);
-                    stackBuilder.addParentStack(MainActivity.class);
-                    stackBuilder.addNextIntent(notifyIntent);
-                    resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                    notificationBuilder.setContentIntent(resultPendingIntent);
-                    ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify((int) System.currentTimeMillis(), notificationBuilder.build());
+                    sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+                    if ( !initialCheckSubscription ) {
+                        NotificationCompat.Builder notificationBuilder = null;
+                        Intent notifyIntent = null;
+                        PendingIntent resultPendingIntent = null;
+                        TaskStackBuilder stackBuilder = null;
+                        notificationBuilder =
+                                new NotificationCompat.Builder(this)
+                                        .setSmallIcon(R.drawable.ic_launcher512)
+                                        .setContentTitle(this.getResources().getString(R.string.proceed_now))
+                                        .setContentText(this.getResources().getString(R.string.have_the_right))
+                                        .setTicker(this.getResources().getString(R.string.have_the_right))
+                                        .setAutoCancel(true);
+                        notifyIntent = new Intent(this, MainActivity.class);
+                        stackBuilder = TaskStackBuilder.create(this);
+                        stackBuilder.addParentStack(MainActivity.class);
+                        stackBuilder.addNextIntent(notifyIntent);
+                        resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                        notificationBuilder.setContentIntent(resultPendingIntent);
+                        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify((int) System.currentTimeMillis(), notificationBuilder.build());
+                    }
                 }
             }
         }

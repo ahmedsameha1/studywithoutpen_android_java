@@ -1,13 +1,12 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -17,7 +16,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -27,11 +25,12 @@ import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.app.LoaderManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
@@ -84,7 +83,6 @@ import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -97,7 +95,8 @@ public class MainActivity extends AppCompatActivity implements
         MainActivityFragmentDrawer.FragmentDrawerListener,
         DeleteFieldDialogFragment.Contact,
         CreateFieldDialogFragment.Contact,
-        ExportFieldsDialogFragment.Contact {
+        ExportFieldsDialogFragment.Contact,
+        SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST = "mid_night_service_pendingintent_request";
     public static final String SCREEN_NAME = "MainActivity";
     private static final String RUN_FIRST_TIME = "run_first_time";
@@ -134,10 +133,11 @@ public class MainActivity extends AppCompatActivity implements
     private Tracker mTracker;
     private String to_export_file_name;
     private ArrayList<String> to_export_fields;
-    private IInAppBillingService mService;
+    private IInAppBillingService billingService;
     private ServiceConnection mServiceConn;
     private NetworkReceiver networkReceiver;
     private String pay_load;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,13 +181,14 @@ public class MainActivity extends AppCompatActivity implements
         mServiceConn = new ServiceConnection() {
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                mService = null;
+                billingService = null;
             }
 
             @Override
             public void onServiceConnected(ComponentName name,
                                            IBinder service) {
-                mService = IInAppBillingService.Stub.asInterface(service);
+                billingService = IInAppBillingService.Stub.asInterface(service);
+                Money.checkSubscription(MainActivity.this, billingService);
             }
         };
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -236,7 +237,6 @@ public class MainActivity extends AppCompatActivity implements
                 new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
         bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
-        Money.checkSubscription(this, mService);
         fff();
     }
 
@@ -319,6 +319,7 @@ public class MainActivity extends AppCompatActivity implements
                             if ( pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id) ) {
                                 Money.putUserSubscriptionStatus(this, true);
                                 Money.removeAllGetPurchasesErrors(this);
+                                new CursorLoaderAndUpdateDatabase(this).addOrderId(order_id);
                                 Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_success), Toast.LENGTH_LONG);
                                 toast1.setGravity(Gravity.TOP, 0, 400);
                                 toast1.show();
@@ -435,13 +436,10 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case SUBSCRIBE:
                 if (NetworkReceiver.isOnline(this)) {
-                    Toast toast = Toast.makeText(this, R.string.free_trial_announcement, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
                     pay_load = PayloadString.getString();
                     try {
                         //// TODO: 24/10/16 add the real sku
-                        Bundle bundle = mService.getBuyIntent(3, this.getPackageName(), "99", Money.SUBSCRIPTION_TYPE,
+                        Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "test_app_subscription1", Money.SUBSCRIPTION_TYPE,
                                 pay_load);
                         int response_code = bundle.getInt(Money.RESPONSE_CODE);
                         if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
@@ -456,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements
                             toast1.setGravity(Gravity.TOP, 0, 400);
                             toast1.show();
                         }
-                    } catch (IntentSender.SendIntentException | RemoteException e) {
+                    } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
                         Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
                         toast1.setGravity(Gravity.TOP, 0, 400);
                         toast1.show();
@@ -503,15 +501,21 @@ public class MainActivity extends AppCompatActivity implements
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
         if (Money.getNetworkDownGetPurchasesesStatus(this)) {
             IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
-            networkReceiver = new NetworkReceiver(mService);
+            networkReceiver = new NetworkReceiver(billingService);
             registerReceiver(networkReceiver, intentFilter);
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(networkReceiver);
+        try {
+            unregisterReceiver(networkReceiver);
+        } catch ( IllegalArgumentException e ) {
+            e.printStackTrace();
+        }
     }
 
     private void addFab() {
@@ -574,7 +578,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         mySQLiteCursorLoader.cleanDatabase();
-        if (mService != null) {
+        if (billingService != null) {
             unbindService(mServiceConn);
         }
     }
@@ -652,6 +656,18 @@ public class MainActivity extends AppCompatActivity implements
         to_export_file_name = savedInstanceState.getString(TO_EXPORT_FILE_NAME);
         pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
         super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(Money.NETWORK_DOWN_GET_PURCHASES_STATUS)) {
+            if (!Money.getNetworkDownGetPurchasesesStatus(this)) {
+                if (Money.getUserSubscriptionStatus(this)) {
+                    unregisterReceiver(networkReceiver);
+                    sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+                }
+            }
+        }
     }
 
     public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {

@@ -81,7 +81,7 @@ public class Money {
     public static void startPurchase() {
 
     }
-
+//// TODO: 10/29/16 remeber to implement deleting the apk after the app installation on the device so no one get the apk the share it
     public static void continuePurchase() {
 
     }
@@ -236,20 +236,6 @@ public class Money {
     public static void checkSubscription (final Context context, final IInAppBillingService billingService ) {
         (new Thread(new Runnable() {
             public void run() {
-                if ( context.getPackageManager().checkPermission(Manifest.permission.GET_ACCOUNTS, context.getPackageName() ) == PERMISSION_GRANTED ) {
-                    Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-                    Account[] accounts = AccountManager.get(context).getAccounts();
-                    for (Account account : accounts) {
-                        if (emailPattern.matcher(account.name).matches()) {
-                            String possibleEmail = account.name;
-                            if (possibleEmail.equalsIgnoreCase("ahmedsameha1@gmail.com")) {
-                                putUserSubscriptionStatus(context, true);
-                                removeAllGetPurchasesErrors(context);
-                                return;
-                            }
-                        }
-                    }
-                }
                 try {
                     Bundle items_bundle = billingService.getPurchases(3,context.getPackageName(), SUBSCRIPTION_TYPE, null);
                     int response_code = items_bundle.getInt(RESPONSE_CODE);

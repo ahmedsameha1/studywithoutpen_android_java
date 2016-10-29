@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.android.vending.billing.IInAppBillingService;
@@ -20,7 +21,9 @@ public class NetworkReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
       if ( isOnline(context) ) {
-          Money.checkSubscription(context, billingService);
+          if ( billingService != null ) {
+              Money.checkSubscription(context, billingService);
+          }
       }
     }
 
