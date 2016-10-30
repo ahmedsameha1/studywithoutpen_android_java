@@ -74,6 +74,5 @@ public class ExportFileDirectlyActivity extends AppCompatActivity {
                     }
                 });
         dialog.show();
-        // // TODO: 30/10/16 remeber to add the code of apk deletion after app installation
     }
 }

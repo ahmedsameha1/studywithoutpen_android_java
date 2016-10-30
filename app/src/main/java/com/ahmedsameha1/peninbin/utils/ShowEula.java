@@ -83,6 +83,7 @@ public class ShowEula {
                     });
             Dialog dialog = builder.create();
             dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
             dialog.show();
         }
     }

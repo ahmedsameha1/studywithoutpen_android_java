@@ -81,7 +81,6 @@ public class Money {
     public static void startPurchase() {
 
     }
-//// TODO: 10/29/16 remeber to implement deleting the apk after the app installation on the device so no one get the apk the share it
     public static void continuePurchase() {
 
     }
