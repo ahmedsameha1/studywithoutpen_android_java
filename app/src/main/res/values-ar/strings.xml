@@ -253,4 +253,6 @@
     <string name="need_internet_try_again">Please, enable an Internet connection then try again</string>
     <string name="purchase_error">There is a purchase error</string>
     <string name="purchase_success">You have successfully bought a subscription. Thank you for you trust.</string>
+    <string name="please_read">Please, read carefully</string>
+    <string name="agree">أوافق</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.ahmedsameha1.peninbin.secondary_activities;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
+import com.ahmedsameha1.peninbin.utils.ShowEula;
 
 /**
  * Created by me on 11/07/16.
@@ -63,7 +65,15 @@ public class ExportFileDirectlyActivity extends AppCompatActivity {
                                 })
                                 .create().show();
                     }
-                })
-                .create().show();
+                });
+                Dialog dialog = ask_import_fields.create();
+                dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialogInterface) {
+                        new ShowEula(ExportFileDirectlyActivity.this).show();
+                    }
+                });
+        dialog.show();
+        // // TODO: 30/10/16 remeber to add the code of apk deletion after app installation
     }
 }

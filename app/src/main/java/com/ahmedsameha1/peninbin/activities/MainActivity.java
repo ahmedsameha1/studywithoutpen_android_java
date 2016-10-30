@@ -69,6 +69,7 @@ import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.PayloadString;
+import com.ahmedsameha1.peninbin.utils.ShowEula;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.android.vending.billing.IInAppBillingService;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
@@ -238,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements
         serviceIntent.setPackage("com.android.vending");
         bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
         fff();
+        new ShowEula(this).show();
     }
 
 
