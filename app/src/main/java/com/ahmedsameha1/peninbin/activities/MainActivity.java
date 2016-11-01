@@ -255,9 +255,7 @@ public class MainActivity extends AppCompatActivity implements
         if (sharedPreferences.getBoolean(RUN_FIRST_TIME, true)) {
 
             Calendar calendar = Calendar.getInstance();
-            long long_utc = System.currentTimeMillis();
-            long offset = TimeZone.getDefault().getOffset(long_utc);
-            calendar.setTimeInMillis(long_utc + offset);
+            calendar.setTimeInMillis(System.currentTimeMillis());
             calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
