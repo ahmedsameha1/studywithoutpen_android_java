@@ -46,10 +46,13 @@
                     android:scrollbarAlwaysDrawVerticalTrack="true"
                     android:scrollbars="vertical"
                     android:textColor="#FFFFFF"
-
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    android:typeface="monospace" />
+                    android:typeface="monospace"
+                    android:layout_weight="1"
+                    android:ellipsize="none"
+                    android:maxLines="1000"
+                    android:scrollHorizontally="false"/>
             </android.support.v7.widget.CardView>
         </LinearLayout>
 
@@ -84,10 +87,13 @@
                     android:padding="5dp"
                     android:scrollbarAlwaysDrawVerticalTrack="true"
                     android:textColor="#FFFFFF"
-
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    android:typeface="monospace" />
+                    android:typeface="monospace"
+                    android:layout_weight="1"
+                    android:ellipsize="none"
+                    android:maxLines="1000"
+                    android:scrollHorizontally="false"/>
             </android.support.v7.widget.CardView>
         </LinearLayout>
 

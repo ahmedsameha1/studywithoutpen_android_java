@@ -37,6 +37,7 @@
                     android:id="@+id/question"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:background="@drawable/text_bordered_transperant"
                     android:gravity="center"
                     android:hint="@string/enter_a_question"
@@ -49,7 +50,10 @@
                     android:textColor="#FFFFFF"
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    android:typeface="monospace" />
+                    android:typeface="monospace"
+                    android:ellipsize="none"
+                    android:maxLines="1000"
+                    android:scrollHorizontally="false"/>
             </android.support.v7.widget.CardView>
         </LinearLayout>
 
@@ -87,7 +91,11 @@
 
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    android:typeface="monospace" />
+                    android:typeface="monospace"
+                    android:layout_weight="1"
+                    android:ellipsize="none"
+                    android:maxLines="1000"
+                    android:scrollHorizontally="false"/>
             </android.support.v7.widget.CardView>
         </LinearLayout>
 

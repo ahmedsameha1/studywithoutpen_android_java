@@ -25,6 +25,7 @@ import com.ahmedsameha1.peninbin.database.Contract.Old_Question_DBV6_AppV32;
 import com.ahmedsameha1.peninbin.database.Contract.Old_Answer_DBV6_AppV32;
 import com.ahmedsameha1.peninbin.database.Contract.Old_Linker_DBV6_AppV32;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -494,6 +495,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         if ( oldVersion < 12 ) {
             sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
+            Emulation.modifyEmulationCreationDatesOfAppV53AndHigher(sqLiteDatabase);
         }
     }
     

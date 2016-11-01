@@ -51,6 +51,7 @@ public class ShowTestResultDialogFragment extends DialogFragment {
         test_type = getArguments().getInt(TEST_TYPE);
         correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) /questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();
+        numberFormat.setMaximumFractionDigits(1);
         message = getString(R.string.Your_correct_answers_was) + " " + numberFormat.format(correctAnswersPercent)+ " " +
                 getString(R.string.of_questions);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
@@ -60,16 +61,7 @@ public class ShowTestResultDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage(message)
                 .setTitle(R.string.test_result)
-                .setPositiveButton(R.string.wrong_answers, null /*new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItemList);
-                        Intent intent = new Intent(getActivity(),WrongAnswersActivity.class);
-                        intent.putExtra(WrongAnswersActivity.WRONG_ITEM_LIST,bundle);
-                        startActivity(intent);
-                    }
-                }*/)
+                .setPositiveButton(R.string.wrong_answers, null )
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

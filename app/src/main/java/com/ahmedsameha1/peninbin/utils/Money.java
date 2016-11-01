@@ -3,6 +3,7 @@ package com.ahmedsameha1.peninbin.utils;
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -14,8 +15,11 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.android.vending.billing.IInAppBillingService;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -76,6 +80,7 @@ public class Money {
     public static final String INAPP_CONTINUATION_TOKEN = "INAPP_CONTINUATION_TOKEN";
     private static final String SECURITY_ERROR_GET_PURCHASES = "security_error_get_purchases";
     private static final String UNSOLVABLE_ERROR_GETPURCHASES = "unsolvable_error_getpurchases";
+    private static final String MONEY = "money";
 
 
     public static void startPurchase() {
@@ -231,8 +236,9 @@ public class Money {
 
 
 
-    //// TODO: 22/10/16 must put google analytic flags in every part of the work with getpurchases
     public static void checkSubscription (final Context context, final IInAppBillingService billingService ) {
+        AnalyticsApplication application = (AnalyticsApplication) (((Activity) context).getApplication());
+        final Tracker mTracker = application.getDefaultTracker();
         (new Thread(new Runnable() {
             public void run() {
                 try {
@@ -260,6 +266,10 @@ public class Money {
                                 } else {
                                     putUserSubscriptionStatus(context, false);
                                     putUnsolvableErrorGetPurchases(context, true);   // security error
+                                    mTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory(MONEY)
+                                            .setAction("security error")
+                                            .build());
                                 }
                             } else if ( owned_item_data_list.size() == 0 ) {
                                 putUserSubscriptionStatus(context, false);
@@ -276,15 +286,31 @@ public class Money {
                             response_code == BILLING_RESPONSE_RESULT_ITEM_NOT_OWNED ) {
                         allowUserDueAnError(context);
                         putUserSubscriptionStatus(context, false);
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory(MONEY)
+                                .setAction("allow user due error")
+                                .build());
                     } else if ( response_code == BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
                         putNetworkDownGetPurchasesesStatus(context, true);
                         putUserSubscriptionStatus(context, false);
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory(MONEY)
+                                .setAction("network error on money")
+                                .build());
                     } else if ( response_code == BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE ) {
                         putUnsolvableErrorGetPurchases(context, true);
                         putUserSubscriptionStatus(context, false);
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory(MONEY)
+                                .setAction("billing unavailable error money")
+                                .build());
                     }
                 } catch (RemoteException e) {
                     allowUserDueAnError(context);
+                    mTracker.send(new HitBuilders.EventBuilder()
+                            .setCategory(MONEY)
+                            .setAction("allow user due error")
+                            .build());
                     e.printStackTrace();
                 }
             }

@@ -17,6 +17,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -69,10 +70,17 @@ public class Emulation {
     }
 
     private static void partition(int number_of_everyday_entries, Cursor cursor, SQLiteDatabase sqLiteDatabase) {
-        long emulated_creation_time_millis = System.currentTimeMillis();
-        Date date = new Date(emulated_creation_time_millis);
+        Calendar calendar = Calendar.getInstance();
+        long long_utc = System.currentTimeMillis();
+        calendar.setTimeInMillis(long_utc);
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 5);
+        calendar.set(Calendar.SECOND, 0);
+      /*  long emulated_creation_time_millis = System.currentTimeMillis();
+        Date date = new Date(emulated_creation_time_millis);*/
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
-        String emulated_creation_time_string = simpleDateFormat.format(date);
+        String emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
         int number_of_days = cursor.getCount() / number_of_everyday_entries;
         if (cursor.getCount() % number_of_everyday_entries > 0) {
             number_of_days++;
@@ -91,9 +99,10 @@ public class Emulation {
                 outter:
                 for (int i = 0; i < number_of_days; i++) {
                     if (i >= 1) {
-                        emulated_creation_time_millis += AlarmManager.INTERVAL_DAY;
-                        date = new Date(emulated_creation_time_millis);
-                        emulated_creation_time_string = simpleDateFormat.format(date);
+                        /*emulated_creation_time_millis += AlarmManager.INTERVAL_DAY;
+                        date = new Date(emulated_creation_time_millis);*/
+                        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+                        emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
                     }
                     for (int k = 0; k < number_of_everyday_entries; k++) {
                         if (i == 0 && k == 0) {
@@ -118,10 +127,17 @@ public class Emulation {
     }
 
     private static void partition(int number_of_everyday_entries, ArrayList<Long> list_of_entries, SQLiteDatabase sqLiteDatabase) {
-        long emulated_creation_time_millis = System.currentTimeMillis();
-        Date date = new Date(emulated_creation_time_millis);
+        Calendar calendar = Calendar.getInstance();
+        long long_utc = System.currentTimeMillis();
+        calendar.setTimeInMillis(long_utc);
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 5);
+        calendar.set(Calendar.SECOND, 0);
+      /*  long emulated_creation_time_millis = System.currentTimeMillis();
+        Date date = new Date(emulated_creation_time_millis);*/
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
-        String emulated_creation_time_string = simpleDateFormat.format(date);
+        String emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
         int number_of_days = list_of_entries.size() / number_of_everyday_entries;
         if (list_of_entries.size() % number_of_everyday_entries > 0) {
             number_of_days++;
@@ -140,9 +156,10 @@ public class Emulation {
                 outter:
                 for (int i = 0; i < number_of_days; i++) {
                     if (i >= 1) {
-                        emulated_creation_time_millis += AlarmManager.INTERVAL_DAY;
-                        date = new Date(emulated_creation_time_millis);
-                        emulated_creation_time_string = simpleDateFormat.format(date);
+                      /*  emulated_creation_time_millis += AlarmManager.INTERVAL_DAY;
+                        date = new Date(emulated_creation_time_millis);*/
+                        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+                        emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
                     }
                     for (int k = 0; k < number_of_everyday_entries; k++) {
                         if (++counter > list_of_entries.size() - 1) {
@@ -161,8 +178,15 @@ public class Emulation {
             sqLiteDatabase.endTransaction();
         }
     }
-
+//// TODO: 01/11/16 must change the emulation creation dates of the old databasese on onupgrade method to be consestent
     public static String getEmulationCreationDate(long field_id, int number_of_everyday_entries, SQLiteDatabase sqLiteDatabase) {
+        Calendar calendar_1 = Calendar.getInstance();
+        long long_utc = System.currentTimeMillis();
+        calendar_1.setTimeInMillis(long_utc);
+        calendar_1.set(Calendar.DAY_OF_MONTH, calendar_1.get(Calendar.DAY_OF_MONTH) + 1);
+        calendar_1.set(Calendar.HOUR_OF_DAY, 0);
+        calendar_1.set(Calendar.MINUTE, 5);
+        calendar_1.set(Calendar.SECOND, 0);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
         Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
                 new String[]{Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
@@ -175,7 +199,6 @@ public class Emulation {
             Cursor cursor1 = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
                     Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " = ? ", new String[]{date_string}, null, null, null);
             int number_of_entries_last_date = cursor1.getCount();
-            Calendar calendar = Calendar.getInstance(Locale.getDefault());
             long date_millis = Timestamp.valueOf(date_string).getTime();
             long now_millis = System.currentTimeMillis();
             Calendar calendar_date = Calendar.getInstance(Locale.getDefault());
@@ -184,29 +207,34 @@ public class Emulation {
             calendar_now.setTimeInMillis(now_millis);
             SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
             int remaining_this_day = number_of_everyday_entries - number_of_entries_last_date;
-            long date_millis_one_day_after = Timestamp.valueOf(date_string).getTime() + AlarmManager.INTERVAL_DAY;
+            Date utc_date_of_date_string = null;
+            try {
+                utc_date_of_date_string = simpleDateFormat.parse(date_string);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Calendar calendar_2 = Calendar.getInstance();
+            calendar_2.setTime(utc_date_of_date_string);
+            calendar_2.set(Calendar.DAY_OF_MONTH, calendar_2.get(Calendar.DAY_OF_MONTH) + 1);
             if (now_millis >= date_millis) {
-                if (fmt.format(calendar_date.getTime()).equals(fmt.format(calendar_now.getTime()))) {
+                if (fmt.format(calendar_date.getTime()).equals(fmt.format(calendar_now.getTime()))) {     // in the same day
                     if (remaining_this_day == 0) {
-                        calendar.setTimeInMillis(date_millis_one_day_after);
-                        return simpleDateFormat.format(calendar.getTime());
+                        return simpleDateFormat.format(calendar_2.getTime());
                     } else {
                         return date_string;
                     }
                 } else {
-                    calendar.setTimeInMillis(now_millis);
-                    return simpleDateFormat.format(calendar.getTime());
+                    return simpleDateFormat.format(calendar_1.getTime());
                 }
             } else {
                 if (remaining_this_day == 0) {
-                    calendar.setTimeInMillis(date_millis_one_day_after);
-                    return simpleDateFormat.format(calendar.getTime());
+                    return simpleDateFormat.format(calendar_2.getTime());
                 } else {
                     return date_string;
                 }
             }
         } else {
-            return simpleDateFormat.format(new Date(System.currentTimeMillis()));
+            return simpleDateFormat.format(calendar_1.getTime());
         }
     }
 
@@ -249,7 +277,6 @@ public class Emulation {
 
     private static void emulate(final Context context, final long field_id, final int number_of_entries, final long starting_entry) {
         SQLiteDatabase sqLiteDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_CREATION_EMULATION_NUMBER, number_of_entries);
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
@@ -337,5 +364,37 @@ public class Emulation {
             return false;
         }
         return true;
+    }
+
+    public static void modifyEmulationCreationDatesOfAppV53AndHigher(SQLiteDatabase sqLiteDatabase) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
+        sqLiteDatabase.beginTransaction();
+        try {
+            Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                    new String[]{Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
+                    Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NOT NULL", null, null, null, null);
+            for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                 cursor.moveToNext()) {
+                String date_string = cursor.getString(1);
+                Date utc_date_of_date_string = null;
+                try {
+                    utc_date_of_date_string = simpleDateFormat.parse(date_string);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                Calendar calendar_2 = Calendar.getInstance();
+                calendar_2.setTime(utc_date_of_date_string);
+                calendar_2.set(Calendar.HOUR_OF_DAY, 0);
+                calendar_2.set(Calendar.MINUTE, 5);
+                calendar_2.set(Calendar.SECOND, 0);
+                String modified_date_string = simpleDateFormat.format(calendar_2.getTime());
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, modified_date_string);
+                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) +""});
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
     }
 }
