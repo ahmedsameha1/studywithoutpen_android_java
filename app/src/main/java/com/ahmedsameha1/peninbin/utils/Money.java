@@ -331,7 +331,9 @@ public class Money {
         })).start();
     }
 
-
+//// TODO: 09/11/16 review geting the ids from the database using getlong not get anything else
+    
+    //// TODO: 10/11/16 fix what if the user deleted an entry from the past emulated entries 
         /*
     the following commented work method is the method how produced the wrong string and the array of integers to make it true
      */
