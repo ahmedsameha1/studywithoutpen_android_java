@@ -47,6 +47,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.MoreThanOneAnswer;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -1362,60 +1363,13 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     }
 
     private void ifMoreThanOnce() {
-        if (searchForCursor != null) {
-            searchForCursor.close();
-        }
-        searchForCursor = databaseOperations.searchExactlyFor(current_field_id,
-                question_data_type, listForTest[currentQuestionCounter][0]);
-        if (searchForCursor.getCount() > 1) {
-            hints = new ArrayList<>();
-            int number_of_matches = 0;
-            for (searchForCursor.moveToFirst(); searchForCursor.getPosition() < searchForCursor.getCount();
-                 searchForCursor.moveToNext()) {
-                String temp = searchForCursor.getString(0);
-                if (listForTest[currentQuestionCounter][1].charAt(0) == temp.charAt(0) &&
-                        listForTest[currentQuestionCounter][1].length() == temp.length() &&
-                        listForTest[currentQuestionCounter][1].charAt(listForTest[currentQuestionCounter][1].length() - 1)
-                                == temp.charAt(temp.length() - 1)) {
-                    number_of_matches++;
-                }
-            }
-            if ( number_of_matches <= 1 || listForTest[currentQuestionCounter][1].length() <= 2 ) {
-                hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
-                hints.add(getString(R.string.number_of_letters)  + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
-                hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
-                        .charAt(listForTest[currentQuestionCounter][1].length() - 1));
-                Collections.shuffle(hints);
-            } else {
-                int three_parts = listForTest[currentQuestionCounter][1].length() / 3;
-                if ( listForTest[currentQuestionCounter][1].length() > 3 ) {
-                    for ( int i = 2, k = 0; k < three_parts; i += 3, k++) {
-                        hints.add(getString(R.string.letter_number) + " " + ( i + 1 ) + " : " +
-                                listForTest[currentQuestionCounter][1].charAt(i));
-                    }
-                    hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
-                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
-                    hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
-                            .charAt(listForTest[currentQuestionCounter][1].length() - 1));
-                    Collections.shuffle(hints);
-                } else {
-                    hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
-                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
-                    hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
-                            .charAt(listForTest[currentQuestionCounter][1].length() - 1));
-                    hints.add(getString(R.string.letter_number) + " " + 2 + " : "
-                            + listForTest[currentQuestionCounter][1].charAt(1));
-                    Collections.shuffle(hints);
-                }
-            }
+        hints = MoreThanOneAnswer.getHints(this,current_field_id,question_data_type,
+                listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+        if ( hints != null ) {
             nextHint.setEnabled(true);
-
         } else {
-            hints = null;
             nextHint.setEnabled(false);
-
         }
-        searchForCursor.close();
     }
 
     @SuppressWarnings("deprecation")

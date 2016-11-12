@@ -48,6 +48,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.MoreThanOneAnswer;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -278,7 +279,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                        ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+                        ifMoreThanOnce();
                         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                         if (boolean_continue) {
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -409,7 +410,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
                                 showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                                ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+                                ifMoreThanOnce();
                             } else {
                                 mySQLiteCursorLoader.resetEntriesStudyPeriodOrder(current_field_id, question_data_type);
                                 mySQLiteCursorLoader.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
@@ -444,7 +445,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                 }
                             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void []) null);
                             showTries.setText(Integer.toString(triesCounter + 1));
-                            ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+                            ifMoreThanOnce();
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                             enterAnswer.setHint(R.string.enter_your_answer);
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
@@ -683,80 +684,14 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         return temp;
     }
 
-/*    private void ifMoreThanOnce(String currentQuestion, String currentAnswer) {
-        if (searchForCursor != null) {
-            searchForCursor.close();
-        }
-        searchForCursor = databaseOperations.searchExactlyFor(current_field_id, question_data_type, currentQuestion);
-        if (searchForCursor.getCount() > 1) {
-            hints = new ArrayList<String>(3);
-            hints.add(getString(R.string.first_character) + currentAnswer.charAt(0));
-            hints.add(getString(R.string.number_of_characters) + Integer.toString(currentAnswer.length()));
-            hints.add(getString(R.string.last_character) + currentAnswer.charAt(currentAnswer.length() - 1));
+    private void ifMoreThanOnce() {
+        hints = MoreThanOneAnswer.getHints(this,current_field_id,question_data_type,
+                listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+        if ( hints != null ) {
             nextHint.setEnabled(true);
-
         } else {
-            hints = null;
             nextHint.setEnabled(false);
-
         }
-        searchForCursor.close();
-    }*/
-    private void ifMoreThanOnce(String currentQuestion, String currentAnswer) {
-        if (searchForCursor != null) {
-            searchForCursor.close();
-        }
-        searchForCursor = databaseOperations.searchExactlyFor(current_field_id,
-                question_data_type, currentQuestion);
-        if (searchForCursor.getCount() > 1) {
-            hints = new ArrayList<>();
-            int number_of_matches = 0;
-            for (searchForCursor.moveToFirst(); searchForCursor.getPosition() < searchForCursor.getCount();
-                 searchForCursor.moveToNext()) {
-                String temp = searchForCursor.getString(0);
-                if (currentAnswer.charAt(0) == temp.charAt(0) &&
-                        currentAnswer.length() == temp.length() &&
-                        currentAnswer.charAt(currentAnswer.length() - 1)
-                                == temp.charAt(temp.length() - 1)) {
-                    number_of_matches++;
-                }
-            }
-            if ( number_of_matches <= 1 || currentAnswer.length() <= 2 ) {
-                hints.add(getString(R.string.first_letters) + " " + currentAnswer.charAt(0));
-                hints.add(getString(R.string.number_of_letters)  + " " + Integer.toString(currentAnswer.length()));
-                hints.add(getString(R.string.last_letter) + " " + currentAnswer
-                        .charAt(currentAnswer.length() - 1));
-                Collections.shuffle(hints);
-            } else {
-                int three_parts = currentAnswer.length() / 3;
-                if ( currentAnswer.length() > 3 ) {
-                    for ( int i = 2, k = 0; k < three_parts; i += 3, k++) {
-                        hints.add(getString(R.string.letter_number) + " " + ( i + 1 ) + " : " +
-                                currentAnswer.charAt(i));
-                    }
-                    hints.add(getString(R.string.first_letters) + " " + currentAnswer.charAt(0));
-                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(currentAnswer.length()));
-                    hints.add(getString(R.string.last_letter) + " " + currentAnswer
-                            .charAt(currentAnswer.length() - 1));
-                    Collections.shuffle(hints);
-                } else {
-                    hints.add(getString(R.string.first_letters) + " " + currentAnswer.charAt(0));
-                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(currentAnswer.length()));
-                    hints.add(getString(R.string.last_letter) + " " + currentAnswer
-                            .charAt(currentAnswer.length() - 1));
-                    hints.add(getString(R.string.letter_number) + " " + 2 + " : "
-                            + currentAnswer.charAt(1));
-                    Collections.shuffle(hints);
-                }
-            }
-            nextHint.setEnabled(true);
-
-        } else {
-            hints = null;
-            nextHint.setEnabled(false);
-
-        }
-        searchForCursor.close();
     }
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
@@ -1030,7 +965,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             enterAnswer.setEnabled(! _continueState);
 
 //            enterAnswer.setEnabled(true);
-            ifMoreThanOnce(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+            ifMoreThanOnce();
         }
         if (hintCounter > 0) {
             enterAnswer.setHint(hints.get(hintCounter - 1));

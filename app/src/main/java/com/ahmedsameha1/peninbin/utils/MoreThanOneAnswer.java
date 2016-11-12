@@ -27,11 +27,12 @@ public class MoreThanOneAnswer {
                  searchForCursor.moveToNext()) {
                 answers.add(searchForCursor.getString(0));
             }
+            searchForCursor.close();
             if ( isNumberOfLettersDifferent(answers) ) {
                 hints.add(context.getString(R.string.number_of_letters)  + " " + Integer.toString(answer.length()));
                 return hints;
             }
-            ArrayList<Integer> number_of_differences = new ArrayList<>(Collections.nCopies(answers.size(), 0));
+            ArrayList<Integer> number_of_differences = new ArrayList<>(Collections.nCopies(answer.length(), 0));
             for ( int i = (answer.length() -1); i >= 0; i--) {
                 for ( String temp : answers ) {
                     if ( !temp.equals(answer) && temp.length() > i ) {
@@ -46,13 +47,13 @@ public class MoreThanOneAnswer {
             for (int i = answers.size() - 1; i > 0; i--) {
                 if ( number_of_differences.contains(i) ) {
                     ArrayList<Integer> indices = new ArrayList<>(answer.length());
-                    for ( int k = 0; k < number_of_differences.size(); i++ ) {
+                    for ( int k = 0; k < number_of_differences.size(); k++ ) {
                         if ( number_of_differences.get(k) == i ) {
                             indices.add(k);
                         }
                     }
                     for ( int l = 0; l < indices.size() && l <= answers.size() - i; l++ ) {
-                        hints.add(context.getString(R.string.letter_number) + " " + ( l ) + " : " +
+                        hints.add(context.getString(R.string.letter_number) + " " + ( indices.get(l) + 1) + " : " +
                                 answer.charAt(indices.get(l)));
                     }
                     if ( i != answers.size() -1 ) {
@@ -61,6 +62,7 @@ public class MoreThanOneAnswer {
                     break;
                 }
             }
+            Collections.shuffle(hints);
             return hints;
         } else {
             return null;

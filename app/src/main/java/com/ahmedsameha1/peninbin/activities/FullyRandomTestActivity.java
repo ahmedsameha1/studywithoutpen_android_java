@@ -44,6 +44,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.MoreThanOneAnswer;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -778,7 +779,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         }
     }
     private void ifMoreThanOnce() {
-        if (searchForCursor != null) {
+        /*if (searchForCursor != null) {
             searchForCursor.close();
         }
         searchForCursor = databaseOperations.searchExactlyFor(current_field_id,
@@ -831,7 +832,14 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             nextHint.setEnabled(false);
 
         }
-        searchForCursor.close();
+        searchForCursor.close();*/
+        hints = MoreThanOneAnswer.getHints(this,current_field_id,question_data_type,
+                listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
+        if ( hints != null ) {
+            nextHint.setEnabled(true);
+        } else {
+            nextHint.setEnabled(false);
+        }
     }
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {

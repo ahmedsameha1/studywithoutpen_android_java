@@ -427,6 +427,7 @@ public class FieldActivity extends AppCompatActivity implements
     public void onDrawerItemSelected(View view, int position) {
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        Money.putUserSubscriptionStatus(this, true); //// TODO: 11/12/16 must remove this line 
         boolean user_eligible = Money.getUserSubscriptionStatus(this);
         switch (position) {
             case ENHANCED_TEST:
