@@ -53,8 +53,8 @@ public class MoreThanOneAnswer {
                         }
                     }
                     for ( int l = 0; l < indices.size() && l <= answers.size() - i; l++ ) {
-                        hints.add(context.getString(R.string.letter_number) + " " + ( indices.get(l) + 1) + " : " +
-                                answer.charAt(indices.get(l)));
+                        hints.add(context.getString(R.string.letter_number) + " " + ( indices.get(l) + 1) + " : \"" +
+                                answer.charAt(indices.get(l)) + "\"");
                     }
                     if ( i != answers.size() -1 ) {
                         hints.add(context.getString(R.string.number_of_letters)  + " " + Integer.toString(answer.length()));
@@ -80,25 +80,5 @@ public class MoreThanOneAnswer {
         return true;
     }
 
-    private static boolean isFirstLettersDifferent(ArrayList<String> answers) {
-        for ( String temp : answers ) {
-            for ( String temp2 : answers ) {
-                if ( !temp.equals(temp2) && temp.charAt(0) == temp2.charAt(0) ) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 
-    private static boolean isLastLettersDifferent(ArrayList<String> answers) {
-        for ( String temp : answers ) {
-            for ( String temp2 : answers ) {
-                if ( !temp.equals(temp2) && temp.charAt(temp.length() - 1) == temp2.charAt(temp2.length() - 1) ) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 }

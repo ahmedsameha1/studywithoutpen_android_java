@@ -270,6 +270,11 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                                                 intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
                                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                                                 intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE, false);
+                                                if ( control_test_entries.isChecked() ) {
+                                                    intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
+                                                    intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
+                                                    intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
+                                                }
                                                 startActivity(intent);
                                                 if ( from_notification ) {
                                                     getActivity().finish();
