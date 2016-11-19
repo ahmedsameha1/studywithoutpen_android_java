@@ -1538,7 +1538,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                 controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;
-            } else if ( fieldEntriesCursor.getInt(3) >= rank && entry_wrongness <= 0 ) {
+            } else if ( fieldEntriesCursor.getInt(3) >= rank && wrongness <= 0 ) {
                 controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;

@@ -1043,14 +1043,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             return null;
                         }
                     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                /*shuffleArray(uncontrolled_entries,uncontrolled_entries_ids);
-                for ( int n = number_of_controlled_questions; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++ ) {
-                    listForTest[n][0] = uncontrolled_entries[n][0];
-                    listForTest[n][1] = uncontrolled_entries[n][1];
-                    list_for_test_ids [n] = uncontrolled_entries_ids [n];
-                }*/
-
-                }
+               }
                 shuffleArray(listForTest);
                 return listForTest;
             }
@@ -1760,7 +1753,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;
-            } else if (fieldEntriesCursor.getInt(3) >= rank && entry_wrongness <= 0) {
+            } else if (fieldEntriesCursor.getInt(3) >= rank && wrongness <= 0) {   // to include the not asked entries
                 controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
                 controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);
                 controlled_counter++;
