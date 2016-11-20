@@ -134,7 +134,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private Chronometer timer;
     private long lastPause;
-    private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
     private boolean isEmulated;
@@ -215,11 +215,12 @@ public class QuickTestActivity extends AppCompatActivity implements
             AnalyticsApplication application = (AnalyticsApplication) getApplication();
             mTracker = application.getDefaultTracker();
             loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+                String date_string;
                 @Override
                 public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                     if ( id == GET_ENTRIES_LOADER_ID ) {
                         if ( isEmulated ) {
-                            String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                            date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
                                     .format(new Date(System.currentTimeMillis()));
                             return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this,
                                     "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
@@ -262,9 +263,9 @@ public class QuickTestActivity extends AppCompatActivity implements
                         fieldEntriesCursor = data;
                         if (listForTest == null) {
                             if (percent_or_number == PERCENTAGE) {
-                                listForTest = getListForTest(percentage);
+                                listForTest = getListForTest(percentage, date_string);
                             } else if (percent_or_number == NUMBER) {
-                                listForTest = getListForTest(number);
+                                listForTest = getListForTest(number, date_string);
                             }
                             if (listForTest != null) {
                                 questionsNumber = listForTest.length;
@@ -307,99 +308,6 @@ public class QuickTestActivity extends AppCompatActivity implements
                     if ( loader.getId() == GET_ENTRIES_LOADER_ID ) {
                         fieldEntriesCursor = null;
                     }
-                }
-            };
-            get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
-                @Override
-                public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                    return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this,
-                            "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
-                                    + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                                    + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
-                                    + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                            new String[]{current_field_id + ""});
-            /*return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this,
-                    "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
-                            + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " FROM " + Contract.STring.TABLE_NAME
-                            + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                            + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{current_field_id + ""});*/
-                }
-                @Override
-                public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                    fieldEntriesCursor = data;
-                    if ( listForTest == null ) {
-                        if ( percent_or_number == PERCENTAGE ) {
-                            listForTest = getListForTest(percentage);
-                        } else if ( percent_or_number == NUMBER ) {
-                            listForTest = getListForTest(number);
-                        }
-                        if ( listForTest != null ) {
-                            questionsNumber = listForTest.length;
-                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                            showTries.setText(Integer.toString(triesCounter + 1));
-                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                            new AsyncTask<Void, Void, Void>() {
-
-                                @Override
-                                protected Void doInBackground(Void... params) {
-                                    current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
-                                    return null;
-                                }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,(Void[]) null);
-                            enterAnswer.requestFocus();
-                            testingNow = true;
-                            ifMoreThanOnce();
-                        } else {
-                            finish();
-                            ExitActivity.exit(QuickTestActivity.this);
-                        }
-                    }
-                    crossfade();
-                }
-
-                @Override
-                public void onLoaderReset(Loader<Cursor> loader) {
-                    fieldEntriesCursor = null;
-                }
-            };
-            get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
-                @Override
-                public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                    return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                            new String[]{current_field_type + ""});
-
-                }
-
-                @Override
-                public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-                    if (symbol == null && customable_text == null) {
-                        symbol = new String[data.getCount()];
-                        customable_text = new String[data.getCount()];
-                        for (data.moveToFirst(); data.getPosition() < data.getCount();
-                             data.moveToNext()) {
-                            symbol[data.getPosition()] = data.getString(1);
-                            customable_text[data.getPosition()] = data.getString(2);
-                        }
-                    }
-                }
-
-                @Override
-                public void onLoaderReset(android.content.Loader<Cursor> loader) {
-
                 }
             };
             check.setOnClickListener(new View.OnClickListener() {
@@ -639,7 +547,7 @@ public class QuickTestActivity extends AppCompatActivity implements
 
     }
 
-    private String [][] getListForTest ( double percent ) {
+    private String [][] getListForTest ( double percent, final String date_string ) {
         if ( fieldEntriesCursor.getCount() > 0 ) {
             int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
             String[][] listForTest = new String[numberOfQuestions][2];
@@ -680,7 +588,7 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                         @Override
                         protected Void doInBackground(Void... params) {
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                            mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                             return null;
                         }
                     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -702,8 +610,8 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                         @Override
                         protected Void doInBackground(Void... params) {
-                            databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                            mySQLiteCursorLoader.restWhetherAskedCurrentTestRound(current_field_id, isEmulated, date_string);
+                            mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                             return null;
                         }
                     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -764,7 +672,7 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                                mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -786,8 +694,8 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                                databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                                mySQLiteCursorLoader.restWhetherAskedCurrentTestRound(current_field_id, isEmulated, date_string);
+                                mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -843,7 +751,7 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                                mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
@@ -864,18 +772,11 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                                databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                                mySQLiteCursorLoader.restWhetherAskedCurrentTestRound(current_field_id, isEmulated, date_string);
+                                mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                /*shuffleArray(uncontrolled_entries,uncontrolled_entries_ids);
-                for ( int n = number_of_controlled_questions; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++ ) {
-                    listForTest[n][0] = uncontrolled_entries[n][0];
-                    listForTest[n][1] = uncontrolled_entries[n][1];
-                    list_for_test_ids [n] = uncontrolled_entries_ids [n];
-                }*/
-
                     }
                     shuffleArray(listForTest);
                     return listForTest;
@@ -890,7 +791,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         }
         return null;
     }
-    private String [][] getListForTest ( int numberOfQuestions ) {
+    private String [][] getListForTest ( int numberOfQuestions, final String date_string) {
         if ( fieldEntriesCursor.getCount() >= numberOfQuestions ) {
             String[][] listForTest = new String[numberOfQuestions][2];
             long [] list_for_test_ids = new long[numberOfQuestions];
@@ -930,7 +831,7 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                         @Override
                         protected Void doInBackground(Void... params) {
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                            mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                             return null;
                         }
                     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -952,8 +853,8 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                         @Override
                         protected Void doInBackground(Void... params) {
-                            databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                            databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                            mySQLiteCursorLoader.restWhetherAskedCurrentTestRound(current_field_id, isEmulated, date_string);
+                            mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                             return null;
                         }
                     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -1014,7 +915,7 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                                mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -1036,8 +937,8 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                                databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                                mySQLiteCursorLoader.restWhetherAskedCurrentTestRound(current_field_id, isEmulated, date_string);
+                                mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -1093,7 +994,7 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                                mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
@@ -1114,8 +1015,8 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                databaseOperations.restWhetherAskedCurrentTestRound(current_field_id);
-                                databaseOperations.makeAskedCurrentTestRound(final_list_for_test_ids);
+                                mySQLiteCursorLoader.restWhetherAskedCurrentTestRound(current_field_id, isEmulated, date_string);
+                                mySQLiteCursorLoader.makeAskedCurrentTestRound(final_list_for_test_ids);
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);

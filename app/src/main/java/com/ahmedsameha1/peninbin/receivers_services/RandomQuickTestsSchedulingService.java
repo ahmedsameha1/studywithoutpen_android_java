@@ -173,7 +173,7 @@ public class RandomQuickTestsSchedulingService extends IntentService {
     /**
      * Not tested
      */
-    private void reorderEmulatedFields() {
+    /*private void reorderEmulatedFields() {
         Log.i("on reorder", "on reorder");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
@@ -213,7 +213,7 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                         new String[]{entry_cursor.getLong(0) + ""});
             }
         }
-    }
+    }*/
 
 
 }

@@ -632,39 +632,7 @@ public class DatabaseReadOperations {
         return field_id;
     }
 
-    public void makeAskedCurrentTestRound( long [] ids ) {
-        for ( long temp: ids ) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.ASKED_AT_CURRENT_ROUND);
-            sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME,contentValues,
-                    Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
-        }
-    }
-    public void restWhetherAskedCurrentTestRound ( long field_id ) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
-        sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME,contentValues,
-                Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
-    }
-    public int countAskedCurrentTestRound( long field_id ) {
-        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
-                .format(new Date(System.currentTimeMillis()));
-        Cursor cursor;
-        if ( isEmulated(field_id) <= Constants.NOT_EMULATED ) {
-            cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                    Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND + " = ? ",
-                    new String[]{field_id + "", Constants.TestRound.ASKED_AT_CURRENT_ROUND + ""}, null, null, null);
-        } else {
-            cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                    Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
-                            + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
-                            + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL ) ",
-                    new String[]{field_id + "", Constants.TestRound.ASKED_AT_CURRENT_ROUND + "", date_string}, null, null, null);
-        }
-        int count = cursor.getCount();
-        cursor.close();
-        return count;
-    }
+
     public int countModerateOrHigherEntries( long field_id ) {
         Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
                 Contract.String_Entry.COLUMN_FIELD + " = ? AND "

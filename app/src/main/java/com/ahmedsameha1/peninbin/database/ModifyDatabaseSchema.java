@@ -355,17 +355,17 @@ public class ModifyDatabaseSchema {
                         Contract.STring.COLUMN_VALUE + " = ? ",
                         new String[]{linkerCursor.getString(0)},null,null,null,null);
                 question_id_cursor.moveToFirst();
-                int question_id = question_id_cursor.getInt(0);
+                long question_id = question_id_cursor.getLong(0);
                 Cursor answer_id_cursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME,new String[] { Contract.COLUMN_ID},
                         Contract.STring.COLUMN_VALUE + " = ? ",
                         new String[]{linkerCursor.getString(1)},null,null,null,null);
                 answer_id_cursor.moveToFirst();
-                int answer_id = answer_id_cursor.getInt(0);
+                long answer_id = answer_id_cursor.getLong(0);
                 Cursor field_id_cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[] { Contract.COLUMN_ID},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{field},null,null,null,null);
                 field_id_cursor.moveToFirst();
-                int field_id = field_id_cursor.getInt(0);
+                long field_id = field_id_cursor.getLong(0);
                 question_id_cursor.close();
                 answer_id_cursor.close();
                 field_id_cursor.close();

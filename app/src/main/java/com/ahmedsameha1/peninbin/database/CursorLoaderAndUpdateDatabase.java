@@ -177,7 +177,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{answer}, null, null, null);
                     c.moveToFirst();
-                    answer_id = c.getInt(0);
+                    answer_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -189,7 +189,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{question}, null, null, null);
                     c.moveToFirst();
-                    question_id = c.getInt(0);
+                    question_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -226,7 +226,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{answer}, null, null, null);
                     c.moveToFirst();
-                    answer_id = c.getInt(0);
+                    answer_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -238,7 +238,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{question}, null, null, null);
                     c.moveToFirst();
-                    question_id = c.getInt(0);
+                    question_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -276,7 +276,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{answer}, null, null, null);
                     c.moveToFirst();
-                    answer_id = c.getInt(0);
+                    answer_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -288,7 +288,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{question}, null, null, null);
                     c.moveToFirst();
-                    question_id = c.getInt(0);
+                    question_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -497,7 +497,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{answer}, null, null, null);
                     c.moveToFirst();
-                    answer_id = c.getInt(0);
+                    answer_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -509,7 +509,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{question}, null, null, null);
                     c.moveToFirst();
-                    question_id = c.getInt(0);
+                    question_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -542,7 +542,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{answer}, null, null, null);
                     c.moveToFirst();
-                    answer_id = c.getInt(0);
+                    answer_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -554,7 +554,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                             Contract.STring.COLUMN_VALUE + " = ? ",
                             new String[]{question}, null, null, null);
                     c.moveToFirst();
-                    question_id = c.getInt(0);
+                    question_id = c.getLong(0);
                     c.close();
                 }
                 contentValues = new ContentValues();
@@ -618,7 +618,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                                 Contract.STring.COLUMN_VALUE + " = ? ",
                                 new String[]{answer}, null, null, null);
                         c.moveToFirst();
-                        answer_id = c.getInt(0);
+                        answer_id = c.getLong(0);
                         c.close();
                     }
                     contentValues = new ContentValues();
@@ -630,7 +630,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                                 Contract.STring.COLUMN_VALUE + " = ? ",
                                 new String[]{question}, null, null, null);
                         c.moveToFirst();
-                        question_id = c.getInt(0);
+                        question_id = c.getLong(0);
                         c.close();
                     }
                     contentValues = new ContentValues();
@@ -1480,5 +1480,29 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         contentValues.put(Contract.GooglePaymentOrderID.COLUMN_ORDER_ID, order_id);
         db.getWritableDatabase().insert(Contract.GooglePaymentOrderID.TABLE_NAME,null,contentValues);
     }
+    public void restWhetherAskedCurrentTestRound ( long field_id, boolean isEmulated, String date_string ) {
+        //// TODO: 20/11/16 test this method 
+        if ( isEmulated ) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
+            db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+                    Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                            + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL )"
+                    , new String[]{field_id + "", date_string});
+        } else {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
+            db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+                    Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
+        }
+    }
 
+    public void makeAskedCurrentTestRound( long [] ids ) {
+        for ( long temp: ids ) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.ASKED_AT_CURRENT_ROUND);
+            db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+                    Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
+        }
+    }
 }

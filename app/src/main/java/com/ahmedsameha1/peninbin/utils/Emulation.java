@@ -178,7 +178,6 @@ public class Emulation {
             sqLiteDatabase.endTransaction();
         }
     }
-//// TODO: 01/11/16 must change the emulation creation dates of the old databasese on onupgrade method to be consestent
     public static String getEmulationCreationDate(long field_id, int number_of_everyday_entries, SQLiteDatabase sqLiteDatabase) {
         Calendar calendar_1 = Calendar.getInstance();
         long long_utc = System.currentTimeMillis();

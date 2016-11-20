@@ -94,7 +94,7 @@ public class MainActivityRecyclerViewAdapter extends
     public void onBindViewHolder(final MainActivityRecyclerViewViewHolder viewHolder, Cursor data) {
         ((LinearLayout.LayoutParams) viewHolder.actions.getLayoutParams()).bottomMargin = -50;
         viewHolder.actions.setVisibility(View.GONE);
-        viewHolder.field_id = data.getInt(0);
+        viewHolder.field_id = data.getLong(0);
         final String fieldName = data.getString(2);
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
