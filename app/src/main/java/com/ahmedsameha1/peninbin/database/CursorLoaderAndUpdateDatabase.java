@@ -1481,7 +1481,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         db.getWritableDatabase().insert(Contract.GooglePaymentOrderID.TABLE_NAME,null,contentValues);
     }
     public void restWhetherAskedCurrentTestRound ( long field_id, boolean isEmulated, String date_string ) {
-        //// TODO: 20/11/16 test this method 
         if ( isEmulated ) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);

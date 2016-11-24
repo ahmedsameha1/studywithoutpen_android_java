@@ -190,7 +190,7 @@ public class Money {
                                     RESPONSE_INAPP_PURCHASE_DATA_LIST);
                             ArrayList<String> owned_item_signature_list = items_bundle.getStringArrayList(
                                     RESPONSE_INAPP_SIGNATURE_LIST);
-                            if ( owned_item_data_list.size() == 1 ) {
+                            if ( owned_item_data_list.size() > 0 ) {
                                 if (Security.verifyPurchase(get64(piece1 + piece2 + piece3 + piece4 + piece5 + piece6
                                         + piece7 + piece8 + piece9 + piece10 + piece11, context.getResources().getIntArray(R.array.values))
                                         , owned_item_data_list.get(0), owned_item_signature_list.get(0))) {
@@ -203,11 +203,8 @@ public class Money {
                                             .setAction("security error")
                                             .build());
                                 }
-                            } else if ( owned_item_data_list.size() == 0 ) {
+                            } else {
                                 putUserSubscriptionStatus(context, false);
-                            } else if ( owned_item_data_list.size() > 1 ) {
-                                putUserSubscriptionStatus(context, false);
-                                putUnsolvableErrorGetPurchases(context, true);  // error because there is only one item
                             }
                         }
                     } else if ( response_code == BILLING_RESPONSE_RESULT_USER_CANCELED ||

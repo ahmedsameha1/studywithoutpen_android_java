@@ -8,13 +8,14 @@ android {
         applicationId "com.ahmedsameha1.peninbin"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 54
-        versionName "2.4.6"
+        versionCode 55
+        versionName "3.0"
         multiDexEnabled true
     }
     buildTypes {
         release {
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

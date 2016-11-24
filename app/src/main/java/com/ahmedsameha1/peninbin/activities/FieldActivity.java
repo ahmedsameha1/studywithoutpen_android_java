@@ -364,7 +364,6 @@ public class FieldActivity extends AppCompatActivity implements
             }
         }
     }
-///// TODO: 25/10/16 make proguard work
     @Override
     protected void onResume() {
         super.onResume();
@@ -427,7 +426,6 @@ public class FieldActivity extends AppCompatActivity implements
     public void onDrawerItemSelected(View view, int position) {
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-        Money.putUserSubscriptionStatus(this, true); //// TODO: 11/12/16 must remove this line 
         boolean user_eligible = Money.getUserSubscriptionStatus(this);
         switch (position) {
             case ENHANCED_TEST:
@@ -703,8 +701,7 @@ public class FieldActivity extends AppCompatActivity implements
         if (NetworkReceiver.isOnline(this)) {
             pay_load = PayloadString.getString();
             try {
-                //// TODO: 24/10/16 add the real sku
-                Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "test_app_subscription1", Money.SUBSCRIPTION_TYPE,
+                Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
                         pay_load);
                 int response_code = bundle.getInt(Money.RESPONSE_CODE);
                 if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {

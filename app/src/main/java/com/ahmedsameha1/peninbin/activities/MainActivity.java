@@ -435,33 +435,38 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 break;
             case SUBSCRIBE:
-                if (NetworkReceiver.isOnline(this)) {
-                    pay_load = PayloadString.getString();
-                    try {
-                        //// TODO: 24/10/16 add the real sku
-                        Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "test_app_subscription1", Money.SUBSCRIPTION_TYPE,
-                                pay_load);
-                        int response_code = bundle.getInt(Money.RESPONSE_CODE);
-                        if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
-                            PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
-                            startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
-                        } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
-                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                            toast1.setGravity(Gravity.TOP, 0, 400);
-                            toast1.show();
-                        } else {
+                if ( !Money.getUserSubscriptionStatus(this) ) {
+                    if (NetworkReceiver.isOnline(this)) {
+                        pay_load = PayloadString.getString();
+                        try {
+                            Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
+                                    pay_load);
+                            int response_code = bundle.getInt(Money.RESPONSE_CODE);
+                            if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
+                                PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
+                                startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
+                            } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
+                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                            } else {
+                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                            }
+                        } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
                             Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
                             toast1.setGravity(Gravity.TOP, 0, 400);
                             toast1.show();
+                            e.printStackTrace();
                         }
-                    } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
-                        Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                        toast1.setGravity(Gravity.TOP, 0, 400);
-                        toast1.show();
-                        e.printStackTrace();
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.need_internet_try_again, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                     }
                 } else {
-                    Toast toast = Toast.makeText(this, R.string.need_internet_try_again, Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(this, R.string.already_subscribed, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
