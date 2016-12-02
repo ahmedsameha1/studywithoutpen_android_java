@@ -28,7 +28,7 @@ public class MoreThanOneAnswer {
                 answers.add(searchForCursor.getString(0));
             }
             searchForCursor.close();
-            if ( isNumberOfLettersDifferent(answers) ) {
+            if ( isNumberOfLettersDifferent(answers, answer.length()) ) {
                 hints.add(context.getString(R.string.number_of_letters)  + " " + Integer.toString(answer.length()));
                 return hints;
             }
@@ -52,7 +52,7 @@ public class MoreThanOneAnswer {
                             indices.add(k);
                         }
                     }
-                    for ( int l = 0; l < indices.size() && l <= answers.size() - i; l++ ) {
+                    for ( int l = 0; l < indices.size() && l < answers.size() - i; l++ ) {
                         hints.add(context.getString(R.string.letter_number) + " " + ( indices.get(l) + 1) + " : \"" +
                                 answer.charAt(indices.get(l)) + "\"");
                     }
@@ -69,15 +69,14 @@ public class MoreThanOneAnswer {
         }
     }
 
-    private static boolean isNumberOfLettersDifferent(ArrayList<String> answers) {
+    private static boolean isNumberOfLettersDifferent(ArrayList<String> answers, int answer_length) {
+        int counter = 0;
         for ( String temp : answers ) {
-            for ( String temp2 : answers ) {
-                if ( !temp.equals(temp2) && temp.length() == temp2.length() ) {
-                    return false;
+                if ( temp.length() == answer_length ) {
+                    counter++;
                 }
-            }
         }
-        return true;
+        return counter == 1;
     }
 
 

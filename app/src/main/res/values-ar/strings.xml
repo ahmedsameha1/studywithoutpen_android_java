@@ -196,7 +196,7 @@
     <string name="ask_import_fields">هل تريد استيراد المجالات من هذا الملف؟</string>
     <string name="import_from_text_file_help">يجب أن يكون الملف ملف نصي txt\nﻻ يمكنك استيراد مدخﻻت إلى المجاﻻت من نوع مفكرة\nيجب أن يكون كل سطر في الملف النصي إما على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب\nأو على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب%%%مستوى أهمية المُدخَل\nحيث مستوى أهمية المُدخَل رقم واحد:\n0\tمنخفض\n1\tمتوسط\n2\tمهم\n3\tحيوي\nأو على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب###ترتيب المُدخَل\nحيث ترتيب المُدخَل هو رقم  أكبر من أو يساوي صفر وأصغر من مليار</string>
     <string name="facebook_page">صفحة Facebook</string>
-    <string name="collect_data_about_usage">هذا التطبيق يجمع معلومات غير محدد  الهوية عن استخدامه.</string>
+    <string name="collect_data_about_usage">هذا التطبيق يجمع معلومات غير محددة  الهوية عن استخدامه.</string>
     <string name="version">إصدار:</string>
     <string name="about_app">عن التطبيق</string>
     <string name="where_is_field_name">أين اسم المجال؟!</string>
@@ -255,4 +255,6 @@
     <string name="proceed_now">استمر الآن</string>
     <string name="purchase_success">لقد اشتركت بنجاح. شكرا على ثقتك</string>
     <string name="already_subscribed">لديك بالفعل اشتراك!</string>
+    <string name="terms_of_use">شروط الاستخدام</string>
+    <string name="contact_developer">اتصل بالمطور</string>
 </resources>

@@ -17,6 +17,7 @@
             android:gravity="center"
             android:text="@string/version"
             android:layout_margin="3dp"/>
+
         <TextView
         android:id="@+id/version"
         android:layout_width="wrap_content"
@@ -27,12 +28,30 @@
 
     </LinearLayout>
 
+
+        <TextView
+            android:id="@+id/terms_of_use"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:padding="3dp"
+            android:layout_gravity="center"
+            android:text="@string/terms_of_use"
+            />
+
+    <Button
+        android:id="@+id/contact_developer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/contact_developer"/>
     <Button
         android:id="@+id/facebook"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/facebook_page"/>
+
     <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"

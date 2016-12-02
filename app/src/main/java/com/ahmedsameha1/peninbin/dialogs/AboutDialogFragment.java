@@ -47,10 +47,12 @@ public class AboutDialogFragment extends DialogFragment {
             @Override
             public void onShow(DialogInterface dialog) {
                 final Button facebook = (Button) alertDialog.findViewById(R.id.facebook);
+                final Button contact_developer = (Button) alertDialog.findViewById(R.id.contact_developer);
                 final TextView version_textview = (TextView) alertDialog.findViewById(R.id.version);
                 final TextView cwac_loaderex_license = (TextView) alertDialog.findViewById(R.id.cwac_loaderex);
                 final TextView android_filepicker_license = (TextView) alertDialog.findViewById(R.id.android_filepicker);
                 final TextView circular_floating_action_menu_license = (TextView) alertDialog.findViewById(R.id.circular_floating_action_menu);
+                final TextView terms_of_use = (TextView) alertDialog.findViewById(R.id.terms_of_use);
                 PackageInfo pInfo = null;
                 String version = null;
                 try {
@@ -72,21 +74,28 @@ public class AboutDialogFragment extends DialogFragment {
                         dismiss();
                     }
                 });
+                contact_developer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setType("plain/text");
+                        intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "ahmedsameha1@gmail.com" });
+                        startActivity(Intent.createChooser(intent, ""));
+                    }
+                });
                 cwac_loaderex_license.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.cwac_loaderex_apache_license_version_2_0).create().show();
+                       new AlertDialog.Builder(getActivity())
+                               .setMessage(R.string.cwac_loaderex_apache_license_version_2_0).create().show();
                     }
                 });
                 android_filepicker_license.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
+                        new AlertDialog.Builder(getActivity())
                                 .setMessage(R.string.android_filepicker_apache_license_version_2_0).create().show();
                     }
                 });
@@ -94,9 +103,15 @@ public class AboutDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
 
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
+                        new AlertDialog.Builder(getActivity())
                                 .setMessage(R.string.circular_floating_action_menu_mit_license).create().show();
+                    }
+                });
+                terms_of_use.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new AlertDialog.Builder(getActivity())
+                                .setMessage(R.string.eula).create().show();
                     }
                 });
             }
