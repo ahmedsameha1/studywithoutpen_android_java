@@ -85,7 +85,7 @@ public class ExportFieldsDialogFragment extends DialogFragment {
                             }
                         }
                         if (selectedFields.size() <= 0) {
-                            Toast toast = Toast.makeText(context, R.string.zero_selected_fields_toast, Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(context, R.string.select_one, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP,0,400);
                             toast.show();
                         } else if (fileName.length() <= 0) {

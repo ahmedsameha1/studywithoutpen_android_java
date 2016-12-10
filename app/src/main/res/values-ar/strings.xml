@@ -51,7 +51,6 @@
     <string name="export">صدِّر</string>
     <string name="file_name">أدخل اسم للملف الذي سيتم تصديره (حروف صغيرة):</string>
     <string name="no_file_name_toast">أدخل اسم للملف الذي سيتم تصديره!</string>
-    <string name="zero_selected_fields_toast">أختر على الأقل مجالا واحدا لتصديره!</string>
     <string name="export_failed">لقد فشل تصدير المجالات</string>
     <string name="plug_your_sdcard"> تأكد من أن بطاقة SD مُرَكَّبة في مكانها!</string>
     <string name="external_storage_unmounted">وحدة التخزين الخاصة بجهازك غير مُعَدَة لعملية التصدير!</string>
@@ -257,4 +256,5 @@
     <string name="already_subscribed">لديك بالفعل اشتراك!</string>
     <string name="terms_of_use">شروط الاستخدام</string>
     <string name="contact_developer">اتصل بالمطور</string>
+    <string name="select_one">اختر واحدا!</string>
 </resources>

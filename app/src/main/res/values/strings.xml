@@ -50,7 +50,6 @@
     <string name="write_whatever">Write whatever you want</string>
     <string name="export">Export </string>
     <string name="file_name">Enter a name for the file that will be exported (lowercase):</string>
-    <string name="zero_selected_fields_toast">Select at least one field to export!</string>
     <string name="no_file_name_toast">Enter a name for the file that will be exported!</string>
     <string name="export_failed">Fields export has been failed</string>
     <string name="plug_your_sdcard">Make sure that your SD card is plugged!</string>
@@ -268,4 +267,5 @@
     <string name="already_subscribed">You already have a subscription!</string>
     <string name="terms_of_use">TERMS OF USE</string>
     <string name="contact_developer">Contact Developer</string>
+    <string name="select_one">Select one!</string>
 </resources>

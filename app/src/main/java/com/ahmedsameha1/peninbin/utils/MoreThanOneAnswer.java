@@ -52,6 +52,7 @@ public class MoreThanOneAnswer {
                             indices.add(k);
                         }
                     }
+                    Collections.shuffle(indices);
                     for ( int l = 0; l < indices.size() && l < answers.size() - i; l++ ) {
                         hints.add(context.getString(R.string.letter_number) + " " + ( indices.get(l) + 1) + " : \"" +
                                 answer.charAt(indices.get(l)) + "\"");
@@ -62,7 +63,6 @@ public class MoreThanOneAnswer {
                     break;
                 }
             }
-            Collections.shuffle(hints);
             return hints;
         } else {
             return null;

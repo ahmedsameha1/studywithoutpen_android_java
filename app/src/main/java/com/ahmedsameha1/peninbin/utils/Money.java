@@ -153,7 +153,7 @@ public class Money {
         return sharedPreferences.getBoolean(UNSOLVABLE_ERROR_GETPURCHASES, false);
     }
 
-
+//todo add privacy to the terms of use and to the google play account
     public static void checkSubscription (final Context context, final IInAppBillingService billingService ) {
         AnalyticsApplication application = (AnalyticsApplication) (((Activity) context).getApplication());
         final Tracker mTracker = application.getDefaultTracker();

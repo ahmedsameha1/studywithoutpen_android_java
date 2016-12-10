@@ -12,9 +12,11 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.CopyMoveEntriesActivityRecyclerViewAdapter;
@@ -81,23 +83,27 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         CopyFieldDialogFragment copyFieldDialogFragment = new CopyFieldDialogFragment();
         Bundle bundle = new Bundle();
         //noinspection SimplifiableIfStatement
-        switch (id) {
-            case R.id.copy:
-                bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.COPY_ENTRIES);
-                copyFieldDialogFragment.setArguments(bundle);
-                copyFieldDialogFragment.show(getSupportFragmentManager(),CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
-                return true;
-            case R.id.move:
-                bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.MOVE_ENTRIES);
-                copyFieldDialogFragment.setArguments(bundle);
-                copyFieldDialogFragment.show(getSupportFragmentManager(),CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+        if ( list_of_entries.size() > 0 ) {
+            switch (id) {
+                case R.id.copy:
+                    bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.COPY_ENTRIES);
+                    copyFieldDialogFragment.setArguments(bundle);
+                    copyFieldDialogFragment.show(getSupportFragmentManager(), CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
+                    return true;
+                case R.id.move:
+                    bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.MOVE_ENTRIES);
+                    copyFieldDialogFragment.setArguments(bundle);
+                    copyFieldDialogFragment.show(getSupportFragmentManager(), CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
+        } else {
+            Toast toast = Toast.makeText(CopyMoveEntriesActivity.this, R.string.select_one, Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
         }
-
-
+        return true;
     }
 
     @Override
