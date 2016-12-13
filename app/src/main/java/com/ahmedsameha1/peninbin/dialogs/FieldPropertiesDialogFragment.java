@@ -238,7 +238,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                         cursorLoaderAndUpdateDatabase.updateFieldName(current_field_id, new_field_name.getText().toString());
                                         ((Contact) getActivity()).updateFieldName(new_field_name.getText().toString());
                                     } else {
-                                        Toast toast = Toast.makeText(getActivity(), R.string.background_thread, Toast.LENGTH_SHORT);
+                                        Toast toast = Toast.makeText(getActivity(), R.string.change_field_name_background_thread, Toast.LENGTH_SHORT);
                                         toast.setGravity(Gravity.TOP, 0, 400);
                                         toast.show();
                                     }

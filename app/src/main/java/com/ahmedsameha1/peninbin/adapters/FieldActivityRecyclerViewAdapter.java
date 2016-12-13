@@ -24,8 +24,11 @@ import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
+import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
 /**
@@ -90,21 +93,30 @@ public class FieldActivityRecyclerViewAdapter extends
         viewHolder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, EditEntryActivity.class);
-                intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
-                intent.putExtra(EditEntryActivity.FIELD_TYPE, fieldType );
-                intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
-                intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
-                intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
-                ((Activity) context).startActivityForResult(intent,FieldActivity.EDIT_ENTRY);
+                if ( !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                        && !ImportTextFile.isThreadRunning() ) {
+                    Intent intent = new Intent(context, EditEntryActivity.class);
+                    intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
+                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
+                    intent.putExtra(EditEntryActivity.FIELD_TYPE, fieldType );
+                    intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
+                    intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
+                    intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
+                    ((Activity) context).startActivityForResult(intent,FieldActivity.EDIT_ENTRY);
+                } else {
+                    Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
             }
         });
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if ( (! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id)) &&
-                        (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id))) {
+                        (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id)) &&
+                        !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                        && !ImportTextFile.isThreadRunning() ) {
                     if ( ! databaseOperations.checkIfIncludedInPausedOperations(field_id,entry_id) ) {
                         DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
                         Bundle bundle = new Bundle();
@@ -118,8 +130,14 @@ public class FieldActivityRecyclerViewAdapter extends
                         toast.setGravity(Gravity.TOP,0,400);
                         toast.show();
                     }
-                } else {
+                } else if ( ! ((! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id)) &&
+                        (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id))) ){
                     Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                } else if ( ! (!Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                        && !ImportTextFile.isThreadRunning()) ) {
+                    Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }

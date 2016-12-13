@@ -257,7 +257,8 @@
     <string name="terms_of_use">شروط الاستخدام</string>
     <string name="contact_developer">اتصل بالمطور</string>
     <string name="select_one">اختر واحدا!</string>
-    <string name="background_thread">You cannot change the field name while exporting/importing/emulating operation is running!</string>
+    <string name="change_field_name_background_thread">You cannot change the field name while exporting/importing/emulating operation is running!</string>
     <string name="field_same_name">There is an field with the same name!</string>
     <string name="no_field_name">Where is the field name?!</string>
+    <string name="background_thread">Wait untill export/import/emulation operation finishes</string>
 </resources>

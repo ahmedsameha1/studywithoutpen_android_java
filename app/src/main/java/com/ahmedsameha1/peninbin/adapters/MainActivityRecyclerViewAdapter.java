@@ -113,8 +113,14 @@ public class MainActivityRecyclerViewAdapter extends
                     fragment.setArguments(bundle);
                     fragment.setMainActivityRecyclerViewViewHolder(viewHolder);
                     fragment.show(((AppCompatActivity) context).getSupportFragmentManager(), GET_CONFIRMATION);
-                } else {
+                } else if ( ! ((!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id)) &&
+                        (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id))) ){
                     Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                } else if ( ! (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                        && !Emulation.isAnyThreadRunning()) ) {
+                    Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
