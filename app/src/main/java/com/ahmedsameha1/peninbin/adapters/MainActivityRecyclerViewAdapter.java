@@ -21,9 +21,12 @@ import com.ahmedsameha1.peninbin.activities.NotebookFieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
+import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
 /**
@@ -52,15 +55,15 @@ public class MainActivityRecyclerViewAdapter extends
         MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder =
                 new MainActivityRecyclerViewViewHolder(itemView, new MainActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
-                    public void onClick(View v, long field_id,boolean isDeleting) {
+                    public void onClick(View v, long field_id, boolean isDeleting) {
                         int field_type = databaseOperations.getFieldType(field_id);
-                        if ( ! isDeleting ) {
-                            if ( field_type != Constants.FieldTypes.NOTEBOOK_TYPE ) {
+                        if (!isDeleting) {
+                            if (field_type != Constants.FieldTypes.NOTEBOOK_TYPE) {
                                 Intent intent = new Intent(context, FieldActivity.class);
                                 intent.putExtra(FieldActivity.FIELD_ID, field_id);
                                 context.startActivity(intent);
                                 new CursorLoaderAndUpdateDatabase(context).incrementFieldUsage(field_id);
-                            } else if ( field_type == Constants.FieldTypes.NOTEBOOK_TYPE ) {
+                            } else if (field_type == Constants.FieldTypes.NOTEBOOK_TYPE) {
                                 Intent intent = new Intent(context, NotebookFieldActivity.class);
                                 intent.putExtra(FieldActivity.FIELD_ID, field_id);
                                 context.startActivity(intent);
@@ -70,8 +73,8 @@ public class MainActivityRecyclerViewAdapter extends
                     }
 
                     @Override
-                    public void onLongClick(View view, final long field_id,boolean isDeleting) {
-                        if ( ! isDeleting ) {
+                    public void onLongClick(View view, final long field_id, boolean isDeleting) {
+                        if (!isDeleting) {
                             View actions = view.findViewById(R.id.main_recyclerview_item_actions);
                             Expand_Custom_Animation expandAni = new Expand_Custom_Animation(actions, 500);
                             actions.startAnimation(expandAni);
@@ -99,10 +102,12 @@ public class MainActivityRecyclerViewAdapter extends
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( (! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id)) &&
-                        (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id)) ) {
+                if ((!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id)) &&
+                        (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id)) &&
+                        !ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                        && !Emulation.isAnyThreadRunning()) {
                     Bundle bundle = new Bundle();
-                    bundle.putLong(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_ID,viewHolder.field_id);
+                    bundle.putLong(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_ID, viewHolder.field_id);
                     bundle.putString(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_NAME, fieldName);
                     DeleteFieldDialogFragment fragment = new DeleteFieldDialogFragment();
                     fragment.setArguments(bundle);

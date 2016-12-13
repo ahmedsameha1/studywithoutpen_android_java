@@ -228,13 +228,20 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                             } else if ((!new_field_name.getText().toString().equals(field_name)) && databaseReadOperations.checkFieldDuplication(new_field_name.getText().toString())) {
-                                Toast toast = Toast.makeText(getActivity(), "There is an field with the same name!", Toast.LENGTH_SHORT);
+                                Toast toast = Toast.makeText(getActivity(), R.string.field_same_name, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                             } else {
                                 if (!new_field_name.getText().toString().equals(field_name)) {
-                                    cursorLoaderAndUpdateDatabase.updateFieldName(current_field_id, new_field_name.getText().toString());
-                                    ((Contact) getActivity()).updateFieldName(new_field_name.getText().toString());
+                                    if (!Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                                            && !ImportTextFile.isThreadRunning() ) {
+                                        cursorLoaderAndUpdateDatabase.updateFieldName(current_field_id, new_field_name.getText().toString());
+                                        ((Contact) getActivity()).updateFieldName(new_field_name.getText().toString());
+                                    } else {
+                                        Toast toast = Toast.makeText(getActivity(), R.string.background_thread, Toast.LENGTH_SHORT);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                    }
                                 }
                                 if (select_field_type.getSelectedItemPosition() != effective_field_type) {
                                     if (select_field_type.getSelectedItemPosition() == 0) {
@@ -263,7 +270,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                 dismiss();
                             }
                         } else {
-                            Toast toast = Toast.makeText(getActivity(), "Where is the field name?!", Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(getActivity(), R.string.no_field_name, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
                         }

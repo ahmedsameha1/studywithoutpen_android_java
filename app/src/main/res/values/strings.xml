@@ -268,4 +268,7 @@
     <string name="terms_of_use">TERMS OF USE</string>
     <string name="contact_developer">Contact Developer</string>
     <string name="select_one">Select one!</string>
+    <string name="background_thread">You cannot change the field name while exporting/importing/emulating operation is running!</string>
+    <string name="field_same_name">There is an field with the same name!</string>
+    <string name="no_field_name">Where is the field name?!</string>
 </resources>
