@@ -1,14 +1,18 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.LoaderManager;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -51,6 +55,23 @@ public class FieldInformationActivity extends AppCompatActivity implements
         simpleCursorAdapter = new SimpleCursorAdapter(this,android.R.layout.simple_list_item_1,null,
                 new String[]{Contract.Field_Note.COLUMN_NOTE}, new int[]{android.R.id.text1},0);
         list_of_notes.setAdapter(simpleCursorAdapter);
+        list_of_notes.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, final long l) {
+                new AlertDialog.Builder(FieldInformationActivity.this)
+                        .setTitle(R.string.delete)
+                        .setMessage(R.string.delete_note)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mySQLiteCursorLoader.deleteFieldNote(l);
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .create().show();
+                return true;
+            }
+        });
         getLoaderManager().initLoader(0,null,this);
     }
     @Override

@@ -1439,6 +1439,25 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             sqLiteDatabase.insertWithOnConflict(Contract.Field_Note.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
             return null;
         }
+    }protected ContentChangingTask buildDeleteFieldNoteTask(CursorLoaderAndUpdateDatabase loader) {
+        return (new DeleteFieldNote(loader));
+    }
+    public void deleteFieldNote(long note_id) {
+        buildDeleteFieldNoteTask(this).execute(db, note_id);
+    }
+    protected static class DeleteFieldNote extends ContentChangingTask {
+        DeleteFieldNote(CursorLoaderAndUpdateDatabase loader) {
+            super(loader);
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+            long note_id = (long) params[1];
+            sqLiteDatabase.delete(Contract.Field_Note.TABLE_NAME, Contract.COLUMN_ID + " = ?", new String[]{note_id + ""});
+            return null;
+        }
     }
     protected ContentChangingTask buildUpdateCustomableText(CursorLoaderAndUpdateDatabase loader) {
         return (new UpdateCustomableText(loader));
