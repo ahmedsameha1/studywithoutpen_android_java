@@ -84,7 +84,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                     AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(context);
                                     importUserUsageData
                                             .setMessage(R.string.import_user_usage)
-                                            .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                                            .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
@@ -100,7 +100,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                                             .build());
                                                 }
                                             })
-                                            .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);

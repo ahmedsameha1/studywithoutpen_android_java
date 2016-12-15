@@ -141,7 +141,6 @@ public class ImportTextFile {
         try {
             ArrayList<Object[]> arrayList = checkSort(file_path);
             sqLiteDatabase.beginTransactionNonExclusive();
-            sqLiteDatabase.enableWriteAheadLogging();
             DatabaseReadOperations databaseOperations = new DatabaseReadOperations(context);
             for (Object[] temp : arrayList) {
                 String field_name = (String) temp[0];
@@ -195,7 +194,9 @@ public class ImportTextFile {
             showNotification(context, FAILED_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
         }
         finally {
-            sqLiteDatabase.endTransaction();
+            if ( sqLiteDatabase.inTransaction() ) {
+                sqLiteDatabase.endTransaction();
+            }
         }
     }
 

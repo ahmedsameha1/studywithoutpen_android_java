@@ -445,7 +445,6 @@ public class ExportImportDatabase {
         notImportedFieldsIDs = new ArrayList<>();
         SQLiteDatabase appDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
         appDatabase.beginTransactionNonExclusive();
-        appDatabase.enableWriteAheadLogging();
         try {
             Cursor toImportFieldCursor = toImportDatabase.query(Contract.Field.TABLE_NAME,
                     new String[]{Contract.Field.COLUMN_FIELD_NAME, Contract.Field.COLUMN_FIELD_TYPE,

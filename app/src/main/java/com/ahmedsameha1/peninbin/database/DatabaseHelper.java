@@ -430,11 +430,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onOpen(SQLiteDatabase db) {
         super.onOpen(db);
-        if (!db.isReadOnly()) {
+        db.enableWriteAheadLogging();
+    }
+
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
             // Enable foreign key constraints
             db.execSQL("PRAGMA foreign_keys=ON;");
-        }
+
     }
+
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Log.d("from Peninbin", "onUpgrade");
