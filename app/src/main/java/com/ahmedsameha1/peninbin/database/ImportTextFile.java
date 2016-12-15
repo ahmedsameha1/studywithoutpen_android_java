@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
@@ -135,9 +136,12 @@ public class ImportTextFile {
     }
 
     public static void importFields(Context context, String file_path) {
+        CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
+        SQLiteDatabase sqLiteDatabase = mySQLiteCursorLoader.getSqLiteDatabase();
         try {
             ArrayList<Object[]> arrayList = checkSort(file_path);
-            CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
+            sqLiteDatabase.beginTransactionNonExclusive();
+            sqLiteDatabase.enableWriteAheadLogging();
             DatabaseReadOperations databaseOperations = new DatabaseReadOperations(context);
             for (Object[] temp : arrayList) {
                 String field_name = (String) temp[0];
@@ -181,6 +185,7 @@ public class ImportTextFile {
                     }
                 }
             }
+            sqLiteDatabase.setTransactionSuccessful();
             showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
         } catch (InvalidTextFileFormatException e) {
             showNotification(context, FAILED_IMPORT_INVALID_FILE_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
@@ -188,6 +193,9 @@ public class ImportTextFile {
             showNotification(context, IMPORT_NOTEBOOK_FIELD_FROM_TEXT_FILE, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
         } catch (IOException e) {
             showNotification(context, FAILED_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
+        }
+        finally {
+            sqLiteDatabase.endTransaction();
         }
     }
 

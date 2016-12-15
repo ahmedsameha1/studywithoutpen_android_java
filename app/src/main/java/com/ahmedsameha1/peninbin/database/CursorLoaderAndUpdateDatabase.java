@@ -9,7 +9,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
-import android.provider.ContactsContract;
 
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
@@ -27,24 +26,32 @@ import java.util.Arrays;
  * Created by Ahmed on 4/9/16.
  */
 public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
-    SQLiteOpenHelper db = null;
-    String rawQuery = null;
-    String[] args = null;
-    Context context;
+    private SQLiteOpenHelper sqLiteOpenHelper = null;
+    private SQLiteDatabase sqLiteDatabase = null;
+    private String rawQuery = null;
+    private String[] args = null;
+    private Context context;
 
 
     public CursorLoaderAndUpdateDatabase(Context context,
                                          String rawQuery, String[] args) {
         super(context);
-        this.db = DatabaseHelper.getInstance(context);
+        this.sqLiteOpenHelper = DatabaseHelper.getInstance(context);
+        this.sqLiteDatabase = sqLiteOpenHelper.getWritableDatabase();
         this.rawQuery = rawQuery;
         this.args = args;
         this.context = context;
     }
 
+    public SQLiteDatabase getSqLiteDatabase() {
+        return sqLiteDatabase;
+    }
+
     public CursorLoaderAndUpdateDatabase(Context context) {
         super(context);
-        this.db = DatabaseHelper.getInstance(context);
+        this.sqLiteOpenHelper = DatabaseHelper.getInstance(context);
+        this.sqLiteDatabase = sqLiteOpenHelper.getWritableDatabase();
+
         this.context = context;
     }
 
@@ -54,7 +61,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
      */
     @Override
     protected Cursor buildCursor() {
-        return (db.getReadableDatabase().rawQuery(rawQuery, args));
+        return (sqLiteOpenHelper.getReadableDatabase().rawQuery(rawQuery, args));
     }
 
     /**
@@ -75,7 +82,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
 
 
     public void createField(String field_name, int field_type, int question_data_type, int check_type, boolean read_answer, String locale) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
         contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
@@ -92,7 +98,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
     public void createField(String field_name, int field_type, int question_data_type) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
         contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
@@ -106,7 +111,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
 
 
     public void setRandomQuickTestData(long field_id, int number_of_quick_tests, int number_of_tries, int number_of_question, String[][] excluded_times) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             int s = sqLiteDatabase.delete(Contract.Excluded_Time.TABLE_NAME, Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
@@ -133,7 +137,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
     public void setRandomQuickTestData(long field_id, int number_of_quick_tests, int number_of_tries,
                                        int number_of_question, String[][] excluded_times, int controlled_portion, int wrongness_level, int rank_level) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             int s = sqLiteDatabase.delete(Contract.Excluded_Time.TABLE_NAME, Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
@@ -163,7 +166,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
     public void insertEntry(int question_data_type, String question, String answer, long field_id) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -212,7 +214,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
 
     public void insertEntryWithRank(int question_data_type, String question, String answer, long field_id, int rank) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -262,7 +263,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
 
     public void insertEntryWithOrder(int question_data_type, String question, String answer, long field_id, int order) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -311,14 +311,13 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void deleteEntry(long entry_id, int question_data_type) {
-        buildDeleteEntryTask(this).execute(db, entry_id, question_data_type);
+        buildDeleteEntryTask(this).execute(sqLiteOpenHelper, entry_id, question_data_type);
     }
 
 
     public void updateFieldReadAnswer(long field_id, boolean isReadAnswer) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_READ_ANSWER, isReadAnswer ? Contract.Field.READ_ANSWER : Contract.Field.DO_NOT_READ_ANSWER);
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
     }
@@ -326,7 +325,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     public void updateFieldCheckType(long field_id, int check_type) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, check_type);
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
     }
@@ -338,7 +336,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         } else {
             contentValues.putNull(Contract.Field.COLUMN_LOCALE);
         }
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
     }
@@ -355,12 +352,12 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
 
 
     public void incrementFieldUsage(long field_id) {
-        buildIncrementFieldUsageTask(this).execute(db, field_id);
+        buildIncrementFieldUsageTask(this).execute(sqLiteOpenHelper, field_id);
     }
 
 
     public void putEntriesTestOrderEnhancedTest(long field_id, int question_data_type, String[][] array) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             for (int i = 0; i < array.length; i++) {
                 Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
@@ -385,7 +382,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
     public void putEntriesTestOrderFullyRandomTest(long field_id, int question_data_type, String[][] array) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             for (int i = 0; i < array.length; i++) {
                 Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
@@ -411,7 +407,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void putEntriesStudyPeriodOrder(long field_id, int question_data_type, String[][] array) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             for (int i = 0; i < array.length; i++) {
                 Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
@@ -437,7 +432,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void putStudyPeriodRepeatedEntries(long field_id, ArrayList<Integer> arrayList) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             for (Integer i : arrayList) {
@@ -453,7 +447,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void putTestPausedDataEnhancedTest(long field_id, int[] array) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Test_Paused.COLUMN_TEST_TYPE, Constants.TestType.ENHANCED_TEST);
         contentValues.put(Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER, array[0]);
@@ -464,7 +457,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void putTestPausedDataFullyRandomTest(long field_id, int[] array) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Test_Paused.COLUMN_TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
         contentValues.put(Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER, array[0]);
@@ -475,7 +467,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void putStudyPeriodPausedData(long field_id, int[] array) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Study_Period_Paused.COLUMN_CURRENT_QUESTION_COUNTER, array[0]);
         contentValues.put(Contract.Study_Period_Paused.COLUMN_TRIES_NUMBER, array[1]);
@@ -483,7 +474,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         sqLiteDatabase.insert(Contract.Study_Period_Paused.TABLE_NAME, null, contentValues);
     }
     public void editEntry(long entry_id, int question_data_type, String question, String answer) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -528,7 +518,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void editEntry(long entry_id, int question_data_type, String question, String answer, int rank) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -576,87 +565,17 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-    protected ContentChangingTask buildEditEntryTask(CursorLoaderAndUpdateDatabase loader) {
-        return (new EditEntryTask(loader));
-    }
 
     public void updateFieldName(long current_field_id, String s) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, s);
-        db.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{current_field_id + ""});
     }
 
 
-
-
-    protected static class EditEntryTask extends ContentChangingTask {
-        EditEntryTask(CursorLoaderAndUpdateDatabase loader) {
-            super(loader);
-        }
-
-        @Override
-        protected Void doInBackground(Object... params) {
-            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
-            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-            Context context = (Context) params[1];
-            long entry_id = (long) params[2];
-            int question_data_type = (int) params[3];
-            String question = (String) params[4];
-            String answer = (String) params[5];
-            int rank = (int) params[6];
-            sqLiteDatabase.beginTransactionNonExclusive();
-            try {
-                if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
-                    long question_id, answer_id;
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.STring.COLUMN_VALUE, answer);
-                    try {
-                        answer_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
-                    } catch (Exception e) {
-                        Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                                Contract.STring.COLUMN_VALUE + " = ? ",
-                                new String[]{answer}, null, null, null);
-                        c.moveToFirst();
-                        answer_id = c.getLong(0);
-                        c.close();
-                    }
-                    contentValues = new ContentValues();
-                    contentValues.put(Contract.STring.COLUMN_VALUE, question);
-                    try {
-                        question_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
-                    } catch (Exception e) {
-                        Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                                Contract.STring.COLUMN_VALUE + " = ? ",
-                                new String[]{question}, null, null, null);
-                        c.moveToFirst();
-                        question_id = c.getLong(0);
-                        c.close();
-                    }
-                    contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
-                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
-
-                    sqLiteDatabase.updateWithOnConflict(Contract.String_Entry.TABLE_NAME, contentValues,
-                            Contract.COLUMN_ID + " = ? ",
-                            new String[]{entry_id + ""}, SQLiteDatabase.CONFLICT_IGNORE);
-                    contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_RANK,rank);
-                    sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME,contentValues,
-                            Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
-                } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
-                }
-                sqLiteDatabase.setTransactionSuccessful();
-            } finally {
-                sqLiteDatabase.endTransaction();
-            }
-
-            return (null);
-        }
-    }
-
     public void updateFieldSort(long field_id, int sort) {
-        buildUpdateFieldSortTask(this).execute(db, field_id, sort);
+        buildUpdateFieldSortTask(this).execute(sqLiteOpenHelper, field_id, sort);
     }
 
     protected ContentChangingTask buildUpdateFieldSortTask(CursorLoaderAndUpdateDatabase loader) {
@@ -684,7 +603,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void updateFieldAreasSize(long field_id, int question_area_size, int answer_area_size) {
-        buildUpdateFieldAreasSize(this).execute(db, field_id, question_area_size, answer_area_size);
+        buildUpdateFieldAreasSize(this).execute(sqLiteOpenHelper, field_id, question_area_size, answer_area_size);
     }
 
     protected ContentChangingTask buildUpdateFieldAreasSize(CursorLoaderAndUpdateDatabase loader) {
@@ -714,7 +633,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void copyEntries( ArrayList<Long> list_of_entries, long field_id) {
-        buildCopyEntries(this).execute(db, list_of_entries, field_id, context);
+        buildCopyEntries(this).execute(sqLiteOpenHelper, list_of_entries, field_id, context);
     }
 
     protected ContentChangingTask buildCopyEntries(CursorLoaderAndUpdateDatabase loader) {
@@ -765,7 +684,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void copyField(  long from_field_id, long to_field_id) {
-        buildCopyField(this).execute(db, from_field_id, to_field_id, context);
+        buildCopyField(this).execute(sqLiteOpenHelper, from_field_id, to_field_id, context);
     }
 
     protected ContentChangingTask buildCopyField(CursorLoaderAndUpdateDatabase loader) {
@@ -814,7 +733,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
     public void moveEntries( ArrayList<Long> list_of_entries,  long to_field_id) {
-        buildMoveEntries(this).execute(db, list_of_entries, to_field_id, context);
+        buildMoveEntries(this).execute(sqLiteOpenHelper, list_of_entries, to_field_id, context);
     }
 
     protected ContentChangingTask buildMoveEntries(CursorLoaderAndUpdateDatabase loader) {
@@ -867,7 +786,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void updateFieldAnswerAreaSize(long field_id, int question_area_size) {
-        buildUpdateFieldAnswerAreaSize(this).execute(db, field_id, question_area_size);
+        buildUpdateFieldAnswerAreaSize(this).execute(sqLiteOpenHelper, field_id, question_area_size);
     }
 
     protected ContentChangingTask buildUpdateFieldAnswerAreaSize(CursorLoaderAndUpdateDatabase loader) {
@@ -895,7 +814,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void updateFieldTestTextSize(long field_id, int test_text_size) {
-        buildUpdateFieldTestTextSize(this).execute(db, field_id, test_text_size);
+        buildUpdateFieldTestTextSize(this).execute(sqLiteOpenHelper, field_id, test_text_size);
     }
 
     protected ContentChangingTask buildUpdateFieldTestTextSize(CursorLoaderAndUpdateDatabase loader) {
@@ -923,7 +842,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void updateFieldActionBarShown(long field_id, int action_bar_shown) {
-        buildUpdateFieldActionBarShown(this).execute(db, field_id, action_bar_shown);
+        buildUpdateFieldActionBarShown(this).execute(sqLiteOpenHelper, field_id, action_bar_shown);
     }
 
     protected ContentChangingTask buildUpdateFieldActionBarShown(CursorLoaderAndUpdateDatabase loader) {
@@ -1002,7 +921,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void resetEntriesStudyPeriodOrder(long field_id, int question_data_type) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, -1);
@@ -1014,7 +932,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void resetEntriesTestOrderEnhancedTest(long field_id, int question_data_type) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER, -1);
@@ -1025,7 +942,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
     public void resetEntriesTestOrderFullyRandomTest(long field_id, int question_data_type) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER, -1);
@@ -1041,7 +957,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
                 Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time_Backup.TABLE_NAME,
                         new String[]{ Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST},
                         Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null, null);
@@ -1088,7 +1003,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void cleanDatabase() {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         cleanSTringTable(sqLiteDatabase);
 
         sqLiteDatabase.execSQL("DELETE FROM " + Contract.Not_String.TABLE_NAME + " WHERE " + Contract.COLUMN_ID
@@ -1098,7 +1012,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
 
 
     public void clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(long field_id) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             sqLiteDatabase.delete(Contract.Study_Period_Paused.TABLE_NAME, Contract.Study_Period_Paused.COLUMN_FIELD + " = ? ",
@@ -1113,14 +1026,12 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
 
 
     public void clearThisFieldFromTestPausedEnhancedTest(long field_id) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.delete(Contract.Test_Paused.TABLE_NAME,
                 Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
                 new String[]{field_id + "", Constants.TestType.ENHANCED_TEST + ""});
     }
 
     public void clearThisFieldFromTestPausedFullyRandomTest(long field_id) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.delete(Contract.Test_Paused.TABLE_NAME,
                 Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
                 new String[]{field_id + "", Constants.TestType.FULLY_RANDOM_TEST + ""});
@@ -1128,7 +1039,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
 
 
     public void clearThisFieldFromWrongAnswersEnhancedTest(long field_id, int question_data_type) {
-        buildClearThisFieldFromWrongAnswersEnhancedTest(this).execute(db, field_id, question_data_type);
+        buildClearThisFieldFromWrongAnswersEnhancedTest(this).execute(sqLiteOpenHelper, field_id, question_data_type);
     }
 
     protected ContentChangingTask buildClearThisFieldFromWrongAnswersEnhancedTest(CursorLoaderAndUpdateDatabase loader) {
@@ -1171,7 +1082,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
     public void clearThisFieldFromWrongAnswersFullyRandomTest(long field_id, int question_data_type) {
-        buildClearThisFieldFromWrongAnswersFullyRandomTest(this).execute(db, field_id, question_data_type);
+        buildClearThisFieldFromWrongAnswersFullyRandomTest(this).execute(sqLiteOpenHelper, field_id, question_data_type);
     }
 
     protected ContentChangingTask buildClearThisFieldFromWrongAnswersFullyRandomTest(CursorLoaderAndUpdateDatabase loader) {
@@ -1215,7 +1126,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void putEntryWrongAnswersEnhancedTest(String question, String answer, long field_id, ArrayList<String> wrongAnswer, int question_data_type) {
-        buildPutEntryWrongAnswersEnhancedTest(this).execute(db, question, answer, field_id, wrongAnswer, question_data_type);
+        buildPutEntryWrongAnswersEnhancedTest(this).execute(sqLiteOpenHelper, question, answer, field_id, wrongAnswer, question_data_type);
     }
 
     protected ContentChangingTask buildPutEntryWrongAnswersEnhancedTest(CursorLoaderAndUpdateDatabase loader) {
@@ -1276,7 +1187,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void putEntryWrongAnswersFullyRandomTest(String question, String answer, long field_id, ArrayList<String> wrongAnswer, int question_data_type) {
-        buildPutEntryWrongAnswersFullyRandomTest(this).execute(db, question, answer, field_id, wrongAnswer, question_data_type);
+        buildPutEntryWrongAnswersFullyRandomTest(this).execute(sqLiteOpenHelper, question, answer, field_id, wrongAnswer, question_data_type);
     }
 
     protected ContentChangingTask buildPutEntryWrongAnswersFullyRandomTest(CursorLoaderAndUpdateDatabase loader) {
@@ -1337,7 +1248,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void addScheduledTimeForBackup(long field_id, int session_type, long time, int pendingintent_request) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_FIELD, field_id);
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE, session_type);
@@ -1348,7 +1258,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     public void addScheduledTimeForBackup(long field_id, int session_type, long time,
                                           int pendingintent_request,int percentage_or_number, int number, int number_of_tries,
                                           int controlled_portion, int wrongness_level, int rank_level) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_FIELD, field_id);
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE, session_type);
@@ -1364,7 +1273,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void deleteScheduledTimeForBackup(long field_id, int session_type, long time) {
-        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
         sqLiteDatabase.delete(Contract.Scheduled_Time_Backup.TABLE_NAME, Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? AND "
                         + Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE + " = ? AND " + Contract.Scheduled_Time_Backup.COLUMN_TIME + " = ?",
                 new String[]{field_id + "", session_type + "", time + ""});
@@ -1384,43 +1292,43 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 + " );");
     }
     public void increaseEntryAskedByOne( long entry_id ) {
-        Cursor cursor = db.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
+        Cursor cursor = sqLiteOpenHelper.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
                 new String[]{Contract.String_Entry.COLUMN_ASKED_COUNT}, Contract.COLUMN_ID + " = ? ",
                 new String[]{entry_id + ""}, null,null,null);
         cursor.moveToFirst();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.String_Entry.COLUMN_ASKED_COUNT, cursor.getInt(0) + 1);
-        db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
     }
     public void increaseEntryWrongAnsweredCountByOne( long entry_id ) {
-        Cursor cursor = db.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
+        Cursor cursor = sqLiteOpenHelper.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
                 new String[]{Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT}, Contract.COLUMN_ID + " = ? ",
                 new String[]{entry_id + ""}, null,null,null);
         cursor.moveToFirst();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, cursor.getInt(0) + 1);
-        db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
     }
     public void setReminderData ( long entry_id, long time , int request ) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT, time);
         contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST, request);
-        db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
     }
     public void deleteReminderData ( long entry_id ) {
         ContentValues contentValues = new ContentValues();
         contentValues.putNull(Contract.String_Entry.COLUMN_REMIND_AT);
         contentValues.putNull(Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST);
-        db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
     }
 
     protected ContentChangingTask buildAddFieldNoteTask(CursorLoaderAndUpdateDatabase loader) {
         return (new AddFieldNote(loader));
     }
     public void addFieldNote(long field_id, String note) {
-        buildAddFieldNoteTask(this).execute(db, field_id, note);
+        buildAddFieldNoteTask(this).execute(sqLiteOpenHelper, field_id, note);
     }
     protected static class AddFieldNote extends ContentChangingTask {
         AddFieldNote(CursorLoaderAndUpdateDatabase loader) {
@@ -1443,7 +1351,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         return (new DeleteFieldNote(loader));
     }
     public void deleteFieldNote(long note_id) {
-        buildDeleteFieldNoteTask(this).execute(db, note_id);
+        buildDeleteFieldNoteTask(this).execute(sqLiteOpenHelper, note_id);
     }
     protected static class DeleteFieldNote extends ContentChangingTask {
         DeleteFieldNote(CursorLoaderAndUpdateDatabase loader) {
@@ -1463,7 +1371,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         return (new UpdateCustomableText(loader));
     }
     public void updateCustomableText(long id, String text) {
-        buildUpdateCustomableText(this).execute(db, id, text);
+        buildUpdateCustomableText(this).execute(sqLiteOpenHelper, id, text);
     }
     protected static class UpdateCustomableText extends ContentChangingTask {
         UpdateCustomableText(CursorLoaderAndUpdateDatabase loader) {
@@ -1489,7 +1397,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         if ( field_type != Constants.FieldTypes.NOTEBOOK_TYPE ) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
-            db.getWritableDatabase().update(Contract.Field.TABLE_NAME,contentValues,
+            sqLiteOpenHelper.getWritableDatabase().update(Contract.Field.TABLE_NAME,contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
         }
     }
@@ -1497,20 +1405,20 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     public void addOrderId( String order_id ) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.GooglePaymentOrderID.COLUMN_ORDER_ID, order_id);
-        db.getWritableDatabase().insert(Contract.GooglePaymentOrderID.TABLE_NAME,null,contentValues);
+        sqLiteOpenHelper.getWritableDatabase().insert(Contract.GooglePaymentOrderID.TABLE_NAME,null,contentValues);
     }
     public void restWhetherAskedCurrentTestRound ( long field_id, boolean isEmulated, String date_string ) {
         if ( isEmulated ) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
-            db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
                     Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
                             + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL )"
                     , new String[]{field_id + "", date_string});
         } else {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
-            db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
                     Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
         }
     }
@@ -1519,7 +1427,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         for ( long temp: ids ) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.ASKED_AT_CURRENT_ROUND);
-            db.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
         }
     }
