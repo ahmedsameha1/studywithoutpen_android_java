@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.NotebookFieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -102,8 +103,9 @@ public class MainActivityRecyclerViewAdapter extends
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ((!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id)) &&
+                if ( (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id)) &&
                         (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id)) &&
+                        (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + viewHolder.field_id)) &&
                         !ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
                         && !Emulation.isAnyThreadRunning()) {
                     Bundle bundle = new Bundle();
@@ -113,13 +115,14 @@ public class MainActivityRecyclerViewAdapter extends
                     fragment.setArguments(bundle);
                     fragment.setMainActivityRecyclerViewViewHolder(viewHolder);
                     fragment.show(((AppCompatActivity) context).getSupportFragmentManager(), GET_CONFIRMATION);
-                } else if ( ! ((!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id)) &&
-                        (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id))) ){
+                } else if ( sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id) ||
+                        sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id) ||
+                        sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + viewHolder.field_id) ){
                     Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
-                } else if ( ! (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
-                        && !Emulation.isAnyThreadRunning()) ) {
+                } else if ( ExportImportDatabase.isAnyThreadRunning() || ImportTextFile.isThreadRunning()
+                        || Emulation.isAnyThreadRunning() ) {
                     Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();

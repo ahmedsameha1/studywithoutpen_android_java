@@ -98,8 +98,9 @@ public class DatabaseReadOperations {
             cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
                     new String[]{Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER},
                     Contract.COLUMN_ID + " = ? AND ( " + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? OR "
-                            + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? )",
-                    new String[]{entry_id + "", "0", "0"}, null, null, null);
+                            + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? OR "
+                    + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " >= ? )",
+                    new String[]{entry_id + "", "0", "0", "0"}, null, null, null);
         } else if (getQuestionDataType(field_id) == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
         if (cursor == null || cursor.getCount() <= 0) {

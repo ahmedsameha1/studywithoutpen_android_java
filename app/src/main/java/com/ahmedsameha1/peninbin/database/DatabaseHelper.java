@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import android.util.Log;
+
 import com.ahmedsameha1.peninbin.database.Contract.Field;
 
 
@@ -69,11 +70,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'))"
             + " );";
-/*    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME
-            + " ( "
-            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
-            + Field_Type.COLUMN_NAME_FIELD_TYPE_NAME + " TEXT UNIQUE NOT NULL"
-            + " );";*/
+    /*    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME
+                + " ( "
+                + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
+                + Field_Type.COLUMN_NAME_FIELD_TYPE_NAME + " TEXT UNIQUE NOT NULL"
+                + " );";*/
 /*    public static final String CREATE_LOCALE_TABLE = "CREATE TABLE IF NOT EXISTS " + Locale.TABLE_NAME
             + " ( "
             + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
@@ -355,13 +356,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return sInstance;
     }
+
     private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
         app_database_path = context.getApplicationContext().getDatabasePath(DATABASE_NAME).getAbsolutePath();
     }
+
     @Override
-    public void onCreate( SQLiteDatabase sqLiteDatabase ) {
+    public void onCreate(SQLiteDatabase sqLiteDatabase) {
         /*boolean dbExist = checkDataBase();
         if(dbExist) {
             Log.d(TAG, "Database exists.");
@@ -398,16 +401,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
         SpecialText.addSpecialTextToDBV11(sqLiteDatabase);
     }
+
     private boolean checkDataBase() {
         boolean checkDB = false;
         try {
             File file = new File(app_database_path);
             checkDB = file.exists();
-        } catch(SQLiteException e) {
+        } catch (SQLiteException e) {
             Log.d(TAG, e.getMessage());
         }
         return checkDB;
     }
+
     private void copyDataBase() throws IOException {
         OutputStream os = new FileOutputStream(app_database_path);
         InputStream is = context.getAssets().open("sqlite" + File.separator + DATABASE_NAME);
@@ -420,31 +425,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         os.flush();
         os.close();
     }
+
     public void deleteDb() {
         File file = new File(app_database_path);
-        if(file.exists()) {
+        if (file.exists()) {
             file.delete();
             Log.d(TAG, "Database deleted.");
         }
-    }
-    @Override
-    public void onOpen(SQLiteDatabase db) {
-        super.onOpen(db);
-        db.enableWriteAheadLogging();
     }
 
     @Override
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
-            // Enable foreign key constraints
-            db.execSQL("PRAGMA foreign_keys=ON;");
+        db.enableWriteAheadLogging();
+        // Enable foreign key constraints
+        db.execSQL("PRAGMA foreign_keys=ON;");
 
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Log.d("from Peninbin", "onUpgrade");
-        if ( oldVersion < 2 ) {
+        if (oldVersion < 2) {
             ModifyDatabaseSchema.fieldTableMigration(sqLiteDatabase);
             sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_QUESTION_TABLE);
             sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_ANSWER_TABLE);
@@ -454,24 +456,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ModifyDatabaseSchema.linkerMigration(sqLiteDatabase);
             ModifyDatabaseSchema.tablesDeletion(sqLiteDatabase);
         }
-        if ( oldVersion < 3 ) {
+        if (oldVersion < 3) {
             ModifyDatabaseSchema.onUpgradeForFieldTableV3(sqLiteDatabase);
             ModifyDatabaseSchema.onUpgradeForQuestionTableV3(sqLiteDatabase);
             ModifyDatabaseSchema.onUpgradeForAnswerTableV3(sqLiteDatabase);
             ModifyDatabaseSchema.onUpgradeForLinkerTableV3(sqLiteDatabase);
         }
-        if ( oldVersion < 4 ) {
+        if (oldVersion < 4) {
             sqLiteDatabase.execSQL(DBV6_APPV32_CREATE_STUDY_DURING_TEMP_TABLE);
         }
-        if ( oldVersion < 5 ) {
+        if (oldVersion < 5) {
             ModifyDatabaseSchema.onUpgradeForFieldTableV5(sqLiteDatabase);
             ModifyDatabaseSchema.onUpgradeForLinkerTableV5(sqLiteDatabase);
             ModifyDatabaseSchema.migrateDataFromStudyDuringTempTableToLinkerStudyDuringFlagColumnV5(sqLiteDatabase);
         }
-        if ( oldVersion < 6 ) {
+        if (oldVersion < 6) {
             ModifyDatabaseSchema.onUpgradeForFieldTableV6(sqLiteDatabase);
         }
-        if ( oldVersion < 7 ) {
+        if (oldVersion < 7) {
             sqLiteDatabase.execSQL(CREATE_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);
@@ -483,39 +485,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_PAUSED_TABLE);
             sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);
-            ModifyDatabaseSchema.onUpgradeDatabaseToDBV7AppV33(context,sqLiteDatabase);
+            ModifyDatabaseSchema.onUpgradeDatabaseToDBV7AppV33(context, sqLiteDatabase);
         }
-        if ( oldVersion < 8 ) {
+        if (oldVersion < 8) {
             ModifyDatabaseSchema.onUpgradeDatabaseToDBV8AppV38(sqLiteDatabase);
         }
-        if ( oldVersion < 9 ) {
+        if (oldVersion < 9) {
             ModifyDatabaseSchema.onUpgradeDatabaseToDBV9AppV40(sqLiteDatabase);
         }
-        if ( oldVersion < 10 ) {
+        if (oldVersion < 10) {
             ModifyDatabaseSchema.onUpgradeDatabaseToDBV10AppV43(sqLiteDatabase);
         }
-        if ( oldVersion < 11 ) {
+        if (oldVersion < 11) {
             ModifyDatabaseSchema.onUpgradeDatabaseToDBV11AppV47(sqLiteDatabase);
             SpecialText.addSpecialTextToDBV11(sqLiteDatabase);
         }
-        if ( oldVersion < 12 ) {
+        if (oldVersion < 12) {
             sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
             Emulation.modifyEmulationCreationDatesOfAppV53AndHigher(sqLiteDatabase);
         }
     }
-    
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

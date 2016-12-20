@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.activities.EditEntryActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
@@ -115,6 +116,7 @@ public class FieldActivityRecyclerViewAdapter extends
             public void onClick(View v) {
                 if ( (! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id)) &&
                         (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id)) &&
+                        (! sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + field_id)) &&
                         !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
                         && !ImportTextFile.isThreadRunning() ) {
                     if ( ! databaseOperations.checkIfIncludedInPausedOperations(field_id,entry_id) ) {
@@ -130,13 +132,14 @@ public class FieldActivityRecyclerViewAdapter extends
                         toast.setGravity(Gravity.TOP,0,400);
                         toast.show();
                     }
-                } else if ( ! ((! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id)) &&
-                        (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id))) ){
+                } else if ( sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id) ||
+                         sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id) ||
+                        sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + field_id) ){
                     Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
-                } else if ( ! (!Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
-                        && !ImportTextFile.isThreadRunning()) ) {
+                } else if ( Emulation.isAnyThreadRunning() || ExportImportDatabase.isAnyThreadRunning()
+                        || ImportTextFile.isThreadRunning() ) {
                     Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();

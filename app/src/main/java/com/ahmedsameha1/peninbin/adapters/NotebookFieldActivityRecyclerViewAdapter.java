@@ -26,8 +26,6 @@ import com.ahmedsameha1.peninbin.activities.EditNotebookEntryActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.NotebookFieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
@@ -154,8 +152,6 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( (! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id)) &&
-                        (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id))) {
                     if ( ! databaseOperations.checkIfIncludedInPausedOperations(field_id,entry_id) ) {
                         DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
                         Bundle bundle = new Bundle();
@@ -169,11 +165,6 @@ public class NotebookFieldActivityRecyclerViewAdapter extends
                         toast.setGravity(Gravity.TOP,0,400);
                         toast.show();
                     }
-                } else {
-                    Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
             }
         });
 
