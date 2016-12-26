@@ -65,11 +65,6 @@ public class ShowTestResultDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if ( test_type == Constants.TestType.ENHANCED_TEST) {
-                            mySQLiteCursorLoader.clearThisFieldFromWrongAnswersEnhancedTest(current_field_id, question_data_type);
-                        } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
-                            mySQLiteCursorLoader.clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id, question_data_type);
-                        }
                         getActivity().finish();
                         ExitActivity.exit(getActivity());
                     }
@@ -80,11 +75,6 @@ public class ShowTestResultDialogFragment extends DialogFragment {
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        if ( test_type == Constants.TestType.ENHANCED_TEST) {
-                            mySQLiteCursorLoader.clearThisFieldFromWrongAnswersEnhancedTest(current_field_id, question_data_type);
-                        } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
-                            mySQLiteCursorLoader.clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id, question_data_type);
-                        }
                         getActivity().finish();
                         ExitActivity.exit(getActivity());
                         return false;

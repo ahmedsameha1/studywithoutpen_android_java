@@ -145,15 +145,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.cursor = data;
         if ( wrongItemList == null ) {
-            try {
-                wrongItemList = getWrongItems();
-            } finally {
-                if ( test_type == Constants.TestType.ENHANCED_TEST) {
-                    mySQLiteCursorLoader.clearThisFieldFromWrongAnswersEnhancedTest(current_field_id,question_data_type);
-                } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
-                    mySQLiteCursorLoader.clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id,question_data_type);
-                }
-            }
+            wrongItemList = getWrongItems();
         }
         mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this,wrongItemList,current_field_id);
         recyclerView.setAdapter(mAdapter);

@@ -1038,8 +1038,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
 
-    public void clearThisFieldFromWrongAnswersEnhancedTest(long field_id, int question_data_type) {
-        buildClearThisFieldFromWrongAnswersEnhancedTest(this).execute(sqLiteOpenHelper, field_id, question_data_type);
+    public void clearThisFieldFromWrongAnswersEnhancedTest(long field_id) {
+        buildClearThisFieldFromWrongAnswersEnhancedTest(this).execute(sqLiteOpenHelper, field_id, context);
     }
 
     protected ContentChangingTask buildClearThisFieldFromWrongAnswersEnhancedTest(CursorLoaderAndUpdateDatabase loader) {
@@ -1055,7 +1055,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         protected Void doInBackground(Object... params) {
             SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
             long field_id = (long) params[1];
-            int question_data_type = (int) params[2];
+            Context method_context = (Context) params[2];
+            int question_data_type = new DatabaseReadOperations(method_context).getQuestionDataType(field_id);
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             sqLiteDatabase.beginTransactionNonExclusive();
             try {
@@ -1081,8 +1082,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             return null;
         }
     }
-    public void clearThisFieldFromWrongAnswersFullyRandomTest(long field_id, int question_data_type) {
-        buildClearThisFieldFromWrongAnswersFullyRandomTest(this).execute(sqLiteOpenHelper, field_id, question_data_type);
+    public void clearThisFieldFromWrongAnswersFullyRandomTest(long field_id) {
+        buildClearThisFieldFromWrongAnswersFullyRandomTest(this).execute(sqLiteOpenHelper, field_id, context);
     }
 
     protected ContentChangingTask buildClearThisFieldFromWrongAnswersFullyRandomTest(CursorLoaderAndUpdateDatabase loader) {
@@ -1098,7 +1099,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         protected Void doInBackground(Object... params) {
             SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
             long field_id = (long) params[1];
-            int question_data_type = (int) params[2];
+            Context method_context = (Context) params[2];
+            int question_data_type = new DatabaseReadOperations(method_context).getQuestionDataType(field_id);
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             sqLiteDatabase.beginTransactionNonExclusive();
             try {

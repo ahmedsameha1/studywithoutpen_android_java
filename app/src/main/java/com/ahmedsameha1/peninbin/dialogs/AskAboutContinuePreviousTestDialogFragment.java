@@ -67,7 +67,6 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                 CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
                                 if ( test_type == Constants.TestType.ENHANCED_TEST ) {
                                     mySQLiteCursorLoader.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
-                                    mySQLiteCursorLoader.clearThisFieldFromWrongAnswersEnhancedTest(current_field_id,question_data_type);
                                     mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id,question_data_type);
                                     Bundle bundle = new Bundle();
                                     bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
@@ -77,7 +76,6 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                     dismiss();
                                 } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
                                     mySQLiteCursorLoader.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
-                                    mySQLiteCursorLoader.clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id,question_data_type);
                                     mySQLiteCursorLoader.resetEntriesTestOrderFullyRandomTest(current_field_id,question_data_type);
                                     Bundle bundle = new Bundle();
                                     bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);

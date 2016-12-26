@@ -78,8 +78,6 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
-    public static final String DASH = "-";
-    public static final int START_NEW_SESSION = 2;
     public static final String LIST_FOR_TEST = "listForTest";
     public static final String CURRENT_QUESTION_COUNTER = "currentQuestionCounter";
     public static final String TRIES_COUNTER = "triesCounter";
@@ -102,20 +100,21 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     public static final String PAUSING = "pausing";
     private static final String SYMBOL = "symbol";
     private static final String CUSTOMABLE_TEXT = "customable_text";
+    private static final String BEFORE_SHOWING_RESULT_DIALOG = "before_showing_result_dialog";
     private long current_field_id;
-    private String [][] listForTest;
+    private String[][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
-    private boolean boolean_continue = false, actionBarShown;
+    private boolean boolean_continue = false, actionBarShown, before_showing_result_dialog;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private boolean result, testingNow = false;
-    private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber,wrongAnswersCounter , percent_or_number,number;
+    private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber, wrongAnswersCounter, percent_or_number, number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private double percentage;
-    private Cursor fieldEntriesCursor, searchForCursor;
+    private Cursor fieldEntriesCursor;
     private Toolbar toolbar;
     private EditText enterAnswer;
-    private TextView showQuestion, remainingQuestionCounter,showTries, showNumberOfQuestions,check,nextHint,showActionbar;
-    private LinearLayout showResult,questionLinearlayout, container;
+    private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuestions, check, nextHint, showActionbar;
+    private LinearLayout showResult, questionLinearlayout, container;
     private Handler mHandler = new Handler();
     private Tracker mTracker;
     private boolean isEmulated;
@@ -153,28 +152,29 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private int mShortAnimationDuration;
     private View mLoadingView;
-    private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
+    private Runnable show_result_dialog_runnable;
 
     @Override
-    protected void onCreate( Bundle savedInstanceState ) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        int question_area_size,answer_area_size,test_text_size,action_bar_shown;
+        int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         boolean isReadAnswer;
         // getting the reference of the fragment that holds the reference of list for test array
         retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
         // if the reference to the fragment was null we create a new fragment object and add it to the activity
-        if ( retainedFragment == null ) {
+        if (retainedFragment == null) {
             retainedFragment = new RetainedFragment();
-            getFragmentManager().beginTransaction().add(retainedFragment,LIST_FOR_TEST).commit();
+            getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
         }
         databaseOperations = new DatabaseReadOperations(this);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
         listForTest = retainedFragment.getListForTest_TestActivity();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
+        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
@@ -202,24 +202,24 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
         final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
-        if ( savedInstanceState == null ) {
+        if (savedInstanceState == null) {
             content.setVisibility(View.GONE);
             mShortAnimationDuration = getResources().getInteger(
                     android.R.integer.config_shortAnimTime);
         } else {
-            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
-            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE? View.VISIBLE : View.GONE);
+            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
+            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
         }
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         setSupportActionBar(toolbar);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
-        if ( action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR ) {
+        if (action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR) {
             getSupportActionBar().hide();
         }
         actionBarShown = getSupportActionBar().isShowing();
-        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show );
+        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
-        if ( isReadAnswer ) {
+        if (isReadAnswer) {
             Intent checkIntent = new Intent();
             checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
             startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
@@ -230,7 +230,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         loader = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if ( id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
                             "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a , se." + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
@@ -239,8 +239,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                                     + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " >= ? ",
                             new String[]{current_field_id + "", "0"});
-                } else if ( id == GET_ENTRIES_LOADER_ID ){
-                    if ( isEmulated ) {
+                } else if (id == GET_ENTRIES_LOADER_ID) {
+                    if (isEmulated) {
                         String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
                                 .format(new Date(System.currentTimeMillis()));
                         return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
@@ -251,7 +251,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
                                         + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL )",
-                                new String[]{current_field_id + "", date_string });
+                                new String[]{current_field_id + "", date_string});
                     } else {
                         return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
                                 "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
@@ -262,7 +262,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                                 new String[]{current_field_id + ""});
                     }
-                } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
+                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                             + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
@@ -272,13 +272,14 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 }
                 return null;
             }
+
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 int id = loader.getId();
-                if ( id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID ) {
+                if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     fieldEntriesCursor = data;
-                    if ( boolean_continue ) {
-                        if ( listForTest == null ) {
+                    if (boolean_continue) {
+                        if (listForTest == null) {
                             listForTest = readTestDataFromLinkerTable();
                             questionsNumber = listForTest.length;
                             showNumberOfQuestions.setText(Integer.toString(questionsNumber));
@@ -293,10 +294,10 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                             ifMoreThanOnce();
                         }
                     } else {
-                        if ( listForTest == null ) {
-                            if ( percent_or_number == PERCENTAGE ) {
+                        if (listForTest == null) {
+                            if (percent_or_number == PERCENTAGE) {
                                 listForTest = getListForTest(percentage);
-                            } else if ( percent_or_number == NUMBER ) {
+                            } else if (percent_or_number == NUMBER) {
                                 listForTest = getListForTest(number);
                             }
                             questionsNumber = listForTest.length;
@@ -312,7 +313,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                         }
                     }
                     crossfade();
-                } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
+                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     if (symbol == null && customable_text == null) {
                         symbol = new String[data.getCount()];
                         customable_text = new String[data.getCount()];
@@ -328,122 +329,9 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             @Override
             public void onLoaderReset(Loader<Cursor> loader) {
                 int id = loader.getId();
-                if ( id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID ) {
+                if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     fieldEntriesCursor = null;
                 }
-            }
-        };
-        get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if ( id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
-                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " >= ? ",
-                            new String[]{current_field_id + "", "0"});
-            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-            return new CursorLoader(this,uri,
-                    new String[] {Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK,
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK,
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_ORDER},
-                    Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_ORDER + " >= ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
-                    new String[] {"0", currentField},
-                    null);*/
-                } else {
-                    return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this,
-                            "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a " + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                            new String[]{current_field_id + ""});
-            /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-            return new CursorLoader(this,
-                    uri,
-                    new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK},
-                    Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
-                    new String[]{currentField},
-                    null);*/
-                }
-            }
-            @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                fieldEntriesCursor = data;
-                if ( boolean_continue ) {
-                    if ( listForTest == null ) {
-                        listForTest = readTestDataFromLinkerTable();
-                        questionsNumber = listForTest.length;
-                        showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                        showTries.setText(Integer.toString(triesCounter + 1));
-                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                        enterAnswer.setEnabled(true);
-                        enterAnswer.requestFocus();
-                        testingNow = true;
-                        wrongAnswers = new ArrayList<String>(permitedTriesNumber);
-                        boolean_continue = false;
-                        ifMoreThanOnce();
-                    }
-                } else {
-                    if ( listForTest == null ) {
-                        if ( percent_or_number == PERCENTAGE ) {
-                            listForTest = getListForTest(percentage);
-                        } else if ( percent_or_number == NUMBER ) {
-                            listForTest = getListForTest(number);
-                        }
-                        questionsNumber = listForTest.length;
-                        showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                        showTries.setText(Integer.toString(triesCounter + 1));
-                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                        enterAnswer.requestFocus();
-                        testingNow = true;
-                        wrongAnswers = new ArrayList<String>(permitedTriesNumber);
-                        boolean_continue = false;
-                        ifMoreThanOnce();
-                    }
-                }
-                crossfade();
-            }
-
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-                fieldEntriesCursor = null;
-            }
-        };
-        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                        new String[]{current_field_type + ""});
-
-            }
-
-            @Override
-            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-                if (symbol == null && customable_text == null) {
-                    symbol = new String[data.getCount()];
-                    customable_text = new String[data.getCount()];
-                    for (data.moveToFirst(); data.getPosition() < data.getCount();
-                         data.moveToNext()) {
-                        symbol[data.getPosition()] = data.getString(1);
-                        customable_text[data.getPosition()] = data.getString(2);
-                    }
-                }
-            }
-
-            @Override
-            public void onLoaderReset(android.content.Loader<Cursor> loader) {
-
             }
         };
         check.setOnClickListener(new View.OnClickListener() {
@@ -462,31 +350,19 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                             check.setEnabled(false);
 //                            start.setEnabled(true);
 
-
-                            final ShowTestResultDialogFragment fragment = new ShowTestResultDialogFragment();
-                            Bundle bundle = new Bundle();
-                            bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
-                            bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
-                            bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                            bundle.putInt(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
-//                            wrongItems.trimToSize();
-//                            bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItems);
-                            fragment.setArguments(bundle);
-                            Runnable mRunnable;
-                            mRunnable = new Runnable() {
+                            before_showing_result_dialog = true;
+                            show_result_dialog_runnable = new Runnable() {
                                 @Override
                                 public void run() {
                                     showQuestion.setText(R.string.test_has_completed);
                                     enterAnswer.setText(R.string.test_has_completed);
                                     showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                                    showResult.setPadding(0,0,0,0);
-                                    fragment.show(getSupportFragmentManager(), ShowTestResultDialogFragment.SHOW_TEST_RESULT_DIALOG_FRAGMENT);
+                                    showResult.setPadding(0, 0, 0, 0);
+                                    show_result_dialog();
                                 }
                             };
-                            mHandler.postDelayed(mRunnable, RETURN_TIME);
+                            mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
                             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                            questionsNumber = 0;
-                            wrongAnswersCounter = 0;
                             testingNow = false;
                             enterAnswer.setEnabled(false);
                             showNumberOfQuestions.setText("");
@@ -495,11 +371,11 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                             enterAnswer.setHint(R.string.enter_your_answer);
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
 //                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, FullyRandomTestActivity.this);
-                            mySQLiteCursorLoader.resetEntriesTestOrderFullyRandomTest(current_field_id,question_data_type);
+                            mySQLiteCursorLoader.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
                             mySQLiteCursorLoader.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                            showQuestion.scrollTo(0,0);
+                            showQuestion.scrollTo(0, 0);
                             showTries.setText(Integer.toString(triesCounter + 1));
                             ifMoreThanOnce();
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -534,7 +410,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                     showResult.setBackgroundResource(R.drawable.enter_answer_background);
                     showResult.setPadding(0, 0, 0, 0);
                 }
-                if ( s.length() <= 0 ) {
+                if (s.length() <= 0) {
                     check.setEnabled(false);
                 }
                 if (symbol != null && customable_text != null) {
@@ -568,16 +444,16 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 show_actionbar_card_view.startAnimation(animAlpha);
-                if ( actionBarShown ) {
+                if (actionBarShown) {
                     getSupportActionBar().hide();
-                    actionBarShown = (! actionBarShown);
+                    actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
                     getSupportActionBar().show();
-                    actionBarShown = (! actionBarShown);
+                    actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id,Contract.Field.SHOW_ACTION_BAR);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
                 }
             }
         });
@@ -611,26 +487,26 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 toast.show();
             }
         });
-        if ( boolean_continue ) {
-            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID,null, loader);
+        if (boolean_continue) {
+            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
             int[] array = databaseOperations.getDataFromTestPausedFullyRandomTest(current_field_id);
             currentQuestionCounter = array[0];
             wrongAnswersCounter = array[1];
             permitedTriesNumber = array[2];
         } else {
-            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID,null, loader);
+            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
         }
         getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         check_type = databaseOperations.getFieldCheckType(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
         answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
-        changeAreas(question_area_size,answer_area_size);
+        changeAreas(question_area_size, answer_area_size);
         test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
-        if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE ) {
+        if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
-        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE ) {
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
-        } else if ( test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE ) {
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
         }
     }
@@ -665,21 +541,21 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 return true;
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                bundle.putFloat(QUESTION_LAYOUT,((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
-                bundle.putFloat(ANSWER_LAYOUT,((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
+                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
+                bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
                 changeAreasDialogFragment.setArguments(bundle);
-                changeAreasDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                changeAreasDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
-                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
-                bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize()/scaledDensity) );
+                bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize() / scaledDensity));
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
                 changeTextSizeDialogFragment.setArguments(bundle1);
-                changeTextSizeDialogFragment.show(getSupportFragmentManager(),ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                changeTextSizeDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
 
             default:
@@ -690,172 +566,90 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     }
 
     private void toPause() {
-        if ( ! databaseOperations.checkEntriesForAnyTestOrderFullyRandomTest(current_field_id,question_data_type) ) {
+        if (!databaseOperations.checkEntriesForAnyTestOrderFullyRandomTest(current_field_id, question_data_type)) {
             mySQLiteCursorLoader.putEntriesTestOrderFullyRandomTest(current_field_id,
-                    question_data_type,listForTest);
+                    question_data_type, listForTest);
         }
         mySQLiteCursorLoader.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
         int[] array = new int[3];
         array[0] = currentQuestionCounter;
         array[1] = wrongAnswersCounter;
         array[2] = permitedTriesNumber;
-        mySQLiteCursorLoader.putTestPausedDataFullyRandomTest(current_field_id,array);
+        mySQLiteCursorLoader.putTestPausedDataFullyRandomTest(current_field_id, array);
     }
-    /*    private String [][] getListForTest ( double percent ) {
-            int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
-            String[][] listForTest = new String[numberOfQuestions][2];
-            for (int i = 0; i < listForTest.length; i++) {
-                Arrays.fill(listForTest[i], "");
-            }
-            int counter = 0;
-            while (counter < numberOfQuestions) {
-                String question = null;
-                String answer = null;
-                boolean newPair = false;
-                int random = (int) (Math.random() * fieldEntriesCursor.getCount());
-                while (! newPair) {
-                    for (int i = 0; i < listForTest.length; i++) {
-                        fieldEntriesCursor.moveToPosition(random);
-                        question = fieldEntriesCursor.getString(1);
-                        answer = fieldEntriesCursor.getString(2);
-                        if ( listForTest[i][0].equals(question) && listForTest[i][1].equals(answer) ) {
-                            newPair = false;
-                            random = (int) (Math.random() * fieldEntriesCursor.getCount());
-                            break;
-                        }
-                        newPair = true;
-                    }
-                }
-                listForTest[counter][0] = question;
-                listForTest[counter][1] = answer;
-                counter++;
-            }
-            return listForTest;
-        }*/
-    private String [][] getListForTest ( double percent ) {
+
+    private String[][] getListForTest(double percent) {
         int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
         String[][] listForTest = new String[numberOfQuestions][2];
         String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
-            listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
-            listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+        for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+             fieldEntriesCursor.moveToNext()) {
+            listOfEntries[fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
+            listOfEntries[fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
         }
         shuffleArray(listOfEntries);
-        for ( int n = 0; n < listForTest.length; n++ ) {
-            listForTest [n][0] = listOfEntries [n][0];
-            listForTest [n][1] = listOfEntries [n][1];
+        for (int n = 0; n < listForTest.length; n++) {
+            listForTest[n][0] = listOfEntries[n][0];
+            listForTest[n][1] = listOfEntries[n][1];
         }
         return listForTest;
     }
-    private String [][] getListForTest ( int numberOfQuestions ) {
+
+    private String[][] getListForTest(int numberOfQuestions) {
         String[][] listForTest = new String[numberOfQuestions][2];
         String[][] listOfEntries = new String[fieldEntriesCursor.getCount()][2];
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
-            listOfEntries [fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
-            listOfEntries [fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
+        for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+             fieldEntriesCursor.moveToNext()) {
+            listOfEntries[fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
+            listOfEntries[fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
         }
         shuffleArray(listOfEntries);
-        for ( int n = 0; n < listForTest.length; n++ ) {
-            listForTest [n][0] = listOfEntries [n][0];
-            listForTest [n][1] = listOfEntries [n][1];
+        for (int n = 0; n < listForTest.length; n++) {
+            listForTest[n][0] = listOfEntries[n][0];
+            listForTest[n][1] = listOfEntries[n][1];
         }
         return listForTest;
     }
-    private void shuffleArray( String [][] array )
-    {
+
+    private void shuffleArray(String[][] array) {
         Random rnd = new Random();
-        for (int i = array.length - 1; i > 0; i--)
-        {
+        for (int i = array.length - 1; i > 0; i--) {
             int index = rnd.nextInt(i + 1);
             // Simple swap
             String question = array[index][0];
-            String answer = array [index][1];
+            String answer = array[index][1];
             array[index][0] = array[i][0];
             array[index][1] = array[i][1];
             array[i][0] = question;
             array[i][1] = answer;
         }
     }
+
     private void ifMoreThanOnce() {
-        /*if (searchForCursor != null) {
-            searchForCursor.close();
-        }
-        searchForCursor = databaseOperations.searchExactlyFor(current_field_id,
-                question_data_type, listForTest[currentQuestionCounter][0]);
-        if (searchForCursor.getCount() > 1) {
-            hints = new ArrayList<>();
-            int number_of_matches = 0;
-            for (searchForCursor.moveToFirst(); searchForCursor.getPosition() < searchForCursor.getCount();
-                 searchForCursor.moveToNext()) {
-                String temp = searchForCursor.getString(0);
-                if (listForTest[currentQuestionCounter][1].charAt(0) == temp.charAt(0) &&
-                        listForTest[currentQuestionCounter][1].length() == temp.length() &&
-                        listForTest[currentQuestionCounter][1].charAt(listForTest[currentQuestionCounter][1].length() - 1)
-                                == temp.charAt(temp.length() - 1)) {
-                    number_of_matches++;
-                }
-            }
-            if ( number_of_matches <= 1 || listForTest[currentQuestionCounter][1].length() <= 2 ) {
-                hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
-                hints.add(getString(R.string.number_of_letters)  + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
-                hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
-                        .charAt(listForTest[currentQuestionCounter][1].length() - 1));
-                Collections.shuffle(hints);
-            } else {
-                int three_parts = listForTest[currentQuestionCounter][1].length() / 3;
-                if ( listForTest[currentQuestionCounter][1].length() > 3 ) {
-                    for ( int i = 2, k = 0; k < three_parts; i += 3, k++) {
-                        hints.add(getString(R.string.letter_number) + " " + ( i + 1 ) + " : " +
-                                listForTest[currentQuestionCounter][1].charAt(i));
-                    }
-                    hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
-                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
-                    hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
-                            .charAt(listForTest[currentQuestionCounter][1].length() - 1));
-                    Collections.shuffle(hints);
-                } else {
-                    hints.add(getString(R.string.first_letters) + " " + listForTest[currentQuestionCounter][1].charAt(0));
-                    hints.add(getString(R.string.number_of_letters) + " " + Integer.toString(listForTest[currentQuestionCounter][1].length()));
-                    hints.add(getString(R.string.last_letter) + " " + listForTest[currentQuestionCounter][1]
-                            .charAt(listForTest[currentQuestionCounter][1].length() - 1));
-                    hints.add(getString(R.string.letter_number) + " " + 2 + " : "
-                            + listForTest[currentQuestionCounter][1].charAt(1));
-                    Collections.shuffle(hints);
-                }
-            }
-            nextHint.setEnabled(true);
-
-        } else {
-            hints = null;
-            nextHint.setEnabled(false);
-
-        }
-        searchForCursor.close();*/
-        hints = MoreThanOneAnswer.getHints(this,current_field_id,question_data_type,
-                listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
-        if ( hints != null ) {
+        hints = MoreThanOneAnswer.getHints(this, current_field_id, question_data_type,
+                listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+        if (hints != null) {
             nextHint.setEnabled(true);
         } else {
             nextHint.setEnabled(false);
         }
     }
+
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
         Runnable mRunnable;
         boolean result = false;
-        if ( check_type == Contract.Field.NON_STRICT_IGNORE_CASE ) {
-            if ( CompareUtility.nonStrictCompareIgnoreCase(listForTest [currentQuestionCounter][1],enterAnswer.getText().toString()) ) {
-                if ( locale_available ) {
-                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+        if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
+            if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
+                if (locale_available) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
                     } else {
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
                 showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -865,10 +659,9 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 };
                 mHandler.postDelayed(mRunnable, RETURN_TIME);
                 result = true;
-            }
-            else {
+            } else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -882,23 +675,23 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             }
             enterAnswer.setText("");
             triesCounter++;
-            if ( triesCounter == permitedTriesNumber && !result ) {
+            if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest [currentQuestionCounter][0],
-                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
-        } else if ( check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE ) {
-            if ( CompareUtility.nonStrictCompare(listForTest [currentQuestionCounter][1],enterAnswer.getText().toString()) ) {
-                if ( locale_available ) {
-                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+        } else if (check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE) {
+            if (CompareUtility.nonStrictCompare(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
+                if (locale_available) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
                     } else {
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
                 showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -908,10 +701,9 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 };
                 mHandler.postDelayed(mRunnable, RETURN_TIME);
                 result = true;
-            }
-            else {
+            } else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -925,23 +717,23 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             }
             enterAnswer.setText("");
             triesCounter++;
-            if ( triesCounter == permitedTriesNumber && !result ) {
+            if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest [currentQuestionCounter][0],
-                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
-        } else if ( check_type == Contract.Field.IGNORE_CASE ) {
-            if ( enterAnswer.getText().toString().equalsIgnoreCase(listForTest [currentQuestionCounter][1]) ) {
-                if ( locale_available ) {
-                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+        } else if (check_type == Contract.Field.IGNORE_CASE) {
+            if (enterAnswer.getText().toString().equalsIgnoreCase(listForTest[currentQuestionCounter][1])) {
+                if (locale_available) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
                     } else {
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
                 showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -951,10 +743,9 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 };
                 mHandler.postDelayed(mRunnable, RETURN_TIME);
                 result = true;
-            }
-            else {
+            } else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -968,23 +759,23 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             }
             enterAnswer.setText("");
             triesCounter++;
-            if ( triesCounter == permitedTriesNumber && !result ) {
+            if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest [currentQuestionCounter][0],
-                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
-        } else if ( check_type == Contract.Field.DO_NOT_IGNORE_CASE ) {
-            if ( enterAnswer.getText().toString().equals(listForTest [currentQuestionCounter][1]) ) {
-                if ( locale_available ) {
-                    if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null,null);
+        } else if (check_type == Contract.Field.DO_NOT_IGNORE_CASE) {
+            if (enterAnswer.getText().toString().equals(listForTest[currentQuestionCounter][1])) {
+                if (locale_available) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
                     } else {
-                        tts.speak(listForTest [currentQuestionCounter][1],TextToSpeech.QUEUE_ADD,null);
+                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
                 showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -994,10 +785,9 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 };
                 mHandler.postDelayed(mRunnable, RETURN_TIME);
                 result = true;
-            }
-            else {
+            } else {
                 showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0,0,0,0);
+                showResult.setPadding(0, 0, 0, 0);
                 mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1011,32 +801,23 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             }
             enterAnswer.setText("");
             triesCounter++;
-            if ( triesCounter == permitedTriesNumber && !result ) {
+            if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest [currentQuestionCounter][0],
-                        listForTest[currentQuestionCounter][1],current_field_id,wrongAnswers,question_data_type);
+                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
+                        listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
         }
         return result;
     }
-    private String convertWrongAnswersArrayListToString( ArrayList<String> arrayList ) {
-        String s = "";
-        for ( int i = 0; i < arrayList.size(); i++ ) {
-            s += arrayList.get(i);
-            if ( i < arrayList.size() - 1) {
-                s += "\t";
-            }
-        }
-        return s;
-    }
-    private String [][] readTestDataFromLinkerTable() {
-        String [][] listForTest = new String[fieldEntriesCursor.getCount()][2];
-        for ( fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-              fieldEntriesCursor.moveToNext() ) {
+
+    private String[][] readTestDataFromLinkerTable() {
+        String[][] listForTest = new String[fieldEntriesCursor.getCount()][2];
+        for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
+             fieldEntriesCursor.moveToNext()) {
             int order = fieldEntriesCursor.getInt(2);
-            listForTest [order][0] = fieldEntriesCursor.getString(0);
-            listForTest [order][1] = fieldEntriesCursor.getString(1);
+            listForTest[order][0] = fieldEntriesCursor.getString(0);
+            listForTest[order][1] = fieldEntriesCursor.getString(1);
         }
         return listForTest;
     }
@@ -1050,87 +831,79 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        if ( tts_available && isFinishing() ) {
+        if (tts_available && isFinishing()) {
             tts.stop();
         }
         UsageLastTime.updateUsageLastTime(this);
     }
 
     @Override
-    public void onSaveInstanceState ( Bundle savedInsatanceState ) {
-        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER,currentQuestionCounter);
-        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS,wrongAnswersCounter);
-        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER,permitedTriesNumber);
-//        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
+    public void onSaveInstanceState(Bundle savedInsatanceState) {
+        savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
+        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
+        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInsatanceState.putBoolean(RESULT, result);
-//        savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInsatanceState.putBoolean(NEXT_BUTTON_STATE, check.isEnabled());
         savedInsatanceState.putBoolean(TESTING_NOW, testingNow);
         savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
-//        savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
         savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
-        savedInsatanceState.putInt(CONTENT_VISIBILITY,content.getVisibility());
-        savedInsatanceState.putInt(LOADING_VISIBILITY,mLoadingView.getVisibility());
-//        savedInsatanceState.putSerializable(WRONG_ITEMS,wrongItems);
-        savedInsatanceState.putBoolean(BOOLEAN_CONTINUE,boolean_continue);
+        savedInsatanceState.putInt(CONTENT_VISIBILITY, content.getVisibility());
+        savedInsatanceState.putInt(LOADING_VISIBILITY, mLoadingView.getVisibility());
+        savedInsatanceState.putBoolean(BOOLEAN_CONTINUE, boolean_continue);
         savedInsatanceState.putStringArray(SYMBOL, symbol);
         savedInsatanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
+        savedInsatanceState.putBoolean(BEFORE_SHOWING_RESULT_DIALOG, before_showing_result_dialog);
         saveUserLayoutChanges(savedInsatanceState);
-       /* if ( ! isFinishing() ) {
-            pauseThread.start();
-        }*/
+        mHandler.removeCallbacks(show_result_dialog_runnable);
         super.onSaveInstanceState(savedInsatanceState);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName( SCREEN_NAME);
+        mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override
-    public void onRestoreInstanceState( Bundle savedInstanceState ) {
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
         permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
-//        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
         result = savedInstanceState.getBoolean(RESULT);
-//        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
         testingNow = savedInstanceState.getBoolean(TESTING_NOW);
         boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
         questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
-//        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
-//        wrongItems = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEMS);
         boolean_continue = savedInstanceState.getBoolean(BOOLEAN_CONTINUE);
         customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
         symbol = savedInstanceState.getStringArray(SYMBOL);
+        before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
         restoreUserLayoutChanges(savedInstanceState);
-        if ( testingNow ) {
-            showQuestion.setText(listForTest[currentQuestionCounter][0]);
-            showTries.setText(Integer.toString(triesCounter + 1));
-            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-//            start.setEnabled(false);
-            check.setEnabled(nextState);
-
-
-            enterAnswer.setEnabled(true);
-            ifMoreThanOnce();
-        }
-        if ( hintCounter > 0 ) {
-//            hintIfMoreThanOneAnswer.setText(hints.get(hintCounter - 1));
-            if ( enterAnswer.getText().toString().length() <= 0 ) {
-                enterAnswer.setHint(hints.get(hintCounter - 1));
+        if (!before_showing_result_dialog) {
+            if (testingNow) {
+                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                showTries.setText(Integer.toString(triesCounter + 1));
+                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                check.setEnabled(nextState);
+                enterAnswer.setEnabled(true);
+                ifMoreThanOnce();
             }
+            if (hintCounter > 0) {
+                if (enterAnswer.getText().toString().length() <= 0) {
+                    enterAnswer.setHint(hints.get(hintCounter - 1));
+                }
+            }
+        } else {
+            show_result_dialog();
         }
     }
 
@@ -1142,9 +915,9 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 tts = new TextToSpeech(getApplicationContext(), this);
                 tts_available = true;
             } else {
-                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
+                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id, false);
                 Toast toast = Toast.makeText(this, R.string.tts_not_available, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP,0,400);
+                toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
         }
@@ -1163,14 +936,16 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
 
     @Override
     public void changeTextSize(float textSize) {
-        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_SP,textSize);
-        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP,textSize);
+        showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
     }
+
     private void saveUserLayoutChanges(Bundle bundle) {
         bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
         bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
         bundle.putFloat(TEXT_SIZE, showQuestion.getTextSize());
     }
+
     private void restoreUserLayoutChanges(Bundle bundle) {
         changeAreas(bundle.getFloat(QUESTION_LAYOUT), bundle.getFloat(ANSWER_LAYOUT));
         showQuestion.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
@@ -1178,30 +953,41 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     }
 
 
-
     @Override
     public void onInit(int i) {
-        if ( tts_available ) {
+        if (tts_available) {
             String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
             StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
             String lang = stringTokenizer.nextToken();
             String country = stringTokenizer.nextToken();
             Locale locale = new Locale(lang, country);
-            if ( tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE ) {
+            if (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
                 tts.setLanguage(locale);
                 locale_available = true;
             } else {
-                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id,false);
+                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id, false);
                 Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP,0,400);
+                toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
-            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null,null);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                tts.speak("Hello", TextToSpeech.QUEUE_ADD, null, null);
             } else {
-                tts.speak("Hello",TextToSpeech.QUEUE_ADD,null);
+                tts.speak("Hello", TextToSpeech.QUEUE_ADD, null);
             }
         }
+    }
+
+    private void show_result_dialog() {
+        final ShowTestResultDialogFragment fragment = new ShowTestResultDialogFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
+        bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
+        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        bundle.putInt(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+        ;
+        fragment.setArguments(bundle);
+        fragment.show(getSupportFragmentManager(), ShowTestResultDialogFragment.SHOW_TEST_RESULT_DIALOG_FRAGMENT);
     }
 
     private void crossfade() {
