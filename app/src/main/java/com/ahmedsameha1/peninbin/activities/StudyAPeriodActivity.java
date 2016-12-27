@@ -962,50 +962,15 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
             showNumberOfQuetions.setText(Integer.toString(questionsNumber));
             check.setEnabled(checkState);
-//            enterAnswer.setEnabled(checkState);
             _continue.setEnabled(_continueState);
             enterAnswer.setEnabled(! _continueState);
-
-//            enterAnswer.setEnabled(true);
             ifMoreThanOnce();
-        }
-        if (hintCounter > 0) {
-            enterAnswer.setHint(hints.get(hintCounter - 1));
-        }
-    }
-
-    private String convertRepeatedEntriesArrayListToString() {
-//        StringBuilder stringBuilder = new StringBuilder();
-        String s = "";
-        for (int i = 0; i < repeatedEntries.size(); i++) {
-            s += Integer.toString(repeatedEntries.get(i));
-            if (i < repeatedEntries.size() - 1) {
-                s += "-";
+            if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
+                enterAnswer.setHint(hints.get(hintCounter - 1));
             }
         }
-        return s;
     }
 
-    private ArrayList<Integer> convertStringToRepeatedEntriesArrayList(String s) {
-        ArrayList<Integer> arrayList = new ArrayList<Integer>();
-        if (s == null) {
-            return arrayList;
-        }
-        StringTokenizer stringTokenizer = new StringTokenizer(s, "-");
-        while (stringTokenizer.hasMoreTokens()) {
-            arrayList.add(Integer.parseInt(stringTokenizer.nextToken()));
-        }
-        return arrayList;
-    }
-
-    /*    private String [][] readFromLinkerTableStudyDuringColumn() {
-            String array [][] = new String [cursor.getCount()][2];
-            for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
-                array [cursor.getPosition()][0] = cursor.getString(0);
-                array [cursor.getPosition()][1] = cursor.getString(1);
-            }
-            return array;
-        }*/
     private String[][] readFromLinkerTableStudyDuringColumn() {
         String array[][] = new String[cursor.getCount()][2];
         for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {

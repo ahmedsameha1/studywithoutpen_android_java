@@ -1313,9 +1313,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                 check.setEnabled(nextState);
                 enterAnswer.setEnabled(true);
                 ifMoreThanOnce();
-            }
-            if (hintCounter > 0) {
-                if (enterAnswer.getText().toString().length() <= 0) {
+                if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
                     enterAnswer.setHint(hints.get(hintCounter - 1));
                 }
             }

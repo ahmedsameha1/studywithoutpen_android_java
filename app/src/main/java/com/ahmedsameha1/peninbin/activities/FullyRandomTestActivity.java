@@ -172,7 +172,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         }
         databaseOperations = new DatabaseReadOperations(this);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
-        listForTest = retainedFragment.getListForTest_TestActivity();
+        listForTest = retainedFragment.getListForTest_FullyRandomTestActivity();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         current_field_type = databaseOperations.getFieldType(current_field_id);
@@ -825,7 +825,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        retainedFragment.setListForTest_TestActivity(listForTest);
+        retainedFragment.setListForTest_FullyRandomTestActivity(listForTest);
     }
 
     @Override
@@ -896,12 +896,11 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 check.setEnabled(nextState);
                 enterAnswer.setEnabled(true);
                 ifMoreThanOnce();
-            }
-            if (hintCounter > 0) {
-                if (enterAnswer.getText().toString().length() <= 0) {
+                if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
                     enterAnswer.setHint(hints.get(hintCounter - 1));
                 }
             }
+
         } else {
             show_result_dialog();
         }
