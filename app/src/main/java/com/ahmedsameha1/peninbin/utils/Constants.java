@@ -40,4 +40,8 @@ public class Constants {
         public static final long NOT_SUBSCRIBED = -1L;
         public static final int PERIOD_OF_SUBSCRIBTION_INCLUDING_GRACE_PERIOD = 99;
     }
+
+    public static abstract class TimeOfAnswer {
+        public static final int NOT_SAVED = 0;
+    }
 }

@@ -39,7 +39,7 @@ import java.io.OutputStream;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private final static String TAG = "DatabaseHelper";
-    public static final int DATABASE_VERSION = 12;
+    public static final int DATABASE_VERSION = 13;
     public static final String DATABASE_NAME = "data";
     private Context context;
     private static DatabaseHelper sInstance;
@@ -68,6 +68,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION + " INTEGER NOT NULL DEFAULT -1, "
             + Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
             + Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
+            + Field.COLUMN_TIME_OF_ANSWER_TESTS + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_EMULATED_ERROR + " INTEGER NOT NULL DEFAULT 0, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'))"
             + " );";
     /*    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME
@@ -504,6 +507,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
             Emulation.modifyEmulationCreationDatesOfAppV53AndHigher(sqLiteDatabase);
         }
+        if (oldVersion < 13 ) {
+            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV67(sqLiteDatabase);
+        }//// TODO: 12/30/16 make the remaining action of upgrading the database 
     }
 
 

@@ -43,6 +43,9 @@ public final class Contract {
         public static final String COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL = "random_quick_test_wrongness_level";
         public static final String COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL = "random_quick_test_rank_level";
         public static final String COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION = "random_quick_test_controlled_portion";
+        public static final String COLUMN_TIME_OF_ANSWER_TESTS = "time_of_answer_tests";
+        public static final String COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD = "time_of_answer_study_a_period";
+        public static final String COLUMN_EMULATED_ERROR = "emulated_error";
     }
     public static abstract class STring implements BaseColumns {
         public static final String TABLE_NAME = "string";
@@ -53,7 +56,6 @@ public final class Contract {
         public static final String COLUMN_VALUE = "value";
     }
     public static abstract class String_Entry implements BaseColumns {
-        public static final int NO_NOTIFICATION = -1;
         public static final String TABLE_NAME = "string_entry";
         public static final String COLUMN_QUESTION = "question";
         public static final String COLUMN_ANSWER = "answer";

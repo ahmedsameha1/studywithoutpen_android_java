@@ -718,5 +718,23 @@ public class DatabaseReadOperations {
                 Contract.GooglePaymentOrderID.COLUMN_ORDER_ID + " = ? ", new String[] {order_id},null,null,null);
         return ! cursor.moveToFirst();
     }
+
+    public int getTimeOfAnswerTests(long field_id ) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS},
+                Contract.COLUMN_ID + " = ?", new String[]{field_id + ""},null,null, null);
+        cursor.moveToFirst();
+        int time_of_answer = cursor.getInt(0);
+        cursor.close();
+        return time_of_answer;
+    }
+
+    public int getTimeOfAnswerStudyAPeriod(long field_id ) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD},
+                Contract.COLUMN_ID + " = ?", new String[]{field_id + ""},null,null, null);
+        cursor.moveToFirst();
+        int time_of_answer = cursor.getInt(0);
+        cursor.close();
+        return time_of_answer;
+    }
 }
 
