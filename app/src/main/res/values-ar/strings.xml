@@ -262,4 +262,6 @@
     <string name="delete_note">هل تريد حذف هذه الملاحظة؟</string>
     <string name="background_thread">انتظر حتى تنتهي عملية التصدير/الاستيراد/المحاكاة</string>
     <string name="change_field_name_background_thread">لا يمكنك تغيير اسم المجال أثناء جريان عملية تصدير/استيراد/محاكاة</string>
+    <string name="subscription1_description">افتح الوظائف المغلقة. يمكنك  طلب إعادة المال من المطور من خلال البريد الإلكتروني</string>
+    <string name="subscription_description">صفة الاشتراك</string>
 </resources>

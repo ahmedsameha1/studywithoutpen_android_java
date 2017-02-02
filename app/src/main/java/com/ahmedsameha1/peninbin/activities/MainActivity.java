@@ -7,6 +7,7 @@ import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -31,6 +32,7 @@ import android.support.v4.content.ContextCompat;
 import android.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
@@ -437,29 +439,38 @@ public class MainActivity extends AppCompatActivity implements
             case SUBSCRIBE:
                 if ( !Money.getUserSubscriptionStatus(this) ) {
                     if (NetworkReceiver.isOnline(this)) {
-                        pay_load = PayloadString.getString();
-                        try {
-                            Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
-                                    pay_load);
-                            int response_code = bundle.getInt(Money.RESPONSE_CODE);
-                            if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
-                                PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
-                                startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
-                            } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
-                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                                toast1.setGravity(Gravity.TOP, 0, 400);
-                                toast1.show();
-                            } else {
-                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                                toast1.setGravity(Gravity.TOP, 0, 400);
-                                toast1.show();
-                            }
-                        } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
-                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                            toast1.setGravity(Gravity.TOP, 0, 400);
-                            toast1.show();
-                            e.printStackTrace();
-                        }
+                        new AlertDialog.Builder(this)
+                                .setTitle(R.string.subscription_description)
+                                .setMessage(R.string.subscription1_description)
+                                .setPositiveButton(R.string.proceed_now, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        pay_load = PayloadString.getString();
+                                        try {
+                                            Bundle bundle = billingService.getBuyIntent(3, MainActivity.this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
+                                                    pay_load);
+                                            int response_code = bundle.getInt(Money.RESPONSE_CODE);
+                                            if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
+                                                PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
+                                                startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
+                                            } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
+                                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                                toast1.show();
+                                            } else {
+                                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                                toast1.show();
+                                            }
+                                        } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
+                                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                                            toast1.setGravity(Gravity.TOP, 0, 400);
+                                            toast1.show();
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                })
+                                .create().show();
                     } else {
                         Toast toast = Toast.makeText(this, R.string.need_internet_try_again, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);

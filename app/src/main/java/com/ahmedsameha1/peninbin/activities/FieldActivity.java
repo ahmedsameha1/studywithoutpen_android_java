@@ -6,6 +6,7 @@ import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -26,6 +27,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -224,8 +226,8 @@ public class FieldActivity extends AppCompatActivity implements
             public void onServiceConnected(ComponentName name,
                                            IBinder service) {
                 billingService = IInAppBillingService.Stub.asInterface(service);
-                if ( Money.getNetworkDownGetPurchasesesStatus(FieldActivity.this) &&
-                        NetworkReceiver.isOnline(FieldActivity.this) ) {
+                if (Money.getNetworkDownGetPurchasesesStatus(FieldActivity.this) &&
+                        NetworkReceiver.isOnline(FieldActivity.this)) {
                     Money.checkSubscription(FieldActivity.this, billingService);
                     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
                     sharedPreferences.registerOnSharedPreferenceChangeListener(FieldActivity.this);
@@ -290,7 +292,7 @@ public class FieldActivity extends AppCompatActivity implements
         super.onPause();
         try {
             unregisterReceiver(networkReceiver);
-        } catch ( IllegalArgumentException e ) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -329,7 +331,7 @@ public class FieldActivity extends AppCompatActivity implements
                             JSONObject jo = new JSONObject(purchaseData);
                             String pay_load = jo.getString("developerPayload");
                             String order_id = jo.getString("orderId");
-                            if ( pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id) ) {
+                            if (pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id)) {
                                 Money.putUserSubscriptionStatus(this, true);
                                 Money.removeAllGetPurchasesErrors(this);
                                 new CursorLoaderAndUpdateDatabase(this).addOrderId(order_id);
@@ -427,6 +429,7 @@ public class FieldActivity extends AppCompatActivity implements
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         boolean user_eligible = Money.getUserSubscriptionStatus(this);
+        // user_eligible = true;
         switch (position) {
             case ENHANCED_TEST:
                 if (user_eligible || Money.getUserAllowedDueAnError(this)) {
@@ -484,7 +487,7 @@ public class FieldActivity extends AppCompatActivity implements
                 break;
             case STUDY_PERIOD:
                 if (user_eligible || Money.getUserAllowedDueAnError(this)) {
-                   startStudyAPeriod();
+                    startStudyAPeriod();
                 } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
                     if (NetworkReceiver.isOnline(this)) {
                         Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
@@ -619,7 +622,7 @@ public class FieldActivity extends AppCompatActivity implements
         initialCheckSubscription = savedInstanceState.getBoolean(INITIAL_CHECK_SUPSCRIPTION);
         super.onRestoreInstanceState(savedInstanceState);
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; FieldActivity.this adds items to the action bar if it is present.
@@ -697,37 +700,48 @@ public class FieldActivity extends AppCompatActivity implements
                 return super.onOptionsItemSelected(item);
         }
     }
+
     private void startPurchaseFlow() {
         if (NetworkReceiver.isOnline(this)) {
-            pay_load = PayloadString.getString();
-            try {
-                Bundle bundle = billingService.getBuyIntent(3, this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
-                        pay_load);
-                int response_code = bundle.getInt(Money.RESPONSE_CODE);
-                if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
-                    PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
-                    startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
-                } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
-                    Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                    toast1.setGravity(Gravity.TOP, 0, 400);
-                    toast1.show();
-                } else {
-                    Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                    toast1.setGravity(Gravity.TOP, 0, 400);
-                    toast1.show();
-                }
-            } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
-                Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                toast1.setGravity(Gravity.TOP, 0, 400);
-                toast1.show();
-                e.printStackTrace();
-            }
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.subscription_description)
+                    .setMessage(R.string.subscription1_description)
+                    .setPositiveButton(R.string.proceed_now, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            pay_load = PayloadString.getString();
+                            try {
+                                Bundle bundle = billingService.getBuyIntent(3, FieldActivity.this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
+                                        pay_load);
+                                int response_code = bundle.getInt(Money.RESPONSE_CODE);
+                                if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
+                                    PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
+                                    startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
+                                } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
+                                    Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                                    toast1.setGravity(Gravity.TOP, 0, 400);
+                                    toast1.show();
+                                } else {
+                                    Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                                    toast1.setGravity(Gravity.TOP, 0, 400);
+                                    toast1.show();
+                                }
+                            } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
+                                Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                toast1.show();
+                                e.printStackTrace();
+                            }
+                        }
+                    })
+                    .create().show();
         } else {
             Toast toast = Toast.makeText(this, R.string.need_internet_try_again, Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
         }
     }
+
     @Override
     public void search(String value) {
         Bundle bundle = new Bundle();
@@ -766,7 +780,7 @@ public class FieldActivity extends AppCompatActivity implements
                 if (Money.getUserSubscriptionStatus(this)) {
                     unregisterReceiver(networkReceiver);
                     sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
-                    if ( !initialCheckSubscription ) {
+                    if (!initialCheckSubscription) {
                         NotificationCompat.Builder notificationBuilder = null;
                         Intent notifyIntent = null;
                         PendingIntent resultPendingIntent = null;

@@ -286,7 +286,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         } else {
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
                         }
-
+                        enterAnswer.requestFocus();
                     } else {
                         Toast toast = Toast.makeText(StudyAPeriodActivity.this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
