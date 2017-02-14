@@ -38,6 +38,7 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -67,7 +68,8 @@ import java.util.StringTokenizer;
 public class EnhancedTestActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
-        TextToSpeech.OnInitListener {
+        TextToSpeech.OnInitListener,
+        TimeOfAnswerDialogFragment.Contact {
     public static final String SCREEN_NAME = "EnhancedTestActivity";
     public static final String ACTIVITY_NAME = "EnhancedTestActivity";
     public static final String PERCENTAGE_OR_NUMBER = "percentage_or_number";
@@ -172,8 +174,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private String[] symbol, customable_text;
     private int current_field_type;
     private Runnable show_result_dialog_runnable, show_time_for_answer_passed_background_runnable;
-    private int time_for_answer = 15;
-    private long time_of_starting_time_for_answer = -1, effictive_time_for_answer;
+    private int time_of_answer;
+    private long time_of_starting_time_of_answer = -1, effictive_time_of_answer;
 
 
     @Override
@@ -196,6 +198,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        time_of_answer = databaseOperations.getTimeOfAnswerTests(current_field_id);
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
         percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
@@ -596,6 +599,15 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
                 changeTextSizeDialogFragment.setArguments(bundle1);
                 changeTextSizeDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                return true;
+
+            case R.id.time_of_answer:
+                Bundle bundle2 = new Bundle();
+                bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle2.putInt( TimeOfAnswerDialogFragment.TYPE, Constants.TimeOfAnswer.TEST);
+                TimeOfAnswerDialogFragment timeOfAnswerDialogFragment = new TimeOfAnswerDialogFragment();
+                timeOfAnswerDialogFragment.setArguments(bundle2);
+                timeOfAnswerDialogFragment.show(getSupportFragmentManager(), TimeOfAnswerDialogFragment.TIME_OF_ANSWER_DIALOG_FRAGMENT);
                 return true;
 
             default:
@@ -1329,9 +1341,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
         mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
-        if ( time_of_starting_time_for_answer > -1 ) {
+        if ( time_of_starting_time_of_answer > -1 ) {
             savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER,
-                    effictive_time_for_answer  - (System.currentTimeMillis() - time_of_starting_time_for_answer));
+                    effictive_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
         }
         super.onSaveInstanceState(savedInsatanceState);
     }
@@ -1381,9 +1393,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         show_question_linearlayout.setPadding(0, 0, 0, 0);
                         showQuestion.setTextColor(Color.BLACK);
                         time_between_answers_passed = true;
-                        time_of_starting_time_for_answer = -1;
+                        time_of_starting_time_of_answer = -1;
                     } else {
-                        effictive_time_for_answer = how_much_time_remaining_time_for_answer;
+                        effictive_time_of_answer = how_much_time_remaining_time_for_answer;
                         show_time_for_answer_passed_background_runnable = new Runnable() {
                             @Override
                             public void run() {
@@ -1391,11 +1403,11 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                                 show_question_linearlayout.setPadding(0, 0, 0, 0);
                                 showQuestion.setTextColor(Color.BLACK);
                                 time_between_answers_passed = true;
-                                time_of_starting_time_for_answer = -1;
+                                time_of_starting_time_of_answer = -1;
                             }
                         };
-                        mHandler.postDelayed(show_time_for_answer_passed_background_runnable, effictive_time_for_answer );
-                        time_of_starting_time_for_answer = System.currentTimeMillis();
+                        mHandler.postDelayed(show_time_for_answer_passed_background_runnable, effictive_time_of_answer);
+                        time_of_starting_time_of_answer = System.currentTimeMillis();
                     }
                 }
                 if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
@@ -1569,8 +1581,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         wrongAnswers = new ArrayList<>(permitedTriesNumber);
         mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
         time_between_answers_passed = false;
-        if ( time_for_answer > 0 ) {
-            effictive_time_for_answer = time_for_answer * 1000;
+        if ( time_of_answer > 0 ) {
+            effictive_time_of_answer = time_of_answer * 1000;
             show_time_for_answer_passed_background_runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -1578,11 +1590,11 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     show_question_linearlayout.setPadding(0, 0, 0, 0);
                     showQuestion.setTextColor(Color.BLACK);
                     time_between_answers_passed = true;
-                    time_of_starting_time_for_answer = -1;
+                    time_of_starting_time_of_answer = -1;
                 }
             };
-            mHandler.postDelayed(show_time_for_answer_passed_background_runnable, effictive_time_for_answer );
-            time_of_starting_time_for_answer = System.currentTimeMillis();
+            mHandler.postDelayed(show_time_for_answer_passed_background_runnable, effictive_time_of_answer);
+            time_of_starting_time_of_answer = System.currentTimeMillis();
         }
     }
     private void setNormalEnterAnswerBackground() {
@@ -1595,6 +1607,13 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         };
         mHandler.postDelayed(mRunnable, RETURN_TIME);
     }
+
+    @Override
+    public void setTimeOfAnswer(int time) {
+        time_of_answer = time;
+    }
+
+
     private void crossfade() {
 
         // Set the content view to 0% opacity but visible, so that it is visible
@@ -1622,4 +1641,5 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     }
                 });
     }
+
 }

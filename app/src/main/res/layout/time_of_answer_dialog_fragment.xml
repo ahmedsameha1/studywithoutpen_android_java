@@ -16,6 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="14"
             android:gravity="center"
+            android:inputType="number"
             android:hint="@string/enter_the_time_of_answer"/>
 
         <ImageButton

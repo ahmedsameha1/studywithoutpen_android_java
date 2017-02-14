@@ -32,19 +32,18 @@ import com.google.android.gms.analytics.Tracker;
 
 public class TimeOfAnswerDialogFragment extends DialogFragment {
     public static final String TYPE = "type";
-    public static final String TESTS = "tests";
-    public static final String STUDY_A_PERIOD = "study_a_period";
+    public static final String TIME_OF_ANSWER_DIALOG_FRAGMENT = "time_of_answer_dialog_fragment";
 
     private long current_field_id;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private DatabaseReadOperations databaseReadOperations;
-    private String type;
+    private int type;
     private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
-        type = getArguments().getString(TYPE);
+        type = getArguments().getInt(TYPE);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
         databaseReadOperations = new DatabaseReadOperations(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
@@ -62,21 +61,26 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                final ImageButton question_area_help = (ImageButton) alertDialog.findViewById(R.id.time_of_answer_help);
-                final EditText enterQuestionArea = (EditText) alertDialog.findViewById(R.id.time_of_answer);
+                final ImageButton time_of_answer_help_help = (ImageButton) alertDialog.findViewById(R.id.time_of_answer_help);
+                final EditText enter_time_of_answer = (EditText) alertDialog.findViewById(R.id.time_of_answer);
                 final CheckBox save = (CheckBox) alertDialog.findViewById(R.id.save);
                 Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                if ( type.equals(TESTS) ) {
-                    if ( databaseReadOperations.getTimeOfAnswerTests(current_field_id) == Constants.TimeOfAnswer.NOT_SAVED) {
-
+                int time;
+                if ( type == Constants.TimeOfAnswer.TEST ) {
+                    time = databaseReadOperations.getTimeOfAnswerTests(current_field_id);
+                    if ( time == Constants.TimeOfAnswer.NOT_SAVED) {
+                        save.setChecked(false);
                     } else {
-
+                        save.setChecked(true);
+                        enter_time_of_answer.setText(String.valueOf(time));
                     }
-                } else if ( type.equals(STUDY_A_PERIOD) ) {
-                    if ( databaseReadOperations.getTimeOfAnswerStudyAPeriod(current_field_id) == Constants.TimeOfAnswer.NOT_SAVED) {
-
+                } else if ( type == Constants.TimeOfAnswer.STUDY_A_PERIOD ) {
+                    time = databaseReadOperations.getTimeOfAnswerStudyAPeriod(current_field_id);
+                    if ( time == Constants.TimeOfAnswer.NOT_SAVED) {
+                        save.setChecked(false);
                     } else {
-
+                        save.setChecked(true);
+                        enter_time_of_answer.setText(String.valueOf(time));
                     }
                 }
 
@@ -84,26 +88,23 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         try {
-                            if ( enterQuestionArea.getText().toString().length() > 0 && enterAnswerArea.getText().toString().length() > 0 ) {
-                                int questionArea = Integer.parseInt(enterQuestionArea.getText().toString());
-                                int answerArea = Integer.parseInt(enterAnswerArea.getText().toString());
-                                if ( questionArea > 0 && answerArea > 0 ) {
-                                    ((ChangeAreasDialogFragment.ChangeAreas) getActivity()).changeAreas((float) questionArea,(float) answerArea);
-                                    mySQLiteCursorLoader.updateFieldAreasSize(current_field_id,questionArea,answerArea);
+                            if ( enter_time_of_answer.getText().toString().length() > 0 ) {
+                                int number = Integer.parseInt(enter_time_of_answer.getText().toString());
+                                if ( number > 0 ) {
+                                    if ( save.isChecked() ) {
+                                        cursorLoaderAndUpdateDatabase.setTimeOfAnswer(number, current_field_id, type);
+                                    }
+                                    ((Contact) getActivity()).setTimeOfAnswer(number);
                                     dismiss();
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory("Utilities")
-                                            .setAction("change areas size")
+                                            .setAction("time of answer")
                                             .build());
                                 } else {
-                                    Toast toast = Toast.makeText(getActivity(), R.string.greater_than_zero, Toast.LENGTH_SHORT);
+                                    Toast toast = Toast.makeText(getActivity(), R.string.time_of_answer_greater_than_zero, Toast.LENGTH_SHORT);
                                     toast.setGravity(Gravity.TOP,0,400);
                                     toast.show();
                                 }
-                            } else {
-                                Toast toast = Toast.makeText(getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
-                                toast.show();
                             }
                         } catch (NumberFormatException e) {
                             Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
@@ -114,7 +115,7 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
                         }
                     }
                 });
-                question_area_help.setOnClickListener(new View.OnClickListener() {
+                time_of_answer_help_help.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         AlertDialog.Builder number_of_tries_help_dialog_builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
@@ -125,5 +126,9 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
             }
         });
         return alertDialog;
+    }
+
+    public interface Contact {
+        void setTimeOfAnswer(int time);
     }
 }

@@ -43,5 +43,7 @@ public class Constants {
 
     public static abstract class TimeOfAnswer {
         public static final int NOT_SAVED = 0;
+        public static final int TEST = 0;
+        public static final int STUDY_A_PERIOD = 1;
     }
 }

@@ -427,6 +427,7 @@ public class FieldActivity extends AppCompatActivity implements
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         boolean user_eligible = Money.getUserSubscriptionStatus(this);
+        user_eligible = true; // TODO: 2/13/17 must comment this line before publish 
         switch (position) {
             case ENHANCED_TEST:
                 if (user_eligible || Money.getUserAllowedDueAnError(this)) {

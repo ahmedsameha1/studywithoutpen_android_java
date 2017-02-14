@@ -43,9 +43,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         this.context = context;
     }
 
-    public SQLiteDatabase getSqLiteDatabase() {
-        return sqLiteDatabase;
-    }
 
     public CursorLoaderAndUpdateDatabase(Context context) {
         super(context);
@@ -53,6 +50,9 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         this.sqLiteDatabase = sqLiteOpenHelper.getWritableDatabase();
 
         this.context = context;
+    }
+    public SQLiteDatabase getSqLiteDatabase() {
+        return sqLiteDatabase;
     }
 
     /**
@@ -1421,7 +1421,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
             sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
-                    Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
+                    Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{String.valueOf(field_id)});
         }
     }
 
@@ -1432,5 +1432,15 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
         }
+    }
+
+    public void setTimeOfAnswer( int time, long field_id, int type ) {
+        ContentValues contentValues = new ContentValues();
+        if (type == Constants.TimeOfAnswer.TEST) {
+            contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, time);
+        } else if (type == Constants.TimeOfAnswer.STUDY_A_PERIOD) {
+            contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD, time);
+        }
+        sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
     }
 }
