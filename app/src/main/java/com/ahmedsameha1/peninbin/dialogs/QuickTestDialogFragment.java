@@ -13,6 +13,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,6 +58,7 @@ public class QuickTestDialogFragment extends DialogFragment {
     private AlarmManager alarmManager;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
+    private String number_suffix;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,8 +103,6 @@ public class QuickTestDialogFragment extends DialogFragment {
                 final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.root_view);
                 ArrayAdapter<String> number_or_percentage_array_adapter = new ArrayAdapter<String>(getActivity(),
                         android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.number_or_percentage));
-//                final ImageButton enter_number_help = (ImageButton) alertDialog.findViewById(R.id.enter_number_help);
-//                final ImageButton number_of_questions_help = (ImageButton) alertDialog.findViewById(R.id.number_of_questions_help);
                 number_or_percentage.setAdapter(number_or_percentage_array_adapter);
                 number_or_percentage_array_adapter.setDropDownViewResource
                         (android.R.layout.simple_spinner_dropdown_item);
@@ -221,15 +222,73 @@ public class QuickTestDialogFragment extends DialogFragment {
                                 .setMessage(R.string.percentage_or_number_help).create().show();
                     }
                 });
+                enterTries.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String string = editable.toString();
+                        String suffix = " " + getActivity().getString(R.string._try);
+                        if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                        } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                            enterTries.setText("");
+                        } else {
+                            string = string + suffix;
+                            enterTries.setText(string);
+                            enterTries.setSelection(string.length() - suffix.length());
+                        }
+                    }
+                });
+                enterNumber.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String string = editable.toString();
+                        if ( number_or_percentage.getSelectedItemPosition() == 0) {
+                            number_suffix = " " + getActivity().getString(R.string.question);
+                        } else {
+                            number_suffix = " %";
+                        }
+                        if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + number_suffix) ) {
+
+                        } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                            enterNumber.setText("");
+                        } else {
+                            string = string + number_suffix;
+                            enterNumber.setText(string);
+                            enterNumber.setSelection(string.length() - number_suffix.length());
+                        }
+                    }
+                });
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         try {
-                            if (enterTries.getText().toString().length() > 0) {
-                                int trys = Integer.parseInt(enterTries.getText().toString());
-                                if (trys > 0) {
-                                    if ( enterNumber.getText().toString().length() > 0) {
-                                        int number = Integer.parseInt(enterNumber.getText().toString());
+                            String trys_suffix = " " + getActivity().getString(R.string._try);
+                            String try_string = enterTries.getText().toString();
+                            String number_string = enterNumber.getText().toString();
+                            if ( try_string.length() > 0) {
+                                int trys = Integer.parseInt(try_string.substring(0,try_string.length() - trys_suffix.length()));
+                                if ( number_string.length() > 0) {
+                                        int number = Integer.parseInt(number_string.substring(0, number_string.length() - number_suffix.length()));
                                         if (number_or_percentage.getSelectedItemPosition() == 1) {
                                             if (number <= 100 && number > 0) {
                                                 Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
@@ -337,11 +396,6 @@ public class QuickTestDialogFragment extends DialogFragment {
                                             toast.show();
                                         }
                                     }
-                                } else {
-                                    Toast toast = Toast.makeText(getActivity(), R.string.greater_zero, Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.TOP,0,400);
-                                    toast.show();
-                                }
                             } else {
                                 Toast toast = Toast.makeText(getActivity(), R.string.enter_tries_number, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);

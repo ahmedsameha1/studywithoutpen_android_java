@@ -25,15 +25,11 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
     private int questionsNumber, wrongAnswersNumber;
     private double correctAnswersPercent;
     private String message;
-    private long current_field_id;
-    private DatabaseReadOperations databaseOperations;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseOperations = new DatabaseReadOperations(getActivity());
         questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
         wrongAnswersNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) /questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();
         message = getString(R.string.Your_correct_answers_was) + " " + numberFormat.format(correctAnswersPercent)+ " " +

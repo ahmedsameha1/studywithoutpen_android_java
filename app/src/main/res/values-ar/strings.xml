@@ -264,4 +264,14 @@
     <string name="change_field_name_background_thread">لا يمكنك تغيير اسم المجال أثناء جريان عملية تصدير/استيراد/محاكاة</string>
     <string name="enter_the_time_of_answer">Enter the time of answer</string>
     <string name="time_of_answer_greater_than_zero">Time of answer must be greater than zero!</string>
+    <string name="set_time_of_answer">Set time of answer</string>
+    <string name="second">second</string>
+    <string name="time_of_answer">Time of answer</string>
+    <string name="enter_time_of_answer_help">You will be notifed when the time of answer finishes. The time of answer includes all the tries.</string>
+    <string name="_try">try</string>
+    <string name="_hour">hour</string>
+    <string name="_day">day</string>
+    <string name="quick_test">quick test</string>
+    <string name="number_tests_lower_95">the number of tests must be lower than 95</string>
+    <string name="time_out">Time out</string>
 </resources>

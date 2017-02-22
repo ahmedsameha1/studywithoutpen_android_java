@@ -1140,6 +1140,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             super(loader);
         }
 
+        // TODO: 2/20/17 make this method work by entry id directly 
         @Override
         protected Void doInBackground(Object... params) {
             SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];

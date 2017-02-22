@@ -9,6 +9,8 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -404,6 +406,84 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                         }
                     }
                 });
+                enter_number_of_tries.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String string = editable.toString();
+                        String suffix = " " + getActivity().getString(R.string._try);
+                        if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                        } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                            enter_number_of_tries.setText("");
+                        } else {
+                            string = string + suffix;
+                            enter_number_of_tries.setText(string);
+                            enter_number_of_tries.setSelection(string.length() - suffix.length());
+                        }
+                    }
+                });
+                enter_number_of_questions.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String string = editable.toString();
+                        String suffix = " " + getActivity().getString(R.string.question);
+                        if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                        } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                            enter_number_of_questions.setText("");
+                        } else {
+                            string = string + suffix;
+                            enter_number_of_questions.setText(string);
+                            enter_number_of_questions.setSelection(string.length() - suffix.length());
+                        }
+                    }
+                });
+                enter_number_of_quick_tests.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String string = editable.toString();
+                        String suffix = " " + getActivity().getString(R.string.quick_test);
+                        if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                        } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                            enter_number_of_quick_tests.setText("");
+                        } else {
+                            string = string + suffix;
+                            enter_number_of_quick_tests.setText(string);
+                            enter_number_of_quick_tests.setSelection(string.length() - suffix.length());
+                        }
+                    }
+                });
                 int[] data = databaseOperations.getRandomQuickTestData(current_field_id);
                 if (data != null) {
                     enable_schedule.setChecked(true);
@@ -459,6 +539,7 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                 } else {
                     enable_schedule.setChecked(false);
                 }
+
                 Button positive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 positive.setOnClickListener(new View.OnClickListener() {
 
@@ -466,13 +547,19 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                     public void onClick(View view) {
                         try {
                             if ( enable_schedule.isChecked() ) {
-                                if (enter_number_of_tries.getText().toString().length() > 0
-                                        && enter_number_of_questions.getText().toString().length() > 0
-                                        && enter_number_of_quick_tests.getText().toString().length() > 0) {
-                                    int number_of_tries = Integer.parseInt(enter_number_of_tries.getText().toString());
-                                    int number_of_questions = Integer.parseInt(enter_number_of_questions.getText().toString());
-                                    int number_of_quick_tests = Integer.parseInt(enter_number_of_quick_tests.getText().toString());
-                                    if (number_of_tries > 0 && number_of_questions > 0 && (number_of_quick_tests > 0 && number_of_quick_tests <= 94) ) {
+                                String trys_suffix = " " + getActivity().getString(R.string._try);
+                                String number_of_questions_suffix = " " + getActivity().getString(R.string.question);
+                                String number_of_quick_tests_suffix = " " + getActivity().getString(R.string.quick_test);
+                                String number_of_tries_string = enter_number_of_tries.getText().toString();
+                                String number_of_questions_string = enter_number_of_questions.getText().toString();
+                                String number_of_quick_tests_string = enter_number_of_quick_tests.getText().toString();
+                                if ( number_of_tries_string.length() > 0
+                                        && number_of_questions_string.length() > 0
+                                        && number_of_quick_tests_string.length() > 0) {
+                                    int number_of_tries = Integer.parseInt(number_of_tries_string.substring(0,number_of_tries_string.length() - trys_suffix.length()));
+                                    int number_of_questions = Integer.parseInt(number_of_questions_string.substring(0, number_of_questions_string.length() - number_of_questions_suffix.length()));
+                                    int number_of_quick_tests = Integer.parseInt(number_of_quick_tests_string.substring(0, number_of_quick_tests_string.length() - number_of_quick_tests_suffix.length()));
+                                    if ( number_of_quick_tests <= 94 ) {
                                         if ( enable_exclude_times.isChecked() ) {
                                             if (!(excluded_time_1_layout.getVisibility() == View.VISIBLE &&
                                                     (enter_excluded_time_1_start.getText().length() == 0
@@ -668,7 +755,7 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                                             dismiss();
                                         }
                                     } else {
-                                        Toast toast = Toast.makeText(getActivity(), R.string.zero_not_allowed, Toast.LENGTH_SHORT);
+                                        Toast toast = Toast.makeText(getActivity(), R.string.number_tests_lower_95, Toast.LENGTH_SHORT);
                                         toast.setGravity(Gravity.TOP, 0, 400);
                                         toast.show();
                                     }

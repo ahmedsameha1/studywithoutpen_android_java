@@ -90,7 +90,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     public static final String CURRENT_QUESTION_COUNTER = "currentQuestionCounter";
     public static final String TRIES_COUNTER = "triesCounter";
     public static final String NEXT_BUTTON_STATE = "newtButtonState";
-    public static final String RESULT = "result";
     public static final String PERMITED_TRIES_NUMBER = "permitedTriesNumber";
     public static final String TESTING_NOW = "testingNow";
     public static final String NUMBER_OF_WRONG_ANSWERS = "numberOfWrongAnswers";
@@ -121,7 +120,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private ArrayList<String> hints, wrongAnswers;
     private boolean boolean_continue = false, actionBarShown, before_showing_result_dialog;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
-    private boolean result, testingNow = false;
+    private boolean testingNow = false;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber, wrongAnswersCounter, percent_or_number, number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private double percentage;
@@ -362,68 +361,53 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
         };
         getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
-        check.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                check_card_view.startAnimation(animAlpha);
-                if (enterAnswer.getText().toString().length() > 0) {
-                    result = checkAnAnswer();
-                    if (triesCounter < permitedTriesNumber && !result) {
-                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                        new AsyncTask<Void, Void, Void>() {
+        check.setOnClickListener(view -> {
+            check_card_view.startAnimation(animAlpha);
+            boolean result = checkAnAnswer();
+            if (triesCounter < permitedTriesNumber && !result) {
+                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                new AsyncTask<Void, Void, Void>() {
 
-                            @Override
-                            protected Void doInBackground(Void... params) {
-                                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
-                                return null;
-                            }
-                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                        showTries.setText(Integer.toString(triesCounter + 1));
-                    } else {
-                        triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                        currentQuestionCounter++;
-                        if (currentQuestionCounter >= questionsNumber) {
-                            check.setEnabled(false);
-//                            start.setEnabled(true);
-
-                            before_showing_result_dialog = true;
-                            show_result_dialog_runnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    showQuestion.setText(R.string.test_has_completed);
-                                    enterAnswer.setText(R.string.test_has_completed);
-                                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                                    show_result_linearlayout.setPadding(0, 0, 0, 0);
-                                    show_result_dialog();
-                                }
-                            };
-                            mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
-                            currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                            testingNow = false;
-                            enterAnswer.setEnabled(false);
-                            showNumberOfQuestions.setText("");
-                            remainingQuestionCounter.setText("");
-                            showTries.setText("");
-                            enterAnswer.setHint(R.string.enter_your_answer);
-                            hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-//                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, EnhancedTestActivity.this);
-                            mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
-                            mySQLiteCursorLoader.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
-                        } else {
-                            showNextQuestion();
-                        }
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
+                        return null;
                     }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+                showTries.setText(Integer.toString(triesCounter + 1));
+            } else {
+                triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                currentQuestionCounter++;
+                if (currentQuestionCounter >= questionsNumber) {
+                    check.setEnabled(false);
+                    before_showing_result_dialog = true;
+                    show_result_dialog_runnable = () -> {
+                            showQuestion.setText(R.string.test_has_completed);
+                            enterAnswer.setText(R.string.test_has_completed);
+                            show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                            show_result_linearlayout.setPadding(0, 0, 0, 0);
+                            show_result_dialog();
+                    };
+                    mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+                    currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                    testingNow = false;
+                    enterAnswer.setEnabled(false);
+                    showNumberOfQuestions.setText("");
+                    remainingQuestionCounter.setText("");
+                    showTries.setText("");
+                    enterAnswer.setHint(R.string.enter_your_answer);
+                    hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                    mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
+                    mySQLiteCursorLoader.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
                 } else {
-                    Toast toast = Toast.makeText(EnhancedTestActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
+                    showNextQuestion();
                 }
-                enterAnswer.setHint(R.string.enter_your_answer);
-                if ( triesCounter == INITIAL_VALUE_OF_TRIES_COUNTER ) {
-                    show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                    show_question_linearlayout.setPadding(0, 0, 0, 0);
-                    showQuestion.setTextColor(Color.WHITE);
-                }
+            }
+            enterAnswer.setHint(R.string.enter_your_answer);
+            if (triesCounter == INITIAL_VALUE_OF_TRIES_COUNTER) {
+                show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                show_question_linearlayout.setPadding(0, 0, 0, 0);
+                showQuestion.setTextColor(Color.WHITE);
             }
         });
         enterAnswer.addTextChangedListener(new TextWatcher() {
@@ -604,7 +588,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             case R.id.time_of_answer:
                 Bundle bundle2 = new Bundle();
                 bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                bundle2.putInt( TimeOfAnswerDialogFragment.TYPE, Constants.TimeOfAnswer.TEST);
+                bundle2.putInt(TimeOfAnswerDialogFragment.TYPE, Constants.TimeOfAnswer.TEST);
+                bundle2.putInt(TimeOfAnswerDialogFragment.CURRENT_TIME_OF_ANSWER, time_of_answer);
                 TimeOfAnswerDialogFragment timeOfAnswerDialogFragment = new TimeOfAnswerDialogFragment();
                 timeOfAnswerDialogFragment.setArguments(bundle2);
                 timeOfAnswerDialogFragment.show(getSupportFragmentManager(), TimeOfAnswerDialogFragment.TIME_OF_ANSWER_DIALOG_FRAGMENT);
@@ -628,6 +613,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         array[1] = wrongAnswersCounter;
         array[2] = permitedTriesNumber;
         mySQLiteCursorLoader.putTestPausedDataEnhancedTest(current_field_id, array);
+        mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);// TODO: 2/21/17 only when autochange question
     }
 
     private String[][] getListForTest(double percent, final String date_string) {
@@ -1142,10 +1128,22 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
     }
 
+    private void setFalseForTimeout() {
+        mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
+        show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+        show_result_linearlayout.setPadding(0, 0, 0, 0);
+        mySQLiteCursorLoader.increaseEntryWrongAnsweredCountByOne(current_entry_id);
+        setNormalEnterAnswerBackground();
+        wrongAnswers.add(getString(R.string.time_out));
+        wrongAnswersCounter++;
+        mySQLiteCursorLoader.putEntryWrongAnswersEnhancedTest(listForTest[currentQuestionCounter][0],
+                listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
+        wrongAnswers = null;
+    }
+
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
         mySQLiteCursorLoader.increaseEntryAskedByOne(current_entry_id);
-        Runnable mRunnable;
         boolean result = false;
         if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
             if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
@@ -1322,7 +1320,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
         savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
-        savedInsatanceState.putBoolean(RESULT, result);
         savedInsatanceState.putBoolean(NEXT_BUTTON_STATE, check.isEnabled());
         savedInsatanceState.putBoolean(TESTING_NOW, testingNow);
         savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
@@ -1341,13 +1338,12 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
         mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
-        if ( time_of_starting_time_of_answer > -1 ) {
+        if (time_of_starting_time_of_answer > -1) {
             savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER,
                     effictive_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
         }
         super.onSaveInstanceState(savedInsatanceState);
     }
-
 
 
     @Override
@@ -1357,7 +1353,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
         permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
-        result = savedInstanceState.getBoolean(RESULT);
         testingNow = savedInstanceState.getBoolean(TESTING_NOW);
         boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
         questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
@@ -1381,14 +1376,14 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 check.setEnabled(nextState);
                 enterAnswer.setEnabled(true);
                 ifMoreThanOnce();
-                if ( time_between_answers_passed ) {
+                if (time_between_answers_passed) {
                     show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
                     show_question_linearlayout.setPadding(0, 0, 0, 0);
                     showQuestion.setTextColor(Color.BLACK);
                 }
-                if ( savedInstanceState.containsKey(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER) ) {
+                if (savedInstanceState.containsKey(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER)) {
                     long how_much_time_remaining_time_for_answer = savedInstanceState.getLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER);
-                    if ( how_much_time_remaining_time_for_answer <= 0 ) {
+                    if (how_much_time_remaining_time_for_answer <= 0) {
                         show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
                         show_question_linearlayout.setPadding(0, 0, 0, 0);
                         showQuestion.setTextColor(Color.BLACK);
@@ -1396,15 +1391,12 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         time_of_starting_time_of_answer = -1;
                     } else {
                         effictive_time_of_answer = how_much_time_remaining_time_for_answer;
-                        show_time_for_answer_passed_background_runnable = new Runnable() {
-                            @Override
-                            public void run() {
+                        show_time_for_answer_passed_background_runnable = () -> {
                                 show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
                                 show_question_linearlayout.setPadding(0, 0, 0, 0);
                                 showQuestion.setTextColor(Color.BLACK);
                                 time_between_answers_passed = true;
                                 time_of_starting_time_of_answer = -1;
-                            }
                         };
                         mHandler.postDelayed(show_time_for_answer_passed_background_runnable, effictive_time_of_answer);
                         time_of_starting_time_of_answer = System.currentTimeMillis();
@@ -1562,6 +1554,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         fragment.setArguments(bundle);
         fragment.show(getSupportFragmentManager(), ShowTestResultDialogFragment.SHOW_TEST_RESULT_DIALOG_FRAGMENT);
     }
+
     private void showNextQuestion() {
         showQuestion.setText(listForTest[currentQuestionCounter][0]);
         new AsyncTask<Void, Void, Void>() {
@@ -1581,29 +1574,62 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         wrongAnswers = new ArrayList<>(permitedTriesNumber);
         mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
         time_between_answers_passed = false;
-        if ( time_of_answer > 0 ) {
+        if (time_of_answer > 0) {
             effictive_time_of_answer = time_of_answer * 1000;
             show_time_for_answer_passed_background_runnable = new Runnable() {
                 @Override
                 public void run() {
-                    show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
+                    setFalseForTimeout();
+                    triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                    currentQuestionCounter++;
+                    if (currentQuestionCounter >= questionsNumber) {
+                        check.setEnabled(false);
+//                            start.setEnabled(true);
+
+                        before_showing_result_dialog = true;
+                        show_result_dialog_runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                showQuestion.setText(R.string.test_has_completed);
+                                enterAnswer.setText(R.string.test_has_completed);
+                                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                                show_result_dialog();
+                            }
+                        };
+                        mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+                        currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                        testingNow = false;
+                        enterAnswer.setEnabled(false);
+                        showNumberOfQuestions.setText("");
+                        remainingQuestionCounter.setText("");
+                        showTries.setText("");
+                        enterAnswer.setHint(R.string.enter_your_answer);
+                        hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+//                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, EnhancedTestActivity.this);
+                        mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
+                        mySQLiteCursorLoader.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
+                    } else {
+                        showNextQuestion();
+                    }
+// TODO: 2/21/17 make the code of branching if notify or autochange question 
+                    /*show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
                     show_question_linearlayout.setPadding(0, 0, 0, 0);
                     showQuestion.setTextColor(Color.BLACK);
                     time_between_answers_passed = true;
-                    time_of_starting_time_of_answer = -1;
+                    time_of_starting_time_of_answer = -1;*/
                 }
             };
             mHandler.postDelayed(show_time_for_answer_passed_background_runnable, effictive_time_of_answer);
             time_of_starting_time_of_answer = System.currentTimeMillis();
         }
     }
+
+    // TODO: 2/21/17 uncomment proguard on gradle before publish
     private void setNormalEnterAnswerBackground() {
-        Runnable mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-            }
+        Runnable mRunnable = () -> {
+            show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+            show_result_linearlayout.setPadding(0, 0, 0, 0);
         };
         mHandler.postDelayed(mRunnable, RETURN_TIME);
     }

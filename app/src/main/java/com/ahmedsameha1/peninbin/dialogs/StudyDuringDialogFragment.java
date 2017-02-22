@@ -7,6 +7,8 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,30 +57,111 @@ public class StudyDuringDialogFragment extends DialogFragment {
                 final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
                 final ImageButton number_of_days_help = (ImageButton) alertDialog.findViewById(R.id.number_of_days_help);
                 final ImageButton number_of_hours_help = (ImageButton) alertDialog.findViewById(R.id.number_of_hours_help);
+                final EditText enterDay = (EditText) alertDialog.findViewById(R.id.enter_day);
+                final EditText enterHour = (EditText) alertDialog.findViewById(R.id.enter_hour);
+                final EditText enterTries = (EditText) alertDialog.findViewById(R.id.enter_tries);
                 Button positive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                enterTries.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String string = editable.toString();
+                        String suffix = " " + getActivity().getString(R.string._try);
+                        if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                        } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                            enterTries.setText("");
+                        } else {
+                            string = string + suffix;
+                            enterTries.setText(string);
+                            enterTries.setSelection(string.length() - suffix.length());
+                        }
+                    }
+                });
+                enterHour.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String string = editable.toString();
+                        String suffix = " " + getActivity().getString(R.string._hour);
+                        if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                        } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                            enterHour.setText("");
+                        } else {
+                            string = string + suffix;
+                            enterHour.setText(string);
+                            enterHour.setSelection(string.length() - suffix.length());
+                        }
+                    }
+                });
+                enterDay.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String string = editable.toString();
+                        String suffix = " " + getActivity().getString(R.string._day);
+                        if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                        } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                            enterDay.setText("");
+                        } else {
+                            string = string + suffix;
+                            enterDay.setText(string);
+                            enterDay.setSelection(string.length() - suffix.length());
+                        }
+                    }
+                });
                 positive.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View view) {
                         try {
-                            EditText enterDay = (EditText) alertDialog.findViewById(R.id.enter_day);
-                            EditText enterHour = (EditText) alertDialog.findViewById(R.id.enter_hour);
-                            EditText enterTries = (EditText) alertDialog.findViewById(R.id.enter_tries);
-                            if ( enterTries.getText().toString().length() > 0 ) {
-                                int trys = Integer.parseInt(enterTries.getText().toString());
-                                if ( trys > 0 ) {
+                            String trys_suffix = " " + getActivity().getString(R.string._try);
+                            String day_suffix = " " + getActivity().getString(R.string._day);
+                            String hour_suffix = " " + getActivity().getString(R.string._hour);
+                            String try_string = enterTries.getText().toString();
+                            String day_string = enterDay.getText().toString();
+                            String hour_string = enterHour.getText().toString();
+                            if ( try_string.length() > 0 ) {
+                                int trys = Integer.parseInt(try_string.substring(0,try_string.length() - trys_suffix.length()));
                                     int day = 0;
                                     int hour = 0;
-                                    if ( enterDay.getText().toString().length() > 0 || enterHour.getText().toString().length() > 0 ) {
-                                        if ( enterDay.getText().toString().length() > 0) {
-                                            day = Integer.parseInt(enterDay.getText().toString());
+                                    if ( day_string.length() > 0 || hour_string.length() > 0 ) {
+                                        if ( day_string.length() > 0) {
+                                            day = Integer.parseInt(day_string.substring(0,day_string.length() - day_suffix.length()));
                                         }
-                                        if ( enterHour.getText().toString().length() > 0) {
-                                            hour = Integer.parseInt(enterHour.getText().toString());
+                                        if ( hour_string.length() > 0) {
+                                            hour = Integer.parseInt(hour_string.substring(0,hour_string.length() - hour_suffix.length()));
                                         }
                                         long duration = ( day * ( (long) MILLISECONDS_IN_DAY) ) + ( hour * ( (long) MILLISECONDS_IN_HOUR) );
-                                        Date now = new Date();
-                                        //                            long nowInMilliseconds = now.getTime();
                                         long nowInMilliseconds = System.currentTimeMillis();
                                         long startingTime = nowInMilliseconds - duration;
                                         Intent intent = new Intent(getActivity(),StudyAPeriodActivity.class);
@@ -96,11 +179,6 @@ public class StudyDuringDialogFragment extends DialogFragment {
                                         toast.setGravity(Gravity.TOP,0,400);
                                         toast.show();
                                     }
-                                } else {
-                                    Toast toast = Toast.makeText(getActivity(),R.string.greater_zero,Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.TOP,0,400);
-                                    toast.show();
-                                }
                             } else {
                                 Toast toast = Toast.makeText(getActivity(),R.string.enter_tries_number,Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);

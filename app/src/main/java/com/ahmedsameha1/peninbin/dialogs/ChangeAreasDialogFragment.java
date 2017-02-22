@@ -7,6 +7,8 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,7 +70,7 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                             if ( enterQuestionArea.getText().toString().length() > 0 && enterAnswerArea.getText().toString().length() > 0 ) {
                                 int questionArea = Integer.parseInt(enterQuestionArea.getText().toString());
                                 int answerArea = Integer.parseInt(enterAnswerArea.getText().toString());
-                                if ( questionArea > 0 && answerArea > 0 ) {
+
                                     ((ChangeAreas) getActivity()).changeAreas((float) questionArea,(float) answerArea);
                                     mySQLiteCursorLoader.updateFieldAreasSize(current_field_id,questionArea,answerArea);
                                     dismiss();
@@ -76,11 +78,6 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                                             .setCategory("Utilities")
                                             .setAction("change areas size")
                                             .build());
-                                } else {
-                                    Toast toast = Toast.makeText(getActivity(), R.string.greater_than_zero, Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.TOP,0,400);
-                                    toast.show();
-                                }
                             } else {
                                 Toast toast = Toast.makeText(getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP,0,400);
@@ -92,6 +89,42 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                             toast.show();
                         } catch (Resources.NotFoundException e) {
                             e.printStackTrace();
+                        }
+                    }
+                });
+                enterQuestionArea.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        if ( editable.toString().equals(String.valueOf(0))) {
+                            enterQuestionArea.setText("");
+                        }
+                    }
+                });
+                enterAnswerArea.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        if ( editable.toString().equals(String.valueOf(0))) {
+                            enterAnswerArea.setText("");
                         }
                     }
                 });

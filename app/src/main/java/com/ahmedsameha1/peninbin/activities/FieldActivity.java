@@ -279,10 +279,7 @@ public class FieldActivity extends AppCompatActivity implements
             }
         };
         getLoaderManager();
-        Intent serviceIntent =
-                new Intent("com.android.vending.billing.InAppBillingService.BIND");
-        serviceIntent.setPackage("com.android.vending");
-        bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
+
     }
 
     @Override
@@ -295,11 +292,20 @@ public class FieldActivity extends AppCompatActivity implements
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent serviceIntent =
+                new Intent("com.android.vending.billing.InAppBillingService.BIND");
+        serviceIntent.setPackage("com.android.vending");
+        bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
+    }
+
     /*
-        Because the database related objects should close as soon as the activity does not use it, I put all database work on onResume()
-        onResume() will be called before the user can react with the activity
-        in onPause() I close all database related objects.
-         */
+            Because the database related objects should close as soon as the activity does not use it, I put all database work on onResume()
+            onResume() will be called before the user can react with the activity
+            in onPause() I close all database related objects.
+             */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
@@ -388,6 +394,9 @@ public class FieldActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
+        if ( mServiceConn != null ) {
+            unbindService(mServiceConn);
+        }
     }
 
     @Override
