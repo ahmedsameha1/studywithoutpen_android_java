@@ -10,13 +10,15 @@ import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
@@ -24,10 +26,10 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-
 /**
  * Created by ahmed on 12/30/16.
  */
@@ -36,11 +38,14 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
     public static final String TYPE = "type";
     public static final String TIME_OF_ANSWER_DIALOG_FRAGMENT = "time_of_answer_dialog_fragment";
     public static final String CURRENT_TIME_OF_ANSWER = "current_time_of_answer";
+    public static final String CURRENT_TIME_OF_ANSWER_DO_WHAT = "current_time_of_answer_do_what";
+    public static final String TIME_OF_ANSWER_SAVED = "time_of_answer_saved";
 
     private long current_field_id;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private DatabaseReadOperations databaseReadOperations;
-    private int type, current_time_of_answer;
+    private int type, current_time_of_answer, current_time_of_answer_do_what;
+    private boolean time_of_answer_saved;
     private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,8 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         type = getArguments().getInt(TYPE);
         current_time_of_answer = getArguments().getInt(CURRENT_TIME_OF_ANSWER);
+        current_time_of_answer_do_what = getArguments().getInt(CURRENT_TIME_OF_ANSWER_DO_WHAT);
+        time_of_answer_saved = getArguments().getBoolean(TIME_OF_ANSWER_SAVED);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
         databaseReadOperations = new DatabaseReadOperations(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
@@ -69,6 +76,9 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
                 final EditText enter_time_of_answer = (EditText) alertDialog.findViewById(R.id.time_of_answer);
                 final CheckBox save = (CheckBox) alertDialog.findViewById(R.id.save);
                 final CheckBox set_time_of_answer = (CheckBox) alertDialog.findViewById(R.id.set_time_of_answer);
+                final RadioButton notify = (RadioButton) alertDialog.findViewById(R.id.notify);
+                final RadioButton move_next = (RadioButton) alertDialog.findViewById(R.id.move_next);
+                final RadioGroup do_what = (RadioGroup) alertDialog.findViewById(R.id.do_what);
                 Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 enter_time_of_answer.addTextChangedListener(new TextWatcher() {
                     @Override
@@ -96,32 +106,23 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
                         }
                     }
                 });
-                int time;
-                if ( current_time_of_answer > 0 ) {
+                if ( current_time_of_answer > Constants.TimeOfAnswer.NOT_USED ) {
                     set_time_of_answer.setChecked(true);
                     enter_time_of_answer.setText(String.valueOf(current_time_of_answer));
+                    save.setEnabled(true);
+                    if ( current_time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY) {
+                        notify.setChecked(true);
+                    } else if ( current_time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
+                        move_next.setChecked(true);
+                    }
                 } else {
                     set_time_of_answer.setChecked(false);
                     enter_time_of_answer.setEnabled(false);
                     enter_time_of_answer.setText("");
                     save.setEnabled(false);
+                    notify.setEnabled(false);
+                    move_next.setEnabled(false);
                 }
-                if ( type == Constants.TimeOfAnswer.TEST ) {
-                    time = databaseReadOperations.getTimeOfAnswerTests(current_field_id);
-                    if ( time == Constants.TimeOfAnswer.NOT_USED) {
-                        save.setChecked(false);
-                    } else {
-                        save.setChecked(true);
-                    }
-                } else if ( type == Constants.TimeOfAnswer.STUDY_A_PERIOD ) {
-                    time = databaseReadOperations.getTimeOfAnswerStudyAPeriod(current_field_id);
-                    if ( time == Constants.TimeOfAnswer.NOT_USED) {
-                        save.setChecked(false);
-                    } else {
-                        save.setChecked(true);
-                    }
-                }
-
                 set_time_of_answer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
@@ -129,27 +130,48 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
                             enter_time_of_answer.setEnabled(true);
                             enter_time_of_answer.requestFocus();
                             save.setEnabled(true);
+                            notify.setEnabled(true);
+                            move_next.setEnabled(true);
                         } else {
                             enter_time_of_answer.setEnabled(false);
                             enter_time_of_answer.setText("");
                             save.setEnabled(false);
+                            notify.setEnabled(false);
+                            move_next.setEnabled(false);
                         }
                     }
                 });
-                positiveButton.setOnClickListener(new View.OnClickListener() {
+                alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
                     @Override
-                    public void onClick(View v) {
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+
+                        if (keyCode == KeyEvent.KEYCODE_BACK) {
+                            ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
+                            return false;
+                        }
+                        return false;
+
+                    }
+                });
+                save.setChecked(time_of_answer_saved);
+                positiveButton.setOnClickListener( view -> {
                         try {
+                            int do_what_choice = do_what.getCheckedRadioButtonId() == R.id.notify ?
+                                Constants.TimeOfAnswer.NOTIFY : Constants.TimeOfAnswer.MOVE_NEXT;
                             if ( set_time_of_answer.isChecked() ) {
                                 String second_suffix = " " + getActivity().getString(R.string.second);
                                 String time_string = enter_time_of_answer.getText().toString();
                                 if ( time_string.length() > 0 ) {
+
                                     int number = Integer.parseInt(time_string.substring(0, time_string.length() - second_suffix.length()));
                                     if ( number > 0 ) {
+                                        ((Contact) getActivity()).setTimeOfAnswer(number, do_what_choice, save.isChecked());
                                         if (save.isChecked()) {
-                                            cursorLoaderAndUpdateDatabase.setTimeOfAnswer(number, current_field_id, type);
+                                            cursorLoaderAndUpdateDatabase.setTimeOfAnswer(current_field_id,number, do_what_choice  , type);
+                                        } else {
+                                            cursorLoaderAndUpdateDatabase.setTimeOfAnswer(current_field_id, Constants.TimeOfAnswer.NOT_USED, do_what_choice, type);
                                         }
-                                        ((Contact) getActivity()).setTimeOfAnswer(number);
+                                        ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
                                         dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory("Utilities")
@@ -162,8 +184,9 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
                                     toast.show();
                                 }
                             } else {
-                                    cursorLoaderAndUpdateDatabase.setTimeOfAnswer(Constants.TimeOfAnswer.NOT_USED, current_field_id, type);
-                                ((Contact) getActivity()).setTimeOfAnswer(Constants.TimeOfAnswer.NOT_USED);
+                                    cursorLoaderAndUpdateDatabase.setTimeOfAnswer(current_field_id, Constants.TimeOfAnswer.NOT_USED, do_what_choice, type);
+                                ((Contact) getActivity()).setTimeOfAnswer(Constants.TimeOfAnswer.NOT_USED, do_what_choice, save.isChecked());
+                                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
                                 dismiss();
                             }
                         } catch (NumberFormatException e) {
@@ -173,22 +196,23 @@ public class TimeOfAnswerDialogFragment extends DialogFragment {
                         } catch (Resources.NotFoundException e) {
                             e.printStackTrace();
                         }
-                    }
                 });
-                time_of_answer_help_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                time_of_answer_help_help.setOnClickListener( view -> {
                         AlertDialog.Builder number_of_tries_help_dialog_builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
                         number_of_tries_help_dialog_builder
                                 .setMessage(R.string.enter_time_of_answer_help).create().show();
-                    }
                 });
+                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(false);
             }
+
         });
+/*        alertDialog.setOnDismissListener(dialog -> {
+            ((Contact) getActivity()).manageTimersDueDialogsShow(true);
+        });*/
         return alertDialog;
     }
-
     public interface Contact {
-        void setTimeOfAnswer(int time);
+        void setTimeOfAnswer(int time_of_answer, int time_of_answer_do_what, boolean saved);
     }
+
 }

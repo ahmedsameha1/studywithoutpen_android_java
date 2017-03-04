@@ -36,14 +36,19 @@ public class Constants {
         public static final int FULLY_RANDOM_TEST = 1;
     }
 
-    public static abstract class Money {
-        public static final long NOT_SUBSCRIBED = -1L;
-        public static final int PERIOD_OF_SUBSCRIBTION_INCLUDING_GRACE_PERIOD = 99;
-    }
-
     public static abstract class TimeOfAnswer {
         public static final int NOT_USED = 0;
         public static final int TEST = 0;
         public static final int STUDY_A_PERIOD = 1;
+        public static final int NOTIFY = 0;
+        public static final int MOVE_NEXT = 1;
+    }
+
+    public static abstract class ElapsedPausedSessionTime {
+        public static final int STUDY_A_PERIOD = 0;
+        public static final int ENHANCED_TEST = 1;
+        public static final int FULLY_RANDOM_TEST = 2;
+        public static final int QUICK_TEST = 2;
+        public static final int NOT_USED = 0;
     }
 }

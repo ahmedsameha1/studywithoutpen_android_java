@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +19,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 /**
@@ -88,6 +90,7 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                                 mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id,SAVE_SMALL_SIZE);
                                 break;
                         }
+                        ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
                         dismiss();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory("Utilities")
@@ -103,6 +106,19 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                                 .setMessage(R.string.text_size_help).create().show();
                     }
                 });
+                alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                    @Override
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+
+                        if (keyCode == KeyEvent.KEYCODE_BACK) {
+                            ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
+                            return false;
+                        }
+                        return false;
+
+                    }
+                });
+                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(false);
             }
         });
         return alertDialog;

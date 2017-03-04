@@ -92,8 +92,6 @@ public class FieldActivity extends AppCompatActivity implements
     public static final int COPY_MOVE = 4;
     public static final int FIELD_PROPERTIES = 5;
     public static final int Field_INFORMATION = 6;
-
-
     private static final String QUERY_KEY = "query_key";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int SEARCH_ENTRIES_LOADER_ID = 1;
@@ -109,9 +107,7 @@ public class FieldActivity extends AppCompatActivity implements
     public static final String CURRENT_FIELD_NAME = "currentField";
     public static final String CHECK_IF_CONTINUE_STUDY_DURING_SESSION = "checkIfContinueStudyDuringSession";
     public static final String CHECK_IF_CONTINUE_TEST_SESSION = "checkIfContinueTestSession";
-    private static final String SEARCH_DATE_OR_TEXT = "search_date_or_text";
     private static final String CURRENT_SORT = "currentSort";
-    public static final java.lang.String FIELD_TYPE = "field_type";
     private static final String SORT_DIALOG = "sort_dialog";
     public static final String FIELD_ID = "field_id";
     public static final int EDIT_ENTRY = 0;
@@ -122,7 +118,6 @@ public class FieldActivity extends AppCompatActivity implements
     private static final String FIELD_OPTIONS_DIALOG = "field_options_dialog";
     public static final String ANALYTICS_CATEGORY = "Field Activity Category";
     public static final String EDITED_RANK = "edited_rank";
-    private static final int SUBSCRIBE = 2;
     private static final String PAY_LOAD_STRING = "pay_load_string";
     private static final String BUY_INTENT = "BUY_INTENT";
     private static final int BUY_FLOW_REQUEST_CODE = 6475;

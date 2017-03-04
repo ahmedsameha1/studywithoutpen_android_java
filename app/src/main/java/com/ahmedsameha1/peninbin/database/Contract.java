@@ -44,7 +44,12 @@ public final class Contract {
         public static final String COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL = "random_quick_test_rank_level";
         public static final String COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION = "random_quick_test_controlled_portion";
         public static final String COLUMN_TIME_OF_ANSWER_TESTS = "time_of_answer_tests";
+        public static final String COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT = "time_of_answer_tests_do_what";
         public static final String COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD = "time_of_answer_study_a_period";
+        public static final String COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD_DO_WHAT = "time_of_answer_study_a_period_do_what";
+        public static final String COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION = "elapsed_time_of_paused_study_a_period_session";
+        public static final String COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION = "elapsed_time_of_paused_enhanced_test_session";
+        public static final String COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION = "elapsed_time_of_paused_fully_random_test_session";
         public static final String COLUMN_EMULATED_ERROR = "emulated_error";
     }
     public static abstract class STring implements BaseColumns {

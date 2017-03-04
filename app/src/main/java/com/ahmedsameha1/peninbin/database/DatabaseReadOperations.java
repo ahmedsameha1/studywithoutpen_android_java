@@ -719,22 +719,45 @@ public class DatabaseReadOperations {
         return ! cursor.moveToFirst();
     }
 
-    public int getTimeOfAnswerTests(long field_id ) {
-        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS},
-                Contract.COLUMN_ID + " = ?", new String[]{field_id + ""},null,null, null);
+    public int[] getTimeOfAnswer(long field_id , int type ) {
+        int [] data = new int[2];
+        Cursor cursor = null;
+        if ( type == Constants.TimeOfAnswer.TEST ) {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                    new String[]{Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT},
+                    Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
+        } else if ( type == Constants.TimeOfAnswer.STUDY_A_PERIOD ) {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                    new String[]{Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD, Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD_DO_WHAT},
+                    Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
+        }
         cursor.moveToFirst();
-        int time_of_answer = cursor.getInt(0);
+        data[0] = cursor.getInt(0);
+        data[1] = cursor.getInt(1);
         cursor.close();
-        return time_of_answer;
+        return data;
     }
 
-    public int getTimeOfAnswerStudyAPeriod(long field_id ) {
-        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD},
-                Contract.COLUMN_ID + " = ?", new String[]{field_id + ""},null,null, null);
+    public long getElapsedPausedSessionTime( long field_id, int type ) {
+        long time;
+        Cursor cursor = null;
+        if ( type == Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD) {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                    new String[] {Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION},
+                    Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
+        } else if ( type == Constants.ElapsedPausedSessionTime.ENHANCED_TEST ) {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                    new String[] {Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION},
+                    Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
+        } else if ( type == Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST ) {
+            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                    new String[] {Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION},
+                    Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
+        }
         cursor.moveToFirst();
-        int time_of_answer = cursor.getInt(0);
+        time = cursor.getLong(0);
         cursor.close();
-        return time_of_answer;
+        return time;
     }
 }
 

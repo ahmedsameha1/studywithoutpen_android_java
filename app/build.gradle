@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "24.0.3"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.ahmedsameha1.peninbin"
-        minSdkVersion 15
+        minSdkVersion 17
         targetSdkVersion 25
         versionCode 66
         versionName "3.0.9"

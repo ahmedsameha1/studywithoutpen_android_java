@@ -73,7 +73,8 @@ public class Emulation {
         Calendar calendar = Calendar.getInstance();
         long long_utc = System.currentTimeMillis();
         calendar.setTimeInMillis(long_utc);
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+//        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 5);
         calendar.set(Calendar.SECOND, 0);
@@ -101,7 +102,8 @@ public class Emulation {
                     if (i >= 1) {
                         /*emulated_creation_time_millis += AlarmManager.INTERVAL_DAY;
                         date = new Date(emulated_creation_time_millis);*/
-                        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+//                        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+                        calendar.add(Calendar.DAY_OF_MONTH, 1);
                         emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
                     }
                     for (int k = 0; k < number_of_everyday_entries; k++) {
@@ -130,7 +132,8 @@ public class Emulation {
         Calendar calendar = Calendar.getInstance();
         long long_utc = System.currentTimeMillis();
         calendar.setTimeInMillis(long_utc);
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+//        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 5);
         calendar.set(Calendar.SECOND, 0);
@@ -158,7 +161,8 @@ public class Emulation {
                     if (i >= 1) {
                       /*  emulated_creation_time_millis += AlarmManager.INTERVAL_DAY;
                         date = new Date(emulated_creation_time_millis);*/
-                        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+//                        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+                        calendar.add(Calendar.DAY_OF_MONTH, 1);
                         emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
                     }
                     for (int k = 0; k < number_of_everyday_entries; k++) {

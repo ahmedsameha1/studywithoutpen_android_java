@@ -11,7 +11,8 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="enter_your_answer">Enter Your Answer</string>
-    <string name="question">Question</string>
+    <string name="question">Question:</string>
+    <string name="_question">question</string>
     <string name="answer">Answer</string>
     <string name="enter_percentage">Percentage of the field (without %)</string>
     <string name="remaining_questions">Remaining Questions: %1$s</string>
@@ -278,11 +279,14 @@
     <string name="set_time_of_answer">Set time of answer</string>
     <string name="second">second</string>
     <string name="time_of_answer">Time of answer</string>
-    <string name="enter_time_of_answer_help">Enter the time that you want the app to wait before it notifies you by changing the background of the question area.</string>
+    <string name="enter_time_of_answer_help">Enter the time that you want the app to wait before it take the action that you have specified.</string>
     <string name="_try">try</string>
     <string name="_hour">hour</string>
     <string name="_day">day</string>
     <string name="quick_test">quick test</string>
     <string name="number_tests_lower_95">the number of tests must be lower than 95</string>
     <string name="time_out">Time out</string>
+    <string name="notify_me">Notify me</string>
+    <string name="show_next_question">Move to next question</string>
+    <string name="dont_know">Don\'t know</string>
 </resources>

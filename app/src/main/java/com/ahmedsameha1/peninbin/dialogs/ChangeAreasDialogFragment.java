@@ -10,6 +10,7 @@ import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +24,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 /**
@@ -73,6 +75,7 @@ public class ChangeAreasDialogFragment extends DialogFragment{
 
                                     ((ChangeAreas) getActivity()).changeAreas((float) questionArea,(float) answerArea);
                                     mySQLiteCursorLoader.updateFieldAreasSize(current_field_id,questionArea,answerArea);
+                                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
                                     dismiss();
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory("Utilities")
@@ -90,6 +93,18 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                         } catch (Resources.NotFoundException e) {
                             e.printStackTrace();
                         }
+                    }
+                });
+                alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                    @Override
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+
+                        if (keyCode == KeyEvent.KEYCODE_BACK) {
+                            ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
+                            return false;
+                        }
+                        return false;
+
                     }
                 });
                 enterQuestionArea.addTextChangedListener(new TextWatcher() {
@@ -144,6 +159,7 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                                 .setMessage(R.string.answer_area_help).create().show();
                     }
                 });
+                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(false);
             }
         });
         return alertDialog;

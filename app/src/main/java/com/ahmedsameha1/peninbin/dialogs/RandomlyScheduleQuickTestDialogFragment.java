@@ -446,7 +446,7 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                     @Override
                     public void afterTextChanged(Editable editable) {
                         String string = editable.toString();
-                        String suffix = " " + getActivity().getString(R.string.question);
+                        String suffix = " " + getActivity().getString(R.string._question);
                         if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
 
                         } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
@@ -548,7 +548,7 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                         try {
                             if ( enable_schedule.isChecked() ) {
                                 String trys_suffix = " " + getActivity().getString(R.string._try);
-                                String number_of_questions_suffix = " " + getActivity().getString(R.string.question);
+                                String number_of_questions_suffix = " " + getActivity().getString(R.string._question);
                                 String number_of_quick_tests_suffix = " " + getActivity().getString(R.string.quick_test);
                                 String number_of_tries_string = enter_number_of_tries.getText().toString();
                                 String number_of_questions_string = enter_number_of_questions.getText().toString();

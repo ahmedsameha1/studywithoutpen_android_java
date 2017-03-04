@@ -238,7 +238,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                     public void afterTextChanged(Editable editable) {
                         String string = editable.toString();
                         if ( number_or_percentage.getSelectedItemPosition() == 0) {
-                            number_suffix = " " + getActivity().getString(R.string.question);
+                            number_suffix = " " + getActivity().getString(R.string._question);
                         } else {
                             number_suffix = " %";
                         }

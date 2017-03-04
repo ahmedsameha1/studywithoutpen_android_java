@@ -48,7 +48,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
-import com.ahmedsameha1.peninbin.utils.MoreThanOneAnswer;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -56,7 +56,6 @@ import com.google.android.gms.analytics.Tracker;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
@@ -687,7 +686,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     }
 
     private void ifMoreThanOnce() {
-        hints = MoreThanOneAnswer.getHints(this,current_field_id,question_data_type,
+        hints = ActivityUtility.getHints(this,current_field_id,question_data_type,
                 listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1]);
         if ( hints != null ) {
             nextHint.setEnabled(true);
