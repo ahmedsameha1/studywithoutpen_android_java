@@ -59,7 +59,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-// TODO: 2/28/17 the time of the actionbar doesn't count
 public class FullyRandomTestActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
@@ -126,7 +125,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
     private Handler mHandler = new Handler();
     private Tracker mTracker;
-    private boolean isEmulated;
+    private boolean isEmulated, isStarting;
     private Chronometer tool_bar_timer;
     private long lastPause;
     private Thread pauseThread = new Thread(new Runnable() {
@@ -167,9 +166,63 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
-    private Runnable show_result_dialog_runnable, show_time_for_answer_passed_background_runnable;
+    private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what;
     private long time_of_starting_time_of_answer = -1, effictive_time_of_answer;
+    private Runnable what_to_do_runnable = new Runnable() {
+
+        @Override
+        public void run() {
+            if ( time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
+                setFalse(ActivityUtility.FalseString.TIME_OUT);
+                triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                currentQuestionCounter++;
+                if (currentQuestionCounter >= questionsNumber) {
+                    check.setEnabled(false);
+                    before_showing_result_dialog = true;
+                    show_result_dialog_runnable = () -> {
+                        showQuestion.setText(R.string.test_has_completed);
+                        enterAnswer.setText(R.string.test_has_completed);
+                        show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                        show_result_linearlayout.setPadding(0, 0, 0, 0);
+                        show_result_dialog();
+                    };
+                    mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+                    currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                    testingNow = false;
+                    enterAnswer.setEnabled(false);
+                    showNumberOfQuestions.setText("");
+                    remainingQuestionCounter.setText("");
+                    showTries.setText("");
+                    enterAnswer.setHint(R.string.enter_your_answer);
+                    hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                    cursorLoaderAndUpdateDatabase.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
+                    cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
+                    mHandler.removeCallbacks(this);
+                    mHandler.removeCallbacks(do_what_method_runnable);
+                    time_of_starting_time_of_answer = -1;
+                    time_between_answers_passed = false;
+                    tool_bar_timer.stop();
+                } else {
+                    showNextQuestion();
+                    show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                    show_question_linearlayout.setPadding(0, 0, 0, 0);
+                    Runnable mRunnable = () -> {
+                        show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                        show_question_linearlayout.setPadding(0, 0, 0, 0);
+                    };
+                    mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
+                }
+            } else if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+                show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
+                show_question_linearlayout.setPadding(0, 0, 0, 0);
+                showQuestion.setTextColor(Color.BLACK);
+                time_between_answers_passed = true;
+                time_of_starting_time_of_answer = -1;
+            }
+        }
+    };
+    private Runnable do_what_method_runnable = () -> doWhat();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -224,6 +277,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             mShortAnimationDuration = getResources().getInteger(
                     android.R.integer.config_shortAnimTime);
             lastPause = databaseOperations.getElapsedPausedSessionTime(current_field_id, Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST);
+            isStarting = true;
         } else {
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
             mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
@@ -376,7 +430,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
                             cursorLoaderAndUpdateDatabase.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
                             cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
-                            mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
+                            mHandler.removeCallbacks(what_to_do_runnable);
+                            mHandler.removeCallbacks(do_what_method_runnable);
                             time_between_answers_passed = false;
                             tool_bar_timer.stop();
                             cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
@@ -522,6 +577,11 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
         }
+        if ( !isStarting && testingNow ) {
+            doWhat();
+        } else {
+            isStarting = false;
+        }
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
@@ -609,9 +669,6 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         array[1] = wrongAnswersCounter;
         array[2] = permitedTriesNumber;
         cursorLoaderAndUpdateDatabase.putTestPausedDataFullyRandomTest(current_field_id, array);
-        if ( time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
-            mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
-        }
     }
 
     private String[][] getListForTest(double percent) {
@@ -811,6 +868,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }
+        mHandler.removeCallbacks(what_to_do_runnable);
+        mHandler.removeCallbacks(do_what_method_runnable);
         retainedFragment.setListForTest_FullyRandomTestActivity(listForTest);
     }
 
@@ -834,8 +893,6 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
                     Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST, Constants.ElapsedPausedSessionTime.NOT_USED);
         }
-        mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
-        time_between_answers_passed = false;
     }
 
     @Override
@@ -862,7 +919,6 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
-        mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
         if (time_of_starting_time_of_answer > -1) {
             savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER,
                     effictive_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
@@ -913,10 +969,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                         doWhat();
                     } else {
                         effictive_time_of_answer = how_much_time_remaining_time_for_answer;
-                        show_time_for_answer_passed_background_runnable = () -> {
-                            doWhat();
-                        };
-                        mHandler.postDelayed(show_time_for_answer_passed_background_runnable, effictive_time_of_answer);
+                        mHandler.postDelayed(do_what_method_runnable, effictive_time_of_answer);
                         time_of_starting_time_of_answer = System.currentTimeMillis();
                     }
                 }
@@ -1021,7 +1074,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         enterAnswer.setHint(R.string.enter_your_answer);
         hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
         wrongAnswers = new ArrayList<>(permitedTriesNumber);
-        mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
+        mHandler.removeCallbacks(what_to_do_runnable);
+        mHandler.removeCallbacks(do_what_method_runnable);
         time_between_answers_passed = false;
         doWhat();
     }
@@ -1040,8 +1094,6 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         this.time_of_answer = time_of_answer;
         this.time_of_answer_do_what = time_of_answer_do_what;
         this.time_of_answer_saved = time_for_answer_saved;
-        mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
-        time_between_answers_passed = false;
         doWhat();
     }
 
@@ -1055,7 +1107,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         } else {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
-            mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
+            mHandler.removeCallbacks(what_to_do_runnable);
+            mHandler.removeCallbacks(do_what_method_runnable);
             time_between_answers_passed = false;
             if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
                 show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
@@ -1068,54 +1121,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     private void doWhat() {
         if (time_of_answer > 0) {
             effictive_time_of_answer = time_of_answer * 1000;
-            show_time_for_answer_passed_background_runnable = () -> {
-                if ( time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
-                    setFalse(ActivityUtility.FalseString.TIME_OUT);
-                    triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                    currentQuestionCounter++;
-                    if (currentQuestionCounter >= questionsNumber) {
-                        check.setEnabled(false);
-                        before_showing_result_dialog = true;
-                        show_result_dialog_runnable = () -> {
-                            showQuestion.setText(R.string.test_has_completed);
-                            enterAnswer.setText(R.string.test_has_completed);
-                            show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                            show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            show_result_dialog();
-                        };
-                        mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
-                        currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                        testingNow = false;
-                        enterAnswer.setEnabled(false);
-                        showNumberOfQuestions.setText("");
-                        remainingQuestionCounter.setText("");
-                        showTries.setText("");
-                        enterAnswer.setHint(R.string.enter_your_answer);
-                        hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                        cursorLoaderAndUpdateDatabase.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
-                        cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
-                        mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
-                        time_between_answers_passed = false;
-                        tool_bar_timer.stop();
-                    } else {
-                        showNextQuestion();
-                        show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                        show_question_linearlayout.setPadding(0, 0, 0, 0);
-                        Runnable mRunnable = () -> {
-                            show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                            show_question_linearlayout.setPadding(0, 0, 0, 0);
-                        };
-                        mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
-                    }
-                } else if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
-                    show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
-                    show_question_linearlayout.setPadding(0, 0, 0, 0);
-                    showQuestion.setTextColor(Color.BLACK);
-                    time_between_answers_passed = true;
-                    time_of_starting_time_of_answer = -1;
-                }
-            };
-            mHandler.postDelayed(show_time_for_answer_passed_background_runnable, effictive_time_of_answer);
+            mHandler.postDelayed(what_to_do_runnable, effictive_time_of_answer);
             time_of_starting_time_of_answer = System.currentTimeMillis();
         }
     }
@@ -1146,7 +1152,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
             cursorLoaderAndUpdateDatabase.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
             cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
-            mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
+            mHandler.removeCallbacks(what_to_do_runnable);
+            mHandler.removeCallbacks(do_what_method_runnable);
             time_between_answers_passed = false;
             tool_bar_timer.stop();
         } else {

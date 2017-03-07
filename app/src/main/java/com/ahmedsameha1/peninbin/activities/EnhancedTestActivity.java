@@ -136,7 +136,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private Tracker mTracker;
     private Chronometer tool_bar_timer;
     private long lastPause;
-    private boolean isEmulated;
+    private boolean isEmulated, isStarting;
     private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -175,10 +175,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
-    private Runnable show_result_dialog_runnable, show_time_for_answer_passed_background_runnable;
+    private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what;
     private long time_of_starting_time_of_answer = -1, effictive_time_of_answer;
-    private Runnable m = new Runnable() {
+    private Runnable what_to_do_runnable = new Runnable() {
 
         @Override
         public void run() {
@@ -208,7 +208,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     cursorLoaderAndUpdateDatabase.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
                     cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
                     mHandler.removeCallbacks(this);
-                    mHandler.removeCallbacks(n);
+                    mHandler.removeCallbacks(do_what_method_runnable);
+                    time_of_starting_time_of_answer = -1;
                     time_between_answers_passed = false;
                     tool_bar_timer.stop();
                 } else {
@@ -230,7 +231,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             }
         }
     };
-    private Runnable n = () -> doWhat();
+    private Runnable do_what_method_runnable = () -> doWhat();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -288,6 +289,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             mShortAnimationDuration = getResources().getInteger(
                     android.R.integer.config_shortAnimTime);
             lastPause = databaseOperations.getElapsedPausedSessionTime(current_field_id, Constants.ElapsedPausedSessionTime.ENHANCED_TEST);
+            isStarting = true;
         } else {
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
             mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
@@ -457,8 +459,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
                     cursorLoaderAndUpdateDatabase.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
                     cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
-                    mHandler.removeCallbacks(m);
-                    mHandler.removeCallbacks(n);
+                    mHandler.removeCallbacks(what_to_do_runnable);
+                    mHandler.removeCallbacks(do_what_method_runnable);
                     time_between_answers_passed = false;
                     tool_bar_timer.stop();
                     cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
@@ -603,7 +605,11 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
         }
-        doWhat();
+        if ( !isStarting && testingNow ) {
+            doWhat();
+        } else {
+            isStarting = false;
+        }
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
@@ -1352,8 +1358,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }
-        mHandler.removeCallbacks(m);
-        mHandler.removeCallbacks(n);
+        mHandler.removeCallbacks(what_to_do_runnable);
+        mHandler.removeCallbacks(do_what_method_runnable);
         retainedFragment.setListForTest_EnhancedTestActivity(listForTest);
         super.onPause();
 
@@ -1456,10 +1462,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                       doWhat();
                     } else {
                         effictive_time_of_answer = how_much_time_remaining_time_for_answer;
-                       /* show_time_for_answer_passed_background_runnable = () -> {
-                                doWhat();
-                        };*/
-                        mHandler.postDelayed(n, effictive_time_of_answer);
+                        mHandler.postDelayed(do_what_method_runnable, effictive_time_of_answer);
                         time_of_starting_time_of_answer = System.currentTimeMillis();
                     }
                 }
@@ -1573,8 +1576,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         enterAnswer.setHint(R.string.enter_your_answer);
         hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
         wrongAnswers = new ArrayList<>(permitedTriesNumber);
-        mHandler.removeCallbacks(m);
-        mHandler.removeCallbacks(n);
+        mHandler.removeCallbacks(what_to_do_runnable);
+        mHandler.removeCallbacks(do_what_method_runnable);
         time_between_answers_passed = false;
         doWhat();
     }
@@ -1606,8 +1609,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         } else {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
-            mHandler.removeCallbacks(m);
-            mHandler.removeCallbacks(n);
+            mHandler.removeCallbacks(what_to_do_runnable);
+            mHandler.removeCallbacks(do_what_method_runnable);
             time_between_answers_passed = false;
             if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
                 show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
@@ -1620,54 +1623,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private void doWhat() {
         if (time_of_answer > 0) {
             effictive_time_of_answer = time_of_answer * 1000;
-            /*show_time_for_answer_passed_background_runnable = () -> {
-                if ( time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
-                    setFalse(ActivityUtility.FalseString.TIME_OUT);
-                    triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                    currentQuestionCounter++;
-                    if (currentQuestionCounter >= questionsNumber) {
-                        check.setEnabled(false);
-                        before_showing_result_dialog = true;
-                        show_result_dialog_runnable = () -> {
-                            showQuestion.setText(R.string.test_has_completed);
-                            enterAnswer.setText(R.string.test_has_completed);
-                            show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                            show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            show_result_dialog();
-                        };
-                        mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
-                        currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                        testingNow = false;
-                        enterAnswer.setEnabled(false);
-                        showNumberOfQuestions.setText("");
-                        remainingQuestionCounter.setText("");
-                        showTries.setText("");
-                        enterAnswer.setHint(R.string.enter_your_answer);
-                        hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                        cursorLoaderAndUpdateDatabase.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
-                        cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
-                        mHandler.removeCallbacks(show_time_for_answer_passed_background_runnable);
-                        time_between_answers_passed = false;
-                        tool_bar_timer.stop();
-                    } else {
-                        showNextQuestion();
-                        show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                        show_question_linearlayout.setPadding(0, 0, 0, 0);
-                        Runnable mRunnable = () -> {
-                            show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                            show_question_linearlayout.setPadding(0, 0, 0, 0);
-                        };
-                        mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
-                    }
-                } else if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
-                    show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
-                    show_question_linearlayout.setPadding(0, 0, 0, 0);
-                    showQuestion.setTextColor(Color.BLACK);
-                    time_between_answers_passed = true;
-                    time_of_starting_time_of_answer = -1;
-                }
-            };*/
-            mHandler.postDelayed(m, effictive_time_of_answer);
+            mHandler.postDelayed(what_to_do_runnable, effictive_time_of_answer);
             time_of_starting_time_of_answer = System.currentTimeMillis();
         }
     }
@@ -1698,8 +1654,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
                         cursorLoaderAndUpdateDatabase.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
                         cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
-                        mHandler.removeCallbacks(m);
-                        mHandler.removeCallbacks(n);
+                        mHandler.removeCallbacks(what_to_do_runnable);
+                        mHandler.removeCallbacks(do_what_method_runnable);
                         time_between_answers_passed = false;
                         tool_bar_timer.stop();
                     } else {

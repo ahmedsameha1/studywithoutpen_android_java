@@ -43,7 +43,7 @@ import com.ahmedsameha1.peninbin.adapters.FieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.CopyFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.CopyMoveDialogFragment;
@@ -875,7 +875,7 @@ public class FieldActivity extends AppCompatActivity implements
                 && !Emulation.isAnyThreadRunning()) {
             if (databaseOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
                 if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
-                    AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
+                    AskAboutContinuePreviousStudyAPeriodDialogFragment fragment2 = new AskAboutContinuePreviousStudyAPeriodDialogFragment();
                     fragment2.setArguments(bundle);
                     fragment2.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
                 } else {

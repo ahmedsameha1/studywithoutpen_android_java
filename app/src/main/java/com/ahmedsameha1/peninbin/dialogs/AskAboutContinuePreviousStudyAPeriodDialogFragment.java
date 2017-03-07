@@ -14,13 +14,14 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 /**
  * Created by ahmed_000 on 10/13/2015.
  */
-public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFragment {
+public class AskAboutContinuePreviousStudyAPeriodDialogFragment extends DialogFragment {
     private long current_field_id;
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private boolean from_notification;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,13 +33,8 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState ) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//        LayoutInflater inflater = getActivity().getLayoutInflater();
         builder.setMessage(R.string.ask_for_continue_previous_study_during)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-//                        ((Contact) getActivity()).continueStudyDuring(true);
+                .setPositiveButton(R.string.yes, (dialog , which) -> {
                                 Intent intent = new Intent(getActivity(),StudyAPeriodActivity.class);
                                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID,(current_field_id));
                                 intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE,true);
@@ -46,19 +42,16 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                                 if ( from_notification ) {
                                     getActivity().finish();
                                 }
-                            }
                         }
-
                 )
-                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-//                                ((Contact) getActivity()).continueStudyDuring(false);
-                                mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
+                .setNegativeButton(R.string.no, (dialog , which) -> {
+                                cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
                                 DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
-                                mySQLiteCursorLoader
+                                cursorLoaderAndUpdateDatabase
                                         .resetEntriesStudyPeriodOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
-                                mySQLiteCursorLoader.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
+                                cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
+                                cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
+                                        Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD, Constants.ElapsedPausedSessionTime.NOT_USED);
                                 Bundle bundle = new Bundle();
                                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                 StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
@@ -66,13 +59,8 @@ public class AskAboutContinuePreviousStudyDuringDialogFragment extends DialogFra
                                 fragment2.show(getActivity().getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
                                 dismiss();
                             }
-                        }
-
                 );
         return builder.create();
     }
-/*    public interface Contact {
-        public void continueStudyDuring( boolean decision );
-    }*/
 }
 

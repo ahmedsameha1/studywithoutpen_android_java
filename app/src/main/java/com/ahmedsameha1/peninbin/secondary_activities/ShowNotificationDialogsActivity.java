@@ -14,7 +14,7 @@ import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyDuringDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.QuickTestDialogFragment;
@@ -121,7 +121,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
 
                         if (databaseOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
                             if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
-                                AskAboutContinuePreviousStudyDuringDialogFragment fragment2 = new AskAboutContinuePreviousStudyDuringDialogFragment();
+                                AskAboutContinuePreviousStudyAPeriodDialogFragment fragment2 = new AskAboutContinuePreviousStudyAPeriodDialogFragment();
                                 fragment2.setArguments(bundle);
                                 fragment2.show(getSupportFragmentManager(), FieldActivity.CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
                             } else {

@@ -9,6 +9,10 @@
         app:showAsAction="ifRoom"
         />
     <item
+        android:id="@+id/time_of_answer"
+        android:title="@string/time_of_answer"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/change_areas"
         android:title="@string/repartition_the_area"
         app:showAsAction="never"/>
