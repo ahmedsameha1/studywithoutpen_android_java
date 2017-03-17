@@ -9,7 +9,7 @@ import com.ahmedsameha1.peninbin.utils.Constants;
  * Created by ahmed on 9/7/16.
  */
 public class SpecialText {
-    public static void addSpecialTextToDBV11(SQLiteDatabase sqLiteDatabase ) {
+    public static void addSpecialTextToDBV11(SQLiteDatabase sqLiteDatabase ) {// TODO: 3/11/17 must reflect the new field type numbers in the old databases 
         String [] special_text1 = { "[after n]","[after v]","[always + adv]","[always + prep]","[always + adv/prep]",
                 "[as form of address]","[before n]","[C]","[I]","[+ infinitive without to]","[L]","[M]","[not continuous]",
                 "[+ obj + adj]","[+ obj + n]","[+ obj + n/adj]","[+ obj + to infinitive]","[+ obj + infinitive without to]",
@@ -26,7 +26,7 @@ public class SpecialText {
             long symbol_id = sqLiteDatabase.insert(Contract.Symbol.TABLE_NAME, null, contentValues);
             contentValues = new ContentValues();
             contentValues.put(Contract.Field_Type_Symbol.COLUMN_SYMBOL, symbol_id);
-            contentValues.put(Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE, Constants.FieldTypes.ENGLISH_TYPE);
+            contentValues.put(Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE, Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE);
             sqLiteDatabase.insert(Contract.Field_Type_Symbol.TABLE_NAME,null, contentValues);
         }
         char [] chars = {1619, 1648, 1622, 1620, 1621, 1750, 1752, 1753, 1754, 1751, 1755, 1756, 1758};

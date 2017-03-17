@@ -31,10 +31,6 @@ import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * Created by ahmed on 3/13/2016.
  */
@@ -66,7 +62,6 @@ public class SearchActivityRecyclerViewAdapter extends
                 new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
                     public void onClick(View v, String currentQuestion, String currentAnswer, long entry_id) {
-                        if (fieldType != Constants.FieldTypes.NOTEBOOK_TYPE) {
                             Intent intent = new Intent(context, StudyActivity.class);
                             intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                             intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
@@ -74,11 +69,6 @@ public class SearchActivityRecyclerViewAdapter extends
                             intent.putExtra(StudyActivity.CURRENT_ANSWER, currentAnswer);
                             intent.putExtra(StudyActivity.ORDER_OF_ENTRIES, 0);
                             context.startActivity(intent);
-                        } else {
-                            Toast toast = Toast.makeText(context, R.string.study_not_for_notebook, Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
-                        }
                     }
 
                     @Override
@@ -159,12 +149,6 @@ public class SearchActivityRecyclerViewAdapter extends
             }
         });
         switch (fieldType) {
-            case Constants.FieldTypes.NOTEBOOK_TYPE:
-                Timestamp timestamp = Timestamp.valueOf(question);
-                Date date = new Date(timestamp.getTime());
-                viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));
-                viewHolder.answer.setText(answer);
-                break;
             default:
                 viewHolder.question.setText(question);
                 viewHolder.answer.setText(answer);

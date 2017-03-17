@@ -36,7 +36,7 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
-import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -66,7 +66,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener,
-        TimeOfAnswerDialogFragment.Contact,
+        TimeOfAnswerOfTestsDialogFragment.Contact,
         ActivityUtility.ActivityTimers {
     public static final String SCREEN_NAME = "QuickTestActivity";
     public static final String PERCENTAGE_OR_NUMBER = "percentage_or_number";
@@ -195,7 +195,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             }
         }
     };
-    private Runnable do_what_method_runnable = () -> doWhat();
+    private Runnable do_what_method_runnable = this::doWhat;
 
 
 
@@ -218,7 +218,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
             current_field_type = databaseOperations.getFieldType(current_field_id);
             isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-            int [] time_of_answer_data = databaseOperations.getTimeOfAnswer(current_field_id, Constants.TimeOfAnswer.TEST);
+            int [] time_of_answer_data = databaseOperations.getTimeOfAnswerOfTests(current_field_id);
             time_of_answer = time_of_answer_data[0];
             time_of_answer_do_what = time_of_answer_data[1];
             time_of_answer_saved = time_of_answer > 0;
@@ -594,13 +594,12 @@ public class QuickTestActivity extends AppCompatActivity implements
             case R.id.time_of_answer:
                 Bundle bundle2 = new Bundle();
                 bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                bundle2.putInt(TimeOfAnswerDialogFragment.TYPE, Constants.TimeOfAnswer.TEST);
-                bundle2.putInt(TimeOfAnswerDialogFragment.CURRENT_TIME_OF_ANSWER, time_of_answer);
-                bundle2.putInt(TimeOfAnswerDialogFragment.CURRENT_TIME_OF_ANSWER_DO_WHAT, time_of_answer_do_what);
-                bundle2.putBoolean(TimeOfAnswerDialogFragment.TIME_OF_ANSWER_SAVED, time_of_answer_saved);
-                TimeOfAnswerDialogFragment timeOfAnswerDialogFragment = new TimeOfAnswerDialogFragment();
-                timeOfAnswerDialogFragment.setArguments(bundle2);
-                timeOfAnswerDialogFragment.show(getSupportFragmentManager(), TimeOfAnswerDialogFragment.TIME_OF_ANSWER_DIALOG_FRAGMENT);
+                bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.CURRENT_TIME_OF_ANSWER, time_of_answer);
+                bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.CURRENT_TIME_OF_ANSWER_DO_WHAT, time_of_answer_do_what);
+                bundle2.putBoolean(TimeOfAnswerOfTestsDialogFragment.TIME_OF_ANSWER_SAVED, time_of_answer_saved);
+                TimeOfAnswerOfTestsDialogFragment timeOfAnswerOfTestsDialogFragment = new TimeOfAnswerOfTestsDialogFragment();
+                timeOfAnswerOfTestsDialogFragment.setArguments(bundle2);
+                timeOfAnswerOfTestsDialogFragment.show(getSupportFragmentManager(), TimeOfAnswerOfTestsDialogFragment.TIME_OF_ANSWER_DIALOG_FRAGMENT);
                 return true;
 
             default:

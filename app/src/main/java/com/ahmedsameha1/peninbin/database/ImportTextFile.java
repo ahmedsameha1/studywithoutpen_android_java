@@ -12,7 +12,6 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.utils.ImportNotebookFieldFromTextFileException;
 import com.ahmedsameha1.peninbin.utils.InvalidTextFileFormatException;
 
 import java.io.BufferedReader;
@@ -31,7 +30,6 @@ public class ImportTextFile {
     private static final int FAILED_IMPORT_NOTIFICATION = 0;
     private static final int FAILED_IMPORT_INVALID_FILE_NOTIFICATION = 1;
     private static final int SUCCESSFUL_IMPORT_NOTIFICATION = 2;
-    private static final int IMPORT_NOTEBOOK_FIELD_FROM_TEXT_FILE = 3;
     private static final int ORDER = 4;
     private static final int RANK = 3;
     private static Thread importThread;
@@ -153,7 +151,6 @@ public class ImportTextFile {
                     field_id = databaseOperations.getFieldId(field_name);
                     if (question.length() > 0 && answer.length() > 0) {
                         if (!databaseOperations.checkEntryDuplication(question, answer, field_id, Contract.Field.STRING_DATA_TYPE)) {
-                            if (databaseOperations.getFieldType(field_id) != Constants.FieldTypes.NOTEBOOK_TYPE) {
                                 if (rank >= 0) {
                                     mySQLiteCursorLoader.insertEntryWithRank(Contract.Field.STRING_DATA_TYPE, question, answer, field_id, rank);
                                 } else if (order >= 0) {
@@ -161,9 +158,6 @@ public class ImportTextFile {
                                 } else {
                                     mySQLiteCursorLoader.insertEntry(Contract.Field.STRING_DATA_TYPE, question, answer, field_id);
                                 }
-                            } else {
-                                throw new ImportNotebookFieldFromTextFileException();
-                            }
                         }
                     }
                 } else {
@@ -188,8 +182,6 @@ public class ImportTextFile {
             showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
         } catch (InvalidTextFileFormatException e) {
             showNotification(context, FAILED_IMPORT_INVALID_FILE_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
-        } catch (ImportNotebookFieldFromTextFileException e) {
-            showNotification(context, IMPORT_NOTEBOOK_FIELD_FROM_TEXT_FILE, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
         } catch (IOException e) {
             showNotification(context, FAILED_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
         }
@@ -229,22 +221,6 @@ public class ImportTextFile {
                                 .setContentTitle(context.getResources().getString(R.string.import_failed))
                                 .setContentText(context.getResources().getString(R.string.invalid_file))
                                 .setTicker(context.getResources().getString(R.string.import_failed))
-                                .setAutoCancel(true);
-                notifyIntent = new Intent(context, MainActivity.class);
-                stackBuilder = TaskStackBuilder.create(context);
-                stackBuilder.addParentStack(MainActivity.class);
-                stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                notificationBuilder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(notificationId, notificationBuilder.build());
-                break;
-            case IMPORT_NOTEBOOK_FIELD_FROM_TEXT_FILE:
-                notificationBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
-                                .setContentTitle(context.getResources().getString(R.string.cannot_import_entries_to_notebook_fields_using_text_files))
-                                .setContentText(context.getResources().getString(R.string.some_entries_have_not_imported))
-                                .setTicker(context.getResources().getString(R.string.some_entries_have_not_imported))
                                 .setAutoCancel(true);
                 notifyIntent = new Intent(context, MainActivity.class);
                 stackBuilder = TaskStackBuilder.create(context);

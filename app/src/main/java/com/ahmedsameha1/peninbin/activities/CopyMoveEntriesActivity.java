@@ -25,6 +25,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.dialogs.CopyFieldDialogFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.SortOptions;
 
 import java.util.ArrayList;
 
@@ -39,7 +40,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
     private ArrayList<Long> list_of_entries = new ArrayList<>();
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
-    private int currentSort;
+    private SortOptions sortOption;
     private DatabaseReadOperations databaseOperations;
 
     @Override
@@ -48,7 +49,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_copy_move_entries);
         current_field_id = getIntent().getLongExtra(FieldActivity.FIELD_ID, 0);
         databaseOperations = new DatabaseReadOperations(this);
-        currentSort = databaseOperations.getFieldSort(current_field_id);
+        sortOption = databaseOperations.getFieldSort(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
         setSupportActionBar(toolbar);
@@ -114,7 +115,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
-                        + "ORDER BY " + FieldActivity.SORT_STRINGS[currentSort],
+                        + "ORDER BY " + sortOption.getSortString(),
                 new String[]{current_field_id + ""});
         return mySQLiteCursorLoader;
     }

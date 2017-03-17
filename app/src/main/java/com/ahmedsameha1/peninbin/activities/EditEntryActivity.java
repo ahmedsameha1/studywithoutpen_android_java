@@ -164,9 +164,7 @@ public class EditEntryActivity extends AppCompatActivity implements
             }
         };
         getLoaderManager().restartLoader(0, null, get_symbol_string);
-        showActionbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        showActionbar.setOnClickListener( view ->  {
                 show_actionbar_card_view.startAnimation(animAlpha);
                 if (actionBarShown) {
                     getSupportActionBar().hide();
@@ -179,11 +177,8 @@ public class EditEntryActivity extends AppCompatActivity implements
                     showActionbar.setText(R.string.hide);
                     mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
                 }
-            }
         });
-        save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        save.setOnClickListener( view -> {
                 save_card_view.startAnimation(animAlpha);
                 String editedQuestion = editQuestion.getText().toString();
                 String editedAnswer = editAnswer.getText().toString();
@@ -222,8 +217,6 @@ public class EditEntryActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-
-            }
         });
 /*        editQuestion.setOnLongClickListener(new View.OnLongClickListener() {
             @Override

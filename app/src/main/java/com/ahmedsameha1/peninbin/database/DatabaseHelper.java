@@ -71,7 +71,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_TIME_OF_ANSWER_TESTS + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT + " INTEGER NOT NULL DEFAULT " + Constants.TimeOfAnswer.NOTIFY + ", "
             + Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD + " INTEGER NOT NULL DEFAULT 0, "
-            + Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD_DO_WHAT + " INTEGER NOT NULL DEFAULT " + Constants.TimeOfAnswer.NOTIFY + ", "
             + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
             + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
             + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
@@ -513,7 +512,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Emulation.modifyEmulationCreationDatesOfAppV53AndHigher(sqLiteDatabase);
         }
         if (oldVersion < 13 ) {
-            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV67(sqLiteDatabase);
+            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV68(sqLiteDatabase);
         }//// TODO: 12/30/16 make the remaining action of upgrading the database 
     }
 

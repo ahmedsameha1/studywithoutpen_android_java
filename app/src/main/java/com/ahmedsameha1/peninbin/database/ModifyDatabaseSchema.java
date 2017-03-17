@@ -11,6 +11,7 @@ import android.util.Log;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.Contract.Field;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -27,9 +28,19 @@ public class ModifyDatabaseSchema {
             + " UNIQUE ( " + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " )"
             + " );";
 
-    public static void onUpgradeDatabaseToDBV13AppV67(SQLiteDatabase sqLiteDatabase) {
+    public static void onUpgradeDatabaseToDBV13AppV68(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
+            sqLiteDatabase.delete(Field.TABLE_NAME, Field.COLUMN_FIELD_TYPE + " = ? ",
+                    new String[]{String.valueOf(Constants.FieldTypes.NOTEBOOK_TYPE_REMOVED_FEATURE)});
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.KORAN_TYPE);
+            sqLiteDatabase.update(Field.TABLE_NAME, contentValues,
+                    Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.KORAN_TYPE_OLD)});
+            contentValues = new ContentValues();
+            contentValues.put(Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE);
+            sqLiteDatabase.update(Field.TABLE_NAME, contentValues,
+                    Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE_OLD)});
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
             sqLiteDatabase.execSQL(rename);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);

@@ -46,7 +46,6 @@
     <string name="complete_or_cancel_last_study_session">Please firstly complete or cancel any (study during period or test)  paused sessions which concerning with this field!</string>
     <string name="repeated_entry">There is an entry that has the same question and the same answer, delete this entry if you want!</string>
     <string name="ask_for_continue_previous_test">Do you want to continue the previous test session?</string>
-    <string name="notbook_feature_is_not_active">This feature is not active on notebook fields!</string>
     <string name="enter_date_time">Click to specify the date and time.</string>
     <string name="write_whatever">Write whatever you want</string>
     <string name="export">Export </string>
@@ -95,7 +94,6 @@
     <string name="number_of_questions_smaller_than">Enter a number of questions which is smaller than or equals %1$d and greater than 0.</string>
     <string name="enter_question_area_answer_area">Enter values for the question area and answer area!</string>
     <string name="show_entry">Entry?!</string>
-    <string name="study_not_for_notebook">This feature is not available for notebook fields</string>
     <string name="search_hint">Search</string>
     <string name="enter_number_of_tries_help">Enter a number of tries here. The app will let you keep tring to enter a correct answer of the current question until your number of tries reaches this number, then the app will include the current entry in the wrong answerd entries and will show you the next question. If you entered a correct answer before the number of your tries reaches this number, the app won\'t include this entry in the wrong answered entries.</string>
     <string name="enter_number_of_days_help">Enter the number of past days from now. Let\'s assume that you want to study all the entries that you have entered in the last five days, so, enter 5 here. Note that you mightn\'t enter anything here. If you entered a number here and a number in the hours below, the app will add them to each other, and will bring the entries of the result period.</string>
@@ -187,7 +185,6 @@
     <string name="select_rank_level">Select rank:</string>
     <string name="sort">Sort</string>
     <string name="change_field_name">Change field name</string>
-    <string name="notebook_reminder">Notebook reminder</string>
     <string name="reminder_set">The reminder has been set</string>
     <string name="time_in_past">This time is in past</string>
     <string name="reminder_canceled">The reminder has been canceled</string>
@@ -214,9 +211,8 @@
     <string name="copy">Copy</string>
     <string name="copy_move_entries">Copy/Move Entries</string>
     <string name="sort_by_entry_order">Sort By Entry Order</string>
-    <string name="cannot_import_entries_to_notebook_fields_using_text_files">Cannot import entries to notebook fields using text file method</string>
     <string name="some_entries_have_not_imported">At least, one entry has not imported</string>
-    <string name="import_from_text_file_help">The file must be text file txt\nYou cannot import entries to notebook fields\nEvery line in the text file must be formated as: \nfield name@@@question~~~answer\nOr:\nfield name@@@question~~~answer%%%rank of entry \nRank of entry is one digit: \n0\tLow \n1\tModerate \n2\tImportant \n3\tVital\nOr:\nfield name@@@question~~~answer###order of entry\nOrder of entry is a number which is larger than or equals zero and lower than billion</string>
+    <string name="import_from_text_file_help">The file must be text file txt\nEvery line in the text file must be formated as: \nfield name@@@question~~~answer\nOr:\nfield name@@@question~~~answer%%%rank of entry \nRank of entry is one digit: \n0\tLow \n1\tModerate \n2\tImportant \n3\tVital\nOr:\nfield name@@@question~~~answer###order of entry\nOrder of entry is a number which is larger than or equals zero and lower than billion</string>
     <string name="text_contained_in_special_text">enter a text that is not contained of any other special text</string>
     <string name="special_text">Special Text</string>
     <string name="schedule_enhanced_test">schedule an enhanced test</string>

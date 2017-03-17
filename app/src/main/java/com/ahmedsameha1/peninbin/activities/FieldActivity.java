@@ -62,6 +62,7 @@ import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.PayloadString;
+import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.android.vending.billing.IInAppBillingService;
 import com.google.android.gms.analytics.HitBuilders;
@@ -95,19 +96,9 @@ public class FieldActivity extends AppCompatActivity implements
     private static final String QUERY_KEY = "query_key";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int SEARCH_ENTRIES_LOADER_ID = 1;
-    public static final int SORT_CREATION_DATE_DESC = 0;
-    public static final int SORT_ANSWER_DESC = 1;
-    public static final int SORT_QUESTION_ASC = 2;
-    public static final int SORT_ANSWER_ASC = 3;
-    public static final int SORT_DATE_DESC = 4;
-    public static final int SORT_DATE_ASC = 5;
-    public static final int SORT_QUESTION_DESC = 6;
-    public static final int SORT_CREATION_DATE_ASC = 7;
-    public static final int SORT_ENTRY_ORDER_ASC = 8;
     public static final String CURRENT_FIELD_NAME = "currentField";
     public static final String CHECK_IF_CONTINUE_STUDY_DURING_SESSION = "checkIfContinueStudyDuringSession";
     public static final String CHECK_IF_CONTINUE_TEST_SESSION = "checkIfContinueTestSession";
-    private static final String CURRENT_SORT = "currentSort";
     private static final String SORT_DIALOG = "sort_dialog";
     public static final String FIELD_ID = "field_id";
     public static final int EDIT_ENTRY = 0;
@@ -125,16 +116,7 @@ public class FieldActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     protected int fieldType = 0;
     private long current_field_id;
-    private int currentSort;
-    public static final String[] SORT_STRINGS = {"datetime(" + Contract.CREATION_DATE + ") DESC",
-            " a DESC",
-            " q ASC",
-            " a ASC",
-            "date( q ) DESC",
-            "date( q ) ASC",
-            " q DESC",
-            "datetime(" + Contract.CREATION_DATE + ") ASC",
-            Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC"};
+    private SortOptions sortOption;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private DatabaseReadOperations databaseOperations;
     private FieldActivityRecyclerViewAdapter mAdapter;
@@ -170,7 +152,7 @@ public class FieldActivity extends AppCompatActivity implements
         databaseOperations = new DatabaseReadOperations(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         fieldType = databaseOperations.getFieldType(current_field_id);
-        currentSort = databaseOperations.getFieldSort(current_field_id);
+        sortOption = databaseOperations.getFieldSort(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_field_activity); // FieldActivity.this Toolbar will act as action bar of the activity
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -200,14 +182,11 @@ public class FieldActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        fab.setOnClickListener( view ->  {
                 Intent intent = new Intent(FieldActivity.this, AddEntryActivity.class);
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                 intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, true);
                 startActivity(intent);
-            }
         });
         mServiceConn = new ServiceConnection() {
             @Override
@@ -231,7 +210,6 @@ public class FieldActivity extends AppCompatActivity implements
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
-                    int sort = args.getInt(CURRENT_SORT);
                     if (id == SEARCH_ENTRIES_LOADER_ID) {
                         String searchString = args.getString(QUERY_KEY);
                         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(FieldActivity.this,
@@ -242,7 +220,7 @@ public class FieldActivity extends AppCompatActivity implements
                                         + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                                         + "  q LIKE ? "
                                         + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
-                                        + " a LIKE ? ORDER BY " + SORT_STRINGS[sort],
+                                        + " a LIKE ? ORDER BY " + sortOption.getSortString(),
                                 new String[]{current_field_id + "", "%" + searchString + "%", current_field_id + "", "%" + searchString + "%"});
                         return mySQLiteCursorLoader;
 
@@ -253,7 +231,7 @@ public class FieldActivity extends AppCompatActivity implements
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
-                                        + "ORDER BY " + SORT_STRINGS[sort],
+                                        + "ORDER BY " + sortOption.getSortString(),
                                 new String[]{current_field_id + ""});
                         return mySQLiteCursorLoader;
 
@@ -369,14 +347,11 @@ public class FieldActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         if (load_or_search) {
-            Bundle bundle = new Bundle();
-            bundle.putInt(CURRENT_SORT, currentSort);
-            getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+            getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
         } else {
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, search_value);
-            bundle.putInt(CURRENT_SORT, currentSort);
-            getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+            getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, null, getFieldEntries);
         }
         if (Money.getNetworkDownGetPurchasesesStatus(this)) {
             IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
@@ -612,7 +587,6 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putInt(CURRENT_SORT, currentSort);
         savedInstanceState.putLong(FIELD_ID, current_field_id);
         savedInstanceState.putString(PAY_LOAD_STRING, pay_load);
         savedInstanceState.putBoolean(INITIAL_CHECK_SUPSCRIPTION, initialCheckSubscription);
@@ -641,9 +615,7 @@ public class FieldActivity extends AppCompatActivity implements
 
                     @Override
                     public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                        Bundle bundle = new Bundle();
-                        bundle.putInt(CURRENT_SORT, currentSort);
-                        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+                        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
                         load_or_search = true;
                         return true;
                     }
@@ -657,7 +629,7 @@ public class FieldActivity extends AppCompatActivity implements
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (!newText.equals("")) {
-                    if (fieldType != Contract.Field.NOTEBOOK_TYPE) {
+                    if (fieldType != Contract.Field.NOTEBOOK_TYPE_REMOVED_FEATURE) {
                         handleIntent(newText);
                     } else {
                         searchView.clearFocus();
@@ -737,16 +709,13 @@ public class FieldActivity extends AppCompatActivity implements
     public void search(String value) {
         Bundle bundle = new Bundle();
         bundle.putString(QUERY_KEY, value);
-        bundle.putInt(CURRENT_SORT, currentSort);
         getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
     }
 
     @Override
-    public void sort(int sort_type) {
-        currentSort = sort_type;
-        Bundle bundle = new Bundle();
-        bundle.putInt(CURRENT_SORT, currentSort);
-        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+    public void sort(SortOptions sortOption) {
+        this.sortOption = sortOption;
+        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
     }
 
     @Override

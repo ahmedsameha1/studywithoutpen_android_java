@@ -15,7 +15,6 @@ import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
-import com.ahmedsameha1.peninbin.adapters.NotebookFieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -23,7 +22,6 @@ import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * Created by ahmed on 24/05/16.
@@ -35,7 +33,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         Log.i("boot receiver","running");
         rescheduleMidnightService(context);
         rescheduleAllSessions(context);
-        rescheduleReminders(context);
     }
 
     private void rescheduleAllSessions(Context context) {
@@ -126,25 +123,5 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
         }
-    }
-
-    private void rescheduleReminders(Context context) {
-        AlarmManager alarm_manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Cursor cursor = new DatabaseReadOperations(context).getReminderDataForRescheduling();
-        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-             cursor.moveToNext()) {
-            Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
-            intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT,ScheduleInFieldDialogFragment.REMINDER);
-            intent.putExtra(NotebookFieldActivityRecyclerViewAdapter.NOTE_TEXT,cursor.getString(0));
-            intent.putExtra(NotebookFieldActivityRecyclerViewAdapter.ENTRY_ID,cursor.getLong(3));
-            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(2), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            if ( Build.VERSION.SDK_INT >= 19 ){
-                alarm_manager.setExact(AlarmManager.RTC, cursor.getLong(1), pendingIntent);
-            } else {
-                alarm_manager.set(AlarmManager.RTC, cursor.getLong(1), pendingIntent);
-            }
-        }
-        cursor.close();
     }
 }

@@ -122,7 +122,6 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                         android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.check_type));
                 String[] field_type_names = getResources().getStringArray(R.array.field_type);
                 List<String> list = new ArrayList<String>(Arrays.asList(field_type_names));
-                list.removeAll(Arrays.asList(field_type_names[Constants.FieldTypes.NOTEBOOK_TYPE]));
                 String[] allowed_field_types = list.toArray(new String[0]);
                 final ArrayAdapter<String> field_type_adapter = new ArrayAdapter<String>(getActivity(),
                         android.R.layout.simple_spinner_item, allowed_field_types);

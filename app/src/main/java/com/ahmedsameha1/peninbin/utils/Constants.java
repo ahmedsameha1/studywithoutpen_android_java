@@ -8,9 +8,11 @@ public class Constants {
 
     public static abstract class FieldTypes {
         public static final int DEFAULT_TYPE = 0;
-        public static final int NOTEBOOK_TYPE = 1;
-        public static final int KORAN_TYPE = 2;
-        public static final int ENGLISH_TYPE = 3;
+        public static final int KORAN_TYPE = 1;
+        public static final int ENGLISH_DICTIONARY_TYPE = 2;
+        public static final int NOTEBOOK_TYPE_REMOVED_FEATURE = 1;
+        public static final int KORAN_TYPE_OLD = 2;
+        public static final int ENGLISH_DICTIONARY_TYPE_OLD = 3;
     }
 
     public static abstract class Rank {

@@ -49,7 +49,7 @@ public class CopyFieldDialogFragment extends DialogFragment {
             public void onShow(DialogInterface dialog) {
                 final Spinner existing_fields = (Spinner) alertDialog.findViewById(R.id.existing_fields);
                 SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(getActivity(),
-                        android.R.layout.simple_list_item_1,databaseOperations.getNonNotebookFieldList(),
+                        android.R.layout.simple_list_item_1,databaseOperations.getFieldList(),
                         new String[]{Contract.Field.COLUMN_FIELD_NAME}, new int[]{android.R.id.text1},0);
                 simpleCursorAdapter.setDropDownViewResource
                         (android.R.layout.simple_spinner_dropdown_item);

@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -94,6 +96,20 @@ public class ActivityUtility {
         }
 
         return false;
+    }
+
+    public static void closeOpenedDialogs(FragmentActivity activity) {
+        FragmentManager fragmentManager = activity.getSupportFragmentManager();
+        List<Fragment> fragments = fragmentManager.getFragments();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        if (fragments != null) {
+            for (Fragment fragment : fragments) {
+                if (fragment instanceof DialogFragment) {
+                    fragmentTransaction.remove(fragment);
+                }
+            }
+        }
+        fragmentTransaction.commit();
     }
     public enum FalseString {
         TIME_OUT, DONT_KNOW

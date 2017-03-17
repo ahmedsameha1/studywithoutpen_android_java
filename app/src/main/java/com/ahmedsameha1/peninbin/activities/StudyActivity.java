@@ -43,6 +43,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -66,7 +67,6 @@ public class StudyActivity extends AppCompatActivity implements
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
-    private static final String CURRENT_SORT = "currentSort";
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int SELECT_ENTRY_REQUEST = 1;
     public static final int RETURN_TIME = 1000;
@@ -88,10 +88,7 @@ public class StudyActivity extends AppCompatActivity implements
     private LinearLayout answerLinearlayout, questionLinearlayout, container;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader1;
     private Cursor fieldEntriesCursor;
-    private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
-    private LoaderManager.LoaderCallbacks<Cursor> get_symbol_string;
     private LoaderManager.LoaderCallbacks<Cursor> loader;
-    private int currentSort;
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
     private DatabaseReadOperations databaseOperations;
@@ -101,6 +98,7 @@ public class StudyActivity extends AppCompatActivity implements
     private int check_type;
     private Tracker mTracker;
     private Chronometer timer;
+    private SortOptions sortOption;
     private long lastPause;
     private String[] symbol, customable_text;
     private int current_field_type;
@@ -120,7 +118,7 @@ public class StudyActivity extends AppCompatActivity implements
         currentQuestion = getIntent().getStringExtra(CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(CURRENT_ANSWER);
         databaseOperations = new DatabaseReadOperations(this);
-        currentSort = databaseOperations.getFieldSort(current_field_id);
+        sortOption = databaseOperations.getFieldSort(current_field_id);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
@@ -178,15 +176,13 @@ public class StudyActivity extends AppCompatActivity implements
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 if ( id == GET_ENTRIES_LOADER_ID ) {
                     if (databaseOperations.getQuestionDataType(current_field_id) == Contract.Field.STRING_DATA_TYPE) {
-                        int sort = args.getInt(CURRENT_SORT);
-
                         mySQLiteCursorLoader1 = new CursorLoaderAndUpdateDatabase(StudyActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
-                                        + "ORDER BY " + FieldActivity.SORT_STRINGS[sort],
+                                        + "ORDER BY " + sortOption.getSortString(),
                                 new String[]{current_field_id + ""});
                         return mySQLiteCursorLoader1;
                     }
@@ -225,75 +221,8 @@ public class StudyActivity extends AppCompatActivity implements
                 }
             }
         };
-        getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if (databaseOperations.getQuestionDataType(current_field_id) == Contract.Field.STRING_DATA_TYPE) {
-                    int sort = args.getInt(CURRENT_SORT);
-
-                    mySQLiteCursorLoader1 = new CursorLoaderAndUpdateDatabase(StudyActivity.this,
-                            "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
-                                    + "ORDER BY " + FieldActivity.SORT_STRINGS[sort],
-                            new String[]{current_field_id + ""});
-                    return mySQLiteCursorLoader1;
-                        /*return new CursorLoader(FieldActivity.this, uri,
-                                new String[]{"rowid _id", Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK},
-                                Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
-                                new String[]{currentField},
-                                sortStrings[sort]);*/
-
-                }
-                return null;
-            }
-
-            @Override
-            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-                fieldEntriesCursor = data;
-            }
-
-            @Override
-            public void onLoaderReset(android.content.Loader<Cursor> loader) {
-                fieldEntriesCursor = null;
-            }
-        };
-        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new CursorLoaderAndUpdateDatabase(StudyActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                        new String[]{current_field_type + ""});
-
-            }
-
-            @Override
-            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-                if (symbol == null && customable_text == null) {
-                    symbol = new String[data.getCount()];
-                    customable_text = new String[data.getCount()];
-                    for (data.moveToFirst(); data.getPosition() < data.getCount();
-                         data.moveToNext()) {
-                        symbol[data.getPosition()] = data.getString(1);
-                        customable_text[data.getPosition()] = data.getString(2);
-                    }
-                }
-            }
-
-            @Override
-            public void onLoaderReset(android.content.Loader<Cursor> loader) {
-
-            }
-        };
-        Bundle bundle = new Bundle();
-        bundle.putInt(CURRENT_SORT, currentSort);
-        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, loader);
-        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, bundle, loader);
+        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, loader);
+        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         showCurrentEntry.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -996,10 +925,7 @@ public class StudyActivity extends AppCompatActivity implements
             searchIntent.setAction(Intent.ACTION_SEARCH);
             searchIntent.putExtra(SearchManager.QUERY, query);
             searchIntent.putExtra(CURRENT_FIELD_ID, current_field_id);
-            searchIntent.putExtra(ORDER_OF_ENTRIES, currentSort);
             startActivityForResult(searchIntent, SELECT_ENTRY_REQUEST);
-            /*intent.putExtra(CURRENT_FIELD, currentField);
-            startActivityForResult(intent,SELECT_ENTRY_REQUEST);*/
         } else {
             super.startActivity(intent);
         }
@@ -1016,9 +942,7 @@ public class StudyActivity extends AppCompatActivity implements
                 enterQuestion.setText(currentQuestion);
                 correctAnswers.setText(Integer.toString(0));
                 this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                Bundle bundle = new Bundle();
-                bundle.putInt(CURRENT_SORT, currentSort);
-                getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, loader);
+                getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, loader);
             }
         } else if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
