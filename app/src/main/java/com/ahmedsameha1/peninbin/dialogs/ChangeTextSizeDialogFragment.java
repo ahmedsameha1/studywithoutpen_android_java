@@ -1,6 +1,7 @@
 package com.ahmedsameha1.peninbin.dialogs;
 
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -16,6 +17,9 @@ import android.support.v7.app.AlertDialog;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
+import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -45,7 +49,11 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
-        setRetainInstance(true);
+        Activity activity = getActivity();
+        if ( !(activity instanceof EnhancedTestActivity || activity instanceof FullyRandomTestActivity ||
+                activity instanceof QuickTestActivity || activity instanceof StudyAPeriodActivity) ) {
+            setRetainInstance(true);
+        }
     }
     @NonNull
     @Override

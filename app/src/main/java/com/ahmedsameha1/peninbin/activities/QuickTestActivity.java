@@ -85,7 +85,6 @@ public class QuickTestActivity extends AppCompatActivity implements
     public static final String CURRENT_QUESTION_COUNTER = "currentQuestionCounter";
     public static final String TRIES_COUNTER = "triesCounter";
     public static final String NEXT_BUTTON_STATE = "newtButtonState";
-    public static final String RESULT = "result";
     public static final String PERMITED_TRIES_NUMBER = "permitedTriesNumber";
     public static final String TESTING_NOW = "testingNow";
     public static final String NUMBER_OF_WRONG_ANSWERS = "numberOfWrongAnswers";
@@ -113,7 +112,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     private ArrayList<String> hints;
     private boolean actionBarShown;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
-    private boolean testingNow = false, before_showing_result_dialog, time_of_answer_saved;
+    private boolean is_testing_now = false, before_showing_result_dialog, time_of_answer_saved;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber, wrongAnswersCounter, percent_or_number, number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private double percentage;
@@ -139,64 +138,12 @@ public class QuickTestActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
-    private boolean isEmulated, isStarting;
+    private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
     private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what;
     private long time_of_starting_time_of_answer = -1, effictive_time_of_answer;
-    private boolean time_between_answers_passed = false;
-    private Runnable what_to_do_runnable = new Runnable() {
-
-        @Override
-        public void run() {
-            if ( time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
-                setFalse(ActivityUtility.FalseString.TIME_OUT);
-                triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                currentQuestionCounter++;
-                if (currentQuestionCounter >= questionsNumber) {
-                    check.setEnabled(false);
-                    before_showing_result_dialog = true;
-                    show_result_dialog_runnable = () -> {
-                        showQuestion.setText(R.string.test_has_completed);
-                        enterAnswer.setText(R.string.test_has_completed);
-                        show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                        show_result_linearlayout.setPadding(0, 0, 0, 0);
-                        show_result_dialog();
-                    };
-                    mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
-                    currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                    testingNow = false;
-                    enterAnswer.setEnabled(false);
-                    showNumberOfQuestions.setText("");
-                    remainingQuestionCounter.setText("");
-                    showTries.setText("");
-                    enterAnswer.setHint(R.string.enter_your_answer);
-                    hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                    mHandler.removeCallbacks(this);
-                    mHandler.removeCallbacks(do_what_method_runnable);
-                    time_of_starting_time_of_answer = -1;
-                    time_between_answers_passed = false;
-                    tool_bar_timer.stop();
-                } else {
-                    showNextQuestion();
-                    show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                    show_question_linearlayout.setPadding(0, 0, 0, 0);
-                    Runnable mRunnable = () -> {
-                        show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                        show_question_linearlayout.setPadding(0, 0, 0, 0);
-                    };
-                    mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
-                }
-            } else if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
-                show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
-                show_question_linearlayout.setPadding(0, 0, 0, 0);
-                showQuestion.setTextColor(Color.BLACK);
-                time_between_answers_passed = true;
-                time_of_starting_time_of_answer = -1;
-            }
-        }
-    };
-    private Runnable do_what_method_runnable = this::doWhat;
-
+    private boolean is_time_of_answer_elapsed = false;
+    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
 
 
     @Override
@@ -254,7 +201,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                 content.setVisibility(View.GONE);
                 mShortAnimationDuration = getResources().getInteger(
                         android.R.integer.config_shortAnimTime);
-                isStarting = true;
+                isStartingFirstTime = true;
             } else {
                 content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
                 mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
@@ -335,9 +282,9 @@ public class QuickTestActivity extends AppCompatActivity implements
                             if (listForTest != null) {
                                 questionsNumber = listForTest.length;
                                 showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                                showNextQuestion();
+                                showQuestion();
                                 enterAnswer.requestFocus();
-                                testingNow = true;
+                                is_testing_now = true;
                             } else {
                                 finish();
                                 ExitActivity.exit(QuickTestActivity.this);
@@ -396,19 +343,20 @@ public class QuickTestActivity extends AppCompatActivity implements
                                 };
                                 mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
                                 currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                                testingNow = false;
+                                is_testing_now = false;
                                 enterAnswer.setEnabled(false);
                                 showNumberOfQuestions.setText("");
                                 remainingQuestionCounter.setText("");
                                 showTries.setText("");
                                 enterAnswer.setHint(R.string.enter_your_answer);
                                 hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                                mHandler.removeCallbacks(what_to_do_runnable);
-                                mHandler.removeCallbacks(do_what_method_runnable);
-                                time_between_answers_passed = false;
+                                mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                                time_of_starting_time_of_answer = -1;
+                                is_time_of_answer_elapsed = false;
+                                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
                                 tool_bar_timer.stop();
                             } else {
-                                showNextQuestion();
+                                showQuestion();
                             }
                         }
                     enterAnswer.setHint(R.string.enter_your_answer);
@@ -546,11 +494,25 @@ public class QuickTestActivity extends AppCompatActivity implements
         if ( !ActivityUtility.hasOpenedDialogs(this) ) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
+
+            // to set the timer on the tool_bar_timer after recreation of activity due configuration change to the last value
+        } else if ( !is_testing_now ) {
+            tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
         }
-        if ( !isStarting && testingNow ) {
-            doWhat();
-        } else {
-            isStarting = false;
+        /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
+         * do not call it after destruction because it will be called from onrestoreinstancestate method
+         * do not call it if the test has already finished
+         */
+        if ( !isStartingFirstTime && !is_starting_after_destruction && is_testing_now) {
+            scheduleWhatToDoAfterTimeOfAnswerElapsed();
+        }
+        // at this point this flag has performed its role so I return it to its default value
+        if ( isStartingFirstTime ) {
+            isStartingFirstTime = false;
+        }
+        // at this point this flag has performed its role so I return it to its default value
+        if ( is_starting_after_destruction ) {
+            is_starting_after_destruction = false;
         }
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
@@ -1234,8 +1196,10 @@ public class QuickTestActivity extends AppCompatActivity implements
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }
-        mHandler.removeCallbacks(what_to_do_runnable);
-        mHandler.removeCallbacks(do_what_method_runnable);
+        /* Canceling the timers of time of answer when the user go away from the activity
+         or before the activity finishes
+         or before the activity destroyed due a change of configuration*/
+        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
         retainedFragment.setListForTest_QuickTestActivity(listForTest);
         super.onPause();
     }
@@ -1257,7 +1221,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInsatanceState.putBoolean(NEXT_BUTTON_STATE, check.isEnabled());
-        savedInsatanceState.putBoolean(TESTING_NOW, testingNow);
+        savedInsatanceState.putBoolean(TESTING_NOW, is_testing_now);
         savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
@@ -1267,15 +1231,29 @@ public class QuickTestActivity extends AppCompatActivity implements
         savedInsatanceState.putLong(TIMER_LAST_PAUSE, lastPause);
         savedInsatanceState.putStringArray(SYMBOL, symbol);
         savedInsatanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
-        savedInsatanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, time_between_answers_passed);
+        savedInsatanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInsatanceState.putInt(TIME_FOR_ANSWER_DO_WHAT, time_of_answer_do_what);
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         saveUserLayoutChanges(savedInsatanceState);
         savedInsatanceState.putBoolean(BEFORE_SHOWING_RESULT_DIALOG, before_showing_result_dialog);
         mHandler.removeCallbacks(show_result_dialog_runnable);
+                       /* Saving the remaining time till completion of the current timer of time of answer because the activity
+        will be destroyed, not finishing normally.
+        * We don't need to save this remaining time when the activity finishes normally
+        * or when the user go away from the activity */
         if (time_of_starting_time_of_answer > -1) {
             savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER,
                     effictive_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
+        }
+                      /* To run scheduleWhatToDoAfterTimeOfAnswerElapsed() method after restarting the activity
+        in case the activity destroyed while a dialog is shown */
+        else if ( ActivityUtility.hasOpenedDialogs(this) ) {
+            savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000 );
+        }
+        // call this method to prevent the dialogs from being shown after the recreation of the activity
+        // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
+        if ( is_testing_now ) { // don't close dialogs (exactly the result dialog) if the test already has finished
+            ActivityUtility.closeOpenedDialogs(this);
         }
         super.onSaveInstanceState(savedInsatanceState);
     }
@@ -1289,7 +1267,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
         permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
-        testingNow = savedInstanceState.getBoolean(TESTING_NOW);
+        is_testing_now = savedInstanceState.getBoolean(TESTING_NOW);
         boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
         questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
         hints = savedInstanceState.getStringArrayList(HINTS);
@@ -1300,10 +1278,11 @@ public class QuickTestActivity extends AppCompatActivity implements
         before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
         time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
         time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
-        time_between_answers_passed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+        is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+        is_starting_after_destruction = true;
         restoreUserLayoutChanges(savedInstanceState);
         if (!before_showing_result_dialog) {
-            if (testingNow) {
+            if (is_testing_now) {
                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
                 showTries.setText(Integer.toString(triesCounter + 1));
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -1311,7 +1290,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                 check.setEnabled(nextState);
                 enterAnswer.setEnabled(true);
                 ifMoreThanOnce();
-                if ( time_between_answers_passed && time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+                if ( is_time_of_answer_elapsed && time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
                     show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
                     show_question_linearlayout.setPadding(0, 0, 0, 0);
                     showQuestion.setTextColor(Color.BLACK);
@@ -1319,10 +1298,10 @@ public class QuickTestActivity extends AppCompatActivity implements
                 if (savedInstanceState.containsKey(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER)) {
                     long how_much_time_remaining_time_for_answer = savedInstanceState.getLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER);
                     if (how_much_time_remaining_time_for_answer <= 0) {
-                        doWhat();
+                        DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
                     } else {
                         effictive_time_of_answer = how_much_time_remaining_time_for_answer;
-                        mHandler.postDelayed(do_what_method_runnable, effictive_time_of_answer);
+                        mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
                         time_of_starting_time_of_answer = System.currentTimeMillis();
                     }
                 }
@@ -1431,7 +1410,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     }
 
 
-    private void showNextQuestion() {
+    private void showQuestion() {
         showQuestion.setText(listForTest[currentQuestionCounter][0]);
         new AsyncTask<Void, Void, Void>() {
 
@@ -1447,10 +1426,10 @@ public class QuickTestActivity extends AppCompatActivity implements
         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
         enterAnswer.setHint(R.string.enter_your_answer);
         hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-        mHandler.removeCallbacks(what_to_do_runnable);
-        mHandler.removeCallbacks(do_what_method_runnable);
-        time_between_answers_passed = false;
-        doWhat();
+        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+        time_of_starting_time_of_answer = -1;
+        is_time_of_answer_elapsed = false;
+        scheduleWhatToDoAfterTimeOfAnswerElapsed();
     }
 
     // TODO: 2/21/17 make proguard options on gradle before publish true
@@ -1467,7 +1446,7 @@ public class QuickTestActivity extends AppCompatActivity implements
         this.time_of_answer = time_of_answer;
         this.time_of_answer_do_what = time_of_answer_do_what;
         this.time_of_answer_saved = time_for_answer_saved;
-        doWhat();
+        scheduleWhatToDoAfterTimeOfAnswerElapsed();
     }
 
 
@@ -1476,13 +1455,13 @@ public class QuickTestActivity extends AppCompatActivity implements
         if ( isCounting ) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
-            doWhat();
+            scheduleWhatToDoAfterTimeOfAnswerElapsed();
         } else {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
-            mHandler.removeCallbacks(what_to_do_runnable);
-            mHandler.removeCallbacks(do_what_method_runnable);
-            time_between_answers_passed = false;
+            mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+            time_of_starting_time_of_answer = -1;
+            is_time_of_answer_elapsed = false;
             if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
                 show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
                 show_question_linearlayout.setPadding(0, 0, 0, 0);
@@ -1490,11 +1469,57 @@ public class QuickTestActivity extends AppCompatActivity implements
             }
         }
     }
-
-    private void doWhat() {
+    private void DoWhatYouHaveToDoAfterTimeOfAnswerElapsed() {
+        if ( time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
+            setFalse(ActivityUtility.FalseString.TIME_OUT);
+            triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+            currentQuestionCounter++;
+            if (currentQuestionCounter >= questionsNumber) {
+                check.setEnabled(false);
+                before_showing_result_dialog = true;
+                show_result_dialog_runnable = () -> {
+                    showQuestion.setText(R.string.test_has_completed);
+                    enterAnswer.setText(R.string.test_has_completed);
+                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                    show_result_linearlayout.setPadding(0, 0, 0, 0);
+                    show_result_dialog();
+                };
+                mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+                currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                is_testing_now = false;
+                enterAnswer.setEnabled(false);
+                showNumberOfQuestions.setText("");
+                remainingQuestionCounter.setText("");
+                showTries.setText("");
+                enterAnswer.setHint(R.string.enter_your_answer);
+                hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                time_of_starting_time_of_answer = -1;
+                is_time_of_answer_elapsed = false;
+                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                tool_bar_timer.stop();
+            } else {
+                showQuestion();
+                show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                show_question_linearlayout.setPadding(0, 0, 0, 0);
+                Runnable mRunnable = () -> {
+                    show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                    show_question_linearlayout.setPadding(0, 0, 0, 0);
+                };
+                mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
+            }
+        } else if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+            show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
+            show_question_linearlayout.setPadding(0, 0, 0, 0);
+            showQuestion.setTextColor(Color.BLACK);
+            is_time_of_answer_elapsed = true;
+            time_of_starting_time_of_answer = -1;
+        }
+    }
+    private void scheduleWhatToDoAfterTimeOfAnswerElapsed() {
         if (time_of_answer > 0) {
             effictive_time_of_answer = time_of_answer * 1000;
-            mHandler.postDelayed(what_to_do_runnable, effictive_time_of_answer);
+            mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
             time_of_starting_time_of_answer = System.currentTimeMillis();
         }
     }
@@ -1516,19 +1541,20 @@ public class QuickTestActivity extends AppCompatActivity implements
             };
             mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-            testingNow = false;
+            is_testing_now = false;
             enterAnswer.setEnabled(false);
             showNumberOfQuestions.setText("");
             remainingQuestionCounter.setText("");
             showTries.setText("");
             enterAnswer.setHint(R.string.enter_your_answer);
             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-            mHandler.removeCallbacks(what_to_do_runnable);
-            mHandler.removeCallbacks(do_what_method_runnable);
-            time_between_answers_passed = false;
+            mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+            time_of_starting_time_of_answer = -1;
+            is_time_of_answer_elapsed = false;
+            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         } else {
-            showNextQuestion();
+            showQuestion();
             show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
             show_question_linearlayout.setPadding(0, 0, 0, 0);
             Runnable mRunnable = () -> {

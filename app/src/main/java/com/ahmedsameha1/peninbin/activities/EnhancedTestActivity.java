@@ -204,7 +204,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         time_of_answer = time_of_answer_data[0];
         time_of_answer_do_what = time_of_answer_data[1];
         time_of_answer_saved = time_of_answer > 0;
-        boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
         percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
         controlled_portion = getIntent().getIntExtra(CONTROLLED_PORTION, -1);
@@ -232,12 +231,14 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         if (savedInstanceState == null) {
+            boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
             content.setVisibility(View.GONE);
             mShortAnimationDuration = getResources().getInteger(
                     android.R.integer.config_shortAnimTime);
             lastPause = databaseOperations.getElapsedPausedSessionTime(current_field_id, Constants.ElapsedPausedSessionTime.ENHANCED_TEST);
             isStartingFirstTime = true;
         } else {
+            boolean_continue = savedInstanceState.getBoolean(BOOLEAN_CONTINUE);
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
             mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
             lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
@@ -328,6 +329,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             enterAnswer.setEnabled(true);
                             enterAnswer.requestFocus();
                             is_testing_now = true;
+                            boolean_continue = false;
                         }
                     } else {
                         if (listForTest == null) {
@@ -341,7 +343,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             showQuestion();
                             enterAnswer.requestFocus();
                             is_testing_now = true;
-                            boolean_continue = false;
                         }
                     }
                     crossfade();
@@ -1281,7 +1282,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
     private long getEntry_id(String queston, String answer) {
         long entry_id = 0;
-        boolean which_cursor = boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
+        boolean which_cursor = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
              fieldEntriesCursor.moveToNext()) {
             if (which_cursor) { // continue previous session
@@ -1375,7 +1376,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000 );
         }
         // call this method to prevent the dialogs from being shown after the recreation of the activity
-        ActivityUtility.closeOpenedDialogs(this);
+        // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
+        if ( is_testing_now ) { // don't close dialogs (exactly the result dialog) if the test already has finished
+            ActivityUtility.closeOpenedDialogs(this);
+        }
         super.onSaveInstanceState(savedInsatanceState);
     }
 
@@ -1394,7 +1398,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
         current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
-        boolean_continue = savedInstanceState.getBoolean(BOOLEAN_CONTINUE);
         customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
         time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
         time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);

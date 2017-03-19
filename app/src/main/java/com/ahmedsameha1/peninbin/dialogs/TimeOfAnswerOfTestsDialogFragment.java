@@ -1,5 +1,6 @@
 package com.ahmedsameha1.peninbin.dialogs;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
@@ -26,6 +27,10 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
+import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
+import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
@@ -57,6 +62,11 @@ public class TimeOfAnswerOfTestsDialogFragment extends DialogFragment {
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
+        Activity activity = getActivity();
+        if ( !(activity instanceof EnhancedTestActivity || activity instanceof FullyRandomTestActivity ||
+                activity instanceof QuickTestActivity || activity instanceof StudyAPeriodActivity) ) {
+            setRetainInstance(true);
+        }
     }
 
 
@@ -207,12 +217,6 @@ public class TimeOfAnswerOfTestsDialogFragment extends DialogFragment {
         });
         return alertDialog;
     }
-
-/*    @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-        ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
-    }*/
 
     public interface Contact {
         void setTimeOfAnswer(int time_of_answer, int time_of_answer_do_what, boolean saved);

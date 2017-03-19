@@ -109,9 +109,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     public static final String TIME_BETWEEN_ANSWERS_PASSED = "time_between_answers_passed";
     private static final String HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER = "how_much_time_remaining_from_time_for_answer";
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
-    private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
     private long startingTime;
-    boolean boolean_continue, actionBarShown, time_between_answers_passed = false;
+    boolean boolean_continue, actionBarShown, is_time_of_answer_elapsed = false;
     private Cursor cursor;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private ArrayList<String> questions = new ArrayList<String>(), answers = new ArrayList<String>();
@@ -143,21 +142,11 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
-    private boolean isEmulated, isStarting;
+    private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
     private int time_of_answer;
     private long time_of_starting_time_of_answer = -1, effictive_time_of_answer;
-    private Runnable what_to_do_runnable = new Runnable() {
+    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
 
-        @Override
-        public void run() {
-                show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
-                show_question_linearlayout.setPadding(0, 0, 0, 0);
-                showQuestion.setTextColor(Color.BLACK);
-                time_between_answers_passed = true;
-                time_of_starting_time_of_answer = -1;
-        }
-    };
-    private Runnable do_what_method_runnable = this::doWhat;
 
     private int question_data_type;
     private Thread pauseThread = new Thread(new Runnable() {
@@ -310,7 +299,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         } else {
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
                         }
-                        doWhat();
+                        scheduleWhatToDoAfterTimeOfAnswerElapsed();
                     } else {
                         Toast toast = Toast.makeText(StudyAPeriodActivity.this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -342,7 +331,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             mShortAnimationDuration = getResources().getInteger(
                     android.R.integer.config_shortAnimTime);
             lastPause = databaseOperations.getElapsedPausedSessionTime(current_field_id, Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD);
-            isStarting = true;
+            isStartingFirstTime = true;
         } else {
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
             mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
@@ -435,9 +424,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                         ifMoreThanOnce();
-                        mHandler.removeCallbacks(what_to_do_runnable);
-                        mHandler.removeCallbacks(do_what_method_runnable);
-                        doWhat();
+                        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                        time_of_starting_time_of_answer = -1;
+                        scheduleWhatToDoAfterTimeOfAnswerElapsed();
                     } else {
                         cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, question_data_type);
                         cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
@@ -475,14 +464,14 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                     ifMoreThanOnce();
                     remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                     hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                    mHandler.removeCallbacks(what_to_do_runnable);
-                    mHandler.removeCallbacks(do_what_method_runnable);
-                    doWhat();
+                    mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                    time_of_starting_time_of_answer = -1;
+                    scheduleWhatToDoAfterTimeOfAnswerElapsed();
                 }
                 show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
                 show_question_linearlayout.setPadding(0, 0, 0, 0);
                 showQuestion.setTextColor(Color.WHITE);
-                time_between_answers_passed = false;
+                is_time_of_answer_elapsed = false;
             }
             enterAnswer.setHint(R.string.enter_your_answer);
         });
@@ -610,14 +599,24 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (!ActivityUtility.hasOpenedDialogs(this)) {
+        if ( !ActivityUtility.hasOpenedDialogs(this) ) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
         }
-        if (!isStarting) {
-            doWhat();
-        } else {
-            isStarting = false;
+        /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
+         * do not call it after destruction because it will be called from onrestoreinstancestate method
+         * do not call it if the test has already finished
+         */
+        if ( !isStartingFirstTime && !is_starting_after_destruction ) {
+            scheduleWhatToDoAfterTimeOfAnswerElapsed();
+        }
+        // at this point this flag has performed its role so I return it to its default value
+        if ( isStartingFirstTime ) {
+            isStartingFirstTime = false;
+        }
+        // at this point this flag has performed its role so I return it to its default value
+        if ( is_starting_after_destruction ) {
+            is_starting_after_destruction = false;
         }
         mTracker.setScreenName(SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
@@ -720,8 +719,10 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }
-        mHandler.removeCallbacks(what_to_do_runnable);
-        mHandler.removeCallbacks(do_what_method_runnable);
+        /* Canceling the timers of time of answer when the user go away from the activity
+         or before the activity finishes
+         or before the activity destroyed due a change of configuration*/
+        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
         retainedFragment.setListForTest_StudyDuringActivity(listForTest);
     }
 
@@ -935,13 +936,25 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         savedInstanceState.putLong(TIMER_LAST_PAUSE, lastPause);
         savedInstanceState.putStringArray(SYMBOL, symbol);
         savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
-        savedInstanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, time_between_answers_passed);
+        savedInstanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInstanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         saveUserLayoutChanges(savedInstanceState);
+                       /* Saving the remaining time till completion of the current timer of time of answer because the activity
+        will be destroyed, not finishing normally.
+        * We don't need to save this remaining time when the activity finishes normally
+        * or when the user go away from the activity */
         if (time_of_starting_time_of_answer > -1) {
             savedInstanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER,
                     effictive_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
         }
+                     /* To run scheduleWhatToDoAfterTimeOfAnswerElapsed() method after restarting the activity
+        in case the activity destroyed while a dialog is shown */
+        else if ( ActivityUtility.hasOpenedDialogs(this) ) {
+            savedInstanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000 );
+        }
+        // call this method to prevent the dialogs from being shown after the recreation of the activity
+        // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
+        ActivityUtility.closeOpenedDialogs(this);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -962,7 +975,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
         symbol = savedInstanceState.getStringArray(SYMBOL);
         time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
-        time_between_answers_passed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+        is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+        is_starting_after_destruction = true;
         restoreUserLayoutChanges(savedInstanceState);
         showQuestion.setText(listForTest[currentQuestionCounter][0]);
         showTries.setText(Integer.toString(triesCounter + 1));
@@ -972,7 +986,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         _continue.setEnabled(_continueState);
         enterAnswer.setEnabled(!_continueState);
         ifMoreThanOnce();
-        if (time_between_answers_passed) {
+        if (is_time_of_answer_elapsed) {
             show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
             show_question_linearlayout.setPadding(0, 0, 0, 0);
             showQuestion.setTextColor(Color.BLACK);
@@ -980,10 +994,10 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         if (savedInstanceState.containsKey(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER)) {
             long how_much_time_remaining_time_for_answer = savedInstanceState.getLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER);
             if (how_much_time_remaining_time_for_answer <= 0) {
-                doWhat();
+                DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
             } else {
                 effictive_time_of_answer = how_much_time_remaining_time_for_answer;
-                mHandler.postDelayed(do_what_method_runnable, effictive_time_of_answer);
+                mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
                 time_of_starting_time_of_answer = System.currentTimeMillis();
             }
         }
@@ -1107,7 +1121,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     public void setTimeOfAnswer(int time_of_answer, boolean time_for_answer_saved) {
         this.time_of_answer = time_of_answer;
         this.time_of_answer_saved = time_for_answer_saved;
-        doWhat();
+        scheduleWhatToDoAfterTimeOfAnswerElapsed();
     }
 
 
@@ -1116,23 +1130,29 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         if (isCounting) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
-            doWhat();
+            scheduleWhatToDoAfterTimeOfAnswerElapsed();
         } else {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
-            mHandler.removeCallbacks(what_to_do_runnable);
-            mHandler.removeCallbacks(do_what_method_runnable);
-            time_between_answers_passed = false;
+            mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+            time_of_starting_time_of_answer = -1;
+            is_time_of_answer_elapsed = false;
                 show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
                 show_question_linearlayout.setPadding(0, 0, 0, 0);
                 showQuestion.setTextColor(Color.WHITE);
         }
     }
-
-    private void doWhat() {
+    private void DoWhatYouHaveToDoAfterTimeOfAnswerElapsed() {
+        show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
+        show_question_linearlayout.setPadding(0, 0, 0, 0);
+        showQuestion.setTextColor(Color.BLACK);
+        is_time_of_answer_elapsed = true;
+        time_of_starting_time_of_answer = -1;
+    }
+    private void scheduleWhatToDoAfterTimeOfAnswerElapsed() {
         if (time_of_answer > 0) {
             effictive_time_of_answer = time_of_answer * 1000;
-            mHandler.postDelayed(what_to_do_runnable, effictive_time_of_answer);
+            mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
             time_of_starting_time_of_answer = System.currentTimeMillis();
         }
     }
