@@ -32,10 +32,7 @@ import com.google.android.gms.analytics.Tracker;
  * Created by ahmed on 12/20/2015.
  */
 public class ImportFromWhatDialogFragment extends DialogFragment {
-    public static final String EXPORT_FIELD_DIALOG_FRAGMENT = "exportFieldDialogFragment";
     public static final String IMPORT_FROM_WHAT_DIALOG_FRAGMENT = "import_from_what_dialog_fragment";
-    public static final int TEXT_FILE_CODE = 0;
-    public static final int APP_FILE_CODE = 1;
     private Context context;
     private Tracker mTracker;
 

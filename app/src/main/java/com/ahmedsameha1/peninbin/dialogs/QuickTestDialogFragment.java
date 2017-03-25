@@ -45,7 +45,6 @@ import com.google.android.gms.analytics.HitBuilders;
  * Created by ahmed on 2/8/2016.
  */
 public class QuickTestDialogFragment extends DialogFragment {
-    public static final String TEST_DIALOG_FRAGMENT = "test_dialog_fragment";
     public static final String SCHEDULE_WHAT = "schedule_what";
     public static final String QUICK_TEST_DIALOG = "quick_test_dialog";
     public static final String YEAR = "year";

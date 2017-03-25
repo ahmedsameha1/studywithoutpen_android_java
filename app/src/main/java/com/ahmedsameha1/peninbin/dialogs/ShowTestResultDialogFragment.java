@@ -29,27 +29,23 @@ import java.util.ArrayList;
 public class ShowTestResultDialogFragment extends DialogFragment {
     public static final String SHOW_TEST_RESULT_DIALOG_FRAGMENT = "showTestResultDialogFragment";
     public static final String TEST_TYPE = "test_type";
-    private int questionsNumber, wrongAnswersNumber;
-    private double correctAnswersPercent;
+    private int wrongAnswersNumber;
     private String message;
     private long current_field_id;
     private int question_data_type;
     ArrayList<WrongItem> wrongItemList;
-    private DatabaseReadOperations databaseOperations;
     private int test_type;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseOperations = new DatabaseReadOperations(getActivity());
+        DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
-/*        wrongItemList = (ArrayList<WrongItem>) getArguments()
-                .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);*/
-        questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
+        int questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
         wrongAnswersNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         test_type = getArguments().getInt(TEST_TYPE);
-        correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) /questionsNumber;
+        double correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) / questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();
         numberFormat.setMaximumFractionDigits(1);
         message = getString(R.string.Your_correct_answers_was) + " " + numberFormat.format(correctAnswersPercent)+ " " +
@@ -97,6 +93,8 @@ public class ShowTestResultDialogFragment extends DialogFragment {
                         bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                         bundle.putInt(TEST_TYPE, test_type);
                         bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItemList);
+                        bundle.putInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER, getArguments()
+                                .getInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER));
                         Intent intent = new Intent(getActivity(),WrongAnswersActivity.class);
                         intent.putExtra(WrongAnswersActivity.WRONG_ITEM_LIST,bundle);
                         startActivity(intent);

@@ -74,7 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
             + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
             + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
-            + Field.COLUMN_EMULATED_ERROR + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_EMULATED_ERROR + " INTEGER NOT NULL DEFAULT 0, " //// TODO: 3/24/17 delete this column and change all what needs to change accordingly
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'))"
             + " );";
     /*    public static final String CREATE_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Field_Type.TABLE_NAME

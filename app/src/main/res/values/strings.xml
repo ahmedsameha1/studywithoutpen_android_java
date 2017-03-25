@@ -285,4 +285,6 @@
     <string name="notify_me">Notify me</string>
     <string name="show_next_question">Move to next question</string>
     <string name="dont_know">Don\'t know</string>
+    <string name="enter_emulated_errors">Enter emulated errors</string>
+    <string name="ask_again">Ask again</string>
 </resources>

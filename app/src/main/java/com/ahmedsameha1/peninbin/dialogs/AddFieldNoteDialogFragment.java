@@ -26,14 +26,11 @@ public class AddFieldNoteDialogFragment extends DialogFragment  {
     public static final String ADD_FIELD_NOTE_DIALOG_FRAGMENT = "add_field_note_dialog_fragment";
 
     private Tracker mTracker;
-    private long current_field_id;
 
     @Override
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-
         mTracker = application.getDefaultTracker();
         setRetainInstance(true);
     }

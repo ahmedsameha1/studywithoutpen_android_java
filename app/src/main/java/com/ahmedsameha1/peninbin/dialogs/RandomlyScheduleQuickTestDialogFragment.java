@@ -38,12 +38,8 @@ import java.util.StringTokenizer;
  * Created by ahmed on 9/23/2015.
  */
 public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
-    public static final String SHOW_STUDY_DURING_DIALOG_FRAGMENT = "showStudyDuringDialogFragment";
-    public static final int MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
-    public static final int MILLISECONDS_IN_HOUR = 60 * 60 * 1000;
     public static final String RANDOMLY_SCHEDULE_QUICK_TEST = "randomly_schedule_quick_test";
     private long current_field_id;
-    private boolean from_notification;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private DatabaseReadOperations databaseOperations;
 

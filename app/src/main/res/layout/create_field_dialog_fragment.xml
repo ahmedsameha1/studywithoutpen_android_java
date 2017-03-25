@@ -1,71 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingEnd="20dp"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
-    android:paddingStart="20dp">
-
-    <EditText
-        android:id="@+id/enter_field_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:hint="@string/enter_field_name"
-        android:imeOptions="flagNoExtractUi"
-        android:paddingLeft="7dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginLeft="5dp"
-        android:text="@string/field_type" />
-
-    <Spinner
-        android:id="@+id/field_type_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
-        android:layout_marginTop="6dp" />
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/show_default_field_options"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:paddingEnd="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingStart="20dp">
+
+        <EditText
+            android:id="@+id/enter_field_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="@string/enter_field_name"
+            android:imeOptions="flagNoExtractUi"
+            android:paddingLeft="7dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
             android:layout_marginLeft="5dp"
-            android:text="@string/check_type" />
+            android:layout_marginStart="5dp"
+            android:text="@string/field_type" />
 
         <Spinner
-            android:id="@+id/check_type_spinner"
+            android:id="@+id/field_type_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="6dp"
             android:layout_marginTop="6dp" />
 
-
-        <CheckBox
-            android:id="@+id/read_answer"
+        <LinearLayout
+            android:id="@+id/show_default_field_options"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="3dp"
-            android:text="@string/read_answer" />
+            android:orientation="vertical"
+            android:visibility="gone">
 
-        <Spinner
-            android:id="@+id/locales_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            android:layout_marginTop="6dp"
-            android:visibility="gone" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:text="@string/check_type" />
+
+            <Spinner
+                android:id="@+id/check_type_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:layout_marginTop="6dp" />
+
+
+            <CheckBox
+                android:id="@+id/read_answer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="3dp"
+                android:text="@string/read_answer" />
+
+            <Spinner
+                android:id="@+id/locales_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:layout_marginTop="6dp"
+                android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

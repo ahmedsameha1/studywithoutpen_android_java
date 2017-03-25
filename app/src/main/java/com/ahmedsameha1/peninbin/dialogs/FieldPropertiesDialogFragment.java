@@ -47,7 +47,6 @@ import com.google.android.gms.analytics.Tracker;
  * Created by ahmed on 28/04/16.
  */
 public class FieldPropertiesDialogFragment extends DialogFragment {
-    public static final String TEST_DIALOG_FRAGMENT = "test_dialog_fragment";
     public static final String LOCALE_DISPLAY_NAMES = "local_display_names";
     public static final String LOCALE_LIST = "locale_list";
     public static final String TTS_AVAILABLE = "tts_available";

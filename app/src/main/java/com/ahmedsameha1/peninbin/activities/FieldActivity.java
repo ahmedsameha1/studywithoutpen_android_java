@@ -50,7 +50,6 @@ import com.ahmedsameha1.peninbin.dialogs.CopyMoveDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.SearchDateOrTextDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
@@ -78,7 +77,6 @@ import java.util.StringTokenizer;
 
 public class FieldActivity extends AppCompatActivity implements
         FieldActivityFragmentDrawer.FragmentDrawerListener,
-        SearchDateOrTextDialogFragment.Contact,
         SortEntriesDialogFragment.Contact,
         DeleteEntryDialogFragment.Contact,
         FieldPropertiesDialogFragment.Contact,
@@ -705,12 +703,7 @@ public class FieldActivity extends AppCompatActivity implements
             toast.show();
         }
     }
-    @Override
-    public void search(String value) {
-        Bundle bundle = new Bundle();
-        bundle.putString(QUERY_KEY, value);
-        getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
-    }
+
 
     @Override
     public void sort(SortOptions sortOption) {

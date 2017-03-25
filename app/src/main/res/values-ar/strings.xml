@@ -275,4 +275,6 @@
     <string name="show_next_question">Show next question</string>
     <string name="_question">سؤال</string>
     <string name="dont_know">Don\'t know</string>
+    <string name="enter_emulated_errors">Enter emulated errors</string>
+    <string name="ask_again">Ask again</string>
 </resources>
