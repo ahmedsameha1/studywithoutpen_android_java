@@ -365,7 +365,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        /*boolean dbExist = checkDataBase();
+        boolean dbExist = checkDataBase();
         if(dbExist) {
             Log.d(TAG, "Database exists.");
             deleteDb();
@@ -380,8 +380,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
             }
-        }*/
-        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
+        }
+/*        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);//
@@ -399,7 +399,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_SYMBOL_TABLE);
         sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_SYMBOL_TABLE);
         sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
-        SpecialText.addSpecialTextToDBV11(sqLiteDatabase);
+        SpecialText.addSpecialTextToDBV11(sqLiteDatabase);*/
     }
 
     private boolean checkDataBase() {
@@ -440,7 +440,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.enableWriteAheadLogging();
         // Enable foreign key constraints
         db.execSQL("PRAGMA foreign_keys=ON;");
-
     }
 
     @Override

@@ -51,6 +51,7 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.AboutDialogFragment;
@@ -152,12 +153,12 @@ public class MainActivity extends AppCompatActivity implements
         recyclerView = (RecyclerView) findViewById(R.id.main_activity_recyclerview);
         drawerFragment = (MainActivityFragmentDrawer)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
- /*       try {
+        try {
             DatabaseHelper.getInstance(this).getWritableDatabase().rawQuery("SELECT _id FROM field",null);
         } catch (android.database.sqlite.SQLiteException e) {
             DatabaseHelper.getInstance(this).close();
-            recreate();
-        }*/
+//            recreate();
+        }
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
@@ -240,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements
                 new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
         bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
-        fff();
+//        fff();
         new ShowEula(this).show();
     }
 

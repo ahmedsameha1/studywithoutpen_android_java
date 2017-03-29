@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "24.0.3"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.ahmedsameha1.peninbin"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 67
-        versionName "3.0.9.1"
+        versionCode 68
+        versionName "3.0.9.2"
         multiDexEnabled true
     }
     buildTypes {

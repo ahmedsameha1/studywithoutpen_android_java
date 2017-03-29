@@ -264,4 +264,5 @@
     <string name="change_field_name_background_thread">لا يمكنك تغيير اسم المجال أثناء جريان عملية تصدير/استيراد/محاكاة</string>
     <string name="subscription1_description">افتح الوظائف المغلقة. يمكنك  طلب إعادة المال من المطور من خلال البريد الإلكتروني</string>
     <string name="subscription_description">صفة الاشتراك</string>
+    <string name="please_subscribe">لطفا اشترك</string>
 </resources>

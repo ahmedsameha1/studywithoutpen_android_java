@@ -19,6 +19,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Money;
 
 import java.util.Date;
 
@@ -36,16 +37,17 @@ public class StudyDuringDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
-        from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
+        from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION, false);
         setRetainInstance(true);
     }
+
     @Override
-    public Dialog onCreateDialog( Bundle savedInstanceState ) {
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
                 builder.setTitle(R.string.start_studying_a_period)
-                        .setView(inflater.inflate(R.layout.study_during_dialog_fragment,null))
+                        .setView(inflater.inflate(R.layout.study_during_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -60,58 +62,64 @@ public class StudyDuringDialogFragment extends DialogFragment {
 
                     @Override
                     public void onClick(View view) {
-                        try {
-                            EditText enterDay = (EditText) alertDialog.findViewById(R.id.enter_day);
-                            EditText enterHour = (EditText) alertDialog.findViewById(R.id.enter_hour);
-                            EditText enterTries = (EditText) alertDialog.findViewById(R.id.enter_tries);
-                            if ( enterTries.getText().toString().length() > 0 ) {
-                                int trys = Integer.parseInt(enterTries.getText().toString());
-                                if ( trys > 0 ) {
-                                    int day = 0;
-                                    int hour = 0;
-                                    if ( enterDay.getText().toString().length() > 0 || enterHour.getText().toString().length() > 0 ) {
-                                        if ( enterDay.getText().toString().length() > 0) {
-                                            day = Integer.parseInt(enterDay.getText().toString());
+                        if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity())) {
+                            try {
+                                EditText enterDay = (EditText) alertDialog.findViewById(R.id.enter_day);
+                                EditText enterHour = (EditText) alertDialog.findViewById(R.id.enter_hour);
+                                EditText enterTries = (EditText) alertDialog.findViewById(R.id.enter_tries);
+                                if (enterTries.getText().toString().length() > 0) {
+                                    int trys = Integer.parseInt(enterTries.getText().toString());
+                                    if (trys > 0) {
+                                        int day = 0;
+                                        int hour = 0;
+                                        if (enterDay.getText().toString().length() > 0 || enterHour.getText().toString().length() > 0) {
+                                            if (enterDay.getText().toString().length() > 0) {
+                                                day = Integer.parseInt(enterDay.getText().toString());
+                                            }
+                                            if (enterHour.getText().toString().length() > 0) {
+                                                hour = Integer.parseInt(enterHour.getText().toString());
+                                            }
+                                            long duration = (day * ((long) MILLISECONDS_IN_DAY)) + (hour * ((long) MILLISECONDS_IN_HOUR));
+                                            Date now = new Date();
+                                            //                            long nowInMilliseconds = now.getTime();
+                                            long nowInMilliseconds = System.currentTimeMillis();
+                                            long startingTime = nowInMilliseconds - duration;
+                                            Intent intent = new Intent(getActivity(), StudyAPeriodActivity.class);
+                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(StudyAPeriodActivity.STARTING_TIME, startingTime);
+                                            intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE, false);
+                                            intent.putExtra(StudyAPeriodActivity.NUMBER_OF_TRIES, trys);
+                                            startActivity(intent);
+                                            if (from_notification) {
+                                                getActivity().finish();
+                                            }
+                                            dismiss();
+                                        } else {
+                                            Toast toast = Toast.makeText(getActivity(), R.string.please_enter_at_least_one_value, Toast.LENGTH_SHORT);
+                                            toast.setGravity(Gravity.TOP, 0, 400);
+                                            toast.show();
                                         }
-                                        if ( enterHour.getText().toString().length() > 0) {
-                                            hour = Integer.parseInt(enterHour.getText().toString());
-                                        }
-                                        long duration = ( day * ( (long) MILLISECONDS_IN_DAY) ) + ( hour * ( (long) MILLISECONDS_IN_HOUR) );
-                                        Date now = new Date();
-                                        //                            long nowInMilliseconds = now.getTime();
-                                        long nowInMilliseconds = System.currentTimeMillis();
-                                        long startingTime = nowInMilliseconds - duration;
-                                        Intent intent = new Intent(getActivity(),StudyAPeriodActivity.class);
-                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                                        intent.putExtra(StudyAPeriodActivity.STARTING_TIME,startingTime);
-                                        intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE,false);
-                                        intent.putExtra(StudyAPeriodActivity.NUMBER_OF_TRIES,trys);
-                                        startActivity(intent);
-                                        if ( from_notification ) {
-                                            getActivity().finish();
-                                        }
-                                        dismiss();
                                     } else {
-                                        Toast toast = Toast.makeText(getActivity(),R.string.please_enter_at_least_one_value,Toast.LENGTH_SHORT);
-                                        toast.setGravity(Gravity.TOP,0,400);
+                                        Toast toast = Toast.makeText(getActivity(), R.string.greater_zero, Toast.LENGTH_SHORT);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
                                         toast.show();
                                     }
                                 } else {
-                                    Toast toast = Toast.makeText(getActivity(),R.string.greater_zero,Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.TOP,0,400);
+                                    Toast toast = Toast.makeText(getActivity(), R.string.enter_tries_number, Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
                                     toast.show();
                                 }
-                            } else {
-                                Toast toast = Toast.makeText(getActivity(),R.string.enter_tries_number,Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
+                            } catch (NumberFormatException e) {
+                                Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
+                            } catch (Resources.NotFoundException e) {
+                                e.printStackTrace();
                             }
-                        } catch (NumberFormatException e) {
-                            Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,400);
+                        } else {
+                            Toast toast = Toast.makeText(getActivity(), R.string.please_subscribe, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
-                        } catch (Resources.NotFoundException e) {
-                            e.printStackTrace();
                         }
                     }
                 });

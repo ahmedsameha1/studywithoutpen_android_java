@@ -166,6 +166,12 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                             public void onSelectedFilePaths(final String[] files) {
                                 //files is the array of the paths of files selected by the Application User.
                                 if ( files.length > 0 ) {
+                                    Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                    toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
                                     ImportTextFile.startImportThread(context, files [0]);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)

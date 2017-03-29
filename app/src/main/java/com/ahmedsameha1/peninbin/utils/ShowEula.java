@@ -7,9 +7,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 
 import com.ahmedsameha1.peninbin.R;
+
+import java.util.List;
 
 /**
  * Created by me on 30/10/16.
@@ -34,7 +38,6 @@ public class ShowEula {
     }
 
     public void show() {
-
         final PackageInfo versionInfo = getPackageInfo();
 
         // the eulaKey changes every time you increment the version number in the AndroidManifest.xml

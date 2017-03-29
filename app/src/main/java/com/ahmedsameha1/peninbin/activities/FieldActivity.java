@@ -432,85 +432,13 @@ public class FieldActivity extends AppCompatActivity implements
         // user_eligible = true;
         switch (position) {
             case ENHANCED_TEST:
-                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
-                    startEnhancedTest();
-                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
-                    if (NetworkReceiver.isOnline(this)) {
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    } else {
-                        initialCheckSubscription = false;
-                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
-                        toast1.setGravity(Gravity.TOP, 0, 400);
-                        toast1.show();
-                    }
-                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
-                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                } else {
-                    startPurchaseFlow();
-                }
+                startEnhancedTest();
                 break;
             case FULLY_RANDOM_TEST:
-                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
                     startFulllyRandomTest();
-                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
-                    if (NetworkReceiver.isOnline(this)) {
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    } else {
-                        initialCheckSubscription = false;
-                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
-                        toast1.setGravity(Gravity.TOP, 0, 400);
-                        toast1.show();
-                    }
-                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
-                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                } else {
-                    startPurchaseFlow();
-                }
                 break;
             case STUDY_PERIOD:
-                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
                     startStudyAPeriod();
-                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
-                    if (NetworkReceiver.isOnline(this)) {
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    } else {
-                        initialCheckSubscription = false;
-                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
-                        toast1.setGravity(Gravity.TOP, 0, 400);
-                        toast1.show();
-                    }
-                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
-                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                } else {
-                    startPurchaseFlow();
-                }
                 break;
             case FIELD_PROPERTIES:
                 String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
@@ -543,28 +471,10 @@ public class FieldActivity extends AppCompatActivity implements
                     bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                     scheduleInFieldDialogFragment.setArguments(bundle1);
                     scheduleInFieldDialogFragment.show(getSupportFragmentManager(), ScheduleInFieldDialogFragment.SCHEDULE_IN_FIELD);
-                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
-                    if (NetworkReceiver.isOnline(this)) {
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    } else {
-                        initialCheckSubscription = false;
-                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
-                        toast1.setGravity(Gravity.TOP, 0, 400);
-                        toast1.show();
-                    }
-                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
-                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.please_subscribe, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
-                } else {
-                    startPurchaseFlow();
                 }
                 break;
             case Field_INFORMATION:
@@ -580,28 +490,10 @@ public class FieldActivity extends AppCompatActivity implements
                     bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
                     copyMoveDialogFragment.setArguments(bundle2);
                     copyMoveDialogFragment.show(getSupportFragmentManager(), CopyMoveDialogFragment.COPY_MOVE_DIALOG_FRAGMENT);
-                } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
-                    if (NetworkReceiver.isOnline(this)) {
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    } else {
-                        initialCheckSubscription = false;
-                        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-                        Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.need_internet), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.notified_if_eligible), Toast.LENGTH_SHORT);
-                        toast1.setGravity(Gravity.TOP, 0, 400);
-                        toast1.show();
-                    }
-                } else if (Money.getUnsolvableErrorGetPurchases(this)) {
-                    Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.error), Toast.LENGTH_SHORT);
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.please_subscribe, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
-                } else {
-                    startPurchaseFlow();
                 }
                 break;
         }
