@@ -13,6 +13,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -118,7 +119,7 @@ public class ActivityUtility {
     }
 
     public static void shuffleArray(String[][] array) {
-        Random rnd = new Random();
+        SecureRandom rnd = new SecureRandom();
         for (int i = array.length - 1; i > 0; i--) {
             int index = rnd.nextInt(i + 1);
             // Simple swap
@@ -132,7 +133,7 @@ public class ActivityUtility {
     }
 
     public static void shuffleArray(String[][] strings_array, long[] ids) {
-        Random rnd = new Random();
+        SecureRandom rnd = new SecureRandom();
         for (int i = strings_array.length - 1; i > 0; i--) {
             int index = rnd.nextInt(i + 1);
             // Simple swap
@@ -176,19 +177,31 @@ public class ActivityUtility {
             } else {
                 entry_wrongness = -1;
             }
-            if ((fieldEntriesCursor.getInt(3) >= rank && entry_wrongness >= wrongness)
-                    || (fieldEntriesCursor.getInt(3) >= rank && wrongness <= 0) ) {
-             /*   controlled[controlled_counter][0] = fieldEntriesCursor.getString(1);
-                controlled[controlled_counter][1] = fieldEntriesCursor.getString(2);*/
-                controlled_arraylist.add(new Object[]{fieldEntriesCursor.getLong(0),fieldEntriesCursor.getString(1),
-                        fieldEntriesCursor.getString(2), entry_wrongness, rank, fieldEntriesCursor.getInt(6)});
-                controlled_counter++;
+            if ( rank > Constants.Rank.LOW && wrongness > 0 ) {
+                if (fieldEntriesCursor.getInt(3) >= rank || entry_wrongness >= wrongness) {
+                    controlled_arraylist.add(new Object[]{fieldEntriesCursor.getLong(0), fieldEntriesCursor.getString(1),
+                            fieldEntriesCursor.getString(2), entry_wrongness, rank, fieldEntriesCursor.getInt(6)});
+                    controlled_counter++;
+                } else {
+                    uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
+                    uncontrolled[uncontrolled_counter][1] = fieldEntriesCursor.getString(2);
+                    uncontrolled_ids[uncontrolled_counter] = fieldEntriesCursor.getLong(0);
+                    uncontrolled_whether_asked[uncontrolled_counter] = fieldEntriesCursor.getInt(6);
+                    uncontrolled_counter++;
+                }
             } else {
-                uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
-                uncontrolled[uncontrolled_counter][1] = fieldEntriesCursor.getString(2);
-                uncontrolled_ids[uncontrolled_counter] = fieldEntriesCursor.getLong(0);
-                uncontrolled_whether_asked[uncontrolled_counter] = fieldEntriesCursor.getInt(6);
-                uncontrolled_counter++;
+                if ((fieldEntriesCursor.getInt(3) >= rank && entry_wrongness >= wrongness)
+                        || (fieldEntriesCursor.getInt(3) >= rank && wrongness <= 0)) {
+                    controlled_arraylist.add(new Object[]{fieldEntriesCursor.getLong(0), fieldEntriesCursor.getString(1),
+                            fieldEntriesCursor.getString(2), entry_wrongness, rank, fieldEntriesCursor.getInt(6)});
+                    controlled_counter++;
+                } else {
+                    uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
+                    uncontrolled[uncontrolled_counter][1] = fieldEntriesCursor.getString(2);
+                    uncontrolled_ids[uncontrolled_counter] = fieldEntriesCursor.getLong(0);
+                    uncontrolled_whether_asked[uncontrolled_counter] = fieldEntriesCursor.getInt(6);
+                    uncontrolled_counter++;
+                }
             }
         }
         if ( rank >= Constants.Rank.LOW && wrongness_postion > 0 ) {

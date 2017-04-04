@@ -20,21 +20,10 @@ import java.util.ArrayList;
  */
 public class CopyMoveEntriesActivityRecyclerViewAdapter extends
         CursorRecyclerViewAdapter<CopyMoveEntriesActivityRecyclerViewViewHolder> {
-    private Context context;
-    private long field_id;
-    private int question_data_type;
-    private SharedPreferences sharedPreferences;
-    private DatabaseReadOperations databaseOperations;
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private ArrayList<Long> list_of_entries;
     public CopyMoveEntriesActivityRecyclerViewAdapter(Context context, Cursor data, ArrayList<Long> list) {
         super(context,data);
-        this.context = context;
         list_of_entries = list;
-        databaseOperations = new DatabaseReadOperations(context);
-        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-//        this.question_data_type = databaseOperations.getQuestionDataType(field_id);
     }
     @Override
     public CopyMoveEntriesActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -59,7 +48,6 @@ public class CopyMoveEntriesActivityRecyclerViewAdapter extends
         final long entry_id = data.getLong(0);
         final String question = data.getString(1);
         final String answer = data.getString(2);
-        viewHolder.field_id = field_id;
         viewHolder.entry_id = entry_id;
         viewHolder.currentQuestion = question;
         viewHolder.currentAnswer = answer;

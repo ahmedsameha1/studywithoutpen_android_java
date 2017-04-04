@@ -1025,7 +1025,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         bundle.putInt(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
-        ;
+        bundle.putInt(PERMITED_TRIES_NUMBER,permitedTriesNumber);
         fragment.setArguments(bundle);
         fragment.show(getSupportFragmentManager(), ShowTestResultDialogFragment.SHOW_TEST_RESULT_DIALOG_FRAGMENT);
     }

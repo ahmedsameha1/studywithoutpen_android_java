@@ -63,6 +63,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private Spinner field_spinner;
     private EditText enter_question;
     private EditText enter_answer;
+    private EditText enter_order;
     private TextView showActionbar;
     private SimpleCursorAdapter simple_cursor_adapter;
     private Chronometer timer;
@@ -105,6 +106,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         final Spinner rank_spinner = (Spinner) findViewById(R.id.rank_spinner);
         enter_question = (EditText) findViewById(R.id.question);
         enter_answer = (EditText) findViewById(R.id.answer);
+        enter_order = (EditText) findViewById(R.id.order);
         final TextView add_entry = (TextView) findViewById(R.id.add_entry);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
@@ -198,12 +200,13 @@ public class AddEntryActivity extends AppCompatActivity implements
                 add_entry_cardview.startAnimation(animAlpha);
                 String question = enter_question.getText().toString();
                 String answer = enter_answer.getText().toString();
+            int order = "".equals(enter_order.getText().toString()) ? -1 : Integer.parseInt(enter_order.getText().toString());
                 if (question.length() > 0 && answer.length() > 0) {
                     if (fromFieldActivity) {
 
                         if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
-                            mySQLiteCursorLoader.insertEntryWithRank(question_data_type, question, answer,
-                                    current_field_id, rank_spinner.getSelectedItemPosition());
+                            mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                    current_field_id, rank_spinner.getSelectedItemPosition(), order);
                         } else {
                             Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                             toast.setGravity(Gravity.TOP, 0, 400);
@@ -212,11 +215,12 @@ public class AddEntryActivity extends AppCompatActivity implements
 
                         enter_question.setText("");
                         enter_answer.setText("");
+                        enter_order.setText("");
                     } else {
                         if (field_chosen) {
                             if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
-                                mySQLiteCursorLoader.insertEntryWithRank(question_data_type, question, answer,
-                                        current_field_id, rank_spinner.getSelectedItemPosition());
+                                mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                        current_field_id, rank_spinner.getSelectedItemPosition(), order);
                             } else {
                                 Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -225,6 +229,7 @@ public class AddEntryActivity extends AppCompatActivity implements
 
                             enter_question.setText("");
                             enter_answer.setText("");
+                            enter_order.setText("");
                         } else {
                             Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);

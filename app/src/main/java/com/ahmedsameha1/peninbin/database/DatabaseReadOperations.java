@@ -162,6 +162,20 @@ public class DatabaseReadOperations {
         cursor.close();
         return rank;
     }
+
+    public int getEntryOrder( long entry_id ) {
+        int rank;
+        Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
+                Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""},null,null,null);
+        cursor.moveToFirst();
+        if ( cursor.isNull(0) ) {
+            rank = -1;
+        } else {
+            rank = cursor.getInt(0);
+        }
+        cursor.close();
+        return rank;
+    }
     public boolean isReadAnswer(long field_id) {
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_READ_ANSWER},
                 Contract.COLUMN_ID + " = ? ",

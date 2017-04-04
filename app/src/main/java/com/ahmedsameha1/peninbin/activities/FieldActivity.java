@@ -103,6 +103,7 @@ public class FieldActivity extends AppCompatActivity implements
     public static final String EDITED_ENTRY_ID = "edited_entry_id";
     public static final String EDITED_QUESTION = "edited_question";
     public static final String EDITED_ANSWER = "edited_answer";
+    public static final String EDITED_ORDER = "edited_order";
     private static final int MY_DATA_CHECK_CODE = 1234;
     private static final String FIELD_OPTIONS_DIALOG = "field_options_dialog";
     public static final String ANALYTICS_CATEGORY = "Field Activity Category";
@@ -134,6 +135,7 @@ public class FieldActivity extends AppCompatActivity implements
     private SharedPreferences sharedPreferences;
     private String pay_load;
     private boolean initialCheckSubscription = true;
+    private StringBuilder search_string_highlight = new StringBuilder();
 
 
     @Override
@@ -162,7 +164,7 @@ public class FieldActivity extends AppCompatActivity implements
         getSupportActionBar().setTitle(databaseOperations.getFieldName(current_field_id));
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setDrawerListener(FieldActivity.this);
-        mAdapter = new FieldActivityRecyclerViewAdapter(FieldActivity.this, null, current_field_id, fieldType);
+        mAdapter = new FieldActivityRecyclerViewAdapter(FieldActivity.this, null, current_field_id, search_string_highlight);
         final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(FieldActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -180,11 +182,11 @@ public class FieldActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        fab.setOnClickListener( view ->  {
-                Intent intent = new Intent(FieldActivity.this, AddEntryActivity.class);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, true);
-                startActivity(intent);
+        fab.setOnClickListener(view -> {
+            Intent intent = new Intent(FieldActivity.this, AddEntryActivity.class);
+            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+            intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, true);
+            startActivity(intent);
         });
         mServiceConn = new ServiceConnection() {
             @Override
@@ -196,8 +198,8 @@ public class FieldActivity extends AppCompatActivity implements
             public void onServiceConnected(ComponentName name,
                                            IBinder service) {
                 billingService = IInAppBillingService.Stub.asInterface(service);
-                if ( Money.getNetworkDownGetPurchasesesStatus(FieldActivity.this) &&
-                        NetworkReceiver.isOnline(FieldActivity.this) ) {
+                if (Money.getNetworkDownGetPurchasesesStatus(FieldActivity.this) &&
+                        NetworkReceiver.isOnline(FieldActivity.this)) {
                     Money.checkSubscription(FieldActivity.this, billingService);
                     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
                     sharedPreferences.registerOnSharedPreferenceChangeListener(FieldActivity.this);
@@ -212,7 +214,8 @@ public class FieldActivity extends AppCompatActivity implements
                         String searchString = args.getString(QUERY_KEY);
                         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(FieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                        + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
@@ -225,7 +228,8 @@ public class FieldActivity extends AppCompatActivity implements
                     } else if (id == GET_ENTRIES_LOADER_ID) {
                         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(FieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                        + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
@@ -258,7 +262,7 @@ public class FieldActivity extends AppCompatActivity implements
         super.onPause();
         try {
             unregisterReceiver(networkReceiver);
-        } catch ( IllegalArgumentException e ) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -287,7 +291,8 @@ public class FieldActivity extends AppCompatActivity implements
                 String question = data.getStringExtra(EDITED_QUESTION);
                 String answer = data.getStringExtra(EDITED_ANSWER);
                 int rank = data.getIntExtra(EDITED_RANK, 0);
-                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer, rank);
+                int order = data.getIntExtra(EDITED_ORDER, -1);
+                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer, rank, order);
             }
         } else if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
@@ -306,7 +311,7 @@ public class FieldActivity extends AppCompatActivity implements
                             JSONObject jo = new JSONObject(purchaseData);
                             String pay_load = jo.getString("developerPayload");
                             String order_id = jo.getString("orderId");
-                            if ( pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id) ) {
+                            if (pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id)) {
                                 Money.putUserSubscriptionStatus(this, true);
                                 Money.removeAllGetPurchasesErrors(this);
                                 new CursorLoaderAndUpdateDatabase(this).addOrderId(order_id);
@@ -341,6 +346,7 @@ public class FieldActivity extends AppCompatActivity implements
             }
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -349,7 +355,8 @@ public class FieldActivity extends AppCompatActivity implements
         } else {
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, search_value);
-            getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, null, getFieldEntries);
+            search_string_highlight.replace(0, search_string_highlight.length(), search_value);
+            getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
         }
         if (Money.getNetworkDownGetPurchasesesStatus(this)) {
             IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
@@ -362,7 +369,7 @@ public class FieldActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
-        if ( mServiceConn != null ) {
+        if (mServiceConn != null) {
             unbindService(mServiceConn);
         }
     }
@@ -462,7 +469,7 @@ public class FieldActivity extends AppCompatActivity implements
                 break;
             case STUDY_PERIOD:
                 if (user_eligible || Money.getUserAllowedDueAnError(this)) {
-                   startStudyAPeriod();
+                    startStudyAPeriod();
                 } else if (Money.getNetworkDownGetPurchasesesStatus(this)) {
                     if (NetworkReceiver.isOnline(this)) {
                         Toast toast = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
@@ -596,7 +603,7 @@ public class FieldActivity extends AppCompatActivity implements
         initialCheckSubscription = savedInstanceState.getBoolean(INITIAL_CHECK_SUPSCRIPTION);
         super.onRestoreInstanceState(savedInstanceState);
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; FieldActivity.this adds items to the action bar if it is present.
@@ -672,6 +679,7 @@ public class FieldActivity extends AppCompatActivity implements
                 return super.onOptionsItemSelected(item);
         }
     }
+
     private void startPurchaseFlow() {
         if (NetworkReceiver.isOnline(this)) {
             pay_load = PayloadString.getString();
@@ -733,7 +741,7 @@ public class FieldActivity extends AppCompatActivity implements
                 if (Money.getUserSubscriptionStatus(this)) {
                     unregisterReceiver(networkReceiver);
                     sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
-                    if ( !initialCheckSubscription ) {
+                    if (!initialCheckSubscription) {
                         NotificationCompat.Builder notificationBuilder = null;
                         Intent notifyIntent = null;
                         PendingIntent resultPendingIntent = null;

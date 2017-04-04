@@ -258,6 +258,60 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
+    public void insertEntry(int question_data_type, String question, String answer, long field_id, int rank, int order) {
+        DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
+        sqLiteDatabase.beginTransactionNonExclusive();
+        try {
+            if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+                long question_id, answer_id;
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Contract.STring.COLUMN_VALUE, answer);
+                try {
+                    answer_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
+                } catch (Exception e) {
+                    Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                            Contract.STring.COLUMN_VALUE + " = ? ",
+                            new String[]{answer}, null, null, null);
+                    c.moveToFirst();
+                    answer_id = c.getLong(0);
+                    c.close();
+                }
+                contentValues = new ContentValues();
+                contentValues.put(Contract.STring.COLUMN_VALUE, question);
+                try {
+                    question_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
+                } catch (Exception e) {
+                    Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                            Contract.STring.COLUMN_VALUE + " = ? ",
+                            new String[]{question}, null, null, null);
+                    c.moveToFirst();
+                    question_id = c.getLong(0);
+                    c.close();
+                }
+                contentValues = new ContentValues();
+                contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
+                contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
+                contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
+                contentValues.put(Contract.String_Entry.COLUMN_RANK, rank);
+                if ( order <= -1 ) {
+                    contentValues.putNull(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY);
+                } else {
+                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, order);
+                }
+                int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
+                if (number_of_entries_everyday > Constants.NOT_EMULATED) {
+                    contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                            Emulation.getEmulationCreationDate(field_id, number_of_entries_everyday, sqLiteDatabase));
+                }
+                sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
+            } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
+    }
+
     public void insertEntryWithOrder(int question_data_type, String question, String answer, long field_id, int order) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         sqLiteDatabase.beginTransactionNonExclusive();
@@ -516,7 +570,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-    public void editEntry(long entry_id, int question_data_type, String question, String answer, int rank) {
+    public void editEntry(long entry_id, int question_data_type, String question, String answer, int rank, int order) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -554,6 +608,11 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                         new String[]{entry_id + ""}, SQLiteDatabase.CONFLICT_IGNORE);
                 contentValues = new ContentValues();
                 contentValues.put(Contract.String_Entry.COLUMN_RANK, rank);
+                if ( order <= -1 ) {
+                    contentValues.putNull(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY);
+                } else {
+                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, order);
+                }
                 sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
                         Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {

@@ -277,4 +277,7 @@
     <string name="dont_know">Don\'t know</string>
     <string name="enter_emulated_errors">Enter emulated errors</string>
     <string name="ask_again">Ask again</string>
+    <string name="order">Order</string>
+    <string name="asked">Asked: %1$s</string>
+    <string name="wrongly_answered">Wrongly answered: %1$s</string>
 </resources>

@@ -8,14 +8,17 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.adapters.SearchActivityRecyclerViewAdapter;
@@ -24,10 +27,14 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by ahmed on 3/2/2016.
@@ -35,11 +42,14 @@ import com.google.android.gms.analytics.Tracker;
 public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> ,
         DeleteEntryDialogFragment.Contact{
     public static final String SCREEN_NAME = "SearchActivity";
-    public static final int SORT_CREATION_DATE_DESC = 6;
-    public static final int DEFAULT_SORT = SORT_CREATION_DATE_DESC;
     public static final int SEARCH_LOADER = 0;
+    public static final String EDITED_ENTRY_ID = "edited_entry_id";
+    public static final String EDITED_QUESTION = "edited_question";
+    public static final String EDITED_ANSWER = "edited_answer";
+    public static final String EDITED_RANK = "edited_rank";
+    public static final String EDITED_ORDER = "edited_order";
+    public static final int EDIT_ENTRY = 0;
     private static final String QUERY_KEY = "query_key";
-    private static final String CURRENT_SORT = "current_sort";
     private static final String CURRENT_FIELD_ID = "current_field_id";
     private SearchActivityRecyclerViewAdapter mAdapter;
     private long current_field_id;
@@ -47,11 +57,13 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private SortOptions sortOption;
     private DatabaseReadOperations databaseReadOperations;
     private Tracker mTracker;
+    private StringBuilder search_string_highlight = new StringBuilder();
+    private int question_data_type;
+
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        int fieldType;
         RecyclerView recyclerView;
         if ( savedInstanceState != null ) {
             current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
@@ -59,12 +71,12 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
         }
         databaseReadOperations = new DatabaseReadOperations(this);
+        question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
-        fieldType = databaseReadOperations.getFieldType(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.search_activity_recyclerview);
         setSupportActionBar(toolbar);
-        mAdapter = new SearchActivityRecyclerViewAdapter(SearchActivity.this,null, current_field_id,fieldType);
+        mAdapter = new SearchActivityRecyclerViewAdapter(SearchActivity.this,null, current_field_id, search_string_highlight);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(SearchActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -100,6 +112,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                     intent.getStringExtra(SearchManager.QUERY);
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, query);
+            search_string_highlight.replace(0, search_string_highlight.length(), query);
             getLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
         }
     }
@@ -136,8 +149,8 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         String searchString = args.getString(QUERY_KEY);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                        + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                        + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                        + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                         + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                         + "  q LIKE ? "
@@ -161,7 +174,21 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public void deleteEntry(long entry_id, int question_data_type) {
         mySQLiteCursorLoader.deleteEntry(entry_id,question_data_type);
     }
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == EDIT_ENTRY) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                long entry_id = data.getLongExtra(EDITED_ENTRY_ID, 1);
+                String question = data.getStringExtra(EDITED_QUESTION);
+                String answer = data.getStringExtra(EDITED_ANSWER);
+                int rank = data.getIntExtra(EDITED_RANK, 0);
+                int order = data.getIntExtra(EDITED_ORDER, -1);
+                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer, rank, order);
+            }
+        }
+    }
 
     public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {
 

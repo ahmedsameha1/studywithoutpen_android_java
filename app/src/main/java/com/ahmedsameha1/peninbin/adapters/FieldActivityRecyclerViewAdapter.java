@@ -10,6 +10,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
+import android.text.Spannable;
+import android.text.style.BackgroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,21 +39,18 @@ import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
  */
 public class FieldActivityRecyclerViewAdapter extends
         CursorRecyclerViewAdapter<FieldActivityRecyclerViewViewHolder> {
-    public static final String GET_CONFIRMATION = "getConfirmation";
     private Context context;
     private long field_id;
-    private int fieldType;
     private int question_data_type;
     private SharedPreferences sharedPreferences;
     private DatabaseReadOperations databaseOperations;
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
-    public FieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, int fieldType ) {
+    private StringBuilder search_string;
+    public FieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, StringBuilder search_string ) {
         super(context,data);
         this.context = context;
         this.field_id = field_id;
-        this.fieldType = fieldType;
+        this.search_string = search_string;
         databaseOperations = new DatabaseReadOperations(context);
-        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         this.question_data_type = databaseOperations.getQuestionDataType(field_id);
     }
@@ -87,6 +86,8 @@ public class FieldActivityRecyclerViewAdapter extends
         final long entry_id = data.getLong(0);
         final String question = data.getString(1);
         final String answer = data.getString(2);
+        final int asked_counter = data.getInt(3);
+        final int wrong_answer_counter = data.getInt(4);
         viewHolder.field_id = field_id;
         viewHolder.entry_id = entry_id;
         viewHolder.currentQuestion = question;
@@ -99,7 +100,6 @@ public class FieldActivityRecyclerViewAdapter extends
                     Intent intent = new Intent(context, EditEntryActivity.class);
                     intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
                     intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
-                    intent.putExtra(EditEntryActivity.FIELD_TYPE, fieldType );
                     intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
                     intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
                     intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
@@ -146,33 +146,52 @@ public class FieldActivityRecyclerViewAdapter extends
                 }
             }
         });
-        viewHolder.question.setText(question);
-        viewHolder.answer.setText(answer);
-        /*switch (fieldType) {
-            case Constants.FieldTypes.DEFAULT_TYPE:
-                viewHolder.question.setText(question);
-                viewHolder.answer.setText(answer);
-                break;
-            case Constants.FieldTypes.NOTEBOOK_TYPE:
-                try {
-                    Timestamp timestamp = Timestamp.valueOf(question);
-                    Date date = new Date(timestamp.getTime());
-                    viewHolder.question.setText(new SimpleDateFormat("EEEE yyyy-MM-dd HH:mm").format(date));
-                    viewHolder.answer.setText(answer);
-                    break;
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                    String s = question.substring(0,question.length() - 3);
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    Date date = null;
-                    try {
-                        date = dateFormat.parse(s);
-                    } catch (ParseException e1) {
-                        e1.printStackTrace();
+        viewHolder.asked_count.setOnClickListener(view -> {
+            Toast toast = Toast.makeText(context,
+                    context.getString(R.string.asked, String.valueOf(asked_counter)), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        });
+        viewHolder.wrong_answer_count.setOnClickListener(view -> {
+            Toast toast = Toast.makeText(context,
+                    context.getString(R.string.wrongly_answered, String.valueOf(wrong_answer_counter)), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        });
+        Spannable spannable_question = Spannable.Factory.getInstance().newSpannable(question);
+        Spannable spannable_answer = Spannable.Factory.getInstance().newSpannable(answer);
+        String value = search_string.toString();
+        if ( ! "".equals(value) ) {
+            if (question.contains(value)) {
+                int start = 0;
+                while (start < question.length()) {
+                    if (question.indexOf(value,start) == start) {
+                        int end = start + search_string.length();
+                        spannable_question.setSpan(new BackgroundColorSpan(0xFFFFFF00),
+                                start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        start = end;
+                    } else {
+                        start++;
                     }
-                    String d = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(date) + ":00";
-                    mySQLiteCursorLoader.editEntry(entry_id, question_data_type,d,answer,databaseOperations.getEntryRank(entry_id));
                 }
-        }*/
+            }
+            if (answer.contains(value)) {
+                int start = 0;
+                while (start < answer.length()) {
+                    if (answer.indexOf(value, start) == start) {
+                        int end = start + search_string.length();
+                        spannable_answer.setSpan(new BackgroundColorSpan(0xFFFFFF00),
+                                start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        start = end;
+                    } else {
+                        start++;
+                    }
+                }
+            }
+        }
+        viewHolder.question.setText(spannable_question);
+        viewHolder.answer.setText(spannable_answer);
+        viewHolder.asked_count.setText(String.valueOf(asked_counter));
+        viewHolder.wrong_answer_count.setText(String.valueOf(wrong_answer_counter));
     }
 }

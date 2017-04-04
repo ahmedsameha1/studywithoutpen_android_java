@@ -48,17 +48,16 @@ public class EditEntryActivity extends AppCompatActivity implements
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
-    public static final String FIELD_TYPE = "field_type";
     public static final String ENTRY_ID = "entry_id";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private static final String SYMBOL = "symbol";
     private static final String CUSTOMABLE_TEXT = "customable_text";
     private EditText editQuestion;
     private EditText editAnswer;
+    private EditText enter_order;
     private TextView showActionbar;
     private DatabaseReadOperations databaseOperations;
     private boolean actionBarShown;
-    private int fieldType;
     private TextView save;
     private long current_field_id;
     private String currentQuestion;
@@ -73,6 +72,7 @@ public class EditEntryActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> get_symbol_string;
     private String[] symbol, customable_text;
     private int current_field_type;
+    private int order;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +80,6 @@ public class EditEntryActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_edit_entry);
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
-        fieldType = getIntent().getIntExtra(FIELD_TYPE, 0);
         entry_id = getIntent().getLongExtra(ENTRY_ID, 0);
         question_data_type = getIntent().getIntExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE, 0);
         currentQuestion = getIntent().getStringExtra(StudyActivity.CURRENT_QUESTION);
@@ -89,6 +88,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         databaseOperations = new DatabaseReadOperations(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         rank = databaseOperations.getEntryRank(entry_id);
+        order = databaseOperations.getEntryOrder(entry_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
         answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
@@ -99,6 +99,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         final Spinner rank_spinner = (Spinner) findViewById(R.id.rank_spinner);
         editQuestion = (EditText) findViewById(R.id.question);
         editAnswer = (EditText) findViewById(R.id.answer);
+        enter_order = (EditText) findViewById(R.id.order);
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
@@ -119,9 +120,9 @@ public class EditEntryActivity extends AppCompatActivity implements
                 (android.R.layout.simple_spinner_dropdown_item);
         rank_spinner.setSelection(rank);
         editAnswer.setText(currentAnswer);
-                editQuestion.setText(currentQuestion);
-
-        setHints(fieldType);
+        editQuestion.setText(currentQuestion);
+        enter_order.setText(order == -1 ? "" : String.valueOf(order));
+        setHints(current_field_type);
         editAnswer.requestFocus();
         changeAreas(question_area_size, answer_area_size);
         if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
@@ -182,11 +183,13 @@ public class EditEntryActivity extends AppCompatActivity implements
                 save_card_view.startAnimation(animAlpha);
                 String editedQuestion = editQuestion.getText().toString();
                 String editedAnswer = editAnswer.getText().toString();
-                if (editedQuestion.length() > 0 && editedAnswer.length() > 0) {
+            int edited_order = "".equals(enter_order.getText().toString()) ? -1 : Integer.parseInt(enter_order.getText().toString());
+
+            if (editedQuestion.length() > 0 && editedAnswer.length() > 0) {
                             editQuestion.setEnabled(false);
                             editAnswer.setEnabled(false);
                             if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)
-                                    || rank != rank_spinner.getSelectedItemPosition()) {
+                                    || rank != rank_spinner.getSelectedItemPosition() || edited_order != order ) {
                                 if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
                                     if (!databaseOperations.checkEntryDuplication(editedQuestion, editedAnswer, current_field_id, question_data_type)) {
                                         //                                    mySQLiteCursorLoader.editEntry(entry_id,question_data_type,editedQuestion,editedAnswer);
@@ -195,6 +198,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                                         intent.putExtra(FieldActivity.EDITED_QUESTION, editedQuestion);
                                         intent.putExtra(FieldActivity.EDITED_ANSWER, editedAnswer);
                                         intent.putExtra(FieldActivity.EDITED_RANK, rank_spinner.getSelectedItemPosition());
+                                        intent.putExtra(FieldActivity.EDITED_ORDER, edited_order);
                                         setResult(RESULT_OK, intent);
                                     } else {
                                         Toast toast = Toast.makeText(EditEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
@@ -207,6 +211,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                                     intent.putExtra(FieldActivity.EDITED_QUESTION, editedQuestion);
                                     intent.putExtra(FieldActivity.EDITED_ANSWER, editedAnswer);
                                     intent.putExtra(FieldActivity.EDITED_RANK, rank_spinner.getSelectedItemPosition());
+                                    intent.putExtra(FieldActivity.EDITED_ORDER, edited_order);
                                     setResult(RESULT_OK, intent);
                                 }
                             }
