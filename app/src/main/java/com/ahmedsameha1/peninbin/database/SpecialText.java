@@ -9,7 +9,7 @@ import com.ahmedsameha1.peninbin.utils.Constants;
  * Created by ahmed on 9/7/16.
  */
 public class SpecialText {
-    public static void addSpecialTextToDBV11(SQLiteDatabase sqLiteDatabase ) {// TODO: 3/11/17 must reflect the new field type numbers in the old databases 
+    public static void addSpecialTextToDBV11(SQLiteDatabase sqLiteDatabase ) {
         String [] special_text1 = { "[after n]","[after v]","[always + adv]","[always + prep]","[always + adv/prep]",
                 "[as form of address]","[before n]","[C]","[I]","[+ infinitive without to]","[L]","[M]","[not continuous]",
                 "[+ obj + adj]","[+ obj + n]","[+ obj + n/adj]","[+ obj + to infinitive]","[+ obj + infinitive without to]",

@@ -30,14 +30,11 @@ public class CopyMoveEntriesActivityRecyclerViewAdapter extends
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.copy_move_entries_activity_recyclerview_row, parent, false);
         CopyMoveEntriesActivityRecyclerViewViewHolder copy_move_entries_activity_recyclerview =
-                new CopyMoveEntriesActivityRecyclerViewViewHolder(itemView, new CopyMoveEntriesActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
-                    @Override
-                    public void onCheckChanged(long entry_id, boolean checked) {
-                        if ( checked ) {
-                            list_of_entries.add(entry_id);
-                        } else {
-                            list_of_entries.remove(entry_id);
-                        }
+                new CopyMoveEntriesActivityRecyclerViewViewHolder(itemView, (entry_id, checked) -> {
+                    if ( checked ) {
+                        list_of_entries.add(entry_id);
+                    } else {
+                        list_of_entries.remove(entry_id);
                     }
                 });
         return copy_move_entries_activity_recyclerview;

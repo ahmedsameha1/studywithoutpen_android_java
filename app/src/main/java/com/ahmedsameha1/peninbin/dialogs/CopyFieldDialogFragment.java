@@ -44,32 +44,26 @@ public class CopyFieldDialogFragment extends DialogFragment {
                         .setView(inflater.inflate(R.layout.copy_field_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                final Spinner existing_fields = (Spinner) alertDialog.findViewById(R.id.existing_fields);
-                SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(getActivity(),
-                        android.R.layout.simple_list_item_1,databaseOperations.getFieldList(),
-                        new String[]{Contract.Field.COLUMN_FIELD_NAME}, new int[]{android.R.id.text1},0);
-                simpleCursorAdapter.setDropDownViewResource
-                        (android.R.layout.simple_spinner_dropdown_item);
-                existing_fields.setAdapter(simpleCursorAdapter);
-                Button positive_button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                positive_button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if ( what_to_do == Constants.CopyMove.COPY_FIELD) {
-                            ( (CopyField) getActivity()).copyField(existing_fields.getSelectedItemId());
-                        } else if ( what_to_do == Constants.CopyMove.COPY_ENTRIES ){
-                            ( (CopyEntries) getActivity()).copyEntries(existing_fields.getSelectedItemId());
-                        } else if ( what_to_do == Constants.CopyMove.MOVE_ENTRIES ) {
-                            ( (MoveEntries) getActivity()).moveEntries(existing_fields.getSelectedItemId());
-                        }
-                        dismiss();
-                        getActivity().finish();
-                    }
-                });
-            }
+        alertDialog.setOnShowListener(dialog -> {
+            final Spinner existing_fields = (Spinner) alertDialog.findViewById(R.id.existing_fields);
+            SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(getActivity(),
+                    android.R.layout.simple_list_item_1,databaseOperations.getFieldList(),
+                    new String[]{Contract.Field.COLUMN_FIELD_NAME}, new int[]{android.R.id.text1},0);
+            simpleCursorAdapter.setDropDownViewResource
+                    (android.R.layout.simple_spinner_dropdown_item);
+            existing_fields.setAdapter(simpleCursorAdapter);
+            Button positive_button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            positive_button.setOnClickListener(view -> {
+                if ( what_to_do == Constants.CopyMove.COPY_FIELD) {
+                    ( (CopyField) getActivity()).copyField(existing_fields.getSelectedItemId());
+                } else if ( what_to_do == Constants.CopyMove.COPY_ENTRIES ){
+                    ( (CopyEntries) getActivity()).copyEntries(existing_fields.getSelectedItemId());
+                } else if ( what_to_do == Constants.CopyMove.MOVE_ENTRIES ) {
+                    ( (MoveEntries) getActivity()).moveEntries(existing_fields.getSelectedItemId());
+                }
+                dismiss();
+                getActivity().finish();
+            });
         });
         return alertDialog;
     }

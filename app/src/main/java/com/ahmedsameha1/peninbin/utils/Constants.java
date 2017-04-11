@@ -10,9 +10,9 @@ public class Constants {
         public static final int DEFAULT_TYPE = 0;
         public static final int KORAN_TYPE = 1;
         public static final int ENGLISH_DICTIONARY_TYPE = 2;
-        public static final int NOTEBOOK_TYPE_REMOVED_FEATURE = 1;
-        public static final int KORAN_TYPE_OLD = 2;
-        public static final int ENGLISH_DICTIONARY_TYPE_OLD = 3;
+        public static final int NOTEBOOK_TYPE_REMOVED_FEATURE_V68 = 1;
+        public static final int KORAN_TYPE_OLD_V68 = 2;
+        public static final int ENGLISH_DICTIONARY_TYPE_OLD_V68 = 3;
     }
 
     public static abstract class Rank {

@@ -57,29 +57,20 @@ public class ShowEula {
             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity)
                     .setTitle(title)
                     .setMessage(message)
-                    .setPositiveButton(R.string.agree, new Dialog.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int y ) {
-                            // Mark this version as read.
-                            editor.putBoolean(eulaKey, true);
-                            for ( int i = 0; i < versionInfo.versionCode; i++ ) {
-                                if ( prefs.contains(EULA_PREFIX + i) ) {
-                                    editor.remove(EULA_PREFIX + i);
-                                }
+                    .setPositiveButton(R.string.agree, (dialogInterface, y) -> {
+                        // Mark this version as read.
+                        editor.putBoolean(eulaKey, true);
+                        for ( int i = 0; i < versionInfo.versionCode; i++ ) {
+                            if ( prefs.contains(EULA_PREFIX + i) ) {
+                                editor.remove(EULA_PREFIX + i);
                             }
-                            editor.commit();
-                            dialogInterface.dismiss();
                         }
+                        editor.commit();
+                        dialogInterface.dismiss();
                     })
-                    .setNegativeButton(R.string.cancel, new Dialog.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // Close the activity as they have declined the EULA
-                            mActivity.finish();
-                        }
-
+                    .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                        // Close the activity as they have declined the EULA
+                        mActivity.finish();
                     });
             Dialog dialog = builder.create();
             dialog.setCanceledOnTouchOutside(false);

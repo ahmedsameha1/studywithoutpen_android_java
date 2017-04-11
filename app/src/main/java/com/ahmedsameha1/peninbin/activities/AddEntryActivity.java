@@ -35,6 +35,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
@@ -46,7 +47,8 @@ import com.google.android.gms.analytics.Tracker;
  */
 public class AddEntryActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
-        ChangeTextSizeDialogFragment.ChangeTextSize {
+        ChangeTextSizeDialogFragment.ChangeTextSize,
+        ActivityUtility.ActivityTimers {
     public static final String SCREEN_NAME = "AddEntryActivity";
     public static final String FROM_FIELD_ACTIVITY = "from_field_activity";
     private static final String FIELD_CHOSEN = "field_chosen";
@@ -243,12 +245,9 @@ public class AddEntryActivity extends AppCompatActivity implements
                 }
         });
 
-        field_spinner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                field_chosen = true;
-                return false;
-            }
+        field_spinner.setOnTouchListener((v, event) -> {
+            field_chosen = true;
+            return false;
         });
         field_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -507,5 +506,10 @@ public class AddEntryActivity extends AppCompatActivity implements
         changeAreas(bundle.getFloat(QUESTION_LAYOUT), bundle.getFloat(ANSWER_LAYOUT));
         enter_question.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
         enter_answer.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
+    }
+
+    @Override
+    public void manageTimersDueDialogsShow(boolean isCounting) {
+
     }
 }

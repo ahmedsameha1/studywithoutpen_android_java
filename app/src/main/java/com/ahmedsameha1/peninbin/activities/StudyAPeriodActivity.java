@@ -39,6 +39,7 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
@@ -70,7 +71,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener,
         TimeOfAnswerOfStudyAPeriodDialogFragment.Contact,
-        ActivityUtility.ActivityTimers {
+        ActivityUtility.ActivityTimers,
+        ObfuscateQuestionDialogFragment.ObfuscateText {
     public static final String SCREEN_NAME = "StudyAPeriodActivity";
     public static final String ACTIVITY_NAME = "StudyAPeriodActivity";
     public static final String STARTING_TIME = "startingTime";
@@ -157,22 +159,20 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             try {
                 toPause();
             } finally {
-                pauseRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyAPeriodActivity.this);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
-                        editor.commit();
-                        Toast toast = Toast.makeText(StudyAPeriodActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    }
+                pauseRunnable = () -> {
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyAPeriodActivity.this);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
+                    editor.commit();
+                    Toast toast = Toast.makeText(StudyAPeriodActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 };
                 mHandler.post(pauseRunnable);
             }
         }
     });
+    private boolean obfuscate;
 
 
     @Override
@@ -189,6 +189,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
         time_of_answer = databaseOperations.getTimeOfAnswerOfStudyAPeroid(current_field_id);
         time_of_answer_saved = time_of_answer > 0;
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -217,6 +218,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         continue_card_view = (CardView) findViewById(R.id.continue_card_view);
         next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
         show_action_bar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
+        final CardView dont_know_card_view = (CardView) findViewById(R.id.dont_know_card_view);
         tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         loader = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -283,7 +285,11 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                     }
                     questionsNumber = listForTest.length;
                     if (questionsNumber > 0) {
-                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        if ( obfuscate ) {
+                            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                        } else {
+                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        }
                         new AsyncTask<Void, Void, Void>() {
 
                             @Override
@@ -382,7 +388,11 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             check_card_view.startAnimation(animAlpha);
             result = checkAnAnswer();
             if (triesCounter < permitedTriesNumber && !result) {
-                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                if ( obfuscate ) {
+                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                } else {
+                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                }
                 new AsyncTask<Void, Void, Void>() {
 
                     @Override
@@ -412,7 +422,11 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         listForTest = prepareListForStudySecondAndMore(repeatedEntries);
                         questionsNumber = listForTest.length;
                         repeatedEntries.clear();
-                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        if ( obfuscate ) {
+                            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                        } else {
+                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        }
                         new AsyncTask<Void, Void, Void>() {
 
                             @Override
@@ -451,7 +465,11 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         }
                     }
                 } else {
-                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                    if ( obfuscate ) {
+                        showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                    } else {
+                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                    }
                     new AsyncTask<Void, Void, Void>() {
 
                         @Override
@@ -475,20 +493,17 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             }
             enterAnswer.setHint(R.string.enter_your_answer);
         });
-        nextHint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                next_hint_card_view.startAnimation(animAlpha);
-                if (hints != null) {
-                    if (enterAnswer.getText().toString().length() <= 0) {
-                        enterAnswer.setHint(hints.get(hintCounter++));
-                    } else {
-                        Toast toast = Toast.makeText(StudyAPeriodActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    }
-                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+        nextHint.setOnClickListener(v -> {
+            next_hint_card_view.startAnimation(animAlpha);
+            if (hints != null) {
+                if (enterAnswer.getText().toString().length() <= 0) {
+                    enterAnswer.setHint(hints.get(hintCounter++));
+                } else {
+                    Toast toast = Toast.makeText(StudyAPeriodActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 }
+                hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
             }
         });
         enterAnswer.addTextChangedListener(new TextWatcher() {
@@ -527,71 +542,59 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             }
         });
 
-        _continue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                continue_card_view.startAnimation(animAlpha);
-                enterAnswer.setText("");
-                _continue.setEnabled(false);
-                enterAnswer.setEnabled(true);
+        _continue.setOnClickListener(v -> {
+            continue_card_view.startAnimation(animAlpha);
+            enterAnswer.setText("");
+            _continue.setEnabled(false);
+            enterAnswer.setEnabled(true);
 
-                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                inputMethodManager.toggleSoftInputFromWindow(enterAnswer.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
-                enterAnswer.requestFocus();
-                enterAnswer.setHint(R.string.enter_your_answer);
-                if (permitedTriesNumber == 1) {
-                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                    show_result_linearlayout.setPadding(0, 0, 0, 0);
-                }
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.toggleSoftInputFromWindow(enterAnswer.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+            enterAnswer.requestFocus();
+            enterAnswer.setHint(R.string.enter_your_answer);
+            if (permitedTriesNumber == 1) {
+                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
             }
         });
-        dont_know.setOnClickListener(view -> dontKnow());
-        showActionbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                show_action_bar_card_view.startAnimation(animAlpha);
-                if (actionBarShown) {
-                    getSupportActionBar().hide();
-                    actionBarShown = (!actionBarShown);
-                    showActionbar.setText(R.string.show);
-                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
-                } else {
-                    getSupportActionBar().show();
-                    actionBarShown = (!actionBarShown);
-                    showActionbar.setText(R.string.hide);
-                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
-                }
+        dont_know.setOnClickListener(view -> {
+            dont_know_card_view.startAnimation(animAlpha);
+            dontKnow();
+        });
+        showActionbar.setOnClickListener(v -> {
+            show_action_bar_card_view.startAnimation(animAlpha);
+            if (actionBarShown) {
+                getSupportActionBar().hide();
+                actionBarShown = (!actionBarShown);
+                showActionbar.setText(R.string.show);
+                cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+            } else {
+                getSupportActionBar().show();
+                actionBarShown = (!actionBarShown);
+                showActionbar.setText(R.string.hide);
+                cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
             }
         });
-        showNumberOfQuetions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(StudyAPeriodActivity.this,
-                        getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
+        showNumberOfQuetions.setOnClickListener(v -> {
+            v.startAnimation(animAlpha);
+            Toast toast = Toast.makeText(StudyAPeriodActivity.this,
+                    getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
         });
-        remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(StudyAPeriodActivity.this,
-                        getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
+        remainingQuestionCounter.setOnClickListener(v -> {
+            v.startAnimation(animAlpha);
+            Toast toast = Toast.makeText(StudyAPeriodActivity.this,
+                    getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
         });
-        showTries.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(StudyAPeriodActivity.this,
-                        getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
+        showTries.setOnClickListener(v -> {
+            v.startAnimation(animAlpha);
+            Toast toast = Toast.makeText(StudyAPeriodActivity.this,
+                    getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
         });
     }
 
@@ -635,7 +638,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.study_during_activity_menu, menu);
+        getMenuInflater().inflate(R.menu.study_a_period_activity_menu, menu);
         return true;
     }
 
@@ -691,6 +694,13 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 timeOfAnswerOfStudyAPeriodDialogFragment.setArguments(bundle2);
                 timeOfAnswerOfStudyAPeriodDialogFragment.show(getSupportFragmentManager(), timeOfAnswerOfStudyAPeriodDialogFragment.getClass().getName());
                 return true;
+
+            case R.id.obfuscate_question:
+                Bundle bundle3 = new Bundle();
+                bundle3.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                ObfuscateQuestionDialogFragment obfuscateQuestionDialogFragment = new ObfuscateQuestionDialogFragment();
+                obfuscateQuestionDialogFragment.setArguments(bundle3);
+                obfuscateQuestionDialogFragment.show(getSupportFragmentManager(), ObfuscateQuestionDialogFragment.OBFUSCATE_QUESTION_DIALOG_FRAGMENT);
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -978,7 +988,11 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
         is_starting_after_destruction = true;
         restoreUserLayoutChanges(savedInstanceState);
-        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        if ( obfuscate ) {
+            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+        } else {
+            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        }
         showTries.setText(Integer.toString(triesCounter + 1));
         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
@@ -1108,7 +1122,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     }
 
 
-    // TODO: 2/21/17 make proguard options on gradle before publish true
     private void setNormalEnterAnswerBackground() {
         Runnable mRunnable = () -> {
             show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
@@ -1192,5 +1205,14 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         mLoadingView.setVisibility(View.GONE);
                     }
                 });
+    }
+    @Override
+    public void obfuscateText(boolean obfuscate) {
+        this.obfuscate = obfuscate;
+        if ( obfuscate ) {
+            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+        } else {
+            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        }
     }
 }

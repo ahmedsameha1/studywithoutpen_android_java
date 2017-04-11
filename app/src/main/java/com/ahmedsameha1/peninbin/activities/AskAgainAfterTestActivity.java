@@ -257,7 +257,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 getBundleExtra(WrongAnswersActivity.WRONG_ITEM_LIST)
                 .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);
         questionsNumber = wrongItemArrayList.size();
-        showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+        showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
         ifMoreThanOnce();
         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
         showTries.setText(Integer.toString(triesCounter + 1));
@@ -269,7 +269,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             check_card_view.startAnimation(animAlpha);
             result = checkAnAnswer();
             if (triesCounter < permitedTriesNumber && !result) {
-                showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+                showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
                 showTries.setText(Integer.toString(triesCounter + 1));
             } else if (!result) {
                 enterAnswer.setText(wrongItemArrayList.get(currentQuestionCounter).getAnswer());
@@ -291,7 +291,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         wrongItemArrayList = prepareListForStudySecondAndMore(repeatedEntries);
                         questionsNumber = wrongItemArrayList.size();
                         repeatedEntries.clear();
-                        showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+                        showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
                         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                         ifMoreThanOnce();
@@ -322,7 +322,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         }
                     }
                 } else {
-                    showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+                    showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
                     showTries.setText(Integer.toString(triesCounter + 1));
                     ifMoreThanOnce();
                     remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -338,20 +338,17 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             }
             enterAnswer.setHint(R.string.enter_your_answer);
         });
-        nextHint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                next_hint_card_view.startAnimation(animAlpha);
-                if (hints != null) {
-                    if (enterAnswer.getText().toString().length() <= 0) {
-                        enterAnswer.setHint(hints.get(hintCounter++));
-                    } else {
-                        Toast toast = Toast.makeText(AskAgainAfterTestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    }
-                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+        nextHint.setOnClickListener(v -> {
+            next_hint_card_view.startAnimation(animAlpha);
+            if (hints != null) {
+                if (enterAnswer.getText().toString().length() <= 0) {
+                    enterAnswer.setHint(hints.get(hintCounter++));
+                } else {
+                    Toast toast = Toast.makeText(AskAgainAfterTestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 }
+                hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
             }
         });
         enterAnswer.addTextChangedListener(new TextWatcher() {
@@ -390,71 +387,56 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             }
         });
 
-        _continue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                continue_card_view.startAnimation(animAlpha);
-                enterAnswer.setText("");
-                _continue.setEnabled(false);
-                enterAnswer.setEnabled(true);
+        _continue.setOnClickListener(v -> {
+            continue_card_view.startAnimation(animAlpha);
+            enterAnswer.setText("");
+            _continue.setEnabled(false);
+            enterAnswer.setEnabled(true);
 
-                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                inputMethodManager.toggleSoftInputFromWindow(enterAnswer.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
-                enterAnswer.requestFocus();
-                enterAnswer.setHint(R.string.enter_your_answer);
-                if (permitedTriesNumber == 1) {
-                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                    show_result_linearlayout.setPadding(0, 0, 0, 0);
-                }
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.toggleSoftInputFromWindow(enterAnswer.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+            enterAnswer.requestFocus();
+            enterAnswer.setHint(R.string.enter_your_answer);
+            if (permitedTriesNumber == 1) {
+                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
             }
         });
         dont_know.setOnClickListener(view -> dontKnow());
-        showActionbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                show_action_bar_card_view.startAnimation(animAlpha);
-                if (actionBarShown) {
-                    getSupportActionBar().hide();
-                    actionBarShown = (!actionBarShown);
-                    showActionbar.setText(R.string.show);
-                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
-                } else {
-                    getSupportActionBar().show();
-                    actionBarShown = (!actionBarShown);
-                    showActionbar.setText(R.string.hide);
-                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
-                }
+        showActionbar.setOnClickListener(v -> {
+            show_action_bar_card_view.startAnimation(animAlpha);
+            if (actionBarShown) {
+                getSupportActionBar().hide();
+                actionBarShown = (!actionBarShown);
+                showActionbar.setText(R.string.show);
+                cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+            } else {
+                getSupportActionBar().show();
+                actionBarShown = (!actionBarShown);
+                showActionbar.setText(R.string.hide);
+                cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
             }
         });
-        showNumberOfQuetions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(AskAgainAfterTestActivity.this,
-                        getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
+        showNumberOfQuetions.setOnClickListener(v -> {
+            v.startAnimation(animAlpha);
+            Toast toast = Toast.makeText(AskAgainAfterTestActivity.this,
+                    getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
         });
-        remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(AskAgainAfterTestActivity.this,
-                        getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
+        remainingQuestionCounter.setOnClickListener(v -> {
+            v.startAnimation(animAlpha);
+            Toast toast = Toast.makeText(AskAgainAfterTestActivity.this,
+                    getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
         });
-        showTries.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(animAlpha);
-                Toast toast = Toast.makeText(AskAgainAfterTestActivity.this,
-                        getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
+        showTries.setOnClickListener(v -> {
+            v.startAnimation(animAlpha);
+            Toast toast = Toast.makeText(AskAgainAfterTestActivity.this,
+                    getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
         });
     }
 
@@ -769,7 +751,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
         is_starting_after_destruction = true;
         restoreUserLayoutChanges(savedInstanceState);
-        showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+        showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
         showTries.setText(Integer.toString(triesCounter + 1));
         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
@@ -870,8 +852,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         }
     }
 
-
-    // TODO: 2/21/17 make proguard options on gradle before publish true
     private void setNormalEnterAnswerBackground() {
         Runnable mRunnable = () -> {
             show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
@@ -923,7 +903,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     }
 
     private void dontKnow() {
-        enterAnswer.setText(wrongItemArrayList.get(currentQuestionCounter).getAnswer());
+        enterAnswer.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getAnswer()));
         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
         showTries.setText(Integer.toString(triesCounter + 1));
         check.setEnabled(false);

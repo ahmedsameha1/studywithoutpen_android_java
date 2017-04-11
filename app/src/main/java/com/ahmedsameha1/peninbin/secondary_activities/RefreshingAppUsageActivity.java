@@ -25,13 +25,10 @@ public class RefreshingAppUsageActivity extends Activity {
         String[] refreshing_messages = getResources().getStringArray(R.array.refreshing_messages);
         int random = new Random().nextInt(refreshing_messages.length);
         refreshing_message_textview.setText(refreshing_messages[random]);
-        open.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(RefreshingAppUsageActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        open.setOnClickListener(view -> {
+            Intent intent = new Intent(RefreshingAppUsageActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 }

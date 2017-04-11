@@ -78,143 +78,134 @@ public class TimeOfAnswerOfTestsDialogFragment extends DialogFragment {
         final AlertDialog alertDialog = builder.setTitle(R.string.time_of_answer)
                 .setView(inflater.inflate(R.layout.time_of_answer_of_tests_dialog_fragment, null))
                 .setPositiveButton(R.string.ok,null).create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-        final ImageButton time_of_answer_help_help = (ImageButton) alertDialog.findViewById(R.id.time_of_answer_help);
-        final EditText enter_time_of_answer = (EditText) alertDialog.findViewById(R.id.time_of_answer);
-        final CheckBox save = (CheckBox) alertDialog.findViewById(R.id.save);
-        final CheckBox set_time_of_answer = (CheckBox) alertDialog.findViewById(R.id.set_time_of_answer);
-        final RadioButton notify = (RadioButton) alertDialog.findViewById(R.id.notify);
-        final RadioButton move_next = (RadioButton) alertDialog.findViewById(R.id.move_next);
-        final RadioGroup do_what = (RadioGroup) alertDialog.findViewById(R.id.do_what);
-        Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        enter_time_of_answer.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        alertDialog.setOnShowListener(dialog -> {
+    final ImageButton time_of_answer_help_help = (ImageButton) alertDialog.findViewById(R.id.time_of_answer_help);
+    final EditText enter_time_of_answer = (EditText) alertDialog.findViewById(R.id.time_of_answer);
+    final CheckBox save = (CheckBox) alertDialog.findViewById(R.id.save);
+    final CheckBox set_time_of_answer = (CheckBox) alertDialog.findViewById(R.id.set_time_of_answer);
+    final RadioButton notify = (RadioButton) alertDialog.findViewById(R.id.notify);
+    final RadioButton move_next = (RadioButton) alertDialog.findViewById(R.id.move_next);
+    final RadioGroup do_what = (RadioGroup) alertDialog.findViewById(R.id.do_what);
+    Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+    enter_time_of_answer.addTextChangedListener(new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            String string = editable.toString();
+            String suffix = " " + getActivity().getString(R.string.second);
+            if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+            } else if ( string.equals(String.valueOf(0)) || !string.matches("[0-9]+") ) {
+                enter_time_of_answer.setText("");
+            } else {
+                string = string + suffix;
+                enter_time_of_answer.setText(string);
+                enter_time_of_answer.setSelection(string.length() - suffix.length());
             }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                String string = editable.toString();
-                String suffix = " " + getActivity().getString(R.string.second);
-                if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
-
-                } else if ( string.equals(String.valueOf(0)) || !string.matches("[0-9]+") ) {
-                    enter_time_of_answer.setText("");
-                } else {
-                    string = string + suffix;
-                    enter_time_of_answer.setText(string);
-                    enter_time_of_answer.setSelection(string.length() - suffix.length());
-                }
-            }
-        });
-        if ( current_time_of_answer > Constants.TimeOfAnswer.NOT_USED ) {
-            set_time_of_answer.setChecked(true);
-            enter_time_of_answer.setText(String.valueOf(current_time_of_answer));
+        }
+    });
+    if ( current_time_of_answer > Constants.TimeOfAnswer.NOT_USED ) {
+        set_time_of_answer.setChecked(true);
+        enter_time_of_answer.setText(String.valueOf(current_time_of_answer));
+        save.setEnabled(true);
+        if ( current_time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY) {
+            notify.setChecked(true);
+        } else if ( current_time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
+            move_next.setChecked(true);
+        }
+    } else {
+        set_time_of_answer.setChecked(false);
+        enter_time_of_answer.setEnabled(false);
+        enter_time_of_answer.setText("");
+        save.setEnabled(false);
+        notify.setEnabled(false);
+        move_next.setEnabled(false);
+    }
+    set_time_of_answer.setOnCheckedChangeListener((compoundButton, checked) -> {
+        if ( checked ) {
+            enter_time_of_answer.setEnabled(true);
+            enter_time_of_answer.requestFocus();
             save.setEnabled(true);
-            if ( current_time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY) {
-                notify.setChecked(true);
-            } else if ( current_time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
-                move_next.setChecked(true);
-            }
+            notify.setEnabled(true);
+            move_next.setEnabled(true);
         } else {
-            set_time_of_answer.setChecked(false);
             enter_time_of_answer.setEnabled(false);
             enter_time_of_answer.setText("");
             save.setEnabled(false);
             notify.setEnabled(false);
             move_next.setEnabled(false);
         }
-        set_time_of_answer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                if ( checked ) {
-                    enter_time_of_answer.setEnabled(true);
-                    enter_time_of_answer.requestFocus();
-                    save.setEnabled(true);
-                    notify.setEnabled(true);
-                    move_next.setEnabled(true);
-                } else {
-                    enter_time_of_answer.setEnabled(false);
-                    enter_time_of_answer.setText("");
-                    save.setEnabled(false);
-                    notify.setEnabled(false);
-                    move_next.setEnabled(false);
-                }
-            }
-        });
-        alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+    });
+    alertDialog.setOnKeyListener((dialog1, keyCode, event) -> {
 
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
-                    return false;
-                }
-                return false;
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
+            return false;
+        }
+        return false;
 
-            }
-        });
-        save.setChecked(time_of_answer_saved);
-        positiveButton.setOnClickListener( view -> {
-            try {
-                int do_what_choice = do_what.getCheckedRadioButtonId() == R.id.notify ?
-                        Constants.TimeOfAnswer.NOTIFY : Constants.TimeOfAnswer.MOVE_NEXT;
-                if ( set_time_of_answer.isChecked() ) {
-                    String second_suffix = " " + getActivity().getString(R.string.second);
-                    String time_string = enter_time_of_answer.getText().toString();
-                    if ( time_string.length() > 0 ) {
+    });
+    save.setChecked(time_of_answer_saved);
+    positiveButton.setOnClickListener( view -> {
+        try {
+            int do_what_choice = do_what.getCheckedRadioButtonId() == R.id.notify ?
+                    Constants.TimeOfAnswer.NOTIFY : Constants.TimeOfAnswer.MOVE_NEXT;
+            if ( set_time_of_answer.isChecked() ) {
+                String second_suffix = " " + getActivity().getString(R.string.second);
+                String time_string = enter_time_of_answer.getText().toString();
+                if ( time_string.length() > 0 ) {
 
-                        int number = Integer.parseInt(time_string.substring(0, time_string.length() - second_suffix.length()));
-                        if ( number > 0 ) {
-                            ((Contact) getActivity()).setTimeOfAnswer(number, do_what_choice, save.isChecked());
-                            if (save.isChecked()) {
-                                cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfTests(current_field_id,number, do_what_choice);
-                            } else {
-                                cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfTests(current_field_id, Constants.TimeOfAnswer.NOT_USED, do_what_choice);
-                            }
-                            ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
-                            dismiss();
-                            mTracker.send(new HitBuilders.EventBuilder()
-                                    .setCategory("Utilities")
-                                    .setAction("time of answer")
-                                    .build());
+                    int number = Integer.parseInt(time_string.substring(0, time_string.length() - second_suffix.length()));
+                    if ( number > 0 ) {
+                        ((Contact) getActivity()).setTimeOfAnswer(number, do_what_choice, save.isChecked());
+                        if (save.isChecked()) {
+                            cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfTests(current_field_id,number, do_what_choice);
+                        } else {
+                            cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfTests(current_field_id, Constants.TimeOfAnswer.NOT_USED, do_what_choice);
                         }
-                    } else {
-                        Toast toast = Toast.makeText(getActivity(), getString(R.string.enter_the_time_of_answer), Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
+                        ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
+                        dismiss();
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("Utilities")
+                                .setAction("time of answer")
+                                .build());
                     }
                 } else {
-                    cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfTests(current_field_id, Constants.TimeOfAnswer.NOT_USED, do_what_choice);
-                    ((Contact) getActivity()).setTimeOfAnswer(Constants.TimeOfAnswer.NOT_USED, do_what_choice, save.isChecked());
-                    ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
-                    dismiss();
+                    Toast toast = Toast.makeText(getActivity(), getString(R.string.enter_the_time_of_answer), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 }
-            } catch (NumberFormatException e) {
-                Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP,0,400);
-                toast.show();
-            } catch (Resources.NotFoundException e) {
-                e.printStackTrace();
+            } else {
+                cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfTests(current_field_id, Constants.TimeOfAnswer.NOT_USED, do_what_choice);
+                ((Contact) getActivity()).setTimeOfAnswer(Constants.TimeOfAnswer.NOT_USED, do_what_choice, save.isChecked());
+                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
+                dismiss();
             }
+        } catch (NumberFormatException e) {
+            Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP,0,400);
+            toast.show();
+        } catch (Resources.NotFoundException e) {
+            e.printStackTrace();
+        }
+    });
+    time_of_answer_help_help.setOnClickListener( view -> {
+        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+        number_of_tries_help_dialog_builder
+                .setMessage(R.string.enter_time_of_answer_help).create().show();
+    });
+            ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(false);
         });
-        time_of_answer_help_help.setOnClickListener( view -> {
-            AlertDialog.Builder number_of_tries_help_dialog_builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
-            number_of_tries_help_dialog_builder
-                    .setMessage(R.string.enter_time_of_answer_help).create().show();
-        });
-                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(false);
-            }
-
-        });
+        alertDialog.setCanceledOnTouchOutside(false);
         return alertDialog;
     }
 

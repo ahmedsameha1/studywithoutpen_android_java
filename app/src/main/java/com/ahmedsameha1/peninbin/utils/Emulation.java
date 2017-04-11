@@ -35,36 +35,27 @@ public class Emulation {
     private static Thread emulate_thread, unemulate_thread;
 
     public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries) {
-        emulate_thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                emulate(context, field_id, number_of_entries);
-            }
+        emulate_thread = new Thread(() -> {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            emulate(context, field_id, number_of_entries);
         });
         emulate_thread.start();
     }
 
 
     public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries, final long starting_entry) {
-        emulate_thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                emulate(context, field_id, number_of_entries, starting_entry);
-            }
+        emulate_thread = new Thread(() -> {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            emulate(context, field_id, number_of_entries, starting_entry);
         });
 
         emulate_thread.start();
     }
 
     public static void startUnemulateThread(final Context context, final long field_id) {
-        unemulate_thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                disableEmulation(context, field_id);
-            }
+        unemulate_thread = new Thread(() -> {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            disableEmulation(context, field_id);
         });
         unemulate_thread.start();
     }

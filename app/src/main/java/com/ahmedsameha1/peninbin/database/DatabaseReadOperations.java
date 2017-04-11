@@ -768,5 +768,26 @@ public class DatabaseReadOperations {
         cursor.close();
         return time;
     }
+    public boolean morethanOneAnswerSameQuestion(long field_id, String question) {
+        int count;
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + " COUNT(se." + Contract.COLUMN_ID + ") FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
+                + " s1." + Contract.STring.COLUMN_VALUE + " LIKE ?",
+                new String[]{ field_id + "", question });
+        cursor.moveToFirst();
+        count = cursor.getInt(0);
+        cursor.close();
+        return count > 1;
+    }
+    public boolean isObfuscateQuestion(long field_id) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                new String[]{Contract.Field.COLUMN_OBFUSCATE_QUESTION},
+                Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
+        cursor.moveToFirst();
+        int time = cursor.getInt(0);
+        cursor.close();
+        return time > 0;
+    }
 }
 

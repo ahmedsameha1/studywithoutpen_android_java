@@ -63,113 +63,99 @@ public class ChangeAreasDialogFragment extends DialogFragment{
         final AlertDialog alertDialog = builder.setTitle(R.string.repartition_the_area)
                 .setView(inflater.inflate(R.layout.change_areas_dialog_fragment, null))
                 .setPositiveButton(R.string.ok,null).create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                final ImageButton question_area_help = (ImageButton) alertDialog.findViewById(R.id.question_area_help);
-                final ImageButton answer_area_help = (ImageButton) alertDialog.findViewById(R.id.answer_area_help);
-                final EditText enterQuestionArea = (EditText) alertDialog.findViewById(R.id.questio_area);
-                final EditText enterAnswerArea = (EditText) alertDialog.findViewById(R.id.answer_area);
-                enterQuestionArea.setText(String.format("%d", (int) initialQuestionArea));
-                enterAnswerArea.setText(String.format("%d", (int) initialAnsweArea));
-                Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            if ( enterQuestionArea.getText().toString().length() > 0 && enterAnswerArea.getText().toString().length() > 0 ) {
-                                int questionArea = Integer.parseInt(enterQuestionArea.getText().toString());
-                                int answerArea = Integer.parseInt(enterAnswerArea.getText().toString());
+        alertDialog.setOnShowListener(dialog -> {
+            final ImageButton question_area_help = (ImageButton) alertDialog.findViewById(R.id.question_area_help);
+            final ImageButton answer_area_help = (ImageButton) alertDialog.findViewById(R.id.answer_area_help);
+            final EditText enterQuestionArea = (EditText) alertDialog.findViewById(R.id.questio_area);
+            final EditText enterAnswerArea = (EditText) alertDialog.findViewById(R.id.answer_area);
+            enterQuestionArea.setText(String.format("%d", (int) initialQuestionArea));
+            enterAnswerArea.setText(String.format("%d", (int) initialAnsweArea));
+            Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            positiveButton.setOnClickListener(v -> {
+                try {
+                    if ( enterQuestionArea.getText().toString().length() > 0 && enterAnswerArea.getText().toString().length() > 0 ) {
+                        int questionArea = Integer.parseInt(enterQuestionArea.getText().toString());
+                        int answerArea = Integer.parseInt(enterAnswerArea.getText().toString());
 
-                                    ((ChangeAreas) getActivity()).changeAreas((float) questionArea,(float) answerArea);
-                                    mySQLiteCursorLoader.updateFieldAreasSize(current_field_id,questionArea,answerArea);
-                                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
-                                    dismiss();
-                                    mTracker.send(new HitBuilders.EventBuilder()
-                                            .setCategory("Utilities")
-                                            .setAction("change areas size")
-                                            .build());
-                            } else {
-                                Toast toast = Toast.makeText(getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
-                                toast.show();
-                            }
-                        } catch (NumberFormatException e) {
-                            Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,400);
-                            toast.show();
-                        } catch (Resources.NotFoundException e) {
-                            e.printStackTrace();
-                        }
+                            ((ChangeAreas) getActivity()).changeAreas((float) questionArea,(float) answerArea);
+                            mySQLiteCursorLoader.updateFieldAreasSize(current_field_id,questionArea,answerArea);
+                        ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
+                            dismiss();
+                            mTracker.send(new HitBuilders.EventBuilder()
+                                    .setCategory("Utilities")
+                                    .setAction("change areas size")
+                                    .build());
+                    } else {
+                        Toast toast = Toast.makeText(getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
                     }
-                });
-                alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-                    @Override
-                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                } catch (NumberFormatException e) {
+                    Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                } catch (Resources.NotFoundException e) {
+                    e.printStackTrace();
+                }
+            });
+            alertDialog.setOnKeyListener((dialog1, keyCode, event) -> {
 
-                        if (keyCode == KeyEvent.KEYCODE_BACK) {
-                            ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
-                            return false;
-                        }
-                        return false;
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
+                    return false;
+                }
+                return false;
 
+            });
+            enterQuestionArea.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if ( editable.toString().equals(String.valueOf(0))) {
+                        enterQuestionArea.setText("");
                     }
-                });
-                enterQuestionArea.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                }
+            });
+            enterAnswerArea.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                    }
+                }
 
-                    @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                    }
+                }
 
-                    @Override
-                    public void afterTextChanged(Editable editable) {
-                        if ( editable.toString().equals(String.valueOf(0))) {
-                            enterQuestionArea.setText("");
-                        }
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if ( editable.toString().equals(String.valueOf(0))) {
+                        enterAnswerArea.setText("");
                     }
-                });
-                enterAnswerArea.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable editable) {
-                        if ( editable.toString().equals(String.valueOf(0))) {
-                            enterAnswerArea.setText("");
-                        }
-                    }
-                });
-                question_area_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.question_area_help).create().show();
-                    }
-                });
-                answer_area_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.answer_area_help).create().show();
-                    }
-                });
-                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(false);
-            }
+                }
+            });
+            question_area_help.setOnClickListener(v -> {
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                number_of_tries_help_dialog_builder
+                        .setMessage(R.string.question_area_help).create().show();
+            });
+            answer_area_help.setOnClickListener(v -> {
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                number_of_tries_help_dialog_builder
+                        .setMessage(R.string.answer_area_help).create().show();
+            });
+            ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(false);
         });
+        alertDialog.setCanceledOnTouchOutside(false);
         return alertDialog;
     }
     public interface ChangeAreas {

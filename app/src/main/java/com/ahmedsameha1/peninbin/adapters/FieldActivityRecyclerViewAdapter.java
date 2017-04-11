@@ -3,6 +3,7 @@ package com.ahmedsameha1.peninbin.adapters;
 
 
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.activities.EditEntryActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
+import com.ahmedsameha1.peninbin.activities.SearchActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
@@ -92,58 +94,68 @@ public class FieldActivityRecyclerViewAdapter extends
         viewHolder.entry_id = entry_id;
         viewHolder.currentQuestion = question;
         viewHolder.currentAnswer = answer;
-        viewHolder.edit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ( !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
-                        && !ImportTextFile.isThreadRunning() ) {
-                    Intent intent = new Intent(context, EditEntryActivity.class);
-                    intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
-                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
-                    intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
-                    intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
-                    intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
-                    ((Activity) context).startActivityForResult(intent,FieldActivity.EDIT_ENTRY);
-                } else {
-                    Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
+        viewHolder.edit.setOnClickListener(v -> {
+            if ( !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                    && !ImportTextFile.isThreadRunning() ) {
+                Intent intent = new Intent(context, EditEntryActivity.class);
+                intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
+                intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
+                intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
+                intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
+                ((Activity) context).startActivityForResult(intent,FieldActivity.EDIT_ENTRY);
+            } else {
+                Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
             }
         });
-        viewHolder.delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ( (! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id)) &&
-                        (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id)) &&
-                        (! sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + field_id)) &&
-                        !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
-                        && !ImportTextFile.isThreadRunning() ) {
-                    if ( ! databaseOperations.checkIfIncludedInPausedOperations(field_id,entry_id) ) {
-                        DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
-                        Bundle bundle = new Bundle();
-                        bundle.putLong(DeleteEntryDialogFragment.TO_BE_DELETED_ENTRY_ID,entry_id);
-                        bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
-                        fragment.setArguments(bundle);
-                        FragmentManager fragmentManager = ((FieldActivity) context).getSupportFragmentManager();
-                        fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
-                    } else {
-                        Toast toast = Toast.makeText(context, R.string.complete_or_cancel_last_study_session, Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP,0,400);
-                        toast.show();
-                    }
-                } else if ( sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id) ||
-                         sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id) ||
-                        sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + field_id) ){
-                    Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                } else if ( Emulation.isAnyThreadRunning() || ExportImportDatabase.isAnyThreadRunning()
-                        || ImportTextFile.isThreadRunning() ) {
-                    Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
+        viewHolder.delete.setOnClickListener(v -> {
+            if ( (! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id)) &&
+                    (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id)) &&
+                    (! sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + field_id)) &&
+                    !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                    && !ImportTextFile.isThreadRunning() ) {
+                if ( ! databaseOperations.checkIfIncludedInPausedOperations(field_id,entry_id) ) {
+                    DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putLong(DeleteEntryDialogFragment.TO_BE_DELETED_ENTRY_ID,entry_id);
+                    bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
+                    fragment.setArguments(bundle);
+                    FragmentManager fragmentManager = ((FieldActivity) context).getSupportFragmentManager();
+                    fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
+                } else {
+                    Toast toast = Toast.makeText(context, R.string.complete_or_cancel_last_study_session, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP,0,400);
                     toast.show();
                 }
+            } else if ( sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id) ||
+                     sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id) ||
+                    sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + field_id) ){
+                Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            } else if ( Emulation.isAnyThreadRunning() || ExportImportDatabase.isAnyThreadRunning()
+                    || ImportTextFile.isThreadRunning() ) {
+                Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        });
+        viewHolder.like.setOnClickListener(view -> {
+            if ( databaseOperations.morethanOneAnswerSameQuestion(field_id,question) ) {
+                final Intent intent = new Intent(context,
+                        SearchActivity.class);
+                // add query to the Intent Extras
+                intent.setAction(Intent.ACTION_SEARCH);
+                intent.putExtra(SearchManager.QUERY, question);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                intent.putExtra(SearchActivity.SAME_QUESTION, true);
+                context.startActivity(intent);
+            } else {
+                Toast toast = Toast.makeText(context, R.string.only_this_with_same_question, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
             }
         });
         viewHolder.asked_count.setOnClickListener(view -> {

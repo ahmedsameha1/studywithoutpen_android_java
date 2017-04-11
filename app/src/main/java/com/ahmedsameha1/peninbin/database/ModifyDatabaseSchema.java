@@ -21,26 +21,29 @@ import java.util.StringTokenizer;
  */
 public class ModifyDatabaseSchema {
 
-    public static final String CREATE_OLD_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Old_Field_Type.TABLE_NAME
-            + " ( "
-            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-            + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " TEXT NOT NULL, "
-            + " UNIQUE ( " + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " )"
-            + " );";
-
-    public static void onUpgradeDatabaseToDBV13AppV68(SQLiteDatabase sqLiteDatabase) {
+    static void onUpgradeDatabaseToDBV13AppV69(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
             sqLiteDatabase.delete(Field.TABLE_NAME, Field.COLUMN_FIELD_TYPE + " = ? ",
-                    new String[]{String.valueOf(Constants.FieldTypes.NOTEBOOK_TYPE_REMOVED_FEATURE)});
+                    new String[]{String.valueOf(Constants.FieldTypes.NOTEBOOK_TYPE_REMOVED_FEATURE_V68)});
             ContentValues contentValues = new ContentValues();
             contentValues.put(Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.KORAN_TYPE);
             sqLiteDatabase.update(Field.TABLE_NAME, contentValues,
-                    Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.KORAN_TYPE_OLD)});
+                    Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.KORAN_TYPE_OLD_V68)});
             contentValues = new ContentValues();
             contentValues.put(Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE);
             sqLiteDatabase.update(Field.TABLE_NAME, contentValues,
-                    Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE_OLD)});
+                    Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE_OLD_V68)});
+            contentValues = new ContentValues();
+            contentValues.put(Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE, Constants.FieldTypes.KORAN_TYPE);
+            sqLiteDatabase.update(Contract.Field_Type_Symbol.TABLE_NAME, contentValues,
+                    Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ? ",
+                    new String[]{String.valueOf(Constants.FieldTypes.KORAN_TYPE_OLD_V68)});
+            contentValues = new ContentValues();
+            contentValues.put(Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE, Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE);
+            sqLiteDatabase.update(Contract.Field_Type_Symbol.TABLE_NAME, contentValues,
+                    Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ? ",
+                    new String[]{String.valueOf(Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE_OLD_V68)});
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
             sqLiteDatabase.execSQL(rename);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
@@ -276,6 +279,12 @@ public class ModifyDatabaseSchema {
         }
     }
     public static void onUpgradeDatabaseToDBV10AppV43(SQLiteDatabase sqLiteDatabase) {
+        String CREATE_OLD_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Old_Field_Type.TABLE_NAME
+                + " ( "
+                + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " TEXT NOT NULL, "
+                + " UNIQUE ( " + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " )"
+                + " );";
         sqLiteDatabase.beginTransaction();
         try {
             String rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";

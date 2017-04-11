@@ -280,4 +280,8 @@
     <string name="order">Order</string>
     <string name="asked">Asked: %1$s</string>
     <string name="wrongly_answered">Wrongly answered: %1$s</string>
+    <string name="same">Like</string>
+    <string name="only_this_with_same_question">There is no more entries with the same question</string>
+    <string name="obfuscate_question">Obfuscate question</string>
+    <string name="obfuscate_question_help">This option tries to make reading the question more difficult. Why? To increase you attention while the session. This option tries to let you out of the automatic pilot mode.</string>
 </resources>

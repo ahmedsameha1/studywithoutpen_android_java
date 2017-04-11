@@ -41,25 +41,22 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 //        LayoutInflater inflater = getActivity().getLayoutInflater();
         builder.setMessage(R.string.ask_for_continue_previous_test)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent();
-                                if ( test_type == Constants.TestType.ENHANCED_TEST) {
-                                    intent = new Intent(getActivity(), EnhancedTestActivity.class);
-                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                    intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE,true);
-                                } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
-                                    intent = new Intent(getActivity(), FullyRandomTestActivity.class);
-                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                    intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE,true);
-                                }
-                                startActivity(intent);
-                                if ( from_notification ) {
-                                    getActivity().finish();
-                                }
-                            }
-                        }
+                .setPositiveButton(R.string.yes, (dialog, which) -> {
+                    Intent intent = new Intent();
+                    if ( test_type == Constants.TestType.ENHANCED_TEST) {
+                        intent = new Intent(getActivity(), EnhancedTestActivity.class);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                        intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE,true);
+                    } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                        intent = new Intent(getActivity(), FullyRandomTestActivity.class);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                        intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE,true);
+                    }
+                    startActivity(intent);
+                    if ( from_notification ) {
+                        getActivity().finish();
+                    }
+                }
                 )// TODO: 2/27/17 remember to test at least on of the calendar.add that used to add one day to the date 
                 .setNegativeButton(R.string.no, (dialog, which) -> {
                                 CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());

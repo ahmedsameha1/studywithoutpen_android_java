@@ -8,11 +8,19 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Layout;
+import android.text.Spannable;
+import android.text.style.AlignmentSpan;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.util.Log;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -529,5 +537,35 @@ public class ActivityUtility {
                 return listForTest;
             }
         }
+    }
+
+    public static Spannable spanText (String text) {
+        int [] colors = {0xFF5A0000,0xFF0000FF,
+                0xFFFFFF00,0xFF500850,0xFF00FF00,
+                0xFFFF0000,0xFF4B0082};
+        SecureRandom secureRandom = new SecureRandom();
+        Spannable spanned_text = Spannable.Factory.getInstance().newSpannable(text);
+        for ( int i = 0; i < text.length(); i++ ) {
+            if ( !text.substring(i, i+1).matches("\\s")) {
+                spanned_text.setSpan(new ForegroundColorSpan(colors[secureRandom.nextInt(6)]),
+                        i, i + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spanned_text.setSpan(new StyleSpan(secureRandom.nextInt(4)),
+                        i, i + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+        return spanned_text;
+    }
+
+    public static String getTextFileFromRawDirectory(Context context, int resource){
+        String text = null;
+        try {
+            InputStream is = context.getResources().openRawResource(resource);
+            byte[] buffer = new byte[is.available()];
+            while (is.read(buffer) != -1);
+            text = new String(buffer);
+        } catch (Exception e) {
+            Log.e("error", ""+e.toString());
+        }
+        return text;
     }
 }

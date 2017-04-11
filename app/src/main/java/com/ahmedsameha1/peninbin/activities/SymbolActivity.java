@@ -102,17 +102,14 @@ public class SymbolActivity extends AppCompatActivity implements
             symbol_textview.setText(cursor.getString(1));
             customable_text_edittext.setText(cursor.getString(2));
             final long symbol_customable_text_id = cursor.getLong(0);
-            save.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if ( ! databaseOperations.checkCustomableText(current_field_type,
-                            customable_text_edittext.getText().toString() ) ) {
-                        mySQLiteCursorLoader.updateCustomableText(symbol_customable_text_id, customable_text_edittext.getText().toString());
-                    } else {
-                        Toast toast = Toast.makeText(SymbolActivity.this, R.string.text_contained_in_special_text, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,400);
-                        toast.show();
-                    }
+            save.setOnClickListener(v -> {
+                if ( ! databaseOperations.checkCustomableText(current_field_type,
+                        customable_text_edittext.getText().toString() ) ) {
+                    mySQLiteCursorLoader.updateCustomableText(symbol_customable_text_id, customable_text_edittext.getText().toString());
+                } else {
+                    Toast toast = Toast.makeText(SymbolActivity.this, R.string.text_contained_in_special_text, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
                 }
             });
             customable_text_edittext.addTextChangedListener(new TextWatcher() {

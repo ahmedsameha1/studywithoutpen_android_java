@@ -36,6 +36,7 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
@@ -67,7 +68,8 @@ public class QuickTestActivity extends AppCompatActivity implements
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener,
         TimeOfAnswerOfTestsDialogFragment.Contact,
-        ActivityUtility.ActivityTimers {
+        ActivityUtility.ActivityTimers,
+        ObfuscateQuestionDialogFragment.ObfuscateText {
     public static final String SCREEN_NAME = "QuickTestActivity";
     public static final String PERCENTAGE_OR_NUMBER = "percentage_or_number";
     public static final String QUESTION_PERCENTAGE = "question_percentage";
@@ -144,6 +146,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     private long time_of_starting_time_of_answer = -1, effictive_time_of_answer;
     private boolean is_time_of_answer_elapsed = false;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
+    private boolean obfuscate;
 
 
     @Override
@@ -165,6 +168,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
             current_field_type = databaseOperations.getFieldType(current_field_id);
             isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+            obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
             int [] time_of_answer_data = databaseOperations.getTimeOfAnswerOfTests(current_field_id);
             time_of_answer = time_of_answer_data[0];
             time_of_answer_do_what = time_of_answer_data[1];
@@ -195,6 +199,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
             final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
             final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
+            final CardView dont_know_card_view = (CardView) findViewById(R.id.dont_know_card_view);
             tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
             final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
             if (savedInstanceState == null) {
@@ -315,7 +320,11 @@ public class QuickTestActivity extends AppCompatActivity implements
                     check_card_view.startAnimation(animAlpha);
                         boolean result = checkAnAnswer();
                         if (triesCounter < permitedTriesNumber && !result) {
-                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            if ( obfuscate ) {
+                                showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                            } else {
+                                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            }
                             new AsyncTask<Void, Void, Void>() {
 
                                 @Override
@@ -401,69 +410,56 @@ public class QuickTestActivity extends AppCompatActivity implements
                     }
                 }
             });
-            nextHint.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    next_hint_card_view.startAnimation(animAlpha);
-                    if (hints != null) {
-                        if (enterAnswer.getText().toString().length() <= 0) {
-                            enterAnswer.setHint(hints.get(hintCounter++));
-                        } else {
-                            Toast toast = Toast.makeText(QuickTestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
-                        }
-                        hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
-                    }
-                }
-            });
-            dont_know.setOnClickListener( view -> dontKnow() );
-            showActionbar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    show_actionbar_card_view.startAnimation(animAlpha);
-                    if (actionBarShown) {
-                        getSupportActionBar().hide();
-                        actionBarShown = (!actionBarShown);
-                        showActionbar.setText(R.string.show);
-                        cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+            nextHint.setOnClickListener(v -> {
+                next_hint_card_view.startAnimation(animAlpha);
+                if (hints != null) {
+                    if (enterAnswer.getText().toString().length() <= 0) {
+                        enterAnswer.setHint(hints.get(hintCounter++));
                     } else {
-                        getSupportActionBar().show();
-                        actionBarShown = (!actionBarShown);
-                        showActionbar.setText(R.string.hide);
-                        cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+                        Toast toast = Toast.makeText(QuickTestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                     }
+                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
                 }
             });
-            showNumberOfQuestions.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    v.startAnimation(animAlpha);
-                    Toast toast = Toast.makeText(QuickTestActivity.this,
-                            getString(R.string.number_of_questions, showNumberOfQuestions.getText().toString()), Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
+            dont_know.setOnClickListener( view -> {
+                dont_know_card_view.startAnimation(animAlpha);
+                dontKnow(); });
+            showActionbar.setOnClickListener(v -> {
+                show_actionbar_card_view.startAnimation(animAlpha);
+                if (actionBarShown) {
+                    getSupportActionBar().hide();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.show);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                } else {
+                    getSupportActionBar().show();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.hide);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
                 }
             });
-            remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    v.startAnimation(animAlpha);
-                    Toast toast = Toast.makeText(QuickTestActivity.this,
-                            getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
+            showNumberOfQuestions.setOnClickListener(v -> {
+                v.startAnimation(animAlpha);
+                Toast toast = Toast.makeText(QuickTestActivity.this,
+                        getString(R.string.number_of_questions, showNumberOfQuestions.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
             });
-            showTries.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    v.startAnimation(animAlpha);
-                    Toast toast = Toast.makeText(QuickTestActivity.this,
-                            getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
+            remainingQuestionCounter.setOnClickListener(v -> {
+                v.startAnimation(animAlpha);
+                Toast toast = Toast.makeText(QuickTestActivity.this,
+                        getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            });
+            showTries.setOnClickListener(v -> {
+                v.startAnimation(animAlpha);
+                Toast toast = Toast.makeText(QuickTestActivity.this,
+                        getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
             });
             getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
             getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
@@ -563,6 +559,13 @@ public class QuickTestActivity extends AppCompatActivity implements
                 timeOfAnswerOfTestsDialogFragment.setArguments(bundle2);
                 timeOfAnswerOfTestsDialogFragment.show(getSupportFragmentManager(), TimeOfAnswerOfTestsDialogFragment.TIME_OF_ANSWER_DIALOG_FRAGMENT);
                 return true;
+
+            case R.id.obfuscate_question:
+                Bundle bundle3 = new Bundle();
+                bundle3.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                ObfuscateQuestionDialogFragment obfuscateQuestionDialogFragment = new ObfuscateQuestionDialogFragment();
+                obfuscateQuestionDialogFragment.setArguments(bundle3);
+                obfuscateQuestionDialogFragment.show(getSupportFragmentManager(), ObfuscateQuestionDialogFragment.OBFUSCATE_QUESTION_DIALOG_FRAGMENT);
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -823,7 +826,11 @@ public class QuickTestActivity extends AppCompatActivity implements
         restoreUserLayoutChanges(savedInstanceState);
         if (!before_showing_result_dialog) {
             if (is_testing_now) {
-                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                if ( obfuscate ) {
+                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                } else {
+                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                }
                 showTries.setText(Integer.toString(triesCounter + 1));
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                 showNumberOfQuestions.setText(Integer.toString(questionsNumber));
@@ -951,7 +958,11 @@ public class QuickTestActivity extends AppCompatActivity implements
 
 
     private void showQuestion() {
-        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        if ( obfuscate ) {
+            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+        } else {
+            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        }
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -972,7 +983,6 @@ public class QuickTestActivity extends AppCompatActivity implements
         scheduleWhatToDoAfterTimeOfAnswerElapsed();
     }
 
-    // TODO: 2/21/17 make proguard options on gradle before publish true
     private void setNormalEnterAnswerBackground() {
         Runnable mRunnable = () -> {
             show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
@@ -1134,5 +1144,14 @@ public class QuickTestActivity extends AppCompatActivity implements
                         mLoadingView.setVisibility(View.GONE);
                     }
                 });
+    }
+    @Override
+    public void obfuscateText(boolean obfuscate) {
+        this.obfuscate = obfuscate;
+        if ( obfuscate ) {
+            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+        } else {
+            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        }
     }
 }

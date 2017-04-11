@@ -33,6 +33,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
@@ -43,7 +44,8 @@ import com.google.android.gms.analytics.Tracker;
  */
 public class EditEntryActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
-        ChangeTextSizeDialogFragment.ChangeTextSize {
+        ChangeTextSizeDialogFragment.ChangeTextSize,
+        ActivityUtility.ActivityTimers {
     public static final String SCREEN_NAME = "EditEntryActivity";
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
@@ -435,5 +437,10 @@ public class EditEntryActivity extends AppCompatActivity implements
         changeAreas(bundle.getFloat(QUESTION_LAYOUT), bundle.getFloat(ANSWER_LAYOUT));
         editQuestion.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
         editAnswer.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
+    }
+
+    @Override
+    public void manageTimersDueDialogsShow(boolean isCounting) {
+
     }
 }

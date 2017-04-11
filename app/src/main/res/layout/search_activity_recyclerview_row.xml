@@ -75,7 +75,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
-        android:weightSum="4"
+        android:weightSum="5"
         android:visibility="gone">
         <Button
             android:id="@+id/delete"
@@ -91,6 +91,14 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/edit"
+            android:textColor="@color/colorAccent"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+        <Button
+            android:id="@+id/same_question"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/same"
             android:textColor="@color/colorAccent"
             style="@style/Widget.AppCompat.Button.Borderless"/>
 

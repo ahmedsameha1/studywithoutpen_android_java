@@ -489,7 +489,7 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case ABOUT:
                 AboutDialogFragment aboutDialogFragment = new AboutDialogFragment();
-                aboutDialogFragment.show(getSupportFragmentManager(), AboutDialogFragment.ABOUT_DIALOG_FRAGMENT);
+                aboutDialogFragment.show(getSupportFragmentManager(), aboutDialogFragment.getClass().getName());
                 break;
         }
     }
@@ -541,42 +541,36 @@ public class MainActivity extends AppCompatActivity implements
                 .addSubActionView(button2)
                 .attachTo(fab)
                 .build();
-        button1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mAdapter.getItemCount() > 0) {
-                    Intent intent = new Intent(MainActivity.this, AddEntryActivity.class);
-                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, first_field_id);
-                    intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
-                    startActivity(intent);
-                } else {
-                    Bundle bundle = new Bundle();
-                    bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
-                    CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
-                    fragment.setArguments(bundle);
-                    fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
-                }
-                actionMenu.close(false);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("add entry from main activity")
-                        .build());
-            }
-        });
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        button1.setOnClickListener(view -> {
+            if (mAdapter.getItemCount() > 0) {
+                Intent intent = new Intent(MainActivity.this, AddEntryActivity.class);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, first_field_id);
+                intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
+                startActivity(intent);
+            } else {
                 Bundle bundle = new Bundle();
                 bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
                 CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
                 fragment.setArguments(bundle);
                 fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
-                actionMenu.close(true);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("create field")
-                        .build());
             }
+            actionMenu.close(false);
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory(ANALYTICS_CATEGORY)
+                    .setAction("add entry from main activity")
+                    .build());
+        });
+        button2.setOnClickListener(view -> {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
+            CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
+            fragment.setArguments(bundle);
+            fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
+            actionMenu.close(true);
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory(ANALYTICS_CATEGORY)
+                    .setAction("create field")
+                    .build());
         });
     }
 
@@ -625,23 +619,20 @@ public class MainActivity extends AppCompatActivity implements
 
         FilePickerDialog dialog = new FilePickerDialog(MainActivity.this, properties);
 
-        dialog.setDialogSelectionListener(new DialogSelectionListener() {
-            @Override
-            public void onSelectedFilePaths(String[] files) {
-                //files is the array of the paths of files selected by the Application User.
-                if (files.length > 0) {
-                    ExportImportDatabase.startExportThread(MainActivity.this, to_export_fields, files[0], to_export_file_name);
-                    mTracker.send(new HitBuilders.EventBuilder()
-                            .setCategory(ANALYTICS_CATEGORY)
-                            .setAction("export field")
-                            .build());
-                    Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                    toast = Toast.makeText(MainActivity.this, R.string.shut_down_warning, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
+        dialog.setDialogSelectionListener(files -> {
+            //files is the array of the paths of files selected by the Application User.
+            if (files.length > 0) {
+                ExportImportDatabase.startExportThread(MainActivity.this, to_export_fields, files[0], to_export_file_name);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction("export field")
+                        .build());
+                Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                toast = Toast.makeText(MainActivity.this, R.string.shut_down_warning, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
             }
         });
 
