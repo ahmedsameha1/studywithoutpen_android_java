@@ -176,7 +176,7 @@ public class TimeOfAnswerOfTestsDialogFragment extends DialogFragment {
                         dismiss();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory("Utilities")
-                                .setAction("time of answer")
+                                .setAction(ActivityUtility.getVersionCode(getActivity()) + "time of answer")
                                 .build());
                     }
                 } else {

@@ -621,7 +621,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         if ( is_starting_after_destruction ) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName(SCREEN_NAME);
+        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

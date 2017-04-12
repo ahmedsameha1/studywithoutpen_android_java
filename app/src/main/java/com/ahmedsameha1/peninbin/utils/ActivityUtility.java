@@ -1,6 +1,8 @@
 package com.ahmedsameha1.peninbin.utils;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v4.app.DialogFragment;
@@ -567,5 +569,15 @@ public class ActivityUtility {
             Log.e("error", ""+e.toString());
         }
         return text;
+    }
+
+    public static String getVersionCode(Context context) {
+        PackageInfo pi = null;
+        try {
+            pi = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return "V: " + pi.versionCode + " - ";
     }
 }

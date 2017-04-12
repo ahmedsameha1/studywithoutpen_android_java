@@ -39,6 +39,8 @@ import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 import java.util.Calendar;
+
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.analytics.HitBuilders;
 /**
@@ -312,7 +314,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                         dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction("schedule a random quick test")
+                                                .setAction(ActivityUtility.getVersionCode(getActivity()) + "schedule a random quick test")
                                                 .build());
                                     } else {
                                         Toast toast = Toast.makeText(getActivity(), getString(R.string.percentage_between), Toast.LENGTH_LONG);

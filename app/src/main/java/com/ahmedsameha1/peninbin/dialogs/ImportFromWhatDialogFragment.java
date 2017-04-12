@@ -21,6 +21,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
@@ -84,7 +85,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                     ExportImportDatabase.startImportThread(context, files [0],false);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                            .setAction("import field from app file")
+                                            .setAction(ActivityUtility.getVersionCode(getActivity()) + "import field from app file")
                                             .build());
                                 })
                                 .setPositiveButton(R.string.yes, (dialog12, which) -> {
@@ -97,7 +98,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                     ExportImportDatabase.startImportThread(context,files [0],true);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                            .setAction("import field from app file")
+                                            .setAction(ActivityUtility.getVersionCode(getActivity()) + "import field from app file")
                                             .build());
                                 })
                                 .create().show();
@@ -147,7 +148,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                         ImportTextFile.startImportThread(context, files [0]);
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                .setAction("import field from text file")
+                                .setAction(ActivityUtility.getVersionCode(getActivity()) + "import field from text file")
                                 .build());
                     }
                 });

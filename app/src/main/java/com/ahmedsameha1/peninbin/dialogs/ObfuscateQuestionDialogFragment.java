@@ -73,7 +73,7 @@ public class ObfuscateQuestionDialogFragment extends DialogFragment {
                 dismiss();
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory("Utilities")
-                        .setAction("obfuscate text")
+                        .setAction(ActivityUtility.getVersionCode(getActivity()) + "obfuscate text")
                         .build());
             });
             obfuscate_question_help.setOnClickListener(v -> {

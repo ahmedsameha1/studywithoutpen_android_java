@@ -57,6 +57,7 @@ import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.FieldActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
@@ -515,7 +516,7 @@ public class FieldActivity extends AppCompatActivity implements
                 fieldPropertiesDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("field properties")
+                        .setAction(ActivityUtility.getVersionCode(this) +"field properties")
                         .build());
                 break;
             case SCHEDULE_IN_FIELD:
@@ -668,7 +669,7 @@ public class FieldActivity extends AppCompatActivity implements
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("sort")
+                        .setAction(ActivityUtility.getVersionCode(this) +"sort")
                         .build());
                 return true;
             case R.id.text_shortcuts:

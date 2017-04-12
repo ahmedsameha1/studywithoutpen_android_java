@@ -38,6 +38,7 @@ import java.util.Locale;
 
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.google.android.gms.analytics.HitBuilders;
@@ -246,7 +247,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                             cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, locale_short_name);
                             mTracker.send(new HitBuilders.EventBuilder()
                                     .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                    .setAction("selecting locale")
+                                    .setAction(ActivityUtility.getVersionCode(getActivity()) + "selecting locale")
                                     .build());
                         } else {
                             cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, null);

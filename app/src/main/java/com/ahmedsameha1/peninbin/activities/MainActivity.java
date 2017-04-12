@@ -66,6 +66,7 @@ import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
 import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.PayloadString;
@@ -240,6 +241,10 @@ public class MainActivity extends AppCompatActivity implements
         bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
         fff();
         new ShowEula(this).show();
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory(ANALYTICS_CATEGORY)
+                .setAction(ActivityUtility.getVersionCode(this) + "run the app")
+                .build());
     }
 
 
@@ -471,7 +476,10 @@ public class MainActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(Money.MONEY)
+                        .setAction(ActivityUtility.getVersionCode(this) + "click to subscribe")
+                        .build());
 
               /*  Uri uri = Uri.parse("market://details?id=" + getPackageName());
                 Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
@@ -557,7 +565,7 @@ public class MainActivity extends AppCompatActivity implements
             actionMenu.close(false);
             mTracker.send(new HitBuilders.EventBuilder()
                     .setCategory(ANALYTICS_CATEGORY)
-                    .setAction("add entry from main activity")
+                    .setAction(ActivityUtility.getVersionCode(this) +"add entry from main activity")
                     .build());
         });
         button2.setOnClickListener(view -> {
@@ -569,7 +577,7 @@ public class MainActivity extends AppCompatActivity implements
             actionMenu.close(true);
             mTracker.send(new HitBuilders.EventBuilder()
                     .setCategory(ANALYTICS_CATEGORY)
-                    .setAction("create field")
+                    .setAction(ActivityUtility.getVersionCode(this) +"create field")
                     .build());
         });
     }
@@ -588,7 +596,7 @@ public class MainActivity extends AppCompatActivity implements
         mySQLiteCursorLoader.deleteField(field_id, mHandler, mainActivityRecyclerViewViewHolder);
         mTracker.send(new HitBuilders.EventBuilder()
                 .setCategory(ANALYTICS_CATEGORY)
-                .setAction("delete field")
+                .setAction(ActivityUtility.getVersionCode(this) +"delete field")
                 .build());
     }
 
@@ -625,7 +633,7 @@ public class MainActivity extends AppCompatActivity implements
                 ExportImportDatabase.startExportThread(MainActivity.this, to_export_fields, files[0], to_export_file_name);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("export field")
+                        .setAction(ActivityUtility.getVersionCode(this) +"export field")
                         .build());
                 Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.TOP, 0, 400);

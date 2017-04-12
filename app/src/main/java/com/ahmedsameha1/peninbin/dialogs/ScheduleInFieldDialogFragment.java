@@ -23,6 +23,7 @@ import android.widget.DatePicker;
 import android.widget.TimePicker;
 
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.google.android.gms.analytics.HitBuilders;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
@@ -93,7 +94,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                     ScheduleInFieldDialogFragment.this.dismiss();
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                            .setAction("schedule a quick test")
+                            .setAction(ActivityUtility.getVersionCode(getActivity()) + "schedule a quick test")
                             .build());
                     /*Log.i("time Picker",hourOfDay +" " + minute);
                     calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
@@ -138,7 +139,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                     ScheduleInFieldDialogFragment.this.dismiss();
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                            .setAction("schedule an enhanced test")
+                            .setAction(ActivityUtility.getVersionCode(getActivity()) + "schedule an enhanced test")
                             .build());
                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show(), calendar_current_date_time.get(Calendar.YEAR), calendar_current_date_time.get(Calendar.MONTH),
                         calendar_current_date_time.get(Calendar.DAY_OF_MONTH)).show();
@@ -165,7 +166,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                     ScheduleInFieldDialogFragment.this.dismiss();
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                            .setAction("schedule a fully random test")
+                            .setAction(ActivityUtility.getVersionCode(getActivity()) + "schedule a fully random test")
                             .build());
                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show(), calendar_current_date_time.get(Calendar.YEAR), calendar_current_date_time.get(Calendar.MONTH),
                         calendar_current_date_time.get(Calendar.DAY_OF_MONTH)).show();
@@ -192,7 +193,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                     ScheduleInFieldDialogFragment.this.dismiss();
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                            .setAction("schedule a study a period")
+                            .setAction(ActivityUtility.getVersionCode(getActivity()) + "schedule a study a period")
                             .build());
                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show(), calendar_current_date_time.get(Calendar.YEAR), calendar_current_date_time.get(Calendar.MONTH),
                         calendar_current_date_time.get(Calendar.DAY_OF_MONTH)).show();

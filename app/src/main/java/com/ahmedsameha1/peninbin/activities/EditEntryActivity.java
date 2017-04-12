@@ -381,7 +381,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         super.onResume();
         timer.setBase( SystemClock.elapsedRealtime() - lastPause);
         timer.start();
-        mTracker.setScreenName(SCREEN_NAME);
+        mTracker.setScreenName(ActivityUtility.getVersionCode(this) +SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

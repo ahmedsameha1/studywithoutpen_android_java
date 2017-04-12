@@ -28,6 +28,7 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
@@ -104,7 +105,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     protected void onResume() {
         super.onResume();
         handleIntent(getIntent());
-        mTracker.setScreenName( SCREEN_NAME);
+        mTracker.setScreenName( ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
     @Override

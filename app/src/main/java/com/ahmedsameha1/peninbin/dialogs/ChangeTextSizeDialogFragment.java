@@ -97,7 +97,7 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                 dismiss();
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory("Utilities")
-                        .setAction("change text size")
+                        .setAction(ActivityUtility.getVersionCode(getActivity()) + "change text size")
                         .build());
             });
             text_size_help.setOnClickListener(v -> {

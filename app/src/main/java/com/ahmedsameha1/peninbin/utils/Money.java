@@ -72,7 +72,7 @@ public class Money {
     public static final String RESPONSE_INAPP_PURCHASE_DATA_LIST = "INAPP_PURCHASE_DATA_LIST";
     public static final String RESPONSE_INAPP_SIGNATURE_LIST = "INAPP_DATA_SIGNATURE_LIST";
     private static final String UNSOLVABLE_ERROR_GETPURCHASES = "unsolvable_error_getpurchases";
-    private static final String MONEY = "money";
+    public static final String MONEY = "money";
 
 
     /**
@@ -198,7 +198,7 @@ public class Money {
                                 putUnsolvableErrorGetPurchases(context, true);   // security error
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory(MONEY)
-                                        .setAction("security error")
+                                        .setAction(ActivityUtility.getVersionCode(context) + "security error")
                                         .build());
                             }
                         } else {
@@ -215,21 +215,21 @@ public class Money {
                     putUserSubscriptionStatus(context, false);
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(MONEY)
-                            .setAction("allow user due error")
+                            .setAction(ActivityUtility.getVersionCode(context) + "allow user due error")
                             .build());
                 } else if ( response_code == BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
                     putNetworkDownGetPurchasesesStatus(context, true);
                     putUserSubscriptionStatus(context, false);
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(MONEY)
-                            .setAction("network error on money")
+                            .setAction(ActivityUtility.getVersionCode(context) + "network error on money")
                             .build());
                 } else if ( response_code == BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE ) {
                     putUnsolvableErrorGetPurchases(context, true);
                     putUserSubscriptionStatus(context, false);
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(MONEY)
-                            .setAction("billing unavailable error money")
+                            .setAction(ActivityUtility.getVersionCode(context) + "billing unavailable error money")
                             .build());
                 }
             } catch (RemoteException e) {
@@ -237,7 +237,7 @@ public class Money {
                 allowUserDueAnError(context);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(MONEY)
-                        .setAction("allow user due error")
+                        .setAction(ActivityUtility.getVersionCode(context) + "allow user due error")
                         .build());
                 e.printStackTrace();
             }

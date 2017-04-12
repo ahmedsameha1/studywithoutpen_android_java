@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -143,7 +144,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                                 check_type,read_answer.isChecked(),locale_short_name);
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                        .setAction("selecting locale")
+                                        .setAction(ActivityUtility.getVersionCode(getActivity()) + "selecting locale")
                                         .build());
                             } else {
                                 ((Contact)getActivity())
