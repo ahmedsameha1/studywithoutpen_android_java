@@ -442,12 +442,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onConfigure(SQLiteDatabase db) {
-        super.onConfigure(db);
-        db.enableWriteAheadLogging();
-        // Enable foreign key constraints
-        db.execSQL("PRAGMA foreign_keys=ON;");
-
+    public void onConfigure(SQLiteDatabase sqLiteDatabase) {
+        super.onConfigure(sqLiteDatabase);
+        sqLiteDatabase.enableWriteAheadLogging();
     }
 
     @Override
@@ -516,5 +513,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-
+    @Override
+    public void onOpen(SQLiteDatabase sqLiteDatabase) {
+        super.onOpen(sqLiteDatabase);
+        sqLiteDatabase.setForeignKeyConstraintsEnabled(true);
+    }
 }

@@ -85,7 +85,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                     ExportImportDatabase.startImportThread(context, files [0],false);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                            .setAction(ActivityUtility.getVersionCode(getActivity()) + "import field from app file")
+                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from app file")
                                             .build());
                                 })
                                 .setPositiveButton(R.string.yes, (dialog12, which) -> {
@@ -98,7 +98,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                     ExportImportDatabase.startImportThread(context,files [0],true);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                            .setAction(ActivityUtility.getVersionCode(getActivity()) + "import field from app file")
+                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from app file")
                                             .build());
                                 })
                                 .create().show();
@@ -148,7 +148,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                         ImportTextFile.startImportThread(context, files [0]);
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                .setAction(ActivityUtility.getVersionCode(getActivity()) + "import field from text file")
+                                .setAction(ActivityUtility.getVersionCode(context) + "import field from text file")
                                 .build());
                     }
                 });
