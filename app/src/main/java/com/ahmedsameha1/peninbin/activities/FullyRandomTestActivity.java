@@ -2,6 +2,8 @@ package com.ahmedsameha1.peninbin.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.graphics.Color;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
@@ -25,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -33,6 +36,8 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -44,24 +49,24 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
-import com.ahmedsameha1.peninbin.utils.MoreThanOneAnswer;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Random;
 import java.util.StringTokenizer;
 
 public class FullyRandomTestActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
-        TextToSpeech.OnInitListener {
+        TextToSpeech.OnInitListener,
+        TimeOfAnswerOfTestsDialogFragment.Contact,
+        ActivityUtility.ActivityTimers,
+        ObfuscateQuestionDialogFragment.ObfuscateText {
 
     public static final String SCREEN_NAME = "FullyRandomTestActivity";
     public static final String ACTIVITY_NAME = "FullyRandomTestActivity";
@@ -82,7 +87,6 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     public static final String CURRENT_QUESTION_COUNTER = "currentQuestionCounter";
     public static final String TRIES_COUNTER = "triesCounter";
     public static final String NEXT_BUTTON_STATE = "newtButtonState";
-    public static final String RESULT = "result";
     public static final String PERMITED_TRIES_NUMBER = "permitedTriesNumber";
     public static final String TESTING_NOW = "testingNow";
     public static final String NUMBER_OF_WRONG_ANSWERS = "numberOfWrongAnswers";
@@ -101,23 +105,31 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     private static final String SYMBOL = "symbol";
     private static final String CUSTOMABLE_TEXT = "customable_text";
     private static final String BEFORE_SHOWING_RESULT_DIALOG = "before_showing_result_dialog";
+    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
+    public static final String TIME_BETWEEN_ANSWERS_PASSED = "time_between_answers_passed";
+    private static final String HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER = "how_much_time_remaining_from_time_for_answer";
+    private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
+    private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
+    private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
     private long current_field_id;
     private String[][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
-    private boolean boolean_continue = false, actionBarShown, before_showing_result_dialog;
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
-    private boolean result, testingNow = false;
+    private boolean boolean_continue = false, actionBarShown, before_showing_result_dialog, time_of_answer_saved;
+    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
+    private boolean is_testing_now = false;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber, wrongAnswersCounter, percent_or_number, number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private double percentage;
     private Cursor fieldEntriesCursor;
     private Toolbar toolbar;
     private EditText enterAnswer;
-    private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuestions, check, nextHint, showActionbar;
-    private LinearLayout showResult, questionLinearlayout, container;
+    private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuestions, check, nextHint, showActionbar, dont_know;
+    private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
     private Handler mHandler = new Handler();
     private Tracker mTracker;
-    private boolean isEmulated;
+    private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
+    private Chronometer tool_bar_timer;
+    private long lastPause;
     private Thread pauseThread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -126,17 +138,14 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             try {
                 toPause();
             } finally {
-                pauseRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FullyRandomTestActivity.this);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
-                        editor.commit();
-                        Toast toast = Toast.makeText(FullyRandomTestActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    }
+                pauseRunnable = () -> {
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FullyRandomTestActivity.this);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
+                    editor.commit();
+                    Toast toast = Toast.makeText(FullyRandomTestActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 };
                 mHandler.post(pauseRunnable);
             }
@@ -146,6 +155,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     private int check_type;
     private TextToSpeech tts;
     private boolean tts_available = false;
+    private boolean is_time_of_answer_elapsed = false;
     private boolean locale_available = false;
     private DatabaseReadOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
@@ -156,6 +166,10 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     private String[] symbol, customable_text;
     private int current_field_type;
     private Runnable show_result_dialog_runnable;
+    private int time_of_answer, time_of_answer_do_what;
+    private long time_of_starting_time_of_answer = -1, effictive_time_of_answer;
+    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
+    private boolean obfuscate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,13 +185,17 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
         }
         databaseOperations = new DatabaseReadOperations(this);
-        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
-        listForTest = retainedFragment.getListForTest_TestActivity();
+        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
+        listForTest = retainedFragment.getListForTest_FullyRandomTestActivity();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-        boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
+        obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
+        int [] time_of_answer_data = databaseOperations.getTimeOfAnswerOfTests(current_field_id);
+        time_of_answer = time_of_answer_data[0];
+        time_of_answer_do_what = time_of_answer_data[1];
+        time_of_answer_saved = time_of_answer > 0;
         permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
         percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
         number = getIntent().getIntExtra(QUESTION_NUMBER, 0);
@@ -187,28 +205,33 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         showQuestion = (TextView) findViewById(R.id.display_question);
         check = (TextView) findViewById(R.id.check);
         remainingQuestionCounter = (TextView) findViewById(R.id.remaining_question_counter);
-
-
         showTries = (TextView) findViewById(R.id.trys);
-
         nextHint = (TextView) findViewById(R.id.next_hint);
+        dont_know = (TextView) findViewById(R.id.dont_know);
         showNumberOfQuestions = (TextView) findViewById(R.id.number_of_questions);
-        showResult = (LinearLayout) findViewById(R.id.result);
-        questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
+        show_result_linearlayout = (LinearLayout) findViewById(R.id.result);
+        show_question_linearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
         content = (RelativeLayout) findViewById(R.id.content);
         mLoadingView = findViewById(R.id.loading);
         final CardView show_actionbar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView check_card_view = (CardView) findViewById(R.id.check_card_view);
         final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
+        final CardView dont_know_card_view = (CardView) findViewById(R.id.dont_know_card_view);
+        tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         if (savedInstanceState == null) {
+            boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
             content.setVisibility(View.GONE);
             mShortAnimationDuration = getResources().getInteger(
                     android.R.integer.config_shortAnimTime);
+            lastPause = databaseOperations.getElapsedPausedSessionTime(current_field_id, Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST);
+            isStartingFirstTime = true;
         } else {
+            boolean_continue = savedInstanceState.getBoolean(BOOLEAN_CONTINUE);
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
             mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
+            lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         }
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         setSupportActionBar(toolbar);
@@ -283,15 +306,11 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                             listForTest = readTestDataFromLinkerTable();
                             questionsNumber = listForTest.length;
                             showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                            showTries.setText(Integer.toString(triesCounter + 1));
-                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            showQuestion();
                             enterAnswer.setEnabled(true);
                             enterAnswer.requestFocus();
-                            testingNow = true;
-                            wrongAnswers = new ArrayList<String>(permitedTriesNumber);
+                            is_testing_now = true;
                             boolean_continue = false;
-                            ifMoreThanOnce();
                         }
                     } else {
                         if (listForTest == null) {
@@ -302,14 +321,9 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                             }
                             questionsNumber = listForTest.length;
                             showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                            showTries.setText(Integer.toString(triesCounter + 1));
-                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            showQuestion();
                             enterAnswer.requestFocus();
-                            testingNow = true;
-                            wrongAnswers = new ArrayList<String>(permitedTriesNumber);
-                            boolean_continue = false;
-                            ifMoreThanOnce();
+                            is_testing_now = true;
                         }
                     }
                     crossfade();
@@ -334,62 +348,58 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 }
             }
         };
-        check.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        check.setOnClickListener(view -> {
                 check_card_view.startAnimation(animAlpha);
-                if (enterAnswer.getText().toString().length() > 0) {
-                    result = checkAnAnswer();
+
+                    boolean result = checkAnAnswer();
                     if (triesCounter < permitedTriesNumber && !result) {
-                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        if ( obfuscate ) {
+                            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                        } else {
+                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        }
                         showTries.setText(Integer.toString(triesCounter + 1));
                     } else {
                         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                         currentQuestionCounter++;
                         if (currentQuestionCounter >= questionsNumber) {
                             check.setEnabled(false);
-//                            start.setEnabled(true);
-
                             before_showing_result_dialog = true;
-                            show_result_dialog_runnable = new Runnable() {
-                                @Override
-                                public void run() {
+                            show_result_dialog_runnable = () -> {
                                     showQuestion.setText(R.string.test_has_completed);
                                     enterAnswer.setText(R.string.test_has_completed);
-                                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                                    showResult.setPadding(0, 0, 0, 0);
+                                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                    show_result_linearlayout.setPadding(0, 0, 0, 0);
                                     show_result_dialog();
-                                }
+
                             };
                             mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
                             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                            testingNow = false;
+                            is_testing_now = false;
                             enterAnswer.setEnabled(false);
                             showNumberOfQuestions.setText("");
                             remainingQuestionCounter.setText("");
                             showTries.setText("");
                             enterAnswer.setHint(R.string.enter_your_answer);
                             hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-//                            getSupportLoaderManager().restartLoader(START_NEW_SESSION, null, FullyRandomTestActivity.this);
-                            mySQLiteCursorLoader.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
-                            mySQLiteCursorLoader.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
+                            cursorLoaderAndUpdateDatabase.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
+                            cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
+                            mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                            time_of_starting_time_of_answer = -1;
+                            is_time_of_answer_elapsed = false;
+                            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                            tool_bar_timer.stop();
+                            cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
+                                    Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST, Constants.ElapsedPausedSessionTime.NOT_USED);
                         } else {
-                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                            showQuestion.scrollTo(0, 0);
-                            showTries.setText(Integer.toString(triesCounter + 1));
-                            ifMoreThanOnce();
-                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                            enterAnswer.setHint(R.string.enter_your_answer);
-                            hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                            wrongAnswers = new ArrayList<String>(permitedTriesNumber);
+                            showQuestion();
                         }
                     }
-                } else {
-                    Toast toast = Toast.makeText(FullyRandomTestActivity.this, R.string.where_the_answer, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
                 enterAnswer.setHint(R.string.enter_your_answer);
+            if (triesCounter == INITIAL_VALUE_OF_TRIES_COUNTER) {
+                show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                show_question_linearlayout.setPadding(0, 0, 0, 0);
+                showQuestion.setTextColor(Color.WHITE);
             }
         });
         enterAnswer.addTextChangedListener(new TextWatcher() {
@@ -407,8 +417,11 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             public void afterTextChanged(Editable s) {
                 if (s.length() > 0) {
                     check.setEnabled(true);
-                    showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                    showResult.setPadding(0, 0, 0, 0);
+                    dont_know.setEnabled(false);
+                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                    show_result_linearlayout.setPadding(0, 0, 0, 0);
+                } else {
+                    dont_know.setEnabled(true);
                 }
                 if (s.length() <= 0) {
                     check.setEnabled(false);
@@ -424,9 +437,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 }
             }
         });
-        nextHint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        nextHint.setOnClickListener( view -> {
                 next_hint_card_view.startAnimation(animAlpha);
                 if (hints != null) {
                     if (enterAnswer.getText().toString().length() <= 0) {
@@ -438,54 +449,45 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                     }
                     hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
                 }
-            }
         });
-        showActionbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        dont_know.setOnClickListener( view -> {
+            dont_know_card_view.startAnimation(animAlpha);
+            dontKnow();} );
+        showActionbar.setOnClickListener( view ->  {
                 show_actionbar_card_view.startAnimation(animAlpha);
                 if (actionBarShown) {
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
                     getSupportActionBar().show();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
                 }
-            }
         });
-        showNumberOfQuestions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(animAlpha);
+        showNumberOfQuestions.setOnClickListener( view ->  {
+                view.startAnimation(animAlpha);
                 Toast toast = Toast.makeText(FullyRandomTestActivity.this,
                         getString(R.string.number_of_questions, showNumberOfQuestions.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
-            }
+
         });
-        remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(animAlpha);
+        remainingQuestionCounter.setOnClickListener( view ->  {
+                view.startAnimation(animAlpha);
                 Toast toast = Toast.makeText(FullyRandomTestActivity.this,
                         getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
-            }
         });
-        showTries.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(animAlpha);
+        showTries.setOnClickListener( view ->  {
+                view.startAnimation(animAlpha);
                 Toast toast = Toast.makeText(FullyRandomTestActivity.this,
                         getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
-            }
         });
         if (boolean_continue) {
             getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
@@ -512,6 +514,36 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if ( !ActivityUtility.hasOpenedDialogs(this) ) {
+            tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+            tool_bar_timer.start();
+
+            // to set the timer on the tool_bar_timer after recreation of activity due configuration change to the last value
+        } else if ( !is_testing_now ) {
+            tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+        }
+        /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
+         * do not call it after destruction because it will be called from onrestoreinstancestate method
+         * do not call it if the test has already finished
+         */
+        if ( !isStartingFirstTime && !is_starting_after_destruction && is_testing_now) {
+            scheduleWhatToDoAfterTimeOfAnswerElapsed();
+        }
+        // at this point this flag has performed its role so I return it to its default value
+        if ( isStartingFirstTime ) {
+            isStartingFirstTime = false;
+        }
+        // at this point this flag has performed its role so I return it to its default value
+        if ( is_starting_after_destruction ) {
+            is_starting_after_destruction = false;
+        }
+        mTracker.setScreenName(ActivityUtility.getVersionCode(this) +SCREEN_NAME);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.test_activity_menu, menu);
@@ -535,6 +567,9 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 Toast toast = Toast.makeText(FullyRandomTestActivity.this, R.string.pause_do_not_shutdown, Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
+                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
+                        Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST, lastPause);
                 pauseThread.start();
                 finish();
                 ExitActivity.exit(FullyRandomTestActivity.this);
@@ -542,8 +577,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
-                bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
+                bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) show_question_linearlayout.getLayoutParams()).weight);
+                bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) show_result_linearlayout.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
                 changeAreasDialogFragment.setArguments(bundle);
                 changeAreasDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
@@ -558,6 +593,24 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 changeTextSizeDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
 
+            case R.id.time_of_answer:
+                Bundle bundle2 = new Bundle();
+                bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.CURRENT_TIME_OF_ANSWER, time_of_answer);
+                bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.CURRENT_TIME_OF_ANSWER_DO_WHAT, time_of_answer_do_what);
+                bundle2.putBoolean(TimeOfAnswerOfTestsDialogFragment.TIME_OF_ANSWER_SAVED, time_of_answer_saved);
+                TimeOfAnswerOfTestsDialogFragment timeOfAnswerOfTestsDialogFragment = new TimeOfAnswerOfTestsDialogFragment();
+                timeOfAnswerOfTestsDialogFragment.setArguments(bundle2);
+                timeOfAnswerOfTestsDialogFragment.show(getSupportFragmentManager(), TimeOfAnswerOfTestsDialogFragment.TIME_OF_ANSWER_DIALOG_FRAGMENT);
+                return true;
+
+            case R.id.obfuscate_question:
+                Bundle bundle3 = new Bundle();
+                bundle3.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                ObfuscateQuestionDialogFragment obfuscateQuestionDialogFragment = new ObfuscateQuestionDialogFragment();
+                obfuscateQuestionDialogFragment.setArguments(bundle3);
+                obfuscateQuestionDialogFragment.show(getSupportFragmentManager(), ObfuscateQuestionDialogFragment.OBFUSCATE_QUESTION_DIALOG_FRAGMENT);
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -566,16 +619,19 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     }
 
     private void toPause() {
+        lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+        cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
+                Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST, lastPause);
         if (!databaseOperations.checkEntriesForAnyTestOrderFullyRandomTest(current_field_id, question_data_type)) {
-            mySQLiteCursorLoader.putEntriesTestOrderFullyRandomTest(current_field_id,
+            cursorLoaderAndUpdateDatabase.putEntriesTestOrderFullyRandomTest(current_field_id,
                     question_data_type, listForTest);
         }
-        mySQLiteCursorLoader.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
+        cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
         int[] array = new int[3];
         array[0] = currentQuestionCounter;
         array[1] = wrongAnswersCounter;
         array[2] = permitedTriesNumber;
-        mySQLiteCursorLoader.putTestPausedDataFullyRandomTest(current_field_id, array);
+        cursorLoaderAndUpdateDatabase.putTestPausedDataFullyRandomTest(current_field_id, array);
     }
 
     private String[][] getListForTest(double percent) {
@@ -587,7 +643,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             listOfEntries[fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
             listOfEntries[fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
         }
-        shuffleArray(listOfEntries);
+        ActivityUtility.shuffleArray(listOfEntries);
         for (int n = 0; n < listForTest.length; n++) {
             listForTest[n][0] = listOfEntries[n][0];
             listForTest[n][1] = listOfEntries[n][1];
@@ -603,7 +659,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             listOfEntries[fieldEntriesCursor.getPosition()][0] = fieldEntriesCursor.getString(1);
             listOfEntries[fieldEntriesCursor.getPosition()][1] = fieldEntriesCursor.getString(2);
         }
-        shuffleArray(listOfEntries);
+        ActivityUtility.shuffleArray(listOfEntries);
         for (int n = 0; n < listForTest.length; n++) {
             listForTest[n][0] = listOfEntries[n][0];
             listForTest[n][1] = listOfEntries[n][1];
@@ -611,22 +667,9 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         return listForTest;
     }
 
-    private void shuffleArray(String[][] array) {
-        Random rnd = new Random();
-        for (int i = array.length - 1; i > 0; i--) {
-            int index = rnd.nextInt(i + 1);
-            // Simple swap
-            String question = array[index][0];
-            String answer = array[index][1];
-            array[index][0] = array[i][0];
-            array[index][1] = array[i][1];
-            array[i][0] = question;
-            array[i][1] = answer;
-        }
-    }
 
     private void ifMoreThanOnce() {
-        hints = MoreThanOneAnswer.getHints(this, current_field_id, question_data_type,
+        hints = ActivityUtility.getHints(this, current_field_id, question_data_type,
                 listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
         if (hints != null) {
             nextHint.setEnabled(true);
@@ -635,9 +678,24 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         }
     }
 
+    private void setFalse( ActivityUtility.FalseString falseString) {
+        show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+        show_result_linearlayout.setPadding(0, 0, 0, 0);
+        setNormalEnterAnswerBackground();
+        if ( falseString == ActivityUtility.FalseString.TIME_OUT ) {
+            wrongAnswers.add(getString(R.string.time_out));
+        } else if ( falseString == ActivityUtility.FalseString.DONT_KNOW ){
+            wrongAnswers.add(getString(R.string.dont_know));
+        }
+        wrongAnswersCounter++;
+        cursorLoaderAndUpdateDatabase.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
+                listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
+
+        wrongAnswers = null;
+    }
+
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
-        Runnable mRunnable;
         boolean result = false;
         if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
             if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
@@ -648,28 +706,14 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                         tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
-                showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0, 0, 0, 0);
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                        showResult.setPadding(0, 0, 0, 0);
-                    }
-                };
-                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                setNormalEnterAnswerBackground();
                 result = true;
             } else {
-                showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0, 0, 0, 0);
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                        showResult.setPadding(0, 0, 0, 0);
-                    }
-                };
-                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                setNormalEnterAnswerBackground();
                 result = false;
                 wrongAnswers.add(enterAnswer.getText().toString());
             }
@@ -677,7 +721,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
+                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
                         listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
@@ -690,28 +734,14 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                         tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
-                showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0, 0, 0, 0);
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                        showResult.setPadding(0, 0, 0, 0);
-                    }
-                };
-                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                setNormalEnterAnswerBackground();
                 result = true;
             } else {
-                showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0, 0, 0, 0);
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                        showResult.setPadding(0, 0, 0, 0);
-                    }
-                };
-                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                setNormalEnterAnswerBackground();
                 result = false;
                 wrongAnswers.add(enterAnswer.getText().toString());
             }
@@ -719,7 +749,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
+                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
                         listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
@@ -732,28 +762,14 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                         tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
-                showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0, 0, 0, 0);
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                        showResult.setPadding(0, 0, 0, 0);
-                    }
-                };
-                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                setNormalEnterAnswerBackground();
                 result = true;
             } else {
-                showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0, 0, 0, 0);
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                        showResult.setPadding(0, 0, 0, 0);
-                    }
-                };
-                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                setNormalEnterAnswerBackground();
                 result = false;
                 wrongAnswers.add(enterAnswer.getText().toString());
             }
@@ -761,7 +777,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
+                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
                         listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
@@ -774,28 +790,14 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                         tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                     }
                 }
-                showResult.setBackgroundResource(R.drawable.correct_answer_background);
-                showResult.setPadding(0, 0, 0, 0);
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                        showResult.setPadding(0, 0, 0, 0);
-                    }
-                };
-                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                setNormalEnterAnswerBackground();
                 result = true;
             } else {
-                showResult.setBackgroundResource(R.drawable.wrong_answer_background);
-                showResult.setPadding(0, 0, 0, 0);
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showResult.setBackgroundResource(R.drawable.enter_answer_background);
-                        showResult.setPadding(0, 0, 0, 0);
-                    }
-                };
-                mHandler.postDelayed(mRunnable, RETURN_TIME);
+                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                setNormalEnterAnswerBackground();
                 result = false;
                 wrongAnswers.add(enterAnswer.getText().toString());
             }
@@ -803,7 +805,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                mySQLiteCursorLoader.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
+                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersFullyRandomTest(listForTest[currentQuestionCounter][0],
                         listForTest[currentQuestionCounter][1], current_field_id, wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
@@ -825,7 +827,15 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        retainedFragment.setListForTest_TestActivity(listForTest);
+        if ( !ActivityUtility.hasOpenedDialogs(this)) {
+            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+            tool_bar_timer.stop();
+        }
+        /* Canceling the timers of time of answer when the user go away from the activity
+         or before the activity finishes
+         or before the activity destroyed due a change of configuration*/
+        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+        retainedFragment.setListForTest_FullyRandomTestActivity(listForTest);
     }
 
     @Override
@@ -838,14 +848,26 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if ( databaseOperations.isThisFieldTestPausedFullyRandomTest(current_field_id)) {
+            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+            cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
+                    Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST, lastPause);
+        } else {
+            cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
+                    Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST, Constants.ElapsedPausedSessionTime.NOT_USED);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle savedInsatanceState) {
         savedInsatanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
         savedInsatanceState.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
         savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
-        savedInsatanceState.putBoolean(RESULT, result);
         savedInsatanceState.putBoolean(NEXT_BUTTON_STATE, check.isEnabled());
-        savedInsatanceState.putBoolean(TESTING_NOW, testingNow);
+        savedInsatanceState.putBoolean(TESTING_NOW, is_testing_now);
         savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
@@ -856,17 +878,34 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         savedInsatanceState.putStringArray(SYMBOL, symbol);
         savedInsatanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         savedInsatanceState.putBoolean(BEFORE_SHOWING_RESULT_DIALOG, before_showing_result_dialog);
+        savedInsatanceState.putLong(TIMER_LAST_PAUSE, lastPause);
+        savedInsatanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
+        savedInsatanceState.putInt(TIME_FOR_ANSWER_DO_WHAT, time_of_answer_do_what);
+        savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
+               /* Saving the remaining time till completion of the current timer of time of answer because the activity
+        will be destroyed, not finishing normally.
+        * We don't need to save this remaining time when the activity finishes normally
+        * or when the user go away from the activity */
+        if (time_of_starting_time_of_answer > -1) {
+            savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER,
+                    effictive_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
+        }
+              /* To run scheduleWhatToDoAfterTimeOfAnswerElapsed() method after restarting the activity
+        in case the activity destroyed while a dialog is shown */
+        else if ( ActivityUtility.hasOpenedDialogs(this) ) {
+            savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000 );
+        }
+        // call this method to prevent the dialogs from being shown after the recreation of the activity
+        // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
+        if ( is_testing_now ) { // don't close dialogs (exactly the result dialog) if the test already has finished
+            ActivityUtility.closeOpenedDialogs(this);
+        }
         super.onSaveInstanceState(savedInsatanceState);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mTracker.setScreenName(SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
-    }
+
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -875,33 +914,53 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
         permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
         triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
-        result = savedInstanceState.getBoolean(RESULT);
-        testingNow = savedInstanceState.getBoolean(TESTING_NOW);
+        is_testing_now = savedInstanceState.getBoolean(TESTING_NOW);
         boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
         questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
-        boolean_continue = savedInstanceState.getBoolean(BOOLEAN_CONTINUE);
         customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
         symbol = savedInstanceState.getStringArray(SYMBOL);
         before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
+        time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
+        time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
+        is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+        is_starting_after_destruction = true;
         restoreUserLayoutChanges(savedInstanceState);
         if (!before_showing_result_dialog) {
-            if (testingNow) {
-                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+            if (is_testing_now) {
+                if ( obfuscate ) {
+                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                } else {
+                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                }
                 showTries.setText(Integer.toString(triesCounter + 1));
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                 showNumberOfQuestions.setText(Integer.toString(questionsNumber));
                 check.setEnabled(nextState);
                 enterAnswer.setEnabled(true);
                 ifMoreThanOnce();
-            }
-            if (hintCounter > 0) {
-                if (enterAnswer.getText().toString().length() <= 0) {
+                if ( is_time_of_answer_elapsed && time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+                    show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
+                    show_question_linearlayout.setPadding(0, 0, 0, 0);
+                    showQuestion.setTextColor(Color.BLACK);
+                }
+                if (savedInstanceState.containsKey(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER)) {
+                    long how_much_time_remaining_time_for_answer = savedInstanceState.getLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER);
+                    if (how_much_time_remaining_time_for_answer <= 0) {
+                        DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
+                    } else {
+                        effictive_time_of_answer = how_much_time_remaining_time_for_answer;
+                        mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
+                        time_of_starting_time_of_answer = System.currentTimeMillis();
+                    }
+                }
+                if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
                     enterAnswer.setHint(hints.get(hintCounter - 1));
                 }
             }
+
         } else {
             show_result_dialog();
         }
@@ -915,7 +974,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 tts = new TextToSpeech(getApplicationContext(), this);
                 tts_available = true;
             } else {
-                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id, false);
+                cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id, false);
                 Toast toast = Toast.makeText(this, R.string.tts_not_available, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
@@ -925,13 +984,13 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
 
     @Override
     public void changeAreas(float questionArea, float answerArea) {
-        LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams();
-        LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) showResult.getLayoutParams();
+        LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) show_question_linearlayout.getLayoutParams();
+        LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) show_result_linearlayout.getLayoutParams();
         container.setWeightSum(questionArea + answerArea);
         question_params.weight = (float) (questionArea);
         answer_params.weight = (float) (answerArea);
-        questionLinearlayout.setLayoutParams(question_params);
-        showResult.setLayoutParams(answer_params);
+        show_question_linearlayout.setLayoutParams(question_params);
+        show_result_linearlayout.setLayoutParams(answer_params);
     }
 
     @Override
@@ -941,8 +1000,8 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
     }
 
     private void saveUserLayoutChanges(Bundle bundle) {
-        bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
-        bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
+        bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) show_question_linearlayout.getLayoutParams()).weight);
+        bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) show_result_linearlayout.getLayoutParams()).weight);
         bundle.putFloat(TEXT_SIZE, showQuestion.getTextSize());
     }
 
@@ -965,7 +1024,7 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                 tts.setLanguage(locale);
                 locale_available = true;
             } else {
-                mySQLiteCursorLoader.updateFieldReadAnswer(current_field_id, false);
+                cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id, false);
                 Toast toast = Toast.makeText(this, R.string.locale_is_not_available, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
@@ -985,10 +1044,166 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
         bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         bundle.putInt(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
-        ;
+        bundle.putInt(PERMITED_TRIES_NUMBER,permitedTriesNumber);
         fragment.setArguments(bundle);
         fragment.show(getSupportFragmentManager(), ShowTestResultDialogFragment.SHOW_TEST_RESULT_DIALOG_FRAGMENT);
     }
+    private void showQuestion() {
+        if ( obfuscate ) {
+            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+        } else {
+            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        }
+        showQuestion.scrollTo(0, 0);
+        showTries.setText(Integer.toString(triesCounter + 1));
+        ifMoreThanOnce();
+        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+        enterAnswer.setHint(R.string.enter_your_answer);
+        hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+        wrongAnswers = new ArrayList<>(permitedTriesNumber);
+        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+        time_of_starting_time_of_answer = -1;
+        is_time_of_answer_elapsed = false;
+        scheduleWhatToDoAfterTimeOfAnswerElapsed();
+    }
+
+    private void setNormalEnterAnswerBackground() {
+        Runnable mRunnable = () -> {
+            show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+            show_result_linearlayout.setPadding(0, 0, 0, 0);
+        };
+        mHandler.postDelayed(mRunnable, RETURN_TIME);
+    }
+
+    @Override
+    public void setTimeOfAnswer(int time_of_answer, int time_of_answer_do_what, boolean time_for_answer_saved) {
+        this.time_of_answer = time_of_answer;
+        this.time_of_answer_do_what = time_of_answer_do_what;
+        this.time_of_answer_saved = time_for_answer_saved;
+        scheduleWhatToDoAfterTimeOfAnswerElapsed();
+    }
+
+
+    @Override
+    public void manageTimersDueDialogsShow(boolean isCounting) {
+        if ( isCounting ) {
+            tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+            tool_bar_timer.start();
+            scheduleWhatToDoAfterTimeOfAnswerElapsed();
+        } else {
+            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+            tool_bar_timer.stop();
+            mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+            time_of_starting_time_of_answer = -1;
+            is_time_of_answer_elapsed = false;
+            if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+                show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                show_question_linearlayout.setPadding(0, 0, 0, 0);
+                showQuestion.setTextColor(Color.WHITE);
+            }
+        }
+    }
+    private void DoWhatYouHaveToDoAfterTimeOfAnswerElapsed() {
+        if ( time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
+            setFalse(ActivityUtility.FalseString.TIME_OUT);
+            triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+            currentQuestionCounter++;
+            if (currentQuestionCounter >= questionsNumber) {
+                check.setEnabled(false);
+                before_showing_result_dialog = true;
+                show_result_dialog_runnable = () -> {
+                    showQuestion.setText(R.string.test_has_completed);
+                    enterAnswer.setText(R.string.test_has_completed);
+                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                    show_result_linearlayout.setPadding(0, 0, 0, 0);
+                    show_result_dialog();
+                };
+                mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+                currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                is_testing_now = false;
+                enterAnswer.setEnabled(false);
+                showNumberOfQuestions.setText("");
+                remainingQuestionCounter.setText("");
+                showTries.setText("");
+                enterAnswer.setHint(R.string.enter_your_answer);
+                hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                cursorLoaderAndUpdateDatabase.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
+                cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
+                mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                time_of_starting_time_of_answer = -1;
+                is_time_of_answer_elapsed = false;
+                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                tool_bar_timer.stop();
+            } else {
+                showQuestion();
+                show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                show_question_linearlayout.setPadding(0, 0, 0, 0);
+                Runnable mRunnable = () -> {
+                    show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                    show_question_linearlayout.setPadding(0, 0, 0, 0);
+                };
+                mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
+            }
+        } else if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+            show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
+            show_question_linearlayout.setPadding(0, 0, 0, 0);
+            showQuestion.setTextColor(Color.BLACK);
+            is_time_of_answer_elapsed = true;
+            time_of_starting_time_of_answer = -1;
+        }
+    }
+    private void scheduleWhatToDoAfterTimeOfAnswerElapsed() {
+        if (time_of_answer > 0) {
+            effictive_time_of_answer = time_of_answer * 1000;
+            mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
+            time_of_starting_time_of_answer = System.currentTimeMillis();
+        }
+    }
+
+    private void dontKnow() {
+        setFalse(ActivityUtility.FalseString.DONT_KNOW);
+        triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+        currentQuestionCounter++;
+        showQuestion.setTextColor(Color.WHITE);
+        if (currentQuestionCounter >= questionsNumber) {
+            check.setEnabled(false);
+            before_showing_result_dialog = true;
+            show_result_dialog_runnable = () -> {
+                showQuestion.setText(R.string.test_has_completed);
+                enterAnswer.setText(R.string.test_has_completed);
+                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                show_result_dialog();
+            };
+            mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+            currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+            is_testing_now = false;
+            enterAnswer.setEnabled(false);
+            showNumberOfQuestions.setText("");
+            remainingQuestionCounter.setText("");
+            showTries.setText("");
+            enterAnswer.setHint(R.string.enter_your_answer);
+            hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+            cursorLoaderAndUpdateDatabase.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
+            cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
+            mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+            time_of_starting_time_of_answer = -1;
+            is_time_of_answer_elapsed = false;
+            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+            tool_bar_timer.stop();
+        } else {
+            showQuestion();
+            show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+            show_question_linearlayout.setPadding(0, 0, 0, 0);
+            Runnable mRunnable = () -> {
+                show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                show_question_linearlayout.setPadding(0, 0, 0, 0);
+            };
+            mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
+        }
+
+    }
+
 
     private void crossfade() {
 
@@ -1016,5 +1231,14 @@ public class FullyRandomTestActivity extends AppCompatActivity implements
                         mLoadingView.setVisibility(View.GONE);
                     }
                 });
+    }
+    @Override
+    public void obfuscateText(boolean obfuscate) {
+        this.obfuscate = obfuscate;
+        if ( obfuscate ) {
+            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+        } else {
+            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        }
     }
 }

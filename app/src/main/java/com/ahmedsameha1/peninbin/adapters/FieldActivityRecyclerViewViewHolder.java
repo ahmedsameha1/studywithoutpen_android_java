@@ -14,8 +14,11 @@ import com.ahmedsameha1.peninbin.R;
 public class FieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder implements  View.OnLongClickListener, View.OnClickListener {
     public TextView question;
     public TextView answer;
+    public TextView asked_count;
+    public TextView wrong_answer_count;
     public Button edit;
     public Button delete;
+    public Button like;
     public String currentQuestion;
     public String currentAnswer;
     public LinearLayout toolbar;
@@ -28,8 +31,11 @@ public class FieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder
         mListener = listener;
         question = (TextView) view.findViewById(R.id.question);
         answer = (TextView) view.findViewById(R.id.answer);
+        asked_count = (TextView) view.findViewById(R.id.asked_count);
+        wrong_answer_count = (TextView) view.findViewById(R.id.wrong_answer_count);
         edit = (Button) view.findViewById(R.id.edit);
         delete = (Button) view.findViewById(R.id.delete);
+        like = (Button) view.findViewById(R.id.same_question);
         toolbar = (LinearLayout) view.findViewById(R.id.field_recyclerview_item_actions);
         view.setOnLongClickListener(this);
         view.setOnClickListener(this);

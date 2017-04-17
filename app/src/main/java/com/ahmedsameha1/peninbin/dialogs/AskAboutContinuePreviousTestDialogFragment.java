@@ -41,33 +41,30 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 //        LayoutInflater inflater = getActivity().getLayoutInflater();
         builder.setMessage(R.string.ask_for_continue_previous_test)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent();
-                                if ( test_type == Constants.TestType.ENHANCED_TEST) {
-                                    intent = new Intent(getActivity(), EnhancedTestActivity.class);
-                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                    intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE,true);
-                                } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
-                                    intent = new Intent(getActivity(), FullyRandomTestActivity.class);
-                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                    intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE,true);
-                                }
-                                startActivity(intent);
-                                if ( from_notification ) {
-                                    getActivity().finish();
-                                }
-                            }
-                        }
-                )
-                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
+                .setPositiveButton(R.string.yes, (dialog, which) -> {
+                    Intent intent = new Intent();
+                    if ( test_type == Constants.TestType.ENHANCED_TEST) {
+                        intent = new Intent(getActivity(), EnhancedTestActivity.class);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                        intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE,true);
+                    } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                        intent = new Intent(getActivity(), FullyRandomTestActivity.class);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                        intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE,true);
+                    }
+                    startActivity(intent);
+                    if ( from_notification ) {
+                        getActivity().finish();
+                    }
+                }
+                )// TODO: 2/27/17 remember to test at least on of the calendar.add that used to add one day to the date 
+                .setNegativeButton(R.string.no, (dialog, which) -> {
+                                CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
                                 if ( test_type == Constants.TestType.ENHANCED_TEST ) {
-                                    mySQLiteCursorLoader.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
-                                    mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id,question_data_type);
+                                    cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
+                                    cursorLoaderAndUpdateDatabase.resetEntriesTestOrderEnhancedTest(current_field_id,question_data_type);
+                                    cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
+                                            Constants.ElapsedPausedSessionTime.ENHANCED_TEST, Constants.ElapsedPausedSessionTime.NOT_USED);
                                     Bundle bundle = new Bundle();
                                     bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                     EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
@@ -75,8 +72,10 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                     dialogFragment.show(getActivity().getSupportFragmentManager(), EnhancedTestDialogFragment.ENHANCED_TEST_DIALOG_FRAGMENT);
                                     dismiss();
                                 } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
-                                    mySQLiteCursorLoader.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
-                                    mySQLiteCursorLoader.resetEntriesTestOrderFullyRandomTest(current_field_id,question_data_type);
+                                    cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
+                                    cursorLoaderAndUpdateDatabase.resetEntriesTestOrderFullyRandomTest(current_field_id,question_data_type);
+                                    cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
+                                            Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST, Constants.ElapsedPausedSessionTime.NOT_USED);
                                     Bundle bundle = new Bundle();
                                     bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                     FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
@@ -85,8 +84,6 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                     dismiss();
                                 }
                             }
-                        }
-
                 );
         return builder.create();
     }

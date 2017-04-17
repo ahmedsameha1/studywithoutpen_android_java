@@ -25,15 +25,11 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
     private int questionsNumber, wrongAnswersNumber;
     private double correctAnswersPercent;
     private String message;
-    private long current_field_id;
-    private DatabaseReadOperations databaseOperations;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseOperations = new DatabaseReadOperations(getActivity());
         questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
         wrongAnswersNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) /questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();
         message = getString(R.string.Your_correct_answers_was) + " " + numberFormat.format(correctAnswersPercent)+ " " +
@@ -44,27 +40,21 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage(message)
                 .setTitle(R.string.quick_test_result)
-                .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getActivity().finish();
-                        ExitActivity.exit(getActivity());
-                    }
+                .setNegativeButton(R.string.ok, (dialog, which) -> {
+                    getActivity().finish();
+                    ExitActivity.exit(getActivity());
                 })
                 .create();
-        alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+        alertDialog.setOnKeyListener((dialog, keyCode, event) -> {
 
-                    if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        getActivity().finish();
-                        ExitActivity.exit(getActivity());
-                        return false;
-                    }
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    getActivity().finish();
+                    ExitActivity.exit(getActivity());
+                    return false;
+                }
 
-                return true;
+            return true;
 
-            }
         });
         alertDialog.setCanceledOnTouchOutside(false);
 

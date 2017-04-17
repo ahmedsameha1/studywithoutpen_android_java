@@ -36,18 +36,15 @@ public class WrongAnswersActivityRecyclerViewAdapter extends
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.wrong_item_row, parent, false);
         WrongAnswersActivityRecyclerViewViewHolder wrongAnswersActivityRecyclerViewViewHolder =
-                new WrongAnswersActivityRecyclerViewViewHolder(itemView, new WrongAnswersActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
-                    @Override
-                    public void onClick(View v, String currentQuestion, String currentAnswer ) {
-                        Intent intent = new Intent(context, StudyWrongAnswersActivity.class);
-                        Bundle bundle = new Bundle();
-                        bundle.putLong(StudyActivity.CURRENT_FIELD_ID,field_id);
-                        bundle.putString(StudyWrongAnswersActivity.CURRENT_QUESTION,currentQuestion);
-                        bundle.putString(StudyWrongAnswersActivity.CURRENT_ANSWER, currentAnswer);
-                        bundle.putSerializable(StudyWrongAnswersActivity.WRONG_ITEM_LIST, ((ArrayList<WrongItem>) wrongItemList));
-                        intent.putExtra(StudyWrongAnswersActivity.WRONG_ITEM_LIST,bundle);
-                        context.startActivity(intent);
-                    }
+                new WrongAnswersActivityRecyclerViewViewHolder(itemView, (v, currentQuestion, currentAnswer) -> {
+                    Intent intent = new Intent(context, StudyWrongAnswersActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putLong(StudyActivity.CURRENT_FIELD_ID,field_id);
+                    bundle.putString(StudyWrongAnswersActivity.CURRENT_QUESTION,currentQuestion);
+                    bundle.putString(StudyWrongAnswersActivity.CURRENT_ANSWER, currentAnswer);
+                    bundle.putSerializable(StudyWrongAnswersActivity.WRONG_ITEM_LIST, ((ArrayList<WrongItem>) wrongItemList));
+                    intent.putExtra(StudyWrongAnswersActivity.WRONG_ITEM_LIST,bundle);
+                    context.startActivity(intent);
                 });
         return wrongAnswersActivityRecyclerViewViewHolder;
     }

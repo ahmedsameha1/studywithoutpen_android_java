@@ -8,9 +8,11 @@ public class Constants {
 
     public static abstract class FieldTypes {
         public static final int DEFAULT_TYPE = 0;
-        public static final int NOTEBOOK_TYPE = 1;
-        public static final int KORAN_TYPE = 2;
-        public static final int ENGLISH_TYPE = 3;
+        public static final int KORAN_TYPE = 1;
+        public static final int ENGLISH_DICTIONARY_TYPE = 2;
+        public static final int NOTEBOOK_TYPE_REMOVED_FEATURE_V68 = 1;
+        public static final int KORAN_TYPE_OLD_V68 = 2;
+        public static final int ENGLISH_DICTIONARY_TYPE_OLD_V68 = 3;
     }
 
     public static abstract class Rank {
@@ -36,8 +38,19 @@ public class Constants {
         public static final int FULLY_RANDOM_TEST = 1;
     }
 
-    public static abstract class Money {
-        public static final long NOT_SUBSCRIBED = -1L;
-        public static final int PERIOD_OF_SUBSCRIBTION_INCLUDING_GRACE_PERIOD = 99;
+    public static abstract class TimeOfAnswer {
+        public static final int NOT_USED = 0;
+        public static final int TEST = 0;
+        public static final int STUDY_A_PERIOD = 1;
+        public static final int NOTIFY = 0;
+        public static final int MOVE_NEXT = 1;
+    }
+
+    public static abstract class ElapsedPausedSessionTime {
+        public static final int STUDY_A_PERIOD = 0;
+        public static final int ENHANCED_TEST = 1;
+        public static final int FULLY_RANDOM_TEST = 2;
+        public static final int QUICK_TEST = 2;
+        public static final int NOT_USED = 0;
     }
 }

@@ -1,5 +1,6 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -10,7 +11,10 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.adapters.WrongAnswersActivityRecyclerViewAdapter;
@@ -19,8 +23,12 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
+import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
@@ -39,11 +47,11 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     private Cursor cursor;
     private RecyclerView recyclerView;
     private WrongAnswersActivityRecyclerViewAdapter mAdapter;
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private DatabaseReadOperations databaseOperations;
     private int test_type;
     private int question_data_type;
     private Tracker mTracker;
+    private int permited_tries_number;
 
 
 
@@ -54,7 +62,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
         current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
         test_type = bundle.getInt(ShowTestResultDialogFragment.TEST_TYPE);
-        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
+        permited_tries_number = bundle.getInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER);
         databaseOperations = new DatabaseReadOperations(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -97,8 +105,40 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName(SCREEN_NAME);
+        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.wrong_answers_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        switch (id) {
+            case R.id.ask_again:
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+                Intent intent = new Intent(this,AskAgainAfterTestActivity.class);
+                intent.putExtra(WRONG_ITEM_LIST,bundle);
+                intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+
     }
 
     @Override

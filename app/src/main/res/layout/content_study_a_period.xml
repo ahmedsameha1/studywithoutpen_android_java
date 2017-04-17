@@ -198,6 +198,30 @@
                     android:text="@string/hint"
                     android:textColor="@drawable/textview_enabled_disabled_selector" />
             </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/dont_know_card_view"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android.support.v7.cardview:cardBackgroundColor="@android:color/transparent"
+                android.support.v7.cardview:cardCornerRadius="5dp"
+                android.support.v7.cardview:cardElevation="1dp">
+
+                <TextView
+                    android:id="@+id/dont_know"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/text_bordered_colored"
+                    android:gravity="center"
+                    android:padding="2dp"
+                    android:text="@string/dont_know"
+                    android:textColor="@drawable/textview_enabled_disabled_selector" />
+            </android.support.v7.widget.CardView>
         </LinearLayout>
 
     </LinearLayout>

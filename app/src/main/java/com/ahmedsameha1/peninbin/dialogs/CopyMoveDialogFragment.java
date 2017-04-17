@@ -39,36 +39,26 @@ public class CopyMoveDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog = builder.setView(inflater.inflate(R.layout.copy_move_dialog_fragment, null))
                 .create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                Button copy_field = (Button) alertDialog.findViewById(R.id.copy_field);
-                Button copy_move_entries = (Button) alertDialog.findViewById(R.id.copy_move_entries);
+        alertDialog.setOnShowListener(dialog -> {
+            Button copy_field = (Button) alertDialog.findViewById(R.id.copy_field);
+            Button copy_move_entries = (Button) alertDialog.findViewById(R.id.copy_move_entries);
 
-                copy_field.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        CopyFieldDialogFragment copyFieldDialogFragment = new CopyFieldDialogFragment();
-                        Bundle bundle = new Bundle();
-                        bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.COPY_FIELD);
-                        copyFieldDialogFragment.setArguments(bundle);
-                        copyFieldDialogFragment.show(getActivity().getSupportFragmentManager(),
-                                CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
-                        dismiss();
-                    }
-                });
-                copy_move_entries.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent1 = new Intent(getActivity(),CopyMoveEntriesActivity.class);
-                        intent1.putExtra(FieldActivity.FIELD_ID, current_field_id);
-                        startActivity(intent1);
-                        dismiss();
-                    }
-                });
+            copy_field.setOnClickListener(v -> {
+                CopyFieldDialogFragment copyFieldDialogFragment = new CopyFieldDialogFragment();
+                Bundle bundle = new Bundle();
+                bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.COPY_FIELD);
+                copyFieldDialogFragment.setArguments(bundle);
+                copyFieldDialogFragment.show(getActivity().getSupportFragmentManager(),
+                        CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
+                dismiss();
+            });
+            copy_move_entries.setOnClickListener(v -> {
+                Intent intent1 = new Intent(getActivity(),CopyMoveEntriesActivity.class);
+                intent1.putExtra(FieldActivity.FIELD_ID, current_field_id);
+                startActivity(intent1);
+                dismiss();
+            });
 
-
-            }
 
         });
         return alertDialog;

@@ -35,6 +35,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
@@ -46,7 +47,8 @@ import com.google.android.gms.analytics.Tracker;
  */
 public class AddEntryActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
-        ChangeTextSizeDialogFragment.ChangeTextSize {
+        ChangeTextSizeDialogFragment.ChangeTextSize,
+        ActivityUtility.ActivityTimers {
     public static final String SCREEN_NAME = "AddEntryActivity";
     public static final String FROM_FIELD_ACTIVITY = "from_field_activity";
     private static final String FIELD_CHOSEN = "field_chosen";
@@ -63,6 +65,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private Spinner field_spinner;
     private EditText enter_question;
     private EditText enter_answer;
+    private EditText enter_order;
     private TextView showActionbar;
     private SimpleCursorAdapter simple_cursor_adapter;
     private Chronometer timer;
@@ -78,7 +81,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private int question_data_type;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
-    private LoaderManager.LoaderCallbacks<Cursor> loader,get_entries, get_symbol_string;
+    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
 
@@ -105,6 +108,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         final Spinner rank_spinner = (Spinner) findViewById(R.id.rank_spinner);
         enter_question = (EditText) findViewById(R.id.question);
         enter_answer = (EditText) findViewById(R.id.answer);
+        enter_order = (EditText) findViewById(R.id.order);
         final TextView add_entry = (TextView) findViewById(R.id.add_entry);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
         showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
@@ -128,9 +132,8 @@ public class AddEntryActivity extends AppCompatActivity implements
                     return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this,
                             "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
                                     + " FROM " + Contract.Field.TABLE_NAME
-                                    + " WHERE " + Contract.Field.COLUMN_FIELD_TYPE + " != ? "
-                                    + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
-                            new String[]{Constants.FieldTypes.NOTEBOOK_TYPE + ""});
+                                    + " ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
+                            null);
                 } else if ( id == GET_SPECIAL_TEXT_ID ){
                     return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
@@ -169,59 +172,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 }
             }
         };
-        get_entries = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this,
-                        "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
-                                + " FROM " + Contract.Field.TABLE_NAME
-                                + " WHERE " + Contract.Field.COLUMN_FIELD_TYPE + " != ? "
-                                + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
-                        new String[]{Constants.FieldTypes.NOTEBOOK_TYPE + ""});
-            }
 
-            @Override
-            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-                simple_cursor_adapter.swapCursor(data);
-                cursor = data;
-                setSpinnerPosition(current_field_id);
-            }
-
-            @Override
-            public void onLoaderReset(android.content.Loader<Cursor> loader) {
-                simple_cursor_adapter.swapCursor(null);
-            }
-        };
-        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                        new String[]{current_field_type + ""});
-
-            }
-
-            @Override
-            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-                if (symbol == null && customable_text == null) {
-                    symbol = new String[data.getCount()];
-                    customable_text = new String[data.getCount()];
-                    for (data.moveToFirst(); data.getPosition() < data.getCount();
-                         data.moveToNext()) {
-                        symbol[data.getPosition()] = data.getString(1);
-                        customable_text[data.getPosition()] = data.getString(2);
-                    }
-                }
-            }
-
-            @Override
-            public void onLoaderReset(android.content.Loader<Cursor> loader) {
-
-            }
-        };
 
         simple_cursor_adapter = new SimpleCursorAdapter(this, R.layout.field_spinner, null,
                 new String[]{Contract.Field.COLUMN_FIELD_NAME}, new int[]{R.id.list_item}, 0);
@@ -247,18 +198,17 @@ public class AddEntryActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        add_entry.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        add_entry.setOnClickListener( view -> {
                 add_entry_cardview.startAnimation(animAlpha);
                 String question = enter_question.getText().toString();
                 String answer = enter_answer.getText().toString();
+            int order = "".equals(enter_order.getText().toString()) ? -1 : Integer.parseInt(enter_order.getText().toString());
                 if (question.length() > 0 && answer.length() > 0) {
                     if (fromFieldActivity) {
 
                         if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
-                            mySQLiteCursorLoader.insertEntryWithRank(question_data_type, question, answer,
-                                    current_field_id, rank_spinner.getSelectedItemPosition());
+                            mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                    current_field_id, rank_spinner.getSelectedItemPosition(), order);
                         } else {
                             Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                             toast.setGravity(Gravity.TOP, 0, 400);
@@ -267,11 +217,12 @@ public class AddEntryActivity extends AppCompatActivity implements
 
                         enter_question.setText("");
                         enter_answer.setText("");
+                        enter_order.setText("");
                     } else {
                         if (field_chosen) {
                             if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
-                                mySQLiteCursorLoader.insertEntryWithRank(question_data_type, question, answer,
-                                        current_field_id, rank_spinner.getSelectedItemPosition());
+                                mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                        current_field_id, rank_spinner.getSelectedItemPosition(), order);
                             } else {
                                 Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -280,6 +231,7 @@ public class AddEntryActivity extends AppCompatActivity implements
 
                             enter_question.setText("");
                             enter_answer.setText("");
+                            enter_order.setText("");
                         } else {
                             Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
@@ -291,15 +243,11 @@ public class AddEntryActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-            }
         });
 
-        field_spinner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                field_chosen = true;
-                return false;
-            }
+        field_spinner.setOnTouchListener((v, event) -> {
+            field_chosen = true;
+            return false;
         });
         field_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -316,9 +264,7 @@ public class AddEntryActivity extends AppCompatActivity implements
             }
         });
 
-        showActionbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        showActionbar.setOnClickListener( view -> {
                 show_actionbar_cardview.startAnimation(animAlpha);
                 if (actionBarShown) {
                     getSupportActionBar().hide();
@@ -331,7 +277,6 @@ public class AddEntryActivity extends AppCompatActivity implements
                     showActionbar.setText(R.string.hide);
                     mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
                 }
-            }
         });
 /*        enter_question.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -444,7 +389,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         super.onResume();
         timer.setBase( SystemClock.elapsedRealtime() - lastPause);
         timer.start();
-        mTracker.setScreenName(SCREEN_NAME);
+        mTracker.setScreenName( ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
     @Override
@@ -561,5 +506,10 @@ public class AddEntryActivity extends AppCompatActivity implements
         changeAreas(bundle.getFloat(QUESTION_LAYOUT), bundle.getFloat(ANSWER_LAYOUT));
         enter_question.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
         enter_answer.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
+    }
+
+    @Override
+    public void manageTimersDueDialogsShow(boolean isCounting) {
+
     }
 }

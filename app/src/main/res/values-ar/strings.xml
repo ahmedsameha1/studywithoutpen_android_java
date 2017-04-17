@@ -93,7 +93,6 @@
     <string name="number_of_questions_smaller_than">أدخل عدد أسئلة أصغر من أو يساوي %1$d وأكبر من صفر.</string>
     <string name="enter_question_area_answer_area">أدخل قيمة لكل من مساحة السؤال ومساحة الجواب!</string>
     <string name="show_entry">المُدخَل؟!</string>
-    <string name="study_not_for_notebook">هذه الخاصية غير متاحة للمجالات من نوع مٌفَكِّرة</string>
     <string name="search_hint">ابحث</string>
     <string name="enter_number_of_tries_help">ادخل عدد المحاولات هنا. التطبيق سوف يدعك تستمر في محاولة إدخال الإجابة الصحيحة للسؤال الحالي حتى تصل عدد محاولاتك لهذا الرقم، بعدها سيحتسب التطبيق هذا المُدخل في المُدخلات التي أخطأت في إجابتها ثم ينتقل إلى السؤال التالي، إذا أدخلت إجابة صحيحة للسؤال الحالي قبل أن تصل عدد محاولاتك لهذا الرقم فلن يتم احتساب المُدخل على أنه من المُدخلات التي أخطأت في إجابتها.</string>
     <string name="enter_number_of_days_help">أدخل عدد الأيام الماضية من الآن. لنفترض أنك تريد أن تذاكر كافة المُدخلات التي كنت قد دخلتها في الأيام الخمسة الماضية، لذلك، أدخل 5 هنا. لاحظ أنه قد لا تُدخل أي شيء هنا. إذا قمت بإدخال رقم هنا ورقم للساعات أدناه، فإن التطبيق سيقوم بإضافتهما إلى بعضهما البعض، وسوف يجلب المُداخلات الخاصة بالفترة الناتجة.</string>
@@ -183,7 +182,6 @@
     <string name="select_percentage_of_uncontrolled_portion">الجزء غير المُتَحَكَم فيه:</string>
     <string name="select_rank_level">اختر المرتبة</string>
     <string name="sort">رتِّب </string>
-    <string name="notebook_reminder">مُذكِّر مفكرة</string>
     <string name="reminder_set">تم تشغيل المُذكِّر</string>
     <string name="time_in_past">هذا الوقت من الماضي</string>
     <string name="reminder_canceled">تم إلغاء المُذكِّر</string>
@@ -212,7 +210,6 @@
     <string name="copy">نسخ</string>
     <string name="copy_move_entries">نسخ/نقل مُدخلات</string>
     <string name="sort_by_entry_order">رتب على حسب ترتيب المُدخَل</string>
-    <string name="cannot_import_entries_to_notebook_fields_using_text_files">ﻻ يمكن استيراد مدخﻻت للمجاﻻت من نوع مفكرة باستخدام طريقة الملف النصي</string>
     <string name="some_entries_have_not_imported">على اﻷقل، مُدخَل واحد لم يتم استيراده</string>
     <string name="text_contained_in_special_text">أدخِل نص غير مُتَضَمَّن في أي نص خاص آخر</string>
     <string name="special_text">نَص خاص</string>
@@ -262,7 +259,33 @@
     <string name="delete_note">هل تريد حذف هذه الملاحظة؟</string>
     <string name="background_thread">انتظر حتى تنتهي عملية التصدير/الاستيراد/المحاكاة</string>
     <string name="change_field_name_background_thread">لا يمكنك تغيير اسم المجال أثناء جريان عملية تصدير/استيراد/محاكاة</string>
+    <string name="enter_the_time_of_answer">Enter the time of answer</string>
+    <string name="time_of_answer_greater_than_zero">Time of answer must be greater than zero!</string>
+    <string name="set_time_of_answer">Set time of answer</string>
+    <string name="second">second</string>
+    <string name="time_of_answer">Time of answer</string>
+    <string name="enter_time_of_answer_help">You will be notifed when the time of answer finishes. The time of answer includes all the tries.</string>
+    <string name="_try">try</string>
+    <string name="_hour">hour</string>
+    <string name="_day">day</string>
+    <string name="quick_test">quick test</string>
+    <string name="number_tests_lower_95">the number of tests must be lower than 95</string>
+    <string name="time_out">Time out</string>
+    <string name="notify_me">Notify me</string>
+    <string name="show_next_question">Show next question</string>
+    <string name="_question">سؤال</string>
+    <string name="dont_know">Don\'t know</string>
+    <string name="enter_emulated_errors">Enter emulated errors</string>
+    <string name="ask_again">Ask again</string>
+    <string name="order">Order</string>
+    <string name="asked">Asked: %1$s</string>
+    <string name="wrongly_answered">Wrongly answered: %1$s</string>
+    <string name="same">Like</string>
+    <string name="only_this_with_same_question">There is no more entries with the same question</string>
+    <string name="obfuscate_question">Obfuscate question</string>
+    <string name="obfuscate_question_help">This option tries to make reading the question more difficult. Why? To increase you attention while the session. This option tries to let you out of the automatic pilot mode.</string>
     <string name="subscription1_description">افتح الوظائف المغلقة. يمكنك  طلب إعادة المال من المطور من خلال البريد الإلكتروني</string>
     <string name="subscription_description">صفة الاشتراك</string>
     <string name="please_subscribe">لطفا اشترك</string>
 </resources>
+

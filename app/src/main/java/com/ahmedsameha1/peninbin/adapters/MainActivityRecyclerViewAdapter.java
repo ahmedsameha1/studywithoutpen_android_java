@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
-import com.ahmedsameha1.peninbin.activities.NotebookFieldActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -57,19 +56,11 @@ public class MainActivityRecyclerViewAdapter extends
                 new MainActivityRecyclerViewViewHolder(itemView, new MainActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
                     public void onClick(View v, long field_id, boolean isDeleting) {
-                        int field_type = databaseOperations.getFieldType(field_id);
                         if (!isDeleting) {
-                            if (field_type != Constants.FieldTypes.NOTEBOOK_TYPE) {
                                 Intent intent = new Intent(context, FieldActivity.class);
                                 intent.putExtra(FieldActivity.FIELD_ID, field_id);
                                 context.startActivity(intent);
                                 new CursorLoaderAndUpdateDatabase(context).incrementFieldUsage(field_id);
-                            } else if (field_type == Constants.FieldTypes.NOTEBOOK_TYPE) {
-                                Intent intent = new Intent(context, NotebookFieldActivity.class);
-                                intent.putExtra(FieldActivity.FIELD_ID, field_id);
-                                context.startActivity(intent);
-                                new CursorLoaderAndUpdateDatabase(context).incrementFieldUsage(field_id);
-                            }
                         }
                     }
 
@@ -100,40 +91,33 @@ public class MainActivityRecyclerViewAdapter extends
         viewHolder.actions.setVisibility(View.GONE);
         viewHolder.field_id = data.getLong(0);
         final String fieldName = data.getString(2);
-        viewHolder.delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ( (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id)) &&
-                        (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id)) &&
-                        (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + viewHolder.field_id)) &&
-                        !ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
-                        && !Emulation.isAnyThreadRunning()) {
-                    Bundle bundle = new Bundle();
-                    bundle.putLong(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_ID, viewHolder.field_id);
-                    bundle.putString(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_NAME, fieldName);
-                    DeleteFieldDialogFragment fragment = new DeleteFieldDialogFragment();
-                    fragment.setArguments(bundle);
-                    fragment.setMainActivityRecyclerViewViewHolder(viewHolder);
-                    fragment.show(((AppCompatActivity) context).getSupportFragmentManager(), GET_CONFIRMATION);
-                } else if ( sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id) ||
-                        sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id) ||
-                        sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + viewHolder.field_id) ){
-                    Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                } else if ( ExportImportDatabase.isAnyThreadRunning() || ImportTextFile.isThreadRunning()
-                        || Emulation.isAnyThreadRunning() ) {
-                    Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
+        viewHolder.delete.setOnClickListener(v -> {
+            if ( (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id)) &&
+                    (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id)) &&
+                    (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + viewHolder.field_id)) &&
+                    !ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                    && !Emulation.isAnyThreadRunning()) {
+                Bundle bundle = new Bundle();
+                bundle.putLong(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_ID, viewHolder.field_id);
+                bundle.putString(DeleteFieldDialogFragment.TO_BE_DELETED_FIELD_NAME, fieldName);
+                DeleteFieldDialogFragment fragment = new DeleteFieldDialogFragment();
+                fragment.setArguments(bundle);
+                fragment.setMainActivityRecyclerViewViewHolder(viewHolder);
+                fragment.show(((AppCompatActivity) context).getSupportFragmentManager(), GET_CONFIRMATION);
+            } else if ( sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + viewHolder.field_id) ||
+                    sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + viewHolder.field_id) ||
+                    sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + viewHolder.field_id) ){
+                Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            } else if ( ExportImportDatabase.isAnyThreadRunning() || ImportTextFile.isThreadRunning()
+                    || Emulation.isAnyThreadRunning() ) {
+                Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
             }
         });
-        if (data.getInt(1) != Constants.FieldTypes.NOTEBOOK_TYPE) {
             viewHolder.type.setImageResource(R.drawable.books1);
-        } else if (data.getInt(1) == Constants.FieldTypes.NOTEBOOK_TYPE) {
-            viewHolder.type.setImageResource(R.drawable.agenda1);
-        }
         viewHolder.name.setText(fieldName);
     }
 }

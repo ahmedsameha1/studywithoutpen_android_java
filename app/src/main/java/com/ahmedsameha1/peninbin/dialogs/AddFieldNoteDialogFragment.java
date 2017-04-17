@@ -16,6 +16,7 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -26,14 +27,11 @@ public class AddFieldNoteDialogFragment extends DialogFragment  {
     public static final String ADD_FIELD_NOTE_DIALOG_FRAGMENT = "add_field_note_dialog_fragment";
 
     private Tracker mTracker;
-    private long current_field_id;
 
     @Override
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-
         mTracker = application.getDefaultTracker();
         setRetainInstance(true);
     }
@@ -49,31 +47,24 @@ public class AddFieldNoteDialogFragment extends DialogFragment  {
                 .setPositiveButton(R.string.add_field_note, null)
                 .setNegativeButton(R.string.cancel, null).create();
 
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-
-            @Override
-            public void onShow(DialogInterface dialog) {
-                final EditText enter_note = (EditText) alertDialog.findViewById(R.id.note);
-                Button ok = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                ok.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String note = enter_note.getText().toString();
-                        if ( note.length() > 0 ) {
-                            ((Contact) getActivity()).addFieldNote(note);
-                            mTracker.send(new HitBuilders.EventBuilder()
-                                    .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                    .setAction("add field note")
-                                    .build());
-                            dismiss();
-                        } else {
-                            Toast toast = Toast.makeText(getActivity(), R.string.where_is_note, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP,0,400);
-                            toast.show();
-                        }
-                    }
-                });
-            }
+        alertDialog.setOnShowListener(dialog -> {
+            final EditText enter_note = (EditText) alertDialog.findViewById(R.id.note);
+            Button ok = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            ok.setOnClickListener(view -> {
+                String note = enter_note.getText().toString();
+                if ( note.length() > 0 ) {
+                    ((Contact) getActivity()).addFieldNote(note);
+                    mTracker.send(new HitBuilders.EventBuilder()
+                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                            .setAction(ActivityUtility.getVersionCode(getActivity()) + "add field note")
+                            .build());
+                    dismiss();
+                } else {
+                    Toast toast = Toast.makeText(getActivity(), R.string.where_is_note, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                }
+            });
         });
         return alertDialog;
     }

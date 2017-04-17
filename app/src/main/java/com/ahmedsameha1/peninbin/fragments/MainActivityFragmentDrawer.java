@@ -114,12 +114,7 @@ public class MainActivityFragmentDrawer extends Fragment {
         };
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerToggle.syncState();
-            }
-        });
+        mDrawerLayout.post(() -> mDrawerToggle.syncState());
 
     }
 

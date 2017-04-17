@@ -28,7 +28,6 @@ import java.util.ArrayList;
  * Created by ahmed on 1/5/2016.
  */
 public class ExportImportDatabase {
-    public static final String EXPORT_IMPORT_DIRECTORY_NAME = "StudyWithoutPen";
     public static final int FAILED_EXPORT_NOTIFICATION = 0;
     public static final int FAILED_IMPORT_NOTIFICATION = 3;
     public static final int FAILED_IMPORT_INVALID_FILE_NOTIFICATION = 4;
@@ -42,23 +41,17 @@ public class ExportImportDatabase {
     private static ArrayList<String> notImportedFieldsStrings;
 
     public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String path, final String fileName) {
-        exportThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                exportFields(context, selectedFields, path, fileName);
-            }
+        exportThread = new Thread(() -> {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            exportFields(context, selectedFields, path, fileName);
         });
         exportThread.start();
     }
 
     public static void startImportThread(final Context context, final String file_path, final boolean importUserUsageData ) {
-        importThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                importFields(context, file_path, importUserUsageData );
-            }
+        importThread = new Thread(() -> {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            importFields(context, file_path, importUserUsageData );
         });
         importThread.start();
     }
@@ -104,7 +97,9 @@ public class ExportImportDatabase {
                                 Contract.COLUMN_ID, Contract.Field.COLUMN_CHECK_TYPE,
                                 Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES,
                                 Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION,
-                                Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL},
+                                Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL,
+                                Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD,
+                                Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, Contract.Field.COLUMN_OBFUSCATE_QUESTION},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{tempFieldName}, null, null, null, null);
                 fieldCursor.moveToFirst();
@@ -129,6 +124,10 @@ public class ExportImportDatabase {
                 contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, fieldCursor.getInt(16));
                 contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, fieldCursor.getInt(17));
                 contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL, fieldCursor.getInt(18));
+                contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, fieldCursor.getInt(19));
+                contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD, fieldCursor.getInt(20));
+                contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, fieldCursor.getInt(21));
+                contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, fieldCursor.getInt(22));
                 Long field_id = toExportDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                 fieldCursor.close();
                 if ( question_data_type == Contract.Field.STRING_DATA_TYPE ) {
@@ -384,6 +383,7 @@ public class ExportImportDatabase {
                     upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase,filePath);
                     upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase,filePath);
                     upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase,filePath);
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
                 } catch (Exception e) {
                     showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
                     return;
@@ -395,6 +395,7 @@ public class ExportImportDatabase {
                     upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase, filePath);
                     upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, filePath);
                     upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
                 } catch (Exception e) {
                     showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
                     return;
@@ -405,6 +406,7 @@ public class ExportImportDatabase {
                 try {
                     upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, filePath);
                     upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
                 } catch (Exception e) {
                     showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
                     return;
@@ -414,6 +416,7 @@ public class ExportImportDatabase {
             } else if (databaseVersion == 9) {
                 try {
                     upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
                 } catch (Exception e) {
                     showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
                     return;
@@ -421,6 +424,15 @@ public class ExportImportDatabase {
                 importFields(context, toImportDatabase, importUserUsageData );
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else if ( databaseVersion == 10  || databaseVersion == 11 || databaseVersion == 12 ) {
+                try {
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
+                } catch (Exception e) {
+                    showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
+                    return;
+                }
+                importFields(context, toImportDatabase, importUserUsageData );
+                showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
+            } else if ( databaseVersion == 13 ) {
                 importFields(context, toImportDatabase, importUserUsageData );
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else {
@@ -456,7 +468,9 @@ public class ExportImportDatabase {
                             Contract.COLUMN_ID, Contract.Field.COLUMN_CHECK_TYPE,
                             Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES,
                             Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION,
-                            Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL},
+                            Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL,
+                            Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD,
+                            Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, Contract.Field.COLUMN_OBFUSCATE_QUESTION},
                     null, null, null, null, null);
             for (toImportFieldCursor.moveToFirst(); toImportFieldCursor.getPosition() < toImportFieldCursor.getCount();
                  toImportFieldCursor.moveToNext()) {
@@ -487,6 +501,10 @@ public class ExportImportDatabase {
                         contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION,toImportFieldCursor.getInt(16));
                         contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL,toImportFieldCursor.getInt(17));
                         contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL,toImportFieldCursor.getInt(18));
+                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS,toImportFieldCursor.getInt(19));
+                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD,toImportFieldCursor.getInt(20));
+                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT,toImportFieldCursor.getInt(21));
+                        contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION,toImportFieldCursor.getInt(22));
                         field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                     } else {
                         ContentValues contentValues = new ContentValues();
@@ -1281,4 +1299,84 @@ public class ExportImportDatabase {
             }
         }
     }
+    static void upgradeImportedDatabaseFromDBV12ToDBV13(SQLiteDatabase toImportDatabase, String file_path ) throws Exception {
+        toImportDatabase.beginTransaction();
+        try {
+            toImportDatabase.delete(Contract.Field.TABLE_NAME, Contract.Field.COLUMN_FIELD_TYPE + " = ? ",
+                    new String[]{String.valueOf(Constants.FieldTypes.NOTEBOOK_TYPE_REMOVED_FEATURE_V68)});
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.KORAN_TYPE);
+            toImportDatabase.update(Contract.Field.TABLE_NAME, contentValues,
+                    Contract.Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.KORAN_TYPE_OLD_V68)});
+            contentValues = new ContentValues();
+            contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE);
+            toImportDatabase.update(Contract.Field.TABLE_NAME, contentValues,
+                    Contract.Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE_OLD_V68)});
+            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+            toImportDatabase.execSQL(rename);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
+            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Field.COLUMN_FIELD_NAME
+                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Field.COLUMN_LOCALE
+                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Field.COLUMN_SORT_BY
+                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Field.COLUMN_READ_ANSWER
+                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL
+                    + " , " + Contract.CREATION_DATE
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.Field.COLUMN_FIELD_NAME
+                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Field.COLUMN_LOCALE
+                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Field.COLUMN_SORT_BY
+                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Field.COLUMN_READ_ANSWER
+                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL
+                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL
+                    + " , " + Contract.CREATION_DATE
+                    + " FROM " + "tempTable"
+                    + ";";
+            toImportDatabase.execSQL(copy);
+            String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            toImportDatabase.execSQL(drop);
+            toImportDatabase.setVersion(13);
+            toImportDatabase.setTransactionSuccessful();
+        } catch ( Exception sql) {
+            throw sql;
+        } finally {
+            toImportDatabase.endTransaction();
+            String journalFileName = file_path + "-journal";
+            File journalFile = new File( journalFileName);
+            if (journalFile.exists()) {
+                journalFile.delete();
+            }
+        }
+    }
+
 }

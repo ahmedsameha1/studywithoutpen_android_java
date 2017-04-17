@@ -3,13 +3,19 @@ package com.ahmedsameha1.peninbin.fragments;
 import android.app.Fragment;
 import android.os.Bundle;
 
+import com.ahmedsameha1.peninbin.adapters.WrongItem;
+
+import java.util.ArrayList;
+
 /**
  * Created by ahmed on 8/18/2015.
  */
 public class RetainedFragment extends Fragment {
-    private String [][] listForTest_TestActivity;
+    private String [][] listForTest_FullyRandomTestActivity;
+    private String [][] listForTest_EnhancedTestActivity;
     private String [][] listForTest_QuickTestActivity;
     private String [][] listForTest_StudyDuringActivity;
+    private ArrayList<WrongItem> wrongItemArrayList_ask_again_after_test_activity;
 
     @Override
     public void onCreate( Bundle savedInstanceState ) {
@@ -17,12 +23,20 @@ public class RetainedFragment extends Fragment {
         setRetainInstance(true);
     }
 
-    public String[][] getListForTest_TestActivity() {
-        return listForTest_TestActivity;
+    public String[][] getListForTest_FullyRandomTestActivity() {
+        return listForTest_FullyRandomTestActivity;
     }
 
-    public void setListForTest_TestActivity(String[][] listForTest_TestActivity) {
-        this.listForTest_TestActivity = listForTest_TestActivity;
+    public void setListForTest_FullyRandomTestActivity(String[][] listForTest_FullyRandomTestActivity) {
+        this.listForTest_FullyRandomTestActivity = listForTest_FullyRandomTestActivity;
+    }
+
+    public String[][] getListForTest_EnhancedTestActivity() {
+        return listForTest_EnhancedTestActivity;
+    }
+
+    public void setListForTest_EnhancedTestActivity(String[][] listForTest_EnhancedTestActivity) {
+        this.listForTest_EnhancedTestActivity = listForTest_EnhancedTestActivity;
     }
 
     public String[][] getListForTest_StudyDuringActivity() {
@@ -38,5 +52,13 @@ public class RetainedFragment extends Fragment {
 
     public void setListForTest_QuickTestActivity(String[][] listForTest_QuickTestActivity) {
         this.listForTest_QuickTestActivity = listForTest_QuickTestActivity;
+    }
+
+    public ArrayList<WrongItem> getWrongItemArrayList_ask_again_after_test_activity() {
+        return wrongItemArrayList_ask_again_after_test_activity;
+    }
+
+    public void setWrongItemArrayList_ask_again_after_test_activity(ArrayList<WrongItem> wrongItemArrayList_ask_again_after_test_activity) {
+        this.wrongItemArrayList_ask_again_after_test_activity = wrongItemArrayList_ask_again_after_test_activity;
     }
 }

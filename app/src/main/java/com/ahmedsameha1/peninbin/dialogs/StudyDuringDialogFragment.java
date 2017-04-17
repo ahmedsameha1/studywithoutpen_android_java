@@ -7,6 +7,8 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,104 +52,163 @@ public class StudyDuringDialogFragment extends DialogFragment {
                         .setView(inflater.inflate(R.layout.study_during_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        alertDialog.setOnShowListener(dialog -> {
+            final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
+            final ImageButton number_of_days_help = (ImageButton) alertDialog.findViewById(R.id.number_of_days_help);
+            final ImageButton number_of_hours_help = (ImageButton) alertDialog.findViewById(R.id.number_of_hours_help);
+            final EditText enterDay = (EditText) alertDialog.findViewById(R.id.enter_day);
+            final EditText enterHour = (EditText) alertDialog.findViewById(R.id.enter_hour);
+            final EditText enterTries = (EditText) alertDialog.findViewById(R.id.enter_tries);
+            Button positive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            enterTries.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            @Override
-            public void onShow(DialogInterface dialog) {
-                final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
-                final ImageButton number_of_days_help = (ImageButton) alertDialog.findViewById(R.id.number_of_days_help);
-                final ImageButton number_of_hours_help = (ImageButton) alertDialog.findViewById(R.id.number_of_hours_help);
-                Button positive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                positive.setOnClickListener(new View.OnClickListener() {
+                }
 
-                    @Override
-                    public void onClick(View view) {
-                        if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity())) {
-                            try {
-                                EditText enterDay = (EditText) alertDialog.findViewById(R.id.enter_day);
-                                EditText enterHour = (EditText) alertDialog.findViewById(R.id.enter_hour);
-                                EditText enterTries = (EditText) alertDialog.findViewById(R.id.enter_tries);
-                                if (enterTries.getText().toString().length() > 0) {
-                                    int trys = Integer.parseInt(enterTries.getText().toString());
-                                    if (trys > 0) {
-                                        int day = 0;
-                                        int hour = 0;
-                                        if (enterDay.getText().toString().length() > 0 || enterHour.getText().toString().length() > 0) {
-                                            if (enterDay.getText().toString().length() > 0) {
-                                                day = Integer.parseInt(enterDay.getText().toString());
-                                            }
-                                            if (enterHour.getText().toString().length() > 0) {
-                                                hour = Integer.parseInt(enterHour.getText().toString());
-                                            }
-                                            long duration = (day * ((long) MILLISECONDS_IN_DAY)) + (hour * ((long) MILLISECONDS_IN_HOUR));
-                                            Date now = new Date();
-                                            //                            long nowInMilliseconds = now.getTime();
-                                            long nowInMilliseconds = System.currentTimeMillis();
-                                            long startingTime = nowInMilliseconds - duration;
-                                            Intent intent = new Intent(getActivity(), StudyAPeriodActivity.class);
-                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                            intent.putExtra(StudyAPeriodActivity.STARTING_TIME, startingTime);
-                                            intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE, false);
-                                            intent.putExtra(StudyAPeriodActivity.NUMBER_OF_TRIES, trys);
-                                            startActivity(intent);
-                                            if (from_notification) {
-                                                getActivity().finish();
-                                            }
-                                            dismiss();
-                                        } else {
-                                            Toast toast = Toast.makeText(getActivity(), R.string.please_enter_at_least_one_value, Toast.LENGTH_SHORT);
-                                            toast.setGravity(Gravity.TOP, 0, 400);
-                                            toast.show();
-                                        }
-                                    } else {
-                                        Toast toast = Toast.makeText(getActivity(), R.string.greater_zero, Toast.LENGTH_SHORT);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                } else {
-                                    Toast toast = Toast.makeText(getActivity(), R.string.enter_tries_number, Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    String string = editable.toString();
+                    String suffix = " " + getActivity().getString(R.string._try);
+                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                        enterTries.setText("");
+                    } else {
+                        string = string + suffix;
+                        enterTries.setText(string);
+                        enterTries.setSelection(string.length() - suffix.length());
+                    }
+                }
+            });
+            enterHour.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    String string = editable.toString();
+                    String suffix = " " + getActivity().getString(R.string._hour);
+                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                        enterHour.setText("");
+                    } else {
+                        string = string + suffix;
+                        enterHour.setText(string);
+                        enterHour.setSelection(string.length() - suffix.length());
+                    }
+                }
+            });
+            enterDay.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    String string = editable.toString();
+                    String suffix = " " + getActivity().getString(R.string._day);
+                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+
+                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                        enterDay.setText("");
+                    } else {
+                        string = string + suffix;
+                        enterDay.setText(string);
+                        enterDay.setSelection(string.length() - suffix.length());
+                    }
+                }
+            });
+            positive.setOnClickListener(view -> {
+                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity())) {
+                try {
+                    String trys_suffix = " " + getActivity().getString(R.string._try);
+                    String day_suffix = " " + getActivity().getString(R.string._day);
+                    String hour_suffix = " " + getActivity().getString(R.string._hour);
+                    String try_string = enterTries.getText().toString();
+                    String day_string = enterDay.getText().toString();
+                    String hour_string = enterHour.getText().toString();
+                    if ( try_string.length() > 0 ) {
+                        int trys = Integer.parseInt(try_string.substring(0,try_string.length() - trys_suffix.length()));
+                            int day = 0;
+                            int hour = 0;
+                            if ( day_string.length() > 0 || hour_string.length() > 0 ) {
+                                if ( day_string.length() > 0) {
+                                    day = Integer.parseInt(day_string.substring(0,day_string.length() - day_suffix.length()));
                                 }
-                            } catch (NumberFormatException e) {
-                                Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP, 0, 400);
+                                if ( hour_string.length() > 0) {
+                                    hour = Integer.parseInt(hour_string.substring(0,hour_string.length() - hour_suffix.length()));
+                                }
+                                long duration = ( day * ( (long) MILLISECONDS_IN_DAY) ) + ( hour * ( (long) MILLISECONDS_IN_HOUR) );
+                                long nowInMilliseconds = System.currentTimeMillis();
+                                long startingTime = nowInMilliseconds - duration;
+                                Intent intent = new Intent(getActivity(),StudyAPeriodActivity.class);
+                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                                intent.putExtra(StudyAPeriodActivity.STARTING_TIME,startingTime);
+                                intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE,false);
+                                intent.putExtra(StudyAPeriodActivity.NUMBER_OF_TRIES,trys);
+                                startActivity(intent);
+                                if ( from_notification ) {
+                                    getActivity().finish();
+                                }
+                                dismiss();
+                            } else {
+                                Toast toast = Toast.makeText(getActivity(),R.string.please_enter_at_least_one_value,Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP,0,400);
                                 toast.show();
-                            } catch (Resources.NotFoundException e) {
-                                e.printStackTrace();
                             }
-                        } else {
-                            Toast toast = Toast.makeText(getActivity(), R.string.please_subscribe, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
-                        }
+                    } else {
+                        Toast toast = Toast.makeText(getActivity(),R.string.enter_tries_number,Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
                     }
-                });
-                number_of_tries_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.enter_number_of_tries_help).create().show();
-                    }
-                });
-                number_of_days_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.enter_number_of_days_help).create().show();
-                    }
-                });
-                number_of_hours_help.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                        number_of_tries_help_dialog_builder
-                                .setMessage(R.string.enter_number_of_hours_help).create().show();
-                    }
-                });
-            }
+                } catch (NumberFormatException e) {
+                    Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                } catch (Resources.NotFoundException e) {
+                    e.printStackTrace();
+                }
+                } else {
+                    Toast toast = Toast.makeText(getActivity(), R.string.please_subscribe, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            });
+            number_of_tries_help.setOnClickListener(v -> {
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                number_of_tries_help_dialog_builder
+                        .setMessage(R.string.enter_number_of_tries_help).create().show();
+            });
+            number_of_days_help.setOnClickListener(v -> {
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                number_of_tries_help_dialog_builder
+                        .setMessage(R.string.enter_number_of_days_help).create().show();
+            });
+            number_of_hours_help.setOnClickListener(v -> {
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                number_of_tries_help_dialog_builder
+                        .setMessage(R.string.enter_number_of_hours_help).create().show();
+            });
         });
         return alertDialog;
     }

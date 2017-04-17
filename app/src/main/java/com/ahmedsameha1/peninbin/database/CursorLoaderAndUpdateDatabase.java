@@ -14,6 +14,7 @@ import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.commonsware.cwac.loaderex.AbstractCursorLoader;
 import com.commonsware.cwac.loaderex.ContentChangingTask;
 
@@ -43,9 +44,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         this.context = context;
     }
 
-    public SQLiteDatabase getSqLiteDatabase() {
-        return sqLiteDatabase;
-    }
 
     public CursorLoaderAndUpdateDatabase(Context context) {
         super(context);
@@ -53,6 +51,10 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         this.sqLiteDatabase = sqLiteOpenHelper.getWritableDatabase();
 
         this.context = context;
+    }
+
+    public SQLiteDatabase getSqLiteDatabase() {
+        return sqLiteDatabase;
     }
 
     /**
@@ -91,21 +93,14 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         if (locale != null) {
             contentValues.put(Contract.Field.COLUMN_LOCALE, locale);
         }
-        if ( field_type == Constants.FieldTypes.NOTEBOOK_TYPE ) {
-            contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE,1);
-            contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE,4);
-        }
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
+
     public void createField(String field_name, int field_type, int question_data_type) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
         contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
         contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
-        if ( field_type == Constants.FieldTypes.NOTEBOOK_TYPE ) {
-            contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE,1);
-            contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE,4);
-        }
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
 
@@ -135,6 +130,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             sqLiteDatabase.endTransaction();
         }
     }
+
     public void setRandomQuickTestData(long field_id, int number_of_quick_tests, int number_of_tries,
                                        int number_of_question, String[][] excluded_times, int controlled_portion, int wrongness_level, int rank_level) {
         sqLiteDatabase.beginTransactionNonExclusive();
@@ -164,6 +160,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             sqLiteDatabase.endTransaction();
         }
     }
+
     public void insertEntry(int question_data_type, String question, String answer, long field_id) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         sqLiteDatabase.beginTransactionNonExclusive();
@@ -199,9 +196,9 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
                 int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
-                if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                if (number_of_entries_everyday > Constants.NOT_EMULATED) {
                     contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                            Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, sqLiteDatabase));
+                            Emulation.getEmulationCreationDate(field_id, number_of_entries_everyday, sqLiteDatabase));
                 }
                 sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
@@ -246,11 +243,65 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
                 contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
-                contentValues.put(Contract.String_Entry.COLUMN_RANK,rank);
+                contentValues.put(Contract.String_Entry.COLUMN_RANK, rank);
                 int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
-                if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                if (number_of_entries_everyday > Constants.NOT_EMULATED) {
                     contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                            Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, sqLiteDatabase));
+                            Emulation.getEmulationCreationDate(field_id, number_of_entries_everyday, sqLiteDatabase));
+                }
+                sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
+            } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
+    }
+
+    public void insertEntry(int question_data_type, String question, String answer, long field_id, int rank, int order) {
+        DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
+        sqLiteDatabase.beginTransactionNonExclusive();
+        try {
+            if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+                long question_id, answer_id;
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Contract.STring.COLUMN_VALUE, answer);
+                try {
+                    answer_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
+                } catch (Exception e) {
+                    Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                            Contract.STring.COLUMN_VALUE + " = ? ",
+                            new String[]{answer}, null, null, null);
+                    c.moveToFirst();
+                    answer_id = c.getLong(0);
+                    c.close();
+                }
+                contentValues = new ContentValues();
+                contentValues.put(Contract.STring.COLUMN_VALUE, question);
+                try {
+                    question_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
+                } catch (Exception e) {
+                    Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                            Contract.STring.COLUMN_VALUE + " = ? ",
+                            new String[]{question}, null, null, null);
+                    c.moveToFirst();
+                    question_id = c.getLong(0);
+                    c.close();
+                }
+                contentValues = new ContentValues();
+                contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
+                contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
+                contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
+                contentValues.put(Contract.String_Entry.COLUMN_RANK, rank);
+                if ( order <= -1 ) {
+                    contentValues.putNull(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY);
+                } else {
+                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, order);
+                }
+                int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
+                if (number_of_entries_everyday > Constants.NOT_EMULATED) {
+                    contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                            Emulation.getEmulationCreationDate(field_id, number_of_entries_everyday, sqLiteDatabase));
                 }
                 sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
@@ -297,9 +348,9 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
                 contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, order);
                 int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
-                if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                if (number_of_entries_everyday > Constants.NOT_EMULATED) {
                     contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                            Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, sqLiteDatabase));
+                            Emulation.getEmulationCreationDate(field_id, number_of_entries_everyday, sqLiteDatabase));
                 }
                 sqLiteDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
@@ -381,6 +432,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
     }
+
     public void putEntriesTestOrderFullyRandomTest(long field_id, int question_data_type, String[][] array) {
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             for (int i = 0; i < array.length; i++) {
@@ -473,6 +525,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         contentValues.put(Contract.Study_Period_Paused.COLUMN_FIELD, field_id);
         sqLiteDatabase.insert(Contract.Study_Period_Paused.TABLE_NAME, null, contentValues);
     }
+
     public void editEntry(long entry_id, int question_data_type, String question, String answer) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
@@ -517,7 +570,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-    public void editEntry(long entry_id, int question_data_type, String question, String answer, int rank) {
+    public void editEntry(long entry_id, int question_data_type, String question, String answer, int rank, int order) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -554,8 +607,13 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                         Contract.COLUMN_ID + " = ? ",
                         new String[]{entry_id + ""}, SQLiteDatabase.CONFLICT_IGNORE);
                 contentValues = new ContentValues();
-                contentValues.put(Contract.String_Entry.COLUMN_RANK,rank);
-                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME,contentValues,
+                contentValues.put(Contract.String_Entry.COLUMN_RANK, rank);
+                if ( order <= -1 ) {
+                    contentValues.putNull(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY);
+                } else {
+                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, order);
+                }
+                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
                         Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
             }
@@ -574,8 +632,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
 
-    public void updateFieldSort(long field_id, int sort) {
-        buildUpdateFieldSortTask(this).execute(sqLiteOpenHelper, field_id, sort);
+    public void updateFieldSort(long field_id, SortOptions sortOption) {
+        buildUpdateFieldSortTask(this).execute(sqLiteOpenHelper, field_id, sortOption);
     }
 
     protected ContentChangingTask buildUpdateFieldSortTask(CursorLoaderAndUpdateDatabase loader) {
@@ -592,10 +650,10 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         protected Void doInBackground(Object... params) {
             SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
             long field_id = (long) params[1];
-            int sort = (int) params[2];
+            SortOptions sortOption = (SortOptions) params[2];
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_SORT_BY, sort);
+            contentValues.put(Contract.Field.COLUMN_SORT_BY, sortOption.getSortOptionPosition());
             sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
             return (null);
@@ -632,7 +690,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-    public void copyEntries( ArrayList<Long> list_of_entries, long field_id) {
+    public void copyEntries(ArrayList<Long> list_of_entries, long field_id) {
         buildCopyEntries(this).execute(sqLiteOpenHelper, list_of_entries, field_id, context);
     }
 
@@ -656,24 +714,24 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             sqLiteDatabase.beginTransaction();
             try {
-                for ( long entry_id : list_of_entries ) {
+                for (long entry_id : list_of_entries) {
                     Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
                             new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
-                                   Contract.String_Entry.COLUMN_RANK, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
+                                    Contract.String_Entry.COLUMN_RANK, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
                             Contract.COLUMN_ID + " = ?",
                             new String[]{entry_id + ""}, null, null, null, null);
                     cursor.moveToFirst();
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_FIELD,field_id);
-                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION,cursor.getLong(0));
-                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER,cursor.getLong(1));
-                    contentValues.put(Contract.String_Entry.COLUMN_RANK,cursor.getInt(2));
-                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,cursor.getInt(3));
-                    if ( number_of_everyday_entries > Constants.NOT_EMULATED ) {
+                    contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
+                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION, cursor.getLong(0));
+                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER, cursor.getLong(1));
+                    contentValues.put(Contract.String_Entry.COLUMN_RANK, cursor.getInt(2));
+                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, cursor.getInt(3));
+                    if (number_of_everyday_entries > Constants.NOT_EMULATED) {
                         contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                                Emulation.getEmulationCreationDate(field_id,number_of_everyday_entries,sqLiteDatabase));
+                                Emulation.getEmulationCreationDate(field_id, number_of_everyday_entries, sqLiteDatabase));
                     }
-                    sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+                    sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
                 }
                 sqLiteDatabase.setTransactionSuccessful();
             } finally {
@@ -683,7 +741,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-    public void copyField(  long from_field_id, long to_field_id) {
+    public void copyField(long from_field_id, long to_field_id) {
         buildCopyField(this).execute(sqLiteOpenHelper, from_field_id, to_field_id, context);
     }
 
@@ -710,20 +768,20 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
                         new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
                                 Contract.String_Entry.COLUMN_RANK, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
-                        Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{from_field_id + ""},null,null,null);
-                for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-                      cursor.moveToNext() ) {
+                        Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{from_field_id + ""}, null, null, null);
+                for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                     cursor.moveToNext()) {
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(Contract.String_Entry.COLUMN_FIELD, to_field_id);
-                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION,cursor.getLong(0));
-                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER,cursor.getLong(1));
-                    contentValues.put(Contract.String_Entry.COLUMN_RANK,cursor.getInt(2));
-                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,cursor.getInt(3));
-                    if ( number_of_everyday_entries > Constants.NOT_EMULATED ) {
+                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION, cursor.getLong(0));
+                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER, cursor.getLong(1));
+                    contentValues.put(Contract.String_Entry.COLUMN_RANK, cursor.getInt(2));
+                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, cursor.getInt(3));
+                    if (number_of_everyday_entries > Constants.NOT_EMULATED) {
                         contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                                Emulation.getEmulationCreationDate(to_field_id,number_of_everyday_entries,sqLiteDatabase));
+                                Emulation.getEmulationCreationDate(to_field_id, number_of_everyday_entries, sqLiteDatabase));
                     }
-                    sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+                    sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
                 }
                 sqLiteDatabase.setTransactionSuccessful();
             } finally {
@@ -732,7 +790,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             return (null);
         }
     }
-    public void moveEntries( ArrayList<Long> list_of_entries,  long to_field_id) {
+
+    public void moveEntries(ArrayList<Long> list_of_entries, long to_field_id) {
         buildMoveEntries(this).execute(sqLiteOpenHelper, list_of_entries, to_field_id, context);
     }
 
@@ -756,25 +815,25 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
             sqLiteDatabase.beginTransaction();
             try {
-                for ( long entry_id : list_of_entries ) {
+                for (long entry_id : list_of_entries) {
                     Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
                             new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
-                                   Contract.String_Entry.COLUMN_RANK, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
+                                    Contract.String_Entry.COLUMN_RANK, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
                             Contract.COLUMN_ID + " = ?",
                             new String[]{entry_id + ""}, null, null, null, null);
                     cursor.moveToFirst();
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_FIELD,to_field_id);
-                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION,cursor.getLong(0));
-                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER,cursor.getLong(1));
-                    contentValues.put(Contract.String_Entry.COLUMN_RANK,cursor.getInt(2));
-                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,cursor.getInt(3));
-                    if ( number_of_everyday_entries > Constants.NOT_EMULATED ) {
+                    contentValues.put(Contract.String_Entry.COLUMN_FIELD, to_field_id);
+                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION, cursor.getLong(0));
+                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER, cursor.getLong(1));
+                    contentValues.put(Contract.String_Entry.COLUMN_RANK, cursor.getInt(2));
+                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, cursor.getInt(3));
+                    if (number_of_everyday_entries > Constants.NOT_EMULATED) {
                         contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                                Emulation.getEmulationCreationDate(to_field_id,number_of_everyday_entries,sqLiteDatabase));
+                                Emulation.getEmulationCreationDate(to_field_id, number_of_everyday_entries, sqLiteDatabase));
                     }
-                    sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME,null,
-                            contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+                    sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME, null,
+                            contentValues, SQLiteDatabase.CONFLICT_IGNORE);
                     sqLiteDatabase.delete(Contract.String_Entry.TABLE_NAME, Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
                 }
                 sqLiteDatabase.setTransactionSuccessful();
@@ -941,6 +1000,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
     }
+
     public void resetEntriesTestOrderFullyRandomTest(long field_id, int question_data_type) {
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             ContentValues contentValues = new ContentValues();
@@ -953,51 +1013,45 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void deleteField(final long field_id, final Handler handler, final MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder) {
-        Thread pauseThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time_Backup.TABLE_NAME,
-                        new String[]{ Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST},
-                        Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null, null);
-                if (cursor.getCount() > 0) {
-                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
-                        Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
-                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                        alarmManager.cancel(pendingIntent);
-                    }
+        Thread pauseThread = new Thread(() -> {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time_Backup.TABLE_NAME,
+                    new String[]{Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST},
+                    Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null, null);
+            if (cursor.getCount() > 0) {
+                AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
+                    Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                    intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    alarmManager.cancel(pendingIntent);
                 }
-                cursor.close();
-                cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
-                        new String[]{ Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST},
-                        Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " IS NOT NULL"
-                        , new String[]{field_id + ""}, null, null, null);
-                if (cursor.getCount() > 0) {
-                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
-                        Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
-                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                        alarmManager.cancel(pendingIntent);
-                    }
-                }
-                cursor.close();
-                sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
-                        Contract.COLUMN_ID + " = ? ",
-                        new String[]{field_id + ""});
-
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        CursorLoaderAndUpdateDatabase.this.onContentChanged();
-                        mainActivityRecyclerViewViewHolder.isDeleting = false;
-                    }
-                };
-                handler.post(runnable);
-
             }
+            cursor.close();
+            cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                    new String[]{Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST},
+                    Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " IS NOT NULL"
+                    , new String[]{field_id + ""}, null, null, null);
+            if (cursor.getCount() > 0) {
+                AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
+                    Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                    intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    alarmManager.cancel(pendingIntent);
+                }
+            }
+            cursor.close();
+            sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
+                    Contract.COLUMN_ID + " = ? ",
+                    new String[]{field_id + ""});
+
+            Runnable runnable = () -> {
+                CursorLoaderAndUpdateDatabase.this.onContentChanged();
+                mainActivityRecyclerViewViewHolder.isDeleting = false;
+            };
+            handler.post(runnable);
+
         });
         pauseThread.start();
     }
@@ -1082,6 +1136,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             return null;
         }
     }
+
     public void clearThisFieldFromWrongAnswersFullyRandomTest(long field_id) {
         buildClearThisFieldFromWrongAnswersFullyRandomTest(this).execute(sqLiteOpenHelper, field_id, context);
     }
@@ -1127,8 +1182,8 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-    public void putEntryWrongAnswersEnhancedTest(String question, String answer, long field_id, ArrayList<String> wrongAnswer, int question_data_type) {
-        buildPutEntryWrongAnswersEnhancedTest(this).execute(sqLiteOpenHelper, question, answer, field_id, wrongAnswer, question_data_type);
+    public void putEntryWrongAnswersEnhancedTest(long entry_id, ArrayList<String> wrongAnswer, int question_data_type) {
+        buildPutEntryWrongAnswersEnhancedTest(this).execute(sqLiteOpenHelper, entry_id, wrongAnswer, question_data_type);
     }
 
     protected ContentChangingTask buildPutEntryWrongAnswersEnhancedTest(CursorLoaderAndUpdateDatabase loader) {
@@ -1144,33 +1199,12 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         protected Void doInBackground(Object... params) {
             SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-            String question = (String) params[1];
-            String answer = (String) params[2];
-            long field_id = (long) params[3];
-            ArrayList<String> wrongAnswers = (ArrayList<String>) params[4];
-            int question_data_type = (int) params[5];
+            long entry_id = (long) params[1];
+            ArrayList<String> wrongAnswers = (ArrayList<String>) params[2];
+            int question_data_type = (int) params[3];
             sqLiteDatabase.beginTransactionNonExclusive();
             try {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
-                    Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                            Contract.STring.COLUMN_VALUE + " = ? ",
-                            new String[]{question}, null, null, null);
-                    questionCursor.moveToFirst();
-                    long question_id = questionCursor.getLong(0);
-                    questionCursor.close();
-                    Cursor answerCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                            Contract.STring.COLUMN_VALUE + " = ? ",
-                            new String[]{answer}, null, null, null);
-                    answerCursor.moveToFirst();
-                    long answer_id = answerCursor.getLong(0);
-                    answerCursor.close();
-                    Cursor entryCursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                            Contract.String_Entry.COLUMN_QUESTION + " = ? AND " + Contract.String_Entry.COLUMN_ANSWER + " = ? AND "
-                                    + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                            new String[]{question_id + "", answer_id + "", field_id + ""}, null, null, null);
-                    entryCursor.moveToFirst();
-                    long entry_id = entryCursor.getLong(0);
-                    entryCursor.close();
                     for (String string : wrongAnswers) {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Contract.Test_Wrong_Answer_String.COLUMN_TEST_TYPE, Constants.TestType.ENHANCED_TEST);
@@ -1257,8 +1291,9 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST, pendingintent_request);
         sqLiteDatabase.insert(Contract.Scheduled_Time_Backup.TABLE_NAME, null, contentValues);
     }
+
     public void addScheduledTimeForBackup(long field_id, int session_type, long time,
-                                          int pendingintent_request,int percentage_or_number, int number, int number_of_tries,
+                                          int pendingintent_request, int percentage_or_number, int number, int number_of_tries,
                                           int controlled_portion, int wrongness_level, int rank_level) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_FIELD, field_id);
@@ -1293,45 +1328,51 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 + " ) as jjj"
                 + " );");
     }
-    public void increaseEntryAskedByOne( long entry_id ) {
+
+    public void increaseEntryAskedByOne(long entry_id) {
         Cursor cursor = sqLiteOpenHelper.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
                 new String[]{Contract.String_Entry.COLUMN_ASKED_COUNT}, Contract.COLUMN_ID + " = ? ",
-                new String[]{entry_id + ""}, null,null,null);
+                new String[]{entry_id + ""}, null, null, null);
         cursor.moveToFirst();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.String_Entry.COLUMN_ASKED_COUNT, cursor.getInt(0) + 1);
-        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
     }
-    public void increaseEntryWrongAnsweredCountByOne( long entry_id ) {
+
+    public void increaseEntryWrongAnsweredCountByOne(long entry_id) {
         Cursor cursor = sqLiteOpenHelper.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
                 new String[]{Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT}, Contract.COLUMN_ID + " = ? ",
-                new String[]{entry_id + ""}, null,null,null);
+                new String[]{entry_id + ""}, null, null, null);
         cursor.moveToFirst();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, cursor.getInt(0) + 1);
-        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
     }
-    public void setReminderData ( long entry_id, long time , int request ) {
+
+    public void setReminderData(long entry_id, long time, int request) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT, time);
         contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST, request);
-        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
     }
-    public void deleteReminderData ( long entry_id ) {
+
+    public void deleteReminderData(long entry_id) {
         ContentValues contentValues = new ContentValues();
         contentValues.putNull(Contract.String_Entry.COLUMN_REMIND_AT);
         contentValues.putNull(Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST);
-        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues, Contract.COLUMN_ID + " = ? ",new String[]{entry_id + ""});
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
     }
 
     protected ContentChangingTask buildAddFieldNoteTask(CursorLoaderAndUpdateDatabase loader) {
         return (new AddFieldNote(loader));
     }
+
     public void addFieldNote(long field_id, String note) {
         buildAddFieldNoteTask(this).execute(sqLiteOpenHelper, field_id, note);
     }
+
     protected static class AddFieldNote extends ContentChangingTask {
         AddFieldNote(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
@@ -1346,15 +1387,19 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.Field_Note.COLUMN_FIELD, field_id);
             contentValues.put(Contract.Field_Note.COLUMN_NOTE, note);
-            sqLiteDatabase.insertWithOnConflict(Contract.Field_Note.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_IGNORE);
+            sqLiteDatabase.insertWithOnConflict(Contract.Field_Note.TABLE_NAME, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
             return null;
         }
-    }protected ContentChangingTask buildDeleteFieldNoteTask(CursorLoaderAndUpdateDatabase loader) {
+    }
+
+    protected ContentChangingTask buildDeleteFieldNoteTask(CursorLoaderAndUpdateDatabase loader) {
         return (new DeleteFieldNote(loader));
     }
+
     public void deleteFieldNote(long note_id) {
         buildDeleteFieldNoteTask(this).execute(sqLiteOpenHelper, note_id);
     }
+
     protected static class DeleteFieldNote extends ContentChangingTask {
         DeleteFieldNote(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
@@ -1369,12 +1414,15 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             return null;
         }
     }
+
     protected ContentChangingTask buildUpdateCustomableText(CursorLoaderAndUpdateDatabase loader) {
         return (new UpdateCustomableText(loader));
     }
+
     public void updateCustomableText(long id, String text) {
         buildUpdateCustomableText(this).execute(sqLiteOpenHelper, id, text);
     }
+
     protected static class UpdateCustomableText extends ContentChangingTask {
         UpdateCustomableText(CursorLoaderAndUpdateDatabase loader) {
             super(loader);
@@ -1387,50 +1435,80 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             long id = (long) params[1];
             String text = (String) params[2];
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING,text);
-            sqLiteDatabase.update(Contract.Field_Type_Symbol.TABLE_NAME,contentValues,
+            contentValues.put(Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING, text);
+            sqLiteDatabase.update(Contract.Field_Type_Symbol.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{id + ""});
 
             return null;
         }
     }
 
-    public void updateFieldType(long field_id, int field_type ) {
-        if ( field_type != Constants.FieldTypes.NOTEBOOK_TYPE ) {
+    public void updateFieldType(long field_id, int field_type) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
-            sqLiteOpenHelper.getWritableDatabase().update(Contract.Field.TABLE_NAME,contentValues,
+            sqLiteOpenHelper.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
-        }
     }
 
-    public void addOrderId( String order_id ) {
+    public void addOrderId(String order_id) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.GooglePaymentOrderID.COLUMN_ORDER_ID, order_id);
-        sqLiteOpenHelper.getWritableDatabase().insert(Contract.GooglePaymentOrderID.TABLE_NAME,null,contentValues);
+        sqLiteOpenHelper.getWritableDatabase().insert(Contract.GooglePaymentOrderID.TABLE_NAME, null, contentValues);
     }
-    public void restWhetherAskedCurrentTestRound ( long field_id, boolean isEmulated, String date_string ) {
-        if ( isEmulated ) {
+
+    public void restWhetherAskedCurrentTestRound(long field_id, boolean isEmulated, String date_string) {
+        if (isEmulated) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
-            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
                     Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
                             + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL )"
                     , new String[]{field_id + "", date_string});
         } else {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
-            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
-                    Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
+            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
+                    Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{String.valueOf(field_id)});
         }
     }
 
-    public void makeAskedCurrentTestRound( long [] ids ) {
-        for ( long temp: ids ) {
+    public void makeAskedCurrentTestRound(long[] ids) {
+        for (long temp : ids) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.ASKED_AT_CURRENT_ROUND);
-            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME,contentValues,
+            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
         }
+    }
+
+    public void setTimeOfAnswerOfTests(long field_id, int time, int do_what) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, time);
+        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, do_what);
+        sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
+    }
+
+    public void setTimeOfAnswerOfStudyAPeriod(long field_id, int time) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD, time);
+        sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
+    }
+
+    public void setElapsedPausedSessionTime(long field_id, int type, long time) {
+        ContentValues contentValues = new ContentValues();
+        if (type == Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD) {
+            contentValues.put(Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION, time);
+        } else if (type == Constants.ElapsedPausedSessionTime.ENHANCED_TEST) {
+            contentValues.put(Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION, time);
+        } else if (type == Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST) {
+            contentValues.put(Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION, time);
+        }
+        sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
+                Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
+    }
+    public void setObfuscateQuestion(long field_id, boolean obfuscate) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, obfuscate ? 1 : 0);
+        sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
     }
 }
