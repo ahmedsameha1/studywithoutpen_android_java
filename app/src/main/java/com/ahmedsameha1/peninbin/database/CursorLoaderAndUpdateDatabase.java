@@ -580,27 +580,13 @@ try {
                     new String[]{field_id + ""});
 
 
-
-
+            
 
             for (int i = 0; i < listForTest.length; i++) {
-                Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                        Contract.STring.COLUMN_VALUE + " = ? ",
-                        new String[]{listForTest[i][0]}, null, null, null);
-                questionCursor.moveToFirst();
-                long question_id = questionCursor.getLong(0);
-                questionCursor.close();
-                Cursor answerCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                        Contract.STring.COLUMN_VALUE + " = ? ",
-                        new String[]{listForTest[i][1]}, null, null, null);
-                answerCursor.moveToFirst();
-                long answer_id = answerCursor.getLong(0);
-                answerCursor.close();
                 contentValues = new ContentValues();
                 contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, i);
-                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.String_Entry.COLUMN_QUESTION + " = ? AND "
-                                + Contract.String_Entry.COLUMN_ANSWER + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                        new String[]{question_id + "", answer_id + "", field_id + ""});
+                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ",
+                        new String[]{listForTest[i][2]});
             }
 
 

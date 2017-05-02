@@ -137,10 +137,13 @@ public class ActivityUtility {
             // Simple swap
             String question = array[index][0];
             String answer = array[index][1];
+            String id = array[index][2];
             array[index][0] = array[i][0];
             array[index][1] = array[i][1];
+            array[index][2] = array[i][2];
             array[i][0] = question;
             array[i][1] = answer;
+            array[i][2] = id;
         }
     }
 

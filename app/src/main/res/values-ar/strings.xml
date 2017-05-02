@@ -275,7 +275,8 @@
     <string name="asked">سُئِل: %1$s</string>
     <string name="wrongly_answered">أجيب بشكل خاطئ: %1$s</string>
     <string name="same">مشابه</string>
-    <string name="only_this_with_same_question">لا يوجد مُدخلات أخرى لها نفس السؤال</string>
+    <string name="only_this_with_same_question">لا توجد مُدخلات أخرى لها نفس السؤال</string>
+    <string name="only_this_with_same_answer">لا توجد مُدخلات أخرى لها نفس الجواب</string>
     <string name="obfuscate_question">شَوِّش السؤال</string>
     <string name="obfuscate_question_help">"هذا الخيار يحاول جعل قراءة السؤال أصعب. لماذا؟ لزيادة انتباهك اثناء الجلسة. هذا الخيار يحاول أن يخرجك من وضع الطيار الآلي.  "</string>
     <string name="subscription1_description">افتح الوظائف المغلقة. يمكنك  طلب إعادة المال من المطور من خلال البريد الإلكتروني</string>

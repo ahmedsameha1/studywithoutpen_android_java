@@ -64,6 +64,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private static final String CUSTOMABLE_TEXT = "customable_text";
     public static final int GET_FIELDS_LOADER_ID = 0;
     public static final int GET_SPECIAL_TEXT_ID = 1;
+    private static final String TEMP_SHARED_STRING = "temp_shared_string";
     private Spinner field_spinner;
     private EditText enter_question;
     private EditText enter_answer;
@@ -86,8 +87,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private String[] symbol, customable_text;
     private int current_field_type;
     private Handler mHandler = new Handler();
-
-
+    private String temp_shared_string;
 
 
     @Override
@@ -252,6 +252,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                         toast.show();
                     }
                 }
+                enter_question.requestFocus();
             } else {
                 Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -292,22 +293,6 @@ public class AddEntryActivity extends AppCompatActivity implements
                 mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
             }
         });
-/*        enter_question.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                enter_question.setText("");
-                enter_question.requestFocus();
-                return true;
-            }
-        });
-        enter_answer.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                enter_answer.setText("");
-                enter_answer.requestFocus();
-                return true;
-            }
-        });*/
         enter_answer.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
             public void onSwipeLeft() {
@@ -317,8 +302,16 @@ public class AddEntryActivity extends AppCompatActivity implements
 
             @Override
             public void onSwipeRight() {
-                enter_answer.setText("");
-                enter_answer.requestFocus();
+                if ( temp_shared_string != null ) {
+                    EditText editText = (EditText) view;
+                    int sel = editText.getSelectionEnd();
+                    if ( sel == -1 ) {
+                        editText.setText(editText.getText() + temp_shared_string);
+                    } else {
+                        editText.setText(editText.getText().toString().substring(0,sel)
+                                + temp_shared_string + editText.getText().toString().substring(sel));
+                    }
+                }
             }
         });
         enter_question.setOnTouchListener(new OnSwipeTouchListener(this) {
@@ -330,8 +323,16 @@ public class AddEntryActivity extends AppCompatActivity implements
 
             @Override
             public void onSwipeRight() {
-                enter_question.setText("");
-                enter_question.requestFocus();
+                if ( temp_shared_string != null ) {
+                    EditText editText = (EditText) view;
+                    int sel = editText.getSelectionEnd();
+                    if ( sel == -1 ) {
+                        editText.setText(editText.getText() + temp_shared_string);
+                    } else {
+                        editText.setText(editText.getText().toString().substring(0,sel)
+                                + temp_shared_string + editText.getText().toString().substring(sel));
+                    }
+                }
             }
         });
 
@@ -409,6 +410,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if ("text/plain".equals(type)) {
                 String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                temp_shared_string = sharedText;
                 if (sharedText != null) {
                     enter_question.setText(sharedText);
                 }
@@ -446,6 +448,7 @@ public class AddEntryActivity extends AppCompatActivity implements
             if ("text/plain".equals(type)) {
                 String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
                 if (sharedText != null) {
+                    temp_shared_string = sharedText;
                     if ( enter_question.getText().length() == 0 && enter_question.getText().length() == 0 )  {
                         enter_question.setText(sharedText);
                     } else if ( enter_question.getText().length() == 0 ) {
@@ -461,6 +464,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
+        temp_shared_string = null;
     }
 
     @Override
@@ -512,6 +516,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         savedInstanceState.putLong(TIMER_LAST_PAUSE, lastPause);
         savedInstanceState.putStringArray(SYMBOL, symbol);
         savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
+        savedInstanceState.putString(TEMP_SHARED_STRING, temp_shared_string);
         saveUserLayoutChanges(savedInstanceState);
     }
 
@@ -523,6 +528,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
         symbol = savedInstanceState.getStringArray(SYMBOL);
+        temp_shared_string = savedInstanceState.getString(TEMP_SHARED_STRING);
         restoreUserLayoutChanges(savedInstanceState);
     }
 

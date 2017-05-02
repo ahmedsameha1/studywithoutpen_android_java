@@ -9,10 +9,12 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.EditText;
 
 public class OnSwipeTouchListener implements OnTouchListener {
 
     private final GestureDetector gestureDetector;
+    protected View view;
 
     public OnSwipeTouchListener (Context ctx){
         gestureDetector = new GestureDetector(ctx, new GestureListener());
@@ -20,6 +22,7 @@ public class OnSwipeTouchListener implements OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        view = v;
         return gestureDetector.onTouchEvent(event);
     }
 
