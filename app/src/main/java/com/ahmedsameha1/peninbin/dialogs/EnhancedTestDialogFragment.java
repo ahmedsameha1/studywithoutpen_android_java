@@ -56,7 +56,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
-                builder.setTitle(R.string.start_a_test)
+                builder.setTitle(R.string.start_enhanced_test)
                         .setView(inflater.inflate(R.layout.enhanced_test_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
@@ -83,10 +83,19 @@ public class EnhancedTestDialogFragment extends DialogFragment {
             number_or_percentage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    String number_string = enterNumber.getText().toString();
                     if ( i == 0 ) {
                         enterNumber.setHint(R.string.enter_number_of_questions);
+                        if ( number_suffix != null ) {
+                            enterNumber.setText(number_string.substring(0, number_string.length() - number_suffix.length()) +
+                                    " " + getActivity().getString(R.string._question));
+                        }
                     } else {
                         enterNumber.setHint(R.string.enter_percentage);
+                        if ( number_suffix != null ) {
+                            enterNumber.setText(number_string.substring(0, number_string.length() - number_suffix.length()) +
+                                    " %" );
+                        }
                     }
                 }
 
@@ -245,6 +254,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                 }
             });
             positiveButton.setOnClickListener(v -> {
+                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity()) ) {
                 try {
                     String trys_suffix = " " + getActivity().getString(R.string._try);
                     String try_string = enterTries.getText().toString();
@@ -328,6 +338,11 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                     toast.show();
                 } catch (Resources.NotFoundException e) {
                     e.printStackTrace();
+                }
+                } else {
+                    Toast toast = Toast.makeText(getActivity(), R.string.please_subscribe, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 }
             });
         });

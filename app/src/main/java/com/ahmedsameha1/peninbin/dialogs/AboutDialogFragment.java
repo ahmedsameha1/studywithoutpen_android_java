@@ -79,7 +79,7 @@ public class AboutDialogFragment extends DialogFragment {
                     .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.mit_license))
                     .create().show());
             terms_of_use.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
-                    .setMessage(R.string.eula).create().show());
+                    .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.eula)).create().show());
         });
         return alertDialog;
     }

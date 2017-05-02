@@ -57,8 +57,6 @@ import com.google.android.gms.analytics.Tracker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -106,7 +104,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     private static final String TEXT_SIZE = "user_defined_question_text_size";
     public static final String PAUSING = "pausing";
-    private static final String CURRENT_ENTRY_ID = "current_entry_id";
     public static final String CONTROLLED_PORTION = "controlled_portion";
     public static final String RANK_LEVEL = "importance_level";
     public static final String WRONGNESS_LEVEL = "wrongness_level";
@@ -121,7 +118,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
-    private long current_field_id, current_entry_id;
+    private long current_field_id;
     private String[][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
     private boolean boolean_continue = false, actionBarShown, before_showing_result_dialog, time_of_answer_saved;
@@ -131,7 +128,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private double percentage;
     private Cursor fieldEntriesCursor;
-    private Toolbar toolbar;
     private EditText enterAnswer;
     private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuestions, check, nextHint, showActionbar, dont_know;
     private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
@@ -146,16 +142,20 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             Runnable pauseRunnable;
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
             try {
-                toPause();
+                if (!databaseOperations.checkEntriesForAnyTestOrderEnhancedTest(current_field_id, question_data_type)) {
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(EnhancedTestActivity.this);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean(ACTIVITY_NAME + PAUSING + current_field_id, true);
+                    editor.commit();
+                    cursorLoaderAndUpdateDatabase.putEntriesTestOrderEnhancedTest(current_field_id,
+                            question_data_type, listForTest);
+                }
             } finally {
                 pauseRunnable = () -> {
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(EnhancedTestActivity.this);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
                     editor.commit();
-                    Toast toast = Toast.makeText(EnhancedTestActivity.this, R.string.pause_shutdown, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
                 };
                 mHandler.post(pauseRunnable);
             }
@@ -176,9 +176,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private String[] symbol, customable_text;
     private int current_field_type;
     private Runnable show_result_dialog_runnable;
-    private int time_of_answer, time_of_answer_do_what;
-    private long time_of_starting_time_of_answer = -1, effictive_time_of_answer;
-    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this ::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
+        private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
+    private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
+    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this :: DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
     private boolean obfuscate;
 
     @Override
@@ -197,15 +197,17 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         databaseOperations = new DatabaseReadOperations(this);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         listForTest = retainedFragment.getListForTest_EnhancedTestActivity();
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
         int [] time_of_answer_data = databaseOperations.getTimeOfAnswerOfTests(current_field_id);
-        time_of_answer = time_of_answer_data[0];
-        time_of_answer_do_what = time_of_answer_data[1];
-        time_of_answer_saved = time_of_answer > 0;
+        reading_question_letter_second = time_of_answer_data[0];
+        find_answer_time = time_of_answer_data[1];
+        typing_answer_letter_second = time_of_answer_data[2];
+        time_of_answer_do_what = time_of_answer_data[3];
+        time_of_answer_saved = reading_question_letter_second > 0 && find_answer_time > 0 && typing_answer_letter_second > 0;
         permitedTriesNumber = getIntent().getIntExtra(PERMITED_TRIES_NUMBER, 1);
         percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
         controlled_portion = getIntent().getIntExtra(CONTROLLED_PORTION, -1);
@@ -346,6 +348,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             showQuestion();
                             enterAnswer.requestFocus();
                             is_testing_now = true;
+                            pauseThread.start();
                         }
                     }
                     crossfade();
@@ -377,18 +380,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             boolean result = checkAnAnswer();
             if (triesCounter < permitedTriesNumber && !result) {
                 if ( obfuscate ) {
-                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
                 } else {
                     showQuestion.setText(listForTest[currentQuestionCounter][0]);
                 }
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                 showTries.setText(Integer.toString(triesCounter + 1));
             } else {
                 triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
@@ -462,6 +457,13 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                            show_result_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            show_result_linearlayout.setPadding(0, 0, 0, 0);
+                            Runnable mRunnable = () -> {
+                                show_result_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                            };
+                            mHandler.postDelayed(mRunnable, 50);
                         }
                     }
                 }
@@ -589,21 +591,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
         //noinspection SimplifiableIfStatement
         switch (id) {
-            case R.id.pause:
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(ACTIVITY_NAME + PAUSING + current_field_id, true);
-                editor.commit();
-                Toast toast = Toast.makeText(EnhancedTestActivity.this, R.string.pause_do_not_shutdown, Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-                cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                        Constants.ElapsedPausedSessionTime.ENHANCED_TEST, lastPause);
-                pauseThread.start();
-                finish();
-                ExitActivity.exit(EnhancedTestActivity.this);
-                return true;
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
@@ -626,7 +613,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             case R.id.time_of_answer:
                 Bundle bundle2 = new Bundle();
                 bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.CURRENT_TIME_OF_ANSWER, time_of_answer);
+                bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.READING_QUESTION_LETTER_SECOND, reading_question_letter_second);
+                bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.FIND_ANSWER_TIME, find_answer_time);
+                bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.TYPING_ANSWER_LETTER_SECOND, typing_answer_letter_second);
                 bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.CURRENT_TIME_OF_ANSWER_DO_WHAT, time_of_answer_do_what);
                 bundle2.putBoolean(TimeOfAnswerOfTestsDialogFragment.TIME_OF_ANSWER_SAVED, time_of_answer_saved);
                 TimeOfAnswerOfTestsDialogFragment timeOfAnswerOfTestsDialogFragment = new TimeOfAnswerOfTestsDialogFragment();
@@ -690,10 +679,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     }
 
     private void setFalse( ActivityUtility.FalseString falseString) {
-        cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(current_entry_id);
+        cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
         show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
         show_result_linearlayout.setPadding(0, 0, 0, 0);
-        cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(current_entry_id);
+        cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
         setNormalEnterAnswerBackground();
         if ( falseString == ActivityUtility.FalseString.TIME_OUT ) {
             wrongAnswers.add(getString(R.string.time_out));
@@ -701,13 +690,13 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             wrongAnswers.add(getString(R.string.dont_know));
         }
         wrongAnswersCounter++;
-        cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(current_entry_id, wrongAnswers, question_data_type);
+        cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
         wrongAnswers = null;
     }
 
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
-        cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(current_entry_id);
+        cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
         boolean result = false;
         if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
             if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
@@ -725,7 +714,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             } else {
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(current_entry_id);
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
                 wrongAnswers.add(enterAnswer.getText().toString());
@@ -734,7 +723,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(current_entry_id, wrongAnswers, question_data_type);
+                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
         } else if (check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE) {
@@ -753,7 +742,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             } else {
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(current_entry_id);
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
                 wrongAnswers.add(enterAnswer.getText().toString());
@@ -762,7 +751,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(current_entry_id, wrongAnswers, question_data_type);
+                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
         } else if (check_type == Contract.Field.IGNORE_CASE) {
@@ -781,7 +770,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             } else {
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(current_entry_id);
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
                 wrongAnswers.add(enterAnswer.getText().toString());
@@ -790,7 +779,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(current_entry_id, wrongAnswers, question_data_type);
+                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
         } else if (check_type == Contract.Field.DO_NOT_IGNORE_CASE) {
@@ -809,7 +798,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             } else {
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(current_entry_id);
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
                 wrongAnswers.add(enterAnswer.getText().toString());
@@ -818,7 +807,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
                 wrongAnswersCounter++;
-                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(current_entry_id, wrongAnswers, question_data_type);
+                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
                 wrongAnswers = null;
             }
         }
@@ -826,12 +815,13 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     }
 
     private String[][] readTestDataFromLinkerTable() {
-        String[][] listForTest = new String[fieldEntriesCursor.getCount()][2];
+        String[][] listForTest = new String[fieldEntriesCursor.getCount()][3];
         for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
              fieldEntriesCursor.moveToNext()) {
             int order = fieldEntriesCursor.getInt(2);
             listForTest[order][0] = fieldEntriesCursor.getString(0);
             listForTest[order][1] = fieldEntriesCursor.getString(1);
+            listForTest[order][2] = String.valueOf(fieldEntriesCursor.getLong(3));
         }
         return listForTest;
     }
@@ -878,20 +868,27 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             tts.stop();
         }
         UsageLastTime.updateUsageLastTime(this);
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if ( databaseOperations.isThisFieldTestPausedEnhancedTest(current_field_id)) {
+        if ( is_testing_now ) {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
                     Constants.ElapsedPausedSessionTime.ENHANCED_TEST, lastPause);
-        } else {
-            cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                    Constants.ElapsedPausedSessionTime.ENHANCED_TEST, Constants.ElapsedPausedSessionTime.NOT_USED);
+            cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
+            int[] array = new int[3];
+            array[0] = currentQuestionCounter;
+            array[1] = wrongAnswersCounter;
+            array[2] = permitedTriesNumber;
+            cursorLoaderAndUpdateDatabase.putTestPausedDataEnhancedTest(current_field_id, array);
         }
     }
+
+/*    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+            cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
+                    Constants.ElapsedPausedSessionTime.ENHANCED_TEST, lastPause);
+        ExitActivity.exit(this);
+    }*/
 
     @Override
     public void onSaveInstanceState(Bundle savedInsatanceState) {
@@ -906,7 +903,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putStringArrayList(HINTS, hints);
         savedInsatanceState.putStringArrayList(WRONG_ANSWERS, wrongAnswers);
         savedInsatanceState.putBoolean(BOOLEAN_CONTINUE, boolean_continue);
-        savedInsatanceState.putLong(CURRENT_ENTRY_ID, current_entry_id);
         savedInsatanceState.putInt(CONTENT_VISIBILITY, content.getVisibility());
         savedInsatanceState.putInt(LOADING_VISIBILITY, mLoadingView.getVisibility());
         savedInsatanceState.putLong(TIMER_LAST_PAUSE, lastPause);
@@ -924,11 +920,11 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         * or when the user go away from the activity */
         if (time_of_starting_time_of_answer > -1) {
             savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER,
-                    effictive_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
+                    effective_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
         }
         /* To run scheduleWhatToDoAfterTimeOfAnswerElapsed() method after restarting the activity
         in case the activity destroyed while a dialog is shown */
-        else if ( ActivityUtility.hasOpenedDialogs(this) ) {
+        else if ( ActivityUtility.hasOpenedDialogs(this) && time_of_answer > 0 ) {
             savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000 );
         }
         // call this method to prevent the dialogs from being shown after the recreation of the activity
@@ -953,7 +949,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         hints = savedInstanceState.getStringArrayList(HINTS);
         hintCounter = savedInstanceState.getInt(HINT_COUNTER);
         wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
-        current_entry_id = savedInstanceState.getLong(CURRENT_ENTRY_ID);
         customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
         time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
         time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
@@ -965,7 +960,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         if (!before_showing_result_dialog) {
             if (is_testing_now) {
                 if ( obfuscate ) {
-                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
                 } else {
                     showQuestion.setText(listForTest[currentQuestionCounter][0]);
                 }
@@ -985,8 +980,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     if (how_much_time_remaining_time_for_answer <= 0) {
                       DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
                     } else {
-                        effictive_time_of_answer = how_much_time_remaining_time_for_answer;
-                        mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
+                        effective_time_of_answer = how_much_time_remaining_time_for_answer;
+                        mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effective_time_of_answer);
                         time_of_starting_time_of_answer = System.currentTimeMillis();
                     }
                 }
@@ -1086,22 +1081,17 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
     private void showQuestion() {
         if ( obfuscate ) {
-            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
         } else {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
         }
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                current_entry_id = getEntry_id(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1]);
-                return null;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+        time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1],
+                reading_question_letter_second,find_answer_time, typing_answer_letter_second);
         showQuestion.scrollTo(0, 0);
         showTries.setText(Integer.toString(triesCounter + 1));
         ifMoreThanOnce();
         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+        enterAnswer.setText("");
         enterAnswer.setHint(R.string.enter_your_answer);
         hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
         wrongAnswers = new ArrayList<>(permitedTriesNumber);
@@ -1120,11 +1110,18 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setTimeOfAnswer(int time_of_answer, int time_of_answer_do_what, boolean time_for_answer_saved) {
-        this.time_of_answer = time_of_answer;
+    public void setTimeOfAnswer(int reading_question_letter_second, int find_answer_time, int typing_answer_letter_second, int time_of_answer_do_what, boolean time_for_answer_saved) {
+        this.reading_question_letter_second = reading_question_letter_second;
+        this.find_answer_time = find_answer_time;
+        this.typing_answer_letter_second = typing_answer_letter_second;
         this.time_of_answer_do_what = time_of_answer_do_what;
         this.time_of_answer_saved = time_for_answer_saved;
-        scheduleWhatToDoAfterTimeOfAnswerElapsed();
+        // to avoid the case if the listfortest has not been prepared yet
+        if ( is_testing_now ) {
+            time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1],
+                    reading_question_letter_second,find_answer_time, typing_answer_letter_second);
+            scheduleWhatToDoAfterTimeOfAnswerElapsed();
+        }
     }
 
 
@@ -1133,7 +1130,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         if ( isCounting ) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
-            scheduleWhatToDoAfterTimeOfAnswerElapsed();
+            // to avoid the case if the listfortest has not been prepared yet
+            if ( is_testing_now ) {
+                scheduleWhatToDoAfterTimeOfAnswerElapsed();
+            }
         } else {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
@@ -1199,8 +1199,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     }
     private void scheduleWhatToDoAfterTimeOfAnswerElapsed() {
         if (time_of_answer > 0) {
-            effictive_time_of_answer = time_of_answer * 1000;
-            mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
+            effective_time_of_answer = time_of_answer * 1000;
+            mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effective_time_of_answer);
             time_of_starting_time_of_answer = System.currentTimeMillis();
         }
     }
@@ -1281,7 +1281,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     public void obfuscateText(boolean obfuscate) {
         this.obfuscate = obfuscate;
         if ( obfuscate ) {
-            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0]));
+            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
         } else {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
         }

@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
@@ -54,16 +55,19 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private static final String QUERY_KEY = "query_key";
     private static final String CURRENT_FIELD_ID = "current_field_id";
     public static final String SAME_QUESTION = "same_question";
-    private SearchActivityRecyclerViewAdapter mAdapter;
+    public static final int SEARCH_QUESTION = 1;
+    public static final int SEARCH_ANSWER = 2;
+    public static final String SEARCH_WHAT = "search_what";
+    public SearchActivityRecyclerViewAdapter mAdapter;
     private long current_field_id;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private SortOptions sortOption;
-    private DatabaseReadOperations databaseReadOperations;
     private Tracker mTracker;
     private StringBuilder search_string_highlight = new StringBuilder();
     private int question_data_type;
-    private boolean same_question;
     private SearchView searchView;
+    private TextView result_count;
+    private int search_what;
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -72,16 +76,17 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         RecyclerView recyclerView;
         if ( savedInstanceState != null ) {
             current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
-            same_question = savedInstanceState.getBoolean(SAME_QUESTION);
+            search_what = savedInstanceState.getInt(SEARCH_WHAT);
         } else {
             current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
-            same_question = getIntent().getBooleanExtra(SAME_QUESTION,false);
+            search_what = getIntent().getIntExtra(SEARCH_WHAT,0);
         }
-        databaseReadOperations = new DatabaseReadOperations(this);
+        DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(this);
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.search_activity_recyclerview);
+        result_count = (TextView) findViewById(R.id.result_count);
         setSupportActionBar(toolbar);
         mAdapter = new SearchActivityRecyclerViewAdapter(SearchActivity.this,null, current_field_id, search_string_highlight);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(SearchActivity.this);
@@ -117,8 +122,8 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query =
                     intent.getStringExtra(SearchManager.QUERY);
-            same_question = intent.getBooleanExtra(SAME_QUESTION, false);
-            if ( searchView != null && same_question) {
+            search_what = intent.getIntExtra(SEARCH_WHAT,0);
+            if ( searchView != null && (search_what == SEARCH_QUESTION || search_what == SEARCH_ANSWER)) {
                 searchView.setQuery("", false);
             }
             Bundle bundle = new Bundle();
@@ -146,34 +151,47 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public void onSaveInstanceState ( Bundle savedInsatanceState ) {
         super.onSaveInstanceState(savedInsatanceState);
         savedInsatanceState.putLong(CURRENT_FIELD_ID,current_field_id);
-        savedInsatanceState.putBoolean(SAME_QUESTION,same_question);
+        savedInsatanceState.putInt(SEARCH_WHAT,search_what);
     }
 
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String searchString = args.getString(QUERY_KEY);
-        if ( !same_question ) {
+        if ( search_what == SEARCH_ANSWER ) {
             mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                     "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                            + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                            + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                            + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
+                            + "  a LIKE ? ORDER BY " + sortOption.getSortString(),
+                    new String[]{ String.valueOf(current_field_id) , searchString });
+            search_what = 0;
+        } else if ( search_what == SEARCH_QUESTION ){
+            mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
+                    "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                            + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                            + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                            + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
+                            + "  q LIKE ? ORDER BY " + sortOption.getSortString(),
+                    new String[]{ String.valueOf(current_field_id), searchString });
+            search_what = 0;
+        } else {
+            mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
+                    "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                            + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                            + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                             + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                             + "  q LIKE ? "
                             + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                             + " a LIKE ? ORDER BY " + sortOption.getSortString(),
-                    new String[]{ current_field_id + "","%" + searchString + "%", current_field_id + "","%" + searchString + "%"});
-        } else {
-            mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
-                    "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                            + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                            + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                            + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
-                            + "  q LIKE ? ORDER BY " + sortOption.getSortString(),
-                    new String[]{ current_field_id + "", searchString });
-            same_question = false;
+                    new String[]{ String.valueOf(current_field_id),"%" + searchString + "%", current_field_id + "","%" + searchString + "%"});
         }
         return mySQLiteCursorLoader;
     }
@@ -181,6 +199,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
+        result_count.setText(String.valueOf(data.getCount()));
     }
 
     @Override

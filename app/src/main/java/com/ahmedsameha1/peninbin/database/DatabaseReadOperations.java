@@ -726,25 +726,33 @@ public class DatabaseReadOperations {
     }
 
     public int[] getTimeOfAnswerOfTests(long field_id ) {
-        int [] data = new int[2];
+        int [] data = new int[4];
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
-                    new String[]{Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT},
+                    new String[]{Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS,
+                            Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS,
+                            Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT},
                     Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
         cursor.moveToFirst();
         data[0] = cursor.getInt(0);
         data[1] = cursor.getInt(1);
+        data[2] = cursor.getInt(2);
+        data[3] = cursor.getInt(3);
         cursor.close();
         return data;
     }
 
-    public int getTimeOfAnswerOfStudyAPeroid(long field_id ) {
+    public int[] getTimeOfAnswerOfStudyAPeriod(long field_id ) {
+        int [] data = new int[3];
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
-                    new String[]{Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD},
-                    Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
+                new String[]{Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD, Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD,
+                        Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD},
+                Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
         cursor.moveToFirst();
-        int time = cursor.getInt(0);
+        data[0] = cursor.getInt(0);
+        data[1] = cursor.getInt(1);
+        data[2] = cursor.getInt(2);
         cursor.close();
-        return time;
+        return data;
     }
 
     public long getElapsedPausedSessionTime( long field_id, int type ) {
@@ -768,13 +776,27 @@ public class DatabaseReadOperations {
         cursor.close();
         return time;
     }
-    public boolean morethanOneAnswerSameQuestion(long field_id, String question) {
+    public boolean moreThanOneAnswerSameQuestion(long field_id, String question) {
         int count;
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + " COUNT(se." + Contract.COLUMN_ID + ") FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                 + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                 + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                 + " s1." + Contract.STring.COLUMN_VALUE + " LIKE ?",
                 new String[]{ field_id + "", question });
+        cursor.moveToFirst();
+        count = cursor.getInt(0);
+        cursor.close();
+        return count > 1;
+    }
+    public boolean moreThanOneQuestionSameAnswer(long field_id, String answer) {
+        int count;
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + " COUNT(se." + Contract.COLUMN_ID + ") FROM " + Contract.STring.TABLE_NAME
+                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
+                + " s2." + Contract.STring.COLUMN_VALUE + " LIKE ?",
+                new String[]{ field_id + "", answer });
         cursor.moveToFirst();
         count = cursor.getInt(0);
         cursor.close();

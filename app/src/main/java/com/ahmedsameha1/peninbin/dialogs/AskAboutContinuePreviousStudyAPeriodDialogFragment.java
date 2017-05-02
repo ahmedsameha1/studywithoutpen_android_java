@@ -1,7 +1,6 @@
 package com.ahmedsameha1.peninbin.dialogs;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -54,7 +53,7 @@ public class AskAboutContinuePreviousStudyAPeriodDialogFragment extends DialogFr
                                         Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD, Constants.ElapsedPausedSessionTime.NOT_USED);
                                 Bundle bundle = new Bundle();
                                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                                StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                                StudyAPeriodDialogFragment fragment2 = new StudyAPeriodDialogFragment();
                                 fragment2.setArguments(bundle);
                                 fragment2.show(getActivity().getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
                                 dismiss();

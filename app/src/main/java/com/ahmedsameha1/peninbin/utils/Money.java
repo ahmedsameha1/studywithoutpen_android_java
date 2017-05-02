@@ -7,9 +7,12 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -31,6 +34,7 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -169,6 +173,21 @@ public class Money {
                             return;
                         }
                     }
+                }
+            }
+            // allow the users that have sim card of egypt to use the app without subscription in the first 30 days of the
+            // first installation of the app
+            if ( isInEgypt(context) ) {
+                PackageInfo pi = null;
+                try {
+                    pi = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
+                    if ( System.currentTimeMillis() <= (pi.firstInstallTime + (AlarmManager.INTERVAL_DAY * 30))) {
+                        putUserSubscriptionStatus(context, true);
+                        removeAllGetPurchasesErrors(context);
+                        return;
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
                 }
             }
             try {
@@ -329,5 +348,37 @@ public class Money {
             }
             return false;
         }
+    }
+
+
+    /**
+     * Get ISO 3166-1 alpha-2 country code for this device (or null if not available)
+     * @param context Context reference to get the TelephonyManager instance from
+     * @return country code or null
+     */
+    public static String getUserCountry(Context context) {
+        try {
+            final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            final String simCountry = tm.getSimCountryIso();
+            if (simCountry != null && simCountry.length() == 2) { // SIM country code is available
+                return simCountry.toLowerCase(Locale.US);
+            }
+            else if (tm.getPhoneType() != TelephonyManager.PHONE_TYPE_CDMA) { // device is not 3G (would be unreliable)
+                String networkCountry = tm.getNetworkCountryIso();
+                if (networkCountry != null && networkCountry.length() == 2) { // network country code is available
+                    return networkCountry.toLowerCase(Locale.US);
+                }
+            }
+        }
+        catch (Exception e) { }
+        return null;
+    }
+    public static boolean isInEgypt(Context context) {
+        String country = getUserCountry(context);
+
+        if (country != null && country.equals("eg")) {
+            return true;
+        }
+        return false;
     }
 }

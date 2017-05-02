@@ -6,17 +6,14 @@ import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
@@ -27,7 +24,6 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -53,7 +49,7 @@ import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SortEntriesDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.StudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.FieldActivityFragmentDrawer;
@@ -63,7 +59,6 @@ import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
-import com.ahmedsameha1.peninbin.utils.PayloadString;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.android.vending.billing.IInAppBillingService;
@@ -355,6 +350,7 @@ public class FieldActivity extends AppCompatActivity implements
         super.onResume();
         if (load_or_search) {
             getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
+            search_string_highlight.replace(0, search_string_highlight.length(), "");
         } else {
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, search_value);
@@ -414,7 +410,6 @@ public class FieldActivity extends AppCompatActivity implements
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         boolean user_eligible = Money.getUserSubscriptionStatus(this);
-        user_eligible = true; // TODO: 2/13/17 must comment this line before publish
         switch (position) {
             case ENHANCED_TEST:
                 startEnhancedTest();
@@ -516,6 +511,7 @@ public class FieldActivity extends AppCompatActivity implements
                     @Override
                     public boolean onMenuItemActionCollapse(MenuItem menuItem) {
                         getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
+                        search_string_highlight.replace(0, search_string_highlight.length(), "");
                         load_or_search = true;
                         return true;
                     }
@@ -575,51 +571,12 @@ public class FieldActivity extends AppCompatActivity implements
         }
     }
 
-    private void startPurchaseFlow() {
-        if (NetworkReceiver.isOnline(this)) {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.subscription_description)
-                    .setMessage(R.string.subscription1_description)
-                    .setPositiveButton(R.string.proceed_now, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            pay_load = PayloadString.getString();
-                            try {
-                                Bundle bundle = billingService.getBuyIntent(3, FieldActivity.this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
-                                        pay_load);
-                                int response_code = bundle.getInt(Money.RESPONSE_CODE);
-                                if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
-                                    PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
-                                    startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
-                                } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
-                                    Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                                    toast1.setGravity(Gravity.TOP, 0, 400);
-                                    toast1.show();
-                                } else {
-                                    Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                                    toast1.setGravity(Gravity.TOP, 0, 400);
-                                    toast1.show();
-                                }
-                            } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
-                                Toast toast1 = Toast.makeText(FieldActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                                toast1.setGravity(Gravity.TOP, 0, 400);
-                                toast1.show();
-                                e.printStackTrace();
-                            }
-                        }
-                    })
-                    .create().show();
-        } else {
-            Toast toast = Toast.makeText(this, R.string.need_internet_try_again, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
-        }
-    }
 
     @Override
     public void sort(SortOptions sortOption) {
         this.sortOption = sortOption;
         getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
+        search_string_highlight.replace(0, search_string_highlight.length(), "");
     }
 
     @Override
@@ -752,7 +709,7 @@ public class FieldActivity extends AppCompatActivity implements
                     fragment2.setArguments(bundle);
                     fragment2.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
                 } else {
-                    StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                    StudyAPeriodDialogFragment fragment2 = new StudyAPeriodDialogFragment();
                     fragment2.setArguments(bundle);
                     fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
                 }

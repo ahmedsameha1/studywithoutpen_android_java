@@ -746,6 +746,13 @@ public class StudyActivity extends AppCompatActivity implements
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enterQuestion.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enterQuestion.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                            questionLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                            Runnable mRunnable = () -> {
+                                questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                            };
+                            mHandler.postDelayed(mRunnable, 50);
                         }
                     }
                 }
@@ -783,6 +790,13 @@ public class StudyActivity extends AppCompatActivity implements
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                            answerLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                            Runnable mRunnable = () -> {
+                                answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                answerLinearlayout.setPadding(0, 0, 0, 0);
+                            };
+                            mHandler.postDelayed(mRunnable, 50);
                         }
                     }
                 }

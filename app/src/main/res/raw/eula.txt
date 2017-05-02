@@ -1,0 +1,14 @@
+Please read these Terms of Use ("Terms") carefully before using this App.
+Your access to and use of this App is conditioned on your acceptance of and compliance with these Terms.
+By using this App you agree to be bound by these Terms. If you disagree with any part of these Terms then you may not use this App.
+This App is provided "AS IS" without warranty of any kind. The developer of this App provides no express or implied warranties, specifically the warranties of merchantability, fitness for a particular purpose, the accuracy of the App content or non-infringement of third-party rights. The quality and performance of this App are at your own risk. The developer of this App does not warrant that the functions contained in this App will meet your requirements or that the operation of the App will be uninterrupted or error-free.
+You may not attempt to reverse engineer, compile, modify, translate or disassemble the App in whole or in part.
+You may not copy this App or its apk.
+You may not distribute any copy of this App or its apk.
+The Developer of this app reserves the right to modify or replace these Terms at any time. If The Developer of this App modifies or replaces these Terms, you must agree to the new Terms before you continue of using this app.
+The feature of reading the answer depends on the currently enabled text-to-speech engine. The developer of the App is not responsible for that text-to-speech engine. That text-to-speech engine may be not accurate.
+Your use of the features that need you to subscribe depends on Google Play Store app and the Google Play service. The developer of the App is not responsible for any problems of Google Play Store app or Google Play service.
+Your use of the features that need you to subscribe may need to a reliable internet connection.
+If there is more than one answer belongs to the same question, the app must give the user some hints to let him know the intended answer. This may make the app ineffective in some cases.
+This app collects anonymous data about the use of the app. The app uses Google Analytics to collect these data. The data includes which features is used, how long the app is used, the country of the user and other data about the use of the app. The anonymous collected data is used by the developer to know how the users use the app and in which countries the app is being used.
+This app gets the accounts of the device to allow the developer to use the features that need a subscription to use it ( by checking if the device has the account that belongs to the developer himself).

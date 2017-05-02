@@ -31,7 +31,6 @@ import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
@@ -146,18 +145,34 @@ public class SearchActivityRecyclerViewAdapter extends
                 toast.show();
             }
         });
-        viewHolder.like.setOnClickListener(view -> {
-            if ( databaseOperations.morethanOneAnswerSameQuestion(field_id, question) ) {
+        viewHolder.same_question.setOnClickListener(view -> {
+            if ( databaseOperations.moreThanOneAnswerSameQuestion(field_id, question) ) {
                 final Intent intent = new Intent(context,
                         SearchActivity.class);
                 // add query to the Intent Extras
                 intent.setAction(Intent.ACTION_SEARCH);
                 intent.putExtra(SearchManager.QUERY, question);
                 intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
-                intent.putExtra(SearchActivity.SAME_QUESTION, true);
+                intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_QUESTION);
                 context.startActivity(intent);
             } else {
                 Toast toast = Toast.makeText(context, R.string.only_this_with_same_question, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        });
+        viewHolder.same_answer.setOnClickListener(view -> {
+            if ( databaseOperations.moreThanOneQuestionSameAnswer(field_id, answer) ) {
+                final Intent intent = new Intent(context,
+                        SearchActivity.class);
+                // add query to the Intent Extras
+                intent.setAction(Intent.ACTION_SEARCH);
+                intent.putExtra(SearchManager.QUERY, answer);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_ANSWER);
+                context.startActivity(intent);
+            } else {
+                Toast toast = Toast.makeText(context, R.string.only_this_with_same_answer, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }

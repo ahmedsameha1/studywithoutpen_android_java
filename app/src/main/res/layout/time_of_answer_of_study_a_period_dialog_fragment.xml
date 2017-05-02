@@ -25,23 +25,78 @@
             android:weightSum="15">
 
             <EditText
-                android:id="@+id/time_of_answer"
+                android:id="@+id/letter_second_reading_question"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="14"
                 android:gravity="center"
-                android:hint="@string/enter_the_time_of_answer"
+                android:hint="@string/reading_rate_x_letter_second"
                 android:imeOptions="flagNoExtractUi"
                 android:inputType="number" />
 
 
             <ImageButton
-                android:id="@+id/time_of_answer_help"
-                android:layout_width="wrap_content"
+                android:id="@+id/letter_second_reading_question_help"
+                android:layout_width="66dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_weight="1"
-                android:src="@drawable/ic_help_black_24dp" />
+                android:src="@drawable/ic_help_black_24dp"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:gravity="center"
+            android:padding="2dp"
+            android:weightSum="15">
+
+            <EditText
+                android:id="@+id/time_of_finding_answer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="14"
+                android:gravity="center"
+                android:hint="@string/time_to_find_the_answer"
+                android:imeOptions="flagNoExtractUi"
+                android:inputType="number" />
+
+
+            <ImageButton
+                android:id="@+id/time_of_finding_answer_help"
+                android:layout_width="66dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_help_black_24dp"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:gravity="center"
+            android:padding="2dp"
+            android:weightSum="15">
+
+            <EditText
+                android:id="@+id/letter_second_typing_answer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="14"
+                android:gravity="center"
+                android:hint="@string/typing_rate_x_letter_second"
+                android:imeOptions="flagNoExtractUi"
+                android:inputType="number" />
+
+
+            <ImageButton
+                android:id="@+id/letter_second_typing_answer_help"
+                android:layout_width="66dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_help_black_24dp"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
         </LinearLayout>
 
         <CheckBox

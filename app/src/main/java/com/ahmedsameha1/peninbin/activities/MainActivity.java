@@ -332,6 +332,10 @@ public class MainActivity extends AppCompatActivity implements
                                 Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_success), Toast.LENGTH_LONG);
                                 toast1.setGravity(Gravity.TOP, 0, 400);
                                 toast1.show();
+                                mTracker.send(new HitBuilders.EventBuilder()
+                                        .setCategory(ANALYTICS_CATEGORY)
+                                        .setAction(ActivityUtility.getVersionCode(this) + "somebody has just completed a subscription")
+                                        .build());
                             } else {
                                 Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
                                 toast1.setGravity(Gravity.TOP, 0, 400);
@@ -484,9 +488,15 @@ public class MainActivity extends AppCompatActivity implements
                         toast.show();
                     }
                 } else {
-                    Toast toast = Toast.makeText(this, R.string.already_subscribed, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
+                    if ( Money.isInEgypt(this) ) {
+                        Toast toast = Toast.makeText(this, R.string.Egypt_sim, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.already_subscribed, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
                 }
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(Money.MONEY)

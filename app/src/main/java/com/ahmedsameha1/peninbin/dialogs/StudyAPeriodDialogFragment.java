@@ -1,5 +1,6 @@
 package com.ahmedsameha1.peninbin.dialogs;
 
+import android.app.AlarmManager;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,10 +29,8 @@ import java.util.Date;
 /**
  * Created by ahmed on 9/23/2015.
  */
-public class StudyDuringDialogFragment extends DialogFragment {
+public class StudyAPeriodDialogFragment extends DialogFragment {
     public static final String SHOW_STUDY_DURING_DIALOG_FRAGMENT = "showStudyDuringDialogFragment";
-    public static final int MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
-    public static final int MILLISECONDS_IN_HOUR = 60 * 60 * 1000;
     private long current_field_id;
     private boolean from_notification;
 
@@ -139,7 +138,7 @@ public class StudyDuringDialogFragment extends DialogFragment {
                 }
             });
             positive.setOnClickListener(view -> {
-                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity())) {
+                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity()) ) {
                 try {
                     String trys_suffix = " " + getActivity().getString(R.string._try);
                     String day_suffix = " " + getActivity().getString(R.string._day);
@@ -158,7 +157,7 @@ public class StudyDuringDialogFragment extends DialogFragment {
                                 if ( hour_string.length() > 0) {
                                     hour = Integer.parseInt(hour_string.substring(0,hour_string.length() - hour_suffix.length()));
                                 }
-                                long duration = ( day * ( (long) MILLISECONDS_IN_DAY) ) + ( hour * ( (long) MILLISECONDS_IN_HOUR) );
+                                long duration = ( day * AlarmManager.INTERVAL_DAY) + ( hour * AlarmManager.INTERVAL_HOUR );
                                 long nowInMilliseconds = System.currentTimeMillis();
                                 long startingTime = nowInMilliseconds - duration;
                                 Intent intent = new Intent(getActivity(),StudyAPeriodActivity.class);

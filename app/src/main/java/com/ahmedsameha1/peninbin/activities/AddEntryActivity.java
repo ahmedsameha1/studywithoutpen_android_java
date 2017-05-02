@@ -1,8 +1,10 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.app.LoaderManager;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -81,9 +83,10 @@ public class AddEntryActivity extends AppCompatActivity implements
     private int question_data_type;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
-    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
+    private Handler mHandler = new Handler();
+
 
 
 
@@ -92,9 +95,21 @@ public class AddEntryActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_entry);
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
-        fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, true);
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         databaseOperations = new DatabaseReadOperations(this);
+        fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, false);
+        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
+        if (current_field_id == 0) {
+            Cursor cursor = databaseOperations.getFieldList();
+            if (cursor.moveToFirst()) {
+                current_field_id = cursor.getLong(0);
+            } else {
+                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.please_create_field, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                finish();
+                return;
+            }
+        }
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
@@ -116,25 +131,24 @@ public class AddEntryActivity extends AppCompatActivity implements
         container = (LinearLayout) findViewById(R.id.container);
         final CardView show_actionbar_cardview = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView add_entry_cardview = (CardView) findViewById(R.id.add_entry_card_view);
-        timer = (Chronometer)findViewById(R.id.chronometer);
+        timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR) {
             getSupportActionBar().hide();
         }
         actionBarShown = getSupportActionBar().isShowing();
-        loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+        LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if ( id == GET_FIELDS_LOADER_ID ) {
+                if (id == GET_FIELDS_LOADER_ID) {
                     return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this,
                             "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
                                     + " FROM " + Contract.Field.TABLE_NAME
                                     + " ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                             null);
-                } else if ( id == GET_SPECIAL_TEXT_ID ){
+                } else if (id == GET_SPECIAL_TEXT_ID) {
                     return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
                             + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
                             + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
@@ -147,11 +161,11 @@ public class AddEntryActivity extends AppCompatActivity implements
 
             @Override
             public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-                if ( loader.getId() == GET_FIELDS_LOADER_ID ) {
+                if (loader.getId() == GET_FIELDS_LOADER_ID) {
                     simple_cursor_adapter.swapCursor(data);
                     cursor = data;
                     setSpinnerPosition(current_field_id);
-                } else if ( loader.getId() == GET_SPECIAL_TEXT_ID ) {
+                } else if (loader.getId() == GET_SPECIAL_TEXT_ID) {
                     if (symbol == null && customable_text == null) {
                         symbol = new String[data.getCount()];
                         customable_text = new String[data.getCount()];
@@ -167,7 +181,7 @@ public class AddEntryActivity extends AppCompatActivity implements
 
             @Override
             public void onLoaderReset(android.content.Loader<Cursor> loader) {
-                if ( loader.getId() == GET_FIELDS_LOADER_ID ) {
+                if (loader.getId() == GET_FIELDS_LOADER_ID) {
                     simple_cursor_adapter.swapCursor(null);
                 }
             }
@@ -198,14 +212,28 @@ public class AddEntryActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        add_entry.setOnClickListener( view -> {
-                add_entry_cardview.startAnimation(animAlpha);
-                String question = enter_question.getText().toString();
-                String answer = enter_answer.getText().toString();
+        add_entry.setOnClickListener(view -> {
+            add_entry_cardview.startAnimation(animAlpha);
+            String question = enter_question.getText().toString();
+            String answer = enter_answer.getText().toString();
             int order = "".equals(enter_order.getText().toString()) ? -1 : Integer.parseInt(enter_order.getText().toString());
-                if (question.length() > 0 && answer.length() > 0) {
-                    if (fromFieldActivity) {
+            if (question.length() > 0 && answer.length() > 0) {
+                if (fromFieldActivity) {
 
+                    if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                        mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                    } else {
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+
+                    enter_question.setText("");
+                    enter_answer.setText("");
+                    enter_order.setText("");
+                } else {
+                    if (field_chosen) {
                         if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
                             mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
                                     current_field_id, rank_spinner.getSelectedItemPosition(), order);
@@ -219,30 +247,16 @@ public class AddEntryActivity extends AppCompatActivity implements
                         enter_answer.setText("");
                         enter_order.setText("");
                     } else {
-                        if (field_chosen) {
-                            if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
-                                mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
-                                        current_field_id, rank_spinner.getSelectedItemPosition(), order);
-                            } else {
-                                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
-                            }
-
-                            enter_question.setText("");
-                            enter_answer.setText("");
-                            enter_order.setText("");
-                        } else {
-                            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
-                        }
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                     }
-                } else {
-                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
                 }
+            } else {
+                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
         });
 
         field_spinner.setOnTouchListener((v, event) -> {
@@ -264,19 +278,19 @@ public class AddEntryActivity extends AppCompatActivity implements
             }
         });
 
-        showActionbar.setOnClickListener( view -> {
-                show_actionbar_cardview.startAnimation(animAlpha);
-                if (actionBarShown) {
-                    getSupportActionBar().hide();
-                    actionBarShown = (!actionBarShown);
-                    showActionbar.setText(R.string.show);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
-                } else {
-                    getSupportActionBar().show();
-                    actionBarShown = (!actionBarShown);
-                    showActionbar.setText(R.string.hide);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
-                }
+        showActionbar.setOnClickListener(view -> {
+            show_actionbar_cardview.startAnimation(animAlpha);
+            if (actionBarShown) {
+                getSupportActionBar().hide();
+                actionBarShown = (!actionBarShown);
+                showActionbar.setText(R.string.show);
+                mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+            } else {
+                getSupportActionBar().show();
+                actionBarShown = (!actionBarShown);
+                showActionbar.setText(R.string.hide);
+                mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+            }
         });
 /*        enter_question.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -343,6 +357,13 @@ public class AddEntryActivity extends AppCompatActivity implements
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enter_question.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enter_question.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                            questionLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                            Runnable mRunnable = () -> {
+                                questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                            };
+                            mHandler.postDelayed(mRunnable, 50);
                         }
                     }
                 }
@@ -370,12 +391,29 @@ public class AddEntryActivity extends AppCompatActivity implements
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enter_answer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enter_answer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                            questionLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                            Runnable mRunnable = () -> {
+                                questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                            };
+                            mHandler.postDelayed(mRunnable, 50);
                         }
                     }
                 }
             }
         });
-
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if (sharedText != null) {
+                    enter_question.setText(sharedText);
+                }
+            }
+        }
     }
 
     private void setHints(int fieldType) {
@@ -387,16 +425,37 @@ public class AddEntryActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        timer.setBase( SystemClock.elapsedRealtime() - lastPause);
+        timer.setBase(SystemClock.elapsedRealtime() - lastPause);
         timer.start();
-        mTracker.setScreenName( ActivityUtility.getVersionCode(this) + SCREEN_NAME);
+        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
+
     @Override
     protected void onPause() {
         lastPause = SystemClock.elapsedRealtime() - timer.getBase();
         timer.stop();
         super.onPause();
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if (sharedText != null) {
+                    if ( enter_question.getText().length() == 0 && enter_question.getText().length() == 0 )  {
+                        enter_question.setText(sharedText);
+                    } else if ( enter_question.getText().length() == 0 ) {
+                        enter_question.setText(sharedText);
+                    } else if ( enter_answer.getText().length() == 0 ) {
+                        enter_answer.setText(sharedText);
+                    }
+                }
+            }
+        }
     }
     @Override
     protected void onStop() {
@@ -450,7 +509,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         savedInstanceState.putLong(CURRENT_FIELD_ID, current_field_id);
         savedInstanceState.putBoolean(FIELD_CHOSEN, field_chosen);
         savedInstanceState.putInt(SPINNER_POSITION, field_spinner.getSelectedItemPosition());
-        savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
+        savedInstanceState.putLong(TIMER_LAST_PAUSE, lastPause);
         savedInstanceState.putStringArray(SYMBOL, symbol);
         savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         saveUserLayoutChanges(savedInstanceState);

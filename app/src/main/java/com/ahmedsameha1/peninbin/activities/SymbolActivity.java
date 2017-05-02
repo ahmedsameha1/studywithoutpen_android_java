@@ -96,6 +96,7 @@ public class SymbolActivity extends AppCompatActivity implements
             final TextView symbol_textview;
             final EditText customable_text_edittext;
             final ImageButton save;
+            ImageButton delete = (ImageButton) view.findViewById(R.id.delete);
             symbol_textview = (TextView) view.findViewById(R.id.symbol);
             customable_text_edittext = (EditText) view.findViewById(R.id.user_customized_string);
             save = (ImageButton) view.findViewById(R.id.save);
@@ -111,6 +112,10 @@ public class SymbolActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP,0,400);
                     toast.show();
                 }
+            });
+            delete.setOnClickListener(v -> {
+                customable_text_edittext.setText("");
+                mySQLiteCursorLoader.updateCustomableText(symbol_customable_text_id, null);
             });
             customable_text_edittext.addTextChangedListener(new TextWatcher() {
                 @Override

@@ -160,7 +160,8 @@
                         android:imeOptions="flagNoExtractUi"
                         android:scrollHorizontally="true"
                         android:inputType="number"
-                        android:hint="@string/order" />
+                        android:hint="@string/order"
+                        android:background="@null"/>
 
                 </android.support.v7.widget.CardView>
             <android.support.v7.widget.CardView

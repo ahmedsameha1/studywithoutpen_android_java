@@ -29,7 +29,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:src="@drawable/ic_help_black_24dp" />
+                android:src="@drawable/ic_help_black_24dp"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
         </LinearLayout>
 
         <LinearLayout
@@ -52,7 +53,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:src="@drawable/ic_help_black_24dp" />
+                android:src="@drawable/ic_help_black_24dp"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

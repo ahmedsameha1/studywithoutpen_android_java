@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.content.WakefulBroadcastReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -49,7 +50,7 @@ public class RandomQuickTestsSchedulingService extends IntentService {
         scheduleRandomQuickTest();
         tryRefreshingAppUsage();
 //        reorderEmulatedFields();
-        SimpleWakefulReceiver.completeWakefulIntent(workIntent);
+        WakefulBroadcastReceiver.completeWakefulIntent(workIntent);
         Log.i("service:", "service end");
     }
 

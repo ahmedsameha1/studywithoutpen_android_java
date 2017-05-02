@@ -42,12 +42,12 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -65,10 +65,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener,
         TimeOfAnswerOfStudyAPeriodDialogFragment.Contact,
-        ActivityUtility.ActivityTimers {
+        ActivityUtility.ActivityTimers,
+        ObfuscateQuestionDialogFragment.ObfuscateText {
     public static final String SCREEN_NAME = "StudyAPeriodActivity";
     public static final String REPEATED_ENTRIES = "repeatedEntries";
-    public static final String LAST_SESSION_OR_NEW_ONE = "lastSessionOrNewOne";
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
@@ -95,7 +95,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     public static final String TIME_BETWEEN_ANSWERS_PASSED = "time_between_answers_passed";
     private static final String HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER = "how_much_time_remaining_from_time_for_answer";
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
-    boolean boolean_continue, actionBarShown, is_time_of_answer_elapsed = false;
+    boolean actionBarShown, is_time_of_answer_elapsed = false;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private ArrayList<Integer> repeatedEntries = new ArrayList<Integer>();
     private ArrayList<String> hints;
@@ -125,13 +125,12 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private String[] symbol, customable_text;
     private int current_field_type;
     private boolean isStartingFirstTime, is_starting_after_destruction;
-    private int time_of_answer;
-    private long time_of_starting_time_of_answer = -1, effictive_time_of_answer;
+    private int time_of_answer, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
+    private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
     private ArrayList<WrongItem> wrongItemArrayList;
-
     private int question_data_type;
-
+    private boolean obfuscate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,8 +144,12 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         databaseOperations = new DatabaseReadOperations(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
-        time_of_answer = databaseOperations.getTimeOfAnswerOfStudyAPeroid(current_field_id);
-        time_of_answer_saved = time_of_answer > 0;
+        obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
+        int [] time_of_answer_data = databaseOperations.getTimeOfAnswerOfStudyAPeriod(current_field_id);
+        reading_question_letter_second = time_of_answer_data[0];
+        find_answer_time = time_of_answer_data[1];
+        typing_answer_letter_second = time_of_answer_data[2];
+        time_of_answer_saved = reading_question_letter_second > 0 && find_answer_time > 0 && typing_answer_letter_second > 0;
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
         check_type = databaseOperations.getFieldCheckType(current_field_id);
@@ -214,12 +217,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             content.setVisibility(View.GONE);
             mShortAnimationDuration = getResources().getInteger(
                     android.R.integer.config_shortAnimTime);
-            lastPause = databaseOperations.getElapsedPausedSessionTime(current_field_id, Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD);
             isStartingFirstTime = true;
         } else {
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
             mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
-            lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
         }
         // getting the reference of the fragment that holds the reference of list for test array
         retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
@@ -257,8 +258,16 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 getBundleExtra(WrongAnswersActivity.WRONG_ITEM_LIST)
                 .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);
         questionsNumber = wrongItemArrayList.size();
-        showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
-        ifMoreThanOnce();
+        Collections.shuffle(wrongItemArrayList);
+        if ( obfuscate ) {
+            showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
+        } else {
+            showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+        }
+        time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
+                wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
+                reading_question_letter_second,find_answer_time, typing_answer_letter_second);
+            ifMoreThanOnce();
         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
         showTries.setText(Integer.toString(triesCounter + 1));
         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
@@ -269,7 +278,11 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             check_card_view.startAnimation(animAlpha);
             result = checkAnAnswer();
             if (triesCounter < permitedTriesNumber && !result) {
-                showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
+                if ( obfuscate ) {
+                    showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
+                } else {
+                    showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+                }
                 showTries.setText(Integer.toString(triesCounter + 1));
             } else if (!result) {
                 enterAnswer.setText(wrongItemArrayList.get(currentQuestionCounter).getAnswer());
@@ -291,7 +304,14 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         wrongItemArrayList = prepareListForStudySecondAndMore(repeatedEntries);
                         questionsNumber = wrongItemArrayList.size();
                         repeatedEntries.clear();
-                        showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
+                        if ( obfuscate ) {
+                            showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
+                        } else {
+                            showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+                        }
+                        time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
+                                wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
+                                reading_question_letter_second,find_answer_time, typing_answer_letter_second);
                         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                         ifMoreThanOnce();
@@ -299,8 +319,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         time_of_starting_time_of_answer = -1;
                         scheduleWhatToDoAfterTimeOfAnswerElapsed();
                     } else {
-                        cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, question_data_type);
-                        cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
                         if (tts_available) {
                             new AsyncTask<Void, Void, Void>() {
 
@@ -322,7 +340,14 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         }
                     }
                 } else {
-                    showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
+                    if ( obfuscate ) {
+                        showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
+                    } else {
+                        showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+                    }
+                    time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
+                            wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
+                            reading_question_letter_second,find_answer_time, typing_answer_letter_second);
                     showTries.setText(Integer.toString(triesCounter + 1));
                     ifMoreThanOnce();
                     remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -381,6 +406,13 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                            show_result_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            show_result_linearlayout.setPadding(0, 0, 0, 0);
+                            Runnable mRunnable = () -> {
+                                show_result_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                            };
+                            mHandler.postDelayed(mRunnable, 50);
                         }
                     }
                 }
@@ -515,12 +547,21 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             case R.id.time_of_answer:
                 Bundle bundle2 = new Bundle();
                 bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                bundle2.putInt(TimeOfAnswerOfStudyAPeriodDialogFragment.CURRENT_TIME_OF_ANSWER, time_of_answer);
+                bundle2.putInt(TimeOfAnswerOfStudyAPeriodDialogFragment.READING_QUESTION_LETTER_SECOND, reading_question_letter_second);
+                bundle2.putInt(TimeOfAnswerOfStudyAPeriodDialogFragment.FIND_ANSWER_TIME, find_answer_time);
+                bundle2.putInt(TimeOfAnswerOfStudyAPeriodDialogFragment.TYPING_ANSWER_LETTER_SECOND, typing_answer_letter_second);
                 bundle2.putBoolean(TimeOfAnswerOfStudyAPeriodDialogFragment.TIME_OF_ANSWER_SAVED, time_of_answer_saved);
                 TimeOfAnswerOfStudyAPeriodDialogFragment timeOfAnswerOfStudyAPeriodDialogFragment = new TimeOfAnswerOfStudyAPeriodDialogFragment();
                 timeOfAnswerOfStudyAPeriodDialogFragment.setArguments(bundle2);
                 timeOfAnswerOfStudyAPeriodDialogFragment.show(getSupportFragmentManager(), timeOfAnswerOfStudyAPeriodDialogFragment.getClass().getName());
                 return true;
+
+            case R.id.obfuscate_question:
+                Bundle bundle3 = new Bundle();
+                bundle3.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                ObfuscateQuestionDialogFragment obfuscateQuestionDialogFragment = new ObfuscateQuestionDialogFragment();
+                obfuscateQuestionDialogFragment.setArguments(bundle3);
+                obfuscateQuestionDialogFragment.show(getSupportFragmentManager(), ObfuscateQuestionDialogFragment.OBFUSCATE_QUESTION_DIALOG_FRAGMENT);
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -540,19 +581,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
          or before the activity destroyed due a change of configuration*/
         mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
         retainedFragment.setWrongItemArrayList_ask_again_after_test_activity(wrongItemArrayList);
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
-            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-            cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                    Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD, lastPause);
-        } else {
-            cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                    Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD, Constants.ElapsedPausedSessionTime.NOT_USED);
-        }
     }
 
 
@@ -605,7 +633,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
-                if (!repeatedEntries.contains(Integer.valueOf(currentQuestionCounter))) {
+                if (!repeatedEntries.contains(currentQuestionCounter)) {
                     repeatedEntries.add(currentQuestionCounter);
                 }
             }
@@ -632,7 +660,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
-                if (!repeatedEntries.contains(Integer.valueOf(currentQuestionCounter))) {
+                if (!repeatedEntries.contains(currentQuestionCounter)) {
                     repeatedEntries.add(currentQuestionCounter);
                 }
             }
@@ -659,7 +687,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
-                if (!repeatedEntries.contains(Integer.valueOf(currentQuestionCounter))) {
+                if (!repeatedEntries.contains(currentQuestionCounter)) {
                     repeatedEntries.add(currentQuestionCounter);
                 }
             }
@@ -686,7 +714,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
-                if (!repeatedEntries.contains(Integer.valueOf(currentQuestionCounter))) {
+                if (!repeatedEntries.contains(currentQuestionCounter)) {
                     repeatedEntries.add(currentQuestionCounter);
                 }
             }
@@ -719,11 +747,11 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         * or when the user go away from the activity */
         if (time_of_starting_time_of_answer > -1) {
             savedInstanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER,
-                    effictive_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
+                    effective_time_of_answer - (System.currentTimeMillis() - time_of_starting_time_of_answer));
         }
                      /* To run scheduleWhatToDoAfterTimeOfAnswerElapsed() method after restarting the activity
         in case the activity destroyed while a dialog is shown */
-        else if (ActivityUtility.hasOpenedDialogs(this)) {
+        else if (ActivityUtility.hasOpenedDialogs(this) && time_of_answer > 0 ) {
             savedInstanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000);
         }
         // call this method to prevent the dialogs from being shown after the recreation of the activity
@@ -751,7 +779,11 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
         is_starting_after_destruction = true;
         restoreUserLayoutChanges(savedInstanceState);
-        showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion()));
+        if ( obfuscate ) {
+            showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
+        } else {
+            showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+        }
         showTries.setText(Integer.toString(triesCounter + 1));
         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
@@ -769,8 +801,8 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             if (how_much_time_remaining_time_for_answer <= 0) {
                 DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
             } else {
-                effictive_time_of_answer = how_much_time_remaining_time_for_answer;
-                mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
+                effective_time_of_answer = how_much_time_remaining_time_for_answer;
+                mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effective_time_of_answer);
                 time_of_starting_time_of_answer = System.currentTimeMillis();
             }
         }
@@ -861,9 +893,14 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setTimeOfAnswer(int time_of_answer, boolean time_for_answer_saved) {
-        this.time_of_answer = time_of_answer;
+    public void setTimeOfAnswer(int reading_question_letter_second, int find_answer_time, int typing_answer_letter_second, boolean time_for_answer_saved) {
+        this.reading_question_letter_second = reading_question_letter_second;
+        this.find_answer_time = find_answer_time;
+        this.typing_answer_letter_second = typing_answer_letter_second;
         this.time_of_answer_saved = time_for_answer_saved;
+        time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
+                wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
+                reading_question_letter_second,find_answer_time, typing_answer_letter_second);
         scheduleWhatToDoAfterTimeOfAnswerElapsed();
     }
 
@@ -896,19 +933,22 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
 
     private void scheduleWhatToDoAfterTimeOfAnswerElapsed() {
         if (time_of_answer > 0) {
-            effictive_time_of_answer = time_of_answer * 1000;
-            mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effictive_time_of_answer);
+            effective_time_of_answer = time_of_answer * 1000;
+            mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effective_time_of_answer);
             time_of_starting_time_of_answer = System.currentTimeMillis();
         }
     }
 
     private void dontKnow() {
-        enterAnswer.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getAnswer()));
+        enterAnswer.setText(wrongItemArrayList.get(currentQuestionCounter).getAnswer());
         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
         showTries.setText(Integer.toString(triesCounter + 1));
         check.setEnabled(false);
         _continue.setEnabled(true);
         enterAnswer.setEnabled(false);
+        if (!repeatedEntries.contains(currentQuestionCounter)) {
+            repeatedEntries.add(currentQuestionCounter);
+        }
     }
 
     private void crossfade() {
@@ -937,5 +977,14 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         mLoadingView.setVisibility(View.GONE);
                     }
                 });
+    }
+    @Override
+    public void obfuscateText(boolean obfuscate) {
+        this.obfuscate = obfuscate;
+        if ( obfuscate ) {
+            showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
+        } else {
+            showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+        }
     }
 }

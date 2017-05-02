@@ -118,11 +118,8 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                     : getResources().getString(R.string.enable_emulation));
             final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.check_type));
-            String[] field_type_names = getResources().getStringArray(R.array.field_type);
-            List<String> list = new ArrayList<String>(Arrays.asList(field_type_names));
-            String[] allowed_field_types = list.toArray(new String[0]);
             final ArrayAdapter<String> field_type_adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_spinner_item, allowed_field_types);
+                    android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.field_type));
             check_type_adapter.setDropDownViewResource
                     (android.R.layout.simple_spinner_dropdown_item);
             field_type_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -130,14 +127,8 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
             select_field_type.setAdapter(field_type_adapter);
             select_check_type.setSelection(check_type);
             final int effective_field_type;
-            if (field_type == 0) {
-                select_field_type.setSelection(field_type);
-                effective_field_type = 0;
-            } else {
-                select_field_type.setSelection(field_type - 1);
-                effective_field_type = field_type - 1;
-            }
-
+            select_field_type.setSelection(field_type);
+            effective_field_type = 0;
             final SpinnerWithHintAdapter spinnerWithHintAdapter =
                     new SpinnerWithHintAdapter(getActivity(), android.R.layout.simple_spinner_item, locale_display_names);
 
@@ -229,13 +220,8 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                             }
                         }
                         if (select_field_type.getSelectedItemPosition() != effective_field_type) {
-                            if (select_field_type.getSelectedItemPosition() == 0) {
                                 cursorLoaderAndUpdateDatabase.updateFieldType(current_field_id,
                                         select_field_type.getSelectedItemPosition());
-                            } else {
-                                cursorLoaderAndUpdateDatabase.updateFieldType(current_field_id,
-                                        select_field_type.getSelectedItemPosition() + 1);
-                            }
                         }
                         cursorLoaderAndUpdateDatabase.updateFieldCheckType(current_field_id, select_check_type.getSelectedItemPosition());
                         cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id, read_answer.isChecked());

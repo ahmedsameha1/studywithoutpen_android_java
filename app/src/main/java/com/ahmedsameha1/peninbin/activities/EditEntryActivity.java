@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -75,6 +76,7 @@ public class EditEntryActivity extends AppCompatActivity implements
     private String[] symbol, customable_text;
     private int current_field_type;
     private int order;
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -289,6 +291,13 @@ public class EditEntryActivity extends AppCompatActivity implements
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             editQuestion.setText(text.replaceAll(customable_text[i], symbol[i]));
                             editQuestion.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                            questionLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                            Runnable mRunnable = () -> {
+                                questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                            };
+                            mHandler.postDelayed(mRunnable, 50);
                         }
                     }
                 }
@@ -316,6 +325,13 @@ public class EditEntryActivity extends AppCompatActivity implements
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             editAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             editAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
+                            questionLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                            Runnable mRunnable = () -> {
+                                questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                            };
+                            mHandler.postDelayed(mRunnable, 50);
                         }
                     }
                 }

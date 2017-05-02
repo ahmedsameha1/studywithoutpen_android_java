@@ -18,7 +18,7 @@ import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyAPeriodDia
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.QuickTestDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.StudyDuringDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.StudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
@@ -125,7 +125,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                                 fragment2.setArguments(bundle);
                                 fragment2.show(getSupportFragmentManager(), FieldActivity.CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
                             } else {
-                                StudyDuringDialogFragment fragment2 = new StudyDuringDialogFragment();
+                                StudyAPeriodDialogFragment fragment2 = new StudyAPeriodDialogFragment();
                                 fragment2.setArguments(bundle);
                                 fragment2.show(getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
                             }

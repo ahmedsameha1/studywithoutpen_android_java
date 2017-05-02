@@ -19,9 +19,9 @@
 
         <ImageButton
             android:id="@+id/obfuscate_question_help"
-            android:layout_width="wrap_content"
+            android:layout_width="66dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:src="@drawable/ic_help_black_24dp" />
+            android:src="@drawable/ic_help_black_24dp"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
     </LinearLayout>
 </LinearLayout>

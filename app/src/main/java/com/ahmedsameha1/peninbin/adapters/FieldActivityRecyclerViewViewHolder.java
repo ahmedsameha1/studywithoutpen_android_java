@@ -18,7 +18,8 @@ public class FieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder
     public TextView wrong_answer_count;
     public Button edit;
     public Button delete;
-    public Button like;
+    public Button same_question;
+    public Button same_answer;
     public String currentQuestion;
     public String currentAnswer;
     public LinearLayout toolbar;
@@ -35,7 +36,8 @@ public class FieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder
         wrong_answer_count = (TextView) view.findViewById(R.id.wrong_answer_count);
         edit = (Button) view.findViewById(R.id.edit);
         delete = (Button) view.findViewById(R.id.delete);
-        like = (Button) view.findViewById(R.id.same_question);
+        same_question = (Button) view.findViewById(R.id.same_question);
+        same_answer = (Button) view.findViewById(R.id.same_answer);
         toolbar = (LinearLayout) view.findViewById(R.id.field_recyclerview_item_actions);
         view.setOnLongClickListener(this);
         view.setOnClickListener(this);

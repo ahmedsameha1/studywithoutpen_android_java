@@ -135,7 +135,8 @@
             android:layout_weight="9"
             android:hint="@string/enter_tries_number"
             android:imeOptions="flagNoExtractUi"
-            android:inputType="number" />
+            android:inputType="number"
+            android:gravity="center"/>
 
         <ImageButton
             android:id="@+id/number_of_tries_help"
@@ -143,7 +144,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
 
-            android:src="@drawable/ic_help_black_24dp" />
+            android:src="@drawable/ic_help_black_24dp"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
     </LinearLayout>
 
 
@@ -165,7 +167,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/ic_help_black_24dp" />
+            android:src="@drawable/ic_help_black_24dp"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
 
     </LinearLayout>
 
@@ -175,7 +178,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="9"
         android:imeOptions="flagNoExtractUi"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:gravity="center"/>
 
 
 </LinearLayout>

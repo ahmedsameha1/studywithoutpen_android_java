@@ -42,17 +42,23 @@ import com.google.android.gms.analytics.Tracker;
 public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
     public static final String CURRENT_TIME_OF_ANSWER = "current_time_of_answer";
     public static final String TIME_OF_ANSWER_SAVED = "time_of_answer_saved";
+    public static final String READING_QUESTION_LETTER_SECOND = "reading_question_letter_second";
+    public static final String FIND_ANSWER_TIME = "find_answer_time";
+    public static final String TYPING_ANSWER_LETTER_SECOND = "typing_answer_letter_second";
 
     private long current_field_id;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
-    private int current_time_of_answer;
     private boolean time_of_answer_saved;
     private Tracker mTracker;
+    private int reading_question_letter_second, find_answer_time, typing_answer_letter_second;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
-        current_time_of_answer = getArguments().getInt(CURRENT_TIME_OF_ANSWER);
+        reading_question_letter_second = getArguments().getInt(READING_QUESTION_LETTER_SECOND);
+        find_answer_time = getArguments().getInt(FIND_ANSWER_TIME);
+        typing_answer_letter_second = getArguments().getInt(TYPING_ANSWER_LETTER_SECOND);
         time_of_answer_saved = getArguments().getBoolean(TIME_OF_ANSWER_SAVED);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
@@ -72,12 +78,43 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
                 .setView(inflater.inflate(R.layout.time_of_answer_of_study_a_period_dialog_fragment, null))
                 .setPositiveButton(R.string.ok,null).create();
         alertDialog.setOnShowListener(dialog -> {
-            final ImageButton time_of_answer_help_help = (ImageButton) alertDialog.findViewById(R.id.time_of_answer_help);
-            final EditText enter_time_of_answer = (EditText) alertDialog.findViewById(R.id.time_of_answer);
+            final ImageButton letter_second_reading_question_help = (ImageButton) alertDialog.findViewById(R.id.letter_second_reading_question_help);
+            final ImageButton time_of_finding_answer_help = (ImageButton) alertDialog.findViewById(R.id.time_of_finding_answer_help);
+            final ImageButton letter_second_typing_answer_help = (ImageButton) alertDialog.findViewById(R.id.letter_second_typing_answer_help);
+            final EditText letter_second_reading_question = (EditText) alertDialog.findViewById(R.id.letter_second_reading_question);
+            final EditText time_of_finding_answer = (EditText) alertDialog.findViewById(R.id.time_of_finding_answer);
+            final EditText letter_second_typing_answer = (EditText) alertDialog.findViewById(R.id.letter_second_typing_answer);
             final CheckBox save = (CheckBox) alertDialog.findViewById(R.id.save);
             final CheckBox set_time_of_answer = (CheckBox) alertDialog.findViewById(R.id.set_time_of_answer);
             Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            enter_time_of_answer.addTextChangedListener(new TextWatcher() {
+            letter_second_reading_question.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    String entered_string = editable.toString();
+                    String prefix = getActivity().getString(R.string.reading_prefix);
+                    String reg_string = getActivity().getString(R.string.reg_reading_per_letter_second);
+                    if ("".equals(entered_string) || entered_string.matches(reg_string)) {
+
+                    } else if (entered_string.equals(String.valueOf(0)) || !entered_string.matches("[0-9]+")) {
+                        letter_second_reading_question.setText("");
+                    } else {
+                        String formatted_string = getActivity().getString(R.string.format_reading_per_letter_second, entered_string);
+                        letter_second_reading_question.setText(formatted_string);
+                        letter_second_reading_question.setSelection(prefix.length() + entered_string.length());
+                    }
+                }
+            });
+            time_of_finding_answer.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -91,36 +128,75 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
                 @Override
                 public void afterTextChanged(Editable editable) {
                     String string = editable.toString();
-                    String suffix = " " + getActivity().getString(R.string.second);
-                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+                    String suffix = getActivity().getString(R.string.find_answer_suffix);
+                    if ("".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix)) {
 
-                    } else if ( string.equals(String.valueOf(0)) || !string.matches("[0-9]+") ) {
-                        enter_time_of_answer.setText("");
+                    } else if (string.equals(String.valueOf(0)) || !string.matches("[0-9]+")) {
+                        time_of_finding_answer.setText("");
                     } else {
-                        string = string + suffix;
-                        enter_time_of_answer.setText(string);
-                        enter_time_of_answer.setSelection(string.length() - suffix.length());
+                        time_of_finding_answer.setText(string + suffix);
+                        time_of_finding_answer.setSelection(string.length());
                     }
                 }
             });
-            if ( current_time_of_answer > Constants.TimeOfAnswer.NOT_USED ) {
+            letter_second_typing_answer.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    String entered_string = editable.toString();
+                    String prefix = getActivity().getString(R.string.typing_prefix);
+                    String reg_string = getActivity().getString(R.string.reg_typing_per_letter_second);
+                    if ("".equals(entered_string) || entered_string.matches(reg_string)) {
+
+                    } else if (entered_string.equals(String.valueOf(0)) || !entered_string.matches("[0-9]+")) {
+                        letter_second_typing_answer.setText("");
+                    } else {
+                        String formatted_string = getActivity().getString(R.string.format_typing_per_letter_second, entered_string);
+                        letter_second_typing_answer.setText(formatted_string);
+                        letter_second_typing_answer.setSelection(prefix.length() + entered_string.length());
+                    }
+                }
+            });
+            if (reading_question_letter_second > Constants.TimeOfAnswer.NOT_USED && find_answer_time > Constants.TimeOfAnswer.NOT_USED
+                    && typing_answer_letter_second > Constants.TimeOfAnswer.NOT_USED) {
                 set_time_of_answer.setChecked(true);
-                enter_time_of_answer.setText(String.valueOf(current_time_of_answer));
+                letter_second_reading_question.setText(String.valueOf(reading_question_letter_second));
+                time_of_finding_answer.setText(String.valueOf(find_answer_time));
+                letter_second_typing_answer.setText(String.valueOf(typing_answer_letter_second));
                 save.setEnabled(true);
             } else {
                 set_time_of_answer.setChecked(false);
-                enter_time_of_answer.setEnabled(false);
-                enter_time_of_answer.setText("");
+                letter_second_reading_question.setEnabled(false);
+                letter_second_reading_question.setText("");
+                time_of_finding_answer.setEnabled(false);
+                time_of_finding_answer.setText("");
+                letter_second_typing_answer.setEnabled(false);
+                letter_second_typing_answer.setText("");
                 save.setEnabled(false);
             }
             set_time_of_answer.setOnCheckedChangeListener((compoundButton, checked) -> {
                 if ( checked ) {
-                    enter_time_of_answer.setEnabled(true);
-                    enter_time_of_answer.requestFocus();
+                    letter_second_reading_question.setEnabled(true);
+                    letter_second_reading_question.requestFocus();
+                    time_of_finding_answer.setEnabled(true);
+                    letter_second_typing_answer.setEnabled(true);
                     save.setEnabled(true);
                 } else {
-                    enter_time_of_answer.setEnabled(false);
-                    enter_time_of_answer.setText("");
+                    letter_second_reading_question.setEnabled(false);
+                    letter_second_reading_question.setText("");
+                    time_of_finding_answer.setEnabled(false);
+                    time_of_finding_answer.setText("");
+                    letter_second_typing_answer.setEnabled(false);
+                    letter_second_typing_answer.setText("");
                     save.setEnabled(false);
                 }
             });
@@ -137,17 +213,24 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
             positiveButton.setOnClickListener( view -> {
                     try {
                         if ( set_time_of_answer.isChecked() ) {
-                            String second_suffix = " " + getActivity().getString(R.string.second);
-                            String time_string = enter_time_of_answer.getText().toString();
-                            if ( time_string.length() > 0 ) {
-
-                                int number = Integer.parseInt(time_string.substring(0, time_string.length() - second_suffix.length()));
-                                if ( number > 0 ) {
-                                    ((Contact) getActivity()).setTimeOfAnswer(number, save.isChecked());
+                            String find_suffix = getActivity().getString(R.string.find_answer_suffix);
+                            String typing_prefix = getActivity().getString(R.string.typing_prefix);
+                            String reading_prefix = getActivity().getString(R.string.reading_prefix);
+                            String letter_per_second_suffix = getActivity().getString(R.string.letter_per_second_suffix);
+                            String reading = letter_second_reading_question.getText().toString();
+                            String find = time_of_finding_answer.getText().toString();
+                            String typing = letter_second_typing_answer.getText().toString();
+                            if (reading.length() > 0 && find.length() > 0 && typing.length() > 0) {
+                                int reading_number = Integer.parseInt(reading.substring(reading_prefix.length(), reading.indexOf(letter_per_second_suffix)));
+                                int find_number = Integer.parseInt(find.substring(0, find.length() - find_suffix.length()));
+                                int typing_number = Integer.parseInt(typing.substring(typing_prefix.length(), typing.indexOf(letter_per_second_suffix)));
+                                if (reading_number > 0 && find_number > 0 && typing_number > 0) {
+                                    ((Contact) getActivity()).setTimeOfAnswer(reading_number, find_number, typing_number, save.isChecked());
                                     if (save.isChecked()) {
-                                        cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyAPeriod(current_field_id,number);
+                                        cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyAPeriod(current_field_id,reading_number, find_number, typing_number);
                                     } else {
-                                        cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyAPeriod(current_field_id, Constants.TimeOfAnswer.NOT_USED);
+                                        cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyAPeriod(current_field_id,
+                                                Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED);
                                     }
                                     ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
                                     dismiss();
@@ -157,13 +240,15 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
                                             .build());
                                 }
                             } else {
-                                Toast toast = Toast.makeText(getActivity(), getString(R.string.enter_the_time_of_answer), Toast.LENGTH_SHORT);
+                                Toast toast = Toast.makeText(getActivity(), getString(R.string.missing_data), Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                             }
                         } else {
-                                cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyAPeriod(current_field_id, Constants.TimeOfAnswer.NOT_USED);
-                            ((Contact) getActivity()).setTimeOfAnswer(Constants.TimeOfAnswer.NOT_USED, save.isChecked());
+                                cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyAPeriod(current_field_id,
+                                        Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED);
+                            ((Contact) getActivity()).setTimeOfAnswer(Constants.TimeOfAnswer.NOT_USED,
+                                    Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED, save.isChecked());
                             ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
                             dismiss();
                         }
@@ -175,10 +260,20 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
                         e.printStackTrace();
                     }
             });
-            time_of_answer_help_help.setOnClickListener( view -> {
+            letter_second_reading_question_help.setOnClickListener( view -> {
                     AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
                     number_of_tries_help_dialog_builder
-                            .setMessage(R.string.enter_time_of_answer_help).create().show();
+                            .setMessage(R.string.reading_letter_second_help).create().show();
+            });
+            time_of_finding_answer_help.setOnClickListener(view -> {
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                number_of_tries_help_dialog_builder
+                        .setMessage(R.string.finding_answer_help).create().show();
+            });
+            letter_second_typing_answer_help.setOnClickListener(view -> {
+                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
+                number_of_tries_help_dialog_builder
+                        .setMessage(R.string.typing_letter_second_help).create().show();
             });
             ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(false);
         });
@@ -186,7 +281,7 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
         return alertDialog;
     }
     public interface Contact {
-        void setTimeOfAnswer(int time_of_answer, boolean saved);
+        void setTimeOfAnswer(int reading_letter_second, int find_time, int typing_letter_second, boolean saved);
     }
 
 }

@@ -17,6 +17,8 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.TextView;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -282,7 +284,7 @@ public class ActivityUtility {
                                           int rank_level, int wrongness_level, String date_string,
                                           CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase,
                                           long current_field_id, boolean isEmulated) {
-        String[][] listForTest = new String[numberOfQuestions][2];
+        String[][] listForTest = new String[numberOfQuestions][3];
         long[] list_for_test_ids = new long[numberOfQuestions];
         String[][] list_of_entries_asked_current_round = new String[fieldEntriesCursor.getCount()][2];
         String[][] list_of_entries_did_not_asked_current_round = new String[fieldEntriesCursor.getCount()][2];
@@ -313,6 +315,7 @@ public class ActivityUtility {
                 for (int n = 0; n < listForTest.length; n++) {
                     listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
                     listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
+                    listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[n]);
                     list_for_test_ids[n] = list_of_entries_did_not_asked_current_round_ids[n];
                 }
                 final long[] final_list_for_test_ids = list_for_test_ids;
@@ -330,11 +333,13 @@ public class ActivityUtility {
                 for (int n = 0; n < list_of_entries_did_not_asked_current_round.length; n++) {
                     listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
                     listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
+                    listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[n]);
                 }
                 ActivityUtility.shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
                 for (int n = list_of_entries_did_not_asked_current_round.length, i = 0; n < listForTest.length; n++, i++) {
                     listForTest[n][0] = list_of_entries_asked_current_round[i][0];
                     listForTest[n][1] = list_of_entries_asked_current_round[i][1];
+                    listForTest[n][2] = String.valueOf(list_of_entries_asked_current_round_ids[i]);
                     list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                 }
                 final long[] final_list_for_test_ids = list_for_test_ids;
@@ -398,6 +403,7 @@ public class ActivityUtility {
                     for (int n = 0; n < listForTest.length; n++) {
                         listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
                         listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
+                        listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[n]);
                         list_for_test_ids[n] = list_of_entries_did_not_asked_current_round_ids[n];
                     }
                     final long[] final_list_for_test_ids = list_for_test_ids;
@@ -415,11 +421,13 @@ public class ActivityUtility {
                     for (int n = 0; n < list_of_entries_did_not_asked_current_round.length; n++) {
                         listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
                         listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
+                        listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[n]);
                     }
                     ActivityUtility.shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
                     for (int n = list_of_entries_did_not_asked_current_round.length, i = 0; n < listForTest.length; n++, i++) {
                         listForTest[n][0] = list_of_entries_asked_current_round[i][0];
                         listForTest[n][1] = list_of_entries_asked_current_round[i][1];
+                        listForTest[n][2] = String.valueOf(list_of_entries_asked_current_round_ids[i]);
                         list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                     }
                     final long[] final_list_for_test_ids = list_for_test_ids;
@@ -440,6 +448,7 @@ public class ActivityUtility {
                     Object[] element = controlled_arraylist.get(n);
                     listForTest[n][0] = (String) element[1];
                     listForTest[n][1] = (String) element[2];
+                    listForTest[n][2] = String.valueOf(element[0]);
                 /*    listForTest[n][0] = controlled_entries[n][0];
                     listForTest[n][1] = controlled_entries[n][1];*/
                 }
@@ -457,6 +466,7 @@ public class ActivityUtility {
                     Object[] element = controlled_arraylist.get(n);
                     listForTest[n][0] = (String) element[1];
                     listForTest[n][1] = (String) element[2];
+                    listForTest[n][2] = String.valueOf(element[0]);
                    /* listForTest[n][0] = controlled_entries[n][0];
                     listForTest[n][1] = controlled_entries[n][1];*/
                 }
@@ -501,6 +511,7 @@ public class ActivityUtility {
                     for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + number_of_uncontrolled_questions; n++, i++) {
                         listForTest[n][0] = list_of_entries_did_not_asked_current_round[i][0];
                         listForTest[n][1] = list_of_entries_did_not_asked_current_round[i][1];
+                        listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[i]);
                         list_for_test_ids[i] = list_of_entries_did_not_asked_current_round_ids[i];
                     }
                     final long[] final_list_for_test_ids = list_for_test_ids;
@@ -517,11 +528,13 @@ public class ActivityUtility {
                     for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + list_of_entries_did_not_asked_current_round.length; n++, i++) {
                         listForTest[n][0] = list_of_entries_did_not_asked_current_round[i][0];
                         listForTest[n][1] = list_of_entries_did_not_asked_current_round[i][1];
+                        listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[i]);
                     }
                     ActivityUtility.shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
                     for (int n = number_of_controlled_questions + list_of_entries_did_not_asked_current_round.length, i = 0; n < listForTest.length; n++, i++) {
                         listForTest[n][0] = list_of_entries_asked_current_round[i][0];
                         listForTest[n][1] = list_of_entries_asked_current_round[i][1];
+                        listForTest[n][2] = String.valueOf(list_of_entries_asked_current_round_ids[i]);
                         list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                     }
                     final long[] final_list_for_test_ids = list_for_test_ids;
@@ -541,20 +554,20 @@ public class ActivityUtility {
         }
     }
 
-    public static Spannable spanText (String text) {
+    public static Spannable spanText (String text, TextView textView) {
         int [] colors = {0xFF5A0000,0xFF0000FF,
-                0xFFFFFF00,0xFF500850,0xFF00FF00,
+                0xFF760E32,0xFF500850,0xFF083156,
                 0xFFFF0000,0xFF4B0082};
+        int [] aligns = { Gravity.CENTER, Gravity.START, Gravity.END, Gravity.TOP, Gravity.BOTTOM};
         SecureRandom secureRandom = new SecureRandom();
         Spannable spanned_text = Spannable.Factory.getInstance().newSpannable(text);
         for ( int i = 0; i < text.length(); i++ ) {
             if ( !text.substring(i, i+1).matches("\\s")) {
-                spanned_text.setSpan(new ForegroundColorSpan(colors[secureRandom.nextInt(6)]),
-                        i, i + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                spanned_text.setSpan(new StyleSpan(secureRandom.nextInt(4)),
+                spanned_text.setSpan(new ForegroundColorSpan(colors[secureRandom.nextInt(7)]),
                         i, i + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
+        textView.setGravity(aligns[secureRandom.nextInt(5)]);
         return spanned_text;
     }
 
@@ -573,11 +586,27 @@ public class ActivityUtility {
 
     public static String getVersionCode(Context context) {
         PackageInfo pi = null;
+        String s;
         try {
             pi = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
+            s = "V: " + pi.versionCode + " - ";
         } catch (PackageManager.NameNotFoundException e) {
+            s = "V: problem - ";
             e.printStackTrace();
         }
-        return "V: " + pi.versionCode + " - ";
+        return s;
+    }
+
+    public static int calculate_time_of_answer ( String question, String answer, int reading_letter_second,
+                                                 int find_answer_time, int typing_letter_second) {
+        if ( reading_letter_second <= 0 && find_answer_time <= 0 && typing_letter_second <= 0 ) {
+            return 0;
+        } else {
+            int reading_seconds = question.length() / reading_letter_second;
+            reading_seconds = question.length() % reading_letter_second > 0 ? reading_seconds++ : reading_seconds;
+            int typing_seconds = answer.length() / typing_letter_second;
+            typing_seconds = answer.length() % typing_letter_second > 0 ? typing_seconds++ : typing_seconds;
+            return reading_seconds + find_answer_time + typing_seconds;
+        }
     }
 }

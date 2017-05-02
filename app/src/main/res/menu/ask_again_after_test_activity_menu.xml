@@ -14,5 +14,9 @@
     <item
         android:id="@+id/change_text_size"
         android:title="@string/change_text_size"/>
+    <item
+        android:id="@+id/obfuscate_question"
+        android:title="@string/obfuscate_question"
+        app:showAsAction="never"/>
 
 </menu>

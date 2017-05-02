@@ -36,9 +36,10 @@
 
             <ImageButton
                 android:id="@+id/text_file_help"
-                android:layout_width="wrap_content"
+                android:layout_width="66dp"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_help_black_24dp" />
+                android:src="@drawable/ic_help_black_24dp"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
 
         </LinearLayout>
     </LinearLayout>

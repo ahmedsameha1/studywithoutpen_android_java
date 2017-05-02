@@ -55,7 +55,7 @@ public class ShowEula {
 
             String title = mActivity.getString(R.string.please_read);
 
-            String message =  mActivity.getString(R.string.eula);
+            String message =  ActivityUtility.getTextFileFromRawDirectory(mActivity,R.raw.eula);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity)
                     .setTitle(title)

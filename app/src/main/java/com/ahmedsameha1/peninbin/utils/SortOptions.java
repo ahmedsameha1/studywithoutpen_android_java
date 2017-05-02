@@ -13,7 +13,10 @@ public enum SortOptions {
     SORT_DATE_ASC,
     SORT_QUESTION_DESC,
     SORT_CREATION_DATE_ASC,
-    SORT_ENTRY_ORDER_ASC;
+    SORT_ORDER_ASC,
+    SORT_ORDER_DESC,
+    SORT_RANK_ASC,
+    SORT_RANK_DESC;
 
     public static final String[] SORT_STRINGS = {"datetime(" + Contract.CREATION_DATE + ") DESC",
             " a DESC",
@@ -23,7 +26,11 @@ public enum SortOptions {
             "date( q ) ASC",
             " q DESC",
             "datetime(" + Contract.CREATION_DATE + ") ASC",
-            Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC"};
+            Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
+            Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
+            Contract.String_Entry.COLUMN_RANK + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
+            Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC"
+            };
 
 
     public String getSortString () {
@@ -53,7 +60,7 @@ public enum SortOptions {
             case 7:
                 return SORT_CREATION_DATE_ASC;
             case 8:
-                return SORT_ENTRY_ORDER_ASC;
+                return SORT_ORDER_ASC;
             default:
                 return SORT_CREATION_DATE_DESC;
         }

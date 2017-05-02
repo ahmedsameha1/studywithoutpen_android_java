@@ -43,7 +43,6 @@ import java.util.ArrayList;
  */
 public class EmulateFieldActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String EMULATING = "emulating field: ";
     private EmulateFieldActivityRecyclerViewAdapter mAdapter;
     private int number_of_entries;
     private EditText enter_number_of_entries;

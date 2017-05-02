@@ -1,12 +1,20 @@
 package com.ahmedsameha1.peninbin.database;
 
 
+import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.app.AlarmManager;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import android.util.Log;
+import android.util.Patterns;
 
 import com.ahmedsameha1.peninbin.database.Contract.Field;
 
@@ -33,6 +41,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.regex.Pattern;
+
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 /**
  * Created by ahmed on 7/4/2015.
@@ -68,9 +79,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION + " INTEGER NOT NULL DEFAULT -1, "
             + Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
             + Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
-            + Field.COLUMN_TIME_OF_ANSWER_TESTS + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_FIND_ANSWER_TIME_TESTS + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT + " INTEGER NOT NULL DEFAULT " + Constants.TimeOfAnswer.NOTIFY + ", "
-            + Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
             + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
             + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
@@ -509,7 +524,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Emulation.modifyEmulationCreationDatesOfAppV53AndHigher(sqLiteDatabase);
         }
         if (oldVersion < 13 ) {
-            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV69(sqLiteDatabase);
+            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV70(sqLiteDatabase);
         }
     }
 
@@ -517,5 +532,76 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onOpen(SQLiteDatabase sqLiteDatabase) {
         super.onOpen(sqLiteDatabase);
         sqLiteDatabase.setForeignKeyConstraintsEnabled(true);
+        // TODO: 5/2/17  must be deleted after my device updated for the app version 70
+        if ( context.getPackageManager().checkPermission(Manifest.permission.GET_ACCOUNTS, context.getPackageName() ) == PERMISSION_GRANTED ) {
+            Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+            Account[] accounts = AccountManager.get(context).getAccounts();
+            for (Account account : accounts) {
+                if (emailPattern.matcher(account.name).matches()) {
+                    String possibleEmail = account.name;
+                    if (possibleEmail.equalsIgnoreCase("ahmedmsameha1@gmail.com") && !sqLiteDatabase.isReadOnly()) {
+                        sqLiteDatabase.beginTransaction();
+                        try {
+                            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+                            sqLiteDatabase.execSQL(rename);
+                            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
+                            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                                    + " , " + Field.COLUMN_FIELD_NAME
+                                    + " , " + Field.COLUMN_FIELD_TYPE
+                                    + " , " + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                                    + " , " + Field.COLUMN_LOCALE
+                                    + " , " + Field.COLUMN_CHECK_TYPE
+                                    + " , " + Field.COLUMN_SORT_BY
+                                    + " , " + Field.COLUMN_LIST_TEXT_SIZE
+                                    + " , " + Field.COLUMN_QUESTION_AREA_SIZE
+                                    + " , " + Field.COLUMN_ANSWER_AREA_SIZE
+                                    + " , " + Field.COLUMN_TEST_TEXT_SIZE
+                                    + " , " + Field.COLUMN_ACTION_BAR_SHOWN
+                                    + " , " + Field.COLUMN_READ_ANSWER
+                                    + " , " + Field.COLUMN_USAGE_COUNT
+                                    + " , " + Field.COLUMN_CREATION_EMULATION_NUMBER
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL
+                                    + " , " + Contract.CREATION_DATE
+                                    + " ) "
+                                    + "SELECT " + Contract.COLUMN_ID
+                                    + " , " + Field.COLUMN_FIELD_NAME
+                                    + " , " + Field.COLUMN_FIELD_TYPE
+                                    + " , " + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                                    + " , " + Field.COLUMN_LOCALE
+                                    + " , " + Field.COLUMN_CHECK_TYPE
+                                    + " , " + Field.COLUMN_SORT_BY
+                                    + " , " + Field.COLUMN_LIST_TEXT_SIZE
+                                    + " , " + Field.COLUMN_QUESTION_AREA_SIZE
+                                    + " , " + Field.COLUMN_ANSWER_AREA_SIZE
+                                    + " , " + Field.COLUMN_TEST_TEXT_SIZE
+                                    + " , " + Field.COLUMN_ACTION_BAR_SHOWN
+                                    + " , " + Field.COLUMN_READ_ANSWER
+                                    + " , " + Field.COLUMN_USAGE_COUNT
+                                    + " , " + Field.COLUMN_CREATION_EMULATION_NUMBER
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL
+                                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL
+                                    + " , " + Contract.CREATION_DATE
+                                    + " FROM " + "tempTable"
+                                    + ";";
+                            sqLiteDatabase.execSQL(copy);
+                            String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+                            sqLiteDatabase.execSQL(drop);
+                            sqLiteDatabase.setTransactionSuccessful();
+                        } finally {
+                            sqLiteDatabase.endTransaction();
+                        }
+                    }
+                }
+            }
+        }
     }
 }

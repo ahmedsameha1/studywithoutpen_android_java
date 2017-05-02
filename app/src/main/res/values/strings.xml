@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Study Without Pen!</string>
+    <string name="app_name" translatable="false">Study Without Pen!</string>
     <string name="delete_field">Delete a Field</string>
     <string name="create_field">Create a Field</string>
     <string name="enter_field_name">Enter field name</string>
@@ -38,7 +38,7 @@
     <string name="check">Check</string>
     <string name="no_entries_in_this_time_range">There is no entries in this time range!</string>
     <string name="_continue">Continue</string>
-    <string name="start_studying_a_period">Start Study a Period</string>
+    <string name="start_studying_a_period">Start studying entries of a period</string>
     <string name="pause_studying_now">Pause studying now!</string>
     <string name="ask_for_continue_previous_study_during">Do you want to continue the previous studying session?</string>
     <string name="yes">Yes</string>
@@ -120,14 +120,14 @@
     <string name="percentage_or_number_help">By Percentage:\nEnter a number greater than zero and smaller than or equals 100. The app here lets you determine the number of questions that it will ask you by entering a percentage of the number of the entries in the current field. Assume that the current field has 100 entry, and you will enter 50 here. According to this the app will multiply 100 * 0.50, the result is 50, so the app will ask you 50 questions. Don\'t enter the % sign.\nBy Number:\nEnter a number greater than zero and smaller than or equals the number of entries in the current field. The app here lets you determine the number of questions that it will ask you by entering a number. Assume that you will enter 50 here, so the app will ask you 50 questions. If the current field doesn\'t have 50 entries, the app will refuse this number.</string>
     <string name="both_question_answer">You should enter something in both the question and the answer</string>
     <string name="something_both_question_answer">Both the question and the answer should have something</string>
-    <string name="sort_question_desc">Sort By Question (Descending)</string>
-    <string name="sort_question_asc">Sort By Question (Ascending)</string>
-    <string name="sort_answer_desc">Sort By Answer (Descending)</string>
-    <string name="sort_answer_asc">Sort By Answer (Ascending)</string>
-    <string name="sort_date_desc">Sort By Date (Descending)</string>
-    <string name="sort_date_asc">Sort By Date (Ascending)</string>
-    <string name="sort_creation_desc">Default: Sort By Creation Date (Descending)</string>
-    <string name="sort_creation_asc">Sort By Creation Date (Ascending)</string>
+    <string name="sort_question_desc">Sort by Question (alphabetically descending)</string>
+    <string name="sort_question_asc">Sort by Question (alphabetically ascending)</string>
+    <string name="sort_answer_desc">"Sort by Answer (alphabetically descending)"</string>
+    <string name="sort_answer_asc">Sort by Answer (alphabetically ascending)</string>
+    <string name="sort_date_desc">Sort by Date (descending)</string>
+    <string name="sort_date_asc">Sort by Date (ascending)</string>
+    <string name="sort_creation_desc">Default: Sort by Creation Date (descending)</string>
+    <string name="sort_creation_asc">Sort by Creation Date (ascending)</string>
     <string name="pause_do_not_shutdown">This may take some time, so don\'t close the app untill it notifies you. You can press home button, but don\'t press back button.</string>
     <string name="pause_shutdown">Study Without Pen!: the pause operation completed, you can close the app now.</string>
     <string name="wait_until_test_pausing_finish">Please, wait until the current test session pause opertation of this field finishes.</string>
@@ -210,7 +210,10 @@
     <string name="move">Move</string>
     <string name="copy">Copy</string>
     <string name="copy_move_entries">Copy/Move Entries</string>
-    <string name="sort_by_entry_order">Sort By Entry Order</string>
+    <string name="sort_by_entry_order_asc">Sort by Entry Order (ascending)</string>
+    <string name="sort_by_entry_order_desc">Sort by Entry Order (descending)</string>
+    <string name="sort_by_entry_rank_asc">Sort by Entry Rank (ascending)</string>
+    <string name="sort_by_entry_rank_desc">Sort by Entry Rank (descending)</string>
     <string name="some_entries_have_not_imported">At least, one entry has not imported</string>
     <string name="import_from_text_file_help">The file must be text file txt\nEvery line in the text file must be formated as: \nfield name@@@question~~~answer\nOr:\nfield name@@@question~~~answer%%%rank of entry \nRank of entry is one digit: \n0\tLow \n1\tModerate \n2\tImportant \n3\tVital\nOr:\nfield name@@@question~~~answer###order of entry\nOrder of entry is a number which is larger than or equals zero and lower than billion</string>
     <string name="text_contained_in_special_text">enter a text that is not contained of any other special text</string>
@@ -255,7 +258,6 @@
     <string name="purchase_error">There is a purchase error</string>
     <string name="purchase_success">You have successfully subscribed. Thank you for you trust.</string>
     <string name="please_read">Please, read carefully</string>
-    <string name="eula" translatable="false">Please read these Terms of Use (\"Terms\") carefully before using this App.\nYour access to and use of this App is conditioned on your acceptance of and compliance with these Terms.\nBy using this App you agree to be bound by these Terms. If you disagree with any part of these Terms then you may not use this App.\nThis App is provided \"AS IS\" without warranty of any kind. The developer of this App provides no express or implied warranties, specifically the warranties of merchantability, fitness for a particular purpose, the accuracy of the App content or non-infringement of third-party rights. The quality and performance of this App are at your own risk. The developer of this App does not warrant that the functions contained in this App will meet your requirements or that the operation of the App will be uninterrupted or error-free.\nYou may not attempt to reverse engineer, compile, modify, translate or disassemble the App in whole or in part.\nYou may not copy this App or its apk.\nYou may not distribute any copy of this App or its apk.\nThe Developer of this app reserves the right to modify or replace these Terms at any time. If The Developer of this App modifies or replaces these Terms, you must agree to the new Terms before you continue of using this app.\nThe feature of reading the answer depends on the currently enabled text-to-speech engine. The developer of the App is not responsible for that text-to-speech engine. That text-to-speech engine may be not accurate.\nYour use of the features that need you to subscribe depends on Google Play Store app and the Google Play service. The developer of the App is not responsible for any problems of Google Play Store app or Google Play service.\nYour use of the features that need you to subscribe may need to a reliable internet connection.\nIf there is more than one answer belongs to the same question, the app must give the user some hints to let him know the intended answer. This may make the app ineffective in some cases.\nThis app collects anonymous data about the use of the app. The app uses Google Analytics to collect these data. The data includes which features is used, how long the app is used, the country of the user and other data about the use of the app. The anonymous collected data is used by the developer to know how the users use the app and in which countries the app is being used. \nThis app gets the accounts of the device to allow the developer to use the features that need a subscription to use it ( by checking if the device has the account that belongs to the developer himself).\nIn one of the next versions, the notebook fields will be deleted.</string>
     <string name="agree">I Agree</string>
     <string name="already_subscribed">You already have a subscription!</string>
     <string name="terms_of_use">TERMS OF USE</string>
@@ -269,8 +271,7 @@
     <string name="subscription_description">Subscription Description</string>
     <string name="subscription1_description">Unlock the locked features. You can ask the developer for a refund by Email</string>
     <string name="please_subscribe">Please subscribe</string>
-    <string name="enter_the_time_of_answer">enter the time of answer</string>
-    <string name="time_of_answer_greater_than_zero">Time of answer must be greater than zero!</string>
+    <string name="enter_the_time_of_answer">Enter the time of answer</string>
     <string name="set_time_of_answer">Set time of answer</string>
     <string name="second">second</string>
     <string name="time_of_answer">Time of answer</string>
@@ -284,13 +285,33 @@
     <string name="notify_me">Notify me</string>
     <string name="show_next_question">Move to next question</string>
     <string name="dont_know">Don\'t know</string>
-    <string name="enter_emulated_errors">Enter emulated errors</string>
     <string name="ask_again">Ask again</string>
     <string name="order">Order</string>
     <string name="asked">Asked: %1$s</string>
     <string name="wrongly_answered">Wrongly answered: %1$s</string>
     <string name="same">Like</string>
     <string name="only_this_with_same_question">There is no more entries with the same question</string>
+    <string name="only_this_with_same_answer">There is no more entries with the same answer</string>
     <string name="obfuscate_question">Obfuscate question</string>
     <string name="obfuscate_question_help">This option tries to make reading the question more difficult. Why? To increase you attention while the session. This option tries to let you out of the automatic pilot mode.</string>
+    <string name="Egypt_sim">Who has a SIM Card of Egypt, currently, doesn\'t need to subscribe</string>
+    <string name="typing_rate_x_letter_second">Typing rate - letter/second</string>
+    <string name="time_to_find_the_answer">Time to find the answer</string>
+    <string name="reading_rate_x_letter_second">Reading rate - letter/second</string>
+    <string name="format_reading_per_letter_second">Reading %1$s letter/second</string>
+    <string name="format_typing_per_letter_second">Typing %1$s letter/second</string>
+    <string name="reg_reading_per_letter_second">Reading 0*[1-9]+[0-9]* letter/second</string>
+    <string name="reg_typing_per_letter_second">Typing 0*[1-9]+[0-9]* letter/second</string>
+    <string name="reading_prefix">"Reading "</string>
+    <string name="typing_prefix">"Typing "</string>
+    <string name="find_answer_suffix">" second to find answer"</string>
+    <string name="letter_per_second_suffix">" letter/second"</string>
+    <string name="missing_data">missing data</string>
+    <string name="same_question">Same question</string>
+    <string name="same_answer">Same answer</string>
+    <string name="start_enhanced_test">Start enhanced test</string>
+    <string name="typing_letter_second_help">Enter the number of letters that you can type per second. The time of answer will be calculated for every entry according to this number and the number of finding the answer and the number of reading the question</string>
+    <string name="reading_letter_second_help">Enter the number of letters that you can read per second. The time of answer will be calculated for every entry according to this number and the number of finding the answer and the number of typing the answer</string>
+    <string name="finding_answer_help">Enter the number of seconds that you will take to find the answer of the question. The time of answer will be calculated for every entry according to this number and the number of reading the question and the number of typing the answer</string>
+    <string name="please_create_field">Please, Create a field</string>
 </resources>

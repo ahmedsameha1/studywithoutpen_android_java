@@ -3,7 +3,6 @@ package com.ahmedsameha1.peninbin.dialogs;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -16,7 +15,6 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 
 /**
@@ -54,13 +52,17 @@ public class SortEntriesDialogFragment extends DialogFragment {
             Button sort_date_asc = (Button) alertDialog.findViewById(R.id.sort_date_asc);
             Button sort_creation_desc = (Button) alertDialog.findViewById(R.id.sort_creation_desc);
             Button sort_creation_asc = (Button) alertDialog.findViewById(R.id.sort_creation_asc);
-            Button sort_entry_order = (Button) alertDialog.findViewById(R.id.sort_entry_order);
+            Button sort_entry_order_asc = (Button) alertDialog.findViewById(R.id.sort_entry_order_asc);
+            Button sort_entry_order_desc = (Button) alertDialog.findViewById(R.id.sort_entry_order_desc);
+            Button sort_entry_rank_asc = (Button) alertDialog.findViewById(R.id.sort_rank_asc);
+            Button sort_entry_rank_desc = (Button) alertDialog.findViewById(R.id.sort_rank_desc);
 
                 sort_question_asc.setVisibility(View.VISIBLE);
                 sort_question_desc.setVisibility(View.VISIBLE);
 
             if ( databaseOperations.isThereEntryOrder(current_field_id) ){
-                sort_entry_order.setVisibility(View.VISIBLE);
+                sort_entry_order_asc.setVisibility(View.VISIBLE);
+                sort_entry_order_desc.setVisibility(View.VISIBLE);
             }
 
             sort_answer_desc.setOnClickListener(v -> {
@@ -103,9 +105,24 @@ public class SortEntriesDialogFragment extends DialogFragment {
                 mySQLiteCursorLoader.updateFieldSort(current_field_id, SortOptions.SORT_CREATION_DATE_ASC);
                 dismiss();
             });
-            sort_entry_order.setOnClickListener(v -> {
-                contact.sort(SortOptions.SORT_ENTRY_ORDER_ASC);
-                mySQLiteCursorLoader.updateFieldSort(current_field_id,SortOptions.SORT_ENTRY_ORDER_ASC);
+            sort_entry_order_asc.setOnClickListener(v -> {
+                contact.sort(SortOptions.SORT_ORDER_ASC);
+                mySQLiteCursorLoader.updateFieldSort(current_field_id,SortOptions.SORT_ORDER_ASC);
+                dismiss();
+            });
+            sort_entry_order_desc.setOnClickListener(v -> {
+                contact.sort(SortOptions.SORT_ORDER_DESC);
+                mySQLiteCursorLoader.updateFieldSort(current_field_id,SortOptions.SORT_ORDER_DESC);
+                dismiss();
+            });
+            sort_entry_rank_asc.setOnClickListener(v -> {
+                contact.sort(SortOptions.SORT_RANK_ASC);
+                mySQLiteCursorLoader.updateFieldSort(current_field_id,SortOptions.SORT_RANK_ASC);
+                dismiss();
+            });
+            sort_entry_rank_desc.setOnClickListener(v -> {
+                contact.sort(SortOptions.SORT_RANK_DESC);
+                mySQLiteCursorLoader.updateFieldSort(current_field_id,SortOptions.SORT_RANK_DESC);
                 dismiss();
             });
         });

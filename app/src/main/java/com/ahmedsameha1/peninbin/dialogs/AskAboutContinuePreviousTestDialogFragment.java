@@ -57,7 +57,7 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                         getActivity().finish();
                     }
                 }
-                )// TODO: 2/27/17 remember to test at least on of the calendar.add that used to add one day to the date 
+                )
                 .setNegativeButton(R.string.no, (dialog, which) -> {
                                 CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
                                 if ( test_type == Constants.TestType.ENHANCED_TEST ) {

@@ -144,21 +144,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
-                android:hint="@string/the_number_of_quick_tests"/>
+                android:hint="@string/the_number_of_quick_tests"
+                android:gravity="center"/>
 
             <EditText
                 android:id="@+id/number_of_tries"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
-                android:hint="@string/the_number_of_tries"/>
+                android:hint="@string/the_number_of_tries"
+                android:gravity="center"/>
 
             <EditText
                 android:id="@+id/number_of_questions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
-                android:hint="@string/the_number_of_questions"/>
+                android:hint="@string/the_number_of_questions"
+                android:gravity="center"/>
 
             <CheckBox
                 android:id="@+id/exclude_times"
@@ -197,14 +200,16 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:hint="@string/from"/>
+                                android:hint="@string/from"
+                                android:gravity="center"/>
 
                             <EditText
                                 android:id="@+id/excluded_time_1_end"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:hint="@string/to"/>
+                                android:hint="@string/to"
+                                android:gravity="center"/>
                         </LinearLayout>
                     </LinearLayout>
 
@@ -221,14 +226,16 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="@string/from"/>
+                            android:hint="@string/from"
+                            android:gravity="center"/>
 
                         <EditText
                             android:id="@+id/excluded_time_2_end"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="@string/to"/>
+                            android:hint="@string/to"
+                            android:gravity="center"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -244,14 +251,16 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="@string/from"/>
+                            android:hint="@string/from"
+                            android:gravity="center"/>
 
                         <EditText
                             android:id="@+id/excluded_time_3_end"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="@string/to"/>
+                            android:hint="@string/to"
+                            android:gravity="center"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -267,14 +276,16 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="@string/from"/>
+                            android:hint="@string/from"
+                            android:gravity="center"/>
 
                         <EditText
                             android:id="@+id/excluded_time_4_end"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="@string/to"/>
+                            android:hint="@string/to"
+                            android:gravity="center"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -290,7 +301,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="@string/from"/>
+                            android:hint="@string/from"
+                            android:gravity="center"/>
 
                         <EditText
                             android:id="@+id/excluded_time_5_end"
@@ -298,7 +310,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:hint="@string/to"
-                            />
+                            android:gravity="center"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -313,14 +325,16 @@
 
                     <ImageButton
                         android:id="@+id/add_excluded_time"
-                        android:layout_width="wrap_content"
+                        android:layout_width="66dp"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_add_circle_black_24dp" />
+                        android:src="@drawable/ic_add_circle_black_24dp"
+                        style="@style/Widget.AppCompat.Button.Borderless"/>
                     <ImageButton
                         android:id="@+id/remove_excluded_time"
-                        android:layout_width="wrap_content"
+                        android:layout_width="66dp"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_remove_circle_black_24dp" />
+                        android:src="@drawable/ic_remove_circle_black_24dp"
+                        style="@style/Widget.AppCompat.Button.Borderless"/>
 
                 </LinearLayout>
             </LinearLayout>

@@ -98,7 +98,9 @@ public class ExportImportDatabase {
                                 Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES,
                                 Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION,
                                 Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL,
-                                Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD,
+                                Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS,
+                                Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD,
+                                Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD, Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD,
                                 Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, Contract.Field.COLUMN_OBFUSCATE_QUESTION},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{tempFieldName}, null, null, null, null);
@@ -124,10 +126,14 @@ public class ExportImportDatabase {
                 contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, fieldCursor.getInt(16));
                 contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, fieldCursor.getInt(17));
                 contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL, fieldCursor.getInt(18));
-                contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, fieldCursor.getInt(19));
-                contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD, fieldCursor.getInt(20));
-                contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, fieldCursor.getInt(21));
-                contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, fieldCursor.getInt(22));
+                contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, fieldCursor.getInt(19));
+                contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS, fieldCursor.getInt(20));
+                contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, fieldCursor.getInt(21));
+                contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD, fieldCursor.getInt(22));
+                contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD, fieldCursor.getInt(23));
+                contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD, fieldCursor.getInt(24));
+                contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, fieldCursor.getInt(25));
+                contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, fieldCursor.getInt(26));
                 Long field_id = toExportDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                 fieldCursor.close();
                 if ( question_data_type == Contract.Field.STRING_DATA_TYPE ) {
@@ -469,7 +475,9 @@ public class ExportImportDatabase {
                             Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES,
                             Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION,
                             Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL,
-                            Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS, Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD,
+                            Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS,
+                            Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD,
+                            Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD, Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD,
                             Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, Contract.Field.COLUMN_OBFUSCATE_QUESTION},
                     null, null, null, null, null);
             for (toImportFieldCursor.moveToFirst(); toImportFieldCursor.getPosition() < toImportFieldCursor.getCount();
@@ -501,10 +509,14 @@ public class ExportImportDatabase {
                         contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION,toImportFieldCursor.getInt(16));
                         contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL,toImportFieldCursor.getInt(17));
                         contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL,toImportFieldCursor.getInt(18));
-                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS,toImportFieldCursor.getInt(19));
-                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_STUDY_A_PERIOD,toImportFieldCursor.getInt(20));
-                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT,toImportFieldCursor.getInt(21));
-                        contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION,toImportFieldCursor.getInt(22));
+                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS,toImportFieldCursor.getInt(19));
+                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS,toImportFieldCursor.getInt(20));
+                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS,toImportFieldCursor.getInt(21));
+                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD,toImportFieldCursor.getInt(22));
+                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD,toImportFieldCursor.getInt(23));
+                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD,toImportFieldCursor.getInt(24));
+                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT,toImportFieldCursor.getInt(25));
+                        contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION,toImportFieldCursor.getInt(26));
                         field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                     } else {
                         ContentValues contentValues = new ContentValues();
@@ -1299,7 +1311,7 @@ public class ExportImportDatabase {
             }
         }
     }
-    static void upgradeImportedDatabaseFromDBV12ToDBV13(SQLiteDatabase toImportDatabase, String file_path ) throws Exception {
+    private static void upgradeImportedDatabaseFromDBV12ToDBV13(SQLiteDatabase toImportDatabase, String file_path ) throws Exception {
         toImportDatabase.beginTransaction();
         try {
             toImportDatabase.delete(Contract.Field.TABLE_NAME, Contract.Field.COLUMN_FIELD_TYPE + " = ? ",

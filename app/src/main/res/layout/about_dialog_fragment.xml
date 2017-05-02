@@ -51,14 +51,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/contact_developer" />
+            android:text="@string/contact_developer"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
 
         <Button
             android:id="@+id/facebook"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/facebook_page" />
+            android:text="@string/facebook_page"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
 
         <TextView
             android:layout_width="wrap_content"
