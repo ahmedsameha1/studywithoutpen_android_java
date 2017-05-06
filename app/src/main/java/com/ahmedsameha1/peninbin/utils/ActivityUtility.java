@@ -283,17 +283,18 @@ public class ActivityUtility {
         void manageTimersDueDialogsShow(boolean isCounting);
     }
 
-    public static String[][] prepareListForTest(Cursor fieldEntriesCursor, int numberOfQuestions, int controlled_portion,
-                                          int rank_level, int wrongness_level, String date_string,
-                                          CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase,
-                                          long current_field_id, boolean isEmulated) {
+    public static Object[] prepareListForTest(Cursor fieldEntriesCursor, int numberOfQuestions, int controlled_portion,
+                                          int rank_level, int wrongness_level) {
+        final int CONTROLLED_MARKER = 0, OLD_ROUND_MARKER = 1;
         String[][] listForTest = new String[numberOfQuestions][3];
-        long[] list_for_test_ids = new long[numberOfQuestions];
         String[][] list_of_entries_asked_current_round = new String[fieldEntriesCursor.getCount()][2];
         String[][] list_of_entries_did_not_asked_current_round = new String[fieldEntriesCursor.getCount()][2];
         long[] list_of_entries_asked_current_round_ids = new long[fieldEntriesCursor.getCount()];
         long[] list_of_entries_did_not_asked_current_round_ids = new long[fieldEntriesCursor.getCount()];
+        int[] markers = new int[2];
+        Object[] result = new Object[2];
         if (wrongness_level == -1 && rank_level == -1 && controlled_portion == -1) {
+            markers[CONTROLLED_MARKER] = -1; // indicates that there is no controlled entries
             int asked = 0, didnot_asked = 0;
             for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
                  fieldEntriesCursor.moveToNext()) {
@@ -319,18 +320,11 @@ public class ActivityUtility {
                     listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
                     listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
                     listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[n]);
-                    list_for_test_ids[n] = list_of_entries_did_not_asked_current_round_ids[n];
                 }
-                final long[] final_list_for_test_ids = list_for_test_ids;
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(final_list_for_test_ids);
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                return listForTest;
+                markers[OLD_ROUND_MARKER] = numberOfQuestions - 1; // last index of the old round entries
+                result[0] = listForTest;
+                result[1] = markers;
+                return result;
             } else {
                 ActivityUtility.shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
                 for (int n = 0; n < list_of_entries_did_not_asked_current_round.length; n++) {
@@ -338,24 +332,16 @@ public class ActivityUtility {
                     listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
                     listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[n]);
                 }
+                markers[OLD_ROUND_MARKER] = list_of_entries_did_not_asked_current_round.length - 1; // last index of the old round entries
                 ActivityUtility.shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
                 for (int n = list_of_entries_did_not_asked_current_round.length, i = 0; n < listForTest.length; n++, i++) {
                     listForTest[n][0] = list_of_entries_asked_current_round[i][0];
                     listForTest[n][1] = list_of_entries_asked_current_round[i][1];
                     listForTest[n][2] = String.valueOf(list_of_entries_asked_current_round_ids[i]);
-                    list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                 }
-                final long[] final_list_for_test_ids = list_for_test_ids;
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated, date_string);
-                        cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(final_list_for_test_ids);
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                return listForTest;
+                result[0] = listForTest;
+                result[1] = markers;
+                return result;
             }
         } else {
             int number_of_controlled_questions;
@@ -383,6 +369,7 @@ public class ActivityUtility {
             long[] uncontrolled_entries_ids = (long[]) arrayList.get(2);
             int[] uncontrolled_entries_whether_asked = (int[]) arrayList.get(3);
             if (controlled_arraylist == null) {
+                markers[CONTROLLED_MARKER] = -1; // indicates that there is no controlled entries
                 int asked = 0, didnot_asked = 0;
                 for (int n = 0; n < uncontrolled_entries.length; n++) {
                     if (uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
@@ -407,18 +394,11 @@ public class ActivityUtility {
                         listForTest[n][0] = list_of_entries_did_not_asked_current_round[n][0];
                         listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
                         listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[n]);
-                        list_for_test_ids[n] = list_of_entries_did_not_asked_current_round_ids[n];
                     }
-                    final long[] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                    return listForTest;
+                    markers[OLD_ROUND_MARKER] = numberOfQuestions - 1; // last index of the old round entries
+                    result[0] = listForTest;
+                    result[1] = markers;
+                    return result;
                 } else {
                     ActivityUtility.shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
                     for (int n = 0; n < list_of_entries_did_not_asked_current_round.length; n++) {
@@ -426,24 +406,16 @@ public class ActivityUtility {
                         listForTest[n][1] = list_of_entries_did_not_asked_current_round[n][1];
                         listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[n]);
                     }
+                    markers[OLD_ROUND_MARKER] = list_of_entries_did_not_asked_current_round.length - 1; // index of the last entry of the old round
                     ActivityUtility.shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
                     for (int n = list_of_entries_did_not_asked_current_round.length, i = 0; n < listForTest.length; n++, i++) {
                         listForTest[n][0] = list_of_entries_asked_current_round[i][0];
                         listForTest[n][1] = list_of_entries_asked_current_round[i][1];
                         listForTest[n][2] = String.valueOf(list_of_entries_asked_current_round_ids[i]);
-                        list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                     }
-                    final long[] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated, date_string);
-                            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                    return listForTest;
+                    result[0] = listForTest;
+                    result[1] = markers;
+                    return result;
                 }
             } else if (uncontrolled_entries == null) {
                 Collections.shuffle(controlled_arraylist);
@@ -452,9 +424,9 @@ public class ActivityUtility {
                     listForTest[n][0] = (String) element[1];
                     listForTest[n][1] = (String) element[2];
                     listForTest[n][2] = String.valueOf(element[0]);
-                /*    listForTest[n][0] = controlled_entries[n][0];
-                    listForTest[n][1] = controlled_entries[n][1];*/
                 }
+                markers[CONTROLLED_MARKER] = numberOfQuestions - 1; // the index of the last controlled entry
+                markers[OLD_ROUND_MARKER] = -1; // indicates that there is no entries from the old round
                 return listForTest;
             } else {
                 if (number_of_controlled_questions > controlled_arraylist.size()) {
@@ -470,9 +442,8 @@ public class ActivityUtility {
                     listForTest[n][0] = (String) element[1];
                     listForTest[n][1] = (String) element[2];
                     listForTest[n][2] = String.valueOf(element[0]);
-                   /* listForTest[n][0] = controlled_entries[n][0];
-                    listForTest[n][1] = controlled_entries[n][1];*/
                 }
+                markers[CONTROLLED_MARKER] = number_of_controlled_questions -1; // the index of the last controlled entry
                 int asked = 0, didnot_asked = 0;
                 for (int n = 0; n < uncontrolled_entries.length; n++) {
                     if (uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
@@ -515,17 +486,8 @@ public class ActivityUtility {
                         listForTest[n][0] = list_of_entries_did_not_asked_current_round[i][0];
                         listForTest[n][1] = list_of_entries_did_not_asked_current_round[i][1];
                         listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[i]);
-                        list_for_test_ids[i] = list_of_entries_did_not_asked_current_round_ids[i];
                     }
-                    final long[] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+                    markers[OLD_ROUND_MARKER] = number_of_controlled_questions + number_of_uncontrolled_questions -1; // the index of the last entry from the old round
                 } else {
                     ActivityUtility.shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
                     for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + list_of_entries_did_not_asked_current_round.length; n++, i++) {
@@ -533,26 +495,17 @@ public class ActivityUtility {
                         listForTest[n][1] = list_of_entries_did_not_asked_current_round[i][1];
                         listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[i]);
                     }
+                    markers[OLD_ROUND_MARKER] = number_of_controlled_questions + list_of_entries_did_not_asked_current_round.length - 1; // the index of the last entry from the old round
                     ActivityUtility.shuffleArray(list_of_entries_asked_current_round, list_of_entries_asked_current_round_ids);
                     for (int n = number_of_controlled_questions + list_of_entries_did_not_asked_current_round.length, i = 0; n < listForTest.length; n++, i++) {
                         listForTest[n][0] = list_of_entries_asked_current_round[i][0];
                         listForTest[n][1] = list_of_entries_asked_current_round[i][1];
                         listForTest[n][2] = String.valueOf(list_of_entries_asked_current_round_ids[i]);
-                        list_for_test_ids[i] = list_of_entries_asked_current_round_ids[i];
                     }
-                    final long[] final_list_for_test_ids = list_for_test_ids;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated, date_string);
-                            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(final_list_for_test_ids);
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                 }
-                ActivityUtility.shuffleArray(listForTest);
-                return listForTest;
+                result[0] = listForTest;
+                result[1] = markers;
+                return result;
             }
         }
     }
@@ -606,10 +559,72 @@ public class ActivityUtility {
             return 0;
         } else {
             int reading_seconds = question.length() / reading_letter_second;
-            reading_seconds = question.length() % reading_letter_second > 0 ? reading_seconds++ : reading_seconds;
+            reading_seconds = question.length() % reading_letter_second > 0 ? reading_seconds + 1 : reading_seconds;
             int typing_seconds = answer.length() / typing_letter_second;
-            typing_seconds = answer.length() % typing_letter_second > 0 ? typing_seconds++ : typing_seconds;
+            typing_seconds = answer.length() % typing_letter_second > 0 ? typing_seconds + 1 : typing_seconds;
             return reading_seconds + find_answer_time + typing_seconds;
         }
     }
+
+
+    /**
+     * This method take care of the round work of the old and new round entries
+     * It assume that controlled entries comes first in the array of test then the old round entries then the new round entries
+     */
+    public static void updateRoundData( long current_field_id, String[][] listForTest, CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase,
+                                        int currentQuestionCounter, int last_controlled_index, int last_old_round_index, boolean isEmulated) {
+        // There is no controlled entries and there is no old round entries and the current question counter at the first entry in the array of test
+        // so we rest all the entries round and start a new round
+        if ( last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter == 0) {
+            cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
+            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        }
+        // Because the current question counter is greater than 0 so the old round has ended and we are working on the new round
+        else if ( last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter > 0 ) {
+            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        }
+        // there is no controlled entries and there is old round entries we have not finished the old round entries
+        else if ( last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter <= last_old_round_index ) {
+            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        }
+        // there is no controlled entries and there is old round entries we have just finished the old round entries
+        // so we rest all the entries round and start a new round
+        else if ( last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter > last_old_round_index ) {
+            // resting all the entries round and start a new round
+            // this will be true only if there is entries from a new round
+            if ( currentQuestionCounter == last_old_round_index + 1 ) {
+                cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
+            }
+            // we are working in the new round
+            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        }
+        // There is controlled entries and we are working on them and they are not related with rounds so no action is taken
+        else if ( last_controlled_index > -1 && currentQuestionCounter <= last_controlled_index ) {
+            // No Action
+        }
+        /* if the there is controlled entries and there is no old round entries and there is no new round entries this method will not be called
+         because the last controlled index will be the last entries of the test array, we will not handle this case */
+        //==================
+        // In the following case there must be a new round entries and we are on the first new round entries
+        else if ( last_controlled_index > -1  && last_old_round_index == -1 && currentQuestionCounter == last_controlled_index + 1 ) {
+            cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
+            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        }
+        // we are working in the new round
+        else if ( last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter > last_controlled_index + 1 ) {
+            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        }
+        // there is controlled entries and old round entries and we are on the old round entries
+        else if ( last_controlled_index > -1 && last_old_round_index > -1 && currentQuestionCounter > last_controlled_index ) {
+            // resting all the entries round and start a new round
+            // this will be true only if there is entries from a new round
+            if ( currentQuestionCounter == last_old_round_index + 1 ) {
+                cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
+            }
+            // we are working in the new round
+            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        }
+    }
+
+
 }

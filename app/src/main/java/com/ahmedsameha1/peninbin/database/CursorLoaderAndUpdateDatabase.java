@@ -20,8 +20,11 @@ import com.commonsware.cwac.loaderex.ContentChangingTask;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by Ahmed on 4/9/16.
@@ -1538,8 +1541,10 @@ try {
         sqLiteOpenHelper.getWritableDatabase().insert(Contract.GooglePaymentOrderID.TABLE_NAME, null, contentValues);
     }
 
-    public void restWhetherAskedCurrentTestRound(long field_id, boolean isEmulated, String date_string) {
+    public void restWhetherAskedCurrentTestRound(long field_id, boolean isEmulated) {
         if (isEmulated) {
+            String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                    .format(new Date(System.currentTimeMillis()));
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.DID_NOT_ASKED_AT_CURRENT_ROUND);
             sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
@@ -1561,6 +1566,14 @@ try {
             sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
                     Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
         }
+    }
+    public void makeAskedCurrentTestRound(long entry_id) {
+
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.ASKED_AT_CURRENT_ROUND);
+            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
+                    Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
+
     }
 
     public void setTimeOfAnswerOfTests(long field_id, int reading_question_letter_second, int finding_answer_time,

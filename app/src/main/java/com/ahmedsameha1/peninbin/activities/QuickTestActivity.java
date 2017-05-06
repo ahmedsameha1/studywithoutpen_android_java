@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -106,6 +105,8 @@ public class QuickTestActivity extends AppCompatActivity implements
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
+    public static final String LAST_CONTROLLED_INDEX = "last_controlled_index";
+    public static final String LAST_OLD_ROUND_INDEX = "last_old_round_index";
     private int controlled_portion, rank_level, wrongness_level;
     private long current_field_id;
     private String[][] listForTest;
@@ -144,6 +145,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     private boolean is_time_of_answer_elapsed = false;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this :: DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
     private boolean obfuscate;
+    private int last_controlled_index, last_old_round_index;
 
 
     @Override
@@ -229,13 +231,12 @@ public class QuickTestActivity extends AppCompatActivity implements
             AnalyticsApplication application = (AnalyticsApplication) getApplication();
             mTracker = application.getDefaultTracker();
             loader = new LoaderManager.LoaderCallbacks<Cursor>() {
-                String date_string;
 
                 @Override
                 public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                     if (id == GET_ENTRIES_LOADER_ID) {
                         if (isEmulated) {
-                            date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                            String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
                                     .format(new Date(System.currentTimeMillis()));
                             return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this,
                                     "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
@@ -279,9 +280,9 @@ public class QuickTestActivity extends AppCompatActivity implements
                         fieldEntriesCursor = data;
                         if (listForTest == null) {
                             if (percent_or_number == PERCENTAGE) {
-                                listForTest = getListForTest(percentage, date_string);
+                                listForTest = getDataOfTest(percentage);
                             } else if (percent_or_number == NUMBER) {
-                                listForTest = getListForTest(number, date_string);
+                                listForTest = getDataOfTest(number);
                             }
                             if (listForTest != null) {
                                 questionsNumber = listForTest.length;
@@ -574,11 +575,14 @@ public class QuickTestActivity extends AppCompatActivity implements
 
     }
 
-    private String[][] getListForTest(double percent, final String date_string) {
+    private String[][] getDataOfTest(double percent) {
         if (fieldEntriesCursor.getCount() > 0) {
             int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
-            return ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level,
-                    date_string,cursorLoaderAndUpdateDatabase,current_field_id,isEmulated);
+            Object[] data = ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level);
+            int[] markers = (int[]) data[1];
+            last_controlled_index = markers[0];
+            last_old_round_index = markers[1];
+            return (String[][]) data[0];
         } else {
             Toast toast = Toast.makeText(QuickTestActivity.this, R.string.no_entries_in_field, Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 400);
@@ -589,10 +593,13 @@ public class QuickTestActivity extends AppCompatActivity implements
         return null;
     }
 
-    private String[][] getListForTest(int numberOfQuestions, final String date_string) {
+    private String[][] getDataOfTest(int numberOfQuestions) {
         if (fieldEntriesCursor.getCount() >= numberOfQuestions) {
-            return ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level,
-                    date_string,cursorLoaderAndUpdateDatabase,current_field_id,isEmulated);
+            Object[] data = ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level);
+            int[] markers = (int[]) data[1];
+            last_controlled_index = markers[0];
+            last_old_round_index = markers[1];
+            return (String[][]) data[0];
         } else {
             Toast toast = Toast.makeText(QuickTestActivity.this, R.string.number_of_entries_less_than_number_of_questions, Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 400);
@@ -617,6 +624,8 @@ public class QuickTestActivity extends AppCompatActivity implements
 
     private void setFalse() {
         cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
+                last_controlled_index, last_old_round_index, isEmulated);
         show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
         show_result_linearlayout.setPadding(0, 0, 0, 0);
         cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
@@ -627,6 +636,8 @@ public class QuickTestActivity extends AppCompatActivity implements
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
         cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
+                last_controlled_index, last_old_round_index, isEmulated);
         boolean result = false;
         if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
             if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
@@ -778,6 +789,8 @@ public class QuickTestActivity extends AppCompatActivity implements
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         saveUserLayoutChanges(savedInsatanceState);
         savedInsatanceState.putBoolean(BEFORE_SHOWING_RESULT_DIALOG, before_showing_result_dialog);
+        savedInsatanceState.putInt(LAST_CONTROLLED_INDEX, last_controlled_index);
+        savedInsatanceState.putInt(LAST_OLD_ROUND_INDEX, last_old_round_index);
         mHandler.removeCallbacks(show_result_dialog_runnable);
                        /* Saving the remaining time till completion of the current timer of time of answer because the activity
         will be destroyed, not finishing normally.
@@ -820,6 +833,8 @@ public class QuickTestActivity extends AppCompatActivity implements
         time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
         time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
         is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+        last_controlled_index = savedInstanceState.getInt(LAST_CONTROLLED_INDEX);
+        last_old_round_index = savedInstanceState.getInt(LAST_OLD_ROUND_INDEX);
         is_starting_after_destruction = true;
         restoreUserLayoutChanges(savedInstanceState);
         if (!before_showing_result_dialog) {

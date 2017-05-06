@@ -76,7 +76,6 @@ public class AddEntryActivity extends AppCompatActivity implements
     private DatabaseReadOperations databaseOperations;
     private boolean actionBarShown;
     private boolean fromFieldActivity;
-    private int fieldType;
     private Cursor cursor;
     private boolean field_chosen;
     private LinearLayout showResult, questionLinearlayout, container;
@@ -114,7 +113,6 @@ public class AddEntryActivity extends AppCompatActivity implements
         current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
-        fieldType = databaseOperations.getFieldType(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
         answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
         test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
@@ -198,7 +196,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 (android.R.layout.simple_spinner_dropdown_item);
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         rank_spinner.setSelection(Constants.Rank.LOW);
-        setHints(fieldType);
+        setHints();
         getLoaderManager().restartLoader(GET_FIELDS_LOADER_ID, null, loader);
         getLoaderManager().restartLoader(GET_SPECIAL_TEXT_ID, null, loader);
         enter_answer.requestFocus();
@@ -269,8 +267,9 @@ public class AddEntryActivity extends AppCompatActivity implements
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Cursor c = (Cursor) parent.getSelectedItem();
                 current_field_id = c.getLong(0);
-                fieldType = c.getInt(1);
-                setHints(fieldType);
+                current_field_type = c.getInt(1);
+                getLoaderManager().restartLoader(GET_SPECIAL_TEXT_ID, null, loader);// TODO: 5/4/17 test this 
+                setHints();
             }
 
             @Override
@@ -418,7 +417,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         }
     }
 
-    private void setHints(int fieldType) {
+    private void setHints() {
         enter_question.setHint(R.string.enter_a_question);
         enter_answer.setHint(R.string.enter_an_answer);
 

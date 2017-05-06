@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,7 +39,6 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
-import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
@@ -55,6 +53,7 @@ import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -118,6 +117,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
+    public static final String LAST_CONTROLLED_INDEX = "last_controlled_index";
+    public static final String LAST_OLD_ROUND_INDEX = "last_old_round_index";
     private long current_field_id;
     private String[][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
@@ -180,6 +181,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this :: DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
     private boolean obfuscate;
+    private int last_controlled_index, last_old_round_index;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -266,7 +268,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
         loader = new LoaderManager.LoaderCallbacks<Cursor>() {
-            String date_string;
+
 
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -282,7 +284,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                             new String[]{current_field_id + "", "0"});
                 } else if (id == GET_ENTRIES_LOADER_ID) {
                     if (isEmulated) {
-                        date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
                                 .format(new Date(System.currentTimeMillis()));
                         return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
                                 "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
@@ -339,9 +341,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     } else {
                         if (listForTest == null) {
                             if (percent_or_number == PERCENTAGE) {
-                                listForTest = getListForTest(percentage, date_string);
+                                listForTest = getDataOfTest(percentage);
                             } else if (percent_or_number == NUMBER) {
-                                listForTest = getListForTest(number, date_string);
+                                listForTest = getDataOfTest(number);
                             }
                             questionsNumber = listForTest.length;
                             showNumberOfQuestions.setText(Integer.toString(questionsNumber));
@@ -653,18 +655,22 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         cursorLoaderAndUpdateDatabase.putTestPausedDataEnhancedTest(current_field_id, array);
     }
 
-    private String[][] getListForTest(double percent, final String date_string) {
+    private String[][] getDataOfTest(double percent) {
         int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
-        return ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level,
-                date_string,cursorLoaderAndUpdateDatabase,current_field_id,isEmulated);
+        Object[] data = ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level);
+        int[] markers = (int[]) data[1];
+        last_controlled_index = markers[0];
+        last_old_round_index = markers[1];
+        return (String[][]) data[0];
     }
 
-    private String[][] getListForTest(int numberOfQuestions, final String date_string) {
-       return ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level,
-               date_string,cursorLoaderAndUpdateDatabase,current_field_id,isEmulated);
+    private String[][] getDataOfTest(int numberOfQuestions) {
+        Object[] data = ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level);
+        int[] markers = (int[]) data[1];
+        last_controlled_index = markers[0];
+        last_old_round_index = markers[1];
+        return (String[][]) data[0];
     }
-
-
 
 
 
@@ -680,6 +686,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
     private void setFalse( ActivityUtility.FalseString falseString) {
         cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
+                last_controlled_index, last_old_round_index, isEmulated);
         show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
         show_result_linearlayout.setPadding(0, 0, 0, 0);
         cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
@@ -697,6 +705,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
         cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+        ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
+                last_controlled_index, last_old_round_index, isEmulated);
         boolean result = false;
         if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
             if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
@@ -814,6 +824,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         return result;
     }
 
+
+
     private String[][] readTestDataFromLinkerTable() {
         String[][] listForTest = new String[fieldEntriesCursor.getCount()][3];
         for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
@@ -912,6 +924,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInsatanceState.putInt(TIME_FOR_ANSWER_DO_WHAT, time_of_answer_do_what);
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
+        savedInsatanceState.putInt(LAST_CONTROLLED_INDEX, last_controlled_index);
+        savedInsatanceState.putInt(LAST_OLD_ROUND_INDEX, last_old_round_index);
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
         /* Saving the remaining time till completion of the current timer of time of answer because the activity
@@ -955,6 +969,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         symbol = savedInstanceState.getStringArray(SYMBOL);
         before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
         is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+        last_controlled_index = savedInstanceState.getInt(LAST_CONTROLLED_INDEX);
+        last_old_round_index = savedInstanceState.getInt(LAST_OLD_ROUND_INDEX);
         is_starting_after_destruction = true;
         restoreUserLayoutChanges(savedInstanceState);
         if (!before_showing_result_dialog) {
