@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.ahmedsameha1.peninbin.R;
@@ -14,7 +15,7 @@ import com.ahmedsameha1.peninbin.R;
 public class EmulateFieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener {
     public TextView question;
     public TextView answer;
-    public CheckBox checkBox;
+    public RadioButton radioButton;
     public String currentQuestion;
     public String currentAnswer;
     public IMyViewHolderClicks mListener;
@@ -26,8 +27,8 @@ public class EmulateFieldActivityRecyclerViewViewHolder extends RecyclerView.Vie
         mListener = listener;
         question = (TextView) view.findViewById(R.id.question);
         answer = (TextView) view.findViewById(R.id.answer);
-        checkBox = (CheckBox) view.findViewById(R.id.copy);
-        checkBox.setOnCheckedChangeListener(this);
+        radioButton = (RadioButton) view.findViewById(R.id.copy);
+        radioButton.setOnCheckedChangeListener(this);
     }
 
 

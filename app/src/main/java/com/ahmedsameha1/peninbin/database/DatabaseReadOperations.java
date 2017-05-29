@@ -91,8 +91,10 @@ public class DatabaseReadOperations {
                     new String[]{Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER},
                     Contract.COLUMN_ID + " = ? AND ( " + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? OR "
                             + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? OR "
-                    + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " >= ? )",
-                    new String[]{entry_id + "", "0", "0", "0"}, null, null, null);
+                    + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " >= ? OR "
+                            + Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER + " >= ? OR "
+                            + Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER + " >= ? ) ",
+                    new String[]{String.valueOf(entry_id), "0", "0", "0", "0", "0"}, null, null, null);
         } else if (getQuestionDataType(field_id) == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
         if (cursor == null || cursor.getCount() <= 0) {
@@ -107,19 +109,15 @@ public class DatabaseReadOperations {
     public int[] getRandomQuickTestData(long field_id) {
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
                 new String[]{Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES,
-                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS,Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION,
-                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL}
-                , Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""}, null, null, null);
+                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS}
+                , Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)}, null, null, null);
         cursor.moveToFirst();
         int number_of_quick_tests = cursor.getInt(0);
         int number_of_tries = cursor.getInt(1);
         int number_of_questions = cursor.getInt(2);
-        int controlled_portion = cursor.getInt(3);
-        int wrongness_level = cursor.getInt(4);
-        int rank_level = cursor.getInt(5);
         if (number_of_quick_tests > 0 && number_of_tries > 0 && number_of_questions > 0) {
             cursor.close();
-            return new int[]{number_of_quick_tests, number_of_tries, number_of_questions,controlled_portion,wrongness_level,rank_level};
+            return new int[]{number_of_quick_tests, number_of_tries, number_of_questions};
         } else {
             cursor.close();
             return null;
@@ -282,11 +280,11 @@ public class DatabaseReadOperations {
         }
         return wrongAnswers;
     }*/
-    public ArrayList<Integer> getStudyPeriodRepeatedEntries(long field_id) {
+    public ArrayList<Integer> getStudyTillCorrectRepeatedEntries(int study_till_correct_type, long field_id) {
         ArrayList<Integer> arrayList = new ArrayList<>();
-        Cursor cursor = sqLiteDatabase.query(Contract.Study_Period_Repeated_Entry.TABLE_NAME, new String[]{Contract.Study_Period_Repeated_Entry.COLUMN_REPEATED_ENTRY},
-                Contract.Study_Period_Repeated_Entry.COLUMN_FIELD + " = ? ",
-                new String[]{field_id + ""}, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME, new String[]{Contract.Study_Till_Correct_Repeated_Entry.COLUMN_REPEATED_ENTRY},
+                Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD + " = ? AND " + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + " = ? ",
+                new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)}, null, null, null);
         if (cursor.getCount() <= 0) {
             cursor.close();
             return arrayList;
@@ -298,15 +296,17 @@ public class DatabaseReadOperations {
         return arrayList;
     }
 
-    public int[] getDataFromStudyPeriodPaused(long field_id) {
-        int[] array = new int[2];
-        Cursor cursor = sqLiteDatabase.query(Contract.Study_Period_Paused.TABLE_NAME,
-                new String[]{Contract.Study_Period_Paused.COLUMN_CURRENT_QUESTION_COUNTER, Contract.Study_Period_Paused.COLUMN_TRIES_NUMBER},
-                Contract.Study_Period_Paused.COLUMN_FIELD + " = ? ",
-                new String[]{field_id + ""}, null, null, null);
+    public int[] getDataFromStudyTillCorrectPaused(int study_till_correct_type, long field_id) {
+        int[] array = new int[3];
+        Cursor cursor = sqLiteDatabase.query(Contract.Study_Till_Correct_Paused.TABLE_NAME,
+                new String[]{Contract.Study_Till_Correct_Paused.COLUMN_CURRENT_QUESTION_COUNTER, Contract.Study_Till_Correct_Paused.COLUMN_TRIES_NUMBER,
+                Contract.Study_Till_Correct_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION},
+                Contract.Study_Till_Correct_Paused.COLUMN_FIELD + " = ? AND " + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
+                new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)}, null, null, null);
         cursor.moveToFirst();
         array[0] = cursor.getInt(0);
         array[1] = cursor.getInt(1);
+        array[2] = cursor.getInt(2);
         cursor.close();
         return array;
     }
@@ -371,10 +371,10 @@ public class DatabaseReadOperations {
         return number == 1;
     }
 
-    public boolean isThisFieldStudyPeriodPaused(long field_id) {
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.Study_Period_Paused.TABLE_NAME
-                        + " WHERE " + Contract.Study_Period_Paused.COLUMN_FIELD + " = ? ",
-                new String[]{field_id + ""});
+    public boolean isThisFieldStudyTillCorrectPaused(int study_till_correct_type, long field_id) {
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Contract.Study_Till_Correct_Paused.TABLE_NAME
+                        + " WHERE " + Contract.Study_Till_Correct_Paused.COLUMN_FIELD + " = ? AND " + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
+                new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)});
         cursor.moveToFirst();
         int number = cursor.getInt(0);
         cursor.close();
@@ -463,31 +463,35 @@ public class DatabaseReadOperations {
     }
 
     public int[] getDataFromTestPausedEnhancedTest(long field_id) {
-        int[] array = new int[3];
+        int[] array = new int[4];
         Cursor cursor = sqLiteDatabase.query(Contract.Test_Paused.TABLE_NAME,
                 new String[]{Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER,
-                        Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT, Contract.Test_Paused.COLUMN_TRIES_NUMBER},
+                        Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT, Contract.Test_Paused.COLUMN_TRIES_NUMBER,
+                        Contract.Test_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_TEST_SESSION},
                 Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
                 new String[]{field_id + "", Constants.TestType.ENHANCED_TEST + ""}, null, null, null);
         cursor.moveToFirst();
         array[0] = cursor.getInt(0);
         array[1] = cursor.getInt(1);
         array[2] = cursor.getInt(2);
+        array[3] = cursor.getInt(3);
         cursor.close();
         return array;
     }
 
     public int[] getDataFromTestPausedFullyRandomTest(long field_id) {
-        int[] array = new int[3];
+        int[] array = new int[4];
         Cursor cursor = sqLiteDatabase.query(Contract.Test_Paused.TABLE_NAME,
                 new String[]{Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER,
-                        Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT, Contract.Test_Paused.COLUMN_TRIES_NUMBER},
+                        Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT, Contract.Test_Paused.COLUMN_TRIES_NUMBER,
+                Contract.Test_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_TEST_SESSION},
                 Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
                 new String[]{field_id + "", Constants.TestType.FULLY_RANDOM_TEST + ""}, null, null, null);
         cursor.moveToFirst();
         array[0] = cursor.getInt(0);
         array[1] = cursor.getInt(1);
         array[2] = cursor.getInt(2);
+        array[3] = cursor.getInt(3);
         cursor.close();
         return array;
     }
@@ -571,15 +575,12 @@ public class DatabaseReadOperations {
         ArrayList<long[]> data = new ArrayList<>();
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
                 new String[]{Contract.COLUMN_ID, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS,
-                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS,
-                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL,
-                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL},
+                        Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS},
                 null, null, null, null, null);
         for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
              cursor.moveToNext()) {
             if (cursor.getInt(1) > 0) {
-                data.add(new long[]{cursor.getLong(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3),
-                cursor.getInt(4),cursor.getInt(5),cursor.getInt(6)});
+                data.add(new long[]{cursor.getLong(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)});
             }
         }
         cursor.close();
@@ -591,8 +592,7 @@ public class DatabaseReadOperations {
                 new String[]{Contract.Scheduled_Time_Backup.COLUMN_FIELD, Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE,
                 Contract.Scheduled_Time_Backup.COLUMN_TIME, Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST,
                         Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER,
-                        Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES, Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_CONTROLLED_PORTION,
-                        Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_RANK_LEVEL},
+                        Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES},
         null,null,null,null,null);
         if ( cursor.getCount() > 0 ) {
             for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
@@ -600,7 +600,7 @@ public class DatabaseReadOperations {
                 data.add(new long[]{cursor.getLong(0),cursor.getInt(1),cursor.getLong(2),cursor.getInt(3),
                         (cursor.isNull(4)? -1 : cursor.getInt(4)),
                         (cursor.isNull(5)? -1 : cursor.getInt(5)),
-                        (cursor.isNull(6)? -1 : cursor.getInt(6)), cursor.getInt(7), cursor.getInt(8), cursor.getInt(9)});
+                        (cursor.isNull(6)? -1 : cursor.getInt(6))});
             }
         }
         cursor.close();
@@ -741,11 +741,11 @@ public class DatabaseReadOperations {
         return data;
     }
 
-    public int[] getTimeOfAnswerOfStudyAPeriod(long field_id ) {
+    public int[] getTimeOfAnswerOfStudyTillCorrect(long field_id ) {
         int [] data = new int[3];
         Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
-                new String[]{Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD, Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD,
-                        Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD},
+                new String[]{Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT, Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT,
+                        Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT},
                 Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
         cursor.moveToFirst();
         data[0] = cursor.getInt(0);
@@ -755,27 +755,7 @@ public class DatabaseReadOperations {
         return data;
     }
 
-    public long getElapsedPausedSessionTime( long field_id, int type ) {
-        long time;
-        Cursor cursor = null;
-        if ( type == Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD) {
-            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
-                    new String[] {Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION},
-                    Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
-        } else if ( type == Constants.ElapsedPausedSessionTime.ENHANCED_TEST ) {
-            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
-                    new String[] {Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION},
-                    Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
-        } else if ( type == Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST ) {
-            cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
-                    new String[] {Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION},
-                    Contract.COLUMN_ID + " = ?", new String[]{String.valueOf(field_id)},null,null, null);
-        }
-        cursor.moveToFirst();
-        time = cursor.getLong(0);
-        cursor.close();
-        return time;
-    }
+
     public boolean moreThanOneAnswerSameQuestion(long field_id, String question) {
         int count;
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + " COUNT(se." + Contract.COLUMN_ID + ") FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
@@ -810,6 +790,17 @@ public class DatabaseReadOperations {
         int time = cursor.getInt(0);
         cursor.close();
         return time > 0;
+    }
+    public int getDifferenceWronglyAndAskedByEntry( long entry_id ) {
+        int diff;
+        Cursor c = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT,
+                        Contract.String_Entry.COLUMN_ASKED_COUNT},
+                Contract.COLUMN_ID + " = ? ",
+                new String[]{String.valueOf(entry_id)}, null, null, null);
+        c.moveToFirst();
+        diff = c.getInt(0) - c.getInt(1);
+        c.close();
+        return diff;
     }
 }
 

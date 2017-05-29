@@ -18,8 +18,8 @@ import com.ahmedsameha1.peninbin.database.Contract.Not_String_Entry;
 import com.ahmedsameha1.peninbin.database.Contract.Test_Wrong_Answer_String;
 import com.ahmedsameha1.peninbin.database.Contract.Test_Wrong_Answer_Not_String;
 import com.ahmedsameha1.peninbin.database.Contract.Test_Paused;
-import com.ahmedsameha1.peninbin.database.Contract.Study_Period_Repeated_Entry;
-import com.ahmedsameha1.peninbin.database.Contract.Study_Period_Paused;
+import com.ahmedsameha1.peninbin.database.Contract.Old_Study_Period_Repeated_Entry_DBV12_AppV68;
+import com.ahmedsameha1.peninbin.database.Contract.Old_Study_Period_Paused_DBV12_AppV68;
 import com.ahmedsameha1.peninbin.database.Contract.Alternative_Answer_String;
 import com.ahmedsameha1.peninbin.database.Contract.Alternative_Answer_Not_String;
 import com.ahmedsameha1.peninbin.database.Contract.Old_Question_DBV6_AppV32;
@@ -64,20 +64,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_CREATION_EMULATION_NUMBER + " INTEGER NOT NULL DEFAULT " + Constants.NOT_EMULATED + ", "
             + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS + " INTEGER NOT NULL DEFAULT " + Field.ZERO_RANDOM_QUICK_TESTS + ", "
             + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES + " INTEGER NOT NULL DEFAULT 0, "
-            + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS + " INTEGER NOT NULL DEFAULT 0, "
-            + Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION + " INTEGER NOT NULL DEFAULT -1, "
-            + Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
+            + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS + " INTEGER NOT NULL DEFAULT 0, " // not used
+            + Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION + " INTEGER NOT NULL DEFAULT -1, " // not used
+            + Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL + " INTEGER NOT NULL DEFAULT -1, "  // not used
             + Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
             + Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_FIND_ANSWER_TIME_TESTS + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS + " INTEGER NOT NULL DEFAULT 0, "
-            + Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD + " INTEGER NOT NULL DEFAULT 0, "
-            + Field.COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD + " INTEGER NOT NULL DEFAULT 0, "
-            + Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT + " INTEGER NOT NULL DEFAULT " + Constants.TimeOfAnswer.NOTIFY + ", "
-            + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
-            + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
-            + Field.COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION + " INTEGER NOT NULL DEFAULT " + Constants.ElapsedPausedSessionTime.NOT_USED + ", "
             + Field.COLUMN_OBFUSCATE_QUESTION + " INTEGER NOT NULL DEFAULT 0, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'))"
             + " );";
@@ -110,6 +107,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
             + String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
             + String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
             + String_Entry.COLUMN_ASKED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
             + String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
             + String_Entry.COLUMN_RANK + " INTEGER NOT NULL DEFAULT 0, "
@@ -117,7 +116,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + String_Entry.COLUMN_REMIND_AT + " INTEGER DEFAULT NULL, "
             + String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " INTEGER DEFAULT NULL, "
             + String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND + " INTEGER DEFAULT " + Constants.TestRound.ASKED_AT_CURRENT_ROUND + ", "
-            + String_Entry.COLUMN_ORDER_OF_ENTRY + " INTEGER DEFAULT NULL, "
+            + String_Entry.COLUMN_ORDER_OF_ENTRY + " INTEGER DEFAULT 999999999, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
             + "FOREIGN KEY(" + String_Entry.COLUMN_QUESTION + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
             + "FOREIGN KEY(" + String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
@@ -135,6 +134,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Not_String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
             + Not_String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
             + Not_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + Not_String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
+            + Not_String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER + " INTEGER NOT NULL DEFAULT -1, "
             + Not_String_Entry.COLUMN_ASKED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
             + Not_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " INTEGER NOT NULL DEFAULT 0, "
             + Not_String_Entry.COLUMN_RANK + " INTEGER NOT NULL DEFAULT 0, "
@@ -142,7 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Not_String_Entry.COLUMN_REMIND_AT + " INTEGER DEFAULT NULL, "
             + Not_String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " INTEGER DEFAULT NULL, "
             + Not_String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND + " INTEGER DEFAULT " + Constants.TestRound.ASKED_AT_CURRENT_ROUND + ", "
-            + Not_String_Entry.COLUMN_ORDER_OF_ENTRY + " INTEGER DEFAULT NULL, "
+            + Not_String_Entry.COLUMN_ORDER_OF_ENTRY + " INTEGER DEFAULT 0, "
             + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')), "
             + "FOREIGN KEY(" + Not_String_Entry.COLUMN_QUESTION + ") REFERENCES " + Not_String.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
             + "FOREIGN KEY(" + Not_String_Entry.COLUMN_ANSWER + ") REFERENCES " + STring.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE NO ACTION, "
@@ -170,30 +171,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String CREATE_TEST_PAUSED_TABLE = "CREATE TABLE IF NOT EXISTS " + Test_Paused.TABLE_NAME
             + " ( "
             + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
-            + Test_Paused.COLUMN_TEST_TYPE + " INTEGER NOT NULL DEFAULT " + Constants.TestType.ENHANCED_TEST + " , "
+            + Test_Paused.COLUMN_TEST_TYPE + " INTEGER NOT NULL, "
             + Test_Paused.COLUMN_FIELD + " INTEGER NOT NULL, "
             + Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
             + Test_Paused.COLUMN_WRONG_ANSWERS_COUNT + " INTEGER NOT NULL, "
             + Test_Paused.COLUMN_TRIES_NUMBER + " INTEGER NOT NULL, "
+            + Test_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_TEST_SESSION + " INTEGER NOT NULL, "
             + " UNIQUE ( " + Test_Paused.COLUMN_TEST_TYPE + ", " + Test_Paused.COLUMN_FIELD + " ), "
             + "FOREIGN KEY(" + Test_Paused.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
             + " );";
-    public static final String CREATE_STUDY_PERIOD_REPEATED_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + Study_Period_Repeated_Entry.TABLE_NAME
+    public static final String CREATE_STUDY_TILL_CORRECT_REPEATED_ENTRY_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME
             + " ( "
             + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
-            + Study_Period_Repeated_Entry.COLUMN_FIELD + " INTEGER NOT NULL, "
-            + Study_Period_Repeated_Entry.COLUMN_REPEATED_ENTRY + " INTEGER NOT NULL, "
-            + "FOREIGN KEY(" + Study_Period_Repeated_Entry.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
-            + " UNIQUE ( " + Study_Period_Repeated_Entry.COLUMN_FIELD + ", "
-            + Study_Period_Repeated_Entry.COLUMN_REPEATED_ENTRY + " )"
+            + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD + " INTEGER NOT NULL, "
+            + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + " INTEGER NOT NULL, "
+            + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_REPEATED_ENTRY + " INTEGER NOT NULL, "
+            + "FOREIGN KEY(" + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + " UNIQUE ( " + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD + ", "
+            + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + ", "
+            + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_REPEATED_ENTRY + " )"
             + " );";
-    public static final String CREATE_STUDY_PERIOD_PAUSED_TABLE = "CREATE TABLE IF NOT EXISTS " + Study_Period_Paused.TABLE_NAME
+    public static final String CREATE_STUDY_TILL_CORRECT_PAUSED_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Study_Till_Correct_Paused.TABLE_NAME
             + " ( "
             + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
-            + Study_Period_Paused.COLUMN_FIELD + " INTEGER UNIQUE NOT NULL, "
-            + Study_Period_Paused.COLUMN_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
-            + Study_Period_Paused.COLUMN_TRIES_NUMBER + " INTEGER NOT NULL, "
-            + "FOREIGN KEY(" + Study_Period_Paused.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + Contract.Study_Till_Correct_Paused.COLUMN_FIELD + " INTEGER NOT NULL, "
+            + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " INTEGER NOT NULL, "
+            + Contract.Study_Till_Correct_Paused.COLUMN_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
+            + Contract.Study_Till_Correct_Paused.COLUMN_TRIES_NUMBER + " INTEGER NOT NULL, "
+            + Contract.Study_Till_Correct_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION + " INTEGER NOT NULL, "
+            + "FOREIGN KEY(" + Contract.Study_Till_Correct_Paused.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + " UNIQUE ( " + Contract.Study_Till_Correct_Paused.COLUMN_FIELD + ", "
+            + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " )"
             + " );";
     public static final String CREATE_ALTERNATIVE_ANSWER_STRING_TABLE = "CREATE TABLE IF NOT EXISTS " + Alternative_Answer_String.TABLE_NAME
             + " ( "
@@ -281,6 +289,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static final String CREATE_STUDY_PERIOD_REPEATED_ENTRY_DBV12_APPV68_TABLE = "CREATE TABLE IF NOT EXISTS " + Old_Study_Period_Repeated_Entry_DBV12_AppV68.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Old_Study_Period_Repeated_Entry_DBV12_AppV68.COLUMN_FIELD + " INTEGER NOT NULL, "
+            + Old_Study_Period_Repeated_Entry_DBV12_AppV68.COLUMN_REPEATED_ENTRY + " INTEGER NOT NULL, "
+            + "FOREIGN KEY(" + Old_Study_Period_Repeated_Entry_DBV12_AppV68.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+            + " UNIQUE ( " + Old_Study_Period_Repeated_Entry_DBV12_AppV68.COLUMN_FIELD + ", "
+            + Old_Study_Period_Repeated_Entry_DBV12_AppV68.COLUMN_REPEATED_ENTRY + " )"
+            + " );";
+    public static final String CREATE_STUDY_PERIOD_PAUSED_DBV12_APPV68_TABLE = "CREATE TABLE IF NOT EXISTS " + Old_Study_Period_Paused_DBV12_AppV68.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + Old_Study_Period_Paused_DBV12_AppV68.COLUMN_FIELD + " INTEGER UNIQUE NOT NULL, "
+            + Old_Study_Period_Paused_DBV12_AppV68.COLUMN_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
+            + Old_Study_Period_Paused_DBV12_AppV68.COLUMN_TRIES_NUMBER + " INTEGER NOT NULL, "
+            + "FOREIGN KEY(" + Old_Study_Period_Paused_DBV12_AppV68.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE "
+            + " );";
+
     /*public static final String CREATE_FIELD_TABLE = "CREATE TABLE " + OldField.TABLE_NAME +
             " ( " + OldField._ID + " INTEGER PRIMARY KEY , "
             +  OldField.COLUMN_FIELD_NAME + " TEXT , " +
@@ -392,7 +419,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Log.e(TAG, e.getMessage());
             }
         }
-/*        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
+       /* sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);//
@@ -400,8 +427,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_STRING_TABLE);
         sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_NOT_STRING_TABLE);
         sqLiteDatabase.execSQL(CREATE_TEST_PAUSED_TABLE);
-        sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_REPEATED_ENTRY_TABLE);
-        sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_PAUSED_TABLE);
+        sqLiteDatabase.execSQL(CREATE_STUDY_TILL_CORRECT_REPEATED_ENTRY_TABLE);
+        sqLiteDatabase.execSQL(CREATE_STUDY_TILL_CORRECT_PAUSED_TABLE);
         sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_EXCLUDED_TIME_TABLE);
@@ -489,8 +516,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_TEST_WRONG_ANSWER_NOT_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_TEST_PAUSED_TABLE);
-            sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_REPEATED_ENTRY_TABLE);
-            sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_PAUSED_TABLE);
+            sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_REPEATED_ENTRY_DBV12_APPV68_TABLE);
+            sqLiteDatabase.execSQL(CREATE_STUDY_PERIOD_PAUSED_DBV12_APPV68_TABLE);
             sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);
             sqLiteDatabase.execSQL(CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);
             ModifyDatabaseSchema.onUpgradeDatabaseToDBV7AppV33(context, sqLiteDatabase);
@@ -513,7 +540,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Emulation.modifyEmulationCreationDatesOfAppV53AndHigher(sqLiteDatabase);
         }
         if (oldVersion < 13 ) {
-            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV72(sqLiteDatabase);
+            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV73(sqLiteDatabase);
         }
     }
 

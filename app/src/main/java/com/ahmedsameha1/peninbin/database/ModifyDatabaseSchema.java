@@ -21,7 +21,7 @@ import java.util.StringTokenizer;
  */
 public class ModifyDatabaseSchema {
 
-    static void onUpgradeDatabaseToDBV13AppV72(SQLiteDatabase sqLiteDatabase) {
+    static void onUpgradeDatabaseToDBV13AppV73(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
             sqLiteDatabase.delete(Field.TABLE_NAME, Field.COLUMN_FIELD_TYPE + " = ? ",
@@ -96,6 +96,109 @@ public class ModifyDatabaseSchema {
                     + ";";
             sqLiteDatabase.execSQL(copy);
             String drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
+            rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
+            sqLiteDatabase.execSQL(rename);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE);
+            copy = "INSERT INTO " + Contract.String_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.String_Entry.COLUMN_FIELD
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_RANK
+                    + " , " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT
+                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
+                    + " , " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                    + " , " + Contract.String_Entry.COLUMN_ORDER_OF_ENTRY
+                    + " , " + Contract.CREATION_DATE
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.String_Entry.COLUMN_QUESTION
+                    + " , " + Contract.String_Entry.COLUMN_ANSWER
+                    + " , " + Contract.String_Entry.COLUMN_FIELD
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER
+                    + " , " + Contract.String_Entry.COLUMN_ASKED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                    + " , " + Contract.String_Entry.COLUMN_RANK
+                    + " , " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT
+                    + " , " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST
+                    + " , " + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                    + " , " + Contract.String_Entry.COLUMN_ORDER_OF_ENTRY
+                    + " , " + Contract.CREATION_DATE
+                    + " FROM " + "tempTable"
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
+            contentValues = new ContentValues();
+            contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, 999999999);
+            sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " IS NULL ", null);
+            drop = "DROP TABLE IF EXISTS " + Contract.Not_String_Entry.TABLE_NAME + ";";
+            sqLiteDatabase.execSQL(drop);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_ENTRY_TABLE);
+            rename = "ALTER TABLE " + Contract.Test_Paused.TABLE_NAME + " RENAME TO " + "tempTable";
+            sqLiteDatabase.execSQL(rename);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_TEST_PAUSED_TABLE);
+            copy = "INSERT INTO " + Contract.Test_Paused.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Test_Paused.COLUMN_TEST_TYPE
+                    + " , " + Contract.Test_Paused.COLUMN_FIELD
+                    + " , " + Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER
+                    + " , " + Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT
+                    + " , " + Contract.Test_Paused.COLUMN_TRIES_NUMBER
+                    + " , " + Contract.Test_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_TEST_SESSION
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.Test_Paused.COLUMN_TEST_TYPE
+                    + " , " + Contract.Test_Paused.COLUMN_FIELD
+                    + " , " + Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER
+                    + " , " + Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT
+                    + " , " + Contract.Test_Paused.COLUMN_TRIES_NUMBER
+                    + " , 0 " // insert 0 to fix the problem of not null to the existing rows
+                    + " FROM " + "tempTable"
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
+            sqLiteDatabase.execSQL(drop);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_STUDY_TILL_CORRECT_REPEATED_ENTRY_TABLE);
+            copy = "INSERT INTO " + Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD
+                    + " , " + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE
+                    + " , " + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_REPEATED_ENTRY
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.Old_Study_Period_Repeated_Entry_DBV12_AppV68.COLUMN_FIELD
+                    + " , " + Constants.Study_Till_Correct.STUDY_PERIOD
+                    + " , " + Contract.Old_Study_Period_Repeated_Entry_DBV12_AppV68.COLUMN_REPEATED_ENTRY
+                    + " FROM " + Contract.Old_Study_Period_Repeated_Entry_DBV12_AppV68.TABLE_NAME
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + Contract.Old_Study_Period_Repeated_Entry_DBV12_AppV68.TABLE_NAME + ";";
+            sqLiteDatabase.execSQL(drop);
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_STUDY_TILL_CORRECT_PAUSED_TABLE);
+            copy = "INSERT INTO " + Contract.Study_Till_Correct_Paused.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Study_Till_Correct_Paused.COLUMN_FIELD
+                    + " , " + Contract.Study_Till_Correct_Paused.COLUMN_TYPE
+                    + " , " + Contract.Study_Till_Correct_Paused.COLUMN_CURRENT_QUESTION_COUNTER
+                    + " , " + Contract.Study_Till_Correct_Paused.COLUMN_TRIES_NUMBER
+                    + " ) "
+                    + "SELECT " + Contract.COLUMN_ID
+                    + " , " + Contract.Old_Study_Period_Paused_DBV12_AppV68.COLUMN_FIELD
+                    + " , " + Constants.Study_Till_Correct.STUDY_PERIOD
+                    + " , " + Contract.Old_Study_Period_Paused_DBV12_AppV68.COLUMN_CURRENT_QUESTION_COUNTER
+                    + " , " + Contract.Old_Study_Period_Paused_DBV12_AppV68.COLUMN_TRIES_NUMBER
+                    + " , 0 " // insert 0 to fix the problem of not null to the existing rows
+                    + " FROM " + Contract.Old_Study_Period_Paused_DBV12_AppV68.TABLE_NAME
+                    + ";";
+            sqLiteDatabase.execSQL(copy);
+            drop = "DROP TABLE IF EXISTS " + Contract.Old_Study_Period_Paused_DBV12_AppV68.TABLE_NAME + ";";
             sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
@@ -497,8 +600,8 @@ public class ModifyDatabaseSchema {
                     }
                     cursor.close();
                 }
-                Cursor study_period_paused_cursor = sqLiteDatabase.query(Contract.Study_Period_Paused.TABLE_NAME,new String[]{Contract.Study_Period_Paused.COLUMN_FIELD},
-                        Contract.Study_Period_Paused.COLUMN_FIELD + " = ? ",
+                Cursor study_period_paused_cursor = sqLiteDatabase.query(Contract.Old_Study_Period_Paused_DBV12_AppV68.TABLE_NAME,new String[]{Contract.Old_Study_Period_Paused_DBV12_AppV68.COLUMN_FIELD},
+                        Contract.Old_Study_Period_Paused_DBV12_AppV68.COLUMN_FIELD + " = ? ",
                         new String[]{field_id + ""},null,null,null);
                 if ( study_period_paused_cursor.getCount() <= 0 ) {
                     Cursor cursor = sqLiteDatabase.query(Contract.Old_Linker_DBV6_AppV32.TABLE_NAME, new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_ORDER},
@@ -512,9 +615,9 @@ public class ModifyDatabaseSchema {
                             StringTokenizer stringTokenizer = new StringTokenizer(string, "-");
                             while (stringTokenizer.hasMoreTokens()) {
                                 contentValues = new ContentValues();
-                                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_FIELD,field_id);
-                                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_REPEATED_ENTRY,Integer.parseInt(stringTokenizer.nextToken()));
-                                sqLiteDatabase.insert(Contract.Study_Period_Repeated_Entry.TABLE_NAME,null,contentValues);
+                                contentValues.put(Contract.Old_Study_Period_Repeated_Entry_DBV12_AppV68.COLUMN_FIELD,field_id);
+                                contentValues.put(Contract.Old_Study_Period_Repeated_Entry_DBV12_AppV68.COLUMN_REPEATED_ENTRY,Integer.parseInt(stringTokenizer.nextToken()));
+                                sqLiteDatabase.insert(Contract.Old_Study_Period_Repeated_Entry_DBV12_AppV68.TABLE_NAME,null,contentValues);
                             }
                         }
                         int currentQuestionCounter = sharedPreferences.getInt(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.DASH +
@@ -523,10 +626,10 @@ public class ModifyDatabaseSchema {
                         int permitedTriesNumber = sharedPreferences.getInt(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.DASH +
                                 StudyAPeriodActivity.NUMBER_OF_TRIES + StudyAPeriodActivity.DASH + field, 0);
                         contentValues = new ContentValues();
-                        contentValues.put(Contract.Study_Period_Paused.COLUMN_FIELD,field_id);
-                        contentValues.put(Contract.Study_Period_Paused.COLUMN_CURRENT_QUESTION_COUNTER,currentQuestionCounter);
-                        contentValues.put(Contract.Study_Period_Paused.COLUMN_TRIES_NUMBER,permitedTriesNumber);
-                        sqLiteDatabase.insert(Contract.Study_Period_Paused.TABLE_NAME,null,contentValues);
+                        contentValues.put(Contract.Old_Study_Period_Paused_DBV12_AppV68.COLUMN_FIELD,field_id);
+                        contentValues.put(Contract.Old_Study_Period_Paused_DBV12_AppV68.COLUMN_CURRENT_QUESTION_COUNTER,currentQuestionCounter);
+                        contentValues.put(Contract.Old_Study_Period_Paused_DBV12_AppV68.COLUMN_TRIES_NUMBER,permitedTriesNumber);
+                        sqLiteDatabase.insert(Contract.Old_Study_Period_Paused_DBV12_AppV68.TABLE_NAME,null,contentValues);
                         editor.remove(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.DASH +
                                 StudyAPeriodActivity.STRING_REPRESENTING_REPEATED_ENTRIES
                                 + StudyAPeriodActivity.DASH + field);

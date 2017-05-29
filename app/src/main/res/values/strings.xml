@@ -43,7 +43,7 @@
     <string name="ask_for_continue_previous_study_during">Do you want to continue the previous studying session?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="complete_or_cancel_last_study_session">Please firstly complete or cancel any (study during period or test)  paused sessions which concerning with this field!</string>
+    <string name="complete_or_cancel_last_study_session">Please firstly complete or cancel any paused sessions of this field!</string>
     <string name="repeated_entry">There is an entry that has the same question and the same answer, delete this entry if you want!</string>
     <string name="ask_for_continue_previous_test">Do you want to continue the previous test session?</string>
     <string name="enter_date_time">Click to specify the date and time.</string>
@@ -242,7 +242,7 @@
     <string name="if_you_want_select_the_starting_entry">IF YOU WANT, select the first entry</string>
     <string name="everyday_entries_help">Enter the number of entries that you want to study everyday. Everyday, the app will emulate that you have entered this number of entries at that day. If the field that you enable emulation on it has 1000 entries, and you have entered 5 here, this field will take 200 days to finish. If you will add any entries to that field, the app will emulate that you have entered these entries from day 201, and so on.\nThe emulation affect on test features and study a period feature. The list of entries of the field will not be affected.</string>
     <string name="starting_entry_help" >If you want, you can select one entry to start enabling the emulation from it. That entry and the next entries will be emulated, the previous entries will not be emulated.\nOnly the emulated entries will appear when using study a period feature, every entry at its emulation date.</string>
-    <string name="field_emulated">This field has been emulated!</string>
+    <string name="field_emulated">If you have emulated the field today, the entries will appear starting from tomorrow</string>
     <string name="CircularFloatingActionMenu" translatable="false">https://github.com/oguzbilgener/CircularFloatingActionMenu</string>
     <string name="cwac_loaderex" translatable="false">https://github.com/commonsguy/cwac-loaderex</string>
     <string name="android_filepicker" translatable="false">https://github.com/Angads25/android-filepicker</string>
@@ -314,4 +314,19 @@
     <string name="reading_letter_second_help">Enter the number of letters that you can read per second. The time of answer will be calculated for every entry according to this number and the number of finding the answer and the number of typing the answer</string>
     <string name="finding_answer_help">Enter the number of seconds that you will take to find the answer of the question. The time of answer will be calculated for every entry according to this number and the number of reading the question and the number of typing the answer</string>
     <string name="please_create_field">Please, Create a field</string>
+    <string name="wait_some_background_operation">Please, wait until some background operation finishes</string>
+    <string name="continue_last_study_agian">Do you want to continue with the last unfinished ask again session?</string>
+    <string name="https_gist_github_com_skyfishjy_443b7448f59be978bc59" translatable="false">https://gist.github.com/skyfishjy/443b7448f59be978bc59</string>
+    <string name="sort_by_wrongness_level_ascending">Sort by Wrongness Level (ascending)</string>
+    <string name="sort_by_wrongness_level_descending">Sort by Wrongness Level (descending)</string>
+    <string name="import_provided_field">Import provided field</string>
+    <string name="https_github_com_danoz73_recyclerviewfastscroller" translatable="false">https://github.com/danoz73/RecyclerViewFastScroller</string>
+    <string name="intial_period">Currently, you do not need to have a subscription!</string>
+    <string name="last_entry">This is the last entry!</string>
+    <string name="first_entry">This is the first entry!</string>
+    <string name="keep_question">Keep question</string>
+    <string name="keep_answer">Keep answer</string>
+    <string name="vertical_ellipsis" translatable="false">&#8942;</string>
+    <string name="no_timer_app">there is no app that can run timer on your device!</string>
+    <string name="kitkat_or_newer">This feature needs android kitkat or newer</string>
 </resources>

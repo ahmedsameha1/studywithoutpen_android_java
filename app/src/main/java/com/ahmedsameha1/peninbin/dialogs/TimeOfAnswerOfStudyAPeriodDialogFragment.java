@@ -15,11 +15,8 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
@@ -227,9 +224,9 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
                                 if (reading_number > 0 && find_number > 0 && typing_number > 0) {
                                     ((Contact) getActivity()).setTimeOfAnswer(reading_number, find_number, typing_number, save.isChecked());
                                     if (save.isChecked()) {
-                                        cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyAPeriod(current_field_id,reading_number, find_number, typing_number);
+                                        cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyTillCorrect(current_field_id,reading_number, find_number, typing_number);
                                     } else {
-                                        cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyAPeriod(current_field_id,
+                                        cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyTillCorrect(current_field_id,
                                                 Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED);
                                     }
                                     ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
@@ -245,7 +242,7 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
                                 toast.show();
                             }
                         } else {
-                                cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyAPeriod(current_field_id,
+                                cursorLoaderAndUpdateDatabase.setTimeOfAnswerOfStudyTillCorrect(current_field_id,
                                         Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED);
                             ((Contact) getActivity()).setTimeOfAnswer(Constants.TimeOfAnswer.NOT_USED,
                                     Constants.TimeOfAnswer.NOT_USED, Constants.TimeOfAnswer.NOT_USED, save.isChecked());

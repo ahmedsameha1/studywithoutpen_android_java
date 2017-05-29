@@ -5,15 +5,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.Toast;
+import android.widget.RadioButton;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.EmulateFieldActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
@@ -32,7 +30,7 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private ArrayList<Long> list_of_entries;
     private ArrayList<Long> starting_entry_id;
-    private static CheckBox lastChecked = null;
+    private static RadioButton lastChecked = null;
 
 
     public EmulateFieldActivityRecyclerViewAdapter(Context context, Cursor data, ArrayList<Long> starting_entry_id ) {
@@ -48,7 +46,7 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
     @Override
     public EmulateFieldActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.copy_move_entries_activity_recyclerview_row, parent, false);
+                .inflate(R.layout.emulate_field_activity_recyclerview_row, parent, false);
         EmulateFieldActivityRecyclerViewViewHolder emulateFieldActivityRecyclerViewViewHolder =
                 new EmulateFieldActivityRecyclerViewViewHolder(itemView, (entry_id, checked) -> {
                     if ( checked ) {
@@ -61,7 +59,7 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
                         }
                         starting_entry_id.clear();
                             starting_entry_id.add(entry_id);
-                            lastChecked = ((CheckBox) itemView.findViewById(R.id.copy));
+                            lastChecked = ((RadioButton) itemView.findViewById(R.id.copy));
 
                         /*if ( list_of_entries.size() > 1 ) {
                             ((CheckBox)itemView.findViewById(R.id.copy)).setChecked(false);
@@ -91,19 +89,19 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
         viewHolder.currentAnswer = answer;
         viewHolder.question.setText(question);
         viewHolder.answer.setText(answer);
-        viewHolder.checkBox.setOnCheckedChangeListener(null);
+        viewHolder.radioButton.setOnCheckedChangeListener(null);
         if ( starting_entry_id.contains( entry_id) ) {
-            viewHolder.checkBox.setChecked(true);
+            viewHolder.radioButton.setChecked(true);
         } else {
-            viewHolder.checkBox.setChecked(false);
+            viewHolder.radioButton.setChecked(false);
         }
-        viewHolder.checkBox.setOnCheckedChangeListener(viewHolder);
-        if ( viewHolder.checkBox.isChecked())
+        viewHolder.radioButton.setOnCheckedChangeListener(viewHolder);
+        if ( viewHolder.radioButton.isChecked())
         {
-            lastChecked = viewHolder.checkBox;
+            lastChecked = viewHolder.radioButton;
 
         }
-    /*    viewHolder.checkBox.setOnClickListener(new View.OnClickListener()
+    /*    viewHolder.radioButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)

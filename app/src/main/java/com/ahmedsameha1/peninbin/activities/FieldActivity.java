@@ -24,6 +24,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,6 +49,7 @@ import com.ahmedsameha1.peninbin.dialogs.CopyMoveDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.StudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
@@ -71,6 +73,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.StringTokenizer;
+
+import xyz.danoz.recyclerviewfastscroller.sectionindicator.title.SectionTitleIndicator;
+import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
 
 
 public class FieldActivity extends AppCompatActivity implements
@@ -114,8 +119,8 @@ public class FieldActivity extends AppCompatActivity implements
     protected int fieldType = 0;
     private long current_field_id;
     private SortOptions sortOption;
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
-    private DatabaseReadOperations databaseOperations;
+    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
+    private DatabaseReadOperations databaseReadOperations;
     private FieldActivityRecyclerViewAdapter mAdapter;
     private SearchView searchView;
     private MenuItem searchItem;
@@ -147,19 +152,24 @@ public class FieldActivity extends AppCompatActivity implements
         } else {
             current_field_id = getIntent().getLongExtra(FIELD_ID, 0);
         }
-        databaseOperations = new DatabaseReadOperations(this);
-        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
-        fieldType = databaseOperations.getFieldType(current_field_id);
-        sortOption = databaseOperations.getFieldSort(current_field_id);
+        databaseReadOperations = new DatabaseReadOperations(this);
+        question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
+        fieldType = databaseReadOperations.getFieldType(current_field_id);
+        sortOption = databaseReadOperations.getFieldSort(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_field_activity); // FieldActivity.this Toolbar will act as action bar of the activity
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
+        VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
+        // Connect the recycler to the scroller (to let the scroller scroll the list)
+        fastScroller.setRecyclerView(recyclerView);
+        // Connect the scroller to the recycler (to let the recycler scroll the scroller's handle)
+        recyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         drawerFragment = (FieldActivityFragmentDrawer)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         setSupportActionBar(toolbar);       // setting toolbar as the action bar of the activity
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
-        getSupportActionBar().setTitle(databaseOperations.getFieldName(current_field_id));
+        getSupportActionBar().setTitle(databaseReadOperations.getFieldName(current_field_id));
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setDrawerListener(FieldActivity.this);
         mAdapter = new FieldActivityRecyclerViewAdapter(FieldActivity.this, null, current_field_id, search_string_highlight);
@@ -210,7 +220,7 @@ public class FieldActivity extends AppCompatActivity implements
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
                     if (id == SEARCH_ENTRIES_LOADER_ID) {
                         String searchString = args.getString(QUERY_KEY);
-                        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(FieldActivity.this,
+                        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(FieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
                                         + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -221,10 +231,10 @@ public class FieldActivity extends AppCompatActivity implements
                                         + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                                         + " a LIKE ? ORDER BY " + sortOption.getSortString(),
                                 new String[]{current_field_id + "", "%" + searchString + "%", current_field_id + "", "%" + searchString + "%"});
-                        return mySQLiteCursorLoader;
+                        return cursorLoaderAndUpdateDatabase;
 
                     } else if (id == GET_ENTRIES_LOADER_ID) {
-                        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(FieldActivity.this,
+                        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(FieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
                                         + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -233,7 +243,7 @@ public class FieldActivity extends AppCompatActivity implements
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
                                         + "ORDER BY " + sortOption.getSortString(),
                                 new String[]{current_field_id + ""});
-                        return mySQLiteCursorLoader;
+                        return cursorLoaderAndUpdateDatabase;
 
                     }
                 }
@@ -289,8 +299,8 @@ public class FieldActivity extends AppCompatActivity implements
                 String question = data.getStringExtra(EDITED_QUESTION);
                 String answer = data.getStringExtra(EDITED_ANSWER);
                 int rank = data.getIntExtra(EDITED_RANK, 0);
-                int order = data.getIntExtra(EDITED_ORDER, -1);
-                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer, rank, order);
+                int order = data.getIntExtra(EDITED_ORDER, 0);
+                cursorLoaderAndUpdateDatabase.editEntry(entry_id, question_data_type, question, answer, rank, order);
             }
         } else if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
@@ -371,6 +381,8 @@ public class FieldActivity extends AppCompatActivity implements
         if (mServiceConn != null) {
             unbindService(mServiceConn);
         }
+        getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
+        getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
     }
 
     @Override
@@ -415,13 +427,13 @@ public class FieldActivity extends AppCompatActivity implements
                 startEnhancedTest();
                 break;
             case FULLY_RANDOM_TEST:
-                    startFulllyRandomTest();
+                startFullyRandomTest();
                 break;
             case STUDY_PERIOD:
-                    startStudyAPeriod();
+                startStudyAPeriod();
                 break;
             case FIELD_PROPERTIES:
-                String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
+                String locale_short_name = databaseReadOperations.getFieldLocale(current_field_id);
                 if (locale_short_name != null) {
                     StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
                     String lang = stringTokenizer.nextToken();
@@ -441,7 +453,7 @@ public class FieldActivity extends AppCompatActivity implements
                 fieldPropertiesDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction(ActivityUtility.getVersionCode(this) +"field properties")
+                        .setAction(ActivityUtility.getVersionCode(this) + "field properties")
                         .build());
                 break;
             case SCHEDULE_IN_FIELD:
@@ -559,7 +571,7 @@ public class FieldActivity extends AppCompatActivity implements
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction(ActivityUtility.getVersionCode(this) +"sort")
+                        .setAction(ActivityUtility.getVersionCode(this) + "sort")
                         .build());
                 return true;
             case R.id.text_shortcuts:
@@ -586,12 +598,12 @@ public class FieldActivity extends AppCompatActivity implements
 
     @Override
     public void deleteEntry(long entry_id, int question_data_type) {
-        mySQLiteCursorLoader.deleteEntry(entry_id, question_data_type);
+        cursorLoaderAndUpdateDatabase.deleteEntry(entry_id, question_data_type);
     }
 
     @Override
     public void copyField(long field_id) {
-        mySQLiteCursorLoader.copyField(current_field_id, field_id);
+        cursorLoaderAndUpdateDatabase.copyField(current_field_id, field_id);
     }
 
     @Override
@@ -630,15 +642,34 @@ public class FieldActivity extends AppCompatActivity implements
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-        boolean isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-        if (!sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + current_field_id)
+        boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + current_field_id)
+                && !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + current_field_id)
                 && !Emulation.isAnyThreadRunning()) {
-            if (databaseOperations.getEntriesNumberForTests(current_field_id, question_data_type) > 0) {
-                if (databaseOperations.isThisFieldTestPausedEnhancedTest(current_field_id)) {
+            if (databaseReadOperations.getEntriesNumberForTests(current_field_id, question_data_type) > 0) {
+                if (databaseReadOperations.isThisFieldTestPausedEnhancedTest(current_field_id)) {
                     AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
                     bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
                     fragment3.setArguments(bundle);
                     fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
+                } else if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id)) {
+                    new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
+                            .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
+                                Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                                intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                startActivity(intent);
+                            })
+                            .setNegativeButton(R.string.no, (dialogInterface, i) -> {
+                                cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, question_data_type);
+                                cursorLoaderAndUpdateDatabase.
+                                        clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,
+                                                current_field_id);
+                                EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
+                                dialogFragment.setArguments(bundle);
+                                dialogFragment.show(getSupportFragmentManager(), EnhancedTestDialogFragment.ENHANCED_TEST_DIALOG_FRAGMENT);
+                            }).create().show();
                 } else {
                     EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
                     dialogFragment.setArguments(bundle);
@@ -655,25 +686,42 @@ public class FieldActivity extends AppCompatActivity implements
                 }
             }
         } else {
-            Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
         }
     }
 
-    private void startFulllyRandomTest() {
+    private void startFullyRandomTest() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-        boolean isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-        if (!sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + current_field_id)
+        boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        if (!sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + current_field_id)
+                && !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + current_field_id)
                 && !Emulation.isAnyThreadRunning()) {
-            if (databaseOperations.getEntriesNumberForTests(current_field_id, question_data_type) > 0) {
-                if (databaseOperations.isThisFieldTestPausedFullyRandomTest(current_field_id)) {
+            if (databaseReadOperations.getEntriesNumberForTests(current_field_id, question_data_type) > 0) {
+                if (databaseReadOperations.isThisFieldTestPausedFullyRandomTest(current_field_id)) {
                     AskAboutContinuePreviousTestDialogFragment fragment3 = new AskAboutContinuePreviousTestDialogFragment();
                     bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
                     fragment3.setArguments(bundle);
                     fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
+                }  else if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id)) {
+                    new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
+                            .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
+                                Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                                intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                startActivity(intent);
+                            })
+                            .setNegativeButton(R.string.no, (dialogInterface, i) -> {
+                                cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST,question_data_type);
+                                cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id);
+                                FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
+                                dialogFragment.setArguments(bundle);
+                                dialogFragment.show(getSupportFragmentManager(), FullyRandomTestDialogFragment.FULLY_RANDOM_TEST_DIALOG_FRAGMENT);
+                            }).create().show();
                 } else {
                     FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
                     dialogFragment.setArguments(bundle);
@@ -690,7 +738,7 @@ public class FieldActivity extends AppCompatActivity implements
                 }
             }
         } else {
-            Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_test_pausing_finish, Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
         }
@@ -700,11 +748,11 @@ public class FieldActivity extends AppCompatActivity implements
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-        boolean isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-        if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id)
+        boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + current_field_id)
                 && !Emulation.isAnyThreadRunning()) {
-            if (databaseOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
-                if (databaseOperations.isThisFieldStudyPeriodPaused(current_field_id)) {
+            if (databaseReadOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
+                if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id)) {
                     AskAboutContinuePreviousStudyAPeriodDialogFragment fragment2 = new AskAboutContinuePreviousStudyAPeriodDialogFragment();
                     fragment2.setArguments(bundle);
                     fragment2.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_STUDY_DURING_SESSION);
@@ -725,7 +773,7 @@ public class FieldActivity extends AppCompatActivity implements
             }
 
         } else {
-            Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_until_study_during_pausing_finish, Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(FieldActivity.this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
         }

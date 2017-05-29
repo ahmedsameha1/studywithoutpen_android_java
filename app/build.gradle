@@ -8,8 +8,8 @@ android {
         applicationId "com.ahmedsameha1.peninbin"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 72
-        versionName "3.1"
+        versionCode 73
+        versionName "3.2"
         multiDexEnabled true
 
         jackOptions {
@@ -52,6 +52,7 @@ dependencies {
     compile files('libs/CWAC-LoaderEx.jar')
     compile 'com.github.angads25:filepicker:1.0.6'
     compile 'com.oguzdev:CircularFloatingActionMenu:1.0.2'
+    compile 'xyz.danoz:recyclerviewfastscroller:0.1.3'
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'
 }

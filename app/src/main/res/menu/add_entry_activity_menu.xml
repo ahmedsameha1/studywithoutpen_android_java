@@ -11,4 +11,9 @@
         android:id="@+id/change_text_size"
         android:title="@string/change_text_size"/>
 
+    <item
+        android:id="@+id/timer"
+        android:title="timer"
+        app:showAsAction="never"/>
+
 </menu>

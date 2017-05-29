@@ -14,6 +14,7 @@ package com.ahmedsameha1.peninbin.adapters;/*
  * limitations under the License.
  *
  */
+// https://gist.github.com/skyfishjy/443b7448f59be978bc59
  
 import android.content.Context;
 import android.database.Cursor;
@@ -23,7 +24,7 @@ import android.support.v7.widget.RecyclerView;
 /**
  * Created by skyfishjy on 10/31/14.
  */
- 
+
 public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     private Context mContext;

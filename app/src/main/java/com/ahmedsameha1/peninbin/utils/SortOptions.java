@@ -16,7 +16,9 @@ public enum SortOptions {
     SORT_ORDER_ASC,
     SORT_ORDER_DESC,
     SORT_RANK_ASC,
-    SORT_RANK_DESC;
+    SORT_RANK_DESC,
+    SORT_WRONGNESS_ASC,
+    SORT_WRONGNESS_DESC;
 
     public static final String[] SORT_STRINGS = {"datetime(" + Contract.CREATION_DATE + ") DESC",
             " a DESC",
@@ -29,7 +31,9 @@ public enum SortOptions {
             Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
             Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
             Contract.String_Entry.COLUMN_RANK + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
-            Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC"
+            Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
+            "( CAST (" + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " AS FLOAT) /" + Contract.String_Entry.COLUMN_ASKED_COUNT + ") ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
+            "( CAST (" + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " AS FLOAT) /" + Contract.String_Entry.COLUMN_ASKED_COUNT + ") DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC"
             };
 
 

@@ -43,8 +43,10 @@ public class AboutDialogFragment extends DialogFragment {
             final TextView version_textview = (TextView) alertDialog.findViewById(R.id.version);
             final TextView cwac_loaderex_license = (TextView) alertDialog.findViewById(R.id.cwac_loaderex);
             final TextView android_filepicker_license = (TextView) alertDialog.findViewById(R.id.android_filepicker);
+            final TextView cursor_recyclerview_adapter = (TextView) alertDialog.findViewById(R.id.cursor_recyclerview_adapter);
             final TextView circular_floating_action_menu_license = (TextView) alertDialog.findViewById(R.id.circular_floating_action_menu);
             final TextView terms_of_use = (TextView) alertDialog.findViewById(R.id.terms_of_use);
+            final TextView recyclerview_fast_scroller = (TextView) alertDialog.findViewById(R.id.recyclerview_fast_scroller);
             PackageInfo pInfo = null;
             String version = null;
             try {
@@ -79,7 +81,14 @@ public class AboutDialogFragment extends DialogFragment {
                     .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.mit_license))
                     .create().show());
             terms_of_use.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
-                    .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.eula)).create().show());
+                    .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.eula))
+                    .create().show());
+            cursor_recyclerview_adapter.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
+                    .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.apache_license_v2))
+                    .create().show());
+            recyclerview_fast_scroller.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
+                    .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.apache_license_v2))
+                    .create().show());
         });
         return alertDialog;
     }

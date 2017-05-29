@@ -12,5 +12,7 @@
 <ListView
     android:id="@+id/list_view_symbol"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+    android:layout_height="match_parent"
+    android:fastScrollEnabled="true"
+    android:fastScrollAlwaysVisible="true"/>
 </RelativeLayout>

@@ -39,6 +39,8 @@ import com.google.android.gms.analytics.Tracker;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
+
 /**
  * Created by ahmed on 3/2/2016.
  */
@@ -86,6 +88,11 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.search_activity_recyclerview);
+        VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
+        // Connect the recycler to the scroller (to let the scroller scroll the list)
+        fastScroller.setRecyclerView(recyclerView);
+        // Connect the scroller to the recycler (to let the recycler scroll the scroller's handle)
+        recyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
         result_count = (TextView) findViewById(R.id.result_count);
         setSupportActionBar(toolbar);
         mAdapter = new SearchActivityRecyclerViewAdapter(SearchActivity.this,null, current_field_id, search_string_highlight);

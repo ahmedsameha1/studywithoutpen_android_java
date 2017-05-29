@@ -14,6 +14,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.provider.AlarmClock;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -62,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 /**
  * Created by ahmed_000 on 9/23/2015.
@@ -110,6 +112,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     public static final String TIME_BETWEEN_ANSWERS_PASSED = "time_between_answers_passed";
     private static final String HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER = "how_much_time_remaining_from_time_for_answer";
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
+    public static final String PERMITED_TRIES_NUMBER = "permitedTriesNumber";
+    private static final String WHILE_STUDYING = "while_studying";
     private long startingTime;
     boolean boolean_continue, actionBarShown, is_time_of_answer_elapsed = false;
     private Cursor cursor;
@@ -125,7 +129,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private TextView nextHint, check, _continue;
     private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
     private CardView check_card_view, next_hint_card_view, show_action_bar_card_view, continue_card_view;
-    private DatabaseReadOperations databaseOperations;
+    private DatabaseReadOperations databaseReadOperations;
     private RetainedFragment retainedFragment;
     private Handler mHandler = new Handler();
     private long current_field_id;
@@ -146,8 +150,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private int time_of_answer, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
-
-
     private int question_data_type;
     private boolean obfuscate;
     private boolean while_studying;
@@ -163,22 +165,22 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         startingTime = getIntent().getLongExtra(STARTING_TIME, 0);
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
-        databaseOperations = new DatabaseReadOperations(this);
-        current_field_type = databaseOperations.getFieldType(current_field_id);
-        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
-        isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-        obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
-        int [] time_of_answer_data = databaseOperations.getTimeOfAnswerOfStudyAPeriod(current_field_id);
+        databaseReadOperations = new DatabaseReadOperations(this);
+        current_field_type = databaseReadOperations.getFieldType(current_field_id);
+        question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
+        isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
+        obfuscate = databaseReadOperations.isObfuscateQuestion(current_field_id);
+        int [] time_of_answer_data = databaseReadOperations.getTimeOfAnswerOfStudyTillCorrect(current_field_id);
         reading_question_letter_second = time_of_answer_data[0];
         find_answer_time = time_of_answer_data[1];
         typing_answer_letter_second = time_of_answer_data[2];
         time_of_answer_saved = reading_question_letter_second > 0 && find_answer_time > 0 && typing_answer_letter_second > 0;
-        action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
-        isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
-        check_type = databaseOperations.getFieldCheckType(current_field_id);
-        question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
-        answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
-        test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
+        action_bar_shown = databaseReadOperations.getFieldActionBarShown(current_field_id);
+        isReadAnswer = databaseReadOperations.isReadAnswer(current_field_id);
+        check_type = databaseReadOperations.getFieldCheckType(current_field_id);
+        question_area_size = databaseReadOperations.getFieldQuestionAreaSize(current_field_id);
+        answer_area_size = databaseReadOperations.getFieldAnswerAreaSize(current_field_id);
+        test_text_size = databaseReadOperations.getFieldTestTextSize(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         show_result_linearlayout = (LinearLayout) findViewById(R.id.result);
         show_question_linearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
@@ -202,6 +204,13 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         final CardView dont_know_card_view = (CardView) findViewById(R.id.dont_know_card_view);
         tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
+        // getting the reference of the fragment that holds the reference of list for test array
+        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
+        // if the reference to the fragment was null we create a new fragment object and add it to the activity
+        if (retainedFragment == null) {
+            retainedFragment = new RetainedFragment();
+            getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
+        }
         loader = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
@@ -256,14 +265,11 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 int id = loader.getId();
                 if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     StudyAPeriodActivity.this.cursor = cursor;
-                    listForTest = retainedFragment.getListForTest_StudyDuringActivity();
-                    if (listForTest == null) {
                         if (boolean_continue) {
                             listForTest = readFromLinkerTableStudyDuringColumn();
                         } else {
                             listForTest = prepareListForStudyFirstTime();
                         }
-                    }
                     questionsNumber = listForTest.length;
                     if (questionsNumber > 0) {
                         while_studying = true;
@@ -309,58 +315,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
 
             }
         };
-        if (savedInstanceState == null) {
-            content.setVisibility(View.GONE);
-            mShortAnimationDuration = getResources().getInteger(
-                    android.R.integer.config_shortAnimTime);
-            lastPause = databaseOperations.getElapsedPausedSessionTime(current_field_id, Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD);
-            isStartingFirstTime = true;
-        } else {
-            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
-            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
-            lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
-        }
-        // getting the reference of the fragment that holds the reference of list for test array
-        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
-        // if the reference to the fragment was null we create a new fragment object and add it to the activity
-        if (retainedFragment == null) {
-            retainedFragment = new RetainedFragment();
-            getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
-        }
-        setSupportActionBar(toolbar);
-        if (action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR) {
-            getSupportActionBar().hide();
-        }
-        actionBarShown = getSupportActionBar().isShowing();
-        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
-        showQuestion.setMovementMethod(new ScrollingMovementMethod());
-        if (isReadAnswer) {
-            Intent checkIntent = new Intent();
-            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
-        }
-        showTries.setText(Integer.toString(triesCounter + 1));
-        if (boolean_continue) {
-            int[] array = databaseOperations.getDataFromStudyPeriodPaused(current_field_id);
-            currentQuestionCounter = array[0];
-            permitedTriesNumber = array[1];
-            repeatedEntries = databaseOperations.getStudyPeriodRepeatedEntries(current_field_id);
-            getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
-        } else {
-            permitedTriesNumber = getIntent().getExtras().getInt(NUMBER_OF_TRIES);
-            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
-        }
-        changeAreas(question_area_size, answer_area_size);
-        if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
-            changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
-        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE) {
-            changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
-        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
-            changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
-        }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
-        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         check.setOnClickListener(view -> {
             check_card_view.startAnimation(animAlpha);
             result = checkAnAnswer();
@@ -383,6 +337,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             } else {
                 triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                 showTries.setText(Integer.toString(triesCounter + 1));
+                cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 currentQuestionCounter++;
                 if (currentQuestionCounter >= questionsNumber) {
                     currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
@@ -408,10 +363,11 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         scheduleWhatToDoAfterTimeOfAnswerElapsed();
                     } else {
                         while_studying = false;
-                        cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, question_data_type);
-                        cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
-                        cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                                Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD, Constants.ElapsedPausedSessionTime.NOT_USED);
+                        cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_PERIOD,question_data_type);
+                        cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id);
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                        String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
                         if (tts_available) {
                             new AsyncTask<Void, Void, Void>() {
 
@@ -419,6 +375,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                 protected Void doInBackground(Void... params) {
                                     while (true) {
                                         if (!tts.isSpeaking()) {
+                                            Toast toast = Toast.makeText(StudyAPeriodActivity.this, time, Toast.LENGTH_LONG);
+                                            toast.setGravity(Gravity.TOP, 0, 400);
+                                            toast.show();
                                             finish();
                                             ExitActivity.exit(StudyAPeriodActivity.this);
                                             break;
@@ -428,6 +387,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                 }
                             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                         } else {
+                            Toast toast = Toast.makeText(StudyAPeriodActivity.this, time, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
                             finish();
                             ExitActivity.exit(StudyAPeriodActivity.this);
                         }
@@ -477,7 +439,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-            }
+            }// TODO: 5/14/17 test the boot reciever for the outboundarrayindex
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -510,7 +472,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 }
             }
         });
-
         _continue.setOnClickListener(v -> {
             continue_card_view.startAnimation(animAlpha);
             enterAnswer.setText("");
@@ -565,6 +526,107 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
         });
+        setSupportActionBar(toolbar);
+        if (action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR) {
+            getSupportActionBar().hide();
+        }
+        actionBarShown = getSupportActionBar().isShowing();
+        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
+        showQuestion.setMovementMethod(new ScrollingMovementMethod());
+        if (isReadAnswer) {
+            Intent checkIntent = new Intent();
+            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        }
+        showTries.setText(Integer.toString(triesCounter + 1));
+        changeAreas(question_area_size, answer_area_size);
+        if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
+            changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE) {
+            changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
+            changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
+        }
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
+        if (savedInstanceState == null) {
+            content.setVisibility(View.GONE);
+            mShortAnimationDuration = getResources().getInteger(
+                    android.R.integer.config_shortAnimTime);
+            isStartingFirstTime = true;
+            if (boolean_continue) {
+                int[] array = databaseReadOperations.getDataFromStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id);
+                currentQuestionCounter = array[0];
+                permitedTriesNumber = array[1];
+                lastPause = array[2];
+                repeatedEntries = databaseReadOperations.getStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id);
+                getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+            } else {
+                permitedTriesNumber = getIntent().getExtras().getInt(NUMBER_OF_TRIES);
+                getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+            }
+        } else {
+            content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
+            mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
+            lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
+            currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
+            permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
+            triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
+            boolean checkState = savedInstanceState.getBoolean(CHECK_BUTTON_STATE);
+            boolean _continueState = savedInstanceState.getBoolean(_CONTINUE_BUTTON_STATE);
+            questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
+            hints = savedInstanceState.getStringArrayList(HINTS);
+            hintCounter = savedInstanceState.getInt(HINT_COUNTER);
+            result = savedInstanceState.getBoolean(RESULT);
+            repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
+            customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
+            symbol = savedInstanceState.getStringArray(SYMBOL);
+            time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
+            is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+            while_studying = savedInstanceState.getBoolean(WHILE_STUDYING);
+            listForTest = retainedFragment.getListForTest_StudyDuringActivity();
+            if ( listForTest == null ) {
+                if (boolean_continue) {
+                    getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+                } else {
+                    getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+                }
+            } else {
+                is_starting_after_destruction = true;
+                restoreUserLayoutChanges(savedInstanceState);
+                if ( obfuscate ) {
+                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
+                } else {
+                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                }
+                showTries.setText(Integer.toString(triesCounter + 1));
+                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+                check.setEnabled(checkState);
+                _continue.setEnabled(_continueState);
+                enterAnswer.setEnabled(!_continueState);
+                ifMoreThanOnce();
+                if (is_time_of_answer_elapsed) {
+                    show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
+                    show_question_linearlayout.setPadding(0, 0, 0, 0);
+                    showQuestion.setTextColor(Color.BLACK);
+                }
+                if (savedInstanceState.containsKey(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER)) {
+                    long how_much_time_remaining_time_for_answer = savedInstanceState.getLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER);
+                    if (how_much_time_remaining_time_for_answer <= 0) {
+                        DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
+                    } else {
+                        effective_time_of_answer = how_much_time_remaining_time_for_answer;
+                        mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effective_time_of_answer);
+                        time_of_starting_time_of_answer = System.currentTimeMillis();
+                    }
+                }
+                if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
+                    enterAnswer.setHint(hints.get(hintCounter - 1));
+                }
+            }
+        }
     }
 
 
@@ -586,7 +648,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 @Override
                 protected Void doInBackground(Void... params) {
                     while (true) {
-                        if (listForTest[currentQuestionCounter][0] != null && listForTest[currentQuestionCounter][1] != null) {
+                        if ( listForTest != null ) {
                             scheduleWhatToDoAfterTimeOfAnswerElapsed();
                             break;
                         } else {
@@ -609,7 +671,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         if ( is_starting_after_destruction ) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
+        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + this.getLocalClassName());
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
@@ -622,17 +684,14 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         }
         UsageLastTime.updateUsageLastTime(this);
         if ( while_studying ) {
-            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-            cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                    Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD, lastPause);
             new Thread( () -> {
                     Runnable pauseRunnable;
                     android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                     try {
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyAPeriodActivity.this);
-                        if (!sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + current_field_id) ) {
+                        if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + PAUSING + current_field_id) ) {
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putBoolean(ACTIVITY_NAME + PAUSING + current_field_id, true);
+                            editor.putBoolean(StudyAPeriodActivity.class.getName() + PAUSING + current_field_id, true);
                             editor.commit();
                             toPause();
                         }
@@ -640,7 +699,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         pauseRunnable = () -> {
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyAPeriodActivity.this);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.remove(ACTIVITY_NAME + PAUSING + current_field_id);
+                            editor.remove(StudyAPeriodActivity.class.getName() + PAUSING + current_field_id);
                             editor.commit();
                         };
                         mHandler.post(pauseRunnable);
@@ -702,6 +761,25 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 ObfuscateQuestionDialogFragment obfuscateQuestionDialogFragment = new ObfuscateQuestionDialogFragment();
                 obfuscateQuestionDialogFragment.setArguments(bundle3);
                 obfuscateQuestionDialogFragment.show(getSupportFragmentManager(), ObfuscateQuestionDialogFragment.OBFUSCATE_QUESTION_DIALOG_FRAGMENT);
+                return true;
+
+            case R.id.timer:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.kitkat_or_newer, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                return true;
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -712,7 +790,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         int[] array = new int[2];
         array[0] = currentQuestionCounter;
         array[1] = permitedTriesNumber;
-        cursorLoaderAndUpdateDatabase.pauseStudyAPeriod(current_field_id, listForTest, array, repeatedEntries);
+        cursorLoaderAndUpdateDatabase.pauseStudyAPeriod( current_field_id, listForTest, array, repeatedEntries , lastPause);
     }
 
 
@@ -786,7 +864,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
 
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
-        cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
         boolean result = false;
         if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
             if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
@@ -805,7 +882,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
                 //            wrongAnswers.add(enterAnswer.getText().toString());
@@ -813,6 +889,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
+                cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 //            wrongAnswersCounter++;
                 //            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
                 //            wrongItems.add(wrongItem);
@@ -838,7 +916,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
                 //            wrongAnswers.add(enterAnswer.getText().toString());
@@ -846,6 +923,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
+                cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 //            wrongAnswersCounter++;
                 //            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
                 //            wrongItems.add(wrongItem);
@@ -871,7 +950,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
                 //            wrongAnswers.add(enterAnswer.getText().toString());
@@ -879,6 +957,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
+                cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 //            wrongAnswersCounter++;
                 //            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
                 //            wrongItems.add(wrongItem);
@@ -904,7 +984,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 //            check.setBackgroundResource(R.drawable.ic_wrong_sign);
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
                 //            wrongAnswers.add(enterAnswer.getText().toString());
@@ -912,6 +991,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
+                cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 //            wrongAnswersCounter++;
                 //            WrongItem wrongItem = new WrongItem(listForTest [currentQuestionCounter][0],listForTest[currentQuestionCounter][1],wrongAnswers);
                 //            wrongItems.add(wrongItem);
@@ -927,6 +1008,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putInt(CURRENT_QUESTION_COUNTER, currentQuestionCounter);
+        savedInstanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInstanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInstanceState.putBoolean(CHECK_BUTTON_STATE, check.isEnabled());
         savedInstanceState.putBoolean(_CONTINUE_BUTTON_STATE, _continue.isEnabled());
@@ -942,6 +1024,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         savedInstanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInstanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
+        savedInstanceState.putBoolean(WHILE_STUDYING, while_studying);
         saveUserLayoutChanges(savedInstanceState);
                        /* Saving the remaining time till completion of the current timer of time of answer because the activity
         will be destroyed, not finishing normally.
@@ -963,55 +1046,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     }
 
 
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
-        triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
-        boolean checkState = savedInstanceState.getBoolean(CHECK_BUTTON_STATE);
-        boolean _continueState = savedInstanceState.getBoolean(_CONTINUE_BUTTON_STATE);
-        questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
-        hints = savedInstanceState.getStringArrayList(HINTS);
-        hintCounter = savedInstanceState.getInt(HINT_COUNTER);
-        result = savedInstanceState.getBoolean(RESULT);
-        repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
-        customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
-        symbol = savedInstanceState.getStringArray(SYMBOL);
-        time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
-        is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
-        is_starting_after_destruction = true;
-        restoreUserLayoutChanges(savedInstanceState);
-        if ( obfuscate ) {
-            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
-        } else {
-            showQuestion.setText(listForTest[currentQuestionCounter][0]);
-        }
-        showTries.setText(Integer.toString(triesCounter + 1));
-        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-        showNumberOfQuetions.setText(Integer.toString(questionsNumber));
-        check.setEnabled(checkState);
-        _continue.setEnabled(_continueState);
-        enterAnswer.setEnabled(!_continueState);
-        ifMoreThanOnce();
-        if (is_time_of_answer_elapsed) {
-            show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
-            show_question_linearlayout.setPadding(0, 0, 0, 0);
-            showQuestion.setTextColor(Color.BLACK);
-        }
-        if (savedInstanceState.containsKey(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER)) {
-            long how_much_time_remaining_time_for_answer = savedInstanceState.getLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER);
-            if (how_much_time_remaining_time_for_answer <= 0) {
-                DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
-            } else {
-                effective_time_of_answer = how_much_time_remaining_time_for_answer;
-                mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effective_time_of_answer);
-                time_of_starting_time_of_answer = System.currentTimeMillis();
-            }
-        }
-        if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
-            enterAnswer.setHint(hints.get(hintCounter - 1));
-        }
-    }
-
     private String[][] readFromLinkerTableStudyDuringColumn() {
         String array[][] = new String[cursor.getCount()][3];
         for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
@@ -1021,26 +1055,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             array[order][2] = String.valueOf(cursor.getLong(3));
         }
         return array;
-    }
-
-    private long getEntry_id(String queston, String answer) {
-        long entry_id = 0;
-        boolean which_cursor = boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
-        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-             cursor.moveToNext()) {
-            if (which_cursor) { // continue previous session
-                if (cursor.getString(0).equals(queston) && cursor.getString(1).equals(answer)) {
-                    entry_id = cursor.getLong(3);
-                    break;
-                }
-            } else {
-                if (cursor.getString(0).equals(queston) && cursor.getString(1).equals(answer)) {
-                    entry_id = cursor.getLong(3);
-                    break;
-                }
-            }
-        }
-        return entry_id;
     }
 
 
@@ -1092,7 +1106,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     @Override
     public void onInit(int i) {
         if (tts_available) {
-            String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
+            String locale_short_name = databaseReadOperations.getFieldLocale(current_field_id);
             StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
             String lang = stringTokenizer.nextToken();
             String country = stringTokenizer.nextToken();
@@ -1135,7 +1149,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             @Override
             protected Void doInBackground(Void... params) {
                 while (true) {
-                    if (listForTest[currentQuestionCounter][0] != null && listForTest[currentQuestionCounter][1] != null) {
+                    if ( listForTest != null ) {
                         time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1],
                                 reading_question_letter_second,find_answer_time, typing_answer_letter_second);
                         scheduleWhatToDoAfterTimeOfAnswerElapsed();
@@ -1160,13 +1174,12 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
             // to avoid the case if the listfortest has not been prepared yet
-            // to avoid the case if the listfortest has not been prepared yet
             new AsyncTask<Void, Void, Void>() {
 
                 @Override
                 protected Void doInBackground(Void... params) {
                     while (true) {
-                        if (listForTest[currentQuestionCounter][0] != null && listForTest[currentQuestionCounter][1] != null) {
+                        if ( listForTest != null ) {
                             scheduleWhatToDoAfterTimeOfAnswerElapsed();
                             break;
                         } else {

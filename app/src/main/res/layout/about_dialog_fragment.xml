@@ -107,6 +107,22 @@
                 android:padding="5dp"
                 android:text="@string/cwac_loaderex" />
 
+            <TextView
+                android:id="@+id/cursor_recyclerview_adapter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:text="@string/https_gist_github_com_skyfishjy_443b7448f59be978bc59" />
+
+            <TextView
+                android:id="@+id/recyclerview_fast_scroller"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:text="@string/https_github_com_danoz73_recyclerviewfastscroller" />
+
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

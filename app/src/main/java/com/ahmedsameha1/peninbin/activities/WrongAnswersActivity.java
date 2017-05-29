@@ -1,20 +1,26 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.adapters.WrongAnswersActivityRecyclerViewAdapter;
@@ -30,16 +36,19 @@ import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
 
+import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
+
 /**
  * Created by ahmed on 9/7/2015.
  */
-public class WrongAnswersActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+public class WrongAnswersActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String SCREEN_NAME = "WrongAnswersActivity";
     public static final String WRONG_ITEM_LIST = "wrongItemList";
     private long current_field_id;
@@ -52,7 +61,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     private int question_data_type;
     private Tracker mTracker;
     private int permited_tries_number;
-
+    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
 
 
     @Override
@@ -64,9 +73,15 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         test_type = bundle.getInt(ShowTestResultDialogFragment.TEST_TYPE);
         permited_tries_number = bundle.getInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER);
         databaseOperations = new DatabaseReadOperations(this);
+        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
+        VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
+        // Connect the recycler to the scroller (to let the scroller scroll the list)
+        fastScroller.setRecyclerView(recyclerView);
+        // Connect the scroller to the recycler (to let the recycler scroll the scroller's handle)
+        recyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
@@ -76,38 +91,41 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
-        getLoaderManager().initLoader(0,null,this);
+        getLoaderManager().initLoader(0, null, this);
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
     }
+
     private ArrayList<WrongItem> getWrongItems() {
         ArrayList<WrongItem> wrongItemsList = new ArrayList<WrongItem>();
         String[][] wrong_answers = new String[1][1];
-        if ( test_type == Constants.TestType.ENHANCED_TEST ) {
-            wrong_answers = databaseOperations.getWrongAnswersEnhancedTest(current_field_id,question_data_type);
-        } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
-            wrong_answers = databaseOperations.getWrongAnswersFullyRandomTest(current_field_id,question_data_type);
+        if (test_type == Constants.TestType.ENHANCED_TEST) {
+            wrong_answers = databaseOperations.getWrongAnswersEnhancedTest(current_field_id, question_data_type);
+        } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+            wrong_answers = databaseOperations.getWrongAnswersFullyRandomTest(current_field_id, question_data_type);
         }
-        for ( cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext() ) {
+        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
             long entry_id = cursor.getLong(2);
             ArrayList<String> wrong_answers_arrayList = new ArrayList<>();
-            for ( int i = 0; i < wrong_answers.length; i++ ) {
-                if ( entry_id == Long.valueOf(wrong_answers[i][0]) ) {
+            for (int i = 0; i < wrong_answers.length; i++) {
+                if (entry_id == Long.valueOf(wrong_answers[i][0])) {
                     wrong_answers_arrayList.add(wrong_answers[i][1]);
                 }
             }
-            if ( wrong_answers_arrayList.size() > 0 ) {
-                wrongItemsList.add(new WrongItem(cursor.getLong(2),cursor.getString(0), cursor.getString(1), wrong_answers_arrayList));
+            if (wrong_answers_arrayList.size() > 0) {
+                wrongItemsList.add(new WrongItem(cursor.getLong(2), cursor.getString(0), cursor.getString(1), wrong_answers_arrayList));
             }
         }
         return wrongItemsList;
     }
+
     @Override
     protected void onResume() {
         super.onResume();
         mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -125,13 +143,88 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.ask_again:
-                Bundle bundle = new Bundle();
-                bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
-                Intent intent = new Intent(this,AskAgainAfterTestActivity.class);
-                intent.putExtra(WRONG_ITEM_LIST,bundle);
-                intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                startActivity(intent);
+                String string_for_pausing = null;
+                if (test_type == Constants.TestType.ENHANCED_TEST) {
+                    string_for_pausing = AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + current_field_id;
+                } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                    string_for_pausing = AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + current_field_id;
+                }
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(WrongAnswersActivity.this);
+                if (!sharedPreferences.contains(string_for_pausing) && !Emulation.isAnyThreadRunning()) {
+                    if (test_type == Constants.TestType.ENHANCED_TEST) {
+                        if (databaseOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id)) {
+                            new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
+                                    .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
+                                        Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                        intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                                        intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                        startActivity(intent);
+                                    })
+                                    .setNegativeButton(R.string.no, (dialogInterface, i) -> {
+                                        cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, question_data_type);
+                                        cursorLoaderAndUpdateDatabase.
+                                                clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,
+                                                        current_field_id);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+                                        Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                        intent.putExtra(WRONG_ITEM_LIST, bundle);
+                                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
+                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                        intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                                        startActivity(intent);
+                                    }).create().show();
+                        } else {
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                            intent.putExtra(WRONG_ITEM_LIST, bundle);
+                            intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
+                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                            startActivity(intent);
+                        }
+                    } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                        if (databaseOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id)) {
+                            new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
+                                    .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
+                                        Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                        intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                                        intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                        startActivity(intent);
+                                    })
+                                    .setNegativeButton(R.string.no, (dialogInterface, i) -> {
+                                        cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, question_data_type);
+                                        cursorLoaderAndUpdateDatabase.
+                                                clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST,
+                                                        current_field_id);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+                                        Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                        intent.putExtra(WRONG_ITEM_LIST, bundle);
+                                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
+                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                        intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                                        startActivity(intent);
+                                    }).create().show();
+                        } else {
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                            intent.putExtra(WRONG_ITEM_LIST, bundle);
+                            intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
+                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                            startActivity(intent);
+                        }
+                    }
+                } else {
+                    Toast toast = Toast.makeText(WrongAnswersActivity.this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
                 return true;
 
             default:
@@ -146,21 +239,25 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         super.onBackPressed();
         ExitActivity.exit(this);
     }
+
     @Override
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
     }
+
     @Override
-    public void onSaveInstanceState ( Bundle savedInsatanceState ) {
+    public void onSaveInstanceState(Bundle savedInsatanceState) {
         savedInsatanceState.putSerializable(WRONG_ITEM_LIST, wrongItemList);
     }
+
     @Override
-    public void onRestoreInstanceState( Bundle savedInstanceState ) {
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
         wrongItemList = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEM_LIST);
-        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this,wrongItemList,current_field_id);
+        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this, wrongItemList, current_field_id);
         recyclerView.setAdapter(mAdapter);
     }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoaderAndUpdateDatabase(WrongAnswersActivity.this,
@@ -184,10 +281,10 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.cursor = data;
-        if ( wrongItemList == null ) {
+        if (wrongItemList == null) {
             wrongItemList = getWrongItems();
         }
-        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this,wrongItemList,current_field_id);
+        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this, wrongItemList, current_field_id);
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -195,6 +292,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
+
     public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {
 
         private int spanCount;

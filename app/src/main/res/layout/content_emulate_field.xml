@@ -65,11 +65,25 @@
     </LinearLayout>
 
 
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/starting_entry_linearlayout">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/copy_move_entries_activity_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/starting_entry_linearlayout"/>
+       />
 
+    <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
+        android:id="@+id/fast_scroller"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        app:rfs_barColor="#00000000"
+        app:rfs_handleColor="#260000ff"
+        />
+</RelativeLayout>
 </RelativeLayout>

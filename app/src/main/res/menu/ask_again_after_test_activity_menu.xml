@@ -19,4 +19,8 @@
         android:title="@string/obfuscate_question"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/timer"
+        android:title="timer"
+        app:showAsAction="never"/>
 </menu>

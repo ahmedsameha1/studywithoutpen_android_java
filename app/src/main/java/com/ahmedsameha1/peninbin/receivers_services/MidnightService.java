@@ -26,37 +26,35 @@ import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 import java.util.StringTokenizer;
-import java.util.TimeZone;
 
 /**
  * Created by ahmed on 22/05/16.
  */
-public class RandomQuickTestsSchedulingService extends IntentService {
+public class MidnightService extends IntentService {
     private AlarmManager alarmManager;
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
 
-    public RandomQuickTestsSchedulingService() {
-        super("RandomQuickTestsSchedulingService");
+    public MidnightService() {
+        super("MidnightService");
     }
 
     @Override
     protected void onHandleIntent(Intent workIntent) {
-        Toast.makeText(this," here we are ", Toast.LENGTH_LONG);
+        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         Log.i("service:", "service running");
         scheduleRandomQuickTest();
         tryRefreshingAppUsage();
-//        reorderEmulatedFields();
+        cursorLoaderAndUpdateDatabase.cleanDatabase();
+        Emulation.startReemulateThread(this);
         WakefulBroadcastReceiver.completeWakefulIntent(workIntent);
         Log.i("service:", "service end");
     }
 
     private void scheduleRandomQuickTest() {
         alarmManager = (AlarmManager) this.getSystemService(AppCompatActivity.ALARM_SERVICE);
-        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
         DatabaseReadOperations databaseOperations = new DatabaseReadOperations(this);
         ArrayList<long[]> scheduling_data = databaseOperations.getRandomQuickTestsSchedulingData();
         if (scheduling_data.size() > 0) {
@@ -65,9 +63,6 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                 int number_of_quick_tests = (int) field_data[1];
                 int number_of_tries = (int) field_data[2];
                 int number_of_questions = (int) field_data[3];
-                int controlled_portion = (int) field_data[4];
-                int wrongness_level = (int) field_data[5];
-                int rank_level = (int) field_data[6];
                 String[][] excluded_times = databaseOperations.get_excluded_times(field_id);
                 ArrayList<Long> long_excluded_times = new ArrayList<>();
                 for (String[] excluded_time : excluded_times) {
@@ -138,9 +133,6 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
                         intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, number_of_questions);
                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, number_of_tries);
-                        intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion);
-                        intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank_level);
-                        intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness_level);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME, random);
@@ -148,7 +140,7 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                         int request = (int) System.currentTimeMillis();
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager.set(AlarmManager.RTC, random, pendingIntent);
-                        mySQLiteCursorLoader.addScheduledTimeForBackup(field_id, ScheduleInFieldDialogFragment.QUICK_TEST, random, request);
+                        cursorLoaderAndUpdateDatabase.addScheduledTimeForBackup(field_id, ScheduleInFieldDialogFragment.QUICK_TEST, random, request);
 
                         break;
                     }
@@ -214,7 +206,7 @@ public class RandomQuickTestsSchedulingService extends IntentService {
                         new String[]{entry_cursor.getLong(0) + ""});
             }
         }
-    }*/
-
+    }
+*/
 
 }

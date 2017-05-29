@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <compatible-screens>
         <screen
@@ -240,7 +241,7 @@
             android:exported="true" />
 
         <service
-            android:name=".receivers_services.RandomQuickTestsSchedulingService"
+            android:name=".receivers_services.MidnightService"
             android:exported="false" />
 
     </application>

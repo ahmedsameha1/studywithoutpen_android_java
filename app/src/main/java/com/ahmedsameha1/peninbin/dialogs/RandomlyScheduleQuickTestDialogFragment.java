@@ -81,11 +81,6 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
             final LinearLayout excluded_time_5_layout = (LinearLayout) alertDialog.findViewById(R.id.exclude_time_5);
             final EditText enter_excluded_time_1_start = (EditText) alertDialog.findViewById(R.id.excluded_time_1_start);
             final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.root_view);
-            final Spinner controlled_portion = (Spinner) alertDialog.findViewById(R.id.controlled_portion);
-            final Spinner uncontrolled_portion = (Spinner) alertDialog.findViewById(R.id.uncontrolled_portion);
-            final Spinner rank = (Spinner) alertDialog.findViewById(R.id.spinner_rank);
-            final Spinner wrongness = (Spinner) alertDialog.findViewById(R.id.spinner_wrongness_percentage);
-            final CheckBox control_test_entries = (CheckBox) alertDialog.findViewById(R.id.control_test_entries);
             final LinearLayout control_options = (LinearLayout) alertDialog.findViewById(R.id.control_options);
             enter_excluded_time_1_start.setOnFocusChangeListener((view, hasFocus) -> {
                 if (hasFocus) {
@@ -225,85 +220,7 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                     enable_exclude_times.setChecked(false);
                 }
             });
-            controlled_portion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if ( position == 0 ) {
-                        uncontrolled_portion.setSelection(5);
-                    } else if ( position == 1 ) {
-                        uncontrolled_portion.setSelection(4);
-                    } else if ( position == 2 ) {
-                        uncontrolled_portion.setSelection(3);
-                    } else if ( position == 3 ) {
-                        uncontrolled_portion.setSelection(2);
-                    } else if ( position == 4 ) {
-                        uncontrolled_portion.setSelection(1);
-                    } else if ( position == 5 ) {
-                        uncontrolled_portion.setSelection(0);
-                    }
-                }
 
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-            uncontrolled_portion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if ( position == 0 ) {
-                        controlled_portion.setSelection(5);
-                    } else if ( position == 1 ) {
-                        controlled_portion.setSelection(4);
-                    } else if ( position == 2 ) {
-                        controlled_portion.setSelection(3);
-                    } else if ( position == 3 ) {
-                        controlled_portion.setSelection(2);
-                    } else if ( position == 4 ) {
-                        controlled_portion.setSelection(1);
-                    } else if ( position == 5 ) {
-                        controlled_portion.setSelection(0);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-            rank.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if ( position == 0 && wrongness.getSelectedItemPosition() == 0 ) {
-                        wrongness.setSelection(1);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-            wrongness.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if ( position == 0 && rank.getSelectedItemPosition() == 0 ) {
-                        rank.setSelection(1);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-            control_test_entries.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if ( isChecked ) {
-                    control_options.setVisibility(View.VISIBLE);
-                } else {
-                    control_options.setVisibility(View.GONE);
-                }
-            });
             enter_number_of_tries.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -388,12 +305,6 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                 enter_number_of_quick_tests.setText(Integer.toString(data[0]));
                 enter_number_of_tries.setText(Integer.toString(data[1]));
                 enter_number_of_questions.setText(Integer.toString(data[2]));
-                if ( data[3] > -1 && data[4] > -1 && data[5] > -1 ) {
-                    control_test_entries.setChecked(true);
-                    controlled_portion.setSelection(data[3]);
-                    wrongness.setSelection(data[4]);
-                    rank.setSelection(data[5]);
-                }
                 String[][] excluded_times_array = databaseOperations.get_excluded_times(current_field_id);
                 for (int i = 0; i < excluded_times_array.length; i++) {
                     if (excluded_times_array[i] != null) {
@@ -597,15 +508,8 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                                                 String ends = enter_excluded_time_5_end.getText().toString();
                                                 excluded_times1[4] = new String[]{starts, ends};
                                             }
-                                            if ( control_test_entries.isChecked() ) {
-                                                mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
-                                                        number_of_tries, number_of_questions, excluded_times1,
-                                                        controlled_portion.getSelectedItemPosition(),wrongness.getSelectedItemPosition(),
-                                                        rank.getSelectedItemPosition());
-                                            } else {
                                                 mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
                                                         number_of_tries, number_of_questions, excluded_times1);
-                                            }
                                             final Snackbar snackbar = Snackbar
                                                     .make(coordinatorLayout, R.string.take_effect_next_midnight, Snackbar.LENGTH_INDEFINITE);
                                             snackbar.setAction(R.string.ok, view13 -> snackbar.dismiss());
@@ -624,15 +528,8 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                                         toast.show();
                                     }
                                 } else {
-                                    if ( control_test_entries.isChecked() ) {
-                                        mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
-                                                number_of_tries, number_of_questions, null,
-                                                controlled_portion.getSelectedItemPosition(),wrongness.getSelectedItemPosition(),
-                                                rank.getSelectedItemPosition());
-                                    } else {
                                         mySQLiteCursorLoader.setRandomQuickTestData(current_field_id, number_of_quick_tests,
                                                 number_of_tries, number_of_questions, null);
-                                    }
                                     final Snackbar snackbar = Snackbar
                                             .make(coordinatorLayout, R.string.take_effect_next_midnight, Snackbar.LENGTH_INDEFINITE);
                                     snackbar.setAction(R.string.ok, view12 -> snackbar.dismiss());

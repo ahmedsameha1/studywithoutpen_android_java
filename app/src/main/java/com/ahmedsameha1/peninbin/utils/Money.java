@@ -175,20 +175,11 @@ public class Money {
                     }
                 }
             }
-            // allow the users that have sim card of egypt to use the app without subscription in the first 30 days of the
-            // first installation of the app
-            if ( isInEgypt(context) ) {
-                PackageInfo pi = null;
-                try {
-                    pi = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
-                    if ( System.currentTimeMillis() <= (pi.firstInstallTime + (AlarmManager.INTERVAL_DAY * 30))) {
-                        putUserSubscriptionStatus(context, true);
-                        removeAllGetPurchasesErrors(context);
-                        return;
-                    }
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                }
+            // allow the users in the initial time to use the app without subscription
+            if ( isInInitialPeriod(context) ) {
+                putUserSubscriptionStatus(context, true);
+                removeAllGetPurchasesErrors(context);
+                return;
             }
             try {
                 Bundle items_bundle = billingService.getPurchases(3,context.getPackageName(), SUBSCRIPTION_TYPE, null);
@@ -380,5 +371,25 @@ public class Money {
             return true;
         }
         return false;
+    }
+
+    public static boolean isInInitialPeriod(Context context ) {
+        long first_install_time = -1;
+        PackageInfo pi = null;
+        try {
+            pi = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
+            first_install_time =  pi.firstInstallTime;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        if ( first_install_time >= 0 ) {
+            if ( isInEgypt(context) ) {
+                return System.currentTimeMillis() <= first_install_time + (AlarmManager.INTERVAL_DAY * 90);
+            } else {
+                return System.currentTimeMillis() <= first_install_time + (AlarmManager.INTERVAL_DAY * 30);
+            }
+        } else {
+            return false;
+        }
     }
 }

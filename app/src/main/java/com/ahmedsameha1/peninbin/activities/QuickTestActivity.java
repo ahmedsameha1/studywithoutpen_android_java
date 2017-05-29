@@ -57,11 +57,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 /**
  * Created by ahmed on 8/3/2015.
  */
-public class QuickTestActivity extends AppCompatActivity implements
+public class QuickTestActivity extends FullyRandomTest implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
         TextToSpeech.OnInitListener,
@@ -105,19 +106,12 @@ public class QuickTestActivity extends AppCompatActivity implements
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
-    public static final String LAST_CONTROLLED_INDEX = "last_controlled_index";
-    public static final String LAST_OLD_ROUND_INDEX = "last_old_round_index";
-    private int controlled_portion, rank_level, wrongness_level;
-    private long current_field_id;
-    private String[][] listForTest;
     private ArrayList<String> hints;
     private boolean actionBarShown;
-    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private boolean is_testing_now = false, before_showing_result_dialog, time_of_answer_saved;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber, wrongAnswersCounter, percent_or_number, number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private double percentage;
-    private Cursor fieldEntriesCursor;
     private EditText enterAnswer;
     private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuestions, check, nextHint, showActionbar, dont_know;
     private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
@@ -128,14 +122,12 @@ public class QuickTestActivity extends AppCompatActivity implements
     private TextToSpeech tts;
     private boolean tts_available = false;
     private boolean locale_available = false;
-    private DatabaseReadOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
     private int mShortAnimationDuration;
     private View mLoadingView;
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
     private long lastPause;
-    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
@@ -145,7 +137,6 @@ public class QuickTestActivity extends AppCompatActivity implements
     private boolean is_time_of_answer_elapsed = false;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this :: DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
     private boolean obfuscate;
-    private int last_controlled_index, last_old_round_index;
 
 
     @Override
@@ -168,13 +159,13 @@ public class QuickTestActivity extends AppCompatActivity implements
             current_field_type = databaseOperations.getFieldType(current_field_id);
             isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
             obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
+            question_data_type = databaseOperations.getQuestionDataType(current_field_id);
             int [] time_of_answer_data = databaseOperations.getTimeOfAnswerOfTests(current_field_id);
             reading_question_letter_second = time_of_answer_data[0];
             find_answer_time = time_of_answer_data[1];
             typing_answer_letter_second = time_of_answer_data[2];
             time_of_answer_do_what = time_of_answer_data[3];
             time_of_answer_saved = reading_question_letter_second > 0 && find_answer_time > 0 && typing_answer_letter_second > 0;
-            listForTest = retainedFragment.getListForTest_QuickTestActivity();
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             content = (RelativeLayout) findViewById(R.id.content);
             mLoadingView = findViewById(R.id.loading);
@@ -182,9 +173,6 @@ public class QuickTestActivity extends AppCompatActivity implements
             percent_or_number = getIntent().getIntExtra(PERCENTAGE_OR_NUMBER, PERCENTAGE);
             number = getIntent().getIntExtra(QUESTION_NUMBER, 0);
             percentage = getIntent().getIntExtra(QUESTION_PERCENTAGE, 0);
-            controlled_portion = getIntent().getIntExtra(EnhancedTestActivity.CONTROLLED_PORTION, -1);
-            rank_level = getIntent().getIntExtra(EnhancedTestActivity.RANK_LEVEL, -1);
-            wrongness_level = getIntent().getIntExtra(EnhancedTestActivity.WRONGNESS_LEVEL, -1);
             showActionbar = (TextView) findViewById(R.id.show_actionbar);
             enterAnswer = (EditText) findViewById(R.id.enter_answer);
             showQuestion = (TextView) findViewById(R.id.display_question);
@@ -203,16 +191,7 @@ public class QuickTestActivity extends AppCompatActivity implements
             final CardView dont_know_card_view = (CardView) findViewById(R.id.dont_know_card_view);
             tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
             final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
-            if (savedInstanceState == null) {
-                content.setVisibility(View.GONE);
-                mShortAnimationDuration = getResources().getInteger(
-                        android.R.integer.config_shortAnimTime);
-                isStartingFirstTime = true;
-            } else {
-                content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
-                mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
-                lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
-            }
+
             showQuestion.setMovementMethod(new ScrollingMovementMethod());
             setSupportActionBar(toolbar);
             action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -227,7 +206,6 @@ public class QuickTestActivity extends AppCompatActivity implements
                 checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
                 startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
             }
-            question_data_type = databaseOperations.getQuestionDataType(current_field_id);
             AnalyticsApplication application = (AnalyticsApplication) getApplication();
             mTracker = application.getDefaultTracker();
             loader = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -249,7 +227,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                             + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
                                             + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL )",
-                                    new String[]{current_field_id + "", date_string});
+                                    new String[]{String.valueOf(current_field_id), date_string});
                         } else {
                             return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this,
                                     "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
@@ -261,7 +239,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                                             + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                             + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                                    new String[]{current_field_id + ""});
+                                    new String[]{String.valueOf(current_field_id)});
                         }
                     } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                         return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
@@ -269,7 +247,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                                 + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
                                 " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
                                 + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                                new String[]{current_field_type + ""});
+                                new String[]{String.valueOf(current_field_type)});
                     }
                     return null;
                 }
@@ -278,11 +256,10 @@ public class QuickTestActivity extends AppCompatActivity implements
                 public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                     if (loader.getId() == GET_ENTRIES_LOADER_ID) {
                         fieldEntriesCursor = data;
-                        if (listForTest == null) {
                             if (percent_or_number == PERCENTAGE) {
-                                listForTest = getDataOfTest(percentage);
+                                listForTest = getListForTest(percentage);
                             } else if (percent_or_number == NUMBER) {
-                                listForTest = getDataOfTest(number);
+                                listForTest = getListForTest(number);
                             }
                             if (listForTest != null) {
                                 questionsNumber = listForTest.length;
@@ -294,7 +271,6 @@ public class QuickTestActivity extends AppCompatActivity implements
                                 finish();
                                 ExitActivity.exit(QuickTestActivity.this);
                             }
-                        }
                         crossfade();
                     } else if (loader.getId() == GET_SPECIAL_TEXT_LOADER_ID) {
                         if (symbol == null && customable_text == null) {
@@ -328,6 +304,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                             showTries.setText(Integer.toString(triesCounter + 1));
                         } else {
                             triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                            cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                             currentQuestionCounter++;
                             if (currentQuestionCounter >= questionsNumber) {
                                 check.setEnabled(false);
@@ -343,6 +320,12 @@ public class QuickTestActivity extends AppCompatActivity implements
 
                                 };
                                 mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+                                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                                String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
+                                Toast toast = Toast.makeText(QuickTestActivity.this, time, Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
                                 currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
                                 is_testing_now = false;
                                 enterAnswer.setEnabled(false);
@@ -460,7 +443,6 @@ public class QuickTestActivity extends AppCompatActivity implements
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             });
-            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
             getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
             check_type = databaseOperations.getFieldCheckType(current_field_id);
             question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
@@ -473,6 +455,74 @@ public class QuickTestActivity extends AppCompatActivity implements
                 changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
             } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
                 changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
+            }
+            if (savedInstanceState == null) {
+                content.setVisibility(View.GONE);
+                mShortAnimationDuration = getResources().getInteger(
+                        android.R.integer.config_shortAnimTime);
+                isStartingFirstTime = true;
+                getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+            } else {
+                content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
+                mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
+                lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
+                currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
+                wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
+                permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
+                triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
+                is_testing_now = savedInstanceState.getBoolean(TESTING_NOW);
+                boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
+                questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
+                hints = savedInstanceState.getStringArrayList(HINTS);
+                hintCounter = savedInstanceState.getInt(HINT_COUNTER);
+                customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
+                symbol = savedInstanceState.getStringArray(SYMBOL);
+                before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
+                time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
+                time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
+                is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+                listForTest = retainedFragment.getListForTest_QuickTestActivity();
+                if ( listForTest == null ) {
+                    getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+                } else {
+                    is_starting_after_destruction = true;
+                    restoreUserLayoutChanges(savedInstanceState);
+                    if (!before_showing_result_dialog) {
+                        if (is_testing_now) {
+                            if ( obfuscate ) {
+                                showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
+                            } else {
+                                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            }
+                            showTries.setText(Integer.toString(triesCounter + 1));
+                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                            check.setEnabled(nextState);
+                            enterAnswer.setEnabled(true);
+                            ifMoreThanOnce();
+                            if ( is_time_of_answer_elapsed && time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+                                show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
+                                show_question_linearlayout.setPadding(0, 0, 0, 0);
+                                showQuestion.setTextColor(Color.BLACK);
+                            }
+                            if (savedInstanceState.containsKey(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER)) {
+                                long how_much_time_remaining_time_for_answer = savedInstanceState.getLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER);
+                                if (how_much_time_remaining_time_for_answer <= 0) {
+                                    DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
+                                } else {
+                                    effective_time_of_answer = how_much_time_remaining_time_for_answer;
+                                    mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effective_time_of_answer);
+                                    time_of_starting_time_of_answer = System.currentTimeMillis();
+                                }
+                            }
+                            if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
+                                enterAnswer.setHint(hints.get(hintCounter - 1));
+                            }
+                        }
+                    } else {
+                        show_result_dialog();
+                    }
+                }
             }
         } else {
             Toast toast = Toast.makeText(QuickTestActivity.this, R.string.field_doesnot_exist, Toast.LENGTH_SHORT);
@@ -567,6 +617,7 @@ public class QuickTestActivity extends AppCompatActivity implements
                 ObfuscateQuestionDialogFragment obfuscateQuestionDialogFragment = new ObfuscateQuestionDialogFragment();
                 obfuscateQuestionDialogFragment.setArguments(bundle3);
                 obfuscateQuestionDialogFragment.show(getSupportFragmentManager(), ObfuscateQuestionDialogFragment.OBFUSCATE_QUESTION_DIALOG_FRAGMENT);
+                return true;
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -574,43 +625,6 @@ public class QuickTestActivity extends AppCompatActivity implements
 
 
     }
-
-    private String[][] getDataOfTest(double percent) {
-        if (fieldEntriesCursor.getCount() > 0) {
-            int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
-            Object[] data = ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level);
-            int[] markers = (int[]) data[1];
-            last_controlled_index = markers[0];
-            last_old_round_index = markers[1];
-            return (String[][]) data[0];
-        } else {
-            Toast toast = Toast.makeText(QuickTestActivity.this, R.string.no_entries_in_field, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
-            finish();
-            ExitActivity.exit(QuickTestActivity.this);
-        }
-        return null;
-    }
-
-    private String[][] getDataOfTest(int numberOfQuestions) {
-        if (fieldEntriesCursor.getCount() >= numberOfQuestions) {
-            Object[] data = ActivityUtility.prepareListForTest(fieldEntriesCursor,numberOfQuestions,controlled_portion,rank_level,wrongness_level);
-            int[] markers = (int[]) data[1];
-            last_controlled_index = markers[0];
-            last_old_round_index = markers[1];
-            return (String[][]) data[0];
-        } else {
-            Toast toast = Toast.makeText(QuickTestActivity.this, R.string.number_of_entries_less_than_number_of_questions, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
-            finish();
-            ExitActivity.exit(QuickTestActivity.this);
-        }
-        return null;
-    }
-
-
 
     private void ifMoreThanOnce() {
         hints = ActivityUtility.getHints(this, current_field_id, question_data_type,
@@ -623,9 +637,6 @@ public class QuickTestActivity extends AppCompatActivity implements
     }
 
     private void setFalse() {
-        cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-        ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
-                last_controlled_index, last_old_round_index, isEmulated);
         show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
         show_result_linearlayout.setPadding(0, 0, 0, 0);
         cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
@@ -635,9 +646,6 @@ public class QuickTestActivity extends AppCompatActivity implements
 
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
-        cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-        ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
-                last_controlled_index, last_old_round_index, isEmulated);
         boolean result = false;
         if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
             if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
@@ -655,13 +663,13 @@ public class QuickTestActivity extends AppCompatActivity implements
             } else {
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
             }
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 wrongAnswersCounter++;
             }
         } else if (check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE) {
@@ -680,13 +688,13 @@ public class QuickTestActivity extends AppCompatActivity implements
             } else {
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
             }
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 wrongAnswersCounter++;
             }
         } else if (check_type == Contract.Field.IGNORE_CASE) {
@@ -705,13 +713,13 @@ public class QuickTestActivity extends AppCompatActivity implements
             } else {
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
             }
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 wrongAnswersCounter++;
             }
         } else if (check_type == Contract.Field.DO_NOT_IGNORE_CASE) {
@@ -730,13 +738,13 @@ public class QuickTestActivity extends AppCompatActivity implements
             } else {
                 show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
                 show_result_linearlayout.setPadding(0, 0, 0, 0);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 setNormalEnterAnswerBackground();
                 result = false;
             }
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
+                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 wrongAnswersCounter++;
             }
         }
@@ -789,8 +797,6 @@ public class QuickTestActivity extends AppCompatActivity implements
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         saveUserLayoutChanges(savedInsatanceState);
         savedInsatanceState.putBoolean(BEFORE_SHOWING_RESULT_DIALOG, before_showing_result_dialog);
-        savedInsatanceState.putInt(LAST_CONTROLLED_INDEX, last_controlled_index);
-        savedInsatanceState.putInt(LAST_OLD_ROUND_INDEX, last_old_round_index);
         mHandler.removeCallbacks(show_result_dialog_runnable);
                        /* Saving the remaining time till completion of the current timer of time of answer because the activity
         will be destroyed, not finishing normally.
@@ -813,66 +819,6 @@ public class QuickTestActivity extends AppCompatActivity implements
         super.onSaveInstanceState(savedInsatanceState);
     }
 
-
-
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        currentQuestionCounter = savedInstanceState.getInt(CURRENT_QUESTION_COUNTER);
-        wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
-        permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
-        triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
-        is_testing_now = savedInstanceState.getBoolean(TESTING_NOW);
-        boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
-        questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
-        hints = savedInstanceState.getStringArrayList(HINTS);
-        hintCounter = savedInstanceState.getInt(HINT_COUNTER);
-        customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
-        symbol = savedInstanceState.getStringArray(SYMBOL);
-        before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
-        time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
-        time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
-        is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
-        last_controlled_index = savedInstanceState.getInt(LAST_CONTROLLED_INDEX);
-        last_old_round_index = savedInstanceState.getInt(LAST_OLD_ROUND_INDEX);
-        is_starting_after_destruction = true;
-        restoreUserLayoutChanges(savedInstanceState);
-        if (!before_showing_result_dialog) {
-            if (is_testing_now) {
-                if ( obfuscate ) {
-                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
-                } else {
-                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                }
-                showTries.setText(Integer.toString(triesCounter + 1));
-                remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                check.setEnabled(nextState);
-                enterAnswer.setEnabled(true);
-                ifMoreThanOnce();
-                if ( is_time_of_answer_elapsed && time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
-                    show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
-                    show_question_linearlayout.setPadding(0, 0, 0, 0);
-                    showQuestion.setTextColor(Color.BLACK);
-                }
-                if (savedInstanceState.containsKey(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER)) {
-                    long how_much_time_remaining_time_for_answer = savedInstanceState.getLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER);
-                    if (how_much_time_remaining_time_for_answer <= 0) {
-                        DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
-                    } else {
-                        effective_time_of_answer = how_much_time_remaining_time_for_answer;
-                        mHandler.postDelayed(what_to_do_after_time_of_answer_elapsed_runnable, effective_time_of_answer);
-                        time_of_starting_time_of_answer = System.currentTimeMillis();
-                    }
-                }
-                if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
-                    enterAnswer.setHint(hints.get(hintCounter - 1));
-                }
-            }
-        } else {
-            show_result_dialog();
-        }
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1037,10 +983,11 @@ public class QuickTestActivity extends AppCompatActivity implements
             }
         }
     }
-    private void DoWhatYouHaveToDoAfterTimeOfAnswerElapsed() {
+    void DoWhatYouHaveToDoAfterTimeOfAnswerElapsed() {
         if ( time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
             setFalse();
             triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+            cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
             currentQuestionCounter++;
             if (currentQuestionCounter >= questionsNumber) {
                 check.setEnabled(false);
@@ -1053,6 +1000,12 @@ public class QuickTestActivity extends AppCompatActivity implements
                     show_result_dialog();
                 };
                 mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
+                Toast toast = Toast.makeText(QuickTestActivity.this, time, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
                 currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
                 is_testing_now = false;
                 enterAnswer.setEnabled(false);
@@ -1095,6 +1048,7 @@ public class QuickTestActivity extends AppCompatActivity implements
     private void dontKnow() {
         setFalse();
         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+        cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
         currentQuestionCounter++;
         showQuestion.setTextColor(Color.WHITE);
         if (currentQuestionCounter >= questionsNumber) {
@@ -1108,6 +1062,12 @@ public class QuickTestActivity extends AppCompatActivity implements
                 show_result_dialog();
             };
             mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
+            Toast toast = Toast.makeText(QuickTestActivity.this, time, Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
             is_testing_now = false;
             enterAnswer.setEnabled(false);

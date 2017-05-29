@@ -3,6 +3,7 @@
     <string-array name="main_activity_features">
         <item>تصدير مجالات</item>
         <item>استيراد مجالات</item>
+        <item>استيراد مجال متوفر</item>
         <item>اشترك</item>
         <item>عن التطبيق</item>
     </string-array>

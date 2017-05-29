@@ -611,6 +611,10 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                             enterAnswer.setText(currentAnswer);
                             enterAnswer.setEnabled(false);
                         }
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.first_entry, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                     }
                     if (showCurrentEntry.isChecked()) {
                         enterQuestion.setText(currentQuestion);
@@ -646,6 +650,10 @@ public class StudyWrongAnswersActivity extends AppCompatActivity implements
                             enterAnswer.setText(currentAnswer);
                             enterAnswer.setEnabled(false);
                         }
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.last_entry, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                     }
                     if ( showCurrentEntry.isChecked() ) {
                         enterQuestion.setText(currentQuestion);

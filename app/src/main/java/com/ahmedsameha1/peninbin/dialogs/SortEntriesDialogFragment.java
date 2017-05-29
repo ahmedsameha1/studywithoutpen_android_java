@@ -56,6 +56,8 @@ public class SortEntriesDialogFragment extends DialogFragment {
             Button sort_entry_order_desc = (Button) alertDialog.findViewById(R.id.sort_entry_order_desc);
             Button sort_entry_rank_asc = (Button) alertDialog.findViewById(R.id.sort_rank_asc);
             Button sort_entry_rank_desc = (Button) alertDialog.findViewById(R.id.sort_rank_desc);
+            Button sort_entry_wrongness_asc = (Button) alertDialog.findViewById(R.id.sort_wrongness_asc);
+            Button sort_entry_wrongness_desc = (Button) alertDialog.findViewById(R.id.sort_wrongness_desc);
 
                 sort_question_asc.setVisibility(View.VISIBLE);
                 sort_question_desc.setVisibility(View.VISIBLE);
@@ -123,6 +125,16 @@ public class SortEntriesDialogFragment extends DialogFragment {
             sort_entry_rank_desc.setOnClickListener(v -> {
                 contact.sort(SortOptions.SORT_RANK_DESC);
                 mySQLiteCursorLoader.updateFieldSort(current_field_id,SortOptions.SORT_RANK_DESC);
+                dismiss();
+            });
+            sort_entry_wrongness_asc.setOnClickListener(v -> {
+                contact.sort(SortOptions.SORT_WRONGNESS_ASC);
+                mySQLiteCursorLoader.updateFieldSort(current_field_id,SortOptions.SORT_WRONGNESS_ASC);
+                dismiss();
+            });
+            sort_entry_wrongness_desc.setOnClickListener(v -> {
+                contact.sort(SortOptions.SORT_WRONGNESS_DESC);
+                mySQLiteCursorLoader.updateFieldSort(current_field_id,SortOptions.SORT_WRONGNESS_DESC);
                 dismiss();
             });
         });

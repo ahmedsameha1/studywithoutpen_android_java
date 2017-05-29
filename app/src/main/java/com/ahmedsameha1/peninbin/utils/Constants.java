@@ -50,7 +50,13 @@ public class Constants {
         public static final int STUDY_A_PERIOD = 0;
         public static final int ENHANCED_TEST = 1;
         public static final int FULLY_RANDOM_TEST = 2;
-        public static final int QUICK_TEST = 2;
-        public static final int NOT_USED = 0;
+        public static final int STUDY_AGAIN_ENHANCED_TEST = 3;
+        public static final int STUDY_AGAIN_FULLY_RANDOM_TEST = 4;
+    }
+
+    public class Study_Till_Correct {
+        public static final int STUDY_PERIOD = 0;
+        public static final int STUDY_AGAIN_ENHANCED_TEST = 1;
+        public static final int STUDY_AGAIN_FULLY_RANDOM_TEST = 2;
     }
 }

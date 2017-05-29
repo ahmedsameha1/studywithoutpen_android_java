@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
 
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
+import com.ahmedsameha1.peninbin.adapters.WrongItem;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
@@ -134,35 +135,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-    public void setRandomQuickTestData(long field_id, int number_of_quick_tests, int number_of_tries,
-                                       int number_of_question, String[][] excluded_times, int controlled_portion, int wrongness_level, int rank_level) {
-        sqLiteDatabase.beginTransactionNonExclusive();
-        try {
-            int s = sqLiteDatabase.delete(Contract.Excluded_Time.TABLE_NAME, Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{field_id + ""});
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, number_of_quick_tests);
-            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, number_of_tries);
-            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, number_of_question);
-            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, controlled_portion);
-            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, wrongness_level);
-            contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL, rank_level);
-            sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
-            if (excluded_times != null) {
-                for (String[] temp : excluded_times) {
-                    if (temp != null) {
-                        contentValues = new ContentValues();
-                        contentValues.put(Contract.Excluded_Time.COLUMN_STARTS, temp[0]);
-                        contentValues.put(Contract.Excluded_Time.COLUMN_ENDS, temp[1]);
-                        contentValues.put(Contract.Excluded_Time.COLUMN_FIELD, field_id);
-                        sqLiteDatabase.insert(Contract.Excluded_Time.TABLE_NAME, null, contentValues);
-                    }
-                }
-            }
-            sqLiteDatabase.setTransactionSuccessful();
-        } finally {
-            sqLiteDatabase.endTransaction();
-        }
-    }
+
 
     public void insertEntry(int question_data_type, String question, String answer, long field_id) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
@@ -477,31 +450,32 @@ try {
 
 
 
-    public void clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(long field_id) {
+    public void clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(int study_till_correct_type, long field_id) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
-            sqLiteDatabase.delete(Contract.Study_Period_Paused.TABLE_NAME, Contract.Study_Period_Paused.COLUMN_FIELD + " = ? ",
-                    new String[]{field_id + ""});
-            sqLiteDatabase.delete(Contract.Study_Period_Repeated_Entry.TABLE_NAME, Contract.Study_Period_Repeated_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{field_id + ""});
+            sqLiteDatabase.delete(Contract.Study_Till_Correct_Paused.TABLE_NAME, Contract.Study_Till_Correct_Paused.COLUMN_FIELD + " = ? AND "
+                            + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
+                    new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)});
+            sqLiteDatabase.delete(Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME, Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD + " = ? AND "
+                            + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + " = ? ",
+                    new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)});
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();
         }
     }
 
-    public void putStudyPeriodPausedData(long field_id, int[] array) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Study_Period_Paused.COLUMN_CURRENT_QUESTION_COUNTER, array[0]);
-        contentValues.put(Contract.Study_Period_Paused.COLUMN_TRIES_NUMBER, array[1]);
-        contentValues.put(Contract.Study_Period_Paused.COLUMN_FIELD, field_id);
-        sqLiteDatabase.insert(Contract.Study_Period_Paused.TABLE_NAME, null, contentValues);
-    }
 
-    public void resetEntriesStudyPeriodOrder(long field_id, int question_data_type) {
+    public void resetEntriesStudyPeriodOrder(long field_id, int study_till_correct_type,  int question_data_type) {
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, -1);
+            if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_PERIOD ) {
+                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, -1);
+            } else if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST ) {
+                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER, -1);
+            } else if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST ) {
+                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER, -1);
+            }
             sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
                     Contract.String_Entry.COLUMN_FIELD + " = ? ",
                     new String[]{field_id + ""});
@@ -543,41 +517,30 @@ try {
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
     }
-    public void putStudyPeriodRepeatedEntries(long field_id, ArrayList<Integer> arrayList) {
-        sqLiteDatabase.beginTransactionNonExclusive();
-        try {
-            for (Integer i : arrayList) {
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_REPEATED_ENTRY, i);
-                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_FIELD, field_id);
-                sqLiteDatabase.insert(Contract.Study_Period_Repeated_Entry.TABLE_NAME, null, contentValues);
-            }
-            sqLiteDatabase.setTransactionSuccessful();
-        } finally {
-            sqLiteDatabase.endTransaction();
-        }
-    }
-    public void pauseStudyAPeriod( long field_id, String[][] listForTest, int[] session_data, ArrayList<Integer> repeated_entries ) {
+
+    public void pauseStudyAPeriod( long field_id, String[][] listForTest, int[] session_data, ArrayList<Integer> repeated_entries, long lastPause ) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
 
-            sqLiteDatabase.delete(Contract.Study_Period_Paused.TABLE_NAME, Contract.Study_Period_Paused.COLUMN_FIELD + " = ? ",
-                    new String[]{field_id + ""});
-            sqLiteDatabase.delete(Contract.Study_Period_Repeated_Entry.TABLE_NAME, Contract.Study_Period_Repeated_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{field_id + ""});
+            sqLiteDatabase.delete(Contract.Study_Till_Correct_Paused.TABLE_NAME, Contract.Study_Till_Correct_Paused.COLUMN_FIELD + " = ? AND "
+                    + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
+                    new String[]{String.valueOf(field_id), String.valueOf(Constants.Study_Till_Correct.STUDY_PERIOD)});
+            sqLiteDatabase.delete(Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME, Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD + " = ? AND "
+                    + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + " = ? ",
+                    new String[]{String.valueOf(field_id), String.valueOf(Constants.Study_Till_Correct.STUDY_PERIOD)});
 
 
 
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Study_Period_Paused.COLUMN_CURRENT_QUESTION_COUNTER, session_data[0]);
-            contentValues.put(Contract.Study_Period_Paused.COLUMN_TRIES_NUMBER, session_data[1]);
-            contentValues.put(Contract.Study_Period_Paused.COLUMN_FIELD, field_id);
-            sqLiteDatabase.insert(Contract.Study_Period_Paused.TABLE_NAME, null, contentValues);
-
-
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_CURRENT_QUESTION_COUNTER, session_data[0]);
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_TRIES_NUMBER, session_data[1]);
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION, lastPause);
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_FIELD, field_id);
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_TYPE, Constants.Study_Till_Correct.STUDY_PERIOD);
+            sqLiteDatabase.insert(Contract.Study_Till_Correct_Paused.TABLE_NAME, null, contentValues);
 
             contentValues = new ContentValues();
-            contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, -1);
+                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, -1);
             sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
                     Contract.String_Entry.COLUMN_FIELD + " = ? ",
                     new String[]{field_id + ""});
@@ -585,19 +548,20 @@ try {
 
             
 
-            for (int i = 0; i < listForTest.length; i++) {
+            for (int k = 0; k < listForTest.length; k++) {
                 contentValues = new ContentValues();
-                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, i);
+                    contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, k);
                 sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ",
-                        new String[]{listForTest[i][2]});
+                        new String[]{listForTest[k][2]});
             }
 
 
             for (Integer i : repeated_entries) {
                 contentValues = new ContentValues();
-                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_REPEATED_ENTRY, i);
-                contentValues.put(Contract.Study_Period_Repeated_Entry.COLUMN_FIELD, field_id);
-                sqLiteDatabase.insert(Contract.Study_Period_Repeated_Entry.TABLE_NAME, null, contentValues);
+                contentValues.put(Contract.Study_Till_Correct_Repeated_Entry.COLUMN_REPEATED_ENTRY, i);
+                contentValues.put(Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD, field_id);
+                contentValues.put(Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE, Constants.Study_Till_Correct.STUDY_PERIOD);
+                sqLiteDatabase.insert(Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME, null, contentValues);
             }
 
 
@@ -611,15 +575,63 @@ try {
         }
     }
 
-    public void pauseStudyAPeriod( long field_id, String[][] listForTest, int[] session_data, ArrayList<Integer> repeated_entries, int question_data_type ) {
+    public void pauseStudyAgainAfterTest(int study_till_correct_type, long field_id, ArrayList<WrongItem> wrongItemArrayList, int[] session_data, ArrayList<Integer> repeated_entries, long last_pause ) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
 
-            clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(field_id);
-            putStudyPeriodPausedData(field_id,session_data);
-            resetEntriesStudyPeriodOrder(field_id, question_data_type);
-            putEntriesStudyPeriodOrder(field_id,question_data_type, listForTest);
-            putStudyPeriodRepeatedEntries(field_id,repeated_entries);
+            sqLiteDatabase.delete(Contract.Study_Till_Correct_Paused.TABLE_NAME, Contract.Study_Till_Correct_Paused.COLUMN_FIELD + " = ? AND "
+                    + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
+                    new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)});
+            sqLiteDatabase.delete(Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME, Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD + " = ? AND "
+                    + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + " = ? ",
+                    new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)});
+
+
+
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_CURRENT_QUESTION_COUNTER, session_data[0]);
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_TRIES_NUMBER, session_data[1]);
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION, last_pause);
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_FIELD, field_id);
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_TYPE, study_till_correct_type);
+            sqLiteDatabase.insert(Contract.Study_Till_Correct_Paused.TABLE_NAME, null, contentValues);
+
+            contentValues = new ContentValues();
+            if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST ) {
+                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER, -1);
+            } else if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST ) {
+                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER, -1);
+            }
+            sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                    Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                    new String[]{field_id + ""});
+
+
+
+
+            for (int k = 0; k < wrongItemArrayList.size(); k++) {
+                contentValues = new ContentValues();
+                if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST ) {
+                    contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER, k);
+                } else if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST ) {
+                    contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER, k);
+                }
+                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ",
+                        new String[]{String.valueOf(wrongItemArrayList.get(k).getEntry_id())});
+            }
+
+
+            for (Integer i : repeated_entries) {
+                contentValues = new ContentValues();
+                contentValues.put(Contract.Study_Till_Correct_Repeated_Entry.COLUMN_REPEATED_ENTRY, i);
+                contentValues.put(Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD, field_id);
+                contentValues.put(Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE, study_till_correct_type);
+                sqLiteDatabase.insert(Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME, null, contentValues);
+            }
+
+
+
+
 
 
             sqLiteDatabase.setTransactionSuccessful();
@@ -627,26 +639,28 @@ try {
             sqLiteDatabase.endTransaction();
         }
     }
-    public void putTestPausedDataEnhancedTest(long field_id, int[] array) {
+
+    public void putTestPausedDataEnhancedTest(long field_id, int[] array, long last_pause) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Test_Paused.COLUMN_TEST_TYPE, Constants.TestType.ENHANCED_TEST);
         contentValues.put(Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER, array[0]);
         contentValues.put(Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT, array[1]);
         contentValues.put(Contract.Test_Paused.COLUMN_TRIES_NUMBER, array[2]);
+        contentValues.put(Contract.Test_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_TEST_SESSION, last_pause);
         contentValues.put(Contract.Test_Paused.COLUMN_FIELD, field_id);
         sqLiteDatabase.insert(Contract.Test_Paused.TABLE_NAME, null, contentValues);
     }
 
-    public void putTestPausedDataFullyRandomTest(long field_id, int[] array) {
+    public void putTestPausedDataFullyRandomTest(long field_id, int[] array, long last_pause ) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Test_Paused.COLUMN_TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
         contentValues.put(Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER, array[0]);
         contentValues.put(Contract.Test_Paused.COLUMN_WRONG_ANSWERS_COUNT, array[1]);
         contentValues.put(Contract.Test_Paused.COLUMN_TRIES_NUMBER, array[2]);
+        contentValues.put(Contract.Test_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_TEST_SESSION, last_pause);
         contentValues.put(Contract.Test_Paused.COLUMN_FIELD, field_id);
         sqLiteDatabase.insert(Contract.Test_Paused.TABLE_NAME, null, contentValues);
     }
-
 
 
     public void editEntry(long entry_id, int question_data_type, String question, String answer) {
@@ -731,11 +745,7 @@ try {
                         new String[]{entry_id + ""}, SQLiteDatabase.CONFLICT_IGNORE);
                 contentValues = new ContentValues();
                 contentValues.put(Contract.String_Entry.COLUMN_RANK, rank);
-                if ( order <= -1 ) {
-                    contentValues.putNull(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY);
-                } else {
-                    contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, order);
-                }
+                contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, order);
                 sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
                         Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
@@ -1375,8 +1385,7 @@ try {
     }
 
     public void addScheduledTimeForBackup(long field_id, int session_type, long time,
-                                          int pendingintent_request, int percentage_or_number, int number, int number_of_tries,
-                                          int controlled_portion, int wrongness_level, int rank_level) {
+                                          int pendingintent_request, int percentage_or_number, int number, int number_of_tries) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_FIELD, field_id);
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE, session_type);
@@ -1385,9 +1394,6 @@ try {
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER_OR_PERCENTAGE, percentage_or_number);
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_NUMBER, number);
         contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_TRIES, number_of_tries);
-        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_CONTROLLED_PORTION, controlled_portion);
-        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, wrongness_level);
-        contentValues.put(Contract.Scheduled_Time_Backup.COLUMN_NOT_RANDOM_QUICK_TEST_RANK_LEVEL, rank_level);
         sqLiteDatabase.insert(Contract.Scheduled_Time_Backup.TABLE_NAME, null, contentValues);
     }
 
@@ -1586,27 +1592,16 @@ try {
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
     }
 
-    public void setTimeOfAnswerOfStudyAPeriod(long field_id, int reading_question_letter_second, int finding_answer_time,
-                                              int typing_answer_letter_second) {
+    public void setTimeOfAnswerOfStudyTillCorrect(long field_id, int reading_question_letter_second, int finding_answer_time,
+                                                  int typing_answer_letter_second) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD, reading_question_letter_second);
-        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD, finding_answer_time);
-        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD, typing_answer_letter_second);
+        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT, reading_question_letter_second);
+        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT, finding_answer_time);
+        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT, typing_answer_letter_second);
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
     }
 
-    public void setElapsedPausedSessionTime(long field_id, int type, long time) {
-        ContentValues contentValues = new ContentValues();
-        if (type == Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD) {
-            contentValues.put(Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION, time);
-        } else if (type == Constants.ElapsedPausedSessionTime.ENHANCED_TEST) {
-            contentValues.put(Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION, time);
-        } else if (type == Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST) {
-            contentValues.put(Contract.Field.COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION, time);
-        }
-        sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
-    }
+
     public void setObfuscateQuestion(long field_id, boolean obfuscate) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, obfuscate ? 1 : 0);

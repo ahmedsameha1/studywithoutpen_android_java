@@ -46,9 +46,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             if (session[1] == ScheduleInFieldDialogFragment.QUICK_TEST) {
                 if (session[4] == -1 && session[5] == -1 && session[6] == -1) {
                     Cursor cursor = DatabaseHelper.getInstance(context).getWritableDatabase().query(Contract.Field.TABLE_NAME,
-                            new String[]{Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS,
-                                    Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL,
-                                    Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL},
+                            new String[]{Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS},
                             Contract.COLUMN_ID + " = ? ", new String[]{session[0] + ""}, null, null, null);
                     if (cursor.moveToFirst()) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
@@ -57,9 +55,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, cursor.getInt(1));
                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, cursor.getInt(0));
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
-                        intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, cursor.getInt(2));
-                        intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, cursor.getInt(3));
-                        intent.putExtra(EnhancedTestActivity.RANK_LEVEL, cursor.getInt(4));
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME, session[2]);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) session[3], intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -73,9 +68,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
                         intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, (int) session[5]);
                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
-                        intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, (int) session[8]);
-                        intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, (int) session[9]);
-                        intent.putExtra(EnhancedTestActivity.RANK_LEVEL, (int) session[10]);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME, session[2]);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
@@ -87,9 +79,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
                         intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, (int) session[5]);
                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
-                        intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, (int) session[8]);
-                        intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, (int) session[9]);
-                        intent.putExtra(EnhancedTestActivity.RANK_LEVEL, (int) session[10]);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME, session[2]);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);

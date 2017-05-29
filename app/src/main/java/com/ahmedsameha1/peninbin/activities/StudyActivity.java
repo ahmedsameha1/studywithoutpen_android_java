@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.app.LoaderManager;
 import android.os.SystemClock;
+import android.provider.AlarmClock;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -668,6 +669,10 @@ public class StudyActivity extends AppCompatActivity implements
                     answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
                     answerLinearlayout.setPadding(0, 0, 0, 0);
                 }
+            } else {
+                Toast toast = Toast.makeText(this, R.string.first_entry, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
             }
         });
         down.setOnClickListener(v -> {
@@ -713,6 +718,10 @@ public class StudyActivity extends AppCompatActivity implements
                     answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
                     answerLinearlayout.setPadding(0, 0, 0, 0);
                 }
+            } else {
+                Toast toast = Toast.makeText(this, R.string.last_entry, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
             }
         });
         enterQuestion.addTextChangedListener(new TextWatcher() {
@@ -860,6 +869,25 @@ public class StudyActivity extends AppCompatActivity implements
                 changeTextSizeDialogFragment.setArguments(bundle1);
                 changeTextSizeDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
+
+            case R.id.timer:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.kitkat_or_newer, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }

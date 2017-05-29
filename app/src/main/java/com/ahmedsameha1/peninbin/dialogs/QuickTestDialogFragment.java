@@ -89,13 +89,7 @@ public class QuickTestDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(dialog -> {
             final EditText enterTries = (EditText) alertDialog.findViewById(R.id.number_of_tries);
             final EditText enterNumber = (EditText) alertDialog.findViewById(R.id.number);
-            final Spinner number_or_percentage = (Spinner) alertDialog.findViewById(R.id.number_or_percentage);
-            final Spinner controlled_portion = (Spinner) alertDialog.findViewById(R.id.controlled_portion);
-            final Spinner uncontrolled_portion = (Spinner) alertDialog.findViewById(R.id.uncontrolled_portion);
-            final Spinner rank = (Spinner) alertDialog.findViewById(R.id.spinner_rank);
-            final Spinner wrongness = (Spinner) alertDialog.findViewById(R.id.spinner_wrongness_percentage);
-            final CheckBox control_test_entries = (CheckBox) alertDialog.findViewById(R.id.control_test_entries);
-            final LinearLayout control_options = (LinearLayout) alertDialog.findViewById(R.id.control_options);
+            final Spinner number_or_percentage = (Spinner) alertDialog.findViewById(R.id.number_or_percentage);;
             final Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
             final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
             final ImageButton percentage_or_number_help = (ImageButton) alertDialog.findViewById(R.id.percentage_or_number_help);
@@ -121,85 +115,8 @@ public class QuickTestDialogFragment extends DialogFragment {
 
                 }
             });
-            controlled_portion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if ( position == 0 ) {
-                        uncontrolled_portion.setSelection(5);
-                    } else if ( position == 1 ) {
-                        uncontrolled_portion.setSelection(4);
-                    } else if ( position == 2 ) {
-                        uncontrolled_portion.setSelection(3);
-                    } else if ( position == 3 ) {
-                        uncontrolled_portion.setSelection(2);
-                    } else if ( position == 4 ) {
-                        uncontrolled_portion.setSelection(1);
-                    } else if ( position == 5 ) {
-                        uncontrolled_portion.setSelection(0);
-                    }
-                }
 
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
 
-                }
-            });
-            uncontrolled_portion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if ( position == 0 ) {
-                        controlled_portion.setSelection(5);
-                    } else if ( position == 1 ) {
-                        controlled_portion.setSelection(4);
-                    } else if ( position == 2 ) {
-                        controlled_portion.setSelection(3);
-                    } else if ( position == 3 ) {
-                        controlled_portion.setSelection(2);
-                    } else if ( position == 4 ) {
-                        controlled_portion.setSelection(1);
-                    } else if ( position == 5 ) {
-                        controlled_portion.setSelection(0);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-            control_test_entries.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if ( isChecked ) {
-                    control_options.setVisibility(View.VISIBLE);
-                } else {
-                    control_options.setVisibility(View.GONE);
-                }
-            });
-            rank.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if ( position == 0 && wrongness.getSelectedItemPosition() == 0 ) {
-                        wrongness.setSelection(1);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-            wrongness.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if ( position == 0 && rank.getSelectedItemPosition() == 0 ) {
-                        rank.setSelection(1);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
             number_of_tries_help.setOnClickListener(v -> {
                 AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
                 number_of_tries_help_dialog_builder
@@ -284,11 +201,6 @@ public class QuickTestDialogFragment extends DialogFragment {
                                         intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, number);
                                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        if ( control_test_entries.isChecked() ) {
-                                            intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
-                                            intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
-                                            intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
-                                        }
                                         final Calendar calendar_picked_date_time = Calendar.getInstance();
                                         calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                                         intent.putExtra(SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
@@ -297,16 +209,10 @@ public class QuickTestDialogFragment extends DialogFragment {
                                         int request = (int)System.currentTimeMillis();
                                         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                         alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
-                                        if ( control_test_entries.isChecked() ) {
+
                                             mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
                                                     ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                    EnhancedTestActivity.PERCENTAGE,number,trys,controlled_portion.getSelectedItemPosition(),
-                                                    wrongness.getSelectedItemPosition(),rank.getSelectedItemPosition());
-                                        } else {
-                                            mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
-                                                    ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                    EnhancedTestActivity.PERCENTAGE,number,trys, -1, -1, -1);
-                                        }
+                                                    EnhancedTestActivity.PERCENTAGE,number,trys);
                                         final Snackbar snackbar = Snackbar
                                                 .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
                                         snackbar.setAction(R.string.ok, view -> snackbar.dismiss());
@@ -331,11 +237,6 @@ public class QuickTestDialogFragment extends DialogFragment {
                                         intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, number);
                                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
                                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        if ( control_test_entries.isChecked() ) {
-                                            intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
-                                            intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
-                                            intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
-                                        }
                                         final Calendar calendar_picked_date_time = Calendar.getInstance();
                                         calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                                         intent.putExtra(SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
@@ -344,13 +245,9 @@ public class QuickTestDialogFragment extends DialogFragment {
                                         int request = (int)System.currentTimeMillis();
                                         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                         alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
-                                        if ( control_test_entries.isChecked() ) {
-
-                                        } else {
                                             mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
                                                 ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                EnhancedTestActivity.NUMBER,number,trys, -1, -1, -1);
-                                        }
+                                                EnhancedTestActivity.NUMBER,number,trys);
                                         final Snackbar snackbar = Snackbar
                                                 .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
                                         snackbar.setAction(R.string.ok, view -> snackbar.dismiss());

@@ -32,7 +32,7 @@ public class Emulation {
 
     public static final String DATE_FORMAT_SQLITE = "yyyy-MM-dd HH:mm:ss";
 
-    private static Thread emulate_thread, unemulate_thread;
+    private static Thread emulate_thread, unemulate_thread, reemulate_thread;
 
     public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries) {
         emulate_thread = new Thread(() -> {
@@ -50,6 +50,15 @@ public class Emulation {
         });
 
         emulate_thread.start();
+    }
+
+    public static void startReemulateThread(final Context context) {
+        reemulate_thread = new Thread(() -> {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            repartition(context);
+        });
+
+        reemulate_thread.start();
     }
 
     public static void startUnemulateThread(final Context context, final long field_id) {
@@ -354,7 +363,9 @@ public class Emulation {
     }
 
     public static boolean isAnyThreadRunning() {
-        if ((emulate_thread == null || !emulate_thread.isAlive() && (unemulate_thread == null || !unemulate_thread.isAlive()))) {
+        if ( (emulate_thread == null || !emulate_thread.isAlive())
+                && (unemulate_thread == null || !unemulate_thread.isAlive())
+                && ( reemulate_thread == null || !reemulate_thread.isAlive()) ) {
             return false;
         }
         return true;
@@ -391,4 +402,77 @@ public class Emulation {
             sqLiteDatabase.endTransaction();
         }
     }
+
+    private static void repartition( Context context ) {
+        SQLiteDatabase sqLiteDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
+        Calendar calendar = Calendar.getInstance();
+        long long_utc = System.currentTimeMillis();
+        calendar.setTimeInMillis(long_utc);
+//        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 5);
+        calendar.set(Calendar.SECOND, 0);
+      /*  long emulated_creation_time_millis = System.currentTimeMillis();
+        Date date = new Date(emulated_creation_time_millis);*/
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
+        String emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+        Cursor field_cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
+                new String[]{Contract.COLUMN_ID, Contract.Field.COLUMN_CREATION_EMULATION_NUMBER},
+                Contract.Field.COLUMN_CREATION_EMULATION_NUMBER + " > ? ", new String[]{String.valueOf(Constants.NOT_EMULATED)},
+                null,null,null);
+        if ( field_cursor.getCount() > 0 ) {
+            for (field_cursor.moveToFirst(); field_cursor.getPosition() < field_cursor.getCount();
+                 field_cursor.moveToNext()) {
+                long field_id = field_cursor.getLong(0);
+                int number_of_everyday_entries = field_cursor.getInt(1);
+                Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                        Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                                + " >= ? ", new String[]{String.valueOf(field_id), emulated_creation_time_string}, null, null,
+                        Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
+                                + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
+                int number_of_days = cursor.getCount() / number_of_everyday_entries;
+                if (cursor.getCount() % number_of_everyday_entries > 0) {
+                    number_of_days++;
+                }
+                sqLiteDatabase.beginTransaction();
+                try {
+                    if (number_of_days <= 1) {
+                        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                             cursor.moveToNext()) {
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
+                            sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                                    Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) + ""});
+                        }
+                    } else {
+                        outter:
+                        for (int i = 0; i < number_of_days; i++) {
+                            if (i >= 1) {
+                                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                                emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+                            }
+                            for (int k = 0; k < number_of_everyday_entries; k++) {
+                                if (i == 0 && k == 0) {
+                                    cursor.moveToFirst();
+                                } else {
+                                    cursor.moveToNext();
+                                }
+                                if (cursor.isAfterLast()) {
+                                    break outter;
+                                }
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
+                                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                                        Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) + ""});
+                            }
+                        }
+                    }
+                    sqLiteDatabase.setTransactionSuccessful();
+                } finally {
+                    sqLiteDatabase.endTransaction();
+                }
+            }
+        }
+    }
+
 }

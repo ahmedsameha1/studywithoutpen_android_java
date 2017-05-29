@@ -38,6 +38,8 @@ import com.ahmedsameha1.peninbin.utils.Emulation;
 
 import java.util.ArrayList;
 
+import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
+
 /**
  * Created by ahmed on 22/08/16.
  */
@@ -62,6 +64,11 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         ImageButton number_of_entries_help = (ImageButton) findViewById(R.id.number_of_entries_help);
         ImageButton starting_entry_help = (ImageButton) findViewById(R.id.starting_entry_help);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
+        VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
+        // Connect the recycler to the scroller (to let the scroller scroll the list)
+        fastScroller.setRecyclerView(recyclerView);
+        // Connect the scroller to the recycler (to let the recycler scroll the scroller's handle)
+        recyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);

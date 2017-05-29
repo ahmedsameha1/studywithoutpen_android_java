@@ -2,12 +2,15 @@ package com.ahmedsameha1.peninbin.activities;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.AlarmClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,7 +18,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -65,11 +67,13 @@ public class AddEntryActivity extends AppCompatActivity implements
     public static final int GET_FIELDS_LOADER_ID = 0;
     public static final int GET_SPECIAL_TEXT_ID = 1;
     private static final String TEMP_SHARED_STRING = "temp_shared_string";
+    private String JUST_CHANGE_FIELD = "just_change_field";
     private Spinner field_spinner;
     private EditText enter_question;
     private EditText enter_answer;
     private EditText enter_order;
     private TextView showActionbar;
+    private Spinner rank_spinner;
     private SimpleCursorAdapter simple_cursor_adapter;
     private Chronometer timer;
     private long lastPause;
@@ -87,6 +91,8 @@ public class AddEntryActivity extends AppCompatActivity implements
     private int current_field_type;
     private Handler mHandler = new Handler();
     private String temp_shared_string;
+    private boolean just_change_field;
+
 
 
     @Override
@@ -118,7 +124,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         field_spinner = (Spinner) findViewById(R.id.field_spinner);
-        final Spinner rank_spinner = (Spinner) findViewById(R.id.rank_spinner);
+        rank_spinner = (Spinner) findViewById(R.id.rank_spinner);
         enter_question = (EditText) findViewById(R.id.question);
         enter_answer = (EditText) findViewById(R.id.answer);
         enter_order = (EditText) findViewById(R.id.order);
@@ -164,7 +170,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                     cursor = data;
                     setSpinnerPosition(current_field_id);
                 } else if (loader.getId() == GET_SPECIAL_TEXT_ID) {
-                    if (symbol == null && customable_text == null) {
+                    if ((symbol == null && customable_text == null) || just_change_field ) {
                         symbol = new String[data.getCount()];
                         customable_text = new String[data.getCount()];
                         for (data.moveToFirst(); data.getPosition() < data.getCount();
@@ -172,7 +178,9 @@ public class AddEntryActivity extends AppCompatActivity implements
                             symbol[data.getPosition()] = data.getString(1);
                             customable_text[data.getPosition()] = data.getString(2);
                         }
-
+                        if ( just_change_field ) {
+                            just_change_field = false;
+                        }
                     }
                 }
             }
@@ -211,10 +219,11 @@ public class AddEntryActivity extends AppCompatActivity implements
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
         add_entry.setOnClickListener(view -> {
+            try {
             add_entry_cardview.startAnimation(animAlpha);
-            String question = enter_question.getText().toString();
-            String answer = enter_answer.getText().toString();
-            int order = "".equals(enter_order.getText().toString()) ? -1 : Integer.parseInt(enter_order.getText().toString());
+            String question = enter_question.getText().toString().trim();
+            String answer = enter_answer.getText().toString().trim();
+            int order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
             if (question.length() > 0 && answer.length() > 0) {
                 if (fromFieldActivity) {
 
@@ -256,6 +265,25 @@ public class AddEntryActivity extends AppCompatActivity implements
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
+        } catch ( NumberFormatException nfe ) {
+            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+        });
+        add_entry.setOnLongClickListener( view -> {
+            PopupMenu popup = new PopupMenu(this, view);
+            getMenuInflater().inflate(R.menu.add_entry_options_menu, popup.getMenu());
+            popup.setOnMenuItemClickListener(item -> {
+                if ( item.getItemId() == R.id.keep_question ) {
+                    addEntryKeepQuestion();
+                } else {
+                    addEntryKeepAnswer();
+                }
+                return true;
+            });
+            popup.show();
+            return true;
         });
 
         field_spinner.setOnTouchListener((v, event) -> {
@@ -268,7 +296,8 @@ public class AddEntryActivity extends AppCompatActivity implements
                 Cursor c = (Cursor) parent.getSelectedItem();
                 current_field_id = c.getLong(0);
                 current_field_type = c.getInt(1);
-                getLoaderManager().restartLoader(GET_SPECIAL_TEXT_ID, null, loader);// TODO: 5/4/17 test this 
+                getLoaderManager().restartLoader(GET_SPECIAL_TEXT_ID, null, loader);// TODO: 5/4/17 test this
+                just_change_field = true;
                 setHints();
             }
 
@@ -500,6 +529,25 @@ public class AddEntryActivity extends AppCompatActivity implements
                 changeTextSizeDialogFragment.setArguments(bundle1);
                 changeTextSizeDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
                 return true;
+
+            case R.id.timer:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.kitkat_or_newer, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -516,6 +564,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         savedInstanceState.putStringArray(SYMBOL, symbol);
         savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         savedInstanceState.putString(TEMP_SHARED_STRING, temp_shared_string);
+        savedInstanceState.putBoolean(JUST_CHANGE_FIELD, just_change_field);
         saveUserLayoutChanges(savedInstanceState);
     }
 
@@ -528,6 +577,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
         symbol = savedInstanceState.getStringArray(SYMBOL);
         temp_shared_string = savedInstanceState.getString(TEMP_SHARED_STRING);
+        just_change_field = savedInstanceState.getBoolean(JUST_CHANGE_FIELD);
         restoreUserLayoutChanges(savedInstanceState);
     }
 
@@ -542,6 +592,103 @@ public class AddEntryActivity extends AppCompatActivity implements
         }
     }
 
+
+    private void addEntryKeepQuestion(){
+        try {
+            String question = enter_question.getText().toString().trim();
+            String answer = enter_answer.getText().toString().trim();
+            int order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
+            if (question.length() > 0 && answer.length() > 0) {
+                if (fromFieldActivity) {
+
+                    if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                        mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                    } else {
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                    enter_answer.setText("");
+                    enter_order.setText("");
+                } else {
+                    if (field_chosen) {
+                        if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                            mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                    current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                        } else {
+                            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
+                        enter_answer.setText("");
+                        enter_order.setText("");
+                    } else {
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                }
+                enter_answer.requestFocus();
+            } else {
+                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        } catch ( NumberFormatException nfe ) {
+            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+    }
+    private void addEntryKeepAnswer(){
+        try {
+        String question = enter_question.getText().toString().trim();
+        String answer = enter_answer.getText().toString().trim();
+        int order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
+        if (question.length() > 0 && answer.length() > 0) {
+            if (fromFieldActivity) {
+
+                if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                    mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                            current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                } else {
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                enter_question.setText("");
+                enter_order.setText("");
+            } else {
+                if (field_chosen) {
+                    if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                        mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                    } else {
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                    enter_question.setText("");
+                    enter_order.setText("");
+                } else {
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            }
+            enter_question.requestFocus();
+        } else {
+            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+        } catch ( NumberFormatException nfe ) {
+            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+    }
 
     @Override
     public void changeAreas(float questionArea, float answerArea) {

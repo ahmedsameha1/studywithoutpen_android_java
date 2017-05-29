@@ -3,6 +3,7 @@ package com.ahmedsameha1.peninbin.adapters;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -18,8 +19,7 @@ public class FieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder
     public TextView wrong_answer_count;
     public Button edit;
     public Button delete;
-    public Button same_question;
-    public Button same_answer;
+    public ImageView more;
     public String currentQuestion;
     public String currentAnswer;
     public LinearLayout toolbar;
@@ -36,8 +36,7 @@ public class FieldActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder
         wrong_answer_count = (TextView) view.findViewById(R.id.wrong_answer_count);
         edit = (Button) view.findViewById(R.id.edit);
         delete = (Button) view.findViewById(R.id.delete);
-        same_question = (Button) view.findViewById(R.id.same_question);
-        same_answer = (Button) view.findViewById(R.id.same_answer);
+        more = (ImageView) view.findViewById(R.id.more);
         toolbar = (LinearLayout) view.findViewById(R.id.field_recyclerview_item_actions);
         view.setOnLongClickListener(this);
         view.setOnClickListener(this);

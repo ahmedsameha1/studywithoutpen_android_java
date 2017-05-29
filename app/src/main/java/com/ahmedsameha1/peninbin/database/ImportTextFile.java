@@ -136,8 +136,8 @@ public class ImportTextFile {
             DatabaseReadOperations databaseOperations = new DatabaseReadOperations(context);
             for (Object[] temp : arrayList) {
                 String field_name = (String) temp[0];
-                String question = (String) temp[1];
-                String answer = (String) temp[2];
+                String question = ((String) temp[1]).trim();
+                String answer = ((String) temp[2]).trim();
                 int order = (int) temp[ORDER];
                 int rank = (int) temp[RANK];
                 long field_id = -1;

@@ -20,125 +20,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:orientation="vertical">
-                <CheckBox
-                    android:id="@+id/control_test_entries"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/control_the_entries_of_the_test" />
 
-                <LinearLayout
-                    android:id="@+id/control_options"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:padding="3dp"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        android:weightSum="2">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/select_percentage_of_controlled_portion" />
-
-                            <Spinner
-                                android:id="@+id/controlled_portion"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_margin="3dp"
-                                android:drawSelectorOnTop="true"
-                                android:entries="@array/controlled_portion_percentages" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/select_percentage_of_uncontrolled_portion" />
-
-                            <Spinner
-                                android:id="@+id/uncontrolled_portion"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_margin="3dp"
-                                android:drawSelectorOnTop="true"
-                                android:entries="@array/uncontrolled_portion_percentages" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:weightSum="2">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/select_rank" />
-
-                            <Spinner
-                                android:id="@+id/spinner_rank"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_margin="3dp"
-
-                                android:drawSelectorOnTop="true"
-                                android:entries="@array/rank" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/select_wrongness_level" />
-
-                            <Spinner
-                                android:id="@+id/spinner_wrongness_percentage"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_margin="3dp"
-                                android:drawSelectorOnTop="true"
-                                android:entries="@array/wrongness_percentages" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-
-                </LinearLayout>
-            </LinearLayout>
             <EditText
                 android:id="@+id/number_of_quick_tests"
                 android:layout_width="match_parent"
@@ -181,7 +63,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_weight="9">
+                    android:layout_weight="8">
 
                     <LinearLayout
                         android:id="@+id/exclude_time_1"
@@ -318,8 +200,9 @@
                     android:id="@+id/show_add_excluded_time_button"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:layout_gravity="center"
+                    android:gravity="center"
                     android:orientation="vertical"
                     android:visibility="gone">
 

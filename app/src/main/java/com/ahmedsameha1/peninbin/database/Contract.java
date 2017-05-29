@@ -2,6 +2,8 @@ package com.ahmedsameha1.peninbin.database;
 
 import android.provider.BaseColumns;
 
+import com.ahmedsameha1.peninbin.utils.Constants;
+
 
 /**
  * Created by ahmed on 7/11/2015.
@@ -46,13 +48,10 @@ public final class Contract {
         public static final String COLUMN_READING_QUESTION_LETTER_SECOND_TESTS = "reading_question_letter_second_tests";
         public static final String COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS = "typing_answer_letter_second_tests";
         public static final String COLUMN_FIND_ANSWER_TIME_TESTS = "find_answer_time_tests";
-        public static final String COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_A_PERIOD = "reading_question_letter_second_study_a_period";
-        public static final String COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_A_PERIOD = "typing_answer_letter_second_study_a_period";
-        public static final String COLUMN_FIND_ANSWER_TIME_STUDY_A_PERIOD = "find_answer_time_study_a_period";
+        public static final String COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT = "reading_question_letter_second_study_till_correct";
+        public static final String COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT = "typing_answer_letter_second_study_till_correct";
+        public static final String COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT = "find_answer_time_study_till_correct";
         public static final String COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT = "time_of_answer_tests_do_what";
-        public static final String COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_A_PERIOD_SESSION = "elapsed_time_of_paused_study_a_period_session";
-        public static final String COLUMN_ELAPSED_TIME_OF_PAUSED_ENHANCED_TEST_SESSION = "elapsed_time_of_paused_enhanced_test_session";
-        public static final String COLUMN_ELAPSED_TIME_OF_PAUSED_FULLY_RANDOM_TEST_SESSION = "elapsed_time_of_paused_fully_random_test_session";
         public static final String COLUMN_OBFUSCATE_QUESTION = "obfuscate_question";
 
     }
@@ -72,6 +71,8 @@ public final class Contract {
         public static final String COLUMN_PAUSED_ENHANCED_TEST_ORDER = "paused_enhanced_test_order";
         public static final String COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER = "paused_fully_random_test_order";
         public static final String COLUMN_PAUSED_STUDY_PERIOD_ORDER = "paused_study_period_order";
+        public static final String COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER = "paused_study_again_enhanced_test_order";
+        public static final String COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER = "paused_study_again_fully_random_test_order";
         public static final String COLUMN_ASKED_COUNT = "asked_count";
         public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
         public static final String COLUMN_RANK = "rank";
@@ -89,6 +90,8 @@ public final class Contract {
         public static final String COLUMN_PAUSED_ENHANCED_TEST_ORDER = "paused_enhanced_test_order";
         public static final String COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER = "paused_fully_random_test_order";
         public static final String COLUMN_PAUSED_STUDY_PERIOD_ORDER = "paused_study_period_order";
+        public static final String COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER = "paused_study_again_enhanced_test_order";
+        public static final String COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER = "paused_study_again_fully_random_test_order";
         public static final String COLUMN_ASKED_COUNT = "asked_count";
         public static final String COLUMN_WRONGLY_ANSWERED_COUNT = "wrongly_answered_count";
         public static final String COLUMN_RANK = "rank";
@@ -117,17 +120,21 @@ public final class Contract {
         public static final String COLUMN_CURRENT_QUESTION_COUNTER = "current_question_counter";
         public static final String COLUMN_WRONG_ANSWERS_COUNT = "wrong_answers_count";
         public static final String COLUMN_TRIES_NUMBER = "tries_number";
+        public static final String COLUMN_ELAPSED_TIME_OF_PAUSED_TEST_SESSION = "elapsed_time_of_paused_test_session";
     }
-    public static abstract class Study_Period_Repeated_Entry implements BaseColumns {
-        public static final String TABLE_NAME = "study_period_repeated_entry";
+    public static abstract class Study_Till_Correct_Paused implements BaseColumns {
+        public static final String TABLE_NAME = "study_till_correct_paused";
         public static final String COLUMN_FIELD = "field";
-        public static final String COLUMN_REPEATED_ENTRY = "repeated_entry";
-    }
-    public static abstract class Study_Period_Paused implements BaseColumns {
-        public static final String TABLE_NAME = "study_period_paused";
-        public static final String COLUMN_FIELD = "field";
+        public static final String COLUMN_TYPE = "study_till_correct_type";
         public static final String COLUMN_CURRENT_QUESTION_COUNTER = "current_question_counter";
         public static final String COLUMN_TRIES_NUMBER = "tries_number";
+        public static final String COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION = "elapsed_time_of_paused_study_till_correct_session";
+    }
+    public static abstract class Study_Till_Correct_Repeated_Entry implements BaseColumns {
+        public static final String TABLE_NAME = "study_till_correct_repeated_entry";
+        public static final String COLUMN_FIELD = "field";
+        public static final String COLUMN_TYPE = "study_till_correct_type";
+        public static final String COLUMN_REPEATED_ENTRY = "repeated_entry";
     }
     public static abstract class Alternative_Answer_String implements BaseColumns {
         public static final String TABLE_NAME = "alternative_answer_string";
@@ -183,6 +190,18 @@ public final class Contract {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public static final String Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 = "created_at";
+    public static abstract class Old_Study_Period_Paused_DBV12_AppV68 implements BaseColumns {
+        public static final String TABLE_NAME = "study_period_paused";
+        public static final String COLUMN_FIELD = "field";
+        public static final String COLUMN_CURRENT_QUESTION_COUNTER = "current_question_counter";
+        public static final String COLUMN_TRIES_NUMBER = "tries_number";
+    }
+    public static abstract class Old_Study_Period_Repeated_Entry_DBV12_AppV68 implements BaseColumns {
+        public static final String TABLE_NAME = "study_period_repeated_entry";
+        public static final String COLUMN_FIELD = "field";
+        public static final String COLUMN_REPEATED_ENTRY = "repeated_entry";
+    }
+
     public static abstract class Old_Field_DBV6_AppV32 implements BaseColumns {
         public static final int DEFAULT_TYPE = 0;
         public static final int NOTEBOOK_TYPE = 1;

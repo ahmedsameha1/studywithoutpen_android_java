@@ -184,7 +184,26 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
             }
             locale_display_names.add(getString(R.string.select_locale));
         } catch (NullPointerException e) {
-            read_answer.setVisibility(View.GONE);
+            if ( read_answer != null ) {
+                read_answer.setVisibility(View.GONE);
+            } else {
+                new Thread( () -> {
+                   while ( true ) {
+                       try {
+                           Thread.sleep(100);
+                       } catch (InterruptedException e1) {
+                           dismiss();
+                           Toast toast = Toast.makeText(getActivity(), R.string.error, Toast.LENGTH_SHORT);
+                           toast.setGravity(Gravity.TOP,0,400);
+                           toast.show();
+                       }
+                       if ( read_answer != null ) {
+                           read_answer.setVisibility(View.GONE);
+                           break;
+                       }
+                   }
+                }).start();
+            }
         }
     }
 }

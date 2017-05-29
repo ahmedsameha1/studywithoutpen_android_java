@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/same_question"
+        android:title="@string/same_question" />
+
+    <item
+        android:id="@+id/same_answer"
+        android:title="@string/same_answer"/>
+
+
+</menu>

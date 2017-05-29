@@ -47,10 +47,10 @@ public class AskAboutContinuePreviousStudyAPeriodDialogFragment extends DialogFr
                                 cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
                                 DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
                                 cursorLoaderAndUpdateDatabase
-                                        .resetEntriesStudyPeriodOrder(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
-                                cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyPeriodPausedAndFromStudyPeriodRepeatedEntries(current_field_id);
-                                cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                                        Constants.ElapsedPausedSessionTime.STUDY_A_PERIOD, Constants.ElapsedPausedSessionTime.NOT_USED);
+                                        .resetEntriesStudyPeriodOrder(current_field_id,Constants.Study_Till_Correct.STUDY_PERIOD,
+                                                databaseOperations.getQuestionDataType(current_field_id));
+                                cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_PERIOD,
+                                        current_field_id);
                                 Bundle bundle = new Bundle();
                                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                 StudyAPeriodDialogFragment fragment2 = new StudyAPeriodDialogFragment();

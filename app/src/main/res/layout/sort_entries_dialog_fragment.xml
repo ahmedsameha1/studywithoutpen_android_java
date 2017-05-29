@@ -110,6 +110,20 @@
             android:text="@string/sort_creation_asc"
             android:textAllCaps="false"
             style="@style/Widget.AppCompat.Button.Borderless"/>
+        <Button
+            android:id="@+id/sort_wrongness_asc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_by_wrongness_level_ascending"
+            android:textAllCaps="false"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+        <Button
+            android:id="@+id/sort_wrongness_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_by_wrongness_level_descending"
+            android:textAllCaps="false"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
 
     </LinearLayout>
 </ScrollView>

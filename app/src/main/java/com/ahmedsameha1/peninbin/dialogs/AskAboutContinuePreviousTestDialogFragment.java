@@ -63,8 +63,6 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                 if ( test_type == Constants.TestType.ENHANCED_TEST ) {
                                     cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
                                     cursorLoaderAndUpdateDatabase.resetEntriesTestOrderEnhancedTest(current_field_id,question_data_type);
-                                    cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                                            Constants.ElapsedPausedSessionTime.ENHANCED_TEST, Constants.ElapsedPausedSessionTime.NOT_USED);
                                     Bundle bundle = new Bundle();
                                     bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                     EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
@@ -74,8 +72,6 @@ public class AskAboutContinuePreviousTestDialogFragment extends DialogFragment {
                                 } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
                                     cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedFullyRandomTest(current_field_id);
                                     cursorLoaderAndUpdateDatabase.resetEntriesTestOrderFullyRandomTest(current_field_id,question_data_type);
-                                    cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                                            Constants.ElapsedPausedSessionTime.FULLY_RANDOM_TEST, Constants.ElapsedPausedSessionTime.NOT_USED);
                                     Bundle bundle = new Bundle();
                                     bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
                                     FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();

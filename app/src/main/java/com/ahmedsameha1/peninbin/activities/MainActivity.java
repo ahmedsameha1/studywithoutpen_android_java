@@ -56,6 +56,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.AboutDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ImportFromWhatDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ImportProvidedFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -115,15 +116,16 @@ public class MainActivity extends AppCompatActivity implements
     private static final int SEARCH_FIELDS_ID = 1;
     private static final int EXPORT_FIELD = 0;
     private static final int IMPORT_FIELD = 1;
-    public static final int ABOUT = 3;
-    private static final int REVIEW = 2;
+    public static final int IMPORT_PROVIDED_FIELD = 2;
+    private static final int SUBSCRIBE = 3;
+    public static final int ABOUT = 4;
     /*    private static final int FACEBOOK = 3;
         public static final int DROPBOX = 4;*/
     private static final int MY_DATA_CHECK_CODE = 1234;
     private static final int DIRECTORY_CODE = 15;
     private static final String TO_EXPORT_FIELDS = "to_export_fields";
     private static final String TO_EXPORT_FILE_NAME = "to_export_file_name";
-    private static final int SUBSCRIBE = 2;
+
     private static final String PAY_LOAD_STRING = "pay_load_string";
     private static final String BUY_INTENT = "BUY_INTENT";
     private static final int BUY_FLOW_REQUEST_CODE = 6475;
@@ -453,32 +455,29 @@ public class MainActivity extends AppCompatActivity implements
                         new AlertDialog.Builder(this)
                                 .setTitle(R.string.subscription_description)
                                 .setMessage(R.string.subscription1_description)
-                                .setPositiveButton(R.string.proceed_now, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        pay_load = PayloadString.getString();
-                                        try {
-                                            Bundle bundle = billingService.getBuyIntent(3, MainActivity.this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
-                                                    pay_load);
-                                            int response_code = bundle.getInt(Money.RESPONSE_CODE);
-                                            if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
-                                                PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
-                                                startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
-                                            } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
-                                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                                                toast1.setGravity(Gravity.TOP, 0, 400);
-                                                toast1.show();
-                                            } else {
-                                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                                                toast1.setGravity(Gravity.TOP, 0, 400);
-                                                toast1.show();
-                                            }
-                                        } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
+                                .setPositiveButton(R.string.proceed_now, (dialog, which) -> {
+                                    pay_load = PayloadString.getString();
+                                    try {
+                                        Bundle bundle = billingService.getBuyIntent(3, MainActivity.this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
+                                                pay_load);
+                                        int response_code = bundle.getInt(Money.RESPONSE_CODE);
+                                        if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
+                                            PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
+                                            startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
+                                        } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
+                                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                                            toast1.setGravity(Gravity.TOP, 0, 400);
+                                            toast1.show();
+                                        } else {
                                             Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
                                             toast1.setGravity(Gravity.TOP, 0, 400);
                                             toast1.show();
-                                            e.printStackTrace();
                                         }
+                                    } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
+                                        Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                                        toast1.setGravity(Gravity.TOP, 0, 400);
+                                        toast1.show();
+                                        e.printStackTrace();
                                     }
                                 })
                                 .create().show();
@@ -488,14 +487,22 @@ public class MainActivity extends AppCompatActivity implements
                         toast.show();
                     }
                 } else {
-                    if ( Money.isInEgypt(this) ) {
-                        Toast toast = Toast.makeText(this, R.string.Egypt_sim, Toast.LENGTH_SHORT);
+                    if ( Money.isInInitialPeriod(this) ) {
+                        Toast toast = Toast.makeText(this, R.string.intial_period, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory(Money.MONEY)
+                                .setAction(ActivityUtility.getVersionCode(this) + " initial period")
+                                .build());
                     } else {
                         Toast toast = Toast.makeText(this, R.string.already_subscribed, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory(Money.MONEY)
+                                .setAction(ActivityUtility.getVersionCode(this) + "already subscribed")
+                                .build());
                     }
                 }
                 mTracker.send(new HitBuilders.EventBuilder()
@@ -521,6 +528,10 @@ public class MainActivity extends AppCompatActivity implements
                 AboutDialogFragment aboutDialogFragment = new AboutDialogFragment();
                 aboutDialogFragment.show(getSupportFragmentManager(), aboutDialogFragment.getClass().getName());
                 break;
+
+            case IMPORT_PROVIDED_FIELD:
+                ImportProvidedFieldDialogFragment importProvidedFieldDialogFragment = new ImportProvidedFieldDialogFragment();
+                importProvidedFieldDialogFragment.show(getSupportFragmentManager(), ImportProvidedFieldDialogFragment.class.getName());
         }
     }
 
@@ -607,7 +618,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mySQLiteCursorLoader.cleanDatabase();
         if (billingService != null) {
             unbindService(mServiceConn);
         }

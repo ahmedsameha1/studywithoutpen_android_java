@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.PopupMenu;
 import android.text.Spannable;
 import android.text.style.BackgroundColorSpan;
 import android.view.Gravity;
@@ -20,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.ahmedsameha1.peninbin.activities.AskAgainAfterTestActivity;
 import com.ahmedsameha1.peninbin.activities.EditEntryActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
@@ -110,9 +112,11 @@ public class FieldActivityRecyclerViewAdapter extends
             }
         });
         viewHolder.delete.setOnClickListener(v -> {
-            if ( (! sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id)) &&
-                    (! sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id)) &&
-                    (! sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + field_id)) &&
+            if ( !sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + field_id) &&
+                    !sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + field_id) &&
+                    !sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + field_id) &&
+                    !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + field_id) &&
+                    !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + field_id) &&
                     !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
                     && !ImportTextFile.isThreadRunning() ) {
                 if ( ! databaseOperations.checkIfIncludedInPausedOperations(field_id,entry_id) ) {
@@ -128,10 +132,12 @@ public class FieldActivityRecyclerViewAdapter extends
                     toast.setGravity(Gravity.TOP,0,400);
                     toast.show();
                 }
-            } else if ( sharedPreferences.contains(EnhancedTestActivity.ACTIVITY_NAME + EnhancedTestActivity.PAUSING + field_id) ||
-                     sharedPreferences.contains(StudyAPeriodActivity.ACTIVITY_NAME + StudyAPeriodActivity.PAUSING + field_id) ||
-                    sharedPreferences.contains(FullyRandomTestActivity.ACTIVITY_NAME + FullyRandomTestActivity.PAUSING + field_id) ){
-                Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
+            } else if ( sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + field_id) ||
+                     sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + field_id) ||
+                    sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + field_id) ||
+                    sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + field_id) ||
+                    sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + field_id) ){
+                Toast toast = Toast.makeText(context, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             } else if ( Emulation.isAnyThreadRunning() || ExportImportDatabase.isAnyThreadRunning()
@@ -141,7 +147,46 @@ public class FieldActivityRecyclerViewAdapter extends
                 toast.show();
             }
         });
-        viewHolder.same_question.setOnClickListener(view -> {
+        viewHolder.more.setOnClickListener( view -> {
+            PopupMenu popup = new PopupMenu(context, view);
+            ((Activity) context).getMenuInflater().inflate(R.menu.same_search_menu, popup.getMenu());
+            popup.setOnMenuItemClickListener(item -> {
+                if ( item.getItemId() == R.id.same_question ) {
+                    if ( databaseOperations.moreThanOneAnswerSameQuestion(field_id, question) ) {
+                        final Intent intent = new Intent(context,
+                                SearchActivity.class);
+                        // add query to the Intent Extras
+                        intent.setAction(Intent.ACTION_SEARCH);
+                        intent.putExtra(SearchManager.QUERY, question);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                        intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_QUESTION);
+                        context.startActivity(intent);
+                    } else {
+                        Toast toast = Toast.makeText(context, R.string.only_this_with_same_question, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                } else {
+                    if ( databaseOperations.moreThanOneQuestionSameAnswer(field_id, answer) ) {
+                        final Intent intent = new Intent(context,
+                                SearchActivity.class);
+                        // add query to the Intent Extras
+                        intent.setAction(Intent.ACTION_SEARCH);
+                        intent.putExtra(SearchManager.QUERY, answer);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                        intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_ANSWER);
+                        context.startActivity(intent);
+                    } else {
+                        Toast toast = Toast.makeText(context, R.string.only_this_with_same_answer, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                }
+                return true;
+            });
+            popup.show();
+        });
+        /*viewHolder.same_question.setOnClickListener(view -> {
             if ( databaseOperations.moreThanOneAnswerSameQuestion(field_id, question) ) {
                 final Intent intent = new Intent(context,
                         SearchActivity.class);
@@ -172,7 +217,7 @@ public class FieldActivityRecyclerViewAdapter extends
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
-        });
+        });*/
         viewHolder.asked_count.setOnClickListener(view -> {
             Toast toast = Toast.makeText(context,
                     context.getString(R.string.asked, String.valueOf(asked_counter)), Toast.LENGTH_SHORT);

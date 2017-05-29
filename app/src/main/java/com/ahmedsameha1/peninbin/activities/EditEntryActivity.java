@@ -15,7 +15,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
@@ -68,7 +67,7 @@ public class EditEntryActivity extends AppCompatActivity implements
     private LinearLayout showResult, questionLinearlayout, container;
     private long entry_id;
     private int question_data_type, rank;
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private Tracker mTracker;
     private Chronometer timer;
     private long lastPause;
@@ -88,7 +87,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         question_data_type = getIntent().getIntExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE, 0);
         currentQuestion = getIntent().getStringExtra(StudyActivity.CURRENT_QUESTION);
         currentAnswer = getIntent().getStringExtra(StudyActivity.CURRENT_ANSWER);
-        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
+        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         databaseOperations = new DatabaseReadOperations(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         rank = databaseOperations.getEntryRank(entry_id);
@@ -175,19 +174,20 @@ public class EditEntryActivity extends AppCompatActivity implements
                     getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
                     getSupportActionBar().show();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
-                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
                 }
         });
         save.setOnClickListener( view -> {
+            try {
                 save_card_view.startAnimation(animAlpha);
-                String editedQuestion = editQuestion.getText().toString();
-                String editedAnswer = editAnswer.getText().toString();
-            int edited_order = "".equals(enter_order.getText().toString()) ? -1 : Integer.parseInt(enter_order.getText().toString());
+                String editedQuestion = editQuestion.getText().toString().trim();
+                String editedAnswer = editAnswer.getText().toString().trim();
+            int edited_order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
 
             if (editedQuestion.length() > 0 && editedAnswer.length() > 0) {
                             editQuestion.setEnabled(false);
@@ -196,7 +196,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                                     || rank != rank_spinner.getSelectedItemPosition() || edited_order != order ) {
                                 if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
                                     if (!databaseOperations.checkEntryDuplication(editedQuestion, editedAnswer, current_field_id, question_data_type)) {
-                                        //                                    mySQLiteCursorLoader.editEntry(entry_id,question_data_type,editedQuestion,editedAnswer);
+                                        //                                    cursorLoaderAndUpdateDatabase.editEntry(entry_id,question_data_type,editedQuestion,editedAnswer);
                                         Intent intent = new Intent();
                                         intent.putExtra(FieldActivity.EDITED_ENTRY_ID, entry_id);
                                         intent.putExtra(FieldActivity.EDITED_QUESTION, editedQuestion);
@@ -226,6 +226,11 @@ public class EditEntryActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
+            } catch ( NumberFormatException nfe ) {
+                Toast toast = Toast.makeText(EditEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
         });
 /*        editQuestion.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
