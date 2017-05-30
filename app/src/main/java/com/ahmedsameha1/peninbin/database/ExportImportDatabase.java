@@ -37,7 +37,7 @@ public class ExportImportDatabase {
     public static final String PATH = "path";
 
     private static Thread exportThread, importThread, importInternalFieldThread;
-    private static ArrayList<Long> notImportedFieldsIDs;
+    private static ArrayList<String> notImportedFieldsIDs;
     private static ArrayList<String> notImportedFieldsStrings;
 
     public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String path, final String fileName) {
@@ -566,7 +566,7 @@ public class ExportImportDatabase {
                 } else {
                     appFieldCursor.moveToFirst();
                     if (toImportFieldCursor.getInt(1) != appFieldCursor.getInt(0)) {
-                        notImportedFieldsIDs.add(toImportFieldCursor.getLong(11));
+                        notImportedFieldsIDs.add(String.valueOf(toImportFieldCursor.getLong(11)));
                     }
                 }
                 appFieldCursor.close();
@@ -587,10 +587,10 @@ public class ExportImportDatabase {
                 }
             }
             notImportedFieldsStrings = new ArrayList<String>();
-            for ( Long field_id : notImportedFieldsIDs) {
+            for ( String field_id : notImportedFieldsIDs) {
                 Cursor fieldNameCursor = toImportDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_FIELD_NAME},
                         Contract.COLUMN_ID + " = ? ",
-                        new String[]{field_id.toString()},null,null,null,null);
+                        new String[]{field_id},null,null,null,null);
                 fieldNameCursor.moveToFirst();
                 notImportedFieldsStrings.add(fieldNameCursor.getString(0));
             }
