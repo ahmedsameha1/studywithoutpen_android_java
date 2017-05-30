@@ -327,6 +327,6 @@
     <string name="keep_question">Keep question</string>
     <string name="keep_answer">Keep answer</string>
     <string name="vertical_ellipsis" translatable="false">&#8942;</string>
-    <string name="no_timer_app">there is no app that can run timer on your device!</string>
+    <string name="no_timer_app">There is no app that can run timers on your device!</string>
     <string name="kitkat_or_newer">This feature needs android kitkat or newer</string>
 </resources>

@@ -317,7 +317,7 @@
     <string name="first_entry">هذا أول مُدخل!</string>
     <string name="keep_question">أبق السؤال</string>
     <string name="keep_answer">ابق الجواب</string>
-    <string name="no_timer_app">there is no app that can run timer on your device!</string>
-    <string name="kitkat_or_newer">This feature needs android kitkat or newer</string>
+    <string name="no_timer_app">لا يوجد على جهازك تطبيق يستطيع تشغيل المؤقتات</string>
+    <string name="kitkat_or_newer">هذه الخاصية تحتاج أندرويد كيت كات أو أحدث</string>
 </resources>
 
