@@ -65,6 +65,16 @@ public enum SortOptions {
                 return SORT_CREATION_DATE_ASC;
             case 8:
                 return SORT_ORDER_ASC;
+            case 9:
+                return SORT_ORDER_DESC;
+            case 10:
+                return SORT_RANK_ASC;
+            case 11:
+                return SORT_RANK_DESC;
+            case 12:
+                return SORT_WRONGNESS_ASC;
+            case 13:
+                return SORT_WRONGNESS_DESC;
             default:
                 return SORT_CREATION_DATE_DESC;
         }

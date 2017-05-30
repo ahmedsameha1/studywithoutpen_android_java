@@ -319,5 +319,9 @@
     <string name="keep_answer">ابق الجواب</string>
     <string name="no_timer_app">لا يوجد على جهازك تطبيق يستطيع تشغيل المؤقتات</string>
     <string name="kitkat_or_newer">هذه الخاصية تحتاج أندرويد كيت كات أو أحدث</string>
+    <string name="timer">مؤقِّت</string>
+    <string name="wrongness_level">مستوى الخطأ: %.0f%%</string>
+    <string name="asked_menu">سُئِل</string>
+    <string name="wrongly_answered_menu">أجيب بشكل خاطئ</string>
 </resources>
 

@@ -329,4 +329,8 @@
     <string name="vertical_ellipsis" translatable="false">&#8942;</string>
     <string name="no_timer_app">There is no app that can run timers on your device!</string>
     <string name="kitkat_or_newer">This feature needs android kitkat or newer</string>
+    <string name="timer">Timer</string>
+    <string name="wrongness_level">Wrongness level: %.0f%%</string>
+    <string name="asked_menu">Asked</string>
+    <string name="wrongly_answered_menu">Wrongly answered</string>
 </resources>

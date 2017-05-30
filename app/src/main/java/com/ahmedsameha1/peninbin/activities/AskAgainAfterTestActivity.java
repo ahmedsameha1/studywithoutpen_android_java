@@ -335,6 +335,9 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
                         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
                         String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
+                        Toast toast = Toast.makeText(AskAgainAfterTestActivity.this, time, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                         if (tts_available) {
                             new AsyncTask<Void, Void, Void>() {
 
@@ -342,9 +345,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                                 protected Void doInBackground(Void... params) {
                                     while (true) {
                                         if (!tts.isSpeaking()) {
-                                            Toast toast = Toast.makeText(AskAgainAfterTestActivity.this, time, Toast.LENGTH_LONG);
-                                            toast.setGravity(Gravity.TOP, 0, 400);
-                                            toast.show();
                                             finish();
                                             ExitActivity.exit(AskAgainAfterTestActivity.this);
                                             break;
@@ -354,9 +354,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                                 }
                             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
                         } else {
-                            Toast toast = Toast.makeText(AskAgainAfterTestActivity.this, time, Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
                             finish();
                             ExitActivity.exit(AskAgainAfterTestActivity.this);
                         }

@@ -13,7 +13,7 @@
 
     <item
         android:id="@+id/timer"
-        android:title="timer"
+        android:title="@string/timer"
         app:showAsAction="never"/>
 
 </menu>

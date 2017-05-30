@@ -37,6 +37,8 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
+import java.util.Locale;
+
 /**
  * Created by ahmed on 3/13/2016.
  */
@@ -91,6 +93,7 @@ public class FieldActivityRecyclerViewAdapter extends
         final String answer = data.getString(2);
         final int asked_counter = data.getInt(3);
         final int wrong_answer_counter = data.getInt(4);
+        double wrongness_level = asked_counter > 0 ? ((double) wrong_answer_counter / asked_counter) : 0;
         viewHolder.field_id = field_id;
         viewHolder.entry_id = entry_id;
         viewHolder.currentQuestion = question;
@@ -166,7 +169,7 @@ public class FieldActivityRecyclerViewAdapter extends
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
-                } else {
+                } else if ( item.getItemId() == R.id.same_answer ) {
                     if ( databaseOperations.moreThanOneQuestionSameAnswer(field_id, answer) ) {
                         final Intent intent = new Intent(context,
                                 SearchActivity.class);
@@ -181,52 +184,25 @@ public class FieldActivityRecyclerViewAdapter extends
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
+                } else if ( item.getItemId() == R.id.asked_count ) {
+                    Toast toast = Toast.makeText(context,
+                            context.getString(R.string.asked, String.valueOf(asked_counter)), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                } else {
+                    Toast toast = Toast.makeText(context,
+                            context.getString(R.string.wrongly_answered, String.valueOf(wrong_answer_counter)), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 }
                 return true;
             });
             popup.show();
         });
-        /*viewHolder.same_question.setOnClickListener(view -> {
-            if ( databaseOperations.moreThanOneAnswerSameQuestion(field_id, question) ) {
-                final Intent intent = new Intent(context,
-                        SearchActivity.class);
-                // add query to the Intent Extras
-                intent.setAction(Intent.ACTION_SEARCH);
-                intent.putExtra(SearchManager.QUERY, question);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
-                intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_QUESTION);
-                context.startActivity(intent);
-            } else {
-                Toast toast = Toast.makeText(context, R.string.only_this_with_same_question, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
-        });
-        viewHolder.same_answer.setOnClickListener(view -> {
-            if ( databaseOperations.moreThanOneQuestionSameAnswer(field_id, answer) ) {
-                final Intent intent = new Intent(context,
-                        SearchActivity.class);
-                // add query to the Intent Extras
-                intent.setAction(Intent.ACTION_SEARCH);
-                intent.putExtra(SearchManager.QUERY, answer);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
-                intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_ANSWER);
-                context.startActivity(intent);
-            } else {
-                Toast toast = Toast.makeText(context, R.string.only_this_with_same_answer, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-            }
-        });*/
-        viewHolder.asked_count.setOnClickListener(view -> {
+
+        viewHolder.wrongness_level.setOnClickListener(view -> {
             Toast toast = Toast.makeText(context,
-                    context.getString(R.string.asked, String.valueOf(asked_counter)), Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
-        });
-        viewHolder.wrong_answer_count.setOnClickListener(view -> {
-            Toast toast = Toast.makeText(context,
-                    context.getString(R.string.wrongly_answered, String.valueOf(wrong_answer_counter)), Toast.LENGTH_SHORT);
+                    context.getString(R.string.wrongness_level, wrongness_level), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
         });
@@ -263,7 +239,6 @@ public class FieldActivityRecyclerViewAdapter extends
         }
         viewHolder.question.setText(spannable_question);
         viewHolder.answer.setText(spannable_answer);
-        viewHolder.asked_count.setText(String.valueOf(asked_counter));
-        viewHolder.wrong_answer_count.setText(String.valueOf(wrong_answer_counter));
+        viewHolder.wrongness_level.setText(String.format(Locale.getDefault(),"%.0f%%", wrongness_level));
     }
 }
