@@ -296,7 +296,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 Cursor c = (Cursor) parent.getSelectedItem();
                 current_field_id = c.getLong(0);
                 current_field_type = c.getInt(1);
-                getLoaderManager().restartLoader(GET_SPECIAL_TEXT_ID, null, loader);// TODO: 5/4/17 test this
+                getLoaderManager().restartLoader(GET_SPECIAL_TEXT_ID, null, loader);
                 just_change_field = true;
                 setHints();
             }

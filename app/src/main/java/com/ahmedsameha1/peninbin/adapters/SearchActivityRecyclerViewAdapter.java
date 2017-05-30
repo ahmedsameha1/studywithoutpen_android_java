@@ -242,6 +242,6 @@ public class SearchActivityRecyclerViewAdapter extends
         }
         viewHolder.question.setText(spannable_question);
         viewHolder.answer.setText(spannable_answer);
-        viewHolder.wrongness_level.setText(String.format(Locale.getDefault(),"%.0f%%", wrongness_level));
+        viewHolder.wrongness_level.setText(String.format(Locale.getDefault(),"%.2f%%", wrongness_level));
     }
 }
