@@ -93,7 +93,7 @@ public class FieldActivityRecyclerViewAdapter extends
         final String answer = data.getString(2);
         final int asked_counter = data.getInt(3);
         final int wrong_answer_counter = data.getInt(4);
-        double wrongness_level = asked_counter > 0 ? ((double) wrong_answer_counter / asked_counter) : 0;
+        double wrongness_level = asked_counter > 0 ? (((double) wrong_answer_counter / asked_counter) * 100) : 0;
         viewHolder.field_id = field_id;
         viewHolder.entry_id = entry_id;
         viewHolder.currentQuestion = question;
@@ -239,6 +239,6 @@ public class FieldActivityRecyclerViewAdapter extends
         }
         viewHolder.question.setText(spannable_question);
         viewHolder.answer.setText(spannable_answer);
-        viewHolder.wrongness_level.setText(String.format(Locale.getDefault(),"%.2f%%", wrongness_level));
+        viewHolder.wrongness_level.setText(String.format(Locale.getDefault(),"%.0f%%", wrongness_level));
     }
 }

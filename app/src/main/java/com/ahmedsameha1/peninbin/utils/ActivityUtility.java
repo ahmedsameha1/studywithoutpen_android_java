@@ -418,7 +418,6 @@ public class ActivityUtility {
                     return result;
                 }
             } else if (uncontrolled_entries == null) {
-                Collections.shuffle(controlled_arraylist);
                 for (int n = 0; n < listForTest.length; n++) {
                     Object[] element = controlled_arraylist.get(n);
                     listForTest[n][0] = (String) element[1];
@@ -436,7 +435,6 @@ public class ActivityUtility {
                     number_of_uncontrolled_questions = uncontrolled_entries.length;
                     number_of_controlled_questions = numberOfQuestions - number_of_uncontrolled_questions;
                 }
-                Collections.shuffle(controlled_arraylist);
                 for (int n = 0; n < number_of_controlled_questions; n++) {
                     Object[] element = controlled_arraylist.get(n);
                     listForTest[n][0] = (String) element[1];
