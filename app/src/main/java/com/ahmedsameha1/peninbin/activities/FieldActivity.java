@@ -413,6 +413,8 @@ public class FieldActivity extends AppCompatActivity implements
             search_value =
                     intent.getStringExtra(SearchManager.QUERY);
             load_or_search = false;
+            getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
+            getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
         }
     }
 

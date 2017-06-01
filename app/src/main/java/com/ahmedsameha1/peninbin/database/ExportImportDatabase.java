@@ -48,25 +48,25 @@ public class ExportImportDatabase {
         exportThread.start();
     }
 
-    public static void startImportThread(final Context context, final String file_path, final boolean importUserUsageData ) {
+    public static void startImportThread(final Context context, final String file_path, final boolean importUserUsageData) {
         importThread = new Thread(() -> {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-            importFields(context, file_path, importUserUsageData );
+            importFields(context, file_path, importUserUsageData);
         });
         importThread.start();
     }
 
-    public static void startImportInternalFieldThread(final Context context, SQLiteDatabase toImportDatabase, ArrayList<String> wanted_fields ) {
+    public static void startImportInternalFieldThread(final Context context, SQLiteDatabase toImportDatabase, ArrayList<String> wanted_fields) {
         importInternalFieldThread = new Thread(() -> {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-            importInternalFields( context,toImportDatabase, wanted_fields );
+            importInternalFields(context, toImportDatabase, wanted_fields);
         });
         importInternalFieldThread.start();
     }
 
-    public static boolean isAnyThreadRunning () {
-        if ( ( exportThread == null || !exportThread.isAlive() ) &&
-                ( importThread == null || !importThread.isAlive() ) &&
+    public static boolean isAnyThreadRunning() {
+        if ((exportThread == null || !exportThread.isAlive()) &&
+                (importThread == null || !importThread.isAlive()) &&
                 (importInternalFieldThread == null || !importInternalFieldThread.isAlive())) {
             return false;
         }
@@ -146,7 +146,7 @@ public class ExportImportDatabase {
                 contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, fieldCursor.getInt(26));
                 Long field_id = toExportDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                 fieldCursor.close();
-                if ( question_data_type == Contract.Field.STRING_DATA_TYPE ) {
+                if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
                     Cursor stringEntryCursor = appDatabase.query(Contract.String_Entry.TABLE_NAME,
                             new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
                                     Contract.String_Entry.COLUMN_FIELD, Contract.String_Entry.COLUMN_ASKED_COUNT,
@@ -168,9 +168,9 @@ public class ExportImportDatabase {
                         try {
                             question_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                         } catch (Exception e) {
-                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                     Contract.STring.COLUMN_VALUE + " = ? ",
-                                    new String[]{questionCursor.getString(0)},null,null,null,null);
+                                    new String[]{questionCursor.getString(0)}, null, null, null, null);
                             c.moveToFirst();
                             question_id = c.getLong(0);
                             c.close();
@@ -186,9 +186,9 @@ public class ExportImportDatabase {
                         try {
                             answer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                         } catch (Exception e) {
-                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                     Contract.STring.COLUMN_VALUE + " = ? ",
-                                    new String[]{answerCursor.getString(0)},null,null,null,null);
+                                    new String[]{answerCursor.getString(0)}, null, null, null, null);
                             c.moveToFirst();
                             answer_id = c.getLong(0);
                             c.close();
@@ -196,22 +196,22 @@ public class ExportImportDatabase {
                         answerCursor.close();
                         ///////////////////////////////////////////////////////////
                         contentValues = new ContentValues();
-                        contentValues.put(Contract.String_Entry.COLUMN_QUESTION,question_id);
-                        contentValues.put(Contract.String_Entry.COLUMN_ANSWER,answer_id);
-                        contentValues.put(Contract.String_Entry.COLUMN_FIELD,field_id);
-                        contentValues.put(Contract.String_Entry.COLUMN_ASKED_COUNT,stringEntryCursor.getInt(3));
-                        contentValues.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT,stringEntryCursor.getInt(4));
-                        contentValues.put(Contract.String_Entry.COLUMN_RANK,stringEntryCursor.getInt(5));
-                        contentValues.put(Contract.CREATION_DATE,stringEntryCursor.getString(6));
-                        contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT,stringEntryCursor.getLong(8));
-                        contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,stringEntryCursor.getInt(9));
-                        contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,stringEntryCursor.getInt(10));
+                        contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
+                        contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
+                        contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
+                        contentValues.put(Contract.String_Entry.COLUMN_ASKED_COUNT, stringEntryCursor.getInt(3));
+                        contentValues.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, stringEntryCursor.getInt(4));
+                        contentValues.put(Contract.String_Entry.COLUMN_RANK, stringEntryCursor.getInt(5));
+                        contentValues.put(Contract.CREATION_DATE, stringEntryCursor.getString(6));
+                        contentValues.put(Contract.String_Entry.COLUMN_REMIND_AT, stringEntryCursor.getLong(8));
+                        contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, stringEntryCursor.getInt(9));
+                        contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, stringEntryCursor.getInt(10));
                         long stringEntry_id = toExportDatabase.insert(Contract.String_Entry.TABLE_NAME, null, contentValues);
                         Cursor alternativeStringCursor = appDatabase.query(Contract.Alternative_Answer_String.TABLE_NAME,
                                 new String[]{Contract.Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER,
                                         Contract.Alternative_Answer_String.COLUMN_ANSWERED_COUNT},
                                 Contract.Alternative_Answer_String.COLUMN_ENTRY + " = ? ",
-                                new String[]{stringEntryCursor.getLong(7) + ""}, null,null,null,null);
+                                new String[]{stringEntryCursor.getLong(7) + ""}, null, null, null, null);
                         for (alternativeStringCursor.moveToFirst(); alternativeStringCursor.getPosition() < alternativeStringCursor.getCount();
                              alternativeStringCursor.moveToNext()) {
                             Cursor alternativeAnswerCursor = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
@@ -219,23 +219,23 @@ public class ExportImportDatabase {
                                     new String[]{alternativeStringCursor.getLong(0) + ""}, null, null, null, null);
                             alternativeAnswerCursor.moveToFirst();
                             contentValues = new ContentValues();
-                            contentValues.put(Contract.STring.COLUMN_VALUE,alternativeAnswerCursor.getString(0));
+                            contentValues.put(Contract.STring.COLUMN_VALUE, alternativeAnswerCursor.getString(0));
                             long wrongAnswer_id = 0;
                             try {
-                                wrongAnswer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME,null,contentValues);
+                                wrongAnswer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
                             } catch (Exception e) {
-                                Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                                Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                         Contract.STring.COLUMN_VALUE + " = ? ",
-                                        new String[]{alternativeAnswerCursor.getString(0)},null,null,null,null);
+                                        new String[]{alternativeAnswerCursor.getString(0)}, null, null, null, null);
                                 c.moveToFirst();
                                 wrongAnswer_id = c.getLong(0);
                                 c.close();
                             }
                             contentValues = new ContentValues();
-                            contentValues.put(Contract.Alternative_Answer_String.COLUMN_ENTRY,stringEntry_id);
-                            contentValues.put(Contract.Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER,wrongAnswer_id);
-                            contentValues.put(Contract.Alternative_Answer_String.COLUMN_ANSWERED_COUNT,alternativeStringCursor.getInt(1));
-                            toExportDatabase.insert(Contract.Alternative_Answer_String.TABLE_NAME,null,contentValues);
+                            contentValues.put(Contract.Alternative_Answer_String.COLUMN_ENTRY, stringEntry_id);
+                            contentValues.put(Contract.Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER, wrongAnswer_id);
+                            contentValues.put(Contract.Alternative_Answer_String.COLUMN_ANSWERED_COUNT, alternativeStringCursor.getInt(1));
+                            toExportDatabase.insert(Contract.Alternative_Answer_String.TABLE_NAME, null, contentValues);
                             alternativeAnswerCursor.close();
                         }
                         questionCursor.close();
@@ -243,7 +243,7 @@ public class ExportImportDatabase {
                         alternativeStringCursor.close();
                     }
                     stringEntryCursor.close();
-                } else if ( question_data_type == Contract.Field.NOT_STRING_DATA_TYPE ){
+                } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
                     Cursor notstringEntryCursor = appDatabase.query(Contract.Not_String_Entry.TABLE_NAME,
                             new String[]{Contract.Not_String_Entry.COLUMN_QUESTION, Contract.Not_String_Entry.COLUMN_ANSWER,
                                     Contract.Not_String_Entry.COLUMN_FIELD, Contract.Not_String_Entry.COLUMN_ASKED_COUNT,
@@ -272,9 +272,9 @@ public class ExportImportDatabase {
                         try {
                             answer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                         } catch (Exception e) {
-                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                            Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                     Contract.STring.COLUMN_VALUE + " = ? ",
-                                    new String[]{answerCursor.getString(0)},null,null,null,null);
+                                    new String[]{answerCursor.getString(0)}, null, null, null, null);
                             c.moveToFirst();
                             answer_id = c.getLong(0);
                             c.close();
@@ -282,21 +282,21 @@ public class ExportImportDatabase {
                         answerCursor.close();
                         ///////////////////////////////////////////////////////////
                         contentValues = new ContentValues();
-                        contentValues.put(Contract.Not_String_Entry.COLUMN_QUESTION,question_id);
-                        contentValues.put(Contract.Not_String_Entry.COLUMN_ANSWER,answer_id);
-                        contentValues.put(Contract.Not_String_Entry.COLUMN_FIELD,field_id);
-                        contentValues.put(Contract.Not_String_Entry.COLUMN_ASKED_COUNT,notstringEntryCursor.getInt(3));
-                        contentValues.put(Contract.Not_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT,notstringEntryCursor.getInt(4));
-                        contentValues.put(Contract.Not_String_Entry.COLUMN_RANK,notstringEntryCursor.getInt(5));
-                        contentValues.put(Contract.CREATION_DATE,notstringEntryCursor.getString(6));
-                        contentValues.put(Contract.Not_String_Entry.COLUMN_REMIND_AT,notstringEntryCursor.getLong(8));
-                        contentValues.put(Contract.Not_String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,notstringEntryCursor.getInt(9));
+                        contentValues.put(Contract.Not_String_Entry.COLUMN_QUESTION, question_id);
+                        contentValues.put(Contract.Not_String_Entry.COLUMN_ANSWER, answer_id);
+                        contentValues.put(Contract.Not_String_Entry.COLUMN_FIELD, field_id);
+                        contentValues.put(Contract.Not_String_Entry.COLUMN_ASKED_COUNT, notstringEntryCursor.getInt(3));
+                        contentValues.put(Contract.Not_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, notstringEntryCursor.getInt(4));
+                        contentValues.put(Contract.Not_String_Entry.COLUMN_RANK, notstringEntryCursor.getInt(5));
+                        contentValues.put(Contract.CREATION_DATE, notstringEntryCursor.getString(6));
+                        contentValues.put(Contract.Not_String_Entry.COLUMN_REMIND_AT, notstringEntryCursor.getLong(8));
+                        contentValues.put(Contract.Not_String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, notstringEntryCursor.getInt(9));
                         long stringEntry_id = toExportDatabase.insert(Contract.Not_String_Entry.TABLE_NAME, null, contentValues);
                         Cursor alternativeNotStringCursor = appDatabase.query(Contract.Alternative_Answer_Not_String.TABLE_NAME,
                                 new String[]{Contract.Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER,
                                         Contract.Alternative_Answer_Not_String.COLUMN_ANSWERED_COUNT},
                                 Contract.Alternative_Answer_Not_String.COLUMN_ENTRY + " = ? ",
-                                new String[]{notstringEntryCursor.getLong(7) + ""}, null,null,null,null);
+                                new String[]{notstringEntryCursor.getLong(7) + ""}, null, null, null, null);
                         for (alternativeNotStringCursor.moveToFirst(); alternativeNotStringCursor.getPosition() < alternativeNotStringCursor.getCount();
                              alternativeNotStringCursor.moveToNext()) {
                             Cursor alternativeAnswerCursor = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
@@ -304,23 +304,23 @@ public class ExportImportDatabase {
                                     new String[]{alternativeNotStringCursor.getLong(0) + ""}, null, null, null, null);
                             alternativeAnswerCursor.moveToFirst();
                             contentValues = new ContentValues();
-                            contentValues.put(Contract.STring.COLUMN_VALUE,alternativeAnswerCursor.getString(0));
+                            contentValues.put(Contract.STring.COLUMN_VALUE, alternativeAnswerCursor.getString(0));
                             long wrongAnswer_id = 0;
                             try {
-                                wrongAnswer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME,null,contentValues);
+                                wrongAnswer_id = toExportDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
                             } catch (Exception e) {
-                                Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                                Cursor c = toExportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                         Contract.STring.COLUMN_VALUE + " = ? ",
-                                        new String[]{alternativeAnswerCursor.getString(0)},null,null,null,null);
+                                        new String[]{alternativeAnswerCursor.getString(0)}, null, null, null, null);
                                 c.moveToFirst();
                                 wrongAnswer_id = c.getLong(0);
                                 c.close();
                             }
                             contentValues = new ContentValues();
-                            contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ENTRY,stringEntry_id);
-                            contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER,wrongAnswer_id);
-                            contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ANSWERED_COUNT,alternativeNotStringCursor.getInt(1));
-                            toExportDatabase.insert(Contract.Alternative_Answer_Not_String.TABLE_NAME,null,contentValues);
+                            contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ENTRY, stringEntry_id);
+                            contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER, wrongAnswer_id);
+                            contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ANSWERED_COUNT, alternativeNotStringCursor.getInt(1));
+                            toExportDatabase.insert(Contract.Alternative_Answer_Not_String.TABLE_NAME, null, contentValues);
                             alternativeAnswerCursor.close();
                         }
                         questionCursor.close();
@@ -330,26 +330,26 @@ public class ExportImportDatabase {
                     notstringEntryCursor.close();
                 }
                 Cursor excluded_time_cursor = appDatabase.query(Contract.Excluded_Time.TABLE_NAME,
-                        new String[] {Contract.Excluded_Time.COLUMN_STARTS, Contract.Excluded_Time.COLUMN_ENDS},
-                        Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[] {temp_field_id + ""},null,null,null);
+                        new String[]{Contract.Excluded_Time.COLUMN_STARTS, Contract.Excluded_Time.COLUMN_ENDS},
+                        Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{temp_field_id + ""}, null, null, null);
                 for (excluded_time_cursor.moveToFirst(); excluded_time_cursor.getPosition() < excluded_time_cursor.getCount();
                      excluded_time_cursor.moveToNext()) {
                     ContentValues contentValues1 = new ContentValues();
-                    contentValues1.put(Contract.Excluded_Time.COLUMN_FIELD,field_id);
-                    contentValues1.put(Contract.Excluded_Time.COLUMN_STARTS,excluded_time_cursor.getString(0));
-                    contentValues1.put(Contract.Excluded_Time.COLUMN_ENDS,excluded_time_cursor.getString(1));
-                    toExportDatabase.insert(Contract.Excluded_Time.TABLE_NAME,null,contentValues1);
+                    contentValues1.put(Contract.Excluded_Time.COLUMN_FIELD, field_id);
+                    contentValues1.put(Contract.Excluded_Time.COLUMN_STARTS, excluded_time_cursor.getString(0));
+                    contentValues1.put(Contract.Excluded_Time.COLUMN_ENDS, excluded_time_cursor.getString(1));
+                    toExportDatabase.insert(Contract.Excluded_Time.TABLE_NAME, null, contentValues1);
                 }
                 excluded_time_cursor.close();
                 Cursor field_notes_cursor = appDatabase.query(Contract.Field_Note.TABLE_NAME,
-                        new String[] {Contract.Field_Note.COLUMN_NOTE},
-                        Contract.Field_Note.COLUMN_FIELD + " = ? ", new String[] {temp_field_id + ""},null,null,null);
+                        new String[]{Contract.Field_Note.COLUMN_NOTE},
+                        Contract.Field_Note.COLUMN_FIELD + " = ? ", new String[]{temp_field_id + ""}, null, null, null);
                 for (field_notes_cursor.moveToFirst(); field_notes_cursor.getPosition() < field_notes_cursor.getCount();
                      field_notes_cursor.moveToNext()) {
                     ContentValues contentValues1 = new ContentValues();
-                    contentValues1.put(Contract.Field_Note.COLUMN_FIELD,field_id);
-                    contentValues1.put(Contract.Field_Note.COLUMN_NOTE,field_notes_cursor.getString(0));
-                    toExportDatabase.insert(Contract.Field_Note.TABLE_NAME,null,contentValues1);
+                    contentValues1.put(Contract.Field_Note.COLUMN_FIELD, field_id);
+                    contentValues1.put(Contract.Field_Note.COLUMN_NOTE, field_notes_cursor.getString(0));
+                    toExportDatabase.insert(Contract.Field_Note.TABLE_NAME, null, contentValues1);
                 }
                 field_notes_cursor.close();
             }
@@ -379,7 +379,7 @@ public class ExportImportDatabase {
         }
     }
 
-    private static void importFields(Context context, String filePath, boolean importUserUsageData ) {
+    private static void importFields(Context context, String filePath, boolean importUserUsageData) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         SQLiteDatabase toImportDatabase = null;
         try {
@@ -396,65 +396,65 @@ public class ExportImportDatabase {
             if (databaseVersion == 6) {
                 try {
                     upgradeImportedDatabaseFromDBV6ToDBV7(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase,filePath);
-                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase,filePath);
-                    upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase,filePath);
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
+                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase, filePath);
+                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, filePath);
+                    upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
+                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
                     return;
                 }
-                importFields(context, toImportDatabase, importUserUsageData );
+                importFields(context, toImportDatabase, importUserUsageData);
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else if (databaseVersion == 7) {
                 try {
                     upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase, filePath);
                     upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, filePath);
                     upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
+                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
                     return;
                 }
-                importFields(context, toImportDatabase, importUserUsageData );
+                importFields(context, toImportDatabase, importUserUsageData);
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else if (databaseVersion == 8) {
                 try {
                     upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, filePath);
                     upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
+                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
                     return;
                 }
-                importFields(context, toImportDatabase, importUserUsageData );
+                importFields(context, toImportDatabase, importUserUsageData);
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else if (databaseVersion == 9) {
                 try {
                     upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
+                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
                     return;
                 }
-                importFields(context, toImportDatabase, importUserUsageData );
+                importFields(context, toImportDatabase, importUserUsageData);
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            } else if ( databaseVersion == 10  || databaseVersion == 11 || databaseVersion == 12 ) {
+            } else if (databaseVersion == 10 || databaseVersion == 11 || databaseVersion == 12) {
                 try {
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase,filePath);
+                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    showNotification(context,FAILED_IMPORT_NOTIFICATION,notificationManager);
+                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
                     return;
                 }
-                importFields(context, toImportDatabase, importUserUsageData );
+                importFields(context, toImportDatabase, importUserUsageData);
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            } else if ( databaseVersion == 13 ) {
-                importFields(context, toImportDatabase, importUserUsageData );
+            } else if (databaseVersion == 13) {
+                importFields(context, toImportDatabase, importUserUsageData);
                 showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
             } else {
                 throw new InvalidStudyWithoutPenFileException();
@@ -471,7 +471,7 @@ public class ExportImportDatabase {
         }
     }
 
-    private static void importFields(Context context, SQLiteDatabase toImportDatabase, boolean importUserUsageData )
+    private static void importFields(Context context, SQLiteDatabase toImportDatabase, boolean importUserUsageData)
             throws IOException, SQLiteException, InvalidStudyWithoutPenFileException {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -501,66 +501,66 @@ public class ExportImportDatabase {
                 Cursor appFieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,
                         new String[]{Contract.Field.COLUMN_FIELD_TYPE},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
-                        new String[]{toImportFieldCursor.getString(0)},null,null,null,null);
+                        new String[]{toImportFieldCursor.getString(0)}, null, null, null, null);
                 long field_id = -1;
                 if (appFieldCursor.getCount() <= 0) {
-                    if ( importUserUsageData ) {
+                    if (importUserUsageData) {
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put(Contract.Field.COLUMN_FIELD_NAME,toImportFieldCursor.getString(0));
-                        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE,toImportFieldCursor.getInt(1));
-                        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE,toImportFieldCursor.getInt(2));
-                        contentValues.put(Contract.Field.COLUMN_SORT_BY,toImportFieldCursor.getInt(3));
-                        contentValues.put(Contract.Field.COLUMN_LIST_TEXT_SIZE,toImportFieldCursor.getInt(4));
-                        contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE,toImportFieldCursor.getInt(5));
-                        contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE,toImportFieldCursor.getInt(6));
-                        contentValues.put(Contract.Field.COLUMN_TEST_TEXT_SIZE,toImportFieldCursor.getInt(7));
-                        contentValues.put(Contract.Field.COLUMN_ACTION_BAR_SHOWN,toImportFieldCursor.getInt(8));
-                        contentValues.put(Contract.Field.COLUMN_USAGE_COUNT,toImportFieldCursor.getInt(9));
-                        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE,toImportFieldCursor.getInt(12));
-                        contentValues.put(Contract.CREATION_DATE,toImportFieldCursor.getString(10));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS,toImportFieldCursor.getInt(13));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES,toImportFieldCursor.getInt(14));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS,toImportFieldCursor.getInt(15));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION,toImportFieldCursor.getInt(16));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL,toImportFieldCursor.getInt(17));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL,toImportFieldCursor.getInt(18));
-                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS,toImportFieldCursor.getInt(19));
-                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS,toImportFieldCursor.getInt(20));
-                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS,toImportFieldCursor.getInt(21));
-                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT,toImportFieldCursor.getInt(22));
-                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT,toImportFieldCursor.getInt(23));
-                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT,toImportFieldCursor.getInt(24));
-                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT,toImportFieldCursor.getInt(25));
-                        contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION,toImportFieldCursor.getInt(26));
+                        contentValues.put(Contract.Field.COLUMN_FIELD_NAME, toImportFieldCursor.getString(0));
+                        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, toImportFieldCursor.getInt(1));
+                        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(2));
+                        contentValues.put(Contract.Field.COLUMN_SORT_BY, toImportFieldCursor.getInt(3));
+                        contentValues.put(Contract.Field.COLUMN_LIST_TEXT_SIZE, toImportFieldCursor.getInt(4));
+                        contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE, toImportFieldCursor.getInt(5));
+                        contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE, toImportFieldCursor.getInt(6));
+                        contentValues.put(Contract.Field.COLUMN_TEST_TEXT_SIZE, toImportFieldCursor.getInt(7));
+                        contentValues.put(Contract.Field.COLUMN_ACTION_BAR_SHOWN, toImportFieldCursor.getInt(8));
+                        contentValues.put(Contract.Field.COLUMN_USAGE_COUNT, toImportFieldCursor.getInt(9));
+                        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, toImportFieldCursor.getInt(12));
+                        contentValues.put(Contract.CREATION_DATE, toImportFieldCursor.getString(10));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, toImportFieldCursor.getInt(13));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, toImportFieldCursor.getInt(14));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, toImportFieldCursor.getInt(15));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, toImportFieldCursor.getInt(16));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, toImportFieldCursor.getInt(17));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL, toImportFieldCursor.getInt(18));
+                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, toImportFieldCursor.getInt(19));
+                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS, toImportFieldCursor.getInt(20));
+                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, toImportFieldCursor.getInt(21));
+                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(22));
+                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(23));
+                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(24));
+                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, toImportFieldCursor.getInt(25));
+                        contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, toImportFieldCursor.getInt(26));
                         field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                     } else {
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put(Contract.Field.COLUMN_FIELD_NAME,toImportFieldCursor.getString(0));
-                        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE,toImportFieldCursor.getInt(1));
-                        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE,toImportFieldCursor.getInt(2));
+                        contentValues.put(Contract.Field.COLUMN_FIELD_NAME, toImportFieldCursor.getString(0));
+                        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, toImportFieldCursor.getInt(1));
+                        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(2));
                         field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                     }
                     Cursor excluded_times_cursor = toImportDatabase.query(Contract.Excluded_Time.TABLE_NAME,
                             new String[]{Contract.Excluded_Time.COLUMN_STARTS, Contract.Excluded_Time.COLUMN_ENDS},
-                            Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(11) + ""},null,null,null);
+                            Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(11) + ""}, null, null, null);
                     for (excluded_times_cursor.moveToFirst(); excluded_times_cursor.getPosition() < excluded_times_cursor.getCount();
                          excluded_times_cursor.moveToNext()) {
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put(Contract.Excluded_Time.COLUMN_FIELD,field_id);
-                        contentValues.put(Contract.Excluded_Time.COLUMN_STARTS,excluded_times_cursor.getString(0));
-                        contentValues.put(Contract.Excluded_Time.COLUMN_ENDS,excluded_times_cursor.getString(1));
-                        appDatabase.insert(Contract.Excluded_Time.TABLE_NAME,null,contentValues);
+                        contentValues.put(Contract.Excluded_Time.COLUMN_FIELD, field_id);
+                        contentValues.put(Contract.Excluded_Time.COLUMN_STARTS, excluded_times_cursor.getString(0));
+                        contentValues.put(Contract.Excluded_Time.COLUMN_ENDS, excluded_times_cursor.getString(1));
+                        appDatabase.insert(Contract.Excluded_Time.TABLE_NAME, null, contentValues);
                     }
                     excluded_times_cursor.close();
                     Cursor field_notes_cursor = toImportDatabase.query(Contract.Field_Note.TABLE_NAME,
                             new String[]{Contract.Field_Note.COLUMN_NOTE},
-                            Contract.Field_Note.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(11) + ""},null,null,null);
+                            Contract.Field_Note.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(11) + ""}, null, null, null);
                     for (field_notes_cursor.moveToFirst(); field_notes_cursor.getPosition() < field_notes_cursor.getCount();
                          field_notes_cursor.moveToNext()) {
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put(Contract.Field_Note.COLUMN_FIELD,field_id);
-                        contentValues.put(Contract.Field_Note.COLUMN_NOTE,field_notes_cursor.getString(0));
-                        appDatabase.insert(Contract.Field_Note.TABLE_NAME,null,contentValues);
+                        contentValues.put(Contract.Field_Note.COLUMN_FIELD, field_id);
+                        contentValues.put(Contract.Field_Note.COLUMN_NOTE, field_notes_cursor.getString(0));
+                        appDatabase.insert(Contract.Field_Note.TABLE_NAME, null, contentValues);
                     }
                     field_notes_cursor.close();
                 } else {
@@ -587,10 +587,10 @@ public class ExportImportDatabase {
                 }
             }
             notImportedFieldsStrings = new ArrayList<String>();
-            for ( String field_id : notImportedFieldsIDs) {
-                Cursor fieldNameCursor = toImportDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.Field.COLUMN_FIELD_NAME},
+            for (String field_id : notImportedFieldsIDs) {
+                Cursor fieldNameCursor = toImportDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_FIELD_NAME},
                         Contract.COLUMN_ID + " = ? ",
-                        new String[]{field_id},null,null,null,null);
+                        new String[]{field_id}, null, null, null, null);
                 fieldNameCursor.moveToFirst();
                 notImportedFieldsStrings.add(fieldNameCursor.getString(0));
             }
@@ -616,9 +616,9 @@ public class ExportImportDatabase {
                 try {
                     question_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                 } catch (Exception e) {
-                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                             Contract.STring.COLUMN_VALUE + " = ? ",
-                            new String[]{questionCursor.getString(0)},null,null,null,null);
+                            new String[]{questionCursor.getString(0)}, null, null, null, null);
                     c.moveToFirst();
                     question_id = c.getLong(0);
                     c.close();
@@ -634,9 +634,9 @@ public class ExportImportDatabase {
                 try {
                     answer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                 } catch (SQLException e) {
-                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                             Contract.STring.COLUMN_VALUE + " = ? ",
-                            new String[]{answerCursor.getString(0)},null,null,null,null);
+                            new String[]{answerCursor.getString(0)}, null, null, null, null);
                     c.moveToFirst();
                     answer_id = c.getLong(0);
                     c.close();
@@ -646,62 +646,62 @@ public class ExportImportDatabase {
                         Contract.COLUMN_ID + " = ? ",
                         new String[]{toImportStringEntryCursor.getLong(2) + ""}, null, null, null, null);
                 toimportfieldCursor.moveToFirst();
-                Cursor appfieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                Cursor appfieldCursor = appDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
-                        new String[]{toimportfieldCursor.getString(0)},null,null,null,null);
+                        new String[]{toimportfieldCursor.getString(0)}, null, null, null, null);
                 appfieldCursor.moveToFirst();
                 long field_id = appfieldCursor.getLong(0);
                 appfieldCursor.close();
                 toimportfieldCursor.close();
                 long string_entry_id;
-                if ( importUserUsageData ) {
+                if (importUserUsageData) {
                     contentValues1 = new ContentValues();
-                    contentValues1.put(Contract.String_Entry.COLUMN_QUESTION,question_id);
-                    contentValues1.put(Contract.String_Entry.COLUMN_ANSWER,answer_id);
-                    contentValues1.put(Contract.String_Entry.COLUMN_FIELD,field_id);
-                    contentValues1.put(Contract.String_Entry.COLUMN_ASKED_COUNT,toImportStringEntryCursor.getInt(3));
-                    contentValues1.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT,toImportStringEntryCursor.getInt(4));
-                    contentValues1.put(Contract.String_Entry.COLUMN_RANK,toImportStringEntryCursor.getInt(5));
-                    contentValues1.put(Contract.CREATION_DATE,toImportStringEntryCursor.getString(6));
-                    contentValues1.put(Contract.String_Entry.COLUMN_REMIND_AT,toImportStringEntryCursor.getLong(8));
-                    contentValues1.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,toImportStringEntryCursor.getInt(9));
-                    contentValues1.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY,toImportStringEntryCursor.getInt(10));
+                    contentValues1.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
+                    contentValues1.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
+                    contentValues1.put(Contract.String_Entry.COLUMN_FIELD, field_id);
+                    contentValues1.put(Contract.String_Entry.COLUMN_ASKED_COUNT, toImportStringEntryCursor.getInt(3));
+                    contentValues1.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, toImportStringEntryCursor.getInt(4));
+                    contentValues1.put(Contract.String_Entry.COLUMN_RANK, toImportStringEntryCursor.getInt(5));
+                    contentValues1.put(Contract.CREATION_DATE, toImportStringEntryCursor.getString(6));
+                    contentValues1.put(Contract.String_Entry.COLUMN_REMIND_AT, toImportStringEntryCursor.getLong(8));
+                    contentValues1.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, toImportStringEntryCursor.getInt(9));
+                    contentValues1.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, toImportStringEntryCursor.getInt(10));
                     int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
-                    if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                    if (number_of_entries_everyday > Constants.NOT_EMULATED) {
                         contentValues1.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                                Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, appDatabase));
+                                Emulation.getEmulationCreationDate(field_id, number_of_entries_everyday, appDatabase));
                     }
                     try {
-                        string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
+                        string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME, null, contentValues1);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                        Cursor c = appDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                 Contract.String_Entry.COLUMN_QUESTION + " = ? AND "
                                         + Contract.String_Entry.COLUMN_ANSWER + " = ? AND "
                                         + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                                new String[]{question_id + "",answer_id + "",field_id + ""},null,null,null,null);
+                                new String[]{question_id + "", answer_id + "", field_id + ""}, null, null, null, null);
                         c.moveToFirst();
                         string_entry_id = c.getLong(0);
                         c.close();
                     }
                 } else {
                     contentValues1 = new ContentValues();
-                    contentValues1.put(Contract.String_Entry.COLUMN_QUESTION,question_id);
-                    contentValues1.put(Contract.String_Entry.COLUMN_ANSWER,answer_id);
-                    contentValues1.put(Contract.String_Entry.COLUMN_FIELD,field_id);
+                    contentValues1.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
+                    contentValues1.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
+                    contentValues1.put(Contract.String_Entry.COLUMN_FIELD, field_id);
                     contentValues1.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, toImportStringEntryCursor.getInt(10));
                     int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
-                    if ( number_of_entries_everyday > Constants.NOT_EMULATED ) {
+                    if (number_of_entries_everyday > Constants.NOT_EMULATED) {
                         contentValues1.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                                Emulation.getEmulationCreationDate(field_id,number_of_entries_everyday, appDatabase));
+                                Emulation.getEmulationCreationDate(field_id, number_of_entries_everyday, appDatabase));
                     }
                     try {
-                        string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
+                        string_entry_id = appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME, null, contentValues1);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                        Cursor c = appDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                 Contract.String_Entry.COLUMN_QUESTION + " = ? AND "
                                         + Contract.String_Entry.COLUMN_ANSWER + " = ? AND "
                                         + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                                new String[]{question_id + "",answer_id + "",field_id + ""},null,null,null,null);
+                                new String[]{question_id + "", answer_id + "", field_id + ""}, null, null, null, null);
                         c.moveToFirst();
                         string_entry_id = c.getLong(0);
                         c.close();
@@ -711,7 +711,7 @@ public class ExportImportDatabase {
                         new String[]{Contract.Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER,
                                 Contract.Alternative_Answer_String.COLUMN_ANSWERED_COUNT},
                         Contract.Alternative_Answer_String.COLUMN_ENTRY + " = ? ",
-                        new String[]{toImportStringEntryCursor.getLong(7) + ""},null,null,null,null);
+                        new String[]{toImportStringEntryCursor.getLong(7) + ""}, null, null, null, null);
                 for (string_alternative_cursor.moveToFirst(); string_alternative_cursor.getPosition() < string_alternative_cursor.getCount();
                      string_alternative_cursor.moveToNext()) {
                     Cursor alternativeAnswerCursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
@@ -719,23 +719,23 @@ public class ExportImportDatabase {
                             new String[]{string_alternative_cursor.getLong(0) + ""}, null, null, null, null);
                     alternativeAnswerCursor.moveToFirst();
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.STring.COLUMN_VALUE,alternativeAnswerCursor.getString(0));
+                    contentValues.put(Contract.STring.COLUMN_VALUE, alternativeAnswerCursor.getString(0));
                     long wrongAnswer_id = 0;
                     try {
-                        wrongAnswer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME,null,contentValues);
+                        wrongAnswer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                        Cursor c = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                 Contract.STring.COLUMN_VALUE + " = ? ",
-                                new String[]{alternativeAnswerCursor.getString(0)},null,null,null,null);
+                                new String[]{alternativeAnswerCursor.getString(0)}, null, null, null, null);
                         c.moveToFirst();
                         wrongAnswer_id = c.getLong(0);
                         c.close();
                     }
                     contentValues = new ContentValues();
-                    contentValues.put(Contract.Alternative_Answer_String.COLUMN_ENTRY,string_entry_id);
-                    contentValues.put(Contract.Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER,wrongAnswer_id);
-                    contentValues.put(Contract.Alternative_Answer_String.COLUMN_ANSWERED_COUNT,string_alternative_cursor.getInt(1));
-                    appDatabase.insert(Contract.Alternative_Answer_String.TABLE_NAME,null,contentValues);
+                    contentValues.put(Contract.Alternative_Answer_String.COLUMN_ENTRY, string_entry_id);
+                    contentValues.put(Contract.Alternative_Answer_String.COLUMN_ALTERNATIVE_ANSWER, wrongAnswer_id);
+                    contentValues.put(Contract.Alternative_Answer_String.COLUMN_ANSWERED_COUNT, string_alternative_cursor.getInt(1));
+                    appDatabase.insert(Contract.Alternative_Answer_String.TABLE_NAME, null, contentValues);
                     alternativeAnswerCursor.close();
                 }
                 string_alternative_cursor.close();
@@ -770,9 +770,9 @@ public class ExportImportDatabase {
                 try {
                     answer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues1);
                 } catch (Exception e) {
-                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                    Cursor c = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                             Contract.STring.COLUMN_VALUE + " = ? ",
-                            new String[]{answerCursor.getString(0)},null,null,null,null);
+                            new String[]{answerCursor.getString(0)}, null, null, null, null);
                     c.moveToFirst();
                     answer_id = c.getLong(0);
                     c.close();
@@ -782,51 +782,51 @@ public class ExportImportDatabase {
                         Contract.COLUMN_ID + " = ? ",
                         new String[]{toImportNotStringEntryCursor.getLong(2) + ""}, null, null, null, null);
                 toimportfieldCursor.moveToFirst();
-                Cursor appfieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                Cursor appfieldCursor = appDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                         Contract.Field.COLUMN_FIELD_NAME + " = ?",
-                        new String[]{toimportfieldCursor.getString(0)},null,null,null,null);
+                        new String[]{toimportfieldCursor.getString(0)}, null, null, null, null);
                 appfieldCursor.moveToFirst();
                 long field_id = appfieldCursor.getLong(0);
                 appfieldCursor.close();
                 toimportfieldCursor.close();
 
                 long not_string_entry_id;
-                if ( importUserUsageData ) {
+                if (importUserUsageData) {
                     contentValues1 = new ContentValues();
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_QUESTION,question_id);
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_ANSWER,answer_id);
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_FIELD,field_id);
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_ASKED_COUNT,toImportNotStringEntryCursor.getInt(3));
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT,toImportNotStringEntryCursor.getInt(4));
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_RANK,toImportNotStringEntryCursor.getInt(5));
-                    contentValues1.put(Contract.CREATION_DATE,toImportNotStringEntryCursor.getString(6));
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_REMIND_AT,toImportNotStringEntryCursor.getLong(8));
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,toImportNotStringEntryCursor.getInt(9));
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_QUESTION, question_id);
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_ANSWER, answer_id);
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_FIELD, field_id);
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_ASKED_COUNT, toImportNotStringEntryCursor.getInt(3));
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, toImportNotStringEntryCursor.getInt(4));
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_RANK, toImportNotStringEntryCursor.getInt(5));
+                    contentValues1.put(Contract.CREATION_DATE, toImportNotStringEntryCursor.getString(6));
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_REMIND_AT, toImportNotStringEntryCursor.getLong(8));
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, toImportNotStringEntryCursor.getInt(9));
                     try {
-                        not_string_entry_id = appDatabase.insertOrThrow(Contract.Not_String_Entry.TABLE_NAME,null,contentValues1);
+                        not_string_entry_id = appDatabase.insertOrThrow(Contract.Not_String_Entry.TABLE_NAME, null, contentValues1);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.Not_String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                        Cursor c = appDatabase.query(Contract.Not_String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                 Contract.Not_String_Entry.COLUMN_QUESTION + " = ? AND "
                                         + Contract.Not_String_Entry.COLUMN_ANSWER + " = ? AND "
                                         + Contract.Not_String_Entry.COLUMN_FIELD + " = ? ",
-                                new String[]{question_id + "",answer_id + "",field_id + ""},null,null,null,null);
+                                new String[]{question_id + "", answer_id + "", field_id + ""}, null, null, null, null);
                         c.moveToFirst();
                         not_string_entry_id = c.getLong(0);
                         c.close();
                     }
                 } else {
                     contentValues1 = new ContentValues();
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_QUESTION,question_id);
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_ANSWER,answer_id);
-                    contentValues1.put(Contract.Not_String_Entry.COLUMN_FIELD,field_id);
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_QUESTION, question_id);
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_ANSWER, answer_id);
+                    contentValues1.put(Contract.Not_String_Entry.COLUMN_FIELD, field_id);
                     try {
-                        not_string_entry_id = appDatabase.insertOrThrow(Contract.Not_String_Entry.TABLE_NAME,null,contentValues1);
+                        not_string_entry_id = appDatabase.insertOrThrow(Contract.Not_String_Entry.TABLE_NAME, null, contentValues1);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.Not_String_Entry.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                        Cursor c = appDatabase.query(Contract.Not_String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                 Contract.Not_String_Entry.COLUMN_QUESTION + " = ? AND "
                                         + Contract.Not_String_Entry.COLUMN_ANSWER + " = ? AND "
                                         + Contract.Not_String_Entry.COLUMN_FIELD + " = ? ",
-                                new String[]{question_id + "",answer_id + "",field_id + ""},null,null,null,null);
+                                new String[]{question_id + "", answer_id + "", field_id + ""}, null, null, null, null);
                         c.moveToFirst();
                         not_string_entry_id = c.getLong(0);
                         c.close();
@@ -836,7 +836,7 @@ public class ExportImportDatabase {
                         new String[]{Contract.Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER,
                                 Contract.Alternative_Answer_Not_String.COLUMN_ANSWERED_COUNT},
                         Contract.Alternative_Answer_Not_String.COLUMN_ENTRY + " = ? ",
-                        new String[]{toImportNotStringEntryCursor.getLong(7) + ""},null,null,null,null);
+                        new String[]{toImportNotStringEntryCursor.getLong(7) + ""}, null, null, null, null);
                 for (not_string_alternative_cursor.moveToFirst(); not_string_alternative_cursor.getPosition() < not_string_alternative_cursor.getCount();
                      not_string_alternative_cursor.moveToNext()) {
                     Cursor alternativeAnswerCursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.STring.COLUMN_VALUE},
@@ -844,23 +844,23 @@ public class ExportImportDatabase {
                             new String[]{not_string_alternative_cursor.getLong(0) + ""}, null, null, null, null);
                     alternativeAnswerCursor.moveToFirst();
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.STring.COLUMN_VALUE,alternativeAnswerCursor.getString(0));
+                    contentValues.put(Contract.STring.COLUMN_VALUE, alternativeAnswerCursor.getString(0));
                     long wrongAnswer_id = 0;
                     try {
-                        wrongAnswer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME,null,contentValues);
+                        wrongAnswer_id = appDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
                     } catch (Exception e) {
-                        Cursor c = appDatabase.query(Contract.STring.TABLE_NAME,new String[]{Contract.COLUMN_ID},
+                        Cursor c = appDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                                 Contract.STring.COLUMN_VALUE + " = ? ",
-                                new String[]{alternativeAnswerCursor.getString(0)},null,null,null,null);
+                                new String[]{alternativeAnswerCursor.getString(0)}, null, null, null, null);
                         c.moveToFirst();
                         wrongAnswer_id = c.getLong(0);
                         c.close();
                     }
                     contentValues = new ContentValues();
-                    contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ENTRY,not_string_entry_id);
-                    contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER,wrongAnswer_id);
-                    contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ANSWERED_COUNT,not_string_alternative_cursor.getInt(1));
-                    appDatabase.insert(Contract.Alternative_Answer_Not_String.TABLE_NAME,null,contentValues);
+                    contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ENTRY, not_string_entry_id);
+                    contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ALTERNATIVE_ANSWER, wrongAnswer_id);
+                    contentValues.put(Contract.Alternative_Answer_Not_String.COLUMN_ANSWERED_COUNT, not_string_alternative_cursor.getInt(1));
+                    appDatabase.insert(Contract.Alternative_Answer_Not_String.TABLE_NAME, null, contentValues);
                     alternativeAnswerCursor.close();
                 }
                 not_string_alternative_cursor.close();
@@ -875,7 +875,7 @@ public class ExportImportDatabase {
         }
     }
 
-    private static void importInternalFields(Context context, SQLiteDatabase toImportDatabase, ArrayList<String> wanted_fields ) {
+    private static void importInternalFields(Context context, SQLiteDatabase toImportDatabase, ArrayList<String> wanted_fields) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notImportedFieldsIDs = new ArrayList<>();
@@ -971,30 +971,25 @@ public class ExportImportDatabase {
                             contentValues1.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
                                     Emulation.getEmulationCreationDate(field_id, number_of_entries_everyday, appDatabase));
                         }
-                        appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME,null,contentValues1);
+                        appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME, null, contentValues1);
                     }
                 } else {
                     notImportedFieldsStrings.add(toImportFieldCursor.getString(0));
                     continue;
                 }
-
-
-
-
                 appFieldCursor.close();
                 toImportFieldCursor.close();
-                appDatabase.setTransactionSuccessful();
-
             }
-            } finally{
-                appDatabase.endTransaction();
-            }
-            if (notImportedFieldsStrings.size() > 0) {
-                showNotification(context, NOT_IMPORTED_FIELDS, notificationManager);
-            }
-            if ( wanted_fields.size() > notImportedFieldsStrings.size() ) {
-                showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            }
+            appDatabase.setTransactionSuccessful();
+        } finally {
+            appDatabase.endTransaction();
+        }
+        if (notImportedFieldsStrings.size() > 0) {
+            showNotification(context, NOT_IMPORTED_FIELDS, notificationManager);
+        }
+        if (wanted_fields.size() > notImportedFieldsStrings.size()) {
+            showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
+        }
     }
 
 
@@ -1127,7 +1122,7 @@ public class ExportImportDatabase {
         notificationManager.notify(notificationId, notificationBuilder.build());
     }
 
-    private static void upgradeImportedDatabaseFromDBV6ToDBV7(SQLiteDatabase toImportDatabase, String file_path ) throws Exception {
+    private static void upgradeImportedDatabaseFromDBV6ToDBV7(SQLiteDatabase toImportDatabase, String file_path) throws Exception {
         String rename = "ALTER TABLE " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
         toImportDatabase.beginTransaction();
         try {
@@ -1181,37 +1176,37 @@ public class ExportImportDatabase {
             Cursor linkerCursor = toImportDatabase.query(Contract.Old_Linker_DBV6_AppV32.TABLE_NAME,
                     new String[]{Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK,
                             Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK, Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_ORDER, Contract.Old_Linker_DBV6_AppV32.COLUMN_STUDY_DURING_ORDER,
-                            Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_WRONG_ANSWERS,Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32},
-                    null,null,null,null,null,null);
-            for ( linkerCursor.moveToFirst(); linkerCursor.getPosition() < linkerCursor.getCount();
-                  linkerCursor.moveToNext() ) {
+                            Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_WRONG_ANSWERS, Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32},
+                    null, null, null, null, null, null);
+            for (linkerCursor.moveToFirst(); linkerCursor.getPosition() < linkerCursor.getCount();
+                 linkerCursor.moveToNext()) {
                 String field = linkerCursor.getString(2);
-                Cursor question_id_cursor = toImportDatabase.query(Contract.STring.TABLE_NAME,new String[] { Contract.COLUMN_ID},
+                Cursor question_id_cursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                         Contract.STring.COLUMN_VALUE + " = ? ",
-                        new String[]{linkerCursor.getString(0)},null,null,null,null);
+                        new String[]{linkerCursor.getString(0)}, null, null, null, null);
                 question_id_cursor.moveToFirst();
                 long question_id = question_id_cursor.getLong(0);
-                Cursor answer_id_cursor = toImportDatabase.query(Contract.STring.TABLE_NAME,new String[] { Contract.COLUMN_ID},
+                Cursor answer_id_cursor = toImportDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                         Contract.STring.COLUMN_VALUE + " = ? ",
-                        new String[]{linkerCursor.getString(1)},null,null,null,null);
+                        new String[]{linkerCursor.getString(1)}, null, null, null, null);
                 answer_id_cursor.moveToFirst();
                 long answer_id = answer_id_cursor.getLong(0);
-                Cursor field_id_cursor = toImportDatabase.query(Contract.Field.TABLE_NAME,new String[] { Contract.COLUMN_ID},
+                Cursor field_id_cursor = toImportDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
-                        new String[]{field},null,null,null,null);
+                        new String[]{field}, null, null, null, null);
                 field_id_cursor.moveToFirst();
                 long field_id = field_id_cursor.getLong(0);
                 question_id_cursor.close();
                 answer_id_cursor.close();
                 field_id_cursor.close();
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(Contract.Old_String_Entry.COLUMN_QUESTION,question_id);
-                contentValues.put(Contract.Old_String_Entry.COLUMN_ANSWER,answer_id);
-                contentValues.put(Contract.Old_String_Entry.COLUMN_FIELD,field_id);
-                contentValues.put(Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER,linkerCursor.getInt(3));
-                contentValues.put(Contract.Old_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER,linkerCursor.getInt(4));
-                contentValues.put(Contract.CREATION_DATE,linkerCursor.getString(6));
-                toImportDatabase.insert(Contract.Old_String_Entry.TABLE_NAME,null,contentValues);
+                contentValues.put(Contract.Old_String_Entry.COLUMN_QUESTION, question_id);
+                contentValues.put(Contract.Old_String_Entry.COLUMN_ANSWER, answer_id);
+                contentValues.put(Contract.Old_String_Entry.COLUMN_FIELD, field_id);
+                contentValues.put(Contract.Old_String_Entry.COLUMN_PAUSED_TEST_ORDER, linkerCursor.getInt(3));
+                contentValues.put(Contract.Old_String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, linkerCursor.getInt(4));
+                contentValues.put(Contract.CREATION_DATE, linkerCursor.getString(6));
+                toImportDatabase.insert(Contract.Old_String_Entry.TABLE_NAME, null, contentValues);
             }
             drop = "DROP TABLE IF EXISTS " + Contract.Old_Linker_DBV6_AppV32.TABLE_NAME + ";";
             toImportDatabase.execSQL(drop);
@@ -1225,13 +1220,14 @@ public class ExportImportDatabase {
                 exportDirectory.mkdir();
             }*/
             String journalFileName = file_path + "-journal";
-            File journalFile = new File( journalFileName);
+            File journalFile = new File(journalFileName);
             if (journalFile.exists()) {
                 journalFile.delete();
             }
         }
     }
-    private static void upgradeImportedDatabaseFromDBV7ToDBV8(SQLiteDatabase toImportDatabase, String file_path ) throws Exception {
+
+    private static void upgradeImportedDatabaseFromDBV7ToDBV8(SQLiteDatabase toImportDatabase, String file_path) throws Exception {
         toImportDatabase.beginTransaction();
         try {
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
@@ -1316,13 +1312,14 @@ public class ExportImportDatabase {
                 exportDirectory.mkdir();
             }*/
             String journalFileName = file_path + "-journal";
-            File journalFile = new File( journalFileName);
+            File journalFile = new File(journalFileName);
             if (journalFile.exists()) {
                 journalFile.delete();
             }
         }
     }
-    private static void upgradeImportedDatabaseFromDBV8ToDBV9(SQLiteDatabase toImportDatabase, String file_path ) throws Exception {
+
+    private static void upgradeImportedDatabaseFromDBV8ToDBV9(SQLiteDatabase toImportDatabase, String file_path) throws Exception {
         toImportDatabase.beginTransaction();
         try {
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
@@ -1381,13 +1378,14 @@ public class ExportImportDatabase {
                 exportDirectory.mkdir();
             }*/
             String journalFileName = file_path + "-journal";
-            File journalFile = new File( journalFileName);
+            File journalFile = new File(journalFileName);
             if (journalFile.exists()) {
                 journalFile.delete();
             }
         }
     }
-    private static void upgradeImportedDatabaseFromDBV9ToDBV10(SQLiteDatabase toImportDatabase, String file_path ) throws Exception {
+
+    private static void upgradeImportedDatabaseFromDBV9ToDBV10(SQLiteDatabase toImportDatabase, String file_path) throws Exception {
         toImportDatabase.beginTransaction();
         try {
             String rename = "ALTER TABLE " + Contract.Old_String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
@@ -1434,13 +1432,14 @@ public class ExportImportDatabase {
         } finally {
             toImportDatabase.endTransaction();
             String journalFileName = file_path + "-journal";
-            File journalFile = new File( journalFileName);
+            File journalFile = new File(journalFileName);
             if (journalFile.exists()) {
                 journalFile.delete();
             }
         }
     }
-    private static void upgradeImportedDatabaseFromDBV12ToDBV13(SQLiteDatabase toImportDatabase, String file_path ) throws Exception {
+
+    private static void upgradeImportedDatabaseFromDBV12ToDBV13(SQLiteDatabase toImportDatabase, String file_path) throws Exception {
         toImportDatabase.beginTransaction();
         try {
             toImportDatabase.delete(Contract.Field.TABLE_NAME, Contract.Field.COLUMN_FIELD_TYPE + " = ? ",
@@ -1552,7 +1551,7 @@ public class ExportImportDatabase {
         } finally {
             toImportDatabase.endTransaction();
             String journalFileName = file_path + "-journal";
-            File journalFile = new File( journalFileName);
+            File journalFile = new File(journalFileName);
             if (journalFile.exists()) {
                 journalFile.delete();
             }
