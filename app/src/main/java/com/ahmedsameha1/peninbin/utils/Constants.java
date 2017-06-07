@@ -58,5 +58,7 @@ public class Constants {
         public static final int STUDY_PERIOD = 0;
         public static final int STUDY_AGAIN_ENHANCED_TEST = 1;
         public static final int STUDY_AGAIN_FULLY_RANDOM_TEST = 2;
+        public static final int NOT_IN_REPEATED = 0;
+        public static final int IN_REPEATED = 1;
     }
 }

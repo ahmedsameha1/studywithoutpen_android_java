@@ -1,11 +1,8 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.graphics.Color;
 import android.os.SystemClock;
 import android.provider.AlarmClock;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,7 +36,7 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
-import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
+import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -159,7 +156,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     private boolean locale_available = false;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
     private RelativeLayout content;
-    private int mShortAnimationDuration;
     private View mLoadingView;
     private String[] symbol, customable_text;
     private int current_field_type;
@@ -310,7 +306,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
                             is_testing_now = true;
                             pauseThread.start();
                     }
-                    crossfade();
+                    ActivityUtility.crossFade(content, mLoadingView, FullyRandomTestActivity.this);
                 } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     if (symbol == null && customable_text == null) {
                         symbol = new String[data.getCount()];
@@ -349,6 +345,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
                         currentQuestionCounter++;
                         if (currentQuestionCounter >= questionsNumber) {
                             check.setEnabled(false);
+                            dont_know.setEnabled(false);
                             before_showing_result_dialog = true;
                             show_result_dialog_runnable = () -> {
                                     showQuestion.setText(R.string.test_has_completed);
@@ -501,8 +498,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         if (savedInstanceState == null) {
             boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
             content.setVisibility(View.GONE);
-            mShortAnimationDuration = getResources().getInteger(
-                    android.R.integer.config_shortAnimTime);
             isStartingFirstTime = true;
             if (boolean_continue) {
                 getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
@@ -674,9 +669,13 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
             case R.id.timer:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
-                            .putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
                     if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent);
+                        Bundle bundle4 = new Bundle();
+                        bundle4.putString(TimerDialogFragment.MESSAGE, getString(R.string.app_name) + " " + getString(R.string.fully_random_test));
+                        TimerDialogFragment timerDialogFragment = new TimerDialogFragment();
+                        timerDialogFragment.setArguments(bundle4);
+                        timerDialogFragment.show(getSupportFragmentManager(), TimerDialogFragment.class.getName());
                     } else {
                         Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -1135,6 +1134,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
             currentQuestionCounter++;
             if (currentQuestionCounter >= questionsNumber) {
                 check.setEnabled(false);
+                dont_know.setEnabled(false);
                 before_showing_result_dialog = true;
                 show_result_dialog_runnable = () -> {
                     showQuestion.setText(R.string.test_has_completed);
@@ -1199,6 +1199,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         showQuestion.setTextColor(Color.WHITE);
         if (currentQuestionCounter >= questionsNumber) {
             check.setEnabled(false);
+            dont_know.setEnabled(false);
             before_showing_result_dialog = true;
             show_result_dialog_runnable = () -> {
                 showQuestion.setText(R.string.test_has_completed);
@@ -1243,33 +1244,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     }
 
 
-    private void crossfade() {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        content.setAlpha(0f);
-        content.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        content.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        mLoadingView.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLoadingView.setVisibility(View.GONE);
-                    }
-                });
-    }
     @Override
     public void obfuscateText(boolean obfuscate) {
         this.obfuscate = obfuscate;

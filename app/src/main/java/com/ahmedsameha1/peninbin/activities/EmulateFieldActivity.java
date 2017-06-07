@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.CopyMoveEntriesActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.EmulateFieldActivityRecyclerViewAdapter;
+import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -45,25 +46,24 @@ import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScrol
  */
 public class EmulateFieldActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
     private EmulateFieldActivityRecyclerViewAdapter mAdapter;
-    private int number_of_entries;
     private EditText enter_number_of_entries;
     private ArrayList<Long> starting_entry_id = new ArrayList<>();
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
-    private DatabaseReadOperations databaseOperations;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_emulate_field);
         current_field_id = getIntent().getLongExtra(FieldActivity.FIELD_ID, 0);
-        databaseOperations = new DatabaseReadOperations(this);
+        DatabaseReadOperations databaseOperations = new DatabaseReadOperations(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         enter_number_of_entries = (EditText) findViewById(R.id.enter_number_of_entries);
         ImageButton number_of_entries_help = (ImageButton) findViewById(R.id.number_of_entries_help);
         ImageButton starting_entry_help = (ImageButton) findViewById(R.id.starting_entry_help);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
+        recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
         VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
         // Connect the recycler to the scroller (to let the scroller scroll the list)
         fastScroller.setRecyclerView(recyclerView);
@@ -74,8 +74,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
         getSupportActionBar().setTitle(databaseOperations.getFieldName(current_field_id));
         mAdapter = new EmulateFieldActivityRecyclerViewAdapter(EmulateFieldActivity.this, null, starting_entry_id);
-        final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(EmulateFieldActivity.this);
-        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(EmulateFieldActivity.this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
         int spanCount = 1;
@@ -144,12 +143,12 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         switch (id) {
             case R.id.emulate:
                     if ( enter_number_of_entries.getText().length() > 0 ) {
-                        number_of_entries = Integer.parseInt(enter_number_of_entries.getText().toString());
+                        int number_of_entries = Integer.parseInt(enter_number_of_entries.getText().toString());
                         Toast toast = Toast.makeText(EmulateFieldActivity.this, "This operation may take some time", Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                         if ( starting_entry_id.size() == 0 ) {
-                            Emulation.startEmulateThread(this, current_field_id,number_of_entries);
+                            Emulation.startEmulateThread(this, current_field_id, number_of_entries);
                         } else {
                             Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id.get(0));
                         }
@@ -171,7 +170,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(EmulateFieldActivity.this,
+        CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(EmulateFieldActivity.this,
                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                         + " a FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
@@ -195,42 +194,16 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         mAdapter.swapCursor(null);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
+    }
 
-
-
-
-    public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {
-
-        private int spanCount;
-        private int spacing;
-        private boolean includeEdge;
-
-        public LinearSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
-            this.spanCount = spanCount;
-            this.spacing = spacing;
-            this.includeEdge = includeEdge;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            int position = parent.getChildAdapterPosition(view); // item position
-            int column = position % spanCount; // item column
-
-            if (includeEdge) {
-                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
-                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
-
-                if (position < spanCount) { // top edge
-                    outRect.top = spacing;
-                }
-                outRect.bottom = spacing; // item bottom
-            } else {
-                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
-                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
-                if (position >= spanCount) {
-                    outRect.top = spacing; // item top
-                }
-            }
-        }
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        recyclerView.getLayoutManager()
+                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
     }
 }

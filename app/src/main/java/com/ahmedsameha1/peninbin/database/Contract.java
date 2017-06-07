@@ -129,6 +129,7 @@ public final class Contract {
         public static final String COLUMN_CURRENT_QUESTION_COUNTER = "current_question_counter";
         public static final String COLUMN_TRIES_NUMBER = "tries_number";
         public static final String COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION = "elapsed_time_of_paused_study_till_correct_session";
+        public static final String COLUMN_IN_REPEATED = "in_repeated";
     }
     public static abstract class Study_Till_Correct_Repeated_Entry implements BaseColumns {
         public static final String TABLE_NAME = "study_till_correct_repeated_entry";

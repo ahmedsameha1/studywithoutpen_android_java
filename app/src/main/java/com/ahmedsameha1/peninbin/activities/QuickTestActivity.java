@@ -1,7 +1,5 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
@@ -12,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -123,7 +120,6 @@ public class QuickTestActivity extends FullyRandomTest implements
     private boolean tts_available = false;
     private boolean locale_available = false;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
-    private int mShortAnimationDuration;
     private View mLoadingView;
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
@@ -271,7 +267,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                                 finish();
                                 ExitActivity.exit(QuickTestActivity.this);
                             }
-                        crossfade();
+                        ActivityUtility.crossFade(content,mLoadingView,QuickTestActivity.this);
                     } else if (loader.getId() == GET_SPECIAL_TEXT_LOADER_ID) {
                         if (symbol == null && customable_text == null) {
                             symbol = new String[data.getCount()];
@@ -308,6 +304,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                             currentQuestionCounter++;
                             if (currentQuestionCounter >= questionsNumber) {
                                 check.setEnabled(false);
+                                dont_know.setEnabled(false);
                                 before_showing_result_dialog = true;
 
                                 show_result_dialog_runnable = () -> {
@@ -458,8 +455,6 @@ public class QuickTestActivity extends FullyRandomTest implements
             }
             if (savedInstanceState == null) {
                 content.setVisibility(View.GONE);
-                mShortAnimationDuration = getResources().getInteger(
-                        android.R.integer.config_shortAnimTime);
                 isStartingFirstTime = true;
                 getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
             } else {
@@ -991,6 +986,7 @@ public class QuickTestActivity extends FullyRandomTest implements
             currentQuestionCounter++;
             if (currentQuestionCounter >= questionsNumber) {
                 check.setEnabled(false);
+                dont_know.setEnabled(false);
                 before_showing_result_dialog = true;
                 show_result_dialog_runnable = () -> {
                     showQuestion.setText(R.string.test_has_completed);
@@ -1053,6 +1049,7 @@ public class QuickTestActivity extends FullyRandomTest implements
         showQuestion.setTextColor(Color.WHITE);
         if (currentQuestionCounter >= questionsNumber) {
             check.setEnabled(false);
+            dont_know.setEnabled(false);
             before_showing_result_dialog = true;
             show_result_dialog_runnable = () -> {
                 showQuestion.setText(R.string.test_has_completed);
@@ -1095,34 +1092,6 @@ public class QuickTestActivity extends FullyRandomTest implements
     }
 
 
-
-    private void crossfade() {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        content.setAlpha(0f);
-        content.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        content.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        mLoadingView.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLoadingView.setVisibility(View.GONE);
-                    }
-                });
-    }
     @Override
     public void obfuscateText(boolean obfuscate) {
         this.obfuscate = obfuscate;

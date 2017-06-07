@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int DIRECTORY_CODE = 15;
     private static final String TO_EXPORT_FIELDS = "to_export_fields";
     private static final String TO_EXPORT_FILE_NAME = "to_export_file_name";
-
+    private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
     private static final String PAY_LOAD_STRING = "pay_load_string";
     private static final String BUY_INTENT = "BUY_INTENT";
     private static final int BUY_FLOW_REQUEST_CODE = 6475;
@@ -144,14 +144,13 @@ public class MainActivity extends AppCompatActivity implements
     private ServiceConnection mServiceConn;
     private NetworkReceiver networkReceiver;
     private String pay_load;
-    private SharedPreferences sharedPreferences;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MainActivityFragmentDrawer drawerFragment;
-        RecyclerView recyclerView;
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main_activity); // this Toolbar will act as action bar of the activity
         recyclerView = (RecyclerView) findViewById(R.id.main_activity_recyclerview);
         drawerFragment = (MainActivityFragmentDrawer)
@@ -174,8 +173,7 @@ public class MainActivity extends AppCompatActivity implements
             e.printStackTrace();
         }
         mAdapter = new MainActivityRecyclerViewAdapter(this, null);
-        RecyclerView.LayoutManager mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
         int spanCount = 2;
@@ -211,15 +209,10 @@ public class MainActivity extends AppCompatActivity implements
                     return mySQLiteCursorLoader;
                 } else if (id == SEARCH_FIELDS_ID) {
                     String query = args.getString(QUERY_KEY);
-                    /*return new CursorLoader(MainActivity.this, uri,
-                            new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME},
-                            Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME + " LIKE ? ",
-                            new String[] {"%" + query + "%"},
-                            "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
                     mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(MainActivity.this,
                             "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", "
                                     + Contract.Field.COLUMN_FIELD_NAME
-                                    + " FROM " + Contract.Field.TABLE_NAME + " WHERE " + Contract.Field.COLUMN_FIELD_NAME + " LIKE ? "
+                                    + " FROM " + Contract.Field.TABLE_NAME + " WHERE " + Contract.Field.COLUMN_FIELD_NAME + " LIKE ? COLLATE NOCASE "
                                     + " ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC", new String[]{"%" + query + "%"});
                     return mySQLiteCursorLoader;
                 }
@@ -550,7 +543,7 @@ public class MainActivity extends AppCompatActivity implements
             IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
             networkReceiver = new NetworkReceiver(billingService);
             registerReceiver(networkReceiver, intentFilter);
-            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         }
     }
@@ -681,18 +674,21 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putStringArrayList(TO_EXPORT_FIELDS, to_export_fields);
         outState.putString(TO_EXPORT_FILE_NAME, to_export_file_name);
         outState.putString(PAY_LOAD_STRING, pay_load);
-        super.onSaveInstanceState(outState);
+        outState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
         to_export_fields = savedInstanceState.getStringArrayList(TO_EXPORT_FIELDS);
         to_export_file_name = savedInstanceState.getString(TO_EXPORT_FILE_NAME);
         pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
-        super.onRestoreInstanceState(savedInstanceState);
+        recyclerView.getLayoutManager()
+                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
     }
 
     @Override

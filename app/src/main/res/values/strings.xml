@@ -285,7 +285,7 @@
     <string name="notify_me">Notify me</string>
     <string name="show_next_question">Move to next question</string>
     <string name="dont_know">Don\'t know</string>
-    <string name="ask_again">Ask again</string>
+    <string name="ask_again">Ask Again</string>
     <string name="order">Order</string>
     <string name="asked">Asked: %1$s</string>
     <string name="wrongly_answered">Wrongly answered: %1$s</string>
@@ -324,8 +324,8 @@
     <string name="intial_period">Currently, you do not need to have a subscription!</string>
     <string name="last_entry">This is the last entry!</string>
     <string name="first_entry">This is the first entry!</string>
-    <string name="keep_question">Keep question</string>
-    <string name="keep_answer">Keep answer</string>
+    <string name="keep_question">Add entry and keep question</string>
+    <string name="keep_answer">Add entry and keep answer</string>
     <string name="vertical_ellipsis" translatable="false">&#8942;</string>
     <string name="no_timer_app">There is no app that can run timers on your device!</string>
     <string name="kitkat_or_newer">This feature needs android kitkat or newer</string>
@@ -333,4 +333,13 @@
     <string name="wrongness_level">Wrongness level: %.0f%%</string>
     <string name="asked_menu">Asked</string>
     <string name="wrongly_answered_menu">Wrongly answered</string>
+    <string name="enter_number_of_minutes">Enter minutes</string>
+    <string name="start">Start</string>
+    <string name="minute">minute</string>
+    <string name="study_a_period">Study A Period</string>
+    <string name="study">Study</string>
+    <string name="fully_random_test">Fully Random Test</string>
+    <string name="enhanced_test">Enhanced Test</string>
+    <string name="start_fully_random_test">Start a fully random test</string>
+    <string name="wait_loading">Please, wait for loading</string>
 </resources>

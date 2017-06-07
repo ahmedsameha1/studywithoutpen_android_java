@@ -40,6 +40,7 @@ import android.widget.ToggleButton;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -76,7 +77,6 @@ public class StudyActivity extends AppCompatActivity implements
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int SELECT_ENTRY_REQUEST = 1;
     public static final int RETURN_TIME = 1000;
-    public static final String ORDER_OF_ENTRIES = "order_of_entries";
     private static final String CURRENT_ENTRY_ID = "current_entry_id";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
     private static final String SYMBOL = "symbol";
@@ -873,9 +873,13 @@ public class StudyActivity extends AppCompatActivity implements
             case R.id.timer:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
-                            .putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
                     if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent);
+                        Bundle bundle4 = new Bundle();
+                        bundle4.putString(TimerDialogFragment.MESSAGE, getString(R.string.app_name) + " " + getString(R.string.study));
+                        TimerDialogFragment timerDialogFragment = new TimerDialogFragment();
+                        timerDialogFragment.setArguments(bundle4);
+                        timerDialogFragment.show(getSupportFragmentManager(), TimerDialogFragment.class.getName());
                     } else {
                         Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);

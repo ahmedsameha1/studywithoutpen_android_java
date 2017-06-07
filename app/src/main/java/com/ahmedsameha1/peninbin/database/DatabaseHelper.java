@@ -199,6 +199,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Contract.Study_Till_Correct_Paused.COLUMN_CURRENT_QUESTION_COUNTER + " INTEGER NOT NULL, "
             + Contract.Study_Till_Correct_Paused.COLUMN_TRIES_NUMBER + " INTEGER NOT NULL, "
             + Contract.Study_Till_Correct_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION + " INTEGER NOT NULL, "
+            + Contract.Study_Till_Correct_Paused.COLUMN_IN_REPEATED + " INTEGER NOT NULL DEFAULT " + Constants.Study_Till_Correct.NOT_IN_REPEATED + ", "
             + "FOREIGN KEY(" + Contract.Study_Till_Correct_Paused.COLUMN_FIELD + ") REFERENCES " + Field.TABLE_NAME + "(" + Contract.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
             + " UNIQUE ( " + Contract.Study_Till_Correct_Paused.COLUMN_FIELD + ", "
             + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " )"
@@ -540,7 +541,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Emulation.modifyEmulationCreationDatesOfAppV53AndHigher(sqLiteDatabase);
         }
         if (oldVersion < 13 ) {
-            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV79(sqLiteDatabase);
+            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV80(sqLiteDatabase);
         }
     }
 

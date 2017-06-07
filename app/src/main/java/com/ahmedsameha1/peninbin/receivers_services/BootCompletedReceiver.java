@@ -11,9 +11,12 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.ahmedsameha1.peninbin.activities.AskAgainAfterTestActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
+import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
@@ -22,6 +25,7 @@ import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Map;
 
 /**
  * Created by ahmed on 24/05/16.
@@ -35,6 +39,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             Log.i("boot receiver", "running");
             rescheduleMidnightService(context);
             rescheduleAllSessions(context);
+            removePendingPausingSharedPreference(context);
         }
     }
 
@@ -115,5 +120,22 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
         }
+    }
+
+    private void removePendingPausingSharedPreference(Context context ) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Map<String, ?>  all_keys = sharedPreferences.getAll();
+        for ( Map.Entry<String, ?> entry : all_keys.entrySet() ) {
+            String key_string = entry.getKey();
+            if ( key_string.startsWith(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING)
+                    || key_string.startsWith(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING)
+                    || key_string.startsWith(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING)
+                    || key_string.startsWith(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED)
+                    || key_string.startsWith(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM) ){
+                editor.remove(key_string);
+            }
+        }
+        editor.commit();
     }
 }

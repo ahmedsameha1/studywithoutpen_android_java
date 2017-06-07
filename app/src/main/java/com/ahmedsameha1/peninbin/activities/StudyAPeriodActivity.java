@@ -1,7 +1,5 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -10,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Process;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
@@ -42,6 +41,7 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfStudyAPeriodDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -138,12 +138,10 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private boolean locale_available = false;
     private int check_type;
     private Tracker mTracker;
-    private int mShortAnimationDuration;
     private View mLoadingView;
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
     private long lastPause;
-    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
@@ -211,7 +209,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             retainedFragment = new RetainedFragment();
             getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
         }
-        loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+        LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
                 if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
@@ -265,21 +263,21 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 int id = loader.getId();
                 if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     StudyAPeriodActivity.this.cursor = cursor;
-                        if (boolean_continue) {
-                            listForTest = readFromLinkerTableStudyDuringColumn();
-                        } else {
-                            listForTest = prepareListForStudyFirstTime();
-                        }
+                    if (boolean_continue) {
+                        listForTest = readFromLinkerTableStudyDuringColumn();
+                    } else {
+                        listForTest = prepareListForStudyFirstTime();
+                    }
                     questionsNumber = listForTest.length;
                     if (questionsNumber > 0) {
                         while_studying = true;
-                        if ( obfuscate ) {
+                        if (obfuscate) {
                             showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
                         } else {
                             showQuestion.setText(listForTest[currentQuestionCounter][0]);
                         }
-                        time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1],
-                                reading_question_letter_second,find_answer_time, typing_answer_letter_second);
+                        time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
+                                reading_question_letter_second, find_answer_time, typing_answer_letter_second);
                         ifMoreThanOnce();
                         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                         if (boolean_continue) {
@@ -296,7 +294,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         finish();
                         ExitActivity.exit(StudyAPeriodActivity.this);
                     }
-                    crossfade();
+                    ActivityUtility.crossFade(content, mLoadingView, StudyAPeriodActivity.this);
                 } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     if (symbol == null && customable_text == null) {
                         symbol = new String[cursor.getCount()];
@@ -362,6 +360,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                         time_of_starting_time_of_answer = -1;
                         scheduleWhatToDoAfterTimeOfAnswerElapsed();
                     } else {
+                        check.setEnabled(false);
+                        dont_know.setEnabled(false);
                         while_studying = false;
                         cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_PERIOD,question_data_type);
                         cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id);
@@ -549,8 +549,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         if (savedInstanceState == null) {
             content.setVisibility(View.GONE);
-            mShortAnimationDuration = getResources().getInteger(
-                    android.R.integer.config_shortAnimTime);
             isStartingFirstTime = true;
             if (boolean_continue) {
                 int[] array = databaseReadOperations.getDataFromStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id);
@@ -683,7 +681,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         if ( while_studying ) {
             new Thread( () -> {
                     Runnable pauseRunnable;
-                    android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     try {
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyAPeriodActivity.this);
                         if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + PAUSING + current_field_id) ) {
@@ -763,9 +761,13 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             case R.id.timer:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
-                            .putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
                     if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent);
+                        Bundle bundle4 = new Bundle();
+                        bundle4.putString(TimerDialogFragment.MESSAGE, getString(R.string.app_name) + " " + getString(R.string.study_a_period));
+                        TimerDialogFragment timerDialogFragment = new TimerDialogFragment();
+                        timerDialogFragment.setArguments(bundle4);
+                        timerDialogFragment.show(getSupportFragmentManager(), TimerDialogFragment.class.getName());
                     } else {
                         Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -1228,33 +1230,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         }
     }
 
-    private void crossfade() {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        content.setAlpha(0f);
-        content.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        content.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        mLoadingView.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLoadingView.setVisibility(View.GONE);
-                    }
-                });
-    }
     @Override
     public void obfuscateText(boolean obfuscate) {
         this.obfuscate = obfuscate;

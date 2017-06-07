@@ -106,30 +106,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                 });
 
                 dialog14.show();
-                /*Intent i = new Intent(context, FilePickerActivity.class);
-                // This works if you defined the intent filter
-                // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-
-                // Set these depending on your use case. These are the defaults.
-                i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
-                i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
-                i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
-
-                // Configure initial directory by specifying a String.
-                // You could specify a String like "/storage/emulated/0/", but that can
-                // dangerous. Always use Android's API calls to get paths to the SD-card or
-                // internal memory.
-                i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-                getActivity().startActivityForResult(i, APP_FILE_CODE);*/
                 dismiss();
-             /*       ImportFieldsDialogFragment importFieldsDialogFragment = new ImportFieldsDialogFragment();
-                    importFieldsDialogFragment.show(getActivity().getSupportFragmentManager(), ImportFieldsDialogFragment.IMPORT_FIELD_DIALOG_FRAGMENT);
-                dismiss();*/
-       /*         mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("open import field")
-                        .build());*/
             });
             text_file.setOnClickListener(v -> {
                 DialogProperties properties=new DialogProperties();

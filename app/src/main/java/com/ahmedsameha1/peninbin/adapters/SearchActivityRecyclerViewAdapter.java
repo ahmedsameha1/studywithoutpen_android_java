@@ -73,7 +73,6 @@ public class SearchActivityRecyclerViewAdapter extends
                             intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
                             intent.putExtra(StudyActivity.CURRENT_QUESTION, currentQuestion);
                             intent.putExtra(StudyActivity.CURRENT_ANSWER, currentAnswer);
-                            intent.putExtra(StudyActivity.ORDER_OF_ENTRIES, 0);
                             context.startActivity(intent);
                     }
 
@@ -212,11 +211,14 @@ public class SearchActivityRecyclerViewAdapter extends
         Spannable spannable_question = Spannable.Factory.getInstance().newSpannable(question);
         Spannable spannable_answer = Spannable.Factory.getInstance().newSpannable(answer);
         String value = search_string.toString();
-        if ( ! "".equals(value) ) {
-            if (question.contains(value)) {
+        String question_lowercase = question.toLowerCase();
+        String answer_lowercase = answer.toLowerCase();
+        String value_lowercase = value.toLowerCase();
+        if ( ! "".equals(value_lowercase) ) {
+            if (question_lowercase.contains(value_lowercase)) {
                 int start = 0;
-                while (start < question.length()) {
-                    if (question.indexOf(value,start) == start) {
+                while (start < question_lowercase.length()) {
+                    if (question_lowercase.indexOf(value_lowercase,start) == start) {
                         int end = start + search_string.length();
                         spannable_question.setSpan(new BackgroundColorSpan(0xFFFFFF00),
                                 start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -226,10 +228,10 @@ public class SearchActivityRecyclerViewAdapter extends
                     }
                 }
             }
-            if (answer.contains(value)) {
+            if (answer_lowercase.contains(value_lowercase)) {
                 int start = 0;
-                while (start < answer.length()) {
-                    if (answer.indexOf(value, start) == start) {
+                while (start < answer_lowercase.length()) {
+                    if (answer_lowercase.indexOf(value_lowercase, start) == start) {
                         int end = start + search_string.length();
                         spannable_answer.setSpan(new BackgroundColorSpan(0xFFFFFF00),
                                 start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

@@ -35,10 +35,12 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.adapters.FieldActivityRecyclerViewAdapter;
+import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -74,7 +76,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-import xyz.danoz.recyclerviewfastscroller.sectionindicator.title.SectionTitleIndicator;
 import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
 
 
@@ -115,6 +116,7 @@ public class FieldActivity extends AppCompatActivity implements
     private static final String BUY_INTENT = "BUY_INTENT";
     private static final int BUY_FLOW_REQUEST_CODE = 6475;
     private static final String INITIAL_CHECK_SUPSCRIPTION = "intial_check_supscription";
+    private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     protected int fieldType = 0;
     private long current_field_id;
@@ -139,6 +141,9 @@ public class FieldActivity extends AppCompatActivity implements
     private String pay_load;
     private boolean initialCheckSubscription = true;
     private StringBuilder search_string_highlight = new StringBuilder();
+    private View mLoadingView;
+    private RelativeLayout content;
+    private RecyclerView recyclerView;
 
 
     @Override
@@ -146,7 +151,7 @@ public class FieldActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_field);
         FieldActivityFragmentDrawer drawerFragment;
-        RecyclerView recyclerView;
+
         if (savedInstanceState != null) {
             current_field_id = savedInstanceState.getLong(FIELD_ID);
         } else {
@@ -156,6 +161,9 @@ public class FieldActivity extends AppCompatActivity implements
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
         fieldType = databaseReadOperations.getFieldType(current_field_id);
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
+        content = (RelativeLayout) findViewById(R.id.content);
+        mLoadingView = findViewById(R.id.loading);
+        ActivityUtility.antiCrossFade(content, mLoadingView, this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_field_activity); // FieldActivity.this Toolbar will act as action bar of the activity
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
         VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
@@ -229,7 +237,7 @@ public class FieldActivity extends AppCompatActivity implements
                                         + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                                         + "  q LIKE ? "
                                         + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
-                                        + " a LIKE ? ORDER BY " + sortOption.getSortString(),
+                                        + " a LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
                                 new String[]{current_field_id + "", "%" + searchString + "%", current_field_id + "", "%" + searchString + "%"});
                         return cursorLoaderAndUpdateDatabase;
 
@@ -254,6 +262,7 @@ public class FieldActivity extends AppCompatActivity implements
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 mAdapter.swapCursor(data);
+                ActivityUtility.crossFade(content, mLoadingView, FieldActivity.this);
             }
 
             @Override
@@ -383,6 +392,7 @@ public class FieldActivity extends AppCompatActivity implements
         }
         getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
         getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
+        ActivityUtility.antiCrossFade(content,mLoadingView,FieldActivity.this);
     }
 
     @Override
@@ -415,6 +425,7 @@ public class FieldActivity extends AppCompatActivity implements
             load_or_search = false;
             getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
             getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
+            ActivityUtility.antiCrossFade(content,mLoadingView,FieldActivity.this);
         }
     }
 
@@ -499,13 +510,16 @@ public class FieldActivity extends AppCompatActivity implements
         savedInstanceState.putLong(FIELD_ID, current_field_id);
         savedInstanceState.putString(PAY_LOAD_STRING, pay_load);
         savedInstanceState.putBoolean(INITIAL_CHECK_SUPSCRIPTION, initialCheckSubscription);
+        savedInstanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
         pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
         initialCheckSubscription = savedInstanceState.getBoolean(INITIAL_CHECK_SUPSCRIPTION);
-        super.onRestoreInstanceState(savedInstanceState);
+        recyclerView.getLayoutManager()
+                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
     }
 
     @Override
@@ -780,40 +794,4 @@ public class FieldActivity extends AppCompatActivity implements
             toast.show();
         }
     }
-
-    public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {
-
-        private int spanCount;
-        private int spacing;
-        private boolean includeEdge;
-
-        public LinearSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
-            this.spanCount = spanCount;
-            this.spacing = spacing;
-            this.includeEdge = includeEdge;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            int position = parent.getChildAdapterPosition(view); // item position
-            int column = position % spanCount; // item column
-
-            if (includeEdge) {
-                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
-                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
-
-                if (position < spanCount) { // top edge
-                    outRect.top = spacing;
-                }
-                outRect.bottom = spacing; // item bottom
-            } else {
-                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
-                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
-                if (position >= spanCount) {
-                    outRect.top = spacing; // item top
-                }
-            }
-        }
-    }
-
 }

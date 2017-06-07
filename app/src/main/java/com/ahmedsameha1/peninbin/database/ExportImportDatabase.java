@@ -601,7 +601,7 @@ public class ExportImportDatabase {
                             Contract.CREATION_DATE, Contract.COLUMN_ID,
                             Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,
                             Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
-                    Contract.String_Entry.COLUMN_FIELD + " NOT IN " + placeholders, // TODO: 5/16/17 id of fields or id of entry
+                    Contract.String_Entry.COLUMN_FIELD + " NOT IN " + placeholders,
                     notImportedArray, null, null, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
                             + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
             for (toImportStringEntryCursor.moveToFirst(); toImportStringEntryCursor.getPosition() < toImportStringEntryCursor.getCount();
@@ -748,7 +748,7 @@ public class ExportImportDatabase {
                             Contract.Not_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.Not_String_Entry.COLUMN_RANK,
                             Contract.CREATION_DATE, Contract.COLUMN_ID,
                             Contract.Not_String_Entry.COLUMN_REMIND_AT, Contract.Not_String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND},
-                    Contract.String_Entry.COLUMN_FIELD + " NOT IN " + placeholders, // TODO: 5/16/17 id of fields or id of entry
+                    Contract.String_Entry.COLUMN_FIELD + " NOT IN " + placeholders,
                     notImportedArray, null, null, null);
             for (toImportNotStringEntryCursor.moveToFirst(); toImportNotStringEntryCursor.getPosition() < toImportNotStringEntryCursor.getCount();
                  toImportNotStringEntryCursor.moveToNext()) {

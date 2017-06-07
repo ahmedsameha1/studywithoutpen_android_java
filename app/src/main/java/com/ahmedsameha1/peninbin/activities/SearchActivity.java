@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.adapters.FieldActivityRecyclerViewAdapter;
+import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.adapters.SearchActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -56,11 +58,11 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public static final int EDIT_ENTRY = 0;
     private static final String QUERY_KEY = "query_key";
     private static final String CURRENT_FIELD_ID = "current_field_id";
-    public static final String SAME_QUESTION = "same_question";
+    private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
     public static final int SEARCH_QUESTION = 1;
     public static final int SEARCH_ANSWER = 2;
     public static final String SEARCH_WHAT = "search_what";
-    public SearchActivityRecyclerViewAdapter mAdapter;
+    public FieldActivityRecyclerViewAdapter mAdapter;
     private long current_field_id;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private SortOptions sortOption;
@@ -70,12 +72,12 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private SearchView searchView;
     private TextView result_count;
     private int search_what;
+    private RecyclerView recyclerView;
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        RecyclerView recyclerView;
         if ( savedInstanceState != null ) {
             current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
             search_what = savedInstanceState.getInt(SEARCH_WHAT);
@@ -95,9 +97,8 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         recyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
         result_count = (TextView) findViewById(R.id.result_count);
         setSupportActionBar(toolbar);
-        mAdapter = new SearchActivityRecyclerViewAdapter(SearchActivity.this,null, current_field_id, search_string_highlight);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(SearchActivity.this);
-        recyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new FieldActivityRecyclerViewAdapter(SearchActivity.this,null, current_field_id, search_string_highlight);
+        recyclerView.setLayoutManager(new LinearLayoutManager(SearchActivity.this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
         int spanCount = 1;
@@ -159,8 +160,14 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         super.onSaveInstanceState(savedInsatanceState);
         savedInsatanceState.putLong(CURRENT_FIELD_ID,current_field_id);
         savedInsatanceState.putInt(SEARCH_WHAT,search_what);
+        savedInsatanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
     }
-
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        recyclerView.getLayoutManager()
+                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -173,7 +180,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                             + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
-                            + "  a LIKE ? ORDER BY " + sortOption.getSortString(),
+                            + "  a LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
                     new String[]{ String.valueOf(current_field_id) , searchString });
             search_what = 0;
         } else if ( search_what == SEARCH_QUESTION ){
@@ -184,7 +191,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                             + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
-                            + "  q LIKE ? ORDER BY " + sortOption.getSortString(),
+                            + "  q LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
                     new String[]{ String.valueOf(current_field_id), searchString });
             search_what = 0;
         } else {
@@ -197,7 +204,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                             + "  q LIKE ? "
                             + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
-                            + " a LIKE ? ORDER BY " + sortOption.getSortString(),
+                            + " a LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
                     new String[]{ String.valueOf(current_field_id),"%" + searchString + "%", current_field_id + "","%" + searchString + "%"});
         }
         return mySQLiteCursorLoader;
@@ -228,43 +235,8 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                 String question = data.getStringExtra(EDITED_QUESTION);
                 String answer = data.getStringExtra(EDITED_ANSWER);
                 int rank = data.getIntExtra(EDITED_RANK, 0);
-                int order = data.getIntExtra(EDITED_ORDER, -1);
+                int order = data.getIntExtra(EDITED_ORDER, 0);
                 mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer, rank, order);
-            }
-        }
-    }
-
-    public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {
-
-        private int spanCount;
-        private int spacing;
-        private boolean includeEdge;
-
-        public LinearSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
-            this.spanCount = spanCount;
-            this.spacing = spacing;
-            this.includeEdge = includeEdge;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            int position = parent.getChildAdapterPosition(view); // item position
-            int column = position % spanCount; // item column
-
-            if (includeEdge) {
-                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
-                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
-
-                if (position < spanCount) { // top edge
-                    outRect.top = spacing;
-                }
-                outRect.bottom = spacing; // item bottom
-            } else {
-                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
-                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
-                if (position >= spanCount) {
-                    outRect.top = spacing; // item top
-                }
             }
         }
     }

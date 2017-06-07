@@ -51,7 +51,7 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
-                builder.setTitle(R.string.start_a_test)
+                builder.setTitle(R.string.start_fully_random_test)
                         .setView(inflater.inflate(R.layout.fully_random_test_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
@@ -59,14 +59,11 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
             final EditText enterTries = (EditText) alertDialog.findViewById(R.id.number_of_tries);
             final EditText enterNumber = (EditText) alertDialog.findViewById(R.id.number);
             final Spinner number_or_percentage = (Spinner) alertDialog.findViewById(R.id.number_or_percentage);
-//                final ToggleButton percentage_number = (ToggleButton) alertDialog.findViewById(R.id.percentage_number);
             final Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
             final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
             final ImageButton percentage_or_number_help = (ImageButton) alertDialog.findViewById(R.id.percentage_or_number_help);
             ArrayAdapter<String> number_or_percentage_array_adapter = new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.number_or_percentage));
-//                final ImageButton enter_number_help = (ImageButton) alertDialog.findViewById(R.id.enter_number_help);
-//                final ImageButton number_of_questions_help = (ImageButton) alertDialog.findViewById(R.id.number_of_questions_help);
             number_or_percentage.setAdapter(number_or_percentage_array_adapter);
             number_or_percentage_array_adapter.setDropDownViewResource
                     (android.R.layout.simple_spinner_dropdown_item);

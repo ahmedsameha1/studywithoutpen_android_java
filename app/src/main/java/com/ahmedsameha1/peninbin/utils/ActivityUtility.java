@@ -1,5 +1,7 @@
 package com.ahmedsameha1.peninbin.utils;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -18,6 +20,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.TextView;
 
 import com.ahmedsameha1.peninbin.R;
@@ -50,37 +53,37 @@ public class ActivityUtility {
                 answers.add(searchForCursor.getString(0));
             }
             searchForCursor.close();
-            if ( isNumberOfLettersDifferent(answers, answer.length()) ) {
-                hints.add(context.getString(R.string.number_of_letters)  + " " + Integer.toString(answer.length()));
+            if (isNumberOfLettersDifferent(answers, answer.length())) {
+                hints.add(context.getString(R.string.number_of_letters) + " " + Integer.toString(answer.length()));
                 return hints;
             }
             ArrayList<Integer> number_of_differences = new ArrayList<>(Collections.nCopies(answer.length(), 0));
-            for ( int i = (answer.length() -1); i >= 0; i--) {
-                for ( String temp : answers ) {
-                    if ( !temp.equals(answer) && temp.length() > i ) {
-                        if ( temp.charAt(i) != answer.charAt(i) ) {
-                            number_of_differences.set(i,number_of_differences.get(i) + 1 );
+            for (int i = (answer.length() - 1); i >= 0; i--) {
+                for (String temp : answers) {
+                    if (!temp.equals(answer) && temp.length() > i) {
+                        if (temp.charAt(i) != answer.charAt(i)) {
+                            number_of_differences.set(i, number_of_differences.get(i) + 1);
                         }
-                    } else if ( !temp.equals(answer) && temp.length() <= i ) {
-                        number_of_differences.set(i,number_of_differences.get(i) + 1 );
+                    } else if (!temp.equals(answer) && temp.length() <= i) {
+                        number_of_differences.set(i, number_of_differences.get(i) + 1);
                     }
                 }
             }
             for (int i = answers.size() - 1; i > 0; i--) {
-                if ( number_of_differences.contains(i) ) {
+                if (number_of_differences.contains(i)) {
                     ArrayList<Integer> indices = new ArrayList<>(answer.length());
-                    for ( int k = 0; k < number_of_differences.size(); k++ ) {
-                        if ( number_of_differences.get(k) == i ) {
+                    for (int k = 0; k < number_of_differences.size(); k++) {
+                        if (number_of_differences.get(k) == i) {
                             indices.add(k);
                         }
                     }
                     Collections.shuffle(indices);
-                    for ( int l = 0; l < indices.size() && l < answers.size() - i; l++ ) {
-                        hints.add(context.getString(R.string.letter_number) + " " + ( indices.get(l) + 1) + " : \"" +
+                    for (int l = 0; l < indices.size() && l < answers.size() - i; l++) {
+                        hints.add(context.getString(R.string.letter_number) + " " + (indices.get(l) + 1) + " : \"" +
                                 answer.charAt(indices.get(l)) + "\"");
                     }
-                    if ( i != answers.size() -1 ) {
-                        hints.add(context.getString(R.string.number_of_letters)  + " " + Integer.toString(answer.length()));
+                    if (i != answers.size() - 1) {
+                        hints.add(context.getString(R.string.number_of_letters) + " " + Integer.toString(answer.length()));
                     }
                     break;
                 }
@@ -93,13 +96,14 @@ public class ActivityUtility {
 
     private static boolean isNumberOfLettersDifferent(ArrayList<String> answers, int answer_length) {
         int counter = 0;
-        for ( String temp : answers ) {
-                if ( temp.length() == answer_length ) {
-                    counter++;
-                }
+        for (String temp : answers) {
+            if (temp.length() == answer_length) {
+                counter++;
+            }
         }
         return counter == 1;
     }
+
     public static boolean hasOpenedDialogs(FragmentActivity activity) {
         List<Fragment> fragments = activity.getSupportFragmentManager().getFragments();
         if (fragments != null) {
@@ -126,6 +130,7 @@ public class ActivityUtility {
         }
         fragmentTransaction.commit();
     }
+
     public enum FalseString {
         TIME_OUT, DONT_KNOW
     }
@@ -133,6 +138,23 @@ public class ActivityUtility {
     public static void shuffleArray(String[][] array) {
         SecureRandom rnd = new SecureRandom();
         for (int i = array.length - 1; i > 0; i--) {
+            int index = rnd.nextInt(i + 1);
+            // Simple swap
+            String question = array[index][0];
+            String answer = array[index][1];
+            String id = array[index][2];
+            array[index][0] = array[i][0];
+            array[index][1] = array[i][1];
+            array[index][2] = array[i][2];
+            array[i][0] = question;
+            array[i][1] = answer;
+            array[i][2] = id;
+        }
+    }
+
+    public static void shuffleArray(String[][] array, int end_shuffle_index) {
+        SecureRandom rnd = new SecureRandom();
+        for (int i = end_shuffle_index; i > 0; i--) {
             int index = rnd.nextInt(i + 1);
             // Simple swap
             String question = array[index][0];
@@ -164,7 +186,7 @@ public class ActivityUtility {
         }
     }
 
-    public static ArrayList prepareControlledAndUncontrolled(Cursor fieldEntriesCursor,int rank, int wrongness_postion) {
+    public static ArrayList prepareControlledAndUncontrolled(Cursor fieldEntriesCursor, int rank, int wrongness_postion) {
         String[][] uncontrolled = new String[fieldEntriesCursor.getCount()][2];
         long[] uncontrolled_ids = new long[fieldEntriesCursor.getCount()];
         int[] uncontrolled_whether_asked = new int[fieldEntriesCursor.getCount()];
@@ -188,14 +210,14 @@ public class ActivityUtility {
              fieldEntriesCursor.moveToNext()) {
             double entry_wrongness;
             if (fieldEntriesCursor.getInt(4) > 0) {
-                entry_wrongness = (double) fieldEntriesCursor.getInt(5) / fieldEntriesCursor.getInt(4);
+                entry_wrongness = Math.floor(((double) fieldEntriesCursor.getInt(5) / fieldEntriesCursor.getInt(4)) * 100) / 100;
             } else {
                 entry_wrongness = -1;
             }
-            if ( rank > Constants.Rank.LOW && wrongness > 0 ) {
+            if (rank > Constants.Rank.LOW && wrongness > 0) {
                 if (fieldEntriesCursor.getInt(3) >= rank || entry_wrongness >= wrongness) {
                     controlled_arraylist.add(new Object[]{fieldEntriesCursor.getLong(0), fieldEntriesCursor.getString(1),
-                            fieldEntriesCursor.getString(2), entry_wrongness, rank, fieldEntriesCursor.getInt(6)});
+                            fieldEntriesCursor.getString(2), entry_wrongness, rank, fieldEntriesCursor.getInt(6), fieldEntriesCursor.getInt(4)});
                     controlled_counter++;
                 } else {
                     uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
@@ -208,7 +230,7 @@ public class ActivityUtility {
                 if ((fieldEntriesCursor.getInt(3) >= rank && entry_wrongness >= wrongness)
                         || (fieldEntriesCursor.getInt(3) >= rank && wrongness <= 0)) {
                     controlled_arraylist.add(new Object[]{fieldEntriesCursor.getLong(0), fieldEntriesCursor.getString(1),
-                            fieldEntriesCursor.getString(2), entry_wrongness, rank, fieldEntriesCursor.getInt(6)});
+                            fieldEntriesCursor.getString(2), entry_wrongness, rank, fieldEntriesCursor.getInt(6), fieldEntriesCursor.getInt(4)});
                     controlled_counter++;
                 } else {
                     uncontrolled[uncontrolled_counter][0] = fieldEntriesCursor.getString(1);
@@ -219,44 +241,59 @@ public class ActivityUtility {
                 }
             }
         }
-        if ( rank >= Constants.Rank.LOW && wrongness_postion > 0 ) {
+        if (rank >= Constants.Rank.LOW && wrongness_postion > 0) {
             Collections.sort(controlled_arraylist, (element1, element2) -> {
                 int element1_rank = (int) element1[4];
                 double element1_wrongness = (double) element1[3];
                 int element2_rank = (int) element2[4];
                 double element2_wrongness = (double) element2[3];
+                int element1_asked_count = (int) element1[6];
+                int element2_asked_count = (int) element2[6];
                 if (element1_wrongness > element2_wrongness) {
-                    return 1;
-                } else if (element1_wrongness < element2_wrongness) {
                     return -1;
-                } else { // wrongness is the same
-                    if (element1_rank > element2_rank) {
-                        return 1;
-                    } else if (element1_rank < element2_rank) {
+                } else if (element1_wrongness < element2_wrongness) {
+                    return 1;
+                } else {
+                    if (element1_asked_count > element2_asked_count) {
                         return -1;
-                    } else { // wrongness and rank are the same
+                    } else if (element1_asked_count < element2_asked_count) {
+                        return 1;
+                    } else {
+                        if (element1_rank > element2_rank) {
+                            return -1;
+                        } else if (element1_rank < element2_rank) {
+                            return 1;
+                        } else {
                             return 0;
+                        }
                     }
                 }
             });
-        } else if ( rank > Constants.Rank.LOW && wrongness_postion == 0 ) {
+        } else if (rank > Constants.Rank.LOW && wrongness_postion == 0) {
             Collections.sort(controlled_arraylist, (element1, element2) -> {
                 int element1_rank = (int) element1[4];
                 double element1_wrongness = (double) element1[3];
                 int element2_rank = (int) element2[4];
                 double element2_wrongness = (double) element2[3];
+                int element1_asked_count = (int) element1[6];
+                int element2_asked_count = (int) element2[6];
                 if (element1_rank > element2_rank) {
-                    return 1;
-                } else if (element1_rank < element2_rank) {
                     return -1;
+                } else if (element1_rank < element2_rank) {
+                    return 1;
                 } else { // rank is the same
                     if (element1_wrongness > element2_wrongness) {
-                        return 1;
-                    } else if (element1_wrongness < element2_wrongness) {
                         return -1;
+                    } else if (element1_wrongness < element2_wrongness) {
+                        return 1;
                     } else { // wrongness and rank are the same
+                        if ( element1_asked_count > element2_asked_count ) {
+                            return -1;
+                        } else if ( element1_asked_count < element2_asked_count ) {
+                            return 1;
+                        } else {
                             return 0;
-
+                        }
                     }
                 }
             });
@@ -279,12 +316,13 @@ public class ActivityUtility {
         }
         return arrayList;
     }
+
     public interface ActivityTimers {
         void manageTimersDueDialogsShow(boolean isCounting);
     }
 
     public static Object[] prepareListForTest(Cursor fieldEntriesCursor, int numberOfQuestions, int controlled_portion,
-                                          int rank_level, int wrongness_level) {
+                                              int rank_level, int wrongness_level) {
         final int CONTROLLED_MARKER = 0, OLD_ROUND_MARKER = 1;
         String[][] listForTest = new String[numberOfQuestions][3];
         String[][] list_of_entries_asked_current_round = new String[fieldEntriesCursor.getCount()][2];
@@ -362,7 +400,7 @@ public class ActivityUtility {
             }
             number_of_controlled_questions = (int) (numberOfQuestions * controlled_percentage);
             number_of_uncontrolled_questions = numberOfQuestions - number_of_controlled_questions;
-            ArrayList<Object> arrayList = ActivityUtility.prepareControlledAndUncontrolled(fieldEntriesCursor,rank_level, wrongness_level);
+            ArrayList<Object> arrayList = ActivityUtility.prepareControlledAndUncontrolled(fieldEntriesCursor, rank_level, wrongness_level);
 //            String[][] controlled_entries = (String[][]) arrayList.get(0);
             ArrayList<Object[]> controlled_arraylist = (ArrayList<Object[]>) arrayList.get(0);
             String[][] uncontrolled_entries = (String[][]) arrayList.get(1);
@@ -426,6 +464,7 @@ public class ActivityUtility {
                 }
                 markers[CONTROLLED_MARKER] = numberOfQuestions - 1; // the index of the last controlled entry
                 markers[OLD_ROUND_MARKER] = -1; // indicates that there is no entries from the old round
+                shuffleArray(listForTest);
                 return listForTest;
             } else {
                 if (number_of_controlled_questions > controlled_arraylist.size()) {
@@ -441,7 +480,8 @@ public class ActivityUtility {
                     listForTest[n][1] = (String) element[2];
                     listForTest[n][2] = String.valueOf(element[0]);
                 }
-                markers[CONTROLLED_MARKER] = number_of_controlled_questions -1; // the index of the last controlled entry
+                shuffleArray(listForTest, number_of_controlled_questions - 1);
+                markers[CONTROLLED_MARKER] = number_of_controlled_questions - 1; // the index of the last controlled entry
                 int asked = 0, didnot_asked = 0;
                 for (int n = 0; n < uncontrolled_entries.length; n++) {
                     if (uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
@@ -462,7 +502,7 @@ public class ActivityUtility {
                     long id = (long) element[0];
                     String question = (String) element[1];
                     String answer = (String) element[2];
-                    if ( whether_asked == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
+                    if (whether_asked == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
                         list_of_entries_asked_current_round[asked][0] = question;
                         list_of_entries_asked_current_round[asked][1] = answer;
                         list_of_entries_asked_current_round_ids[asked] = id;
@@ -485,7 +525,7 @@ public class ActivityUtility {
                         listForTest[n][1] = list_of_entries_did_not_asked_current_round[i][1];
                         listForTest[n][2] = String.valueOf(list_of_entries_did_not_asked_current_round_ids[i]);
                     }
-                    markers[OLD_ROUND_MARKER] = number_of_controlled_questions + number_of_uncontrolled_questions -1; // the index of the last entry from the old round
+                    markers[OLD_ROUND_MARKER] = number_of_controlled_questions + number_of_uncontrolled_questions - 1; // the index of the last entry from the old round
                 } else {
                     ActivityUtility.shuffleArray(list_of_entries_did_not_asked_current_round, list_of_entries_did_not_asked_current_round_ids);
                     for (int n = number_of_controlled_questions, i = 0; n < number_of_controlled_questions + list_of_entries_did_not_asked_current_round.length; n++, i++) {
@@ -508,15 +548,15 @@ public class ActivityUtility {
         }
     }
 
-    public static Spannable spanText (String text, TextView textView) {
-        int [] colors = {0xFF5A0000,0xFF0000FF,
-                0xFF760E32,0xFF500850,0xFF083156,
-                0xFFFF0000,0xFF4B0082};
-        int [] aligns = { Gravity.CENTER, Gravity.START, Gravity.END, Gravity.TOP, Gravity.BOTTOM};
+    public static Spannable spanText(String text, TextView textView) {
+        int[] colors = {0xFF5A0000, 0xFF0000FF,
+                0xFF760E32, 0xFF500850, 0xFF083156,
+                0xFFFF0000, 0xFF4B0082};
+        int[] aligns = {Gravity.CENTER, Gravity.START, Gravity.END, Gravity.TOP, Gravity.BOTTOM};
         SecureRandom secureRandom = new SecureRandom();
         Spannable spanned_text = Spannable.Factory.getInstance().newSpannable(text);
-        for ( int i = 0; i < text.length(); i++ ) {
-            if ( !text.substring(i, i+1).matches("\\s")) {
+        for (int i = 0; i < text.length(); i++) {
+            if (!text.substring(i, i + 1).matches("\\s")) {
                 spanned_text.setSpan(new ForegroundColorSpan(colors[secureRandom.nextInt(7)]),
                         i, i + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
@@ -525,15 +565,15 @@ public class ActivityUtility {
         return spanned_text;
     }
 
-    public static String getTextFileFromRawDirectory(Context context, int resource){
+    public static String getTextFileFromRawDirectory(Context context, int resource) {
         String text = null;
         try {
             InputStream is = context.getResources().openRawResource(resource);
             byte[] buffer = new byte[is.available()];
-            while (is.read(buffer) != -1);
+            while (is.read(buffer) != -1) ;
             text = new String(buffer);
         } catch (Exception e) {
-            Log.e("error", ""+e.toString());
+            Log.e("error", "" + e.toString());
         }
         return text;
     }
@@ -551,9 +591,9 @@ public class ActivityUtility {
         return s;
     }
 
-    public static int calculate_time_of_answer ( String question, String answer, int reading_letter_second,
-                                                 int find_answer_time, int typing_letter_second) {
-        if ( reading_letter_second <= 0 && find_answer_time <= 0 && typing_letter_second <= 0 ) {
+    public static int calculate_time_of_answer(String question, String answer, int reading_letter_second,
+                                               int find_answer_time, int typing_letter_second) {
+        if (reading_letter_second <= 0 && find_answer_time <= 0 && typing_letter_second <= 0) {
             return 0;
         } else {
             int reading_seconds = question.length() / reading_letter_second;
@@ -569,54 +609,54 @@ public class ActivityUtility {
      * This method take care of the round work of the old and new round entries
      * It assume that controlled entries comes first in the array of test then the old round entries then the new round entries
      */
-    public static void updateRoundData( long current_field_id, String[][] listForTest, CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase,
-                                        int currentQuestionCounter, int last_controlled_index, int last_old_round_index, boolean isEmulated) {
+    public static void updateRoundData(long current_field_id, String[][] listForTest, CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase,
+                                       int currentQuestionCounter, int last_controlled_index, int last_old_round_index, boolean isEmulated) {
         // There is no controlled entries and there is no old round entries and the current question counter at the first entry in the array of test
         // so we rest all the entries round and start a new round
-        if ( last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter == 0) {
+        if (last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter == 0) {
             cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
             cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
         }
         // Because the current question counter is greater than 0 so the old round has ended and we are working on the new round
-        else if ( last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter > 0 ) {
+        else if (last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter > 0) {
             cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
         }
         // there is no controlled entries and there is old round entries we have not finished the old round entries
-        else if ( last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter <= last_old_round_index ) {
+        else if (last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter <= last_old_round_index) {
             cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
         }
         // there is no controlled entries and there is old round entries we have just finished the old round entries
         // so we rest all the entries round and start a new round
-        else if ( last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter > last_old_round_index ) {
+        else if (last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter > last_old_round_index) {
             // resting all the entries round and start a new round
             // this will be true only if there is entries from a new round
-            if ( currentQuestionCounter == last_old_round_index + 1 ) {
+            if (currentQuestionCounter == last_old_round_index + 1) {
                 cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
             }
             // we are working in the new round
             cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
         }
         // There is controlled entries and we are working on them and they are not related with rounds so no action is taken
-        else if ( last_controlled_index > -1 && currentQuestionCounter <= last_controlled_index ) {
+        else if (last_controlled_index > -1 && currentQuestionCounter <= last_controlled_index) {
             // No Action
         }
         /* if the there is controlled entries and there is no old round entries and there is no new round entries this method will not be called
          because the last controlled index will be the last entries of the test array, we will not handle this case */
         //==================
         // In the following case there must be a new round entries and we are on the first new round entries
-        else if ( last_controlled_index > -1  && last_old_round_index == -1 && currentQuestionCounter == last_controlled_index + 1 ) {
+        else if (last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter == last_controlled_index + 1) {
             cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
             cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
         }
         // we are working in the new round
-        else if ( last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter > last_controlled_index + 1 ) {
+        else if (last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter > last_controlled_index + 1) {
             cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
         }
         // there is controlled entries and old round entries and we are on the old round entries
-        else if ( last_controlled_index > -1 && last_old_round_index > -1 && currentQuestionCounter > last_controlled_index ) {
+        else if (last_controlled_index > -1 && last_old_round_index > -1 && currentQuestionCounter > last_controlled_index) {
             // resting all the entries round and start a new round
             // this will be true only if there is entries from a new round
-            if ( currentQuestionCounter == last_old_round_index + 1 ) {
+            if (currentQuestionCounter == last_old_round_index + 1) {
                 cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
             }
             // we are working in the new round
@@ -625,4 +665,59 @@ public class ActivityUtility {
     }
 
 
+    public static void crossFade(View content, View mLoadingView, Context context) {
+        int mShortAnimationDuration = context.getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        content.setAlpha(0f);
+        content.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        content.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
+
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        mLoadingView.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mLoadingView.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    public static void antiCrossFade(View content, View mLoadingView, Context context) {
+        int mShortAnimationDuration = context.getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+        mLoadingView.setAlpha(0f);
+        mLoadingView.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        mLoadingView.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
+
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        content.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        content.setVisibility(View.GONE);
+                    }
+                });
+    }
 }

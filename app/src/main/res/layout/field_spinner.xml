@@ -8,6 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:textColor="@color/textColorPrimary"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:padding="3dp"
+        android:layout_margin="7dp"/>
 
 </LinearLayout>

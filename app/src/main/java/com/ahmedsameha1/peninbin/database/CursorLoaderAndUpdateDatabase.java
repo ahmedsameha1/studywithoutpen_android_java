@@ -575,7 +575,8 @@ try {
         }
     }
 
-    public void pauseStudyAgainAfterTest(int study_till_correct_type, long field_id, ArrayList<WrongItem> wrongItemArrayList, int[] session_data, ArrayList<Integer> repeated_entries, long last_pause ) {
+    public void pauseStudyAgainAfterTest(int study_till_correct_type, long field_id, ArrayList<WrongItem> wrongItemArrayList,
+                                         int[] session_data, ArrayList<Integer> repeated_entries, boolean in_repeated,  long last_pause ) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
 
@@ -594,6 +595,8 @@ try {
             contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION, last_pause);
             contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_FIELD, field_id);
             contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_TYPE, study_till_correct_type);
+            contentValues.put(Contract.Study_Till_Correct_Paused.COLUMN_IN_REPEATED,
+                    in_repeated ? Constants.Study_Till_Correct.IN_REPEATED : Constants.Study_Till_Correct.NOT_IN_REPEATED);
             sqLiteDatabase.insert(Contract.Study_Till_Correct_Paused.TABLE_NAME, null, contentValues);
 
             contentValues = new ContentValues();

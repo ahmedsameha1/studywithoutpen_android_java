@@ -39,6 +39,7 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
@@ -533,9 +534,13 @@ public class AddEntryActivity extends AppCompatActivity implements
             case R.id.timer:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
-                            .putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
                     if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent);
+                        Bundle bundle4 = new Bundle();
+                        bundle4.putString(TimerDialogFragment.MESSAGE, getString(R.string.app_name) + " " + getString(R.string.add_entry));
+                        TimerDialogFragment timerDialogFragment = new TimerDialogFragment();
+                        timerDialogFragment.setArguments(bundle4);
+                        timerDialogFragment.show(getSupportFragmentManager(), TimerDialogFragment.class.getName());
                     } else {
                         Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);

@@ -20,9 +20,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.adapters.WrongAnswersActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -51,6 +53,7 @@ import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScrol
 public class WrongAnswersActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String SCREEN_NAME = "WrongAnswersActivity";
     public static final String WRONG_ITEM_LIST = "wrongItemList";
+    private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
     private long current_field_id;
     private ArrayList<WrongItem> wrongItemList;
     private Cursor cursor;
@@ -62,6 +65,8 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     private Tracker mTracker;
     private int permited_tries_number;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
+    private View mLoadingView;
+    private RelativeLayout content;
 
 
     @Override
@@ -84,14 +89,22 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         recyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(mAdapter);
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
-        getLoaderManager().initLoader(0, null, this);
+        content = (RelativeLayout) findViewById(R.id.content);
+        mLoadingView = findViewById(R.id.loading);
+        content.setVisibility(View.GONE);
+        if ( savedInstanceState != null ) {
+            wrongItemList = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEM_LIST);
+            mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this, wrongItemList, current_field_id);
+            recyclerView.setAdapter(mAdapter);
+            ActivityUtility.crossFade(content, mLoadingView, WrongAnswersActivity.this);
+        } else {
+            getLoaderManager().initLoader(0, null, this);
+        }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
     }
@@ -143,85 +156,91 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.ask_again:
-                String string_for_pausing = null;
-                if (test_type == Constants.TestType.ENHANCED_TEST) {
-                    string_for_pausing = AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + current_field_id;
-                } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
-                    string_for_pausing = AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + current_field_id;
-                }
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(WrongAnswersActivity.this);
-                if (!sharedPreferences.contains(string_for_pausing) && !Emulation.isAnyThreadRunning()) {
+                if ( wrongItemList != null ) {
+                    String string_for_pausing = null;
                     if (test_type == Constants.TestType.ENHANCED_TEST) {
-                        if (databaseOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id)) {
-                            new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
-                                    .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
-                                        Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
-                                        intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
-                                        startActivity(intent);
-                                    })
-                                    .setNegativeButton(R.string.no, (dialogInterface, i) -> {
-                                        cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, question_data_type);
-                                        cursorLoaderAndUpdateDatabase.
-                                                clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,
-                                                        current_field_id);
-                                        Bundle bundle = new Bundle();
-                                        bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
-                                        Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                        intent.putExtra(WRONG_ITEM_LIST, bundle);
-                                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
-                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
-                                        startActivity(intent);
-                                    }).create().show();
-                        } else {
-                            Bundle bundle = new Bundle();
-                            bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
-                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                            intent.putExtra(WRONG_ITEM_LIST, bundle);
-                            intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
-                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
-                            startActivity(intent);
-                        }
+                        string_for_pausing = AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + current_field_id;
                     } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
-                        if (databaseOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id)) {
-                            new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
-                                    .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
-                                        Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
-                                        intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
-                                        startActivity(intent);
-                                    })
-                                    .setNegativeButton(R.string.no, (dialogInterface, i) -> {
-                                        cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, question_data_type);
-                                        cursorLoaderAndUpdateDatabase.
-                                                clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST,
-                                                        current_field_id);
-                                        Bundle bundle = new Bundle();
-                                        bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
-                                        Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                        intent.putExtra(WRONG_ITEM_LIST, bundle);
-                                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
-                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
-                                        startActivity(intent);
-                                    }).create().show();
-                        } else {
-                            Bundle bundle = new Bundle();
-                            bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
-                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                            intent.putExtra(WRONG_ITEM_LIST, bundle);
-                            intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
-                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
-                            startActivity(intent);
+                        string_for_pausing = AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + current_field_id;
+                    }
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(WrongAnswersActivity.this);
+                    if (!sharedPreferences.contains(string_for_pausing) && !Emulation.isAnyThreadRunning()) {
+                        if (test_type == Constants.TestType.ENHANCED_TEST) {
+                            if (databaseOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id)) {
+                                new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
+                                        .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
+                                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                                            intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                            startActivity(intent);
+                                        })
+                                        .setNegativeButton(R.string.no, (dialogInterface, i) -> {
+                                            cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, question_data_type);
+                                            cursorLoaderAndUpdateDatabase.
+                                                    clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,
+                                                            current_field_id);
+                                            Bundle bundle = new Bundle();
+                                            bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+                                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                            intent.putExtra(WRONG_ITEM_LIST, bundle);
+                                            intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
+                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                                            startActivity(intent);
+                                        }).create().show();
+                            } else {
+                                Bundle bundle = new Bundle();
+                                bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+                                Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                intent.putExtra(WRONG_ITEM_LIST, bundle);
+                                intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
+                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                                startActivity(intent);
+                            }
+                        } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                            if (databaseOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id)) {
+                                new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
+                                        .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
+                                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                                            intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                            startActivity(intent);
+                                        })
+                                        .setNegativeButton(R.string.no, (dialogInterface, i) -> {
+                                            cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, question_data_type);
+                                            cursorLoaderAndUpdateDatabase.
+                                                    clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST,
+                                                            current_field_id);
+                                            Bundle bundle = new Bundle();
+                                            bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+                                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                            intent.putExtra(WRONG_ITEM_LIST, bundle);
+                                            intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
+                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                                            startActivity(intent);
+                                        }).create().show();
+                            } else {
+                                Bundle bundle = new Bundle();
+                                bundle.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+                                Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
+                                intent.putExtra(WRONG_ITEM_LIST, bundle);
+                                intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
+                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                                startActivity(intent);
+                            }
                         }
+                    } else {
+                        Toast toast = Toast.makeText(WrongAnswersActivity.this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                     }
                 } else {
-                    Toast toast = Toast.makeText(WrongAnswersActivity.this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(WrongAnswersActivity.this, R.string.wait_loading, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
@@ -248,16 +267,17 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public void onSaveInstanceState(Bundle savedInsatanceState) {
+        super.onSaveInstanceState(savedInsatanceState);
         savedInsatanceState.putSerializable(WRONG_ITEM_LIST, wrongItemList);
+        savedInsatanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
     }
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        wrongItemList = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEM_LIST);
-        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this, wrongItemList, current_field_id);
-        recyclerView.setAdapter(mAdapter);
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        recyclerView.getLayoutManager()
+                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
     }
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoaderAndUpdateDatabase(WrongAnswersActivity.this,
@@ -268,63 +288,19 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
                         + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                 new String[]{current_field_id + ""});
-        /*Uri uri = Uri.withAppendedPath(DataProvider.CONTENT_URI, Contract.Old_Linker_DBV6_AppV32.TABLE_NAME);
-        return new CursorLoader(this,uri,
-                new String[] {Contract.Old_Linker_DBV6_AppV32.COLUMN_QUESTION_LINK,
-                        Contract.Old_Linker_DBV6_AppV32.COLUMN_ANSWER_LINK,
-                        Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_WRONG_ANSWERS},
-                Contract.Old_Linker_DBV6_AppV32.COLUMN_TEST_WRONG_ANSWERS + " != ? AND " + Contract.Old_Linker_DBV6_AppV32.COLUMN_FIELD_LINK + " = ? ",
-                new String[] {"", currentField},
-                null);*/
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.cursor = data;
-        if (wrongItemList == null) {
-            wrongItemList = getWrongItems();
-        }
+        wrongItemList = getWrongItems();
         mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this, wrongItemList, current_field_id);
         recyclerView.setAdapter(mAdapter);
+        ActivityUtility.crossFade(content, mLoadingView, WrongAnswersActivity.this);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
-    }
-
-    public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {
-
-        private int spanCount;
-        private int spacing;
-        private boolean includeEdge;
-
-        public LinearSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
-            this.spanCount = spanCount;
-            this.spacing = spacing;
-            this.includeEdge = includeEdge;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            int position = parent.getChildAdapterPosition(view); // item position
-            int column = position % spanCount; // item column
-
-            if (includeEdge) {
-                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
-                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
-
-                if (position < spanCount) { // top edge
-                    outRect.top = spacing;
-                }
-                outRect.bottom = spacing; // item bottom
-            } else {
-                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
-                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
-                if (position >= spanCount) {
-                    outRect.top = spacing; // item top
-                }
-            }
-        }
     }
 }

@@ -297,16 +297,17 @@ public class DatabaseReadOperations {
     }
 
     public int[] getDataFromStudyTillCorrectPaused(int study_till_correct_type, long field_id) {
-        int[] array = new int[3];
+        int[] array = new int[4];
         Cursor cursor = sqLiteDatabase.query(Contract.Study_Till_Correct_Paused.TABLE_NAME,
                 new String[]{Contract.Study_Till_Correct_Paused.COLUMN_CURRENT_QUESTION_COUNTER, Contract.Study_Till_Correct_Paused.COLUMN_TRIES_NUMBER,
-                Contract.Study_Till_Correct_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION},
+                Contract.Study_Till_Correct_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION, Contract.Study_Till_Correct_Paused.COLUMN_IN_REPEATED},
                 Contract.Study_Till_Correct_Paused.COLUMN_FIELD + " = ? AND " + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
                 new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)}, null, null, null);
         cursor.moveToFirst();
         array[0] = cursor.getInt(0);
         array[1] = cursor.getInt(1);
         array[2] = cursor.getInt(2);
+        array[3] = cursor.getInt(3);
         cursor.close();
         return array;
     }
@@ -761,7 +762,7 @@ public class DatabaseReadOperations {
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + " COUNT(se." + Contract.COLUMN_ID + ") FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                 + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                 + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
-                + " s1." + Contract.STring.COLUMN_VALUE + " LIKE ?",
+                + " s1." + Contract.STring.COLUMN_VALUE + " LIKE ? COLLATE NOCASE",
                 new String[]{ field_id + "", question });
         cursor.moveToFirst();
         count = cursor.getInt(0);
@@ -775,7 +776,7 @@ public class DatabaseReadOperations {
                         + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
                 + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                 + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
-                + " s2." + Contract.STring.COLUMN_VALUE + " LIKE ?",
+                + " s2." + Contract.STring.COLUMN_VALUE + " LIKE ? COLLATE NOCASE",
                 new String[]{ field_id + "", answer });
         cursor.moveToFirst();
         count = cursor.getInt(0);

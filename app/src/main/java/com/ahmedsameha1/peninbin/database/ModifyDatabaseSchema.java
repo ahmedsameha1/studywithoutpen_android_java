@@ -21,7 +21,7 @@ import java.util.StringTokenizer;
  */
 public class ModifyDatabaseSchema {
 
-    static void onUpgradeDatabaseToDBV13AppV79(SQLiteDatabase sqLiteDatabase) {
+    static void onUpgradeDatabaseToDBV13AppV80(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
             sqLiteDatabase.delete(Field.TABLE_NAME, Field.COLUMN_FIELD_TYPE + " = ? ",
@@ -188,6 +188,7 @@ public class ModifyDatabaseSchema {
                     + " , " + Contract.Study_Till_Correct_Paused.COLUMN_TYPE
                     + " , " + Contract.Study_Till_Correct_Paused.COLUMN_CURRENT_QUESTION_COUNTER
                     + " , " + Contract.Study_Till_Correct_Paused.COLUMN_TRIES_NUMBER
+                    + " , " + Contract.Study_Till_Correct_Paused.COLUMN_ELAPSED_TIME_OF_PAUSED_STUDY_TILL_CORRECT_SESSION
                     + " ) "
                     + "SELECT " + Contract.COLUMN_ID
                     + " , " + Contract.Old_Study_Period_Paused_DBV12_AppV68.COLUMN_FIELD

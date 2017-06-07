@@ -102,7 +102,7 @@
     <string name="drawer_close">أغلق</string>
     <string name="drawer_open">افتح</string>
     <string name="select_a_field_type">لطفا، اختر نوعا للمجال!</string>
-    <string name="add_entry">أضف مُدخلاً</string>
+    <string name="add_entry">أضف مُدخلًا</string>
     <string name="add_entry_finish">أضف مُدخلاً واخرج</string>
     <string name="edit">عَدِّل</string>
     <string name="select_field">لطفا، اختر مجالا</string>
@@ -315,13 +315,22 @@
     <string name="intial_period">حاليا، انت لست محتاجا لاشتراك!</string>
     <string name="last_entry">هذا هو المُدخل الأخير</string>
     <string name="first_entry">هذا أول مُدخل!</string>
-    <string name="keep_question">أبق السؤال</string>
-    <string name="keep_answer">ابق الجواب</string>
+    <string name="keep_question">أضف المُدخل وأبق السؤال</string>
+    <string name="keep_answer">أضف المُدخل وأبق الجواب</string>
     <string name="no_timer_app">لا يوجد على جهازك تطبيق يستطيع تشغيل المؤقتات</string>
     <string name="kitkat_or_newer">هذه الخاصية تحتاج أندرويد كيت كات أو أحدث</string>
     <string name="timer">مؤقِّت</string>
     <string name="wrongness_level">مستوى الخطأ: %.0f%%</string>
     <string name="asked_menu">سُئِل</string>
     <string name="wrongly_answered_menu">أجيب بشكل خاطئ</string>
+    <string name="enter_number_of_minutes">أدخل الدقائق</string>
+    <string name="start">ابدأ</string>
+    <string name="minute">دقيقة</string>
+    <string name="study_a_period">مذاكرة فترة</string>
+    <string name="study">مذاكرة</string>
+    <string name="fully_random_test">اختبار عشوائي تماما</string>
+    <string name="enhanced_test">اختبار مُحسَّن</string>
+    <string name="start_fully_random_test">ابدأ اختبار عشوائي تماما</string>
+    <string name="wait_loading">لطفا، انتظر التحميل</string>
 </resources>
 

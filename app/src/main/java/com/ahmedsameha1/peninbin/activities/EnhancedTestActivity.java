@@ -1,7 +1,5 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -40,6 +38,7 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
@@ -54,7 +53,6 @@ import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
-import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -172,10 +170,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private boolean is_time_of_answer_elapsed = false;
     private DatabaseReadOperations databaseOperations;
     private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
-    private int mShortAnimationDuration;
     private View mLoadingView;
     private RelativeLayout content;
-    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
     private Runnable show_result_dialog_runnable;
@@ -255,7 +251,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+        LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
 
 
             @Override
@@ -316,28 +312,28 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     fieldEntriesCursor = data;
                     if (boolean_continue) {
-                            listForTest = readTestDataFromLinkerTable();
-                            questionsNumber = listForTest.length;
-                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                            showQuestion();
-                            enterAnswer.setEnabled(true);
-                            enterAnswer.requestFocus();
-                            is_testing_now = true;
-                            boolean_continue = false;
+                        listForTest = readTestDataFromLinkerTable();
+                        questionsNumber = listForTest.length;
+                        showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                        showQuestion();
+                        enterAnswer.setEnabled(true);
+                        enterAnswer.requestFocus();
+                        is_testing_now = true;
+                        boolean_continue = false;
                     } else {
-                            if (percent_or_number == PERCENTAGE) {
-                                listForTest = getDataOfTest(percentage);
-                            } else if (percent_or_number == NUMBER) {
-                                listForTest = getDataOfTest(number);
-                            }
-                            questionsNumber = listForTest.length;
-                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                            showQuestion();
-                            enterAnswer.requestFocus();
-                            is_testing_now = true;
-                            pauseThread.start();
+                        if (percent_or_number == PERCENTAGE) {
+                            listForTest = getDataOfTest(percentage);
+                        } else if (percent_or_number == NUMBER) {
+                            listForTest = getDataOfTest(number);
+                        }
+                        questionsNumber = listForTest.length;
+                        showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                        showQuestion();
+                        enterAnswer.requestFocus();
+                        is_testing_now = true;
+                        pauseThread.start();
                     }
-                    crossfade();
+                    ActivityUtility.crossFade(content, mLoadingView, EnhancedTestActivity.this);
                 } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     if (symbol == null && customable_text == null) {
                         symbol = new String[data.getCount()];
@@ -379,6 +375,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 currentQuestionCounter++;
                 if (currentQuestionCounter >= questionsNumber) {
                     check.setEnabled(false);
+                    dont_know.setEnabled(false);
                     before_showing_result_dialog = true;
                     show_result_dialog_runnable = () -> {
                             showQuestion.setText(R.string.test_has_completed);
@@ -529,8 +526,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
             content.setVisibility(View.GONE);
-            mShortAnimationDuration = getResources().getInteger(
-                    android.R.integer.config_shortAnimTime);
             isStartingFirstTime = true;
             if (boolean_continue) {
                 getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
@@ -705,9 +700,13 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             case R.id.timer:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
-                            .putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
                     if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent);
+                        Bundle bundle4 = new Bundle();
+                        bundle4.putString(TimerDialogFragment.MESSAGE, getString(R.string.app_name) + " " + getString(R.string.enhanced_test));
+                        TimerDialogFragment timerDialogFragment = new TimerDialogFragment();
+                        timerDialogFragment.setArguments(bundle4);
+                        timerDialogFragment.show(getSupportFragmentManager(), TimerDialogFragment.class.getName());
                     } else {
                         Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -1177,6 +1176,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             currentQuestionCounter++;
             if (currentQuestionCounter >= questionsNumber) {
                 check.setEnabled(false);
+                dont_know.setEnabled(false);
                 before_showing_result_dialog = true;
                 show_result_dialog_runnable = () -> {
                     showQuestion.setText(R.string.test_has_completed);
@@ -1242,6 +1242,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         showQuestion.setTextColor(Color.WHITE);
                     if (currentQuestionCounter >= questionsNumber) {
                         check.setEnabled(false);
+                        dont_know.setEnabled(false);
                         before_showing_result_dialog = true;
                         show_result_dialog_runnable = () -> {
                             showQuestion.setText(R.string.test_has_completed);
@@ -1286,33 +1287,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     }
 
 
-    private void crossfade() {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        content.setAlpha(0f);
-        content.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        content.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        mLoadingView.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLoadingView.setVisibility(View.GONE);
-                    }
-                });
-    }
 
     @Override
     public void obfuscateText(boolean obfuscate) {

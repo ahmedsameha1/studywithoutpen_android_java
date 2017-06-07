@@ -32,8 +32,10 @@ public enum SortOptions {
             Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
             Contract.String_Entry.COLUMN_RANK + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
             Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
-            "( CAST (" + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " AS FLOAT) /" + Contract.String_Entry.COLUMN_ASKED_COUNT + ") ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
-            "( CAST (" + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " AS FLOAT) /" + Contract.String_Entry.COLUMN_ASKED_COUNT + ") DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC"
+            "ROUND (( CAST (" + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " AS FLOAT) /" + Contract.String_Entry.COLUMN_ASKED_COUNT + "),2) ASC, "
+                    + Contract.String_Entry.COLUMN_ASKED_COUNT + " ASC, " + "datetime(" + Contract.CREATION_DATE + ") ASC",
+            "ROUND (( CAST (" + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT + " AS FLOAT) /" + Contract.String_Entry.COLUMN_ASKED_COUNT + "),2) DESC, "
+                    + Contract.String_Entry.COLUMN_ASKED_COUNT + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC"
             };
 
 

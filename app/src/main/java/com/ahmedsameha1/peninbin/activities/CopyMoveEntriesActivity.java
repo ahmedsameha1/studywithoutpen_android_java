@@ -30,7 +30,7 @@ import com.ahmedsameha1.peninbin.utils.SortOptions;
 import java.util.ArrayList;
 
 import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
-
+import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 /**
  * Created by ahmed on 22/08/16.
  */
@@ -38,22 +38,25 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         CopyFieldDialogFragment.CopyEntries,
         CopyFieldDialogFragment.MoveEntries {
+    private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
     private CopyMoveEntriesActivityRecyclerViewAdapter mAdapter;
     private ArrayList<Long> list_of_entries = new ArrayList<>();
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
     private SortOptions sortOption;
-    private DatabaseReadOperations databaseOperations;
+    private  RecyclerView recyclerView;
+
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_copy_move_entries);
         current_field_id = getIntent().getLongExtra(FieldActivity.FIELD_ID, 0);
-        databaseOperations = new DatabaseReadOperations(this);
+        DatabaseReadOperations databaseOperations = new DatabaseReadOperations(this);
         sortOption = databaseOperations.getFieldSort(current_field_id);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
+        recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
         VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
         // Connect the recycler to the scroller (to let the scroller scroll the list)
         fastScroller.setRecyclerView(recyclerView);
@@ -64,8 +67,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
         getSupportActionBar().setTitle(databaseOperations.getFieldName(current_field_id));
         mAdapter = new CopyMoveEntriesActivityRecyclerViewAdapter(CopyMoveEntriesActivity.this, null, list_of_entries);
-        final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(CopyMoveEntriesActivity.this);
-        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(CopyMoveEntriesActivity.this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
         int spanCount = 1;
@@ -149,38 +151,16 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         mySQLiteCursorLoader.moveEntries(list_of_entries,field_id);
     }
 
-    public class LinearSpacingItemDecoration extends RecyclerView.ItemDecoration {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
+    }
 
-        private int spanCount;
-        private int spacing;
-        private boolean includeEdge;
-
-        public LinearSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
-            this.spanCount = spanCount;
-            this.spacing = spacing;
-            this.includeEdge = includeEdge;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            int position = parent.getChildAdapterPosition(view); // item position
-            int column = position % spanCount; // item column
-
-            if (includeEdge) {
-                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
-                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
-
-                if (position < spanCount) { // top edge
-                    outRect.top = spacing;
-                }
-                outRect.bottom = spacing; // item bottom
-            } else {
-                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
-                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
-                if (position >= spanCount) {
-                    outRect.top = spacing; // item top
-                }
-            }
-        }
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        recyclerView.getLayoutManager()
+                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
     }
 }

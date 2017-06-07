@@ -1,7 +1,5 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
@@ -49,6 +47,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfStudyAPeriodDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
@@ -132,7 +131,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private boolean locale_available = false;
     private int check_type;
     private Tracker mTracker;
-    private int mShortAnimationDuration;
     private View mLoadingView;
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
@@ -266,7 +264,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                         enterAnswer.requestFocus();
                         scheduleWhatToDoAfterTimeOfAnswerElapsed();
-                        crossfade();
+                        ActivityUtility.crossFade(content,mLoadingView,AskAgainAfterTestActivity.this);
                 }
             }
 
@@ -324,6 +322,8 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         time_of_starting_time_of_answer = -1;
                         scheduleWhatToDoAfterTimeOfAnswerElapsed();
                     } else {
+                        check.setEnabled(false);
+                        dont_know.setEnabled(false);
                         while_studying = false;
                         if ( test_type == Constants.TestType.ENHANCED_TEST ) {
                             cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,question_data_type);
@@ -515,8 +515,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         showTries.setText(Integer.toString(triesCounter + 1));
         if (savedInstanceState == null) {
             content.setVisibility(View.GONE);
-            mShortAnimationDuration = getResources().getInteger(
-                    android.R.integer.config_shortAnimTime);
             isStartingFirstTime = true;
             if ( boolean_continue ) {
                 int[] array = null;
@@ -530,6 +528,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 currentQuestionCounter = array[0];
                 permitedTriesNumber = array[1];
                 lastPause = array[2];
+                in_repeated = array[3] == Constants.Study_Till_Correct.IN_REPEATED;
                 getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
             } else {
                 permitedTriesNumber = getIntent().getIntExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, 0);
@@ -552,7 +551,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
                 enterAnswer.requestFocus();
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
-                crossfade();
+                ActivityUtility.crossFade(content,mLoadingView,AskAgainAfterTestActivity.this);
             }
         } else {
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
@@ -627,14 +626,13 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
          * do not call it if the test has already finished
          */
         if (!isStartingFirstTime && !is_starting_after_destruction) {
-            scheduleWhatToDoAfterTimeOfAnswerElapsed();
             // to avoid the case if the listfortest has not been prepared yet
             new AsyncTask<Void, Void, Void>() {
 
                 @Override
                 protected Void doInBackground(Void... params) {
                     while (true) {
-                        if ( wrongItemArrayList.get(currentQuestionCounter).getQuestion() != null && wrongItemArrayList.get(currentQuestionCounter).getAnswer() != null) {
+                        if ( wrongItemArrayList != null) {
                             scheduleWhatToDoAfterTimeOfAnswerElapsed();
                             break;
                         } else {
@@ -759,9 +757,13 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             case R.id.timer:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
-                            .putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
                     if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent);
+                        Bundle bundle4 = new Bundle();
+                        bundle4.putString(TimerDialogFragment.MESSAGE, getString(R.string.app_name) + " " + getString(R.string.ask_again));
+                        TimerDialogFragment timerDialogFragment = new TimerDialogFragment();
+                        timerDialogFragment.setArguments(bundle4);
+                        timerDialogFragment.show(getSupportFragmentManager(), TimerDialogFragment.class.getName());
                     } else {
                         Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
@@ -810,9 +812,9 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         array[0] = currentQuestionCounter;
         array[1] = permitedTriesNumber;
         if ( test_type == Constants.TestType.ENHANCED_TEST ) {
-            cursorLoaderAndUpdateDatabase.pauseStudyAgainAfterTest(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id, wrongItemArrayList, array, repeatedEntries, lastPause);
+            cursorLoaderAndUpdateDatabase.pauseStudyAgainAfterTest(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id, wrongItemArrayList, array, repeatedEntries, in_repeated, lastPause);
         } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
-            cursorLoaderAndUpdateDatabase.pauseStudyAgainAfterTest(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id, wrongItemArrayList, array, repeatedEntries, lastPause);
+            cursorLoaderAndUpdateDatabase.pauseStudyAgainAfterTest(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id, wrongItemArrayList, array, repeatedEntries, in_repeated, lastPause);
         }
     }
 
@@ -1102,7 +1104,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             @Override
             protected Void doInBackground(Void... params) {
                 while (true) {
-                    if (wrongItemArrayList.get(currentQuestionCounter).getQuestion() != null && wrongItemArrayList.get(currentQuestionCounter).getAnswer() != null) {
+                    if ( wrongItemArrayList != null ) {
                         time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
                                 reading_question_letter_second,find_answer_time, typing_answer_letter_second);
                         scheduleWhatToDoAfterTimeOfAnswerElapsed();
@@ -1132,7 +1134,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 @Override
                 protected Void doInBackground(Void... params) {
                     while (true) {
-                        if (wrongItemArrayList.get(currentQuestionCounter).getQuestion() != null && wrongItemArrayList.get(currentQuestionCounter).getAnswer() != null) {
+                        if (wrongItemArrayList != null) {
                             scheduleWhatToDoAfterTimeOfAnswerElapsed();
                             break;
                         } else {
@@ -1186,33 +1188,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         }
     }
 
-    private void crossfade() {
 
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        content.setAlpha(0f);
-        content.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        content.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        mLoadingView.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLoadingView.setVisibility(View.GONE);
-                    }
-                });
-    }
     @Override
     public void obfuscateText(boolean obfuscate) {
         this.obfuscate = obfuscate;

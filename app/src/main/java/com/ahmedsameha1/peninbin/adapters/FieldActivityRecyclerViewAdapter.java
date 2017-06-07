@@ -1,7 +1,6 @@
 package com.ahmedsameha1.peninbin.adapters;
 
 
-
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
@@ -50,8 +49,9 @@ public class FieldActivityRecyclerViewAdapter extends
     private SharedPreferences sharedPreferences;
     private DatabaseReadOperations databaseOperations;
     private StringBuilder search_string;
-    public FieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, StringBuilder search_string ) {
-        super(context,data);
+
+    public FieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, StringBuilder search_string) {
+        super(context, data);
         this.context = context;
         this.field_id = field_id;
         this.search_string = search_string;
@@ -59,6 +59,7 @@ public class FieldActivityRecyclerViewAdapter extends
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         this.question_data_type = databaseOperations.getQuestionDataType(field_id);
     }
+
     @Override
     public FieldActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
@@ -66,14 +67,15 @@ public class FieldActivityRecyclerViewAdapter extends
         FieldActivityRecyclerViewViewHolder fieldActivityRecyclerViewViewHolder =
                 new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
                     @Override
-                    public void onClick(View v, String currentQuestion, String currentAnswer, long entry_id ) {
-                            Intent intent = new Intent(context, StudyActivity.class);
-                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
-                            intent.putExtra(StudyActivity.ENTRY_ID,entry_id);
-                            intent.putExtra(StudyActivity.CURRENT_QUESTION,currentQuestion);
-                            intent.putExtra(StudyActivity.CURRENT_ANSWER,currentAnswer);
-                            context.startActivity(intent);
+                    public void onClick(View v, String currentQuestion, String currentAnswer, long entry_id) {
+                        Intent intent = new Intent(context, StudyActivity.class);
+                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                        intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
+                        intent.putExtra(StudyActivity.CURRENT_QUESTION, currentQuestion);
+                        intent.putExtra(StudyActivity.CURRENT_ANSWER, currentAnswer);
+                        context.startActivity(intent);
                     }
+
                     @Override
                     public void onLongClick(View view) {
                         View toolbar = view.findViewById(R.id.field_recyclerview_item_actions);
@@ -99,15 +101,15 @@ public class FieldActivityRecyclerViewAdapter extends
         viewHolder.currentQuestion = question;
         viewHolder.currentAnswer = answer;
         viewHolder.edit.setOnClickListener(v -> {
-            if ( !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
-                    && !ImportTextFile.isThreadRunning() ) {
+            if (!Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                    && !ImportTextFile.isThreadRunning()) {
                 Intent intent = new Intent(context, EditEntryActivity.class);
-                intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id );
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,field_id);
-                intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
-                intent.putExtra(StudyActivity.CURRENT_QUESTION,question);
-                intent.putExtra(StudyActivity.CURRENT_ANSWER,answer);
-                ((Activity) context).startActivityForResult(intent,FieldActivity.EDIT_ENTRY);
+                intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE, question_data_type);
+                intent.putExtra(StudyActivity.CURRENT_QUESTION, question);
+                intent.putExtra(StudyActivity.CURRENT_ANSWER, answer);
+                ((Activity) context).startActivityForResult(intent, FieldActivity.EDIT_ENTRY);
             } else {
                 Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -115,47 +117,53 @@ public class FieldActivityRecyclerViewAdapter extends
             }
         });
         viewHolder.delete.setOnClickListener(v -> {
-            if ( !sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + field_id) &&
+            if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + field_id) &&
                     !sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + field_id) &&
                     !sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + field_id) &&
                     !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + field_id) &&
                     !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + field_id) &&
                     !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
-                    && !ImportTextFile.isThreadRunning() ) {
-                if ( ! databaseOperations.checkIfIncludedInPausedOperations(field_id,entry_id) ) {
+                    && !ImportTextFile.isThreadRunning()) {
+                if (!databaseOperations.checkIfIncludedInPausedOperations(field_id, entry_id)) {
                     DeleteEntryDialogFragment fragment = new DeleteEntryDialogFragment();
                     Bundle bundle = new Bundle();
-                    bundle.putLong(DeleteEntryDialogFragment.TO_BE_DELETED_ENTRY_ID,entry_id);
-                    bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE,question_data_type);
+                    bundle.putLong(DeleteEntryDialogFragment.TO_BE_DELETED_ENTRY_ID, entry_id);
+                    bundle.putInt(DeleteEntryDialogFragment.QUESTION_DATA_TYPE, question_data_type);
                     fragment.setArguments(bundle);
                     FragmentManager fragmentManager = ((FieldActivity) context).getSupportFragmentManager();
                     fragment.show(fragmentManager, DeleteEntryDialogFragment.DELETE_ENTRY_DIALOG_FRAGMENT);
                 } else {
                     Toast toast = Toast.makeText(context, R.string.complete_or_cancel_last_study_session, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-            } else if ( sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + field_id) ||
-                     sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + field_id) ||
+            } else if (sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + field_id) ||
+                    sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + field_id) ||
                     sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + field_id) ||
                     sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + field_id) ||
-                    sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + field_id) ){
+                    sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + field_id)) {
                 Toast toast = Toast.makeText(context, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
-            } else if ( Emulation.isAnyThreadRunning() || ExportImportDatabase.isAnyThreadRunning()
-                    || ImportTextFile.isThreadRunning() ) {
+            } else if (Emulation.isAnyThreadRunning() || ExportImportDatabase.isAnyThreadRunning()
+                    || ImportTextFile.isThreadRunning()) {
                 Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
         });
-        viewHolder.more.setOnClickListener( view -> {
+        viewHolder.wrongness_level.setOnClickListener(view -> {
+            Toast toast = Toast.makeText(context,
+                    context.getString(R.string.wrongness_level, wrongness_level), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        });
+        viewHolder.more.setOnClickListener(view -> {
             PopupMenu popup = new PopupMenu(context, view);
             ((Activity) context).getMenuInflater().inflate(R.menu.same_search_menu, popup.getMenu());
             popup.setOnMenuItemClickListener(item -> {
-                if ( item.getItemId() == R.id.same_question ) {
-                    if ( databaseOperations.moreThanOneAnswerSameQuestion(field_id, question) ) {
+                if (item.getItemId() == R.id.same_question) {
+                    if (databaseOperations.moreThanOneAnswerSameQuestion(field_id, question)) {
                         final Intent intent = new Intent(context,
                                 SearchActivity.class);
                         // add query to the Intent Extras
@@ -169,8 +177,8 @@ public class FieldActivityRecyclerViewAdapter extends
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
-                } else if ( item.getItemId() == R.id.same_answer ) {
-                    if ( databaseOperations.moreThanOneQuestionSameAnswer(field_id, answer) ) {
+                } else if (item.getItemId() == R.id.same_answer) {
+                    if (databaseOperations.moreThanOneQuestionSameAnswer(field_id, answer)) {
                         final Intent intent = new Intent(context,
                                 SearchActivity.class);
                         // add query to the Intent Extras
@@ -184,7 +192,7 @@ public class FieldActivityRecyclerViewAdapter extends
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
-                } else if ( item.getItemId() == R.id.asked_count ) {
+                } else if (item.getItemId() == R.id.asked_count) {
                     Toast toast = Toast.makeText(context,
                             context.getString(R.string.asked, String.valueOf(asked_counter)), Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -199,46 +207,75 @@ public class FieldActivityRecyclerViewAdapter extends
             });
             popup.show();
         });
-
-        viewHolder.wrongness_level.setOnClickListener(view -> {
-            Toast toast = Toast.makeText(context,
-                    context.getString(R.string.wrongness_level, wrongness_level), Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
-        });
-        Spannable spannable_question = Spannable.Factory.getInstance().newSpannable(question);
-        Spannable spannable_answer = Spannable.Factory.getInstance().newSpannable(answer);
-        String value = search_string.toString();
-        if ( ! "".equals(value) ) {
-            if (question.contains(value)) {
-                int start = 0;
-                while (start < question.length()) {
-                    if (question.indexOf(value,start) == start) {
-                        int end = start + search_string.length();
-                        spannable_question.setSpan(new BackgroundColorSpan(0xFFFFFF00),
-                                start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        start = end;
+        viewHolder.question.setText(prepare_search_spans(question, search_string));
+        viewHolder.answer.setText(prepare_search_spans(answer, search_string));
+        viewHolder.wrongness_level.setText(String.format(Locale.getDefault(), "%.0f%%", wrongness_level));
+    }
+    private Spannable prepare_search_spans(String text, StringBuilder search_value) {
+        Spannable spannable = Spannable.Factory.getInstance().newSpannable(text);
+        if ( search_value.length() > 0 ) {
+            String text_lowercase = text.toLowerCase();
+            String search_value_lowercase = search_value.toString().toLowerCase();
+            int value_lowercase_length = search_value_lowercase.length();
+            if (text_lowercase.contains(search_value_lowercase)) {
+                int text_lowercase_length = text_lowercase.length();
+                if (!text_lowercase.equals(search_value_lowercase)) {
+                    if (text_lowercase.matches("\\S+")) { // there is no white spaces in the text
+                        int start = 0;
+                        while (start < text_lowercase_length) {
+                            if (text_lowercase.indexOf(search_value_lowercase, start) == start) {
+                                int end = start + value_lowercase_length;
+                                spannable.setSpan(new BackgroundColorSpan(0xFFFFFF00),
+                                        start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                start = end;
+                            } else {
+                                start++;
+                            }
+                        }
                     } else {
-                        start++;
+                        int start = 0;
+                        while (start < text_lowercase_length) {
+                            if (text_lowercase.indexOf(search_value_lowercase, start) == start) {
+                                int end = start + value_lowercase_length;
+                                spannable.setSpan(new BackgroundColorSpan(0xFFFFFF00),
+                                        start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                start = end;
+                            } else {
+                                start++;
+                            }
+                        }
+                        if (text_lowercase.startsWith(search_value_lowercase) &&
+                                text_lowercase.substring(value_lowercase_length, value_lowercase_length + 1).matches("\\s")) {
+                            spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
+                                    0, value_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        }
+                        if (text_lowercase.endsWith(search_value_lowercase) &&
+                                text_lowercase.substring(text_lowercase_length - value_lowercase_length - 1,
+                                        text_lowercase_length - value_lowercase_length).matches("\\s")) {
+                            spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
+                                    text_lowercase_length - value_lowercase_length, text_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        }
+                        String[] strings = text_lowercase.split(search_value_lowercase);
+                        if (strings.length > 1) {
+                            for (int i = 0, k = 0; i < strings.length - 1; i++) {
+                                if (i == 0) {
+                                    k += strings[i].length();
+                                } else {
+                                    k += strings[i].length() + value_lowercase_length;
+                                }
+                                if (strings[i].matches(".*\\s+") && strings[i + 1].matches("\\s+.*")) {
+                                    spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
+                                            k, k + value_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                }
+                            }
+                        }
                     }
-                }
-            }
-            if (answer.contains(value)) {
-                int start = 0;
-                while (start < answer.length()) {
-                    if (answer.indexOf(value, start) == start) {
-                        int end = start + search_string.length();
-                        spannable_answer.setSpan(new BackgroundColorSpan(0xFFFFFF00),
-                                start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        start = end;
-                    } else {
-                        start++;
-                    }
+                } else {
+                    spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
+                            0, value_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
         }
-        viewHolder.question.setText(spannable_question);
-        viewHolder.answer.setText(spannable_answer);
-        viewHolder.wrongness_level.setText(String.format(Locale.getDefault(),"%.0f%%", wrongness_level));
+        return spannable;
     }
 }
