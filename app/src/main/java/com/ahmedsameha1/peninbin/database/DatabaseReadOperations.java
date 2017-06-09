@@ -28,8 +28,7 @@ public class DatabaseReadOperations {
 
     public Cursor getFieldList() {
         String[] string = {Contract.COLUMN_ID, Contract.Field.COLUMN_FIELD_NAME, Contract.Field.COLUMN_FIELD_TYPE};
-        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, string, null, null, null, null, null);
-        return cursor;
+        return sqLiteDatabase.query(Contract.Field.TABLE_NAME, string, null, null, null, null, Contract.Field.COLUMN_USAGE_COUNT + " DESC");
     }
 
     public boolean checkFieldExists( long field_id ) {

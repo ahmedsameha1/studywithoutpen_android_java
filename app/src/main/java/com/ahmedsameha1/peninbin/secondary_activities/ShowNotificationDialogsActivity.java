@@ -49,7 +49,6 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             int question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
             boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-            int field_type = databaseReadOperations.getFieldType(current_field_id);
             Bundle bundle = new Bundle();
             bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
             bundle.putBoolean(FROM_NOTIFICATION, true);

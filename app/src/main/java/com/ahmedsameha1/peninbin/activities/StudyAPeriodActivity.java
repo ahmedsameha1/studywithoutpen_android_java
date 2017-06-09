@@ -436,7 +436,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-            }// TODO: 5/14/17 test the boot reciever for the outboundarrayindex
+            }
 
             @Override
             public void afterTextChanged(Editable s) {

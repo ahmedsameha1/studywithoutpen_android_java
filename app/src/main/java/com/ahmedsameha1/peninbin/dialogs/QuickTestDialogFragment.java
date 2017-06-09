@@ -103,10 +103,19 @@ public class QuickTestDialogFragment extends DialogFragment {
             number_or_percentage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    String number_string = enterNumber.getText().toString();
                     if ( i == 0 ) {
                         enterNumber.setHint(R.string.enter_number_of_questions);
+                        if ( number_suffix != null ) {
+                            enterNumber.setText(number_string.substring(0, number_string.length() - number_suffix.length()) +
+                                    " " + getActivity().getString(R.string._question));
+                        }
                     } else {
                         enterNumber.setHint(R.string.enter_percentage);
+                        if ( number_suffix != null ) {
+                            enterNumber.setText(number_string.substring(0, number_string.length() - number_suffix.length()) +
+                                    " %" );
+                        }
                     }
                 }
 

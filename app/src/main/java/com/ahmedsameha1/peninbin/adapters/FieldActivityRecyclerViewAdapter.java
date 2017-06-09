@@ -255,7 +255,7 @@ public class FieldActivityRecyclerViewAdapter extends
                             spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
                                     text_lowercase_length - value_lowercase_length, text_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                         }
-                        String[] strings = text_lowercase.split(search_value_lowercase);
+                        String[] strings = text_lowercase.split("\\Q" + search_value_lowercase + "\\E");
                         if (strings.length > 1) {
                             for (int i = 0, k = 0; i < strings.length - 1; i++) {
                                 if (i == 0) {
