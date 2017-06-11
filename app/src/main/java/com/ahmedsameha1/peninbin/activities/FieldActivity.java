@@ -36,6 +36,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
@@ -113,7 +114,6 @@ public class FieldActivity extends AppCompatActivity implements
     public static final String ANALYTICS_CATEGORY = "Field Activity Category";
     public static final String EDITED_RANK = "edited_rank";
     private static final String PAY_LOAD_STRING = "pay_load_string";
-    private static final String BUY_INTENT = "BUY_INTENT";
     private static final int BUY_FLOW_REQUEST_CODE = 6475;
     private static final String INITIAL_CHECK_SUPSCRIPTION = "intial_check_supscription";
     private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
@@ -124,8 +124,6 @@ public class FieldActivity extends AppCompatActivity implements
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private DatabaseReadOperations databaseReadOperations;
     private FieldActivityRecyclerViewAdapter mAdapter;
-    private SearchView searchView;
-    private MenuItem searchItem;
     private boolean tts_available = false;
     private ArrayList<Locale> localeList = new ArrayList<Locale>();
     private ArrayList<String> locale_display_names = new ArrayList<String>();
@@ -144,6 +142,7 @@ public class FieldActivity extends AppCompatActivity implements
     private View mLoadingView;
     private RelativeLayout content;
     private RecyclerView recyclerView;
+    private TextView not_found;
 
 
     @Override
@@ -163,6 +162,7 @@ public class FieldActivity extends AppCompatActivity implements
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
         content = (RelativeLayout) findViewById(R.id.content);
         mLoadingView = findViewById(R.id.loading);
+        not_found = (TextView) findViewById(R.id.not_found);
         ActivityUtility.antiCrossFade(content, mLoadingView, this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_field_activity); // FieldActivity.this Toolbar will act as action bar of the activity
         recyclerView = (RecyclerView) findViewById(R.id.field_activity_recyclerview);
@@ -262,6 +262,13 @@ public class FieldActivity extends AppCompatActivity implements
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 mAdapter.swapCursor(data);
+                if ( data.getCount() == 0 ) {
+                    not_found.setText(R.string.not_found);
+                    not_found.setVisibility(View.VISIBLE);
+                } else {
+                    not_found.setText("");
+                    not_found.setVisibility(View.GONE);
+                }
                 ActivityUtility.crossFade(content, mLoadingView, FieldActivity.this);
             }
 
@@ -527,8 +534,8 @@ public class FieldActivity extends AppCompatActivity implements
         // Inflate the menu; FieldActivity.this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.field_activity_menu, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchItem = menu.findItem(R.id.search);
-        searchView = (SearchView) searchItem.getActionView();
+        MenuItem searchItem = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
         MenuItemCompat.setOnActionExpandListener(searchItem,
                 new MenuItemCompat.OnActionExpandListener() {
                     @Override

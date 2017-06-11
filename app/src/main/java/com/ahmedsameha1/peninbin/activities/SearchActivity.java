@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,7 +74,9 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private TextView result_count;
     private int search_what;
     private RecyclerView recyclerView;
-
+    private TextView not_found;
+    private View mLoadingView;
+    private RelativeLayout content;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,7 +91,11 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(this);
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
+        content = (RelativeLayout) findViewById(R.id.content);
+        mLoadingView = findViewById(R.id.loading);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        not_found = (TextView) findViewById(R.id.not_found);
+        ActivityUtility.antiCrossFade(content, mLoadingView, this);
         recyclerView = (RecyclerView) findViewById(R.id.search_activity_recyclerview);
         VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
         // Connect the recycler to the scroller (to let the scroller scroll the list)
@@ -125,6 +132,8 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
+        getLoaderManager().destroyLoader(SEARCH_LOADER);
+        ActivityUtility.antiCrossFade(content,mLoadingView, this);
     }
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -137,6 +146,8 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, query);
             search_string_highlight.replace(0, search_string_highlight.length(), query);
+            getLoaderManager().destroyLoader(SEARCH_LOADER);
+            ActivityUtility.antiCrossFade(content,mLoadingView,this);
             getLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
         }
     }
@@ -214,6 +225,14 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
         result_count.setText(String.valueOf(data.getCount()));
+        if ( data.getCount() == 0 ) {
+            not_found.setText(R.string.not_found);
+            not_found.setVisibility(View.VISIBLE);
+        } else {
+            not_found.setText("");
+            not_found.setVisibility(View.GONE);
+        }
+        ActivityUtility.crossFade(content, mLoadingView, this);
     }
 
     @Override
