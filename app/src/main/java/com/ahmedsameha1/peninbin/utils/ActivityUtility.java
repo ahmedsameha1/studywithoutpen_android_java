@@ -706,18 +706,5 @@ public class ActivityUtility {
                 .alpha(1f)
                 .setDuration(mShortAnimationDuration)
                 .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        content.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        content.setVisibility(View.GONE);
-                    }
-                });
     }
 }

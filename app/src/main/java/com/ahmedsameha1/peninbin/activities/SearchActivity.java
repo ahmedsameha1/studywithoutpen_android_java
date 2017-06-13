@@ -4,51 +4,41 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.Loader;
-import android.os.PersistableBundle;
-import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.adapters.FieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
-import com.ahmedsameha1.peninbin.adapters.SearchActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
-import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
 
 /**
  * Created by ahmed on 3/2/2016.
  */
-public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> ,
-        DeleteEntryDialogFragment.Contact{
+public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
+        DeleteEntryDialogFragment.Contact {
     public static final String SCREEN_NAME = "SearchActivity";
     public static final int SEARCH_LOADER = 0;
     public static final String EDITED_ENTRY_ID = "edited_entry_id";
@@ -81,12 +71,12 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        if ( savedInstanceState != null ) {
+        if (savedInstanceState != null) {
             current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
             search_what = savedInstanceState.getInt(SEARCH_WHAT);
         } else {
-            current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
-            search_what = getIntent().getIntExtra(SEARCH_WHAT,0);
+            current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
+            search_what = getIntent().getIntExtra(SEARCH_WHAT, 0);
         }
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(this);
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
@@ -95,7 +85,6 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         mLoadingView = findViewById(R.id.loading);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         not_found = (TextView) findViewById(R.id.not_found);
-        ActivityUtility.antiCrossFade(content, mLoadingView, this);
         recyclerView = (RecyclerView) findViewById(R.id.search_activity_recyclerview);
         VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
         // Connect the recycler to the scroller (to let the scroller scroll the list)
@@ -104,7 +93,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         recyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
         result_count = (TextView) findViewById(R.id.result_count);
         setSupportActionBar(toolbar);
-        mAdapter = new FieldActivityRecyclerViewAdapter(SearchActivity.this,null, current_field_id, search_string_highlight);
+        mAdapter = new FieldActivityRecyclerViewAdapter(SearchActivity.this, null, current_field_id, search_string_highlight);
         recyclerView.setLayoutManager(new LinearLayoutManager(SearchActivity.this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
@@ -118,37 +107,36 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
 
     public void onNewIntent(Intent intent) {
         setIntent(intent);
-        handleIntent(intent);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         handleIntent(getIntent());
-        mTracker.setScreenName( ActivityUtility.getVersionCode(this) + SCREEN_NAME);
+        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
+
     @Override
     protected void onStop() {
         super.onStop();
         UsageLastTime.updateUsageLastTime(this);
-        getLoaderManager().destroyLoader(SEARCH_LOADER);
-        ActivityUtility.antiCrossFade(content,mLoadingView, this);
     }
+
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query =
                     intent.getStringExtra(SearchManager.QUERY);
-            search_what = intent.getIntExtra(SEARCH_WHAT,0);
-            if ( searchView != null && (search_what == SEARCH_QUESTION || search_what == SEARCH_ANSWER)) {
+            search_what = intent.getIntExtra(SEARCH_WHAT, 0);
+            if (searchView != null && (search_what == SEARCH_QUESTION || search_what == SEARCH_ANSWER)) {
                 searchView.setQuery("", false);
             }
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, query);
             search_string_highlight.replace(0, search_string_highlight.length(), query);
             getLoaderManager().destroyLoader(SEARCH_LOADER);
-            ActivityUtility.antiCrossFade(content,mLoadingView,this);
             getLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
+            ActivityUtility.antiCrossFade(content, mLoadingView, this);
         }
     }
 
@@ -166,13 +154,15 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         searchView.setIconifiedByDefault(false);
         return true;
     }
+
     @Override
-    public void onSaveInstanceState ( Bundle savedInsatanceState ) {
+    public void onSaveInstanceState(Bundle savedInsatanceState) {
         super.onSaveInstanceState(savedInsatanceState);
-        savedInsatanceState.putLong(CURRENT_FIELD_ID,current_field_id);
-        savedInsatanceState.putInt(SEARCH_WHAT,search_what);
+        savedInsatanceState.putLong(CURRENT_FIELD_ID, current_field_id);
+        savedInsatanceState.putInt(SEARCH_WHAT, search_what);
         savedInsatanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
     }
+
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -183,7 +173,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String searchString = args.getString(QUERY_KEY);
-        if ( search_what == SEARCH_ANSWER ) {
+        if (search_what == SEARCH_ANSWER) {
             mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                     "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -192,9 +182,9 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                             + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                             + "  a LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
-                    new String[]{ String.valueOf(current_field_id) , searchString });
+                    new String[]{String.valueOf(current_field_id), searchString});
             search_what = 0;
-        } else if ( search_what == SEARCH_QUESTION ){
+        } else if (search_what == SEARCH_QUESTION) {
             mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                     "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -203,7 +193,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                             + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                             + "  q LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
-                    new String[]{ String.valueOf(current_field_id), searchString });
+                    new String[]{String.valueOf(current_field_id), searchString});
             search_what = 0;
         } else {
             mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
@@ -216,7 +206,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + "  q LIKE ? "
                             + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                             + " a LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
-                    new String[]{ String.valueOf(current_field_id),"%" + searchString + "%", current_field_id + "","%" + searchString + "%"});
+                    new String[]{String.valueOf(current_field_id), "%" + searchString + "%", current_field_id + "", "%" + searchString + "%"});
         }
         return mySQLiteCursorLoader;
     }
@@ -225,7 +215,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
         result_count.setText(String.valueOf(data.getCount()));
-        if ( data.getCount() == 0 ) {
+        if (data.getCount() == 0) {
             not_found.setText(R.string.not_found);
             not_found.setVisibility(View.VISIBLE);
         } else {
@@ -242,8 +232,9 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void deleteEntry(long entry_id, int question_data_type) {
-        mySQLiteCursorLoader.deleteEntry(entry_id,question_data_type);
+        mySQLiteCursorLoader.deleteEntry(entry_id, question_data_type);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to

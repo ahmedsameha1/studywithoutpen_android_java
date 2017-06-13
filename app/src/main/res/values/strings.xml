@@ -32,8 +32,8 @@
     <string name="where_the_answer">Where is the answer?!</string>
     <string name="wrong_answers">Wrong Answers</string>
     <string name="delete_entry">Are you sure that you want to delete this entry?</string>
-    <string name="hour">Enter the number of hours</string>
-    <string name="day">Enter the number of days</string>
+    <string name="hour">Enter number of hours</string>
+    <string name="day">Enter number of days</string>
     <string name="please_enter_at_least_one_value">Please enter at least one value for day or hour</string>
     <string name="check">Check</string>
     <string name="no_entries_in_this_time_range">There is no entries in this time range!</string>
