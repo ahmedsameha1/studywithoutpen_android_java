@@ -114,6 +114,7 @@
     <orderEntry type="library" exported="" name="play-services-analytics-impl-10.2.1" level="project" />
     <orderEntry type="library" exported="" name="filepicker-1.0.6" level="project" />
     <orderEntry type="library" exported="" name="firebase-common-10.2.1" level="project" />
+    <orderEntry type="library" exported="" name="appintro-v4.2.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-basement-10.2.1" level="project" />
     <orderEntry type="library" exported="" name="multidex-1.0.1" level="project" />
     <orderEntry type="library" exported="" name="support-v4-25.3.1" level="project" />

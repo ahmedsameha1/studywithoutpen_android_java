@@ -243,6 +243,7 @@ public class MainActivity extends AppCompatActivity implements
                 .setCategory(ANALYTICS_CATEGORY)
                 .setAction(ActivityUtility.getVersionCode(this) + "run the app")
                 .build());
+        startActivity(new Intent(this, IntroActivity.class));
     }
 
 
