@@ -246,7 +246,8 @@
             android:name=".receivers_services.MidnightService"
             android:exported="false" />
 
-        <activity android:name=".activities.IntroActivity"></activity>
+        <activity android:name=".activities.IntroActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
