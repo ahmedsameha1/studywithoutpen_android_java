@@ -1033,7 +1033,7 @@ public class ExportImportDatabase {
                 stackBuilder = TaskStackBuilder.create(context);
                 stackBuilder.addParentStack(MainActivity.class);
                 stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                resultPendingIntent = stackBuilder.getPendingIntent((int) System.currentTimeMillis(), PendingIntent.FLAG_UPDATE_CURRENT);
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
@@ -1049,7 +1049,7 @@ public class ExportImportDatabase {
                 stackBuilder = TaskStackBuilder.create(context);
                 stackBuilder.addParentStack(MainActivity.class);
                 stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                resultPendingIntent = stackBuilder.getPendingIntent((int) System.currentTimeMillis(), PendingIntent.FLAG_UPDATE_CURRENT);
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
@@ -1065,7 +1065,7 @@ public class ExportImportDatabase {
                 stackBuilder = TaskStackBuilder.create(context);
                 stackBuilder.addParentStack(MainActivity.class);
                 stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                resultPendingIntent = stackBuilder.getPendingIntent((int) System.currentTimeMillis(), PendingIntent.FLAG_UPDATE_CURRENT);
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
@@ -1084,7 +1084,7 @@ public class ExportImportDatabase {
                 resultPendingIntent =
                         PendingIntent.getActivity(
                                 context,
-                                0,
+                                (int) System.currentTimeMillis(),
                                 notifyIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT
                         );
@@ -1113,7 +1113,7 @@ public class ExportImportDatabase {
         resultPendingIntent =
                 PendingIntent.getActivity(
                         context,
-                        0,
+                        (int) System.currentTimeMillis(),
                         notifyIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );

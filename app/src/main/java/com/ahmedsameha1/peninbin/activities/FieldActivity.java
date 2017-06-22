@@ -11,9 +11,9 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
@@ -117,6 +117,8 @@ public class FieldActivity extends AppCompatActivity implements
     private static final int BUY_FLOW_REQUEST_CODE = 6475;
     private static final String INITIAL_CHECK_SUPSCRIPTION = "intial_check_supscription";
     private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
+    private static final String IS_LOAD_ENTRIES = "is_load_entries";
+    private static final String SEARCH_VALUE = "search_value";
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
     protected int fieldType = 0;
     private long current_field_id;
@@ -128,7 +130,7 @@ public class FieldActivity extends AppCompatActivity implements
     private ArrayList<Locale> localeList = new ArrayList<Locale>();
     private ArrayList<String> locale_display_names = new ArrayList<String>();
     private TextToSpeech tts;
-    private boolean load_or_search = true;
+    private boolean is_load_entries = true;
     private String search_value;
     private int question_data_type;
     private Tracker mTracker;
@@ -143,6 +145,8 @@ public class FieldActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private RecyclerView recyclerView;
     private TextView not_found;
+    private Parcelable recyclerview_position;
+    private SearchView searchView;
 
 
     @Override
@@ -153,6 +157,7 @@ public class FieldActivity extends AppCompatActivity implements
 
         if (savedInstanceState != null) {
             current_field_id = savedInstanceState.getLong(FIELD_ID);
+            recyclerview_position = savedInstanceState.getParcelable(RECYCLERVIEW_POSITION);
         } else {
             current_field_id = getIntent().getLongExtra(FIELD_ID, 0);
         }
@@ -262,7 +267,11 @@ public class FieldActivity extends AppCompatActivity implements
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 mAdapter.swapCursor(data);
-                if ( data.getCount() == 0 ) {
+                if ( recyclerview_position != null ) {
+                    recyclerView.getLayoutManager()
+                            .onRestoreInstanceState(recyclerview_position);
+                }
+                if ( data.getCount() == 0 && search_value != null ) {
                     not_found.setText(R.string.not_found);
                     not_found.setVisibility(View.VISIBLE);
                 } else {
@@ -374,7 +383,7 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (load_or_search) {
+        if (is_load_entries) {
             getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
             search_string_highlight.replace(0, search_string_highlight.length(), "");
         } else {
@@ -422,6 +431,8 @@ public class FieldActivity extends AppCompatActivity implements
 
     public void onNewIntent(Intent intent) {
         setIntent(intent);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
         handleIntent(intent);
     }
 
@@ -429,7 +440,7 @@ public class FieldActivity extends AppCompatActivity implements
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             search_value =
                     intent.getStringExtra(SearchManager.QUERY);
-            load_or_search = false;
+            is_load_entries = false;
             getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
             getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
             ActivityUtility.antiCrossFade(content,mLoadingView,FieldActivity.this);
@@ -517,7 +528,12 @@ public class FieldActivity extends AppCompatActivity implements
         savedInstanceState.putLong(FIELD_ID, current_field_id);
         savedInstanceState.putString(PAY_LOAD_STRING, pay_load);
         savedInstanceState.putBoolean(INITIAL_CHECK_SUPSCRIPTION, initialCheckSubscription);
-        savedInstanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
+        if ( mAdapter.getCursor() != null ) {
+            recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
+        }
+        savedInstanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerview_position);
+        savedInstanceState.putBoolean(IS_LOAD_ENTRIES, is_load_entries);
+        savedInstanceState.putString(SEARCH_VALUE, search_value);
     }
 
     @Override
@@ -525,8 +541,8 @@ public class FieldActivity extends AppCompatActivity implements
         super.onRestoreInstanceState(savedInstanceState);
         pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
         initialCheckSubscription = savedInstanceState.getBoolean(INITIAL_CHECK_SUPSCRIPTION);
-        recyclerView.getLayoutManager()
-                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
+        is_load_entries = savedInstanceState.getBoolean(IS_LOAD_ENTRIES);
+        search_value = savedInstanceState.getString(SEARCH_VALUE);
     }
 
     @Override
@@ -535,7 +551,11 @@ public class FieldActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.field_activity_menu, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         MenuItem searchItem = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView = (SearchView) searchItem.getActionView();
+        if ( search_value != null ) {
+            searchItem.expandActionView();
+            searchView.setQuery(search_value, false);
+        }
         MenuItemCompat.setOnActionExpandListener(searchItem,
                 new MenuItemCompat.OnActionExpandListener() {
                     @Override
@@ -547,32 +567,13 @@ public class FieldActivity extends AppCompatActivity implements
                     public boolean onMenuItemActionCollapse(MenuItem menuItem) {
                         getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
                         search_string_highlight.replace(0, search_string_highlight.length(), "");
-                        load_or_search = true;
+                        recyclerView.setLayoutManager(new LinearLayoutManager(FieldActivity.this));
+                        recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
+                        is_load_entries = true;
+                        search_value = null;
                         return true;
                     }
                 });
-/*        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (!newText.equals("")) {
-                    if (fieldType != Contract.Field.NOTEBOOK_TYPE_REMOVED_FEATURE) {
-                        handleIntent(newText);
-                    } else {
-                        searchView.clearFocus();
-                    }
-                } else {
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(CURRENT_SORT, currentSort);
-                    getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, bundle, getFieldEntries);
-                }
-                return true;
-            }
-        });*/
 
         // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
@@ -589,6 +590,7 @@ public class FieldActivity extends AppCompatActivity implements
         switch (id) {
             case R.id.sort:
                 bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putSerializable(SortEntriesDialogFragment.INITIAL_SORT_OPTION, sortOption);
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
@@ -652,7 +654,7 @@ public class FieldActivity extends AppCompatActivity implements
                         stackBuilder = TaskStackBuilder.create(this);
                         stackBuilder.addParentStack(MainActivity.class);
                         stackBuilder.addNextIntent(notifyIntent);
-                        resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                        resultPendingIntent = stackBuilder.getPendingIntent((int) System.currentTimeMillis(), PendingIntent.FLAG_UPDATE_CURRENT);
                         notificationBuilder.setContentIntent(resultPendingIntent);
                         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify((int) System.currentTimeMillis(), notificationBuilder.build());
                     }

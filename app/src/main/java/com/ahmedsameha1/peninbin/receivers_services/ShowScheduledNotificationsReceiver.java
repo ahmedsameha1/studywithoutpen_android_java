@@ -62,7 +62,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                         quick_test_intent.putExtra(EnhancedTestActivity.RANK_LEVEL, intent.getIntExtra(EnhancedTestActivity.RANK_LEVEL,-1));
                         quick_test_intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, intent.getIntExtra(EnhancedTestActivity.WRONGNESS_LEVEL,-1));
                     }
-                    contentIntent = PendingIntent.getActivity(context, 0, quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
                             new NotificationCompat.Builder(context)
                                     .setSmallIcon(R.drawable.ic_launcher512)
@@ -75,7 +75,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                     Intent quick_test_intent = new Intent(context, ShowNotificationDialogsActivity.class);
                     quick_test_intent.putExtra(ShowNotificationDialogsActivity.DIALOG_TYPE, ShowNotificationDialogsActivity.ENHANCED_TEST_DIALOG);
                     quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                    contentIntent = PendingIntent.getActivity(context, 0, quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
                             new NotificationCompat.Builder(context)
                                     .setSmallIcon(R.drawable.ic_launcher512)
@@ -88,7 +88,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                     Intent fully_random_test_intent = new Intent(context, ShowNotificationDialogsActivity.class);
                     fully_random_test_intent.putExtra(ShowNotificationDialogsActivity.DIALOG_TYPE, ShowNotificationDialogsActivity.FULLY_RANDOM_TEST_DIALOG);
                     fully_random_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                    contentIntent = PendingIntent.getActivity(context, 0, fully_random_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), fully_random_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
                             new NotificationCompat.Builder(context)
                                     .setSmallIcon(R.drawable.ic_launcher512)
@@ -101,7 +101,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                     Intent quick_test_intent = new Intent(context, ShowNotificationDialogsActivity.class);
                     quick_test_intent.putExtra(ShowNotificationDialogsActivity.DIALOG_TYPE, ShowNotificationDialogsActivity.STUDY_PERIOD_DIALOG);
                     quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                    contentIntent = PendingIntent.getActivity(context, 0, quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
                             new NotificationCompat.Builder(context)
                                     .setSmallIcon(R.drawable.ic_launcher512)
@@ -126,7 +126,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                 stackBuilder = TaskStackBuilder.create(context);
                 stackBuilder.addParentStack(MainActivity.class);
                 stackBuilder.addNextIntent(notifyIntent);
-                contentIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                contentIntent = stackBuilder.getPendingIntent((int) System.currentTimeMillis(), PendingIntent.FLAG_UPDATE_CURRENT);
 
 
 
@@ -146,7 +146,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
             Intent refreshing_intent = new Intent(context, RefreshingAppUsageActivity.class);
             refreshing_intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            contentIntent = PendingIntent.getActivity(context, 0, refreshing_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), refreshing_intent, PendingIntent.FLAG_UPDATE_CURRENT);
             notificationBuilder =
                     new android.support.v4.app.NotificationCompat.Builder(context)
                             .setSmallIcon(R.drawable.ic_launcher512)

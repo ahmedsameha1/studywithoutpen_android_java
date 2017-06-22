@@ -170,6 +170,7 @@ public class FieldActivityRecyclerViewAdapter extends
                         // add query to the Intent Extras
                         intent.setAction(Intent.ACTION_SEARCH);
                         intent.putExtra(SearchManager.QUERY, question);
+                        intent.putExtra(SearchActivity.SEARCH_VALUE, question);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                         intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_QUESTION);
                         context.startActivity(intent);
@@ -185,6 +186,7 @@ public class FieldActivityRecyclerViewAdapter extends
                         // add query to the Intent Extras
                         intent.setAction(Intent.ACTION_SEARCH);
                         intent.putExtra(SearchManager.QUERY, answer);
+                        intent.putExtra(SearchActivity.SEARCH_VALUE, answer);
                         intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
                         intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_ANSWER);
                         context.startActivity(intent);

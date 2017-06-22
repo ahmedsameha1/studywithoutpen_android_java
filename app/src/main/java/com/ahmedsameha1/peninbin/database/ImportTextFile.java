@@ -204,7 +204,7 @@ public class ImportTextFile {
                 stackBuilder = TaskStackBuilder.create(context);
                 stackBuilder.addParentStack(MainActivity.class);
                 stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                resultPendingIntent = stackBuilder.getPendingIntent((int) System.currentTimeMillis(), PendingIntent.FLAG_UPDATE_CURRENT);
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
@@ -220,7 +220,7 @@ public class ImportTextFile {
                 stackBuilder = TaskStackBuilder.create(context);
                 stackBuilder.addParentStack(MainActivity.class);
                 stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                resultPendingIntent = stackBuilder.getPendingIntent((int) System.currentTimeMillis(), PendingIntent.FLAG_UPDATE_CURRENT);
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
@@ -236,7 +236,7 @@ public class ImportTextFile {
                 stackBuilder = TaskStackBuilder.create(context);
                 stackBuilder.addParentStack(MainActivity.class);
                 stackBuilder.addNextIntent(notifyIntent);
-                resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                resultPendingIntent = stackBuilder.getPendingIntent((int) System.currentTimeMillis(), PendingIntent.FLAG_UPDATE_CURRENT);
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;

@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.os.Parcelable;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -53,6 +56,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public static final int SEARCH_QUESTION = 1;
     public static final int SEARCH_ANSWER = 2;
     public static final String SEARCH_WHAT = "search_what";
+    public static final String SEARCH_VALUE = "search_value";
     public FieldActivityRecyclerViewAdapter mAdapter;
     private long current_field_id;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
@@ -67,6 +71,9 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private TextView not_found;
     private View mLoadingView;
     private RelativeLayout content;
+    private Parcelable recyclerview_position;
+    private String search_value;
+    private MenuItem searchItem;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,9 +81,12 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         if (savedInstanceState != null) {
             current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
             search_what = savedInstanceState.getInt(SEARCH_WHAT);
+            recyclerview_position = savedInstanceState.getParcelable(RECYCLERVIEW_POSITION);
+            search_value = savedInstanceState.getString(SEARCH_VALUE);
         } else {
             current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
             search_what = getIntent().getIntExtra(SEARCH_WHAT, 0);
+            search_value = getIntent().getStringExtra(SEARCH_VALUE);
         }
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(this);
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
@@ -107,6 +117,8 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
 
     public void onNewIntent(Intent intent) {
         setIntent(intent);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
     }
 
     @Override
@@ -127,9 +139,11 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query =
                     intent.getStringExtra(SearchManager.QUERY);
+            search_value = query;
             search_what = intent.getIntExtra(SEARCH_WHAT, 0);
             if (searchView != null && (search_what == SEARCH_QUESTION || search_what == SEARCH_ANSWER)) {
-                searchView.setQuery("", false);
+                searchItem.expandActionView();
+                searchView.setQuery(search_value, false);
             }
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, query);
@@ -147,8 +161,25 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         getMenuInflater().inflate(R.menu.search_activity_menu, menu);
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchItem = menu.findItem(R.id.search);
         searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        if ( search_value != null && !"".equals(search_value) ) {
+            searchItem.expandActionView();
+            searchView.setQuery(search_value, false);
+        }
+        MenuItemCompat.setOnActionExpandListener(searchItem,
+                new MenuItemCompat.OnActionExpandListener() {
+                    @Override
+                    public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                        return true;
+                    }
 
+                    @Override
+                    public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                        finish();
+                        return true;
+                    }
+                });
         // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false);
@@ -160,14 +191,11 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         super.onSaveInstanceState(savedInsatanceState);
         savedInsatanceState.putLong(CURRENT_FIELD_ID, current_field_id);
         savedInsatanceState.putInt(SEARCH_WHAT, search_what);
-        savedInsatanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        recyclerView.getLayoutManager()
-                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
+        if ( mAdapter.getCursor() != null ) {
+            recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
+        }
+        savedInsatanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerview_position);
+        savedInsatanceState.putString(SEARCH_VALUE, search_value);
     }
 
     @Override
@@ -214,6 +242,10 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
+        if ( recyclerview_position != null ) {
+            recyclerView.getLayoutManager()
+                    .onRestoreInstanceState(recyclerview_position);
+        }
         result_count.setText(String.valueOf(data.getCount()));
         if (data.getCount() == 0) {
             not_found.setText(R.string.not_found);

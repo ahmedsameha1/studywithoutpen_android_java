@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
@@ -145,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements
     private NetworkReceiver networkReceiver;
     private String pay_load;
     private RecyclerView recyclerView;
+    private Parcelable recyclerview_position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,6 +162,9 @@ public class MainActivity extends AppCompatActivity implements
         } catch (android.database.sqlite.SQLiteException e) {
             DatabaseHelper.getInstance(this).close();
 //            recreate();
+        }
+        if ( savedInstanceState != null ) {
+            recyclerview_position = savedInstanceState.getParcelable(RECYCLERVIEW_POSITION);
         }
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -222,6 +227,10 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 mAdapter.swapCursor(data);
+                if ( recyclerview_position != null ) {
+                    recyclerView.getLayoutManager()
+                            .onRestoreInstanceState(recyclerview_position);
+                }
                 if (data.moveToFirst()) {
                     first_field_id = data.getLong(0);
                 }
@@ -678,7 +687,8 @@ public class MainActivity extends AppCompatActivity implements
         outState.putStringArrayList(TO_EXPORT_FIELDS, to_export_fields);
         outState.putString(TO_EXPORT_FILE_NAME, to_export_file_name);
         outState.putString(PAY_LOAD_STRING, pay_load);
-        outState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
+        recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(RECYCLERVIEW_POSITION, recyclerview_position);
     }
 
     @Override
@@ -687,8 +697,6 @@ public class MainActivity extends AppCompatActivity implements
         to_export_fields = savedInstanceState.getStringArrayList(TO_EXPORT_FIELDS);
         to_export_file_name = savedInstanceState.getString(TO_EXPORT_FILE_NAME);
         pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
-        recyclerView.getLayoutManager()
-                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
     }
 
     @Override
@@ -747,7 +755,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
         Calendar cal = new GregorianCalendar(TimeZone.getDefault());
-        cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH) + 1);
+        cal.add(Calendar.DAY_OF_MONTH, 1);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);

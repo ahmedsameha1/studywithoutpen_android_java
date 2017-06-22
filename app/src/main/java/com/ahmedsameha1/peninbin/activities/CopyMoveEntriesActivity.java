@@ -5,6 +5,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -45,6 +46,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
     private long current_field_id;
     private SortOptions sortOption;
     private  RecyclerView recyclerView;
+    private Parcelable recyclerview_position;
 
 
 
@@ -62,6 +64,9 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         fastScroller.setRecyclerView(recyclerView);
         // Connect the scroller to the recycler (to let the recycler scroll the scroller's handle)
         recyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
+        if ( savedInstanceState != null ) {
+            recyclerview_position = savedInstanceState.getParcelable(RECYCLERVIEW_POSITION);
+        }
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
@@ -134,6 +139,10 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mAdapter.swapCursor(cursor);
+        if ( recyclerview_position != null ) {
+            recyclerView.getLayoutManager()
+                    .onRestoreInstanceState(recyclerview_position);
+        }
     }
 
     @Override
@@ -154,13 +163,8 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(RECYCLERVIEW_POSITION, recyclerView.getLayoutManager().onSaveInstanceState());
+        recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(RECYCLERVIEW_POSITION, recyclerview_position);
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        recyclerView.getLayoutManager()
-                .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
-    }
 }

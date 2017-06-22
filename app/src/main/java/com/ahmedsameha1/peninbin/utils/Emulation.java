@@ -186,7 +186,7 @@ public class Emulation {
         Calendar calendar_1 = Calendar.getInstance();
         long long_utc = System.currentTimeMillis();
         calendar_1.setTimeInMillis(long_utc);
-        calendar_1.set(Calendar.DAY_OF_MONTH, calendar_1.get(Calendar.DAY_OF_MONTH) + 1);
+        calendar_1.add(Calendar.DAY_OF_MONTH, 1);
         calendar_1.set(Calendar.HOUR_OF_DAY, 0);
         calendar_1.set(Calendar.MINUTE, 5);
         calendar_1.set(Calendar.SECOND, 0);
@@ -194,14 +194,16 @@ public class Emulation {
         Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
                 new String[]{Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
                 Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NOT NULL",
-                new String[]{field_id + ""}, null, null, "datetime(" + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + ") DESC");
+                new String[]{String.valueOf(field_id)}, null, null, "datetime(" + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + ") DESC");
         int count = cursor.getCount();
         if (count > 0) {
             cursor.moveToFirst();
             String date_string = cursor.getString(0);
+            cursor.close();
             Cursor cursor1 = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
                     Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " = ? ", new String[]{date_string}, null, null, null);
             int number_of_entries_last_date = cursor1.getCount();
+            cursor1.close();
             long date_millis = Timestamp.valueOf(date_string).getTime();
             long now_millis = System.currentTimeMillis();
             Calendar calendar_date = Calendar.getInstance(Locale.getDefault());
@@ -218,10 +220,10 @@ public class Emulation {
             }
             Calendar calendar_2 = Calendar.getInstance();
             calendar_2.setTime(utc_date_of_date_string);
-            calendar_2.set(Calendar.DAY_OF_MONTH, calendar_2.get(Calendar.DAY_OF_MONTH) + 1);
+            calendar_2.add(Calendar.DAY_OF_MONTH, 1);
             if (now_millis >= date_millis) {
                 if (fmt.format(calendar_date.getTime()).equals(fmt.format(calendar_now.getTime()))) {     // in the same day
-                    if (remaining_this_day == 0) {
+                    if (remaining_this_day <= 0) {
                         return simpleDateFormat.format(calendar_2.getTime());
                     } else {
                         return date_string;
@@ -230,7 +232,7 @@ public class Emulation {
                     return simpleDateFormat.format(calendar_1.getTime());
                 }
             } else {
-                if (remaining_this_day == 0) {
+                if (remaining_this_day <= 0) {
                     return simpleDateFormat.format(calendar_2.getTime());
                 } else {
                     return date_string;
@@ -269,7 +271,7 @@ public class Emulation {
         resultPendingIntent =
                 PendingIntent.getActivity(
                         context,
-                        0,
+                        (int) System.currentTimeMillis(),
                         notifyIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
@@ -317,7 +319,7 @@ public class Emulation {
         resultPendingIntent =
                 PendingIntent.getActivity(
                         context,
-                        0,
+                        (int) System.currentTimeMillis(),
                         notifyIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
@@ -354,7 +356,7 @@ public class Emulation {
         resultPendingIntent =
                 PendingIntent.getActivity(
                         context,
-                        0,
+                        (int) System.currentTimeMillis(),
                         notifyIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
@@ -427,7 +429,7 @@ public class Emulation {
                 int number_of_everyday_entries = field_cursor.getInt(1);
                 Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                         Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
-                                + " >= ? ", new String[]{String.valueOf(field_id), emulated_creation_time_string}, null, null,
+                                + " >= datetime(?) ", new String[]{String.valueOf(field_id), emulated_creation_time_string}, null, null,
                         Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
                                 + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
                 int number_of_days = cursor.getCount() / number_of_everyday_entries;
@@ -471,7 +473,9 @@ public class Emulation {
                 } finally {
                     sqLiteDatabase.endTransaction();
                 }
+                cursor.close();
             }
+            field_cursor.close();
         }
     }
 

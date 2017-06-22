@@ -669,7 +669,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         mTracker.setScreenName(ActivityUtility.getVersionCode(this) + this.getLocalClassName());
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
-
+// TODO: 6/18/17 review all the add to entry wrong answers in database in  the five activities 
+    // TODO: 6/19/17 bug of clicking quick test of field then open quick test on another field 
 
     @Override
     public void onStop() {

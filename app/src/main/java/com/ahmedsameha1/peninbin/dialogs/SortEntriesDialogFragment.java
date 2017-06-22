@@ -3,6 +3,7 @@ package com.ahmedsameha1.peninbin.dialogs;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -21,10 +22,12 @@ import com.ahmedsameha1.peninbin.utils.SortOptions;
  * Created by ahmed on 12/20/2015.
  */
 public class SortEntriesDialogFragment extends DialogFragment {
+    public static final String INITIAL_SORT_OPTION = "intial_sort_option";
     private DatabaseReadOperations databaseOperations;
     private Context context;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
+    private SortOptions sort_option;
 
 
     @Override
@@ -33,6 +36,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
         databaseOperations = new DatabaseReadOperations(getActivity());
         current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
+        sort_option = (SortOptions) getArguments().getSerializable(INITIAL_SORT_OPTION);
     }
     @NonNull
     @Override
@@ -62,6 +66,50 @@ public class SortEntriesDialogFragment extends DialogFragment {
                 sort_question_asc.setVisibility(View.VISIBLE);
                 sort_question_desc.setVisibility(View.VISIBLE);
 
+            switch ( sort_option ) {
+                case SORT_CREATION_DATE_DESC:
+                    sort_creation_desc.setTextColor(Color.RED);
+                    break ;
+                case SORT_ANSWER_DESC:
+                    sort_answer_desc.setTextColor(Color.RED);
+                    break ;
+                case SORT_QUESTION_ASC:
+                    sort_question_asc.setTextColor(Color.RED);
+                    break;
+                case SORT_ANSWER_ASC:
+                    sort_answer_asc.setTextColor(Color.RED);
+                    break;
+                case SORT_DATE_DESC:
+                    sort_date_desc.setTextColor(Color.RED);
+                    break;
+                case SORT_DATE_ASC:
+                    sort_date_asc.setTextColor(Color.RED);
+                    break ;
+                case SORT_QUESTION_DESC:
+                    sort_question_desc.setTextColor(Color.RED);
+                    break;
+                case SORT_CREATION_DATE_ASC:
+                    sort_creation_asc.setTextColor(Color.RED);
+                    break;
+                case SORT_ORDER_ASC:
+                    sort_entry_order_asc.setTextColor(Color.RED);
+                    break ;
+                case SORT_ORDER_DESC:
+                    sort_entry_order_desc.setTextColor(Color.RED);
+                    break;
+                case SORT_RANK_ASC:
+                    sort_entry_rank_asc.setTextColor(Color.RED);
+                    break ;
+                case SORT_RANK_DESC:
+                    sort_entry_rank_desc.setTextColor(Color.RED);
+                    break ;
+                case SORT_WRONGNESS_ASC:
+                    sort_entry_wrongness_asc.setTextColor(Color.RED);
+                    break ;
+                case SORT_WRONGNESS_DESC:
+                    sort_entry_wrongness_desc.setTextColor(Color.RED);
+                    break ;
+            }
             if ( databaseOperations.isThereEntryOrder(current_field_id) ){
                 sort_entry_order_asc.setVisibility(View.VISIBLE);
                 sort_entry_order_desc.setVisibility(View.VISIBLE);

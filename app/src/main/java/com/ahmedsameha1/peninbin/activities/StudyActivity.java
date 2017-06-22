@@ -918,6 +918,7 @@ public class StudyActivity extends AppCompatActivity implements
             searchIntent.setAction(Intent.ACTION_SEARCH);
             searchIntent.putExtra(SearchManager.QUERY, query);
             searchIntent.putExtra(CURRENT_FIELD_ID, current_field_id);
+            searchIntent.putExtra(SearchActivity.SEARCH_VALUE, query);
             startActivityForResult(searchIntent, SELECT_ENTRY_REQUEST);
         } else {
             super.startActivity(intent);
