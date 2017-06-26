@@ -15,5 +15,15 @@
     <item
         android:id="@+id/wrong_answered_count"
         android:title="@string/wrongly_answered_menu" />
+    <item
+        android:id="@+id/copy_question"
+        android:title="@string/copy_question"/>
+    <item
+        android:id="@+id/copy_answer"
+        android:title="@string/copy_answer"/>
+    <item android:id="@+id/substitute_question"
+        android:title="@string/substitute_question"/>
+    <item android:id="@+id/substitute_answer"
+        android:title="@string/substitute_answer"/>
 
 </menu>

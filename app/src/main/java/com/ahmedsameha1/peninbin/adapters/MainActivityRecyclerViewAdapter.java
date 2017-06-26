@@ -92,9 +92,9 @@ public class MainActivityRecyclerViewAdapter extends
         viewHolder.field_id = data.getLong(0);
         final String fieldName = data.getString(2);
         viewHolder.delete.setOnClickListener(v -> {
-            if ( (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + viewHolder.field_id)) &&
-                    (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + viewHolder.field_id)) &&
-                    (!sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + viewHolder.field_id)) &&
+            if ( (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + Constants.PAUSING + viewHolder.field_id)) &&
+                    (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + Constants.PAUSING + viewHolder.field_id)) &&
+                    (!sharedPreferences.contains(FullyRandomTestActivity.class.getName() + Constants.PAUSING + viewHolder.field_id)) &&
                     !ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
                     && !Emulation.isAnyThreadRunning()) {
                 Bundle bundle = new Bundle();
@@ -104,9 +104,9 @@ public class MainActivityRecyclerViewAdapter extends
                 fragment.setArguments(bundle);
                 fragment.setMainActivityRecyclerViewViewHolder(viewHolder);
                 fragment.show(((AppCompatActivity) context).getSupportFragmentManager(), GET_CONFIRMATION);
-            } else if ( sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + viewHolder.field_id) ||
-                    sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + viewHolder.field_id) ||
-                    sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + viewHolder.field_id) ){
+            } else if ( sharedPreferences.contains(EnhancedTestActivity.class.getName() + Constants.PAUSING + viewHolder.field_id) ||
+                    sharedPreferences.contains(StudyAPeriodActivity.class.getName() + Constants.PAUSING + viewHolder.field_id) ||
+                    sharedPreferences.contains(FullyRandomTestActivity.class.getName() + Constants.PAUSING + viewHolder.field_id) ){
                 Toast toast = Toast.makeText(context, R.string.wait_until_current_session_pausing_finish, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();

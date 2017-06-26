@@ -87,7 +87,8 @@ public class FieldActivity extends AppCompatActivity implements
         FieldPropertiesDialogFragment.Contact,
         CopyFieldDialogFragment.CopyField,
         TextToSpeech.OnInitListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        SharedPreferences.OnSharedPreferenceChangeListener,
+        FieldActivityRecyclerViewAdapter.Contact {
     public static final String SCREEN_NAME = "FieldActivity";
     public static final int STUDY_PERIOD = 0;
     public static final int ENHANCED_TEST = 1;
@@ -96,7 +97,6 @@ public class FieldActivity extends AppCompatActivity implements
     public static final int COPY_MOVE = 4;
     public static final int FIELD_PROPERTIES = 5;
     public static final int Field_INFORMATION = 6;
-    private static final String QUERY_KEY = "query_key";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int SEARCH_ENTRIES_LOADER_ID = 1;
     public static final String CURRENT_FIELD_NAME = "currentField";
@@ -146,7 +146,6 @@ public class FieldActivity extends AppCompatActivity implements
     private RecyclerView recyclerView;
     private TextView not_found;
     private Parcelable recyclerview_position;
-    private SearchView searchView;
 
 
     @Override
@@ -231,8 +230,7 @@ public class FieldActivity extends AppCompatActivity implements
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
-                    if (id == SEARCH_ENTRIES_LOADER_ID) {
-                        String searchString = args.getString(QUERY_KEY);
+                    if (id == SEARCH_ENTRIES_LOADER_ID && search_value != null ) {
                         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(FieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -243,7 +241,7 @@ public class FieldActivity extends AppCompatActivity implements
                                         + "  q LIKE ? "
                                         + " OR " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                                         + " a LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
-                                new String[]{current_field_id + "", "%" + searchString + "%", current_field_id + "", "%" + searchString + "%"});
+                                new String[]{current_field_id + "", "%" + search_value + "%", current_field_id + "", "%" + search_value + "%"});
                         return cursorLoaderAndUpdateDatabase;
 
                     } else if (id == GET_ENTRIES_LOADER_ID) {
@@ -387,10 +385,8 @@ public class FieldActivity extends AppCompatActivity implements
             getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
             search_string_highlight.replace(0, search_string_highlight.length(), "");
         } else {
-            Bundle bundle = new Bundle();
-            bundle.putString(QUERY_KEY, search_value);
             search_string_highlight.replace(0, search_string_highlight.length(), search_value);
-            getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, bundle, getFieldEntries);
+            getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, null, getFieldEntries);
         }
         if (Money.getNetworkDownGetPurchasesesStatus(this)) {
             IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
@@ -551,7 +547,7 @@ public class FieldActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.field_activity_menu, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         MenuItem searchItem = menu.findItem(R.id.search);
-        searchView = (SearchView) searchItem.getActionView();
+        SearchView searchView = (SearchView) searchItem.getActionView();
         if ( search_value != null ) {
             searchItem.expandActionView();
             searchView.setQuery(search_value, false);
@@ -612,8 +608,14 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     public void sort(SortOptions sortOption) {
         this.sortOption = sortOption;
-        getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
-        search_string_highlight.replace(0, search_string_highlight.length(), "");
+        getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
+        getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
+        ActivityUtility.antiCrossFade(content,mLoadingView,FieldActivity.this);
+        if ( is_load_entries ) {
+            getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
+        } else {
+            getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, null, getFieldEntries);
+        }
     }
 
     @Override
@@ -668,7 +670,7 @@ public class FieldActivity extends AppCompatActivity implements
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-        if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + current_field_id)
+        if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + Constants.PAUSING + current_field_id)
                 && !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + current_field_id)
                 && !Emulation.isAnyThreadRunning()) {
             if (databaseReadOperations.getEntriesNumberForTests(current_field_id, question_data_type) > 0) {
@@ -722,7 +724,7 @@ public class FieldActivity extends AppCompatActivity implements
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-        if (!sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + current_field_id)
+        if (!sharedPreferences.contains(FullyRandomTestActivity.class.getName() + Constants.PAUSING + current_field_id)
                 && !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + current_field_id)
                 && !Emulation.isAnyThreadRunning()) {
             if (databaseReadOperations.getEntriesNumberForTests(current_field_id, question_data_type) > 0) {
@@ -774,7 +776,7 @@ public class FieldActivity extends AppCompatActivity implements
         Bundle bundle = new Bundle();
         bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
         boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-        if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + current_field_id)
+        if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + Constants.PAUSING + current_field_id)
                 && !Emulation.isAnyThreadRunning()) {
             if (databaseReadOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
                 if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id)) {
@@ -802,5 +804,14 @@ public class FieldActivity extends AppCompatActivity implements
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
         }
+    }
+    @Override
+    public void substituteQuestion(long entry_id, String text) {
+        cursorLoaderAndUpdateDatabase.substituteQuestion(entry_id, question_data_type, text);
+    }
+
+    @Override
+    public void substituteAnswer(long entry_id, String text) {
+        cursorLoaderAndUpdateDatabase.substituteAnswer(entry_id, question_data_type, text);
     }
 }

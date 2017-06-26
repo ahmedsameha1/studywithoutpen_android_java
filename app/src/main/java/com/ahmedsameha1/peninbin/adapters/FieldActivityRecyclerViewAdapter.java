@@ -3,13 +3,18 @@ package com.ahmedsameha1.peninbin.adapters;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.text.Spannable;
@@ -29,11 +34,15 @@ import com.ahmedsameha1.peninbin.activities.SearchActivity;
 import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
@@ -60,6 +69,7 @@ public class FieldActivityRecyclerViewAdapter extends
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         this.question_data_type = databaseOperations.getQuestionDataType(field_id);
     }
+
 
     @Override
     public FieldActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -118,9 +128,9 @@ public class FieldActivityRecyclerViewAdapter extends
             }
         });
         viewHolder.delete.setOnClickListener(v -> {
-            if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + field_id) &&
-                    !sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + field_id) &&
-                    !sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + field_id) &&
+            if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + Constants.PAUSING + field_id) &&
+                    !sharedPreferences.contains(StudyAPeriodActivity.class.getName() + Constants.PAUSING + field_id) &&
+                    !sharedPreferences.contains(FullyRandomTestActivity.class.getName() + Constants.PAUSING + field_id) &&
                     !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + field_id) &&
                     !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + field_id) &&
                     !Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
@@ -138,9 +148,9 @@ public class FieldActivityRecyclerViewAdapter extends
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-            } else if (sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + field_id) ||
-                    sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + field_id) ||
-                    sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + field_id) ||
+            } else if (sharedPreferences.contains(EnhancedTestActivity.class.getName() + Constants.PAUSING + field_id) ||
+                    sharedPreferences.contains(StudyAPeriodActivity.class.getName() + Constants.PAUSING + field_id) ||
+                    sharedPreferences.contains(FullyRandomTestActivity.class.getName() + Constants.PAUSING + field_id) ||
                     sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + field_id) ||
                     sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + field_id)) {
                 Toast toast = Toast.makeText(context, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
@@ -162,6 +172,12 @@ public class FieldActivityRecyclerViewAdapter extends
         viewHolder.more.setOnClickListener(view -> {
             PopupMenu popup = new PopupMenu(context, view);
             ((Activity) context).getMenuInflater().inflate(R.menu.same_search_menu, popup.getMenu());
+            ClipboardManager mclipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clipData = mclipboard.getPrimaryClip();
+            if ( clipData == null || clipData.getItemCount() <= 0) {
+                popup.getMenu().findItem(R.id.substitute_question).setEnabled(false);
+                popup.getMenu().findItem(R.id.substitute_answer).setEnabled(false);
+            }
             popup.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.same_question) {
                     if (databaseOperations.moreThanOneAnswerSameQuestion(field_id, question)) {
@@ -200,6 +216,58 @@ public class FieldActivityRecyclerViewAdapter extends
                             context.getString(R.string.asked, String.valueOf(asked_counter)), Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
+                } else if (item.getItemId() == R.id.copy_question) {
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText(context.getString(R.string._question), question);
+                    clipboard.setPrimaryClip(clip);
+                } else if (item.getItemId() == R.id.copy_answer) {
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText(context.getString(R.string.answer), answer);
+                    clipboard.setPrimaryClip(clip);
+                } else if (item.getItemId() == R.id.substitute_question) {
+                    ClipData.Item item_ = clipData.getItemAt(0);
+                    if (item_ != null && item_.coerceToText(context).toString().trim().length() > 0) {
+                        String text = item_.coerceToText(context).toString().trim();
+                        if (!text.equals(question)) {
+                            if (!databaseOperations.checkEntryDuplication(text, answer, field_id, question_data_type)) {
+                                new AlertDialog.Builder(context)
+                                        .setTitle(R.string.question_will)
+                                        .setMessage(text)
+                                        .setPositiveButton(R.string.ok, (d, i) -> ((Contact) context).substituteQuestion(entry_id, text))
+                                        .create().show();
+                            } else {
+                                Toast toast = Toast.makeText(context, R.string.already_inserted, Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
+                        } else {
+                            Toast toast = Toast.makeText(context, R.string.same_text, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
+                    }
+                } else if (item.getItemId() == R.id.substitute_answer) {
+                    ClipData.Item item_ = clipData.getItemAt(0);
+                    if (item_ != null && item_.getText() != null && item_.getText().toString().trim().length() > 0) {
+                        String text = item_.getText().toString().trim();
+                        if (!text.equals(answer)) {
+                            if (!databaseOperations.checkEntryDuplication(question, text, field_id, question_data_type)) {
+                                new AlertDialog.Builder(context)
+                                        .setTitle(R.string.answer_will)
+                                        .setMessage(text)
+                                        .setPositiveButton(R.string.ok, (d, i) -> ((Contact) context).substituteAnswer(entry_id, text))
+                                        .create().show();
+                            } else {
+                                Toast toast = Toast.makeText(context, R.string.already_inserted, Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
+                        } else {
+                            Toast toast = Toast.makeText(context, R.string.same_text, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
+                    }
                 } else {
                     Toast toast = Toast.makeText(context,
                             context.getString(R.string.wrongly_answered, String.valueOf(wrong_answer_counter)), Toast.LENGTH_SHORT);
@@ -214,16 +282,17 @@ public class FieldActivityRecyclerViewAdapter extends
         viewHolder.answer.setText(prepare_search_spans(answer, search_string));
         viewHolder.wrongness_level.setText(String.format(Locale.getDefault(), "%.0f%%", wrongness_level));
     }
+
     private Spannable prepare_search_spans(String text, StringBuilder search_value) {
         Spannable spannable = Spannable.Factory.getInstance().newSpannable(text);
-        if ( search_value.length() > 0 ) {
+        if (search_value.length() > 0) {
             String text_lowercase = text.toLowerCase();
             String search_value_lowercase = search_value.toString().toLowerCase();
             int value_lowercase_length = search_value_lowercase.length();
             if (text_lowercase.contains(search_value_lowercase)) {
                 int text_lowercase_length = text_lowercase.length();
                 if (!text_lowercase.equals(search_value_lowercase)) {
-                    if (text_lowercase.matches("\\S+")) { // there is no white spaces in the text
+                    if (text_lowercase.matches("[\\p{L}0-9]+")) { // only unicode characters and digits
                         int start = 0;
                         while (start < text_lowercase_length) {
                             if (text_lowercase.indexOf(search_value_lowercase, start) == start) {
@@ -248,13 +317,13 @@ public class FieldActivityRecyclerViewAdapter extends
                             }
                         }
                         if (text_lowercase.startsWith(search_value_lowercase) &&
-                                text_lowercase.substring(value_lowercase_length, value_lowercase_length + 1).matches("\\s")) {
+                                text_lowercase.substring(value_lowercase_length, value_lowercase_length + 1).matches("[\\s\\p{Punct}]")) {
                             spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
                                     0, value_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                         }
                         if (text_lowercase.endsWith(search_value_lowercase) &&
                                 text_lowercase.substring(text_lowercase_length - value_lowercase_length - 1,
-                                        text_lowercase_length - value_lowercase_length).matches("\\s")) {
+                                        text_lowercase_length - value_lowercase_length).matches("[\\s\\p{Punct}]")) {
                             spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
                                     text_lowercase_length - value_lowercase_length, text_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                         }
@@ -266,7 +335,7 @@ public class FieldActivityRecyclerViewAdapter extends
                                 } else {
                                     k += strings[i].length() + value_lowercase_length;
                                 }
-                                if (strings[i].matches(".*\\s+") && strings[i + 1].matches("\\s+.*")) {
+                                if (strings[i].matches(".*[\\s\\p{Punct}]+") && strings[i + 1].matches("[\\s\\p{Punct}]+.*")) {
                                     spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
                                             k, k + value_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                 }
@@ -280,5 +349,10 @@ public class FieldActivityRecyclerViewAdapter extends
             }
         }
         return spannable;
+    }
+
+    public interface Contact {
+        void substituteQuestion(long entry_id, String text);
+        void substituteAnswer(long entry_id, String text);
     }
 }

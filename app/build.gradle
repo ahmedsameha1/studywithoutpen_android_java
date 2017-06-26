@@ -8,8 +8,8 @@ android {
         applicationId "com.ahmedsameha1.peninbin"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 82
-        versionName "3.36"
+        versionCode 83
+        versionName "3.37"
         multiDexEnabled true
 
         jackOptions {

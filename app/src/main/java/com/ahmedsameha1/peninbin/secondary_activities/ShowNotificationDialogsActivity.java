@@ -62,7 +62,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
 
                     break;
                 case ENHANCED_TEST_DIALOG:
-                    if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING + current_field_id)
+                    if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + Constants.PAUSING + current_field_id)
                             && !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + current_field_id)) {
 
                         if (databaseReadOperations.getEntriesNumberForTests(current_field_id,question_data_type) > 0) {
@@ -111,7 +111,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                     }
                     break;
                 case FULLY_RANDOM_TEST_DIALOG:
-                    if (!sharedPreferences.contains(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING + current_field_id)
+                    if (!sharedPreferences.contains(FullyRandomTestActivity.class.getName() + Constants.PAUSING + current_field_id)
                             && !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + current_field_id)) {
 
                         if (databaseReadOperations.getEntriesNumberForTests(current_field_id,question_data_type) > 0) {
@@ -158,7 +158,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                     }
                     break;
                 case STUDY_PERIOD_DIALOG:
-                    if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING + current_field_id)) {
+                    if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + Constants.PAUSING + current_field_id)) {
 
                         if (databaseReadOperations.getEntriesNumberForStudyAPeriod(current_field_id, question_data_type) > 0) {
                             if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id)) {

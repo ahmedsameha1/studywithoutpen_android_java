@@ -131,7 +131,7 @@ public class QuickTestActivity extends FullyRandomTest implements
     private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
     private boolean is_time_of_answer_elapsed = false;
-    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this :: DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
+    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
     private boolean obfuscate;
 
 
@@ -156,7 +156,7 @@ public class QuickTestActivity extends FullyRandomTest implements
             isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
             obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
             question_data_type = databaseOperations.getQuestionDataType(current_field_id);
-            int [] time_of_answer_data = databaseOperations.getTimeOfAnswerOfTests(current_field_id);
+            int[] time_of_answer_data = databaseOperations.getTimeOfAnswerOfTests(current_field_id);
             reading_question_letter_second = time_of_answer_data[0];
             find_answer_time = time_of_answer_data[1];
             typing_answer_letter_second = time_of_answer_data[2];
@@ -252,22 +252,22 @@ public class QuickTestActivity extends FullyRandomTest implements
                 public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                     if (loader.getId() == GET_ENTRIES_LOADER_ID) {
                         fieldEntriesCursor = data;
-                            if (percent_or_number == PERCENTAGE) {
-                                listForTest = getListForTest(percentage);
-                            } else if (percent_or_number == NUMBER) {
-                                listForTest = getListForTest(number);
-                            }
-                            if (listForTest != null) {
-                                questionsNumber = listForTest.length;
-                                showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                                showQuestion();
-                                enterAnswer.requestFocus();
-                                is_testing_now = true;
-                            } else {
-                                finish();
-                                ExitActivity.exit(QuickTestActivity.this);
-                            }
-                        ActivityUtility.crossFade(content,mLoadingView,QuickTestActivity.this);
+                        if (percent_or_number == PERCENTAGE) {
+                            listForTest = getListForTest(percentage);
+                        } else if (percent_or_number == NUMBER) {
+                            listForTest = getListForTest(number);
+                        }
+                        if (listForTest != null) {
+                            questionsNumber = listForTest.length;
+                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+                            showQuestion();
+                            enterAnswer.requestFocus();
+                            is_testing_now = true;
+                        } else {
+                            finish();
+                            ExitActivity.exit(QuickTestActivity.this);
+                        }
+                        ActivityUtility.crossFade(content, mLoadingView, QuickTestActivity.this);
                     } else if (loader.getId() == GET_SPECIAL_TEXT_LOADER_ID) {
                         if (symbol == null && customable_text == null) {
                             symbol = new String[data.getCount()];
@@ -289,58 +289,58 @@ public class QuickTestActivity extends FullyRandomTest implements
                 }
             };
             check.setOnClickListener(view -> {
-                    check_card_view.startAnimation(animAlpha);
-                        boolean result = checkAnAnswer();
-                        if (triesCounter < permitedTriesNumber && !result) {
-                            if ( obfuscate ) {
-                                showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
-                            } else {
-                                showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                            }
-                            showTries.setText(Integer.toString(triesCounter + 1));
-                        } else {
-                            triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                            cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                            currentQuestionCounter++;
-                            if (currentQuestionCounter >= questionsNumber) {
-                                check.setEnabled(false);
-                                dont_know.setEnabled(false);
-                                before_showing_result_dialog = true;
+                check_card_view.startAnimation(animAlpha);
+                boolean result = checkAnAnswer();
+                if (triesCounter < permitedTriesNumber && !result) {
+                    if (obfuscate) {
+                        showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
+                    } else {
+                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                    }
+                    showTries.setText(Integer.toString(triesCounter + 1));
+                } else {
+                    triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                    cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+                    currentQuestionCounter++;
+                    if (currentQuestionCounter >= questionsNumber) {
+                        check.setEnabled(false);
+                        dont_know.setEnabled(false);
+                        before_showing_result_dialog = true;
 
-                                show_result_dialog_runnable = () -> {
+                        show_result_dialog_runnable = () -> {
 
-                                        showQuestion.setText(R.string.test_has_completed);
-                                        enterAnswer.setText(R.string.test_has_completed);
-                                        show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                                        show_result_linearlayout.setPadding(0, 0, 0, 0);
-                                        show_result_dialog();
+                            showQuestion.setText(R.string.test_has_completed);
+                            enterAnswer.setText(R.string.test_has_completed);
+                            show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                            show_result_linearlayout.setPadding(0, 0, 0, 0);
+                            show_result_dialog();
 
-                                };
-                                mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
-                                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-                                String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
-                                Toast toast = Toast.makeText(QuickTestActivity.this, time, Toast.LENGTH_LONG);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
-                                currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                                is_testing_now = false;
-                                enterAnswer.setEnabled(false);
-                                showNumberOfQuestions.setText("");
-                                remainingQuestionCounter.setText("");
-                                showTries.setText("");
-                                enterAnswer.setHint(R.string.enter_your_answer);
-                                hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                                mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-                                time_of_starting_time_of_answer = -1;
-                                is_time_of_answer_elapsed = false;
-                                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-                                tool_bar_timer.stop();
-                            } else {
-                                showQuestion();
-                            }
-                        }
-                    enterAnswer.setHint(R.string.enter_your_answer);
+                        };
+                        mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                        String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
+                        Toast toast = Toast.makeText(QuickTestActivity.this, time, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                        is_testing_now = false;
+                        enterAnswer.setEnabled(false);
+                        showNumberOfQuestions.setText("");
+                        remainingQuestionCounter.setText("");
+                        showTries.setText("");
+                        enterAnswer.setHint(R.string.enter_your_answer);
+                        hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                        time_of_starting_time_of_answer = -1;
+                        is_time_of_answer_elapsed = false;
+                        lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                        tool_bar_timer.stop();
+                    } else {
+                        showQuestion();
+                    }
+                }
+                enterAnswer.setHint(R.string.enter_your_answer);
                 if (triesCounter == INITIAL_VALUE_OF_TRIES_COUNTER) {
                     show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
                     show_question_linearlayout.setPadding(0, 0, 0, 0);
@@ -402,9 +402,10 @@ public class QuickTestActivity extends FullyRandomTest implements
                     hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
                 }
             });
-            dont_know.setOnClickListener( view -> {
+            dont_know.setOnClickListener(view -> {
                 dont_know_card_view.startAnimation(animAlpha);
-                dontKnow(); });
+                dontKnow();
+            });
             showActionbar.setOnClickListener(v -> {
                 show_actionbar_card_view.startAnimation(animAlpha);
                 if (actionBarShown) {
@@ -477,14 +478,14 @@ public class QuickTestActivity extends FullyRandomTest implements
                 time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
                 is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
                 listForTest = retainedFragment.getListForTest_QuickTestActivity();
-                if ( listForTest == null ) {
+                if (listForTest == null) {
                     getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
                 } else {
                     is_starting_after_destruction = true;
                     restoreUserLayoutChanges(savedInstanceState);
                     if (!before_showing_result_dialog) {
                         if (is_testing_now) {
-                            if ( obfuscate ) {
+                            if (obfuscate) {
                                 showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
                             } else {
                                 showQuestion.setText(listForTest[currentQuestionCounter][0]);
@@ -495,7 +496,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                             check.setEnabled(nextState);
                             enterAnswer.setEnabled(true);
                             ifMoreThanOnce();
-                            if ( is_time_of_answer_elapsed && time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+                            if (is_time_of_answer_elapsed && time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY) {
                                 show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
                                 show_question_linearlayout.setPadding(0, 0, 0, 0);
                                 showQuestion.setTextColor(Color.BLACK);
@@ -531,30 +532,30 @@ public class QuickTestActivity extends FullyRandomTest implements
     @Override
     protected void onResume() {
         super.onResume();
-        if ( !ActivityUtility.hasOpenedDialogs(this) ) {
+        if (!ActivityUtility.hasOpenedDialogs(this)) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
 
             // to set the timer on the tool_bar_timer after recreation of activity due configuration change to the last value
-        } else if ( !is_testing_now ) {
+        } else if (!is_testing_now) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
         }
         /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
          * do not call it after destruction because it will be called from onrestoreinstancestate method
          * do not call it if the test has already finished
          */
-        if ( !isStartingFirstTime && !is_starting_after_destruction && is_testing_now) {
+        if (!isStartingFirstTime && !is_starting_after_destruction && is_testing_now) {
             scheduleWhatToDoAfterTimeOfAnswerElapsed();
         }
         // at this point this flag has performed its role so I return it to its default value
-        if ( isStartingFirstTime ) {
+        if (isStartingFirstTime) {
             isStartingFirstTime = false;
         }
         // at this point this flag has performed its role so I return it to its default value
-        if ( is_starting_after_destruction ) {
+        if (is_starting_after_destruction) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName(ActivityUtility.getVersionCode(this) +SCREEN_NAME);
+        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
@@ -749,7 +750,7 @@ public class QuickTestActivity extends FullyRandomTest implements
 
     @Override
     protected void onPause() {
-        if ( !ActivityUtility.hasOpenedDialogs(this)) {
+        if (!ActivityUtility.hasOpenedDialogs(this)) {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }
@@ -803,12 +804,12 @@ public class QuickTestActivity extends FullyRandomTest implements
         }
                       /* To run scheduleWhatToDoAfterTimeOfAnswerElapsed() method after restarting the activity
         in case the activity destroyed while a dialog is shown */
-        else if ( ActivityUtility.hasOpenedDialogs(this) && time_of_answer > 0 ) {
-            savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000 );
+        else if (ActivityUtility.hasOpenedDialogs(this) && time_of_answer > 0) {
+            savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000);
         }
         // call this method to prevent the dialogs from being shown after the recreation of the activity
         // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
-        if ( is_testing_now ) { // don't close dialogs (exactly the result dialog) if the test already has finished
+        if (is_testing_now) { // don't close dialogs (exactly the result dialog) if the test already has finished
             ActivityUtility.closeOpenedDialogs(this);
         }
         super.onSaveInstanceState(savedInsatanceState);
@@ -899,7 +900,6 @@ public class QuickTestActivity extends FullyRandomTest implements
     }
 
 
-
     private void show_result_dialog() {
         final ShowQuickTestResultDialogFragment fragment = new ShowQuickTestResultDialogFragment();
         Bundle bundle = new Bundle();
@@ -912,13 +912,13 @@ public class QuickTestActivity extends FullyRandomTest implements
 
 
     private void showQuestion() {
-        if ( obfuscate ) {
+        if (obfuscate) {
             showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
         } else {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
         }
-        time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1],
-                reading_question_letter_second,find_answer_time, typing_answer_letter_second);
+        time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
+                reading_question_letter_second, find_answer_time, typing_answer_letter_second);
         showQuestion.scrollTo(0, 0);
         showTries.setText(Integer.toString(triesCounter + 1));
         ifMoreThanOnce();
@@ -948,9 +948,9 @@ public class QuickTestActivity extends FullyRandomTest implements
         this.time_of_answer_do_what = time_of_answer_do_what;
         this.time_of_answer_saved = time_for_answer_saved;
         // to avoid the case if the listfortest has not been prepared yet
-        if ( is_testing_now ) {
-            time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0],listForTest[currentQuestionCounter][1],
-                    reading_question_letter_second,find_answer_time, typing_answer_letter_second);
+        if (is_testing_now) {
+            time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
+                    reading_question_letter_second, find_answer_time, typing_answer_letter_second);
             scheduleWhatToDoAfterTimeOfAnswerElapsed();
         }
     }
@@ -958,11 +958,11 @@ public class QuickTestActivity extends FullyRandomTest implements
 
     @Override
     public void manageTimersDueDialogsShow(boolean isCounting) {
-        if ( isCounting ) {
+        if (isCounting) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
             // to avoid the case if the listfortest has not been prepared yet
-            if ( is_testing_now ) {
+            if (is_testing_now) {
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
             }
         } else {
@@ -971,15 +971,16 @@ public class QuickTestActivity extends FullyRandomTest implements
             mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
             time_of_starting_time_of_answer = -1;
             is_time_of_answer_elapsed = false;
-            if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+            if (time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY) {
                 show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
                 show_question_linearlayout.setPadding(0, 0, 0, 0);
                 showQuestion.setTextColor(Color.WHITE);
             }
         }
     }
+
     void DoWhatYouHaveToDoAfterTimeOfAnswerElapsed() {
-        if ( time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT ) {
+        if (time_of_answer_do_what == Constants.TimeOfAnswer.MOVE_NEXT) {
             setFalse();
             triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
             cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
@@ -1025,7 +1026,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                 };
                 mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
             }
-        } else if ( time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY ) {
+        } else if (time_of_answer_do_what == Constants.TimeOfAnswer.NOTIFY) {
             show_question_linearlayout.setBackgroundResource(R.drawable.time_for_answer_passed_background);
             show_question_linearlayout.setPadding(0, 0, 0, 0);
             showQuestion.setTextColor(Color.BLACK);
@@ -1033,6 +1034,7 @@ public class QuickTestActivity extends FullyRandomTest implements
             time_of_starting_time_of_answer = -1;
         }
     }
+
     private void scheduleWhatToDoAfterTimeOfAnswerElapsed() {
         if (time_of_answer > 0) {
             effective_time_of_answer = time_of_answer * 1000;
@@ -1095,7 +1097,7 @@ public class QuickTestActivity extends FullyRandomTest implements
     @Override
     public void obfuscateText(boolean obfuscate) {
         this.obfuscate = obfuscate;
-        if ( obfuscate ) {
+        if (obfuscate) {
             showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
         } else {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);

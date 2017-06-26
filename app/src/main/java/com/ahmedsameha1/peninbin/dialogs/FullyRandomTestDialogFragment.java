@@ -37,6 +37,7 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
     private long current_field_id;
     private boolean from_notification;
     private String number_suffix;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +64,7 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
             final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
             final ImageButton percentage_or_number_help = (ImageButton) alertDialog.findViewById(R.id.percentage_or_number_help);
             ArrayAdapter<String> number_or_percentage_array_adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.number_or_percentage));
+                    android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.number_or_percentage));
             number_or_percentage.setAdapter(number_or_percentage_array_adapter);
             number_or_percentage_array_adapter.setDropDownViewResource
                     (android.R.layout.simple_spinner_dropdown_item);
@@ -72,17 +73,17 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     String number_string = enterNumber.getText().toString();
-                    if ( i == 0 ) {
+                    if (i == 0) {
                         enterNumber.setHint(R.string.enter_number_of_questions);
-                        if ( number_suffix != null ) {
+                        if (number_suffix != null) {
                             enterNumber.setText(number_string.substring(0, number_string.length() - number_suffix.length()) +
                                     " " + getActivity().getString(R.string._question));
                         }
                     } else {
                         enterNumber.setHint(R.string.enter_percentage);
-                        if ( number_suffix != null ) {
+                        if (number_suffix != null) {
                             enterNumber.setText(number_string.substring(0, number_string.length() - number_suffix.length()) +
-                                    " %" );
+                                    " %");
                         }
                     }
                 }
@@ -119,9 +120,9 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
                 public void afterTextChanged(Editable editable) {
                     String string = editable.toString();
                     String suffix = " " + getActivity().getString(R.string._try);
-                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+                    if ("".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix)) {
 
-                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                    } else if (string.equals(String.valueOf(0)) || !string.matches("[0-9]+")) {
                         enterTries.setText("");
                     } else {
                         string = string + suffix;
@@ -144,14 +145,14 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
                 @Override
                 public void afterTextChanged(Editable editable) {
                     String string = editable.toString();
-                    if ( number_or_percentage.getSelectedItemPosition() == 0) {
+                    if (number_or_percentage.getSelectedItemPosition() == 0) {
                         number_suffix = " " + getActivity().getString(R.string._question);
                     } else {
                         number_suffix = " %";
                     }
-                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + number_suffix) ) {
+                    if ("".equals(string) || string.matches("0*[1-9]+[0-9]*" + number_suffix)) {
 
-                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                    } else if (string.equals(String.valueOf(0)) || !string.matches("[0-9]+")) {
                         enterNumber.setText("");
                     } else {
                         string = string + number_suffix;
@@ -161,80 +162,79 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
                 }
             });
             positiveButton.setOnClickListener(v -> {
-                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity()) ) {
-                try {
-                    String trys_suffix = " " + getActivity().getString(R.string._try);
-                    String try_string = enterTries.getText().toString();
-                    String number_string = enterNumber.getText().toString();
-                    if ( try_string.length() > 0) {
-                        int trys = Integer.parseInt(try_string.substring(0,try_string.length() - trys_suffix.length()));
-                            if ( number_string.length() > 0) {
-                                Double number = Double.parseDouble(number_string.substring(0, number_string.length() - number_suffix.length()));
-                                if (number_or_percentage.getSelectedItemPosition() == 1) {
-                                    if (number <= 100 && number > 0) {
-                                        Intent intent = new Intent(getActivity(), FullyRandomTestActivity.class);
-                                        intent.putExtra(FullyRandomTestActivity.PERCENTAGE_OR_NUMBER, FullyRandomTestActivity.PERCENTAGE);
-                                        intent.putExtra(FullyRandomTestActivity.QUESTION_PERCENTAGE, number);
-                                        intent.putExtra(FullyRandomTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE, false);
-                                        startActivity(intent);
-                                        if ( from_notification ) {
-                                            getActivity().finish();
-                                        }
-                                        dismiss();
-                                    } else {
-                                        Toast toast = Toast.makeText(getActivity(), getString(R.string.percentage_between), Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
+                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity())) {
+                    try {
+                        String trys_suffix = " " + getActivity().getString(R.string._try);
+                        String try_string = enterTries.getText().toString();
+                        String number_string = enterNumber.getText().toString();
+                        int trys;
+                        if (try_string.length() > 0) {
+                            trys = Integer.parseInt(try_string.substring(0, try_string.length() - trys_suffix.length()));
+                        } else {
+                            trys = 1;
+                        }
+                        if (number_string.length() > 0) {
+                            Double number = Double.parseDouble(number_string.substring(0, number_string.length() - number_suffix.length()));
+                            if (number_or_percentage.getSelectedItemPosition() == 1) {
+                                if (number <= 100 && number > 0) {
+                                    Intent intent = new Intent(getActivity(), FullyRandomTestActivity.class);
+                                    intent.putExtra(FullyRandomTestActivity.PERCENTAGE_OR_NUMBER, FullyRandomTestActivity.PERCENTAGE);
+                                    intent.putExtra(FullyRandomTestActivity.QUESTION_PERCENTAGE, number);
+                                    intent.putExtra(FullyRandomTestActivity.PERMITED_TRIES_NUMBER, trys);
+                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                    intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE, false);
+                                    startActivity(intent);
+                                    if (from_notification) {
+                                        getActivity().finish();
                                     }
+                                    dismiss();
                                 } else {
-                                    DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
-                                    int currentNumberOfEntries =
-                                            databaseOperations.getEntriesNumberForTests(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
-                                    int numberInt = Double.valueOf(number).intValue();
-                                    if ( numberInt > 0 && numberInt <= currentNumberOfEntries) {
-                                        Intent intent = new Intent(getActivity(), FullyRandomTestActivity.class);
-                                        intent.putExtra(FullyRandomTestActivity.PERCENTAGE_OR_NUMBER, FullyRandomTestActivity.NUMBER);
-                                        intent.putExtra(FullyRandomTestActivity.QUESTION_NUMBER, numberInt);
-                                        intent.putExtra(FullyRandomTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE, false);
-                                        startActivity(intent);
-                                        if ( from_notification ) {
-                                            getActivity().finish();
-                                        }
-                                        dismiss();
-                                    } else {
-                                        Toast toast = Toast.makeText(getActivity(),
-                                                getString(R.string.number_of_questions_smaller_than, currentNumberOfEntries), Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
+                                    Toast toast = Toast.makeText(getActivity(), getString(R.string.percentage_between), Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
                                 }
                             } else {
-                                if ( number_or_percentage.getSelectedItemPosition() == 1 ){
-                                    Toast toast = Toast.makeText(getActivity(), R.string.please_enter_percentage, Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.TOP,0,400);
-                                    toast.show();
+                                DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
+                                int currentNumberOfEntries =
+                                        databaseOperations.getEntriesNumberForTests(current_field_id, databaseOperations.getQuestionDataType(current_field_id));
+                                int numberInt = Double.valueOf(number).intValue();
+                                if (numberInt > 0 && numberInt <= currentNumberOfEntries) {
+                                    Intent intent = new Intent(getActivity(), FullyRandomTestActivity.class);
+                                    intent.putExtra(FullyRandomTestActivity.PERCENTAGE_OR_NUMBER, FullyRandomTestActivity.NUMBER);
+                                    intent.putExtra(FullyRandomTestActivity.QUESTION_NUMBER, numberInt);
+                                    intent.putExtra(FullyRandomTestActivity.PERMITED_TRIES_NUMBER, trys);
+                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                    intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE, false);
+                                    startActivity(intent);
+                                    if (from_notification) {
+                                        getActivity().finish();
+                                    }
+                                    dismiss();
                                 } else {
-                                    Toast toast = Toast.makeText(getActivity(), R.string.please_enter_number_of_question, Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.TOP,0,400);
+                                    Toast toast = Toast.makeText(getActivity(),
+                                            getString(R.string.number_of_questions_smaller_than, currentNumberOfEntries), Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
                                     toast.show();
                                 }
                             }
-                    } else {
-                        Toast toast = Toast.makeText(getActivity(), R.string.enter_tries_number, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,400);
+                        } else {
+                            if (number_or_percentage.getSelectedItemPosition() == 1) {
+                                Toast toast = Toast.makeText(getActivity(), R.string.please_enter_percentage, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            } else {
+                                Toast toast = Toast.makeText(getActivity(), R.string.please_enter_number_of_question, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
+                    } catch (Resources.NotFoundException e) {
+                        e.printStackTrace();
                     }
-                } catch (NumberFormatException e) {
-                    Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP,0,400);
-                    toast.show();
-                } catch (Resources.NotFoundException e) {
-                    e.printStackTrace();
-                }
                 } else {
                     Toast toast = Toast.makeText(getActivity(), R.string.please_subscribe, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);

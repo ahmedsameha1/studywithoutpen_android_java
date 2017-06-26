@@ -41,7 +41,8 @@ import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScrol
  * Created by ahmed on 3/2/2016.
  */
 public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
-        DeleteEntryDialogFragment.Contact {
+        DeleteEntryDialogFragment.Contact,
+        FieldActivityRecyclerViewAdapter.Contact {
     public static final String SCREEN_NAME = "SearchActivity";
     public static final int SEARCH_LOADER = 0;
     public static final String EDITED_ENTRY_ID = "edited_entry_id";
@@ -59,7 +60,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public static final String SEARCH_VALUE = "search_value";
     public FieldActivityRecyclerViewAdapter mAdapter;
     private long current_field_id;
-    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
+    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private SortOptions sortOption;
     private Tracker mTracker;
     private StringBuilder search_string_highlight = new StringBuilder();
@@ -202,7 +203,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String searchString = args.getString(QUERY_KEY);
         if (search_what == SEARCH_ANSWER) {
-            mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
+            cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                     "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
                             + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -213,7 +214,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                     new String[]{String.valueOf(current_field_id), searchString});
             search_what = 0;
         } else if (search_what == SEARCH_QUESTION) {
-            mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
+            cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                     "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
                             + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -224,7 +225,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                     new String[]{String.valueOf(current_field_id), searchString});
             search_what = 0;
         } else {
-            mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
+            cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                     "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                             + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
                             + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
@@ -236,7 +237,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + " a LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
                     new String[]{String.valueOf(current_field_id), "%" + searchString + "%", current_field_id + "", "%" + searchString + "%"});
         }
-        return mySQLiteCursorLoader;
+        return cursorLoaderAndUpdateDatabase;
     }
 
     @Override
@@ -264,7 +265,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void deleteEntry(long entry_id, int question_data_type) {
-        mySQLiteCursorLoader.deleteEntry(entry_id, question_data_type);
+        cursorLoaderAndUpdateDatabase.deleteEntry(entry_id, question_data_type);
     }
 
     @Override
@@ -278,8 +279,18 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                 String answer = data.getStringExtra(EDITED_ANSWER);
                 int rank = data.getIntExtra(EDITED_RANK, 0);
                 int order = data.getIntExtra(EDITED_ORDER, 0);
-                mySQLiteCursorLoader.editEntry(entry_id, question_data_type, question, answer, rank, order);
+                cursorLoaderAndUpdateDatabase.editEntry(entry_id, question_data_type, question, answer, rank, order);
             }
         }
+    }
+
+    @Override
+    public void substituteQuestion(long entry_id, String text) {
+        cursorLoaderAndUpdateDatabase.substituteQuestion(entry_id, question_data_type, text);
+    }
+
+    @Override
+    public void substituteAnswer(long entry_id, String text) {
+        cursorLoaderAndUpdateDatabase.substituteAnswer(entry_id, question_data_type, text);
     }
 }

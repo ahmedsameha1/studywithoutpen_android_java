@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
+import android.util.Log;
 
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
@@ -134,7 +135,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             sqLiteDatabase.endTransaction();
         }
     }
-
 
 
     public void insertEntry(int question_data_type, String question, String answer, long field_id) {
@@ -269,7 +269,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
                 contentValues.put(Contract.String_Entry.COLUMN_FIELD, field_id);
                 contentValues.put(Contract.String_Entry.COLUMN_RANK, rank);
-                if ( order <= -1 ) {
+                if (order <= -1) {
                     contentValues.putNull(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY);
                 } else {
                     contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, order);
@@ -383,61 +383,15 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
 
-    public void putEntriesTestOrderEnhancedTest(long field_id, int question_data_type, String[][] array) {
-        sqLiteDatabase.beginTransactionNonExclusive();
-try {
-
-
-    if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
-        for (int i = 0; i < array.length; i++) {
-            Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                    Contract.STring.COLUMN_VALUE + " = ? ",
-                    new String[]{array[i][0]}, null, null, null);
-            questionCursor.moveToFirst();
-            long question_id = questionCursor.getLong(0);
-            questionCursor.close();
-            Cursor answerCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                    Contract.STring.COLUMN_VALUE + " = ? ",
-                    new String[]{array[i][1]}, null, null, null);
-            answerCursor.moveToFirst();
-            long answer_id = answerCursor.getLong(0);
-            answerCursor.close();
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER, i);
-            sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.String_Entry.COLUMN_QUESTION + " = ? AND "
-                            + Contract.String_Entry.COLUMN_ANSWER + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                    new String[]{question_id + "", answer_id + "", field_id + ""});
-        }
-    } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
-    }
-    sqLiteDatabase.setTransactionSuccessful();
-} finally {
-    sqLiteDatabase.endTransaction();
-}
-    }
-
-    public void putEntriesTestOrderFullyRandomTest(long field_id, int question_data_type, String[][] array) {
+    public void putEntriesTestOrderEnhancedTest( int question_data_type, String[][] array) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
             if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
                 for (int i = 0; i < array.length; i++) {
-                    Cursor questionCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                            Contract.STring.COLUMN_VALUE + " = ? ",
-                            new String[]{array[i][0]}, null, null, null);
-                    questionCursor.moveToFirst();
-                    long question_id = questionCursor.getLong(0);
-                    questionCursor.close();
-                    Cursor answerCursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                            Contract.STring.COLUMN_VALUE + " = ? ",
-                            new String[]{array[i][1]}, null, null, null);
-                    answerCursor.moveToFirst();
-                    long answer_id = answerCursor.getLong(0);
-                    answerCursor.close();
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER, i);
-                    sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.String_Entry.COLUMN_QUESTION + " = ? AND "
-                                    + Contract.String_Entry.COLUMN_ANSWER + " = ? AND " + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                            new String[]{question_id + "", answer_id + "", field_id + ""});
+                    contentValues.put(Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER, i);
+                    sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                                    Contract.COLUMN_ID + " = ? ", new String[]{array[i][2]});
                 }
             } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
             }
@@ -447,7 +401,23 @@ try {
         }
     }
 
-
+    public void putEntriesTestOrderFullyRandomTest( int question_data_type, String[][] array) {
+        sqLiteDatabase.beginTransactionNonExclusive();
+        try {
+            if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+                for (int i = 0; i < array.length; i++) {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER, i);
+                    sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ",
+                            new String[]{array[i][2]});
+                }
+            } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
+    }
 
 
     public void clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(int study_till_correct_type, long field_id) {
@@ -466,14 +436,14 @@ try {
     }
 
 
-    public void resetEntriesStudyPeriodOrder(long field_id, int study_till_correct_type,  int question_data_type) {
+    public void resetEntriesStudyPeriodOrder(long field_id, int study_till_correct_type, int question_data_type) {
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             ContentValues contentValues = new ContentValues();
-            if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_PERIOD ) {
+            if (study_till_correct_type == Constants.Study_Till_Correct.STUDY_PERIOD) {
                 contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, -1);
-            } else if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST ) {
+            } else if (study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST) {
                 contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER, -1);
-            } else if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST ) {
+            } else if (study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST) {
                 contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER, -1);
             }
             sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
@@ -482,7 +452,8 @@ try {
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
     }
-    public void putEntriesStudyPeriodOrder( int question_data_type, String[][] array) {
+
+    public void putEntriesStudyPeriodOrder(int question_data_type, String[][] array) {
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             for (int i = 0; i < array.length; i++) {
                 ContentValues contentValues = new ContentValues();
@@ -493,6 +464,7 @@ try {
         } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
         }
     }
+
     public void putEntriesStudyPeriodOrder(long field_id, int question_data_type, String[][] array) {
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             for (int i = 0; i < array.length; i++) {
@@ -518,17 +490,16 @@ try {
         }
     }
 
-    public void pauseStudyAPeriod( long field_id, String[][] listForTest, int[] session_data, ArrayList<Integer> repeated_entries, long lastPause ) {
+    public void pauseStudyAPeriod(long field_id, String[][] listForTest, int[] session_data, ArrayList<Integer> repeated_entries, long lastPause) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
 
             sqLiteDatabase.delete(Contract.Study_Till_Correct_Paused.TABLE_NAME, Contract.Study_Till_Correct_Paused.COLUMN_FIELD + " = ? AND "
-                    + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
+                            + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
                     new String[]{String.valueOf(field_id), String.valueOf(Constants.Study_Till_Correct.STUDY_PERIOD)});
             sqLiteDatabase.delete(Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME, Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD + " = ? AND "
-                    + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + " = ? ",
+                            + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + " = ? ",
                     new String[]{String.valueOf(field_id), String.valueOf(Constants.Study_Till_Correct.STUDY_PERIOD)});
-
 
 
             ContentValues contentValues = new ContentValues();
@@ -540,17 +511,15 @@ try {
             sqLiteDatabase.insert(Contract.Study_Till_Correct_Paused.TABLE_NAME, null, contentValues);
 
             contentValues = new ContentValues();
-                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, -1);
+            contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, -1);
             sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
                     Contract.String_Entry.COLUMN_FIELD + " = ? ",
                     new String[]{field_id + ""});
 
 
-            
-
             for (int k = 0; k < listForTest.length; k++) {
                 contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, k);
+                contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER, k);
                 sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ",
                         new String[]{listForTest[k][2]});
             }
@@ -565,10 +534,6 @@ try {
             }
 
 
-
-
-
-
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();
@@ -576,17 +541,16 @@ try {
     }
 
     public void pauseStudyAgainAfterTest(int study_till_correct_type, long field_id, ArrayList<WrongItem> wrongItemArrayList,
-                                         int[] session_data, ArrayList<Integer> repeated_entries, boolean in_repeated,  long last_pause ) {
+                                         int[] session_data, ArrayList<Integer> repeated_entries, boolean in_repeated, long last_pause) {
         sqLiteDatabase.beginTransactionNonExclusive();
         try {
 
             sqLiteDatabase.delete(Contract.Study_Till_Correct_Paused.TABLE_NAME, Contract.Study_Till_Correct_Paused.COLUMN_FIELD + " = ? AND "
-                    + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
+                            + Contract.Study_Till_Correct_Paused.COLUMN_TYPE + " = ? ",
                     new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)});
             sqLiteDatabase.delete(Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME, Contract.Study_Till_Correct_Repeated_Entry.COLUMN_FIELD + " = ? AND "
-                    + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + " = ? ",
+                            + Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE + " = ? ",
                     new String[]{String.valueOf(field_id), String.valueOf(study_till_correct_type)});
-
 
 
             ContentValues contentValues = new ContentValues();
@@ -600,9 +564,9 @@ try {
             sqLiteDatabase.insert(Contract.Study_Till_Correct_Paused.TABLE_NAME, null, contentValues);
 
             contentValues = new ContentValues();
-            if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST ) {
+            if (study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST) {
                 contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER, -1);
-            } else if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST ) {
+            } else if (study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST) {
                 contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER, -1);
             }
             sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
@@ -610,13 +574,11 @@ try {
                     new String[]{field_id + ""});
 
 
-
-
             for (int k = 0; k < wrongItemArrayList.size(); k++) {
                 contentValues = new ContentValues();
-                if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST ) {
+                if (study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST) {
                     contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER, k);
-                } else if ( study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST ) {
+                } else if (study_till_correct_type == Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST) {
                     contentValues.put(Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER, k);
                 }
                 sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ",
@@ -631,10 +593,6 @@ try {
                 contentValues.put(Contract.Study_Till_Correct_Repeated_Entry.COLUMN_TYPE, study_till_correct_type);
                 sqLiteDatabase.insert(Contract.Study_Till_Correct_Repeated_Entry.TABLE_NAME, null, contentValues);
             }
-
-
-
-
 
 
             sqLiteDatabase.setTransactionSuccessful();
@@ -654,7 +612,7 @@ try {
         sqLiteDatabase.insert(Contract.Test_Paused.TABLE_NAME, null, contentValues);
     }
 
-    public void putTestPausedDataFullyRandomTest(long field_id, int[] array, long last_pause ) {
+    public void putTestPausedDataFullyRandomTest(long field_id, int[] array, long last_pause) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Test_Paused.COLUMN_TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
         contentValues.put(Contract.Test_Paused.COLUMN_CURRENT_QUESTION_COUNTER, array[0]);
@@ -1116,7 +1074,6 @@ try {
     }
 
 
-
     public void resetEntriesTestOrderEnhancedTest(long field_id, int question_data_type) {
         if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
             ContentValues contentValues = new ContentValues();
@@ -1190,9 +1147,6 @@ try {
                 + " IN ( SELECT " + Contract.COLUMN_ID + " FROM " + Contract.Not_String.TABLE_NAME + " EXCEPT SELECT "
                 + Contract.Not_String_Entry.COLUMN_QUESTION + " FROM " + Contract.Not_String_Entry.TABLE_NAME + " );");
     }
-
-
-
 
 
     public void clearThisFieldFromTestPausedEnhancedTest(long field_id) {
@@ -1526,7 +1480,7 @@ try {
             long id = (long) params[1];
             String text = (String) params[2];
             ContentValues contentValues = new ContentValues();
-            if ( text != null ) {
+            if (text != null) {
                 contentValues.put(Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING, text);
             } else {
                 contentValues.putNull(Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING);
@@ -1538,10 +1492,10 @@ try {
     }
 
     public void updateFieldType(long field_id, int field_type) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
-            sqLiteOpenHelper.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
-                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
+                Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
     }
 
     public void addOrderId(String order_id) {
@@ -1576,12 +1530,13 @@ try {
                     Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
         }
     }
+
     public void makeAskedCurrentTestRound(long entry_id) {
 
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.ASKED_AT_CURRENT_ROUND);
-            sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
-                    Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND, Constants.TestRound.ASKED_AT_CURRENT_ROUND);
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
+                Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
 
     }
 
@@ -1609,5 +1564,110 @@ try {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, obfuscate ? 1 : 0);
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
+    }
+
+
+    protected ContentChangingTask buildSubstituteAnswer(CursorLoaderAndUpdateDatabase loader) {
+        return (new SubstituteAnswer(loader));
+    }
+
+    public void substituteAnswer(long entry_id, int question_data_type, String answer) {
+        buildSubstituteAnswer(this).execute(sqLiteOpenHelper, entry_id, question_data_type, answer);
+    }
+
+    protected static class SubstituteAnswer extends ContentChangingTask {
+        SubstituteAnswer(CursorLoaderAndUpdateDatabase loader) {
+            super(loader);
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+            long entry_id = (long) params[1];
+            int question_data_type = (int) params[2];
+            String answer = (String) params[3];
+            sqLiteDatabase.beginTransactionNonExclusive();
+            try {
+                if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+                    long answer_id;
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(Contract.STring.COLUMN_VALUE, answer);
+                    try {
+                        answer_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
+                    } catch (Exception e) {
+                        Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                                Contract.STring.COLUMN_VALUE + " = ? ",
+                                new String[]{answer}, null, null, null);
+                        c.moveToFirst();
+                        answer_id = c.getLong(0);
+                        c.close();
+                    }
+                    contentValues = new ContentValues();
+                    contentValues.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
+
+                    sqLiteDatabase.updateWithOnConflict(Contract.String_Entry.TABLE_NAME, contentValues,
+                            Contract.COLUMN_ID + " = ? ",
+                            new String[]{String.valueOf(entry_id)}, SQLiteDatabase.CONFLICT_IGNORE);
+                } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+                }
+                sqLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sqLiteDatabase.endTransaction();
+            }
+            return null;
+        }
+    }
+
+    protected ContentChangingTask buildSubstituteQuestion(CursorLoaderAndUpdateDatabase loader) {
+        return (new SubstituteQuestion(loader));
+    }
+
+    public void substituteQuestion(long entry_id, int question_data_type, String question) {
+        buildSubstituteQuestion(this).execute(sqLiteOpenHelper, entry_id, question_data_type, question);
+    }
+
+    protected static class SubstituteQuestion extends ContentChangingTask {
+        SubstituteQuestion(CursorLoaderAndUpdateDatabase loader) {
+            super(loader);
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+            long entry_id = (long) params[1];
+            int question_data_type = (int) params[2];
+            String question = (String) params[3];
+            sqLiteDatabase.beginTransactionNonExclusive();
+            try {
+                if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
+                    long question_id;
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(Contract.STring.COLUMN_VALUE, question);
+                    try {
+                        question_id = sqLiteDatabase.insertOrThrow(Contract.STring.TABLE_NAME, null, contentValues);
+                    } catch (Exception e) {
+                        Cursor c = sqLiteDatabase.query(Contract.STring.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                                Contract.STring.COLUMN_VALUE + " = ? ",
+                                new String[]{question}, null, null, null);
+                        c.moveToFirst();
+                        question_id = c.getLong(0);
+                        c.close();
+                    }
+                    contentValues = new ContentValues();
+                    contentValues.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
+
+                    sqLiteDatabase.updateWithOnConflict(Contract.String_Entry.TABLE_NAME, contentValues,
+                            Contract.COLUMN_ID + " = ? ",
+                            new String[]{String.valueOf(entry_id)}, SQLiteDatabase.CONFLICT_IGNORE);
+                } else if (question_data_type == Contract.Field.NOT_STRING_DATA_TYPE) {
+                }
+                sqLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sqLiteDatabase.endTransaction();
+            }
+            return null;
+        }
     }
 }

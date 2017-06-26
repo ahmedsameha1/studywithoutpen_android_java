@@ -248,23 +248,35 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         }
                     }
                 } else if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    wrongItemArrayList = readDataFromCursor(cursor);
-                    questionsNumber = wrongItemArrayList.size();
-                        while_studying = true;
-                        if (obfuscate) {
-                            showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
-                        } else {
-                            showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+                    new AsyncTask<Void,Void, Void>() {
+
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            wrongItemArrayList = readDataFromCursor(cursor);
+                            return null;
                         }
-                        time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
-                                wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
-                                reading_question_letter_second, find_answer_time, typing_answer_letter_second);
-                        ifMoreThanOnce();
-                        showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+                            questionsNumber = wrongItemArrayList.size();
+                            while_studying = true;
+                            if (obfuscate) {
+                                showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
+                            } else {
+                                showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+                            }
+                            time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
+                                    wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
+                                    reading_question_letter_second, find_answer_time, typing_answer_letter_second);
+                            ifMoreThanOnce();
+                            showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                             remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                        enterAnswer.requestFocus();
-                        scheduleWhatToDoAfterTimeOfAnswerElapsed();
-                        ActivityUtility.crossFade(content,mLoadingView,AskAgainAfterTestActivity.this);
+                            enterAnswer.requestFocus();
+                            scheduleWhatToDoAfterTimeOfAnswerElapsed();
+                            ActivityUtility.crossFade(content,mLoadingView,AskAgainAfterTestActivity.this);
+                        }
+                    }.execute();
                 }
             }
 
@@ -1185,6 +1197,12 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         enterAnswer.setEnabled(false);
         if (!repeatedEntries.contains(currentQuestionCounter)) {
             repeatedEntries.add(currentQuestionCounter);
+        }
+        if ( !in_repeated ) {
+            cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
+            cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
+        } else if ( databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1 ){
+            cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
         }
     }
 

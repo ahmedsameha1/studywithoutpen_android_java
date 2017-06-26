@@ -359,10 +359,14 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
                         String number_of_tries_string = enter_number_of_tries.getText().toString();
                         String number_of_questions_string = enter_number_of_questions.getText().toString();
                         String number_of_quick_tests_string = enter_number_of_quick_tests.getText().toString();
-                        if ( number_of_tries_string.length() > 0
-                                && number_of_questions_string.length() > 0
+                        if ( number_of_questions_string.length() > 0
                                 && number_of_quick_tests_string.length() > 0) {
-                            int number_of_tries = Integer.parseInt(number_of_tries_string.substring(0,number_of_tries_string.length() - trys_suffix.length()));
+                            int number_of_tries;
+                            if ( number_of_tries_string.length() > 0 ) {
+                                number_of_tries = Integer.parseInt(number_of_tries_string.substring(0,number_of_tries_string.length() - trys_suffix.length()));
+                            } else {
+                                number_of_tries = 1;
+                            }
                             int number_of_questions = Integer.parseInt(number_of_questions_string.substring(0, number_of_questions_string.length() - number_of_questions_suffix.length()));
                             int number_of_quick_tests = Integer.parseInt(number_of_quick_tests_string.substring(0, number_of_quick_tests_string.length() - number_of_quick_tests_suffix.length()));
                             if ( number_of_quick_tests <= 94 ) {

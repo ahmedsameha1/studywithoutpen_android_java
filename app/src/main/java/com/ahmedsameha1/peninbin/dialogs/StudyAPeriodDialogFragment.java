@@ -74,9 +74,9 @@ public class StudyAPeriodDialogFragment extends DialogFragment {
                 public void afterTextChanged(Editable editable) {
                     String string = editable.toString();
                     String suffix = " " + getActivity().getString(R.string._try);
-                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+                    if ("".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix)) {
 
-                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                    } else if (string.equals(String.valueOf(0)) || !string.matches("[0-9]+")) {
                         enterTries.setText("");
                     } else {
                         string = string + suffix;
@@ -100,9 +100,9 @@ public class StudyAPeriodDialogFragment extends DialogFragment {
                 public void afterTextChanged(Editable editable) {
                     String string = editable.toString();
                     String suffix = " " + getActivity().getString(R.string._hour);
-                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+                    if ("".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix)) {
 
-                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                    } else if (string.equals(String.valueOf(0)) || !string.matches("[0-9]+")) {
                         enterHour.setText("");
                     } else {
                         string = string + suffix;
@@ -126,9 +126,9 @@ public class StudyAPeriodDialogFragment extends DialogFragment {
                 public void afterTextChanged(Editable editable) {
                     String string = editable.toString();
                     String suffix = " " + getActivity().getString(R.string._day);
-                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+                    if ("".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix)) {
 
-                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                    } else if (string.equals(String.valueOf(0)) || !string.matches("[0-9]+")) {
                         enterDay.setText("");
                     } else {
                         string = string + suffix;
@@ -138,55 +138,54 @@ public class StudyAPeriodDialogFragment extends DialogFragment {
                 }
             });
             positive.setOnClickListener(view -> {
-                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity()) ) {
-                try {
-                    String trys_suffix = " " + getActivity().getString(R.string._try);
-                    String day_suffix = " " + getActivity().getString(R.string._day);
-                    String hour_suffix = " " + getActivity().getString(R.string._hour);
-                    String try_string = enterTries.getText().toString();
-                    String day_string = enterDay.getText().toString();
-                    String hour_string = enterHour.getText().toString();
-                    if ( try_string.length() > 0 ) {
-                        int trys = Integer.parseInt(try_string.substring(0,try_string.length() - trys_suffix.length()));
-                            int day = 0;
-                            int hour = 0;
-                            if ( day_string.length() > 0 || hour_string.length() > 0 ) {
-                                if ( day_string.length() > 0) {
-                                    day = Integer.parseInt(day_string.substring(0,day_string.length() - day_suffix.length()));
-                                }
-                                if ( hour_string.length() > 0) {
-                                    hour = Integer.parseInt(hour_string.substring(0,hour_string.length() - hour_suffix.length()));
-                                }
-                                long duration = ( day * AlarmManager.INTERVAL_DAY) + ( hour * AlarmManager.INTERVAL_HOUR );
-                                long nowInMilliseconds = System.currentTimeMillis();
-                                long startingTime = nowInMilliseconds - duration;
-                                Intent intent = new Intent(getActivity(),StudyAPeriodActivity.class);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
-                                intent.putExtra(StudyAPeriodActivity.STARTING_TIME,startingTime);
-                                intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE,false);
-                                intent.putExtra(StudyAPeriodActivity.NUMBER_OF_TRIES,trys);
-                                startActivity(intent);
-                                if ( from_notification ) {
-                                    getActivity().finish();
-                                }
-                                dismiss();
-                            } else {
-                                Toast toast = Toast.makeText(getActivity(),R.string.please_enter_at_least_one_value,Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP,0,400);
-                                toast.show();
+                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity())) {
+                    try {
+                        String trys_suffix = " " + getActivity().getString(R.string._try);
+                        String day_suffix = " " + getActivity().getString(R.string._day);
+                        String hour_suffix = " " + getActivity().getString(R.string._hour);
+                        String try_string = enterTries.getText().toString();
+                        String day_string = enterDay.getText().toString();
+                        String hour_string = enterHour.getText().toString();
+                        int trys;
+                        if (try_string.length() > 0) {
+                            trys = Integer.parseInt(try_string.substring(0, try_string.length() - trys_suffix.length()));
+                        } else {
+                            trys = 1;
+                        }
+                        int day = 0;
+                        int hour = 0;
+                        if (day_string.length() > 0 || hour_string.length() > 0) {
+                            if (day_string.length() > 0) {
+                                day = Integer.parseInt(day_string.substring(0, day_string.length() - day_suffix.length()));
                             }
-                    } else {
-                        Toast toast = Toast.makeText(getActivity(),R.string.enter_tries_number,Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,400);
+                            if (hour_string.length() > 0) {
+                                hour = Integer.parseInt(hour_string.substring(0, hour_string.length() - hour_suffix.length()));
+                            }
+                            long duration = (day * AlarmManager.INTERVAL_DAY) + (hour * AlarmManager.INTERVAL_HOUR);
+                            long nowInMilliseconds = System.currentTimeMillis();
+                            long startingTime = nowInMilliseconds - duration;
+                            Intent intent = new Intent(getActivity(), StudyAPeriodActivity.class);
+                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                            intent.putExtra(StudyAPeriodActivity.STARTING_TIME, startingTime);
+                            intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE, false);
+                            intent.putExtra(StudyAPeriodActivity.NUMBER_OF_TRIES, trys);
+                            startActivity(intent);
+                            if (from_notification) {
+                                getActivity().finish();
+                            }
+                            dismiss();
+                        } else {
+                            Toast toast = Toast.makeText(getActivity(), R.string.please_enter_at_least_one_value, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
+                    } catch (NumberFormatException e) {
+                        Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
+                    } catch (Resources.NotFoundException e) {
+                        e.printStackTrace();
                     }
-                } catch (NumberFormatException e) {
-                    Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP,0,400);
-                    toast.show();
-                } catch (Resources.NotFoundException e) {
-                    e.printStackTrace();
-                }
                 } else {
                     Toast toast = Toast.makeText(getActivity(), R.string.please_subscribe, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);

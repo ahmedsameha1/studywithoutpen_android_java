@@ -22,6 +22,7 @@ import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -128,9 +129,9 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         Map<String, ?>  all_keys = sharedPreferences.getAll();
         for ( Map.Entry<String, ?> entry : all_keys.entrySet() ) {
             String key_string = entry.getKey();
-            if ( key_string.startsWith(FullyRandomTestActivity.class.getName() + FullyRandomTestActivity.PAUSING)
-                    || key_string.startsWith(EnhancedTestActivity.class.getName() + EnhancedTestActivity.PAUSING)
-                    || key_string.startsWith(StudyAPeriodActivity.class.getName() + StudyAPeriodActivity.PAUSING)
+            if ( key_string.startsWith(FullyRandomTestActivity.class.getName() + Constants.PAUSING)
+                    || key_string.startsWith(EnhancedTestActivity.class.getName() + Constants.PAUSING)
+                    || key_string.startsWith(StudyAPeriodActivity.class.getName() + Constants.PAUSING)
                     || key_string.startsWith(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED)
                     || key_string.startsWith(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM) ){
                 editor.remove(key_string);

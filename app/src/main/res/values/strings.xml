@@ -343,4 +343,11 @@
     <string name="start_fully_random_test">Start a fully random test</string>
     <string name="wait_loading">Please, wait for loading</string>
     <string name="not_found">Not found!</string>
+    <string name="copy_question">Copy question</string>
+    <string name="copy_answer">Copy answer</string>
+    <string name="same_text">The text is the same!</string>
+    <string name="substitute_question">Substitute question</string>
+    <string name="substitute_answer">Substitute answer</string>
+    <string name="question_will">Question will be:</string>
+    <string name="answer_will">Answer will be:</string>
 </resources>

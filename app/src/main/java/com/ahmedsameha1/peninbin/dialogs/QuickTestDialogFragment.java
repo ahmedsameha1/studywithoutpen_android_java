@@ -43,6 +43,7 @@ import java.util.Calendar;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.analytics.HitBuilders;
+
 /**
  * Created by ahmed on 2/8/2016.
  */
@@ -55,11 +56,12 @@ public class QuickTestDialogFragment extends DialogFragment {
     public static final String HOUR_OF_DAY = "hour_of_day";
     public static final String MINUTE = "minute";
     private long current_field_id;
-    private int year,monthOfYear,dayOfMonth,hourOfDay,minute;
+    private int year, monthOfYear, dayOfMonth, hourOfDay, minute;
     private AlarmManager alarmManager;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
     private String number_suffix;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,13 +91,14 @@ public class QuickTestDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(dialog -> {
             final EditText enterTries = (EditText) alertDialog.findViewById(R.id.number_of_tries);
             final EditText enterNumber = (EditText) alertDialog.findViewById(R.id.number);
-            final Spinner number_or_percentage = (Spinner) alertDialog.findViewById(R.id.number_or_percentage);;
+            final Spinner number_or_percentage = (Spinner) alertDialog.findViewById(R.id.number_or_percentage);
+            ;
             final Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
             final ImageButton number_of_tries_help = (ImageButton) alertDialog.findViewById(R.id.number_of_tries_help);
             final ImageButton percentage_or_number_help = (ImageButton) alertDialog.findViewById(R.id.percentage_or_number_help);
             final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.root_view);
             ArrayAdapter<String> number_or_percentage_array_adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.number_or_percentage));
+                    android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.number_or_percentage));
             number_or_percentage.setAdapter(number_or_percentage_array_adapter);
             number_or_percentage_array_adapter.setDropDownViewResource
                     (android.R.layout.simple_spinner_dropdown_item);
@@ -104,17 +107,17 @@ public class QuickTestDialogFragment extends DialogFragment {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     String number_string = enterNumber.getText().toString();
-                    if ( i == 0 ) {
+                    if (i == 0) {
                         enterNumber.setHint(R.string.enter_number_of_questions);
-                        if ( number_suffix != null ) {
+                        if (number_suffix != null) {
                             enterNumber.setText(number_string.substring(0, number_string.length() - number_suffix.length()) +
                                     " " + getActivity().getString(R.string._question));
                         }
                     } else {
                         enterNumber.setHint(R.string.enter_percentage);
-                        if ( number_suffix != null ) {
+                        if (number_suffix != null) {
                             enterNumber.setText(number_string.substring(0, number_string.length() - number_suffix.length()) +
-                                    " %" );
+                                    " %");
                         }
                     }
                 }
@@ -153,9 +156,9 @@ public class QuickTestDialogFragment extends DialogFragment {
                 public void afterTextChanged(Editable editable) {
                     String string = editable.toString();
                     String suffix = " " + getActivity().getString(R.string._try);
-                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix) ) {
+                    if ("".equals(string) || string.matches("0*[1-9]+[0-9]*" + suffix)) {
 
-                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                    } else if (string.equals(String.valueOf(0)) || !string.matches("[0-9]+")) {
                         enterTries.setText("");
                     } else {
                         string = string + suffix;
@@ -178,14 +181,14 @@ public class QuickTestDialogFragment extends DialogFragment {
                 @Override
                 public void afterTextChanged(Editable editable) {
                     String string = editable.toString();
-                    if ( number_or_percentage.getSelectedItemPosition() == 0) {
+                    if (number_or_percentage.getSelectedItemPosition() == 0) {
                         number_suffix = " " + getActivity().getString(R.string._question);
                     } else {
                         number_suffix = " %";
                     }
-                    if ( "".equals(string) || string.matches("0*[1-9]+[0-9]*" + number_suffix) ) {
+                    if ("".equals(string) || string.matches("0*[1-9]+[0-9]*" + number_suffix)) {
 
-                    } else if ( string.equals(String.valueOf(0))   || !string.matches("[0-9]+") ) {
+                    } else if (string.equals(String.valueOf(0)) || !string.matches("[0-9]+")) {
                         enterNumber.setText("");
                     } else {
                         string = string + number_suffix;
@@ -199,95 +202,94 @@ public class QuickTestDialogFragment extends DialogFragment {
                     String trys_suffix = " " + getActivity().getString(R.string._try);
                     String try_string = enterTries.getText().toString();
                     String number_string = enterNumber.getText().toString();
-                    if ( try_string.length() > 0) {
-                        int trys = Integer.parseInt(try_string.substring(0,try_string.length() - trys_suffix.length()));
-                        if ( number_string.length() > 0) {
-                                int number = Integer.parseInt(number_string.substring(0, number_string.length() - number_suffix.length()));
-                                if (number_or_percentage.getSelectedItemPosition() == 1) {
-                                    if (number <= 100 && number > 0) {
-                                        Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
-                                        intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
-                                        intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, number);
-                                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        final Calendar calendar_picked_date_time = Calendar.getInstance();
-                                        calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                        intent.putExtra(SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
-                                        intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
-                                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                                        int request = (int)System.currentTimeMillis();
-                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                        alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
-
-                                            mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
-                                                    ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                    EnhancedTestActivity.PERCENTAGE,number,trys);
-                                        final Snackbar snackbar = Snackbar
-                                                .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
-                                        snackbar.setAction(R.string.ok, view -> snackbar.dismiss());
-                                        snackbar.show();
-                                        dismiss();
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction(ActivityUtility.getVersionCode(getActivity()) + "schedule a random quick test")
-                                                .build());
-                                    } else {
-                                        Toast toast = Toast.makeText(getActivity(), getString(R.string.percentage_between), Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                } else {
-                                    DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
-                                    int currentNumberOfEntries =
-                                            databaseOperations.getEntriesNumberForTests(current_field_id,databaseOperations.getQuestionDataType(current_field_id));
-                                    if ( number > 0 && number <= currentNumberOfEntries) {
-                                        Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
-                                        intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
-                                        intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, number);
-                                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                                        final Calendar calendar_picked_date_time = Calendar.getInstance();
-                                        calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                                        intent.putExtra(SCHEDULE_WHAT,ScheduleInFieldDialogFragment.QUICK_TEST);
-                                        intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
-                                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                                        int request = (int)System.currentTimeMillis();
-                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                        alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
-                                            mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
-                                                ScheduleInFieldDialogFragment.QUICK_TEST,calendar_picked_date_time.getTimeInMillis(),request,
-                                                EnhancedTestActivity.NUMBER,number,trys);
-                                        final Snackbar snackbar = Snackbar
-                                                .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
-                                        snackbar.setAction(R.string.ok, view -> snackbar.dismiss());
-                                        snackbar.show();
-                                        dismiss();
-                                    } else {
-                                        Toast toast = Toast.makeText(getActivity(),
-                                                getString(R.string.number_of_questions_smaller_than, currentNumberOfEntries), Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                }
-                            } else {
-                                if ( number_or_percentage.getSelectedItemPosition() == 1 ){
-                                    Toast toast = Toast.makeText(getActivity(), R.string.please_enter_percentage, Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.TOP,0,400);
-                                    toast.show();
-                                } else {
-                                    Toast toast = Toast.makeText(getActivity(), R.string.please_enter_number_of_question, Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.TOP,0,400);
-                                    toast.show();
-                                }
-                            }
+                    int trys;
+                    if (try_string.length() > 0) {
+                        trys = Integer.parseInt(try_string.substring(0, try_string.length() - trys_suffix.length()));
                     } else {
-                        Toast toast = Toast.makeText(getActivity(), R.string.enter_tries_number, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,400);
-                        toast.show();
+                        trys = 1;
+                    }
+                    if (number_string.length() > 0) {
+                        int number = Integer.parseInt(number_string.substring(0, number_string.length() - number_suffix.length()));
+                        if (number_or_percentage.getSelectedItemPosition() == 1) {
+                            if (number <= 100 && number > 0) {
+                                Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
+                                intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
+                                intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, number);
+                                intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
+                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                final Calendar calendar_picked_date_time = Calendar.getInstance();
+                                calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
+                                intent.putExtra(SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
+                                intent.putExtra(ScheduleInFieldDialogFragment.TIME, calendar_picked_date_time.getTimeInMillis());
+                                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                                int request = (int) System.currentTimeMillis();
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
+
+                                mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                        ScheduleInFieldDialogFragment.QUICK_TEST, calendar_picked_date_time.getTimeInMillis(), request,
+                                        EnhancedTestActivity.PERCENTAGE, number, trys);
+                                final Snackbar snackbar = Snackbar
+                                        .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
+                                snackbar.setAction(R.string.ok, view -> snackbar.dismiss());
+                                snackbar.show();
+                                dismiss();
+                                mTracker.send(new HitBuilders.EventBuilder()
+                                        .setCategory(FieldActivity.ANALYTICS_CATEGORY)
+                                        .setAction(ActivityUtility.getVersionCode(getActivity()) + "schedule a random quick test")
+                                        .build());
+                            } else {
+                                Toast toast = Toast.makeText(getActivity(), getString(R.string.percentage_between), Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
+                        } else {
+                            DatabaseReadOperations databaseOperations = new DatabaseReadOperations(getActivity());
+                            int currentNumberOfEntries =
+                                    databaseOperations.getEntriesNumberForTests(current_field_id, databaseOperations.getQuestionDataType(current_field_id));
+                            if (number > 0 && number <= currentNumberOfEntries) {
+                                Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
+                                intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
+                                intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, number);
+                                intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
+                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                final Calendar calendar_picked_date_time = Calendar.getInstance();
+                                calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
+                                intent.putExtra(SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
+                                intent.putExtra(ScheduleInFieldDialogFragment.TIME, calendar_picked_date_time.getTimeInMillis());
+                                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                                int request = (int) System.currentTimeMillis();
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
+                                mySQLiteCursorLoader.addScheduledTimeForBackup(current_field_id,
+                                        ScheduleInFieldDialogFragment.QUICK_TEST, calendar_picked_date_time.getTimeInMillis(), request,
+                                        EnhancedTestActivity.NUMBER, number, trys);
+                                final Snackbar snackbar = Snackbar
+                                        .make(coordinatorLayout, R.string.scheduled, Snackbar.LENGTH_INDEFINITE);
+                                snackbar.setAction(R.string.ok, view -> snackbar.dismiss());
+                                snackbar.show();
+                                dismiss();
+                            } else {
+                                Toast toast = Toast.makeText(getActivity(),
+                                        getString(R.string.number_of_questions_smaller_than, currentNumberOfEntries), Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
+                        }
+                    } else {
+                        if (number_or_percentage.getSelectedItemPosition() == 1) {
+                            Toast toast = Toast.makeText(getActivity(), R.string.please_enter_percentage, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        } else {
+                            Toast toast = Toast.makeText(getActivity(), R.string.please_enter_number_of_question, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
                     }
                 } catch (NumberFormatException e) {
                     Toast toast = Toast.makeText(getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 } catch (Resources.NotFoundException e) {
                     e.printStackTrace();
