@@ -1,6 +1,5 @@
 package com.ahmedsameha1.peninbin.utils;
 
-import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentValues;
@@ -14,7 +13,6 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
-import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -23,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Created by me on 22/09/16.
@@ -301,6 +298,7 @@ public class Emulation {
                 list_of_entries_from_starting_entry.add(cursor.getLong(0));
             }
         }
+        cursor.close();
         Emulation.partition(number_of_entries, list_of_entries_from_starting_entry, sqLiteDatabase);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder notificationBuilder = null;

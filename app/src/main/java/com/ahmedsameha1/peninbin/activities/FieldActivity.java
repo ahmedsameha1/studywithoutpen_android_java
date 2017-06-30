@@ -610,6 +610,7 @@ public class FieldActivity extends AppCompatActivity implements
         this.sortOption = sortOption;
         getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
         getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         ActivityUtility.antiCrossFade(content,mLoadingView,FieldActivity.this);
         if ( is_load_entries ) {
             getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);

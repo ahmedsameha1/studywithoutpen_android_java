@@ -2,10 +2,8 @@ package com.ahmedsameha1.peninbin.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ahmedsameha1.peninbin.R;
@@ -13,7 +11,7 @@ import com.ahmedsameha1.peninbin.R;
 /**
  * Created by Ahmed on 3/17/16.
  */
-public class CopyMoveEntriesActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener {
+public class CopyMoveEntriesActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
     public TextView question;
     public TextView answer;
     public CheckBox checkBox;
@@ -30,6 +28,7 @@ public class CopyMoveEntriesActivityRecyclerViewViewHolder extends RecyclerView.
         answer = (TextView) view.findViewById(R.id.answer);
         checkBox = (CheckBox) view.findViewById(R.id.copy);
         checkBox.setOnCheckedChangeListener(this);
+        view.setOnClickListener(this);
     }
 
 
@@ -38,9 +37,14 @@ public class CopyMoveEntriesActivityRecyclerViewViewHolder extends RecyclerView.
         mListener.onCheckChanged(entry_id, b);
     }
 
+    @Override
+    public void onClick(View view) {
+        mListener.onClick(checkBox);
+    }
 
 
     public interface IMyViewHolderClicks {
         void onCheckChanged( long entry_id , boolean checked);
+        void onClick(CheckBox checkBox);
     }
 }

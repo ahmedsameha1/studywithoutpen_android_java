@@ -707,4 +707,71 @@ public class ActivityUtility {
                 .setDuration(mShortAnimationDuration)
                 .setListener(null);
     }
+    public static Spannable prepare_search_spans(String text, StringBuilder search_value) {
+        Spannable spannable = Spannable.Factory.getInstance().newSpannable(text);
+        if (search_value.length() > 0) {
+            String text_lowercase = text.toLowerCase();
+            String search_value_lowercase = search_value.toString().toLowerCase();
+            int value_lowercase_length = search_value_lowercase.length();
+            if (text_lowercase.contains(search_value_lowercase)) {
+                int text_lowercase_length = text_lowercase.length();
+                if (!text_lowercase.equals(search_value_lowercase)) {
+                    if (text_lowercase.matches("[\\p{L}0-9]+")) { // only unicode characters and digits
+                        int start = 0;
+                        while (start < text_lowercase_length) {
+                            if (text_lowercase.indexOf(search_value_lowercase, start) == start) {
+                                int end = start + value_lowercase_length;
+                                spannable.setSpan(new BackgroundColorSpan(0xFFFFFF00),
+                                        start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                start = end;
+                            } else {
+                                start++;
+                            }
+                        }
+                    } else {
+                        int start = 0;
+                        while (start < text_lowercase_length) {
+                            if (text_lowercase.indexOf(search_value_lowercase, start) == start) {
+                                int end = start + value_lowercase_length;
+                                spannable.setSpan(new BackgroundColorSpan(0xFFFFFF00),
+                                        start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                start = end;
+                            } else {
+                                start++;
+                            }
+                        }
+                        if (text_lowercase.startsWith(search_value_lowercase) &&
+                                text_lowercase.substring(value_lowercase_length, value_lowercase_length + 1).matches("[\\s\\p{Punct}]")) {
+                            spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
+                                    0, value_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        }
+                        if (text_lowercase.endsWith(search_value_lowercase) &&
+                                text_lowercase.substring(text_lowercase_length - value_lowercase_length - 1,
+                                        text_lowercase_length - value_lowercase_length).matches("[\\s\\p{Punct}]")) {
+                            spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
+                                    text_lowercase_length - value_lowercase_length, text_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        }
+                        String[] strings = text_lowercase.split("\\Q" + search_value_lowercase + "\\E");
+                        if (strings.length > 1) {
+                            for (int i = 0, k = 0; i < strings.length - 1; i++) {
+                                if (i == 0) {
+                                    k += strings[i].length();
+                                } else {
+                                    k += strings[i].length() + value_lowercase_length;
+                                }
+                                if (strings[i].matches(".*[\\s\\p{Punct}]+") && strings[i + 1].matches("[\\s\\p{Punct}]+.*")) {
+                                    spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
+                                            k, k + value_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    spannable.setSpan(new BackgroundColorSpan(0xFFFF0000),
+                            0, value_lowercase_length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+            }
+        }
+        return spannable;
+    }
 }

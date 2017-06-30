@@ -9,7 +9,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
-import android.util.Log;
 
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
@@ -1374,27 +1373,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 + " );");
     }
 
-    public void increaseEntryAskedByOne(long entry_id) {
-        Cursor cursor = sqLiteOpenHelper.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
-                new String[]{Contract.String_Entry.COLUMN_ASKED_COUNT}, Contract.COLUMN_ID + " = ? ",
-                new String[]{entry_id + ""}, null, null, null);
-        cursor.moveToFirst();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.String_Entry.COLUMN_ASKED_COUNT, cursor.getInt(0) + 1);
-        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
-                Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
-    }
 
-    public void increaseEntryWrongAnsweredCountByOne(long entry_id) {
-        Cursor cursor = sqLiteOpenHelper.getWritableDatabase().query(Contract.String_Entry.TABLE_NAME,
-                new String[]{Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT}, Contract.COLUMN_ID + " = ? ",
-                new String[]{entry_id + ""}, null, null, null);
-        cursor.moveToFirst();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, cursor.getInt(0) + 1);
-        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues,
-                Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
-    }
 
     public void setReminderData(long entry_id, long time, int request) {
         ContentValues contentValues = new ContentValues();
@@ -1667,6 +1646,66 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
             } finally {
                 sqLiteDatabase.endTransaction();
             }
+            return null;
+        }
+    }
+
+    protected ContentChangingTask buildIncreaseEntryAskedByOne(CursorLoaderAndUpdateDatabase loader) {
+        return (new IncreaseEntryAskedByOne(loader));
+    }
+
+    public void increaseEntryAskedByOne(long entry_id) {
+        buildIncreaseEntryAskedByOne(this).execute(sqLiteOpenHelper, entry_id);
+    }
+
+    protected static class IncreaseEntryAskedByOne extends ContentChangingTask {
+        IncreaseEntryAskedByOne(CursorLoaderAndUpdateDatabase loader) {
+            super(loader);
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+            long entry_id = (long) params[1];
+            Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                    new String[]{Contract.String_Entry.COLUMN_ASKED_COUNT}, Contract.COLUMN_ID + " = ? ",
+                    new String[]{entry_id + ""}, null, null, null);
+            cursor.moveToFirst();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.String_Entry.COLUMN_ASKED_COUNT, cursor.getInt(0) + 1);
+          sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                    Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
+            return null;
+        }
+    }
+
+    protected ContentChangingTask buildIncreaseEntryWrongAnsweredCountByOne(CursorLoaderAndUpdateDatabase loader) {
+        return (new IncreaseEntryWrongAnsweredCountByOne(loader));
+    }
+
+    public void increaseEntryWrongAnsweredCountByOne(long entry_id) {
+        buildIncreaseEntryWrongAnsweredCountByOne(this).execute(sqLiteOpenHelper, entry_id);
+    }
+
+    protected static class IncreaseEntryWrongAnsweredCountByOne extends ContentChangingTask {
+        IncreaseEntryWrongAnsweredCountByOne(CursorLoaderAndUpdateDatabase loader) {
+            super(loader);
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+            long entry_id = (long) params[1];
+            Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                    new String[]{Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT}, Contract.COLUMN_ID + " = ? ",
+                    new String[]{entry_id + ""}, null, null, null);
+            cursor.moveToFirst();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, cursor.getInt(0) + 1);
+            sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                    Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
             return null;
         }
     }
