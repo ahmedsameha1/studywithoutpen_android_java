@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
@@ -42,8 +41,7 @@ public class CopyFieldDialogFragment extends DialogFragment {
         final AlertDialog alertDialog =
                 builder.setTitle(R.string.select_field)
                         .setView(inflater.inflate(R.layout.copy_field_dialog_fragment, null))
-                        .setPositiveButton(R.string.ok, null)
-                        .setNegativeButton(R.string.cancel, null).create();
+                        .setPositiveButton(R.string.ok, null).create();
         alertDialog.setOnShowListener(dialog -> {
             final Spinner existing_fields = (Spinner) alertDialog.findViewById(R.id.existing_fields);
             SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(getActivity(),

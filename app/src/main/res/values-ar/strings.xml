@@ -105,7 +105,7 @@
     <string name="add_entry">أضف مُدخلًا</string>
     <string name="add_entry_finish">أضف مُدخلاً واخرج</string>
     <string name="edit">عَدِّل</string>
-    <string name="select_field">لطفا، اختر مجالا</string>
+    <string name="select_field">اختر مجالا</string>
     <string name="delete_an_entry">حذف مُدخَلٍ</string>
     <string name="enter_search_text">لطفا، أدخل نصا للبحث.</string>
     <string name="pick_date">اختر تاريخا</string>

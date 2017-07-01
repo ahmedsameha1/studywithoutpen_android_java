@@ -108,7 +108,7 @@
     <string name="add_entry">Add Entry</string>
     <string name="add_entry_finish">Add Entry and Exit</string>
     <string name="edit">EDIT</string>
-    <string name="select_field">Please, select a field</string>
+    <string name="select_field">Select a field</string>
     <string name="delete_an_entry">Delete an Entry</string>
     <string name="enter_search_text">Please, enter the text for search!</string>
     <string name="pick_date">Pick a Date</string>
