@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.widget.CardView;
@@ -103,9 +104,10 @@ public class QuickTestActivity extends FullyRandomTest implements
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
+    private static QuickTestActivity quickTestActivity;
     private ArrayList<String> hints;
     private boolean actionBarShown;
-    private boolean is_testing_now = false, before_showing_result_dialog, time_of_answer_saved;
+    private boolean while_testing = false, before_showing_result_dialog, time_of_answer_saved;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber, wrongAnswersCounter, percent_or_number, number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private double percentage;
@@ -139,6 +141,7 @@ public class QuickTestActivity extends FullyRandomTest implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        quickTestActivity = this;
         databaseOperations = new DatabaseReadOperations(this);
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         if (databaseOperations.checkFieldExists(current_field_id)) {
@@ -252,22 +255,15 @@ public class QuickTestActivity extends FullyRandomTest implements
                 public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                     if (loader.getId() == GET_ENTRIES_LOADER_ID) {
                         fieldEntriesCursor = data;
-                        if (percent_or_number == PERCENTAGE) {
-                            listForTest = getListForTest(percentage);
-                        } else if (percent_or_number == NUMBER) {
-                            listForTest = getListForTest(number);
-                        }
-                        if (listForTest != null) {
-                            questionsNumber = listForTest.length;
-                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                            showQuestion();
-                            enterAnswer.requestFocus();
-                            is_testing_now = true;
-                        } else {
-                            finish();
-                            ExitActivity.exit(QuickTestActivity.this);
-                        }
-                        ActivityUtility.crossFade(content, mLoadingView, QuickTestActivity.this);
+                        PrepareListForTest prepareListForTest = new PrepareListForTest();
+                        new Thread(() -> {
+                            if (percent_or_number == PERCENTAGE) {
+                                listForTest = getListForTest(percentage);
+                            } else if (percent_or_number == NUMBER) {
+                                listForTest = getListForTest(number);
+                            }
+                            prepareListForTest.sendMessage(Message.obtain());
+                        }).start();
                     } else if (loader.getId() == GET_SPECIAL_TEXT_LOADER_ID) {
                         if (symbol == null && customable_text == null) {
                             symbol = new String[data.getCount()];
@@ -324,7 +320,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                         currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                        is_testing_now = false;
+                        while_testing = false;
                         enterAnswer.setEnabled(false);
                         showNumberOfQuestions.setText("");
                         remainingQuestionCounter.setText("");
@@ -466,7 +462,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                 wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
                 permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
                 triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
-                is_testing_now = savedInstanceState.getBoolean(TESTING_NOW);
+                while_testing = savedInstanceState.getBoolean(TESTING_NOW);
                 boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
                 questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
                 hints = savedInstanceState.getStringArrayList(HINTS);
@@ -484,7 +480,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                     is_starting_after_destruction = true;
                     restoreUserLayoutChanges(savedInstanceState);
                     if (!before_showing_result_dialog) {
-                        if (is_testing_now) {
+                        if (while_testing) {
                             if (obfuscate) {
                                 showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
                             } else {
@@ -534,17 +530,16 @@ public class QuickTestActivity extends FullyRandomTest implements
         super.onResume();
         if (!ActivityUtility.hasOpenedDialogs(this)) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-            tool_bar_timer.start();
 
             // to set the timer on the tool_bar_timer after recreation of activity due configuration change to the last value
-        } else if (!is_testing_now) {
+        } else if (!while_testing) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
         }
         /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
          * do not call it after destruction because it will be called from onrestoreinstancestate method
          * do not call it if the test has already finished
          */
-        if (!isStartingFirstTime && !is_starting_after_destruction && is_testing_now) {
+        if (!isStartingFirstTime && !is_starting_after_destruction && while_testing) {
             scheduleWhatToDoAfterTimeOfAnswerElapsed();
         }
         // at this point this flag has performed its role so I return it to its default value
@@ -779,7 +774,7 @@ public class QuickTestActivity extends FullyRandomTest implements
         savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInsatanceState.putBoolean(NEXT_BUTTON_STATE, check.isEnabled());
-        savedInsatanceState.putBoolean(TESTING_NOW, is_testing_now);
+        savedInsatanceState.putBoolean(TESTING_NOW, while_testing);
         savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
@@ -809,7 +804,7 @@ public class QuickTestActivity extends FullyRandomTest implements
         }
         // call this method to prevent the dialogs from being shown after the recreation of the activity
         // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
-        if (is_testing_now) { // don't close dialogs (exactly the result dialog) if the test already has finished
+        if (while_testing) { // don't close dialogs (exactly the result dialog) if the test already has finished
             ActivityUtility.closeOpenedDialogs(this);
         }
         super.onSaveInstanceState(savedInsatanceState);
@@ -948,7 +943,7 @@ public class QuickTestActivity extends FullyRandomTest implements
         this.time_of_answer_do_what = time_of_answer_do_what;
         this.time_of_answer_saved = time_for_answer_saved;
         // to avoid the case if the listfortest has not been prepared yet
-        if (is_testing_now) {
+        if (while_testing) {
             time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
                     reading_question_letter_second, find_answer_time, typing_answer_letter_second);
             scheduleWhatToDoAfterTimeOfAnswerElapsed();
@@ -962,7 +957,7 @@ public class QuickTestActivity extends FullyRandomTest implements
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
             // to avoid the case if the listfortest has not been prepared yet
-            if (is_testing_now) {
+            if (while_testing) {
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
             }
         } else {
@@ -1004,7 +999,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
                 currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                is_testing_now = false;
+                while_testing = false;
                 enterAnswer.setEnabled(false);
                 showNumberOfQuestions.setText("");
                 remainingQuestionCounter.setText("");
@@ -1068,7 +1063,7 @@ public class QuickTestActivity extends FullyRandomTest implements
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-            is_testing_now = false;
+            while_testing = false;
             enterAnswer.setEnabled(false);
             showNumberOfQuestions.setText("");
             remainingQuestionCounter.setText("");
@@ -1101,6 +1096,25 @@ public class QuickTestActivity extends FullyRandomTest implements
             showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
         } else {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        }
+    }
+
+    private static class PrepareListForTest extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (quickTestActivity.listForTest != null) {
+                quickTestActivity.questionsNumber = quickTestActivity.listForTest.length;
+                quickTestActivity.showNumberOfQuestions.setText(Integer.toString(quickTestActivity.questionsNumber));
+                quickTestActivity.showQuestion();
+                quickTestActivity.enterAnswer.requestFocus();
+                quickTestActivity.while_testing = true;
+            } else {
+                quickTestActivity.finish();
+                ExitActivity.exit(quickTestActivity);
+            }
+            ActivityUtility.crossFade(quickTestActivity.content, quickTestActivity.mLoadingView, quickTestActivity);
+            quickTestActivity.tool_bar_timer.start();
         }
     }
 }

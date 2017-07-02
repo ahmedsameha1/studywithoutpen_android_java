@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -110,6 +111,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private static final String IN_REPEATED = "in_repeated";
     public static final String PERMITED_TRIES_NUMBER = "permitedTriesNumber";
     private static final String WHILE_STUDYING = "while_studying";
+    private static AskAgainAfterTestActivity askAgainAfterTestActivity;
     boolean actionBarShown, is_time_of_answer_elapsed = false;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private ArrayList<Integer> repeatedEntries = new ArrayList<Integer>();
@@ -154,6 +156,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study_a_period);
+        askAgainAfterTestActivity = this;
         boolean isReadAnswer;
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
@@ -164,7 +167,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         current_field_type = databaseReadOperations.getFieldType(current_field_id);
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
         obfuscate = databaseReadOperations.isObfuscateQuestion(current_field_id);
-        int [] time_of_answer_data = databaseReadOperations.getTimeOfAnswerOfStudyTillCorrect(current_field_id);
+        int[] time_of_answer_data = databaseReadOperations.getTimeOfAnswerOfStudyTillCorrect(current_field_id);
         reading_question_letter_second = time_of_answer_data[0];
         find_answer_time = time_of_answer_data[1];
         typing_answer_letter_second = time_of_answer_data[2];
@@ -214,11 +217,11 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                             " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
                             + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
                             new String[]{current_field_type + ""});
-                } else if ( id == CONTINUE_PREVIOUS_SESSION_LOADER_ID ) {
+                } else if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     String order_column = null;
-                    if ( test_type == Constants.TestType.ENHANCED_TEST ) {
-                       order_column = Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER;
-                    } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                    if (test_type == Constants.TestType.ENHANCED_TEST) {
+                        order_column = Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER;
+                    } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
                         order_column = Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER;
                     }
                     return new CursorLoaderAndUpdateDatabase(AskAgainAfterTestActivity.this,
@@ -248,35 +251,11 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         }
                     }
                 } else if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    new AsyncTask<Void,Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            wrongItemArrayList = readDataFromCursor(cursor);
-                            return null;
-                        }
-
-                        @Override
-                        protected void onPostExecute(Void aVoid) {
-                            super.onPostExecute(aVoid);
-                            questionsNumber = wrongItemArrayList.size();
-                            while_studying = true;
-                            if (obfuscate) {
-                                showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
-                            } else {
-                                showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
-                            }
-                            time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
-                                    wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
-                                    reading_question_letter_second, find_answer_time, typing_answer_letter_second);
-                            ifMoreThanOnce();
-                            showNumberOfQuetions.setText(Integer.toString(questionsNumber));
-                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                            enterAnswer.requestFocus();
-                            scheduleWhatToDoAfterTimeOfAnswerElapsed();
-                            ActivityUtility.crossFade(content,mLoadingView,AskAgainAfterTestActivity.this);
-                        }
-                    }.execute();
+                    PrepareListForTest prepareListForTest = new PrepareListForTest();
+                    new Thread(() -> {
+                        wrongItemArrayList = readDataFromCursor(cursor);
+                        prepareListForTest.sendMessage(Message.obtain());
+                    }).start();
                 }
             }
 
@@ -289,7 +268,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             check_card_view.startAnimation(animAlpha);
             result = checkAnAnswer();
             if (triesCounter < permitedTriesNumber && !result) {
-                if ( obfuscate ) {
+                if (obfuscate) {
                     showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
                 } else {
                     showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
@@ -305,7 +284,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             } else {
                 triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                 showTries.setText(Integer.toString(triesCounter + 1));
-                if ( !in_repeated ) {
+                if (!in_repeated) {
                     cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
                 }
                 currentQuestionCounter++;
@@ -319,14 +298,14 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         questionsNumber = wrongItemArrayList.size();
                         repeatedEntries.clear();
                         in_repeated = true;
-                        if ( obfuscate ) {
+                        if (obfuscate) {
                             showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
                         } else {
                             showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
                         }
                         time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
                                 wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
-                                reading_question_letter_second,find_answer_time, typing_answer_letter_second);
+                                reading_question_letter_second, find_answer_time, typing_answer_letter_second);
                         showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                         remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
                         ifMoreThanOnce();
@@ -337,11 +316,11 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         check.setEnabled(false);
                         dont_know.setEnabled(false);
                         while_studying = false;
-                        if ( test_type == Constants.TestType.ENHANCED_TEST ) {
-                            cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,question_data_type);
+                        if (test_type == Constants.TestType.ENHANCED_TEST) {
+                            cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, question_data_type);
                             cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id);
-                        } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
-                            cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST,question_data_type);
+                        } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                            cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, question_data_type);
                             cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id);
                         }
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -371,14 +350,14 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                         }
                     }
                 } else {
-                    if ( obfuscate ) {
+                    if (obfuscate) {
                         showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
                     } else {
                         showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
                     }
                     time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
                             wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
-                            reading_question_letter_second,find_answer_time, typing_answer_letter_second);
+                            reading_question_letter_second, find_answer_time, typing_answer_letter_second);
                     showTries.setText(Integer.toString(triesCounter + 1));
                     ifMoreThanOnce();
                     remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
@@ -528,12 +507,12 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             content.setVisibility(View.GONE);
             isStartingFirstTime = true;
-            if ( boolean_continue ) {
+            if (boolean_continue) {
                 int[] array = null;
-                if ( test_type == Constants.TestType.ENHANCED_TEST ) {
+                if (test_type == Constants.TestType.ENHANCED_TEST) {
                     repeatedEntries = databaseReadOperations.getStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id);
                     array = databaseReadOperations.getDataFromStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id);
-                } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
+                } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
                     repeatedEntries = databaseReadOperations.getStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id);
                     array = databaseReadOperations.getDataFromStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id);
                 }
@@ -544,26 +523,26 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
             } else {
                 permitedTriesNumber = getIntent().getIntExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, 0);
-                    wrongItemArrayList = (ArrayList<WrongItem>) getIntent().
-                            getBundleExtra(WrongAnswersActivity.WRONG_ITEM_LIST)
-                            .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);
-                    Collections.shuffle(wrongItemArrayList);
+                wrongItemArrayList = (ArrayList<WrongItem>) getIntent().
+                        getBundleExtra(WrongAnswersActivity.WRONG_ITEM_LIST)
+                        .getSerializable(WrongAnswersActivity.WRONG_ITEM_LIST);
+                Collections.shuffle(wrongItemArrayList);
                 questionsNumber = wrongItemArrayList.size();
                 while_studying = true;
-                if ( obfuscate ) {
+                if (obfuscate) {
                     showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
                 } else {
                     showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
                 }
                 time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),
                         wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
-                        reading_question_letter_second,find_answer_time, typing_answer_letter_second);
+                        reading_question_letter_second, find_answer_time, typing_answer_letter_second);
                 ifMoreThanOnce();
                 showNumberOfQuetions.setText(Integer.toString(questionsNumber));
                 remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
                 enterAnswer.requestFocus();
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
-                ActivityUtility.crossFade(content,mLoadingView,AskAgainAfterTestActivity.this);
+                ActivityUtility.crossFade(content, mLoadingView, AskAgainAfterTestActivity.this);
             }
         } else {
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
@@ -586,12 +565,12 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             in_repeated = savedInstanceState.getBoolean(IN_REPEATED);
             while_studying = savedInstanceState.getBoolean(WHILE_STUDYING);
             wrongItemArrayList = retainedFragment.getWrongItemArrayList_ask_again_after_test_activity();
-            if ( wrongItemArrayList == null && boolean_continue ) {
+            if (wrongItemArrayList == null && boolean_continue) {
                 getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
             } else {
                 is_starting_after_destruction = true;
                 restoreUserLayoutChanges(savedInstanceState);
-                if ( obfuscate ) {
+                if (obfuscate) {
                     showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
                 } else {
                     showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
@@ -631,7 +610,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         super.onResume();
         if (!ActivityUtility.hasOpenedDialogs(this)) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-            tool_bar_timer.start();
         }
         /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
          * do not call it after destruction because it will be called from onrestoreinstancestate method
@@ -644,7 +622,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 @Override
                 protected Void doInBackground(Void... params) {
                     while (true) {
-                        if ( wrongItemArrayList != null) {
+                        if (wrongItemArrayList != null) {
                             scheduleWhatToDoAfterTimeOfAnswerElapsed();
                             break;
                         } else {
@@ -679,19 +657,19 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             tts.stop();
         }
         UsageLastTime.updateUsageLastTime(this);
-        if ( while_studying ) {
-            new Thread( () -> {
+        if (while_studying) {
+            new Thread(() -> {
                 Runnable pauseRunnable;
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 String string_for_pausing = null;
                 try {
-                    if ( test_type == Constants.TestType.ENHANCED_TEST ) {
+                    if (test_type == Constants.TestType.ENHANCED_TEST) {
                         string_for_pausing = AskAgainAfterTestActivity.class.getName() + PAUSING_ENHANCED + current_field_id;
-                    } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
+                    } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
                         string_for_pausing = AskAgainAfterTestActivity.class.getName() + PAUSING_FULLY_RANDOM + current_field_id;
                     }
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(AskAgainAfterTestActivity.this);
-                    if (!sharedPreferences.contains(string_for_pausing) ) {
+                    if (!sharedPreferences.contains(string_for_pausing)) {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putBoolean(string_for_pausing, true);
                         editor.commit();
@@ -814,24 +792,25 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         for (int i = 0; i < indices.size(); i++) {
             arrayList.add(new WrongItem(wrongItemArrayList.get(indices.get(i)).getEntry_id(),
                     wrongItemArrayList.get(indices.get(i)).getQuestion(),
-                    wrongItemArrayList.get(indices.get(i)).getAnswer(),null ));
+                    wrongItemArrayList.get(indices.get(i)).getAnswer(), null));
         }
         Collections.shuffle(arrayList);
         return arrayList;
     }
+
     private void toPause() {
         int[] array = new int[2];
         array[0] = currentQuestionCounter;
         array[1] = permitedTriesNumber;
-        if ( test_type == Constants.TestType.ENHANCED_TEST ) {
+        if (test_type == Constants.TestType.ENHANCED_TEST) {
             cursorLoaderAndUpdateDatabase.pauseStudyAgainAfterTest(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id, wrongItemArrayList, array, repeatedEntries, in_repeated, lastPause);
-        } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST ) {
+        } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
             cursorLoaderAndUpdateDatabase.pauseStudyAgainAfterTest(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id, wrongItemArrayList, array, repeatedEntries, in_repeated, lastPause);
         }
     }
 
     private ArrayList<WrongItem> readDataFromCursor(Cursor cursor) {
-                ArrayList<WrongItem> array_list = new ArrayList<>(Collections.nCopies(cursor.getCount(), null));
+        ArrayList<WrongItem> array_list = new ArrayList<>(Collections.nCopies(cursor.getCount(), null));
         for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
             array_list.set(cursor.getInt(2), new WrongItem(cursor.getLong(3), cursor.getString(0), cursor.getString(1), null));
         }
@@ -874,10 +853,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
-                if ( !in_repeated ) {
+                if (!in_repeated) {
                     cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
                     cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
-                } else if ( databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1 ){
+                } else if (databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1) {
                     cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
                 }
                 if (!repeatedEntries.contains(currentQuestionCounter)) {
@@ -906,10 +885,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
-                if ( !in_repeated ) {
+                if (!in_repeated) {
                     cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
                     cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
-                } else if ( databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1 ){
+                } else if (databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1) {
                     cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
                 }
                 if (!repeatedEntries.contains(currentQuestionCounter)) {
@@ -938,10 +917,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
-                if ( !in_repeated ) {
+                if (!in_repeated) {
                     cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
                     cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
-                } else if ( databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1 ){
+                } else if (databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1) {
                     cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
                 }
                 if (!repeatedEntries.contains(currentQuestionCounter)) {
@@ -970,10 +949,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             enterAnswer.setText("");
             triesCounter++;
             if (triesCounter == permitedTriesNumber && !result) {
-                if ( !in_repeated ) {
+                if (!in_repeated) {
                     cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
                     cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
-                } else if ( databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1 ){
+                } else if (databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1) {
                     cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
                 }
                 if (!repeatedEntries.contains(currentQuestionCounter)) {
@@ -1016,7 +995,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         }
                      /* To run scheduleWhatToDoAfterTimeOfAnswerElapsed() method after restarting the activity
         in case the activity destroyed while a dialog is shown */
-        else if (ActivityUtility.hasOpenedDialogs(this) && time_of_answer > 0 ) {
+        else if (ActivityUtility.hasOpenedDialogs(this) && time_of_answer > 0) {
             savedInstanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000);
         }
         // call this method to prevent the dialogs from being shown after the recreation of the activity
@@ -1116,9 +1095,9 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             @Override
             protected Void doInBackground(Void... params) {
                 while (true) {
-                    if ( wrongItemArrayList != null ) {
-                        time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(),wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
-                                reading_question_letter_second,find_answer_time, typing_answer_letter_second);
+                    if (wrongItemArrayList != null) {
+                        time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
+                                reading_question_letter_second, find_answer_time, typing_answer_letter_second);
                         scheduleWhatToDoAfterTimeOfAnswerElapsed();
                         break;
                     } else {
@@ -1198,10 +1177,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         if (!repeatedEntries.contains(currentQuestionCounter)) {
             repeatedEntries.add(currentQuestionCounter);
         }
-        if ( !in_repeated ) {
+        if (!in_repeated) {
             cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
             cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
-        } else if ( databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1 ){
+        } else if (databaseReadOperations.getDifferenceWronglyAndAskedByEntry(wrongItemArrayList.get(currentQuestionCounter).getEntry_id()) <= -1) {
             cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(wrongItemArrayList.get(currentQuestionCounter).getEntry_id());
         }
     }
@@ -1210,10 +1189,34 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     @Override
     public void obfuscateText(boolean obfuscate) {
         this.obfuscate = obfuscate;
-        if ( obfuscate ) {
+        if (obfuscate) {
             showQuestion.setText(ActivityUtility.spanText(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), showQuestion));
         } else {
             showQuestion.setText(wrongItemArrayList.get(currentQuestionCounter).getQuestion());
+        }
+    }
+
+    private static class PrepareListForTest extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            askAgainAfterTestActivity.questionsNumber = askAgainAfterTestActivity.wrongItemArrayList.size();
+            askAgainAfterTestActivity.while_studying = true;
+            if (askAgainAfterTestActivity.obfuscate) {
+                askAgainAfterTestActivity.showQuestion.setText(ActivityUtility.spanText(askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getQuestion(), askAgainAfterTestActivity.showQuestion));
+            } else {
+                askAgainAfterTestActivity.showQuestion.setText(askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getQuestion());
+            }
+            askAgainAfterTestActivity.time_of_answer = ActivityUtility.calculate_time_of_answer(askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getQuestion(),
+                    askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getAnswer(),
+                    askAgainAfterTestActivity.reading_question_letter_second, askAgainAfterTestActivity.find_answer_time, askAgainAfterTestActivity.typing_answer_letter_second);
+            askAgainAfterTestActivity.ifMoreThanOnce();
+            askAgainAfterTestActivity.showNumberOfQuetions.setText(Integer.toString(askAgainAfterTestActivity.questionsNumber));
+            askAgainAfterTestActivity.remainingQuestionCounter.setText(Integer.toString(askAgainAfterTestActivity.questionsNumber - 1 - askAgainAfterTestActivity.currentQuestionCounter));
+            askAgainAfterTestActivity.enterAnswer.requestFocus();
+            askAgainAfterTestActivity.scheduleWhatToDoAfterTimeOfAnswerElapsed();
+            ActivityUtility.crossFade(askAgainAfterTestActivity.content, askAgainAfterTestActivity.mLoadingView, askAgainAfterTestActivity);
+            askAgainAfterTestActivity.tool_bar_timer.start();
         }
     }
 }

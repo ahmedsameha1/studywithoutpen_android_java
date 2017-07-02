@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
@@ -119,12 +120,13 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
     public static final String LAST_CONTROLLED_INDEX = "last_controlled_index";
     public static final String LAST_OLD_ROUND_INDEX = "last_old_round_index";
+    private static EnhancedTestActivity enhancedTestActivity;
     private long current_field_id;
     private String[][] listForTest;
     private ArrayList<String> hints, wrongAnswers;
     private boolean boolean_continue = false, actionBarShown, before_showing_result_dialog, time_of_answer_saved;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
-    private boolean is_testing_now = false;
+    private boolean while_testing = false;
     private int triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER, permitedTriesNumber, questionsNumber, wrongAnswersCounter, percent_or_number, number;
     private int currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER, hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
     private double percentage;
@@ -160,6 +162,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        enhancedTestActivity = this;
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         boolean isReadAnswer;
         // getting the reference of the fragment that holds the reference of list for test array
@@ -286,35 +289,22 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 int id = loader.getId();
                 if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     fieldEntriesCursor = data;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            if (boolean_continue) {
-                                listForTest = readTestDataFromLinkerTable();
-                                boolean_continue = false;
-                            } else {
-                                if (percent_or_number == PERCENTAGE) {
-                                    listForTest = getDataOfTest(percentage);
-                                } else if (percent_or_number == NUMBER) {
-                                    listForTest = getDataOfTest(number);
-                                }
+                    PrepareListForTest prepareListForTest = new PrepareListForTest();
+                    new Thread(() -> {
+                        if (boolean_continue) {
+                            listForTest = readTestDataFromLinkerTable();
+                            boolean_continue = false;
+                        } else {
+                            if (percent_or_number == PERCENTAGE) {
+                                listForTest = getDataOfTest(percentage);
+                            } else if (percent_or_number == NUMBER) {
+                                listForTest = getDataOfTest(number);
                             }
-                            questionsNumber = listForTest.length;
-                            is_testing_now = true;
-                            return null;
                         }
-
-                        @Override
-                        protected void onPostExecute(Void aVoid) {
-                            super.onPostExecute(aVoid);
-                            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
-                            showQuestion();
-                            enterAnswer.setEnabled(true);
-                            enterAnswer.requestFocus();
-                            ActivityUtility.crossFade(content, mLoadingView, EnhancedTestActivity.this);
-                        }
-                    }.execute();
+                        questionsNumber = listForTest.length;
+                        while_testing = true;
+                        prepareListForTest.sendMessage(Message.obtain());
+                    }).start();
                 } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     if (symbol == null && customable_text == null) {
                         symbol = new String[data.getCount()];
@@ -373,7 +363,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                     currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                    is_testing_now = false;
+                    while_testing = false;
                     enterAnswer.setEnabled(false);
                     showNumberOfQuestions.setText("");
                     remainingQuestionCounter.setText("");
@@ -528,7 +518,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             wrongAnswersCounter = savedInstanceState.getInt(NUMBER_OF_WRONG_ANSWERS);
             permitedTriesNumber = savedInstanceState.getInt(PERMITED_TRIES_NUMBER);
             triesCounter = savedInstanceState.getInt(TRIES_COUNTER);
-            is_testing_now = savedInstanceState.getBoolean(TESTING_NOW);
+            while_testing = savedInstanceState.getBoolean(TESTING_NOW);
             boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
             questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
             hints = savedInstanceState.getStringArrayList(HINTS);
@@ -553,7 +543,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 is_starting_after_destruction = true;
                 restoreUserLayoutChanges(savedInstanceState);
                 if (!before_showing_result_dialog) {
-                    if (is_testing_now) {
+                    if (while_testing) {
                         if (obfuscate) {
                             showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
                         } else {
@@ -597,17 +587,16 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         super.onResume();
         if (!ActivityUtility.hasOpenedDialogs(this)) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-            tool_bar_timer.start();
 
             // to set the timer on the tool_bar_timer after recreation of activity due configuration change to the last value
-        } else if (!is_testing_now) {
+        } else if (!while_testing) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
         }
         /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
          * do not call it after destruction because it will be called from onrestoreinstancestate method
          * do not call it if the test has already finished
          */
-        if (!isStartingFirstTime && !is_starting_after_destruction && is_testing_now) {
+        if (!isStartingFirstTime && !is_starting_after_destruction && while_testing) {
             scheduleWhatToDoAfterTimeOfAnswerElapsed();
         }
         // at this point this flag has performed its role so I return it to its default value
@@ -926,7 +915,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             tts.stop();
         }
         UsageLastTime.updateUsageLastTime(this);
-        if (is_testing_now) {
+        if (while_testing) {
             new Thread(() -> {
                 Runnable pauseRunnable;
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -974,7 +963,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         savedInsatanceState.putInt(TRIES_COUNTER, triesCounter);
         savedInsatanceState.putBoolean(NEXT_BUTTON_STATE, check.isEnabled());
-        savedInsatanceState.putBoolean(TESTING_NOW, is_testing_now);
+        savedInsatanceState.putBoolean(TESTING_NOW, while_testing);
         savedInsatanceState.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
         savedInsatanceState.putInt(HINT_COUNTER, hintCounter);
         savedInsatanceState.putStringArrayList(HINTS, hints);
@@ -1008,7 +997,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
         // call this method to prevent the dialogs from being shown after the recreation of the activity
         // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
-        if (is_testing_now) { // don't close dialogs (exactly the result dialog) if the test already has finished
+        if (while_testing) { // don't close dialogs (exactly the result dialog) if the test already has finished
             ActivityUtility.closeOpenedDialogs(this);
         }
         super.onSaveInstanceState(savedInsatanceState);
@@ -1136,7 +1125,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         this.time_of_answer_do_what = time_of_answer_do_what;
         this.time_of_answer_saved = time_for_answer_saved;
         // to avoid the case if the listfortest has not been prepared yet
-        if (is_testing_now) {
+        if (while_testing) {
             time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
                     reading_question_letter_second, find_answer_time, typing_answer_letter_second);
             scheduleWhatToDoAfterTimeOfAnswerElapsed();
@@ -1150,7 +1139,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
             // to avoid the case if the listfortest has not been prepared yet
-            if (is_testing_now) {
+            if (while_testing) {
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
             }
         } else {
@@ -1194,7 +1183,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
                 currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                is_testing_now = false;
+                while_testing = false;
                 enterAnswer.setEnabled(false);
                 showNumberOfQuestions.setText("");
                 remainingQuestionCounter.setText("");
@@ -1262,7 +1251,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
             currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-            is_testing_now = false;
+            while_testing = false;
             enterAnswer.setEnabled(false);
             showNumberOfQuestions.setText("");
             remainingQuestionCounter.setText("");
@@ -1297,6 +1286,19 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
         } else {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        }
+    }
+
+    private static class PrepareListForTest extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            enhancedTestActivity.showNumberOfQuestions.setText(Integer.toString(enhancedTestActivity.questionsNumber));
+            enhancedTestActivity.showQuestion();
+            enhancedTestActivity.enterAnswer.setEnabled(true);
+            enhancedTestActivity.enterAnswer.requestFocus();
+            ActivityUtility.crossFade(enhancedTestActivity.content, enhancedTestActivity.mLoadingView, enhancedTestActivity);
+            enhancedTestActivity.tool_bar_timer.start();
         }
     }
 }

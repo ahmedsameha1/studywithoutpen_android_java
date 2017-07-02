@@ -1,6 +1,7 @@
 package com.ahmedsameha1.peninbin;
 
 import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
@@ -8,7 +9,7 @@ import com.google.android.gms.analytics.Tracker;
 /**
  * Created by ahmed on 03/05/16.
  */
-public class AnalyticsApplication extends Application {
+public class AnalyticsApplication extends MultiDexApplication {
     private Tracker mTracker;
 
     /**

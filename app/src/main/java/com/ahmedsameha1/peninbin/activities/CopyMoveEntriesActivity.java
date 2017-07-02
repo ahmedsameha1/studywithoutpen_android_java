@@ -137,6 +137,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
                         search_string_highlight.replace(0, search_string_highlight.length(), "");
                         recyclerView.setLayoutManager(new LinearLayoutManager(CopyMoveEntriesActivity.this));
                         recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
+                        list_of_entries.clear();
                         is_load_entries = true;
                         search_value = null;
                         return true;
@@ -271,6 +272,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         setIntent(intent);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
+        list_of_entries.clear();
         handleIntent(intent);
     }
 
@@ -320,6 +322,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
         getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        list_of_entries.clear();
         ActivityUtility.antiCrossFade(content, mLoadingView, this);
         if (is_load_entries) {
             getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, this);

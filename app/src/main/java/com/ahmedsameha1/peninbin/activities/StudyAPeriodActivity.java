@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -114,6 +115,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     public static final String PERMITED_TRIES_NUMBER = "permitedTriesNumber";
     private static final String WHILE_STUDYING = "while_studying";
+    private static StudyAPeriodActivity studyAPeriodActivity;
     private long startingTime;
     boolean boolean_continue, actionBarShown, is_time_of_answer_elapsed = false;
     private Cursor cursor;
@@ -157,6 +159,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study_a_period);
+        studyAPeriodActivity = this;
         boolean isReadAnswer;
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
@@ -263,50 +266,16 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 int id = loader.getId();
                 if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     StudyAPeriodActivity.this.cursor = cursor;
-                    new AsyncTask<Void, Void, Void>() {
-
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            if (boolean_continue) {
-                                listForTest = readFromLinkerTableStudyDuringColumn();
-                            } else {
-                                listForTest = prepareListForStudyFirstTime();
-                            }
-                            questionsNumber = listForTest.length;
-                            return null;
+                    PrepareListForTest prepareListForTest = new PrepareListForTest();
+                    new Thread(() -> {
+                        if (boolean_continue) {
+                            listForTest = readFromLinkerTableStudyDuringColumn();
+                        } else {
+                            listForTest = prepareListForStudyFirstTime();
                         }
-
-                        @Override
-                        protected void onPostExecute(Void aVoid) {
-                            super.onPostExecute(aVoid);
-                            if (questionsNumber > 0) {
-                                while_studying = true;
-                                if (obfuscate) {
-                                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
-                                } else {
-                                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                                }
-                                time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
-                                        reading_question_letter_second, find_answer_time, typing_answer_letter_second);
-                                ifMoreThanOnce();
-                                showNumberOfQuetions.setText(Integer.toString(questionsNumber));
-                                if (boolean_continue) {
-                                    remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                                } else {
-                                    remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1));
-                                }
-                                enterAnswer.requestFocus();
-                                scheduleWhatToDoAfterTimeOfAnswerElapsed();
-                            } else {
-                                Toast toast = Toast.makeText(StudyAPeriodActivity.this, getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
-                                finish();
-                                ExitActivity.exit(StudyAPeriodActivity.this);
-                            }
-                            ActivityUtility.crossFade(content, mLoadingView, StudyAPeriodActivity.this);
-                        }
-                    }.execute();
+                        questionsNumber = listForTest.length;
+                        prepareListForTest.sendMessage(Message.obtain());
+                    }).start();
                 } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     if (symbol == null && customable_text == null) {
                         symbol = new String[cursor.getCount()];
@@ -642,7 +611,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         super.onResume();
         if (!ActivityUtility.hasOpenedDialogs(this)) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-            tool_bar_timer.start();
         }
         /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
          * do not call it after destruction because it will be called from onrestoreinstancestate method
@@ -1252,6 +1220,40 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
         } else {
             showQuestion.setText(listForTest[currentQuestionCounter][0]);
+        }
+    }
+
+    private static class PrepareListForTest extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (studyAPeriodActivity.questionsNumber > 0) {
+                studyAPeriodActivity.while_studying = true;
+                if (studyAPeriodActivity.obfuscate) {
+                    studyAPeriodActivity.showQuestion.setText(ActivityUtility.spanText(studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][0], studyAPeriodActivity.showQuestion));
+                } else {
+                    studyAPeriodActivity.showQuestion.setText(studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][0]);
+                }
+                studyAPeriodActivity.time_of_answer = ActivityUtility.calculate_time_of_answer(studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][0], studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][1],
+                        studyAPeriodActivity.reading_question_letter_second, studyAPeriodActivity.find_answer_time, studyAPeriodActivity.typing_answer_letter_second);
+                studyAPeriodActivity.ifMoreThanOnce();
+                studyAPeriodActivity.showNumberOfQuetions.setText(Integer.toString(studyAPeriodActivity.questionsNumber));
+                if (studyAPeriodActivity.boolean_continue) {
+                    studyAPeriodActivity.remainingQuestionCounter.setText(Integer.toString(studyAPeriodActivity.questionsNumber - 1 - studyAPeriodActivity.currentQuestionCounter));
+                } else {
+                    studyAPeriodActivity.remainingQuestionCounter.setText(Integer.toString(studyAPeriodActivity.questionsNumber - 1));
+                }
+                studyAPeriodActivity.enterAnswer.requestFocus();
+                studyAPeriodActivity.scheduleWhatToDoAfterTimeOfAnswerElapsed();
+            } else {
+                Toast toast = Toast.makeText(studyAPeriodActivity, studyAPeriodActivity.getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                studyAPeriodActivity.finish();
+                ExitActivity.exit(studyAPeriodActivity);
+            }
+            ActivityUtility.crossFade(studyAPeriodActivity.content, studyAPeriodActivity.mLoadingView, studyAPeriodActivity);
+            studyAPeriodActivity.tool_bar_timer.start();
         }
     }
 }

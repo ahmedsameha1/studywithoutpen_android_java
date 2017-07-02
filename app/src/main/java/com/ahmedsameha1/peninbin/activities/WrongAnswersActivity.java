@@ -8,6 +8,8 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -54,6 +56,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     public static final String SCREEN_NAME = "WrongAnswersActivity";
     public static final String WRONG_ITEM_LIST = "wrongItemList";
     private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
+    private static WrongAnswersActivity wrongAnswersActivity;
     private long current_field_id;
     private ArrayList<WrongItem> wrongItemList;
     private Cursor cursor;
@@ -73,6 +76,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wrong_answers);
+        wrongAnswersActivity = this;
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
         current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
         test_type = bundle.getInt(ShowTestResultDialogFragment.TEST_TYPE);
@@ -97,7 +101,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         content = (RelativeLayout) findViewById(R.id.content);
         mLoadingView = findViewById(R.id.loading);
         content.setVisibility(View.GONE);
-        if ( savedInstanceState != null ) {
+        if (savedInstanceState != null) {
             wrongItemList = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEM_LIST);
             mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this, wrongItemList, current_field_id);
             recyclerView.setAdapter(mAdapter);
@@ -156,7 +160,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.ask_again:
-                if ( wrongItemList != null ) {
+                if (wrongItemList != null) {
                     String string_for_pausing = null;
                     if (test_type == Constants.TestType.ENHANCED_TEST) {
                         string_for_pausing = AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + current_field_id;
@@ -278,6 +282,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         recyclerView.getLayoutManager()
                 .onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLERVIEW_POSITION));
     }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoaderAndUpdateDatabase(WrongAnswersActivity.this,
@@ -293,14 +298,25 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.cursor = data;
-        wrongItemList = getWrongItems();
-        mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this, wrongItemList, current_field_id);
-        recyclerView.setAdapter(mAdapter);
-        ActivityUtility.crossFade(content, mLoadingView, WrongAnswersActivity.this);
+        PrepareListForTest prepareListForTest = new PrepareListForTest();
+        new Thread(() -> {
+            wrongItemList = getWrongItems();
+            prepareListForTest.sendMessage(Message.obtain());
+        }).start();
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    private static class PrepareListForTest extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            wrongAnswersActivity.mAdapter = new WrongAnswersActivityRecyclerViewAdapter(wrongAnswersActivity, wrongAnswersActivity.wrongItemList, wrongAnswersActivity.current_field_id);
+            wrongAnswersActivity.recyclerView.setAdapter(wrongAnswersActivity.mAdapter);
+            ActivityUtility.crossFade(wrongAnswersActivity.content, wrongAnswersActivity.mLoadingView, wrongAnswersActivity);
+        }
     }
 }
