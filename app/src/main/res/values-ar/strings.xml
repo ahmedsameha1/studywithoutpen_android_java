@@ -41,7 +41,7 @@
     <string name="ask_for_continue_previous_study_during">هل تريد استكمال جلسة الاستذكار السابقة؟</string>
     <string name="no">لا</string>
     <string name="yes">نعم</string>
-    <string name="complete_or_cancel_last_study_session">لطفا أكمل أو ألغ أي جلسات موقوفة خاصة بهذا المجال!</string>
+    <string name="complete_or_cancel_last_study_session">لطفا أكمل أو ألغ أي جلسات موقوفة خاصة بهذا المجال، ﻷن هذا المُدخل في واحد من هذه الجلسات.</string>
     <string name="repeated_entry">يوجد مُدخل يحتوي على نفس السؤال ونفس الجواب، احذف هذا المُدخل إن أردت!</string>
     <string name="ask_for_continue_previous_test">هل تريد استكمال جلسة الاختبار السابقة؟</string>
     <string name="enter_date_time">انقر لتحديد التاريخ والوقت</string>

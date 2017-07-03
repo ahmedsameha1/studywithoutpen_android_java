@@ -17,7 +17,6 @@ import java.util.Locale;
  * Created by ahmed_000 on 8/31/2015.
  */
 public class DatabaseReadOperations {
-    public static final String EXPORT_DIRECTORY_NAME = "StudyWithoutPen";
     private Context context;
     private SQLiteDatabase sqLiteDatabase;
 
@@ -85,23 +84,27 @@ public class DatabaseReadOperations {
 
     public boolean checkIfIncludedInPausedOperations(long field_id, long entry_id) {
         Cursor cursor = null;
-        if (getQuestionDataType(field_id) == Contract.Field.STRING_DATA_TYPE) {
-            cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
-                    new String[]{Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER},
-                    Contract.COLUMN_ID + " = ? AND ( " + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? OR "
-                            + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? OR "
-                    + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " >= ? OR "
-                            + Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER + " >= ? OR "
-                            + Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER + " >= ? ) ",
-                    new String[]{String.valueOf(entry_id), "0", "0", "0", "0", "0"}, null, null, null);
-        } else if (getQuestionDataType(field_id) == Contract.Field.NOT_STRING_DATA_TYPE) {
-        }
-        if (cursor == null || cursor.getCount() <= 0) {
-            cursor.close();
-            return false;
-        } else {
-            cursor.close();
-            return true;
+        try {
+            if (getQuestionDataType(field_id) == Contract.Field.STRING_DATA_TYPE) {
+                cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                        new String[]{Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER},
+                        Contract.COLUMN_ID + " = ? AND ( " + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? OR "
+                                + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? OR "
+                                + Contract.String_Entry.COLUMN_PAUSED_FULLY_RANDOM_TEST_ORDER + " >= ? OR "
+                                + Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER + " >= ? OR "
+                                + Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER + " >= ? ) ",
+                        new String[]{String.valueOf(entry_id), "0", "0", "0", "0", "0"}, null, null, null);
+            } else if (getQuestionDataType(field_id) == Contract.Field.NOT_STRING_DATA_TYPE) {
+            }
+            if (cursor == null || cursor.getCount() <= 0) {
+                return false;
+            } else {
+                return true;
+            }
+        } finally {
+            if ( cursor != null ) {
+                cursor.close();
+            }
         }
     }
 
@@ -722,7 +725,9 @@ public class DatabaseReadOperations {
     public boolean isOrderIdUnique( String order_id ) {
         Cursor cursor = sqLiteDatabase.query(Contract.GooglePaymentOrderID.TABLE_NAME, new String[] {Contract.GooglePaymentOrderID.COLUMN_ORDER_ID},
                 Contract.GooglePaymentOrderID.COLUMN_ORDER_ID + " = ? ", new String[] {order_id},null,null,null);
-        return ! cursor.moveToFirst();
+        boolean b = ! cursor.moveToFirst();
+        cursor.close();
+        return b;
     }
 
     public int[] getTimeOfAnswerOfTests(long field_id ) {

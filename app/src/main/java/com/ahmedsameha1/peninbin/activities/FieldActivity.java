@@ -570,7 +570,6 @@ public class FieldActivity extends AppCompatActivity implements
                         return true;
                     }
                 });
-
         // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false);

@@ -928,6 +928,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                     sqLiteDatabase.insertWithOnConflict(Contract.String_Entry.TABLE_NAME, null,
                             contentValues, SQLiteDatabase.CONFLICT_IGNORE);
                     sqLiteDatabase.delete(Contract.String_Entry.TABLE_NAME, Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
+                    cursor.close();
                 }
                 sqLiteDatabase.setTransactionSuccessful();
             } finally {

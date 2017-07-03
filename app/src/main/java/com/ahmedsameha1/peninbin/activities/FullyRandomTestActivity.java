@@ -1,7 +1,6 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.AlarmClock;
@@ -33,7 +32,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
@@ -101,7 +99,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     private static final String TEXT_SIZE = "user_defined_question_text_size";
     private static final String CONTENT_VISIBILITY = "content_visibility";
     private static final String LOADING_VISIBILITY = "loading_visibility";
-    public static final String PAUSING = "pausing";
     private static final String SYMBOL = "symbol";
     private static final String CUSTOMABLE_TEXT = "customable_text";
     private static final String BEFORE_SHOWING_RESULT_DIALOG = "before_showing_result_dialog";
@@ -126,7 +123,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
     private Chronometer tool_bar_timer;
     private long lastPause;
-
     private int question_data_type;
     private int check_type;
     private TextToSpeech tts;

@@ -34,7 +34,7 @@ public class CopyMoveEntriesActivityRecyclerViewViewHolder extends RecyclerView.
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-        mListener.onCheckChanged(entry_id, b);
+        mListener.onCheckChanged(entry_id, b, checkBox);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class CopyMoveEntriesActivityRecyclerViewViewHolder extends RecyclerView.
 
 
     public interface IMyViewHolderClicks {
-        void onCheckChanged( long entry_id , boolean checked);
+        void onCheckChanged( long entry_id , boolean checked, CheckBox checkBox);
         void onClick(CheckBox checkBox);
     }
 }

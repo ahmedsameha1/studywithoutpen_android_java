@@ -75,26 +75,24 @@ public class FieldActivityRecyclerViewAdapter extends
     public FieldActivityRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.field_activity_recyclerview_row, parent, false);
-        FieldActivityRecyclerViewViewHolder fieldActivityRecyclerViewViewHolder =
-                new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
-                    @Override
-                    public void onClick(View v, String currentQuestion, String currentAnswer, long entry_id) {
-                        Intent intent = new Intent(context, StudyActivity.class);
-                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
-                        intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
-                        intent.putExtra(StudyActivity.CURRENT_QUESTION, currentQuestion);
-                        intent.putExtra(StudyActivity.CURRENT_ANSWER, currentAnswer);
-                        context.startActivity(intent);
-                    }
+        return new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
+            @Override
+            public void onClick(View v, String currentQuestion, String currentAnswer, long entry_id) {
+                Intent intent = new Intent(context, StudyActivity.class);
+                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
+                intent.putExtra(StudyActivity.CURRENT_QUESTION, currentQuestion);
+                intent.putExtra(StudyActivity.CURRENT_ANSWER, currentAnswer);
+                context.startActivity(intent);
+            }
 
-                    @Override
-                    public void onLongClick(View view) {
-                        View toolbar = view.findViewById(R.id.field_recyclerview_item_actions);
-                        Expand_Custom_Animation expandAni = new Expand_Custom_Animation(toolbar, 500);
-                        toolbar.startAnimation(expandAni);
-                    }
-                });
-        return fieldActivityRecyclerViewViewHolder;
+            @Override
+            public void onLongClick(View view) {
+                View toolbar = view.findViewById(R.id.field_recyclerview_item_actions);
+                Expand_Custom_Animation expandAni = new Expand_Custom_Animation(toolbar, 500);
+                toolbar.startAnimation(expandAni);
+            }
+        });
     }
 
     @Override
@@ -174,7 +172,7 @@ public class FieldActivityRecyclerViewAdapter extends
             ((Activity) context).getMenuInflater().inflate(R.menu.same_search_menu, popup.getMenu());
             ClipboardManager mclipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clipData = mclipboard.getPrimaryClip();
-            if ( clipData == null || clipData.getItemCount() <= 0) {
+            if (clipData == null || clipData.getItemCount() <= 0) {
                 popup.getMenu().findItem(R.id.substitute_question).setEnabled(false);
                 popup.getMenu().findItem(R.id.substitute_answer).setEnabled(false);
             }
@@ -286,6 +284,7 @@ public class FieldActivityRecyclerViewAdapter extends
 
     public interface Contact {
         void substituteQuestion(long entry_id, String text);
+
         void substituteAnswer(long entry_id, String text);
     }
 }
