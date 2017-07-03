@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.ahmedsameha1.peninbin"
@@ -11,6 +11,10 @@ android {
         versionCode 84
         versionName "3.38"
         multiDexEnabled true
+
+        jackOptions {
+            enabled true
+        }
     }
 
     compileOptions {
@@ -21,8 +25,8 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
