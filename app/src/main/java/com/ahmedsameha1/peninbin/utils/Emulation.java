@@ -431,9 +431,7 @@ public class Emulation {
                 emulation_calendar.set(Calendar.SECOND, 0);
                 String emulated_creation_time_string = simpleDateFormat.format(emulation_calendar.getTime());
                 long field_id = field_cursor.getLong(0);
-                Log.d("field_id",String.valueOf(field_id));
                 int number_of_everyday_entries = field_cursor.getInt(1);
-                Log.d("everyday_entries", String.valueOf(number_of_everyday_entries));
                 Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
                         Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
                                 + " >= datetime(?) ", new String[]{String.valueOf(field_id), today_emulation_date_string}, null, null,
@@ -443,23 +441,18 @@ public class Emulation {
                 if (cursor.getCount() % number_of_everyday_entries > 0) {
                     number_of_days++;
                 }
-
                 sqLiteDatabase.beginTransaction();
                 try {
                     if (number_of_days == 1) {
-                        Log.d("number_of_days", String.valueOf(number_of_days) + " %%% one day");
                         for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
                              cursor.moveToNext()) {
-                            Log.d("old_emulation", cursor.getString(1));
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
                             if ( sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
                                     Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) + ""}) == 1 ) {
-                                Log.d("entry_updated", emulated_creation_time_string);
                             }
                         }
                     } else if ( number_of_days > 1 ) {
-                        Log.d("number_of_days", String.valueOf(number_of_days) + " %%% more than one day");
                         outter:
                         for (int i = 0; i < number_of_days; i++) {
                             if (i >= 1) {
@@ -475,12 +468,10 @@ public class Emulation {
                                 if (cursor.isAfterLast()) {
                                     break outter;
                                 }
-                                Log.d("old_emulation", cursor.getString(1));
                                 ContentValues contentValues = new ContentValues();
                                 contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
                                 if ( sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
                                         Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) + ""}) == 1 ) {
-                                    Log.d("entry_updated", emulated_creation_time_string);
                                 }
                             }
                         }

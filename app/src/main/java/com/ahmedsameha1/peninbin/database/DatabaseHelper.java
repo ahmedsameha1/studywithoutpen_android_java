@@ -541,7 +541,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Emulation.modifyEmulationCreationDatesOfAppV53AndHigher(sqLiteDatabase);
         }
         if (oldVersion < 13 ) {
-            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV85(sqLiteDatabase);
+            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV86(sqLiteDatabase);
         }
     }
 
