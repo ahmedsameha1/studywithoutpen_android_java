@@ -814,4 +814,17 @@ public class FieldActivity extends AppCompatActivity implements
     public void substituteAnswer(long entry_id, String text) {
         cursorLoaderAndUpdateDatabase.substituteAnswer(entry_id, question_data_type, text);
     }
+
+    @Override
+    public void startStudyActivity(long entry_id, String question, String answer) {
+        Intent intent = new Intent(this, NewStudyActivity.class);
+        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
+        intent.putExtra(StudyActivity.CURRENT_QUESTION, question);
+        intent.putExtra(StudyActivity.CURRENT_ANSWER, answer);
+        if ( search_value != null ) {
+            intent.putExtra(NewStudyActivity.SEARCH_VALUE, search_value);
+        }
+        startActivity(intent);
+    }
 }

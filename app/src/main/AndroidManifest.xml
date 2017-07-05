@@ -118,7 +118,9 @@
             android:windowSoftInputMode="stateAlwaysVisible">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
@@ -252,6 +254,7 @@
             android:name=".receivers_services.MidnightService"
             android:exported="false" />
 
+        <activity android:name=".activities.NewStudyActivity"></activity>
     </application>
 
 </manifest>

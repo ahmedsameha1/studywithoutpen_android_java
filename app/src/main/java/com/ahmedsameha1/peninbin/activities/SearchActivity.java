@@ -212,7 +212,6 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                             + "  a LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
                     new String[]{String.valueOf(current_field_id), searchString});
-            search_what = 0;
         } else if (search_what == SEARCH_QUESTION) {
             cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                     "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
@@ -223,7 +222,6 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                             + "  q LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
                     new String[]{String.valueOf(current_field_id), searchString});
-            search_what = 0;
         } else {
             cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
                     "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
@@ -292,5 +290,22 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void substituteAnswer(long entry_id, String text) {
         cursorLoaderAndUpdateDatabase.substituteAnswer(entry_id, question_data_type, text);
+    }
+    @Override
+    public void startStudyActivity(long entry_id, String question, String answer) {
+        Intent intent = new Intent(this, NewStudyActivity.class);
+        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
+        intent.putExtra(StudyActivity.CURRENT_QUESTION, question);
+        intent.putExtra(StudyActivity.CURRENT_ANSWER, answer);
+        if ( search_value.length() > 0 ) {
+            intent.putExtra(NewStudyActivity.SEARCH_VALUE, search_value);
+            if (search_what == SEARCH_QUESTION) {
+                intent.putExtra(SEARCH_WHAT, SEARCH_QUESTION);
+            } else if ( search_what == SEARCH_ANSWER ) {
+                intent.putExtra(SEARCH_WHAT, SEARCH_ANSWER);
+            }
+        }
+        startActivity(intent);
     }
 }

@@ -4,10 +4,8 @@ package com.ahmedsameha1.peninbin.adapters;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -17,8 +15,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
-import android.text.Spannable;
-import android.text.style.BackgroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,21 +22,20 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.AskAgainAfterTestActivity;
 import com.ahmedsameha1.peninbin.activities.EditEntryActivity;
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
+import com.ahmedsameha1.peninbin.activities.NewStudyActivity;
 import com.ahmedsameha1.peninbin.activities.SearchActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
-import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
@@ -60,6 +55,7 @@ public class FieldActivityRecyclerViewAdapter extends
     private DatabaseReadOperations databaseOperations;
     private StringBuilder search_string;
 
+
     public FieldActivityRecyclerViewAdapter(Context context, Cursor data, long field_id, StringBuilder search_string) {
         super(context, data);
         this.context = context;
@@ -78,12 +74,7 @@ public class FieldActivityRecyclerViewAdapter extends
         return new FieldActivityRecyclerViewViewHolder(itemView, new FieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
             @Override
             public void onClick(View v, String currentQuestion, String currentAnswer, long entry_id) {
-                Intent intent = new Intent(context, StudyActivity.class);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
-                intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
-                intent.putExtra(StudyActivity.CURRENT_QUESTION, currentQuestion);
-                intent.putExtra(StudyActivity.CURRENT_ANSWER, currentAnswer);
-                context.startActivity(intent);
+                ((Contact) context).startStudyActivity(entry_id, currentQuestion, currentAnswer);
             }
 
             @Override
@@ -284,7 +275,7 @@ public class FieldActivityRecyclerViewAdapter extends
 
     public interface Contact {
         void substituteQuestion(long entry_id, String text);
-
         void substituteAnswer(long entry_id, String text);
+        void startStudyActivity(long entry_id, String question, String answer);
     }
 }
