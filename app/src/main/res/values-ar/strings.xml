@@ -332,5 +332,6 @@
     <string name="enhanced_test">اختبار مُحسَّن</string>
     <string name="start_fully_random_test">ابدأ اختبار عشوائي تماما</string>
     <string name="wait_loading">لطفا، انتظر التحميل</string>
+    <string name="field_emulation">مُحاكاة مجال</string>
 </resources>
 
