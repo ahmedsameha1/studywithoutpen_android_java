@@ -17,15 +17,14 @@ import com.ahmedsameha1.peninbin.adapters.StudyFragmentsTabAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
-
-import java.util.LinkedHashMap;
 
 public class NewStudyActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String SEARCH_VALUE = "search_value";
     public static final String DATA = "data";
-    private static NewStudyActivity newStudyActivity;
+    public static final String CURRENT_INDEX = "current_index";
     private long current_field_id;
     private long current_entry_id;
     private String current_question;
@@ -36,14 +35,17 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
     private DatabaseReadOperations databaseReadOperations;
     private SortOptions sortOption;
     private ViewPager mViewPager;
-    private LinkedHashMap<String, String[]> list_of_entries;
+    private String[][] entries;
+    private StringBuilder current_index;
     private View mLoadingView;
+    private RetainedFragment retainedFragment;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_study);
-        newStudyActivity = this;
         Intent intent = getIntent();
         current_field_id = intent.getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
         current_entry_id = intent.getLongExtra(StudyActivity.ENTRY_ID, 0);
@@ -57,9 +59,29 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
         mViewPager = (ViewPager) findViewById(R.id.container);
 //        mViewPager.setAdapter(new StudyFragmentsTabAdapter(getSupportFragmentManager()));
         tableLayout.setupWithViewPager(mViewPager);
-        getLoaderManager().restartLoader(0, null, this);
         mLoadingView = findViewById(R.id.loading);
         mViewPager.setVisibility(View.GONE);
+        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(DATA);
+        // if the reference to the fragment was null we create a new fragment object and add it to the activity
+        if (retainedFragment == null) {
+            retainedFragment = new RetainedFragment();
+            getFragmentManager().beginTransaction().add(retainedFragment, DATA).commit();
+        }
+        if ( savedInstanceState != null ) {
+            entries = retainedFragment.getStudy_activity_entries();
+            current_index = (StringBuilder) savedInstanceState.getSerializable(CURRENT_INDEX);
+            mViewPager.setAdapter(new StudyFragmentsTabAdapter(this, entries, current_index));
+            ActivityUtility.crossFade(mViewPager,mLoadingView, this);
+        } else {
+            getLoaderManager().restartLoader(0, null, this);
+        }
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getLoaderManager().destroyLoader(0);
     }
 
     @Override
@@ -115,13 +137,19 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        list_of_entries = new LinkedHashMap<String, String[]>();
-        UIHandler uihandler = new UIHandler();
+        entries = new String[cursor.getCount()][2];
+        UIHandler uihandler = new UIHandler(this);
         new Thread(() -> {
             for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
                  cursor.moveToNext()) {
-                list_of_entries.put(cursor.getString(0), new String[]{cursor.getString(1), cursor.getString(2)});
+                int position = cursor.getPosition();
+                entries[position][0] = cursor.getString(1);
+                entries[position][1] = cursor.getString(2);
+                if ( cursor.getLong(0) == current_entry_id) {
+                    current_index = new StringBuilder(String.valueOf(position));
+                }
             }
+            retainedFragment.setStudy_activity_entries(entries);
             uihandler.sendMessage(Message.obtain());
         }).start();
     }
@@ -131,10 +159,22 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
 
     }
 
-    private class UIHandler extends Handler {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(CURRENT_INDEX, current_index);
+    }
+
+    private static class UIHandler extends Handler {
+        private NewStudyActivity newStudyActivity;
+
+        public UIHandler( NewStudyActivity newStudyActivity) {
+            this.newStudyActivity = newStudyActivity;
+        }
+
         @Override
         public void handleMessage(Message msg) {
-            newStudyActivity.mViewPager.setAdapter(new StudyFragmentsTabAdapter(newStudyActivity.getSupportFragmentManager(), newStudyActivity.list_of_entries));
+            newStudyActivity.mViewPager.setAdapter(new StudyFragmentsTabAdapter(newStudyActivity, newStudyActivity.entries, newStudyActivity.current_index));
             ActivityUtility.crossFade(newStudyActivity.mViewPager, newStudyActivity.mLoadingView, newStudyActivity);
         }
     }

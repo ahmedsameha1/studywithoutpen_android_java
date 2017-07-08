@@ -16,6 +16,15 @@ public class RetainedFragment extends Fragment {
     private String [][] listForTest_QuickTestActivity;
     private String [][] listForTest_StudyDuringActivity;
     private ArrayList<WrongItem> wrongItemArrayList_ask_again_after_test_activity;
+    private String [][] study_activity_entries;
+
+    public String[][] getStudy_activity_entries() {
+        return study_activity_entries;
+    }
+
+    public void setStudy_activity_entries(String[][] study_activity_entries) {
+        this.study_activity_entries = study_activity_entries;
+    }
 
     @Override
     public void onCreate( Bundle savedInstanceState ) {

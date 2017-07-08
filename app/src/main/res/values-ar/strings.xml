@@ -340,5 +340,6 @@
     <string name="substitute_answer">استبدل الجواب</string>
     <string name="question_will">السؤال سيصبح:</string>
     <string name="answer_will">الجواب سيصبح:</string>
+    <string name="test">اختبار</string>
 </resources>
 

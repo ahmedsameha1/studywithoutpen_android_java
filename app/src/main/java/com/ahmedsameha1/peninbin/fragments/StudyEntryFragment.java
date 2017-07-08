@@ -10,19 +10,19 @@ import android.view.ViewGroup;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.NewStudyActivity;
 
-import java.util.LinkedHashMap;
-
 /**
  * Created by ahmed on 7/6/17.
  */
 
 public class StudyEntryFragment extends Fragment {
-    LinkedHashMap<String, String[]> data;
+    private String[][] entries;
+    private StringBuilder current_index;
 
-    public static StudyEntryFragment newInstance(LinkedHashMap<String, String[]> data) {
+    public static StudyEntryFragment newInstance(String[][] entries, StringBuilder current_index) {
         StudyEntryFragment instance = new StudyEntryFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(NewStudyActivity.DATA, data);
+        bundle.putSerializable(NewStudyActivity.DATA, entries);
+        bundle.putSerializable(NewStudyActivity.CURRENT_INDEX, current_index);
         instance.setArguments(bundle);
         return instance;
     }
@@ -30,7 +30,8 @@ public class StudyEntryFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        data = (LinkedHashMap<String, String[]>) getArguments().getSerializable(NewStudyActivity.DATA);
+        entries = (String[][]) getArguments().getSerializable(NewStudyActivity.DATA);
+        current_index = (StringBuilder) getArguments().getSerializable(NewStudyActivity.CURRENT_INDEX);
     }
 
     @Nullable

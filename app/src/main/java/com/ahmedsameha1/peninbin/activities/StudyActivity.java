@@ -1,5 +1,6 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.LoaderManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +8,6 @@ import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.app.LoaderManager;
 import android.os.SystemClock;
 import android.provider.AlarmClock;
 import android.speech.tts.TextToSpeech;
@@ -16,21 +16,16 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.Spannable;
 import android.text.TextWatcher;
-import android.text.style.BackgroundColorSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.Chronometer;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -39,21 +34,20 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
-import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
-import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
-import com.ahmedsameha1.peninbin.utils.CompareUtility;
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
-import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
-import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
@@ -1043,20 +1037,6 @@ public class StudyActivity extends AppCompatActivity implements
 
     }
 
-    private static class OnViewGlobalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
-        private final static int maxHeight = 75;
-        private View view;
-
-        public OnViewGlobalLayoutListener(View view) {
-            this.view = view;
-        }
-
-        @Override
-        public void onGlobalLayout() {
-            if (view.getHeight() > maxHeight)
-                view.getLayoutParams().height = maxHeight;
-        }
-    }
 
     @Override
     public void changeAreas(float questionArea, float answerArea) {

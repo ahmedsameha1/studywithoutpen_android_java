@@ -1,32 +1,35 @@
 package com.ahmedsameha1.peninbin.adapters;
 
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v7.app.AppCompatActivity;
 
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.StudyEntryFragment;
 import com.ahmedsameha1.peninbin.fragments.TestEntryFragment;
-
-import java.util.LinkedHashMap;
 
 /**
  * Created by ahmed on 7/6/17.
  */
 
 public class StudyFragmentsTabAdapter extends FragmentPagerAdapter {
-    LinkedHashMap<String, String[]> data;
+    private String[][] entries;
+    private StringBuilder current_index;
+    private AppCompatActivity appCompatActivity;
 
-    public StudyFragmentsTabAdapter(FragmentManager fm, LinkedHashMap<String, String[]> data ) {
-        super(fm);
-        this.data = data;
+    public StudyFragmentsTabAdapter(AppCompatActivity appCompatActivity, String[][] entries, StringBuilder current_index ) {
+        super(appCompatActivity.getSupportFragmentManager());
+        this.appCompatActivity = appCompatActivity;
+        this.entries = entries;
+        this.current_index = current_index;
     }
 
     @Override
     public Fragment getItem(int position) {
         if ( position == 0 ) {
-            return StudyEntryFragment.newInstance(data);
+            return StudyEntryFragment.newInstance(entries, current_index);
         } else if ( position == 1 ) {
-            return TestEntryFragment.newInstance(data);
+            return TestEntryFragment.newInstance(entries, current_index);
         }
         return null;
     }
@@ -39,9 +42,9 @@ public class StudyFragmentsTabAdapter extends FragmentPagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
         if ( position == 0 ) {
-            return "Study Entry";
+            return appCompatActivity.getString(R.string.study);
         } else if (position == 1) {
-            return "Test Entry";
+            return appCompatActivity.getString(R.string.test);
         }
         return "";
     }

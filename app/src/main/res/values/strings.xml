@@ -350,4 +350,5 @@
     <string name="substitute_answer">Replace answer</string>
     <string name="question_will">Question will be:</string>
     <string name="answer_will">Answer will be:</string>
+    <string name="test">Test</string>
 </resources>
