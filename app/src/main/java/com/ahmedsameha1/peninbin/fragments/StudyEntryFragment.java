@@ -43,18 +43,4 @@ public class StudyEntryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.study_entry_fragment, container, false);
     }
-
-    public void changeAreas(float questionArea, float answerArea) {
-/*        LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams();
-        LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) answerLinearlayout.getLayoutParams();
-        container.setWeightSum(questionArea + answerArea);
-        question_params.weight = (float) (questionArea);
-        answer_params.weight = (float) (answerArea);
-        questionLinearlayout.setLayoutParams(question_params);
-        answerLinearlayout.setLayoutParams(answer_params);*/
-    }
-    public void changeTextSize(float textSize) {
-/*        enterQuestion.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
-        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);*/
-    }
 }

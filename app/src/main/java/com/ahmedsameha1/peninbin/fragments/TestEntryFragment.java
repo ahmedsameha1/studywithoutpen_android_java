@@ -13,7 +13,6 @@ import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -111,15 +110,11 @@ public class TestEntryFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         boolean isReadAnswer;
         databaseOperations = new DatabaseReadOperations(getActivity());
         current_field_type = databaseOperations.getFieldType(current_field_id);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
         check_type = databaseOperations.getFieldCheckType(current_field_id);
-        question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
-        answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
-        test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
         show_question = (TextView) root_view.findViewById(R.id.question);
         enterAnswer = (EditText) root_view.findViewById(R.id.answer);
         correctAnswers = (TextView) root_view.findViewById(R.id.correct_answers);
@@ -138,6 +133,9 @@ public class TestEntryFragment extends Fragment {
             Intent checkIntent = new Intent();
             checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
             startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        }
+        if ( savedInstanceState != null ) {
+            correctAnswersCounter = savedInstanceState.getInt(CORRECT_ANSWERS_COUNTER);
         }
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
@@ -260,7 +258,7 @@ public class TestEntryFragment extends Fragment {
         down.setOnClickListener(v -> {
             down_card_view.startAnimation(animAlpha);
             int position = Integer.parseInt(current_index.toString());
-            if ( position < entries.length - 1 ) {
+            if ( position < entries.length - 2 ) {
                 current_index.replace(0, current_index.length(), String.valueOf(++position));
                 currentQuestion = entries[position][0];
                 currentAnswer = entries[position][1];
@@ -321,18 +319,12 @@ public class TestEntryFragment extends Fragment {
         currentQuestion = entries[Integer.parseInt(current_index.toString())][0];
         currentAnswer = entries[Integer.parseInt(current_index.toString())][1];
         show_question.setText(currentQuestion);
+        correctAnswers.setText(correctAnswersCounter);
     }
-    public void changeAreas(float questionArea, float answerArea) {
-        LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams();
-        LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) answerLinearlayout.getLayoutParams();
-        container.setWeightSum(questionArea + answerArea);
-        question_params.weight = (float) (questionArea);
-        answer_params.weight = (float) (answerArea);
-        questionLinearlayout.setLayoutParams(question_params);
-        answerLinearlayout.setLayoutParams(answer_params);
-    }
-    public void changeTextSize(float textSize) {
-        show_question.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
-        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
     }
 }
