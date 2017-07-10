@@ -29,7 +29,7 @@
                 android.support.v7.cardview:cardCornerRadius="5dp"
                 android.support.v7.cardview:cardElevation="1dp">
 
-                <EditText
+                <TextView
                     android:id="@+id/question"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -37,8 +37,6 @@
                     android:enabled="false"
                     android:gravity="center"
                     android:hint="@string/question"
-                    android:imeOptions="flagNoExtractUi"
-                    android:inputType="textNoSuggestions|textMultiLine"
                     android:minLines="1"
                     android:padding="5dp"
                     android:scrollbarAlwaysDrawVerticalTrack="true"

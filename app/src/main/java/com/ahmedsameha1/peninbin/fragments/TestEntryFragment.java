@@ -12,6 +12,8 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.ScrollingMovementMethod;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +26,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
@@ -60,9 +61,8 @@ public class TestEntryFragment extends Fragment {
     private String[][] entries;
     private StringBuilder current_index;
     private String currentQuestion, currentAnswer;
-    private TextView correctAnswers, check, showActionbar;
-    private ToggleButton showCurrentEntry;
-    private EditText enterQuestion, enterAnswer;
+    private TextView correctAnswers, check, show_question;
+    private EditText enterAnswer;
     private int correctAnswersCounter = 0;
     private long current_field_id, current_entry_id;
     private LinearLayout answerLinearlayout, questionLinearlayout, container;
@@ -83,11 +83,12 @@ public class TestEntryFragment extends Fragment {
     private View root_view;
 
 
-    public static TestEntryFragment newInstance(String[][] entries, StringBuilder current_index) {
+    public static TestEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id) {
         TestEntryFragment instance = new TestEntryFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable(NewStudyActivity.DATA, entries);
         bundle.putSerializable(NewStudyActivity.CURRENT_INDEX, current_index);
+        bundle.putLong(CURRENT_FIELD_ID, current_field_id);
         instance.setArguments(bundle);
         return instance;
     }
@@ -97,6 +98,7 @@ public class TestEntryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         entries = (String[][]) getArguments().getSerializable(NewStudyActivity.DATA);
         current_index = (StringBuilder) getArguments().getSerializable(NewStudyActivity.CURRENT_INDEX);
+        current_field_id = getArguments().getLong(CURRENT_FIELD_ID, 0);
     }
 
   
@@ -118,14 +120,13 @@ public class TestEntryFragment extends Fragment {
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
         answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
         test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
-        enterQuestion = (EditText) root_view.findViewById(R.id.question);
+        show_question = (TextView) root_view.findViewById(R.id.question);
         enterAnswer = (EditText) root_view.findViewById(R.id.answer);
         correctAnswers = (TextView) root_view.findViewById(R.id.correct_answers);
         check = (TextView) root_view.findViewById(R.id.check);
         answerLinearlayout = (LinearLayout) root_view.findViewById(R.id.answer_linearlayout);
         questionLinearlayout = (LinearLayout) root_view.findViewById(R.id.question_linearlayout);
         container = (LinearLayout) root_view.findViewById(R.id.container);
-        showActionbar = (TextView) root_view.findViewById(R.id.show_actionbar);
         ImageButton up = (ImageButton) root_view.findViewById(R.id.up);
         final ImageButton down = (ImageButton) root_view.findViewById(R.id.down);
         final CardView check_card_view = (CardView) root_view.findViewById(R.id.check_card_view);
@@ -142,7 +143,6 @@ public class TestEntryFragment extends Fragment {
         mTracker = application.getDefaultTracker();
         check.setOnClickListener(v -> {
             check_card_view.startAnimation(animAlpha);
-            String entered_question = enterQuestion.getText().toString();
             String entered_answer = enterAnswer.getText().toString();
 
 
@@ -242,41 +242,15 @@ public class TestEntryFragment extends Fragment {
         });
         up.setOnClickListener(v -> {
             up_card_view.startAnimation(animAlpha);
-            int position = 0;
-/*                if (fieldEntriesCursor != null) {
-                fieldEntriesCursor.close();
-            }*/
-//                fieldEntriesCursor = databaseOperations.getFieldEntries(currentField);
-            for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount(); fieldEntriesCursor.moveToNext()) {
-                if (fieldEntriesCursor.getString(1).equals(currentQuestion) && fieldEntriesCursor.getString(2).equals(currentAnswer)) {
-                    position = fieldEntriesCursor.getPosition();
-                    break;
-                }
-            }
-            if (--position >= 0) {
-                fieldEntriesCursor.moveToPosition(position);
-                currentQuestion = fieldEntriesCursor.getString(1);
-                currentAnswer = fieldEntriesCursor.getString(2);
-                current_entry_id = fieldEntriesCursor.getLong(0);
-                /*viewQuestion.setText(currentQuestion);
-                viewAnswer.setText(currentAnswer);*/
+            int position = Integer.parseInt(current_index.toString());
+            if ( position > 0 ) {
+                current_index.replace(0, current_index.length(), String.valueOf(--position));
+                currentQuestion = entries[position][0];
+                currentAnswer = entries[position][1];
                 correctAnswersCounter = 0;
                 correctAnswers.setText(Integer.toString(correctAnswersCounter));
-//                    showCurrentEntry.setChecked(true);
-
-                    enterQuestion.setText(currentQuestion);
-                    enterQuestion.setEnabled(false);
-
-
-                    enterAnswer.setText("");
-                if (showCurrentEntry.isChecked()) {
-                    enterQuestion.setText(currentQuestion);
-                    enterAnswer.setText(currentAnswer);
-                    questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
-                    questionLinearlayout.setPadding(0, 0, 0, 0);
-                    answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
-                    answerLinearlayout.setPadding(0, 0, 0, 0);
-                }
+                show_question.setText(currentQuestion);
+                enterAnswer.setText("");
             } else {
                 Toast toast = Toast.makeText(getActivity(), R.string.first_entry, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -285,89 +259,22 @@ public class TestEntryFragment extends Fragment {
         });
         down.setOnClickListener(v -> {
             down_card_view.startAnimation(animAlpha);
-            int position = 0;
-/*                if (fieldEntriesCursor != null) {
-                fieldEntriesCursor.close();
-            }*/
-//                fieldEntriesCursor = databaseOperations.getFieldEntries(currentField);
-            for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount(); fieldEntriesCursor.moveToNext()) {
-                if (fieldEntriesCursor.getString(1).equals(currentQuestion) && fieldEntriesCursor.getString(2).equals(currentAnswer)) {
-                    position = fieldEntriesCursor.getPosition();
-                    break;
-                }
-            }
-            if (++position < fieldEntriesCursor.getCount()) {
-                fieldEntriesCursor.moveToPosition(position);
-                currentQuestion = fieldEntriesCursor.getString(1);
-                currentAnswer = fieldEntriesCursor.getString(2);
-                current_entry_id = fieldEntriesCursor.getLong(0);
-                /*viewQuestion.setText(currentQuestion);
-                viewAnswer.setText(currentAnswer);*/
+            int position = Integer.parseInt(current_index.toString());
+            if ( position < entries.length - 1 ) {
+                current_index.replace(0, current_index.length(), String.valueOf(++position));
+                currentQuestion = entries[position][0];
+                currentAnswer = entries[position][1];
                 correctAnswersCounter = 0;
                 correctAnswers.setText(Integer.toString(correctAnswersCounter));
-//                    showCurrentEntry.setChecked(true);
-
-                    enterQuestion.setText(currentQuestion);
-                    enterQuestion.setEnabled(false);
-
-                    enterAnswer.setText("");
-                if (showCurrentEntry.isChecked()) {
-                    enterQuestion.setText(currentQuestion);
-                    enterAnswer.setText(currentAnswer);
-                    questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
-                    questionLinearlayout.setPadding(0, 0, 0, 0);
-                    answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
-                    answerLinearlayout.setPadding(0, 0, 0, 0);
-                }
+                show_question.setText(currentQuestion);
+                enterAnswer.setText("");
             } else {
                 Toast toast = Toast.makeText(getActivity(), R.string.last_entry, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
         });
-        enterQuestion.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (s.length() > 0) {
-//                    resultImage.setImageResource(R.drawable.ic_question_marks);
-                    questionLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                    questionLinearlayout.setPadding(0, 0, 0, 0);
-                }
-                if (s.length() > 0 && enterAnswer.getText().length() > 0) {
-                    if (!showCurrentEntry.isChecked()) {
-                        check.setEnabled(true);
-                    }
-                } else {
-                    check.setEnabled(false);
-                }
-                if (symbol != null && customable_text != null) {
-                    for (int i = 0; i < symbol.length; i++) {
-                        String text = s.toString();
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            enterQuestion.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            enterQuestion.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            questionLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            questionLinearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                questionLinearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
-                }
-            }
-        });
         enterAnswer.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -387,10 +294,8 @@ public class TestEntryFragment extends Fragment {
                     answerLinearlayout.setPadding(0, 0, 0, 0);
 
                 }
-                if (s.length() > 0 && enterQuestion.getText().length() > 0) {
-                    if (!showCurrentEntry.isChecked()) {
+                if (s.length() > 0 && show_question.getText().length() > 0) {
                         check.setEnabled(true);
-                    }
                 } else {
                     check.setEnabled(false);
                 }
@@ -412,6 +317,22 @@ public class TestEntryFragment extends Fragment {
                 }
             }
         });
+        show_question.setMovementMethod(new ScrollingMovementMethod());
+        currentQuestion = entries[Integer.parseInt(current_index.toString())][0];
+        currentAnswer = entries[Integer.parseInt(current_index.toString())][1];
+        show_question.setText(currentQuestion);
     }
-
+    public void changeAreas(float questionArea, float answerArea) {
+        LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams();
+        LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) answerLinearlayout.getLayoutParams();
+        container.setWeightSum(questionArea + answerArea);
+        question_params.weight = (float) (questionArea);
+        answer_params.weight = (float) (answerArea);
+        questionLinearlayout.setLayoutParams(question_params);
+        answerLinearlayout.setLayoutParams(answer_params);
+    }
+    public void changeTextSize(float textSize) {
+        show_question.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+        enterAnswer.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+    }
 }
