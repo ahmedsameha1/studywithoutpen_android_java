@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -75,7 +76,15 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
         } else {
             getLoaderManager().restartLoader(0, null, this);
         }
-
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                for (Fragment fragment: getSupportFragmentManager ().getFragments() ) {
+                    ( (Contact) fragment).changeCurrentTab();
+                }
+            }
+        });
     }
 
     @Override
@@ -178,5 +187,8 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
                     (newStudyActivity, newStudyActivity.entries, newStudyActivity.current_index,newStudyActivity.current_field_id));
             ActivityUtility.crossFade(newStudyActivity.mViewPager, newStudyActivity.mLoadingView, newStudyActivity);
         }
+    }
+    public interface Contact {
+        void changeCurrentTab();
     }
 }

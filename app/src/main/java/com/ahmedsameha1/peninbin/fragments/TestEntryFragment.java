@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -30,15 +29,20 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.NewStudyActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.google.android.gms.analytics.Tracker;
+
+import java.util.Locale;
+import java.util.StringTokenizer;
 
 /**
  * Created by ahmed on 7/6/17.
  */
 
-public class TestEntryFragment extends Fragment {
+public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitListener ,
+    NewStudyActivity.Contact {
     public static final String SCREEN_NAME = "StudyActivity";
     public static final String CURRENT_FIELD_ID = "currentField";
     public static final String ENTRY_ID = "entry_id";
@@ -74,12 +78,10 @@ public class TestEntryFragment extends Fragment {
     private boolean tts_available = false;
     private boolean locale_available = false;
     private int check_type;
-    private Tracker mTracker;
-    private Chronometer timer;
-    private long lastPause;
     private String[] symbol, customable_text;
-    private int current_field_type;
     private View root_view;
+    private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
+    private Tracker mTracker;
 
 
     public static TestEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id) {
@@ -112,7 +114,7 @@ public class TestEntryFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         boolean isReadAnswer;
         databaseOperations = new DatabaseReadOperations(getActivity());
-        current_field_type = databaseOperations.getFieldType(current_field_id);
+        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
         check_type = databaseOperations.getFieldCheckType(current_field_id);
         show_question = (TextView) root_view.findViewById(R.id.question);
@@ -127,7 +129,6 @@ public class TestEntryFragment extends Fragment {
         final CardView check_card_view = (CardView) root_view.findViewById(R.id.check_card_view);
         final CardView up_card_view = (CardView) root_view.findViewById(R.id.up_card_view);
         final CardView down_card_view = (CardView) root_view.findViewById(R.id.down_card_view);
-        timer = (Chronometer) root_view.findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(getActivity(), R.anim.anim_alpha);
         if (isReadAnswer) {
             Intent checkIntent = new Intent();
@@ -154,7 +155,7 @@ public class TestEntryFragment extends Fragment {
                             }
                         }
                         correctAnswersCounter++;
-                        correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                        correctAnswers.setText(String.valueOf(correctAnswersCounter));
                         answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     } else {
@@ -177,7 +178,7 @@ public class TestEntryFragment extends Fragment {
                             }
                         }
                         correctAnswersCounter++;
-                        correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                        correctAnswers.setText(String.valueOf(correctAnswersCounter));
                         answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     } else {
@@ -200,7 +201,7 @@ public class TestEntryFragment extends Fragment {
                             }
                         }
                         correctAnswersCounter++;
-                        correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                        correctAnswers.setText(String.valueOf(correctAnswersCounter));
                         answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     } else {
@@ -223,7 +224,7 @@ public class TestEntryFragment extends Fragment {
                             }
                         }
                         correctAnswersCounter++;
-                        correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                        correctAnswers.setText(String.valueOf(correctAnswersCounter));
                         answerLinearlayout.setBackgroundResource(R.drawable.correct_answer_background);
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     } else {
@@ -246,7 +247,7 @@ public class TestEntryFragment extends Fragment {
                 currentQuestion = entries[position][0];
                 currentAnswer = entries[position][1];
                 correctAnswersCounter = 0;
-                correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                correctAnswers.setText(String.valueOf(correctAnswersCounter));
                 show_question.setText(currentQuestion);
                 enterAnswer.setText("");
             } else {
@@ -263,7 +264,7 @@ public class TestEntryFragment extends Fragment {
                 currentQuestion = entries[position][0];
                 currentAnswer = entries[position][1];
                 correctAnswersCounter = 0;
-                correctAnswers.setText(Integer.toString(correctAnswersCounter));
+                correctAnswers.setText(String.valueOf(correctAnswersCounter));
                 show_question.setText(currentQuestion);
                 enterAnswer.setText("");
             } else {
@@ -287,7 +288,6 @@ public class TestEntryFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() > 0) {
-//                    resultImage.setImageResource(R.drawable.ic_question_marks);
                     answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
                     answerLinearlayout.setPadding(0, 0, 0, 0);
 
@@ -319,12 +319,66 @@ public class TestEntryFragment extends Fragment {
         currentQuestion = entries[Integer.parseInt(current_index.toString())][0];
         currentAnswer = entries[Integer.parseInt(current_index.toString())][1];
         show_question.setText(currentQuestion);
-        correctAnswers.setText(correctAnswersCounter);
+        correctAnswers.setText(String.valueOf(correctAnswersCounter));
     }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                // success, create the TTS instance
+                tts = new TextToSpeech(getActivity().getApplicationContext(), this);
+                tts_available = true;
+            } else {
+                cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id, false);
+                Toast toast = Toast.makeText(getActivity(), R.string.tts_not_available, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        }
+    }
+    @Override
+    public void onInit(int i) {
+        if (tts_available) {
+            String locale_short_name = databaseOperations.getFieldLocale(current_field_id);
+            StringTokenizer stringTokenizer = new StringTokenizer(locale_short_name, ",");
+            String lang = stringTokenizer.nextToken();
+            String country = stringTokenizer.nextToken();
+            Locale locale = new Locale(lang, country);
+            if (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
+                tts.setLanguage(locale);
+                locale_available = true;
+            } else {
+                cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id, false);
+                Toast toast = Toast.makeText(getActivity(), R.string.locale_is_not_available, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                tts.speak("Hello", TextToSpeech.QUEUE_ADD, null, null);
+            } else {
+                tts.speak("Hello", TextToSpeech.QUEUE_ADD, null);
+            }
+        }
+    }
+
+    @Override
+    public void changeCurrentTab() {
+        if ( entries != null && current_index != null ) {
+            int position = Integer.parseInt(current_index.toString());
+            currentQuestion = entries[position][0];
+            currentAnswer = entries[position][1];
+            correctAnswersCounter = 0;
+            correctAnswers.setText(String.valueOf(correctAnswersCounter));
+            show_question.setText(currentQuestion);
+            enterAnswer.setText("");
+        }
     }
 }

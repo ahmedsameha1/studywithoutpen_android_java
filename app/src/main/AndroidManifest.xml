@@ -254,7 +254,8 @@
             android:name=".receivers_services.MidnightService"
             android:exported="false" />
 
-        <activity android:name=".activities.NewStudyActivity"></activity>
+        <activity android:name=".activities.NewStudyActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
