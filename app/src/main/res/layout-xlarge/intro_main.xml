@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/fields"
+        android:textSize="45sp"
+        android:padding="5dp"
+        android:layout_margin="20dp"
+        android:id="@+id/textView"
+        android:textColor="@color/colorAccent"
+        android:layout_gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/intro_main"
+            android:id="@+id/imageView2"
+            android:layout_marginStart="50dp"
+            />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:layout_gravity="center"
+            android:src="@drawable/intro_arrow"/>
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/intro_main_menu"
+            android:layout_marginEnd="50dp"
+
+            />
+    </LinearLayout>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:textSize="20sp"
+        android:textColor="@color/white_color"
+        android:focusable="false"
+        android:cursorVisible="false"
+        android:background="@null"
+        android:layout_margin="20dp"
+        android:padding="5dp"
+        android:text="sss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nsss"
+        android:layout_weight="1"
+        android:gravity="center"/>
+
+</LinearLayout>

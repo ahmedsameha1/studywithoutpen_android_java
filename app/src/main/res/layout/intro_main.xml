@@ -25,8 +25,6 @@
             android:src="@drawable/intro_main"
             android:id="@+id/imageView2"
             android:layout_marginStart="50dp"
-            android:background="#000000"
-            android:padding="2dp"
             />
 
         <ImageView
@@ -42,8 +40,6 @@
             android:layout_weight="1"
             android:src="@drawable/intro_main_menu"
             android:layout_marginEnd="50dp"
-            android:padding="2dp"
-
             />
     </LinearLayout>
     <EditText
