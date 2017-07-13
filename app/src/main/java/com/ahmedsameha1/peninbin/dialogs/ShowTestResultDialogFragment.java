@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
@@ -43,7 +43,7 @@ public class ShowTestResultDialogFragment extends DialogFragment {
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         int questionsNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_QUESTIONS);
         wrongAnswersNumber = getArguments().getInt(EnhancedTestActivity.NUMBER_OF_WRONG_ANSWERS);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         test_type = getArguments().getInt(TEST_TYPE);
         double correctAnswersPercent = ((double) (questionsNumber - wrongAnswersNumber)) / questionsNumber;
         NumberFormat numberFormat = NumberFormat.getPercentInstance();
@@ -79,7 +79,7 @@ public class ShowTestResultDialogFragment extends DialogFragment {
             Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view -> {
                 Bundle bundle = new Bundle();
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                bundle.putLong(Constants.CURRENT_FIELD_ID,current_field_id);
                 bundle.putInt(TEST_TYPE, test_type);
                 bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItemList);
                 bundle.putInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER, getArguments()

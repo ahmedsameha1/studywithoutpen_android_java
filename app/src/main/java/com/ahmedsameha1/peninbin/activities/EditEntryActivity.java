@@ -26,14 +26,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
@@ -46,6 +47,8 @@ public class EditEntryActivity extends AppCompatActivity implements
         ChangeAreasDialogFragment.ChangeAreas,
         ChangeTextSizeDialogFragment.ChangeTextSize,
         ActivityUtility.ActivityTimers {
+    public static final String CURRENT_QUESTION = "currentQuestion";
+    public static final String CURRENT_ANSWER = "currentAnswer";
     public static final String SCREEN_NAME = "EditEntryActivity";
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
@@ -82,11 +85,11 @@ public class EditEntryActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_entry);
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
+        current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
         entry_id = getIntent().getLongExtra(ENTRY_ID, 0);
         question_data_type = getIntent().getIntExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE, 0);
-        currentQuestion = getIntent().getStringExtra(StudyActivity.CURRENT_QUESTION);
-        currentAnswer = getIntent().getStringExtra(StudyActivity.CURRENT_ANSWER);
+        currentQuestion = getIntent().getStringExtra(CURRENT_QUESTION);
+        currentAnswer = getIntent().getStringExtra(CURRENT_ANSWER);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         databaseOperations = new DatabaseReadOperations(this);
         current_field_type = databaseOperations.getFieldType(current_field_id);
@@ -375,7 +378,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         switch (id) {
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
                 bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
@@ -384,7 +387,7 @@ public class EditEntryActivity extends AppCompatActivity implements
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
-                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle1.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
                 bundle1.putFloat(TEXT_SIZE, (editQuestion.getTextSize() / scaledDensity));
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();

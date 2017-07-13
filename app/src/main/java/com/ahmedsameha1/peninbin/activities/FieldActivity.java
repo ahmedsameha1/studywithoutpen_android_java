@@ -90,6 +90,9 @@ public class FieldActivity extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener,
         FieldActivityRecyclerViewAdapter.Contact {
     public static final String SCREEN_NAME = "FieldActivity";
+    public static final String ENTRY_ID = "entry_id";
+    public static final String CURRENT_QUESTION = "currentQuestion";
+    public static final String CURRENT_ANSWER = "currentAnswer";
     public static final int STUDY_PERIOD = 0;
     public static final int ENHANCED_TEST = 1;
     public static final int FULLY_RANDOM_TEST = 2;
@@ -204,7 +207,7 @@ public class FieldActivity extends AppCompatActivity implements
         mTracker = application.getDefaultTracker();
         fab.setOnClickListener(view -> {
             Intent intent = new Intent(FieldActivity.this, AddEntryActivity.class);
-            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
             intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, true);
             startActivity(intent);
         });
@@ -447,7 +450,7 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     public void onDrawerItemSelected(View view, int position) {
         Bundle bundle = new Bundle();
-        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
         boolean user_eligible = Money.getUserSubscriptionStatus(this);
         switch (position) {
             case ENHANCED_TEST:
@@ -487,7 +490,7 @@ public class FieldActivity extends AppCompatActivity implements
                 if (user_eligible || Money.getUserAllowedDueAnError(this)) {
                     ScheduleInFieldDialogFragment scheduleInFieldDialogFragment = new ScheduleInFieldDialogFragment();
                     Bundle bundle1 = new Bundle();
-                    bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    bundle1.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                     scheduleInFieldDialogFragment.setArguments(bundle1);
                     scheduleInFieldDialogFragment.show(getSupportFragmentManager(), ScheduleInFieldDialogFragment.SCHEDULE_IN_FIELD);
                 } else {
@@ -498,7 +501,7 @@ public class FieldActivity extends AppCompatActivity implements
                 break;
             case Field_INFORMATION:
                 Intent intent = new Intent(this, FieldInformationActivity.class);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                 startActivity(intent);
                 break;
 
@@ -506,7 +509,7 @@ public class FieldActivity extends AppCompatActivity implements
                 if (user_eligible || Money.getUserAllowedDueAnError(this)) {
                     CopyMoveDialogFragment copyMoveDialogFragment = new CopyMoveDialogFragment();
                     Bundle bundle2 = new Bundle();
-                    bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    bundle2.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                     copyMoveDialogFragment.setArguments(bundle2);
                     copyMoveDialogFragment.show(getSupportFragmentManager(), CopyMoveDialogFragment.COPY_MOVE_DIALOG_FRAGMENT);
                 } else {
@@ -584,7 +587,7 @@ public class FieldActivity extends AppCompatActivity implements
 
         switch (id) {
             case R.id.sort:
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 bundle.putSerializable(SortEntriesDialogFragment.INITIAL_SORT_OPTION, sortOption);
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
@@ -596,7 +599,7 @@ public class FieldActivity extends AppCompatActivity implements
                 return true;
             case R.id.text_shortcuts:
                 Intent intent = new Intent(this, SymbolActivity.class);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                 startActivity(intent);
             default:
                 return super.onOptionsItemSelected(item);
@@ -668,7 +671,7 @@ public class FieldActivity extends AppCompatActivity implements
     private void startEnhancedTest() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
         Bundle bundle = new Bundle();
-        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
         boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + Constants.PAUSING + current_field_id)
                 && !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_ENHANCED + current_field_id)
@@ -683,7 +686,7 @@ public class FieldActivity extends AppCompatActivity implements
                     new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
                             .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
                                 Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                 intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
                                 intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
                                 startActivity(intent);
@@ -722,7 +725,7 @@ public class FieldActivity extends AppCompatActivity implements
     private void startFullyRandomTest() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
         Bundle bundle = new Bundle();
-        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
         boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         if (!sharedPreferences.contains(FullyRandomTestActivity.class.getName() + Constants.PAUSING + current_field_id)
                 && !sharedPreferences.contains(AskAgainAfterTestActivity.class.getName() + AskAgainAfterTestActivity.PAUSING_FULLY_RANDOM + current_field_id)
@@ -737,7 +740,7 @@ public class FieldActivity extends AppCompatActivity implements
                     new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
                             .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
                                 Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                 intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
                                 intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
                                 startActivity(intent);
@@ -774,7 +777,7 @@ public class FieldActivity extends AppCompatActivity implements
     private void startStudyAPeriod() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
         Bundle bundle = new Bundle();
-        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
         boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + Constants.PAUSING + current_field_id)
                 && !Emulation.isAnyThreadRunning()) {
@@ -818,10 +821,10 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     public void startStudyActivity(long entry_id, String question, String answer) {
         Intent intent = new Intent(this, NewStudyActivity.class);
-        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-        intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
-        intent.putExtra(StudyActivity.CURRENT_QUESTION, question);
-        intent.putExtra(StudyActivity.CURRENT_ANSWER, answer);
+        intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+        intent.putExtra(ENTRY_ID, entry_id);
+        intent.putExtra(CURRENT_QUESTION, question);
+        intent.putExtra(CURRENT_ANSWER, answer);
         if ( search_value != null ) {
             intent.putExtra(NewStudyActivity.SEARCH_VALUE, search_value);
         }

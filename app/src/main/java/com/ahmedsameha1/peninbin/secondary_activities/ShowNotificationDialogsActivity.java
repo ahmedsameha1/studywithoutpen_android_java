@@ -14,7 +14,7 @@ import com.ahmedsameha1.peninbin.activities.AskAgainAfterTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -43,19 +43,19 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_notification_dialogs);
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(this);
         CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
-        long current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, -1);
+        long current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, -1);
         if ( databaseReadOperations.checkFieldExists(current_field_id) ) {
             int dialog_type = getIntent().getIntExtra(DIALOG_TYPE, -1);
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             int question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
             boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
             Bundle bundle = new Bundle();
-            bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+            bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
             bundle.putBoolean(FROM_NOTIFICATION, true);
             switch (dialog_type) {
                 case QUICK_TEST_DIALOG:
 
-                    bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                     QuickTestDialogFragment quickTestDialogFragment = new QuickTestDialogFragment();
                     quickTestDialogFragment.setArguments(bundle);
                     quickTestDialogFragment.show(getSupportFragmentManager(), QuickTestDialogFragment.QUICK_TEST_DIALOG);
@@ -74,7 +74,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                                 new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
                                         .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
                                             Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                             intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
                                             intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
                                             startActivity(intent);
@@ -123,7 +123,7 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                                 new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
                                         .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
                                             Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                             intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
                                             intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
                                             startActivity(intent);

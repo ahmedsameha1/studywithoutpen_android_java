@@ -1,12 +1,12 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.LoaderManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.app.LoaderManager;
-import android.content.Loader;
 import android.os.Parcelable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -22,14 +22,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.FieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
@@ -43,6 +44,9 @@ import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScrol
 public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
         DeleteEntryDialogFragment.Contact,
         FieldActivityRecyclerViewAdapter.Contact {
+    public static final String ENTRY_ID = "entry_id";
+    public static final String CURRENT_QUESTION = "currentQuestion";
+    public static final String CURRENT_ANSWER = "currentAnswer";
     public static final String SCREEN_NAME = "SearchActivity";
     public static final int SEARCH_LOADER = 0;
     public static final String EDITED_ENTRY_ID = "edited_entry_id";
@@ -85,7 +89,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             recyclerview_position = savedInstanceState.getParcelable(RECYCLERVIEW_POSITION);
             search_value = savedInstanceState.getString(SEARCH_VALUE);
         } else {
-            current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
+            current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
             search_what = getIntent().getIntExtra(SEARCH_WHAT, 0);
             search_value = getIntent().getStringExtra(SEARCH_VALUE);
         }
@@ -294,10 +298,10 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void startStudyActivity(long entry_id, String question, String answer) {
         Intent intent = new Intent(this, NewStudyActivity.class);
-        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-        intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
-        intent.putExtra(StudyActivity.CURRENT_QUESTION, question);
-        intent.putExtra(StudyActivity.CURRENT_ANSWER, answer);
+        intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+        intent.putExtra(ENTRY_ID, entry_id);
+        intent.putExtra(CURRENT_QUESTION, question);
+        intent.putExtra(CURRENT_ANSWER, answer);
         if ( search_value.length() > 0 ) {
             intent.putExtra(NewStudyActivity.SEARCH_VALUE, search_value);
             if (search_what == SEARCH_QUESTION) {

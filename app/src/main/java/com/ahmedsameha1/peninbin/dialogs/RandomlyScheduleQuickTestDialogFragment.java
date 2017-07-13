@@ -26,7 +26,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
@@ -48,7 +48,7 @@ public class RandomlyScheduleQuickTestDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         databaseOperations = new DatabaseReadOperations(getActivity());
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         setRetainInstance(true);
     }
 

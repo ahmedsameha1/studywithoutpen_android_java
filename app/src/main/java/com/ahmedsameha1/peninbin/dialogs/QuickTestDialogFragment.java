@@ -35,7 +35,7 @@ import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 import java.util.Calendar;
@@ -65,7 +65,7 @@ public class QuickTestDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         year = getArguments().getInt(YEAR);
         monthOfYear = getArguments().getInt(MONTH_OF_YEAR);
         dayOfMonth = getArguments().getInt(DAY_OF_MONTH);
@@ -216,7 +216,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                 intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
                                 intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, number);
                                 intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                 final Calendar calendar_picked_date_time = Calendar.getInstance();
                                 calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                                 intent.putExtra(SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
@@ -252,7 +252,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                 intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
                                 intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, number);
                                 intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                 final Calendar calendar_picked_date_time = Calendar.getInstance();
                                 calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                                 intent.putExtra(SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);

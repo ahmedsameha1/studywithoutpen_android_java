@@ -15,7 +15,7 @@ import android.widget.Button;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.CopyMoveEntriesActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Constants;
 
 /**
@@ -29,7 +29,7 @@ public class CopyMoveDialogFragment extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
     }
 
     @NonNull

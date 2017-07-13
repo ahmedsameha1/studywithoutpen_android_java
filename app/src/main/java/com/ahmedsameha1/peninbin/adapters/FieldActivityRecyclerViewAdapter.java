@@ -28,16 +28,14 @@ import com.ahmedsameha1.peninbin.activities.EditEntryActivity;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
-import com.ahmedsameha1.peninbin.activities.NewStudyActivity;
 import com.ahmedsameha1.peninbin.activities.SearchActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Expand_Custom_Animation;
 
@@ -48,6 +46,8 @@ import java.util.Locale;
  */
 public class FieldActivityRecyclerViewAdapter extends
         CursorRecyclerViewAdapter<FieldActivityRecyclerViewViewHolder> {
+    public static final String CURRENT_QUESTION = "currentQuestion";
+    public static final String CURRENT_ANSWER = "currentAnswer";
     private Context context;
     private long field_id;
     private int question_data_type;
@@ -105,10 +105,10 @@ public class FieldActivityRecyclerViewAdapter extends
                     && !ImportTextFile.isThreadRunning()) {
                 Intent intent = new Intent(context, EditEntryActivity.class);
                 intent.putExtra(EditEntryActivity.ENTRY_ID, entry_id);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                intent.putExtra(Constants.CURRENT_FIELD_ID, field_id);
                 intent.putExtra(DeleteEntryDialogFragment.QUESTION_DATA_TYPE, question_data_type);
-                intent.putExtra(StudyActivity.CURRENT_QUESTION, question);
-                intent.putExtra(StudyActivity.CURRENT_ANSWER, answer);
+                intent.putExtra(CURRENT_QUESTION, question);
+                intent.putExtra(CURRENT_ANSWER, answer);
                 ((Activity) context).startActivityForResult(intent, FieldActivity.EDIT_ENTRY);
             } else {
                 Toast toast = Toast.makeText(context, R.string.background_thread, Toast.LENGTH_SHORT);
@@ -176,7 +176,7 @@ public class FieldActivityRecyclerViewAdapter extends
                         intent.setAction(Intent.ACTION_SEARCH);
                         intent.putExtra(SearchManager.QUERY, question);
                         intent.putExtra(SearchActivity.SEARCH_VALUE, question);
-                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                        intent.putExtra(Constants.CURRENT_FIELD_ID, field_id);
                         intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_QUESTION);
                         context.startActivity(intent);
                     } else {
@@ -192,7 +192,7 @@ public class FieldActivityRecyclerViewAdapter extends
                         intent.setAction(Intent.ACTION_SEARCH);
                         intent.putExtra(SearchManager.QUERY, answer);
                         intent.putExtra(SearchActivity.SEARCH_VALUE, answer);
-                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                        intent.putExtra(Constants.CURRENT_FIELD_ID, field_id);
                         intent.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_ANSWER);
                         context.startActivity(intent);
                     } else {

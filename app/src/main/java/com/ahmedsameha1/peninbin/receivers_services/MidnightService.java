@@ -13,7 +13,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -133,7 +133,7 @@ public class MidnightService extends IntentService {
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
                         intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, number_of_questions);
                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, number_of_tries);
-                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, field_id);
+                        intent.putExtra(Constants.CURRENT_FIELD_ID, field_id);
                         intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.QUICK_TEST);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME, random);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);

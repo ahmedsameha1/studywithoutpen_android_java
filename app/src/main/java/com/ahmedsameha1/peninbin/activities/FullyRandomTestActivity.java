@@ -158,7 +158,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         databaseOperations = new DatabaseReadOperations(this);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
+        current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
         current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
@@ -598,7 +598,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         switch (id) {
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) show_question_linearlayout.getLayoutParams()).weight);
                 bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) show_result_linearlayout.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
@@ -607,7 +607,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
-                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle1.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
                 bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize() / scaledDensity));
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
@@ -617,7 +617,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
 
             case R.id.time_of_answer:
                 Bundle bundle2 = new Bundle();
-                bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle2.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.READING_QUESTION_LETTER_SECOND, reading_question_letter_second);
                 bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.FIND_ANSWER_TIME, find_answer_time);
                 bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.TYPING_ANSWER_LETTER_SECOND, typing_answer_letter_second);
@@ -630,7 +630,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
 
             case R.id.obfuscate_question:
                 Bundle bundle3 = new Bundle();
-                bundle3.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle3.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 ObfuscateQuestionDialogFragment obfuscateQuestionDialogFragment = new ObfuscateQuestionDialogFragment();
                 obfuscateQuestionDialogFragment.setArguments(bundle3);
                 obfuscateQuestionDialogFragment.show(getSupportFragmentManager(), ObfuscateQuestionDialogFragment.OBFUSCATE_QUESTION_DIALOG_FRAGMENT);
@@ -1043,7 +1043,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         Bundle bundle = new Bundle();
         bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
         bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
-        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
         bundle.putInt(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
         bundle.putInt(PERMITED_TRIES_NUMBER, permitedTriesNumber);
         fragment.setArguments(bundle);

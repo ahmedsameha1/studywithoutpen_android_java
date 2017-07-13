@@ -29,7 +29,7 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.util.Calendar;
 import com.google.android.gms.analytics.Tracker;
@@ -55,7 +55,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         alarmManager = (AlarmManager) getActivity().getSystemService(AppCompatActivity.ALARM_SERVICE);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
@@ -81,8 +81,8 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                 final Calendar calendar_picked_date_time = Calendar.getInstance();
                 new DatePickerDialog(getActivity(), (view111, year, monthOfYear, dayOfMonth) -> new TimePickerDialog(getActivity(), (view110, hourOfDay, minute) -> {
                     Bundle bundle = new Bundle();
-                    bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
-                    bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
+                    bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                     bundle.putInt(QuickTestDialogFragment.YEAR,year);
                     bundle.putInt(QuickTestDialogFragment.MONTH_OF_YEAR,monthOfYear);
                     bundle.putInt(QuickTestDialogFragment.DAY_OF_MONTH,dayOfMonth);
@@ -100,7 +100,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                     calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                     Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                     intent.putExtra(SCHEDULE_WHAT,QUICK_TEST);
-                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                    intent.putExtra(Constants.CURRENT_FIELD_ID,current_field_id);
                     int request = (int)System.currentTimeMillis();
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),request , intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     alarmManager.set(AlarmManager.RTC, calendar_picked_date_time.getTimeInMillis(), pendingIntent);
@@ -124,7 +124,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                     calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                     Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                     intent.putExtra(SCHEDULE_WHAT, ENHANCED_TEST);
-                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                    intent.putExtra(Constants.CURRENT_FIELD_ID,current_field_id);
                     intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
                     intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                     int request = (int)System.currentTimeMillis();
@@ -151,7 +151,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                     calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                     Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                     intent.putExtra(SCHEDULE_WHAT, FULLY_RANDOM_TEST);
-                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                    intent.putExtra(Constants.CURRENT_FIELD_ID,current_field_id);
                     intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
                     intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                     int request = (int)System.currentTimeMillis();
@@ -178,7 +178,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                     calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                     Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
                     intent.putExtra(SCHEDULE_WHAT,STUDY_A_PERIOD);
-                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                    intent.putExtra(Constants.CURRENT_FIELD_ID,current_field_id);
                     intent.putExtra(ScheduleInFieldDialogFragment.TIME,calendar_picked_date_time.getTimeInMillis());
                     intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                     int request = (int)System.currentTimeMillis();
@@ -201,7 +201,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
             randomly_schedule_quick_test.setOnClickListener(view -> {
                 RandomlyScheduleQuickTestDialogFragment randomlyScheduleQuickTestDialogFragment = new RandomlyScheduleQuickTestDialogFragment();
                 Bundle bundle = new Bundle();
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                bundle.putLong(Constants.CURRENT_FIELD_ID,current_field_id);
                 randomlyScheduleQuickTestDialogFragment.setArguments(bundle);
                 randomlyScheduleQuickTestDialogFragment.show(getActivity().getSupportFragmentManager(),
                         RandomlyScheduleQuickTestDialogFragment.RANDOMLY_SCHEDULE_QUICK_TEST);

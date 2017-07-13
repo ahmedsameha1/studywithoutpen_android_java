@@ -28,7 +28,7 @@ import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Money;
 
@@ -45,7 +45,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION, false);
         new CursorLoaderAndUpdateDatabase(getActivity()).clearThisFieldFromWrongAnswersEnhancedTest(current_field_id);
         setRetainInstance(true);
@@ -274,7 +274,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                                     intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
                                     intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, number);
                                     intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                    intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                     intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                     if (control_test_entries.isChecked()) {
                                         intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
@@ -301,7 +301,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                                     intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
                                     intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, numberInt);
                                     intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                    intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                     intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                     if (control_test_entries.isChecked()) {
                                         intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());

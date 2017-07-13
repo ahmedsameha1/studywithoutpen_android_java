@@ -25,7 +25,7 @@ import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Money;
 
@@ -41,7 +41,7 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION, false);
         new CursorLoaderAndUpdateDatabase(getActivity()).clearThisFieldFromWrongAnswersFullyRandomTest(current_field_id);
     }
@@ -181,7 +181,7 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
                                     intent.putExtra(FullyRandomTestActivity.PERCENTAGE_OR_NUMBER, FullyRandomTestActivity.PERCENTAGE);
                                     intent.putExtra(FullyRandomTestActivity.QUESTION_PERCENTAGE, number);
                                     intent.putExtra(FullyRandomTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                    intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                     intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                     startActivity(intent);
                                     if (from_notification) {
@@ -203,7 +203,7 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
                                     intent.putExtra(FullyRandomTestActivity.PERCENTAGE_OR_NUMBER, FullyRandomTestActivity.NUMBER);
                                     intent.putExtra(FullyRandomTestActivity.QUESTION_NUMBER, numberInt);
                                     intent.putExtra(FullyRandomTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                    intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                    intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                     intent.putExtra(FullyRandomTestActivity.LAST_SESSION_OR_NEW_ONE, false);
                                     startActivity(intent);
                                     if (from_notification) {

@@ -143,7 +143,7 @@ public class QuickTestActivity extends FullyRandomTest implements
         setContentView(R.layout.activity_test);
         quickTestActivity = this;
         databaseOperations = new DatabaseReadOperations(this);
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
+        current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
         if (databaseOperations.checkFieldExists(current_field_id)) {
             int question_area_size, answer_area_size, test_text_size, action_bar_shown;
             boolean isReadAnswer;
@@ -572,7 +572,7 @@ public class QuickTestActivity extends FullyRandomTest implements
         switch (id) {
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) show_question_linearlayout.getLayoutParams()).weight);
                 bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) show_result_linearlayout.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
@@ -581,7 +581,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
-                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle1.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
                 bundle1.putFloat(TEXT_SIZE, (showQuestion.getTextSize() / scaledDensity));
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
@@ -591,7 +591,7 @@ public class QuickTestActivity extends FullyRandomTest implements
 
             case R.id.time_of_answer:
                 Bundle bundle2 = new Bundle();
-                bundle2.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle2.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.READING_QUESTION_LETTER_SECOND, reading_question_letter_second);
                 bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.FIND_ANSWER_TIME, find_answer_time);
                 bundle2.putInt(TimeOfAnswerOfTestsDialogFragment.TYPING_ANSWER_LETTER_SECOND, typing_answer_letter_second);
@@ -604,7 +604,7 @@ public class QuickTestActivity extends FullyRandomTest implements
 
             case R.id.obfuscate_question:
                 Bundle bundle3 = new Bundle();
-                bundle3.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle3.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 ObfuscateQuestionDialogFragment obfuscateQuestionDialogFragment = new ObfuscateQuestionDialogFragment();
                 obfuscateQuestionDialogFragment.setArguments(bundle3);
                 obfuscateQuestionDialogFragment.show(getSupportFragmentManager(), ObfuscateQuestionDialogFragment.OBFUSCATE_QUESTION_DIALOG_FRAGMENT);
@@ -900,7 +900,7 @@ public class QuickTestActivity extends FullyRandomTest implements
         Bundle bundle = new Bundle();
         bundle.putInt(NUMBER_OF_QUESTIONS, questionsNumber);
         bundle.putInt(NUMBER_OF_WRONG_ANSWERS, wrongAnswersCounter);
-        bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+        bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
         fragment.setArguments(bundle);
         fragment.show(getSupportFragmentManager(), ShowQuickTestResultDialogFragment.SHOW_QUICK_TEST_RESULT_DIALOG_FRAGMENT);
     }

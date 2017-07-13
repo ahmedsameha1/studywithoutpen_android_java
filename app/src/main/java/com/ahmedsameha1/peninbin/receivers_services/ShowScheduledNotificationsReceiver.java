@@ -17,7 +17,7 @@ import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.RefreshingAppUsageActivity;
@@ -39,7 +39,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                 || schedule_what == ScheduleInFieldDialogFragment.STUDY_A_PERIOD
                 || schedule_what == ScheduleInFieldDialogFragment.ENHANCED_TEST
                 || schedule_what == ScheduleInFieldDialogFragment.FULLY_RANDOM_TEST ) {
-            long current_field_id = intent.getLongExtra(StudyActivity.CURRENT_FIELD_ID,0);
+            long current_field_id = intent.getLongExtra(Constants.CURRENT_FIELD_ID,0);
             String current_field_name = new DatabaseReadOperations(context).getFieldName(current_field_id);
             if ( !Emulation.isAnyThreadRunning() ) {
                 if ( schedule_what == ScheduleInFieldDialogFragment.QUICK_TEST ) {
@@ -48,7 +48,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                         quick_test_intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
                         quick_test_intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, intent.getIntExtra(EnhancedTestActivity.QUESTION_PERCENTAGE,1));
                         quick_test_intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER,1));
-                        quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                        quick_test_intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                         quick_test_intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, intent.getIntExtra(EnhancedTestActivity.CONTROLLED_PORTION,-1));
                         quick_test_intent.putExtra(EnhancedTestActivity.RANK_LEVEL, intent.getIntExtra(EnhancedTestActivity.RANK_LEVEL,-1));
                         quick_test_intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, intent.getIntExtra(EnhancedTestActivity.WRONGNESS_LEVEL,-1));
@@ -57,7 +57,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                         quick_test_intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
                         quick_test_intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, intent.getIntExtra(EnhancedTestActivity.QUESTION_NUMBER,1));
                         quick_test_intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, intent.getIntExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER,1));
-                        quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                        quick_test_intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                         quick_test_intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, intent.getIntExtra(EnhancedTestActivity.CONTROLLED_PORTION,-1));
                         quick_test_intent.putExtra(EnhancedTestActivity.RANK_LEVEL, intent.getIntExtra(EnhancedTestActivity.RANK_LEVEL,-1));
                         quick_test_intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, intent.getIntExtra(EnhancedTestActivity.WRONGNESS_LEVEL,-1));
@@ -74,7 +74,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                 } else if ( schedule_what == ScheduleInFieldDialogFragment.ENHANCED_TEST) {
                     Intent quick_test_intent = new Intent(context, ShowNotificationDialogsActivity.class);
                     quick_test_intent.putExtra(ShowNotificationDialogsActivity.DIALOG_TYPE, ShowNotificationDialogsActivity.ENHANCED_TEST_DIALOG);
-                    quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    quick_test_intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                     contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
                             new NotificationCompat.Builder(context)
@@ -87,7 +87,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                 } else if ( schedule_what == ScheduleInFieldDialogFragment.FULLY_RANDOM_TEST) {
                     Intent fully_random_test_intent = new Intent(context, ShowNotificationDialogsActivity.class);
                     fully_random_test_intent.putExtra(ShowNotificationDialogsActivity.DIALOG_TYPE, ShowNotificationDialogsActivity.FULLY_RANDOM_TEST_DIALOG);
-                    fully_random_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    fully_random_test_intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                     contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), fully_random_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
                             new NotificationCompat.Builder(context)
@@ -100,7 +100,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                 } else if ( schedule_what == ScheduleInFieldDialogFragment.STUDY_A_PERIOD ) {
                     Intent quick_test_intent = new Intent(context, ShowNotificationDialogsActivity.class);
                     quick_test_intent.putExtra(ShowNotificationDialogsActivity.DIALOG_TYPE, ShowNotificationDialogsActivity.STUDY_PERIOD_DIALOG);
-                    quick_test_intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                    quick_test_intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                     contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
                             new NotificationCompat.Builder(context)

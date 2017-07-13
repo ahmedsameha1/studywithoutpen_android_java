@@ -17,7 +17,7 @@ import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -60,7 +60,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
                         intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, cursor.getInt(1));
                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, cursor.getInt(0));
-                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
+                        intent.putExtra(Constants.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME, session[2]);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) session[3], intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -74,7 +74,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
                         intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, (int) session[5]);
                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
-                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
+                        intent.putExtra(Constants.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME, session[2]);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) session[3], intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -85,7 +85,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                         intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
                         intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, (int) session[5]);
                         intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, (int) session[6]);
-                        intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
+                        intent.putExtra(Constants.CURRENT_FIELD_ID, session[0]);
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME, session[2]);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) session[3], intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -95,7 +95,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             } else {
                 Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
                 intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, (int) session[1]);
-                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, session[0]);
+                intent.putExtra(Constants.CURRENT_FIELD_ID, session[0]);
                 intent.putExtra(ScheduleInFieldDialogFragment.TIME, session[2]);
                 intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) session[3], intent, PendingIntent.FLAG_UPDATE_CURRENT);

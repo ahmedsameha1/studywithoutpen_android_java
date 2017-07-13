@@ -27,6 +27,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.utils.Constants;
 
 /**
  * Created by Ahmed on 3/19/16.
@@ -45,7 +46,7 @@ public class SymbolActivity extends AppCompatActivity implements
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_symbol);
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID,-1);
+        current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID,-1);
         databaseOperations = new DatabaseReadOperations(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         list_of_symbols = (ListView) findViewById(R.id.list_view_symbol);

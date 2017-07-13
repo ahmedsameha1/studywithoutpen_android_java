@@ -17,21 +17,25 @@ public class StudyFragmentsTabAdapter extends FragmentPagerAdapter {
     private StringBuilder current_index;
     private AppCompatActivity appCompatActivity;
     private long current_field_id;
+    private String[] symbol, customable_text;
 
-    public StudyFragmentsTabAdapter(AppCompatActivity appCompatActivity, String[][] entries, StringBuilder current_index, long current_field_id ) {
+    public StudyFragmentsTabAdapter(AppCompatActivity appCompatActivity, String[][] entries, StringBuilder current_index, long current_field_id,
+                                    String[] symbol, String[] customable_text) {
         super(appCompatActivity.getSupportFragmentManager());
         this.appCompatActivity = appCompatActivity;
         this.entries = entries;
         this.current_index = current_index;
         this.current_field_id = current_field_id;
+        this.symbol = symbol;
+        this.customable_text = customable_text;
     }
 
     @Override
     public Fragment getItem(int position) {
         if ( position == 0 ) {
-            return StudyEntryFragment.newInstance(entries, current_index, current_field_id);
+            return StudyEntryFragment.newInstance(entries, current_index, current_field_id, symbol, customable_text);
         } else if ( position == 1 ) {
-            return TestEntryFragment.newInstance(entries, current_index, current_field_id);
+            return TestEntryFragment.newInstance(entries, current_index, current_field_id, symbol, customable_text);
         }
         return null;
     }

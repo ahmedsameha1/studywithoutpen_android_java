@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
@@ -34,7 +34,7 @@ public class SortEntriesDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         databaseOperations = new DatabaseReadOperations(getActivity());
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
         sort_option = (SortOptions) getArguments().getSerializable(INITIAL_SORT_OPTION);
     }

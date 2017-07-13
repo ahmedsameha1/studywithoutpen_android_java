@@ -31,7 +31,9 @@ import com.ahmedsameha1.peninbin.activities.NewStudyActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
+import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import java.util.Locale;
@@ -43,23 +45,13 @@ import java.util.StringTokenizer;
 
 public class StudyEntryFragment extends Fragment implements  TextToSpeech.OnInitListener,
 NewStudyActivity.Contact {
-    public static final String SCREEN_NAME = "StudyActivity";
-    public static final String ENTRY_ID = "entry_id";
-    public static final String CURRENT_QUESTION = "currentQuestion";
-    public static final String CURRENT_ANSWER = "currentAnswer";
+    public static final String SCREEN_NAME = "StudyEntryFragment";
     public static final String CORRECT_ANSWERS_COUNTER = "correctAnswerCounter";
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     private static final int MY_DATA_CHECK_CODE = 1234;
-    public static final int SELECT_ENTRY_REQUEST = 1;
     public static final int RETURN_TIME = 1000;
-    private static final String CURRENT_ENTRY_ID = "current_entry_id";
-    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
-    private static final String SYMBOL = "symbol";
-    private static final String CUSTOMABLE_TEXT = "customable_text";
-    public static final int GET_ENTRIES_LOADER_ID = 0;
-    public static final int GET_SPECIAL_TEXT_LOADER_ID = 1;
     public static final String CURRENT_FIELD_ID = "currentField";
     private String[][] entries;
     private StringBuilder current_index;
@@ -85,12 +77,15 @@ NewStudyActivity.Contact {
     private Tracker mTracker;
     private TextView show_answer;
 
-    public static StudyEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id) {
+    public static StudyEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id,
+                                                 String[] symbol, String[] customable_text) {
         StudyEntryFragment instance = new StudyEntryFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable(NewStudyActivity.DATA, entries);
         bundle.putSerializable(NewStudyActivity.CURRENT_INDEX, current_index);
         bundle.putLong(CURRENT_FIELD_ID, current_field_id);
+        bundle.putStringArray(NewStudyActivity.SYMBOL, symbol);
+        bundle.putStringArray(NewStudyActivity.CUSTOMABLE_TEXT, customable_text);
         instance.setArguments(bundle);
         return instance;
     }
@@ -101,6 +96,8 @@ NewStudyActivity.Contact {
         entries = (String[][]) getArguments().getSerializable(NewStudyActivity.DATA);
         current_index = (StringBuilder) getArguments().getSerializable(NewStudyActivity.CURRENT_INDEX);
         current_field_id = getArguments().getLong(CURRENT_FIELD_ID, 0);
+        symbol = getArguments().getStringArray(NewStudyActivity.SYMBOL);
+        customable_text = getArguments().getStringArray(NewStudyActivity.CUSTOMABLE_TEXT);
     }
 
     @Nullable
@@ -142,6 +139,8 @@ NewStudyActivity.Contact {
         }
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
+        mTracker.setScreenName(ActivityUtility.getVersionCode(getActivity()) + SCREEN_NAME);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
         check.setOnClickListener(v -> {
             check_card_view.startAnimation(animAlpha);
             String entered_answer = enterAnswer.getText().toString();

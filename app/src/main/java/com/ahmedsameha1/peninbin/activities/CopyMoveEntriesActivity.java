@@ -184,7 +184,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
                 }
                 return true;
             case R.id.sort:
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 bundle.putSerializable(SortEntriesDialogFragment.INITIAL_SORT_OPTION, sortOption);
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);

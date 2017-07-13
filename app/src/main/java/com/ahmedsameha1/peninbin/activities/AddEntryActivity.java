@@ -103,7 +103,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         databaseOperations = new DatabaseReadOperations(this);
         fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, false);
-        current_field_id = getIntent().getLongExtra(StudyActivity.CURRENT_FIELD_ID, 0);
+        current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
         if (current_field_id == 0) {
             Cursor cursor = databaseOperations.getFieldList();
             if (cursor.moveToFirst()) {
@@ -514,7 +514,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         switch (id) {
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
-                bundle.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
                 bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
@@ -523,7 +523,7 @@ public class AddEntryActivity extends AppCompatActivity implements
                 return true;
             case R.id.change_text_size:
                 Bundle bundle1 = new Bundle();
-                bundle1.putLong(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                bundle1.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
                 float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
                 bundle1.putFloat(TEXT_SIZE, (enter_question.getTextSize() / scaledDensity));
                 ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();

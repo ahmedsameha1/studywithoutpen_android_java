@@ -78,7 +78,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         setContentView(R.layout.activity_wrong_answers);
         wrongAnswersActivity = this;
         Bundle bundle = getIntent().getBundleExtra(WRONG_ITEM_LIST);
-        current_field_id = bundle.getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = bundle.getLong(Constants.CURRENT_FIELD_ID);
         test_type = bundle.getInt(ShowTestResultDialogFragment.TEST_TYPE);
         permited_tries_number = bundle.getInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER);
         databaseOperations = new DatabaseReadOperations(this);
@@ -174,7 +174,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
                                 new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
                                         .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
                                             Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                             intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
                                             intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
                                             startActivity(intent);
@@ -189,7 +189,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
                                             Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
                                             intent.putExtra(WRONG_ITEM_LIST, bundle);
                                             intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
-                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                             intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
                                             startActivity(intent);
                                         }).create().show();
@@ -199,7 +199,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
                                 Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
                                 intent.putExtra(WRONG_ITEM_LIST, bundle);
                                 intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                 intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
                                 startActivity(intent);
                             }
@@ -208,7 +208,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
                                 new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
                                         .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
                                             Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                             intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
                                             intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
                                             startActivity(intent);
@@ -223,7 +223,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
                                             Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
                                             intent.putExtra(WRONG_ITEM_LIST, bundle);
                                             intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
-                                            intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                             intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
                                             startActivity(intent);
                                         }).create().show();
@@ -233,7 +233,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
                                 Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
                                 intent.putExtra(WRONG_ITEM_LIST, bundle);
                                 intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, permited_tries_number);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID, current_field_id);
+                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                                 intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
                                 startActivity(intent);
                             }

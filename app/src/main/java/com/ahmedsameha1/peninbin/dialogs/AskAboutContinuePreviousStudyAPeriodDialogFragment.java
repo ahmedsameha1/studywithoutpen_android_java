@@ -11,7 +11,7 @@ import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Constants;
 
@@ -25,7 +25,7 @@ public class AskAboutContinuePreviousStudyAPeriodDialogFragment extends DialogFr
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        current_field_id = getArguments().getLong(StudyActivity.CURRENT_FIELD_ID);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         from_notification = getArguments().getBoolean(ShowNotificationDialogsActivity.FROM_NOTIFICATION,false);
     }
 
@@ -35,7 +35,7 @@ public class AskAboutContinuePreviousStudyAPeriodDialogFragment extends DialogFr
         builder.setMessage(R.string.ask_for_continue_previous_study_during)
                 .setPositiveButton(R.string.yes, (dialog , which) -> {
                                 Intent intent = new Intent(getActivity(),StudyAPeriodActivity.class);
-                                intent.putExtra(StudyActivity.CURRENT_FIELD_ID,(current_field_id));
+                                intent.putExtra(Constants.CURRENT_FIELD_ID,(current_field_id));
                                 intent.putExtra(StudyAPeriodActivity.LAST_SESSION_OR_NEW_ONE,true);
                                 startActivity(intent);
                                 if ( from_notification ) {
@@ -52,7 +52,7 @@ public class AskAboutContinuePreviousStudyAPeriodDialogFragment extends DialogFr
                                 cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_PERIOD,
                                         current_field_id);
                                 Bundle bundle = new Bundle();
-                                bundle.putLong(StudyActivity.CURRENT_FIELD_ID,current_field_id);
+                                bundle.putLong(Constants.CURRENT_FIELD_ID,current_field_id);
                                 StudyAPeriodDialogFragment fragment2 = new StudyAPeriodDialogFragment();
                                 fragment2.setArguments(bundle);
                                 fragment2.show(getActivity().getSupportFragmentManager(), fragment2.SHOW_STUDY_DURING_DIALOG_FRAGMENT);
