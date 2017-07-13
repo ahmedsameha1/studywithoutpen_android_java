@@ -18,4 +18,9 @@ public class IntroActivity extends AppIntro {
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_fully_random_test));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_emulation));
     }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.intro_change_background_color;
+    }
 }

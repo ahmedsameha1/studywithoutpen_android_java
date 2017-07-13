@@ -27,6 +27,7 @@
             android:src="@drawable/intro_fully_random_test"
             android:id="@+id/imageView2"
             android:layout_marginStart="50dp"
+            android:background="@drawable/text_bordered"
             />
 
        <ImageView
@@ -42,6 +43,7 @@
             android:layout_weight="1"
             android:src="@drawable/intro_fully_random_test_dialog"
             android:layout_marginEnd="50dp"
+            android:background="@drawable/text_bordered"
             />
     </LinearLayout>
     <EditText
