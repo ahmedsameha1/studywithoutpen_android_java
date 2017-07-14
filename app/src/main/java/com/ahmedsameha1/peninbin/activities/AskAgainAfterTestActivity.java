@@ -543,7 +543,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 enterAnswer.requestFocus();
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
                 ActivityUtility.crossFade(content, mLoadingView, AskAgainAfterTestActivity.this);
-            }
+            }//// TODO: 7/14/17 must fix the problem of starting the timer 
         } else {
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
             mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
