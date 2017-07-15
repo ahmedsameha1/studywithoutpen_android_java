@@ -543,7 +543,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 enterAnswer.requestFocus();
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
                 ActivityUtility.crossFade(content, mLoadingView, AskAgainAfterTestActivity.this);
-            }//// TODO: 7/14/17 must fix the problem of starting the timer 
+            }
         } else {
             content.setVisibility(savedInstanceState.getInt(CONTENT_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
             mLoadingView.setVisibility(savedInstanceState.getInt(LOADING_VISIBILITY) == View.VISIBLE ? View.VISIBLE : View.GONE);
@@ -608,8 +608,9 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (!ActivityUtility.hasOpenedDialogs(this)) {
+        if (!ActivityUtility.hasOpenedDialogs(this) && while_studying) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+            tool_bar_timer.start();
         }
         /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
          * do not call it after destruction because it will be called from onrestoreinstancestate method
@@ -1117,8 +1118,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     @Override
     public void manageTimersDueDialogsShow(boolean isCounting) {
         if (isCounting) {
-            tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-            tool_bar_timer.start();
+            if (while_studying) {
+                tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+                tool_bar_timer.start();
+            }
             // to avoid the case if the listfortest has not been prepared yet
             new AsyncTask<Void, Void, Void>() {
 
@@ -1140,8 +1143,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 }
             }.execute();
         } else {
-            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-            tool_bar_timer.stop();
+            if (while_studying) {
+                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                tool_bar_timer.stop();
+            }
             mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
             time_of_starting_time_of_answer = -1;
             is_time_of_answer_elapsed = false;
@@ -1216,7 +1221,10 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             askAgainAfterTestActivity.enterAnswer.requestFocus();
             askAgainAfterTestActivity.scheduleWhatToDoAfterTimeOfAnswerElapsed();
             ActivityUtility.crossFade(askAgainAfterTestActivity.content, askAgainAfterTestActivity.mLoadingView, askAgainAfterTestActivity);
-            askAgainAfterTestActivity.tool_bar_timer.start();
+            if (!ActivityUtility.hasOpenedDialogs(askAgainAfterTestActivity)) {
+                askAgainAfterTestActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - askAgainAfterTestActivity.lastPause);
+                askAgainAfterTestActivity.tool_bar_timer.start();
+            }
         }
     }
 }

@@ -554,9 +554,9 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (!ActivityUtility.hasOpenedDialogs(this)) {
+        if (!ActivityUtility.hasOpenedDialogs(this) && while_testing ) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-
+            tool_bar_timer.start();
             // to set the timer on the tool_bar_timer after recreation of activity due configuration change to the last value
         } else if (!while_testing) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
@@ -1100,15 +1100,17 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     @Override
     public void manageTimersDueDialogsShow(boolean isCounting) {
         if (isCounting) {
-            tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-            tool_bar_timer.start();
-            // to avoid the case if the listfortest has not been prepared yet
             if (while_testing) {
+                tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+                tool_bar_timer.start();
+                // to avoid the case if the listfortest has not been prepared yet
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
             }
         } else {
-            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-            tool_bar_timer.stop();
+            if ( while_testing ) {
+                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                tool_bar_timer.stop();
+            }
             mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
             time_of_starting_time_of_answer = -1;
             is_time_of_answer_elapsed = false;
@@ -1258,7 +1260,10 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
             fullyRandomTestActivity.enterAnswer.setEnabled(true);
             fullyRandomTestActivity.enterAnswer.requestFocus();
             ActivityUtility.crossFade(fullyRandomTestActivity.content, fullyRandomTestActivity.mLoadingView, fullyRandomTestActivity);
-            fullyRandomTestActivity.tool_bar_timer.start();
+            if (!ActivityUtility.hasOpenedDialogs(fullyRandomTestActivity) ) {
+                fullyRandomTestActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - fullyRandomTestActivity.lastPause);
+                fullyRandomTestActivity.tool_bar_timer.start();
+            }
         }
     }
 }

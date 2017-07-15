@@ -1,18 +1,17 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.app.LoaderManager;
-import android.content.Loader;
 import android.provider.AlarmClock;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
@@ -36,21 +35,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
-import com.ahmedsameha1.peninbin.utils.CompareUtility;
-import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
-import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -585,9 +584,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (!ActivityUtility.hasOpenedDialogs(this)) {
+        if (!ActivityUtility.hasOpenedDialogs(this) && while_testing ) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-
+            tool_bar_timer.start();
             // to set the timer on the tool_bar_timer after recreation of activity due configuration change to the last value
         } else if (!while_testing) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
@@ -1136,15 +1135,17 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     @Override
     public void manageTimersDueDialogsShow(boolean isCounting) {
         if (isCounting) {
-            tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-            tool_bar_timer.start();
-            // to avoid the case if the listfortest has not been prepared yet
             if (while_testing) {
+                tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+                tool_bar_timer.start();
+                // to avoid the case if the listfortest has not been prepared yet
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
             }
         } else {
-            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-            tool_bar_timer.stop();
+            if ( while_testing ) {
+                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                tool_bar_timer.stop();
+            }
             mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
             time_of_starting_time_of_answer = -1;
             is_time_of_answer_elapsed = false;
@@ -1298,7 +1299,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             enhancedTestActivity.enterAnswer.setEnabled(true);
             enhancedTestActivity.enterAnswer.requestFocus();
             ActivityUtility.crossFade(enhancedTestActivity.content, enhancedTestActivity.mLoadingView, enhancedTestActivity);
-            enhancedTestActivity.tool_bar_timer.start();
+            if (!ActivityUtility.hasOpenedDialogs(enhancedTestActivity)  ) {
+                enhancedTestActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - enhancedTestActivity.lastPause);
+                enhancedTestActivity.tool_bar_timer.start();
+            }
         }
     }
 }

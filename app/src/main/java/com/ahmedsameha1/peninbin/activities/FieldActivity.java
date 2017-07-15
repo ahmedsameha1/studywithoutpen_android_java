@@ -601,6 +601,15 @@ public class FieldActivity extends AppCompatActivity implements
                 Intent intent = new Intent(this, SymbolActivity.class);
                 intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                 startActivity(intent);
+                return true;
+            case R.id.today_emulation:
+                final Intent intent1 = new Intent(this,
+                        SearchActivity.class);
+                // add query to the Intent Extras
+                intent1.setAction(Intent.ACTION_SEARCH);
+                intent1.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                intent1.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_TODAY_EMULATION);
+                startActivity(intent1);
             default:
                 return super.onOptionsItemSelected(item);
         }

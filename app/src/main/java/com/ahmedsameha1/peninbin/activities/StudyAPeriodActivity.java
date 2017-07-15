@@ -609,8 +609,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (!ActivityUtility.hasOpenedDialogs(this)) {
+        if (!ActivityUtility.hasOpenedDialogs(this) && while_studying ) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+            tool_bar_timer.start();
         }
         /* do not call scheduleWhatToDoAfterTimeOfAnswerElapsed() if first time because the it will be called from the loader onfinished()
          * do not call it after destruction because it will be called from onrestoreinstancestate method
@@ -1149,8 +1150,10 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     @Override
     public void manageTimersDueDialogsShow(boolean isCounting) {
         if (isCounting) {
-            tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
-            tool_bar_timer.start();
+            if ( while_studying ) {
+                tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+                tool_bar_timer.start();
+            }
             // to avoid the case if the listfortest has not been prepared yet
             new AsyncTask<Void, Void, Void>() {
 
@@ -1172,8 +1175,10 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 }
             }.execute();
         } else {
-            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-            tool_bar_timer.stop();
+            if ( while_studying ) {
+                lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                tool_bar_timer.stop();
+            }
             mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
             time_of_starting_time_of_answer = -1;
             is_time_of_answer_elapsed = false;
@@ -1253,7 +1258,10 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 ExitActivity.exit(studyAPeriodActivity);
             }
             ActivityUtility.crossFade(studyAPeriodActivity.content, studyAPeriodActivity.mLoadingView, studyAPeriodActivity);
-            studyAPeriodActivity.tool_bar_timer.start();
+            if (!ActivityUtility.hasOpenedDialogs(studyAPeriodActivity)) {
+                studyAPeriodActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - studyAPeriodActivity.lastPause);
+                studyAPeriodActivity.tool_bar_timer.start();
+            }
         }
     }
 }

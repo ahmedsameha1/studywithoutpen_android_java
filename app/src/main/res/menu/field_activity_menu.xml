@@ -19,4 +19,9 @@
         android:title="@string/search"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
+
+    <item
+        android:id="@+id/today_emulation"
+        android:title="ggg"
+        app:showAsAction="never"/>
 </menu>
