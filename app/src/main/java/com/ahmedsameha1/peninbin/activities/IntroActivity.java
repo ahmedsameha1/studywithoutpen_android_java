@@ -36,6 +36,18 @@ public class IntroActivity extends AppIntro {
             case R.id.intro_main:
                 image_resource_id = R.drawable.intro_main;
                 break;
+            case R.id.intro_main_menu:
+                image_resource_id = R.drawable.intro_main_menu;
+                break;
+            case R.id.study_a_period_dialog:
+                image_resource_id = R.drawable.intro_study_a_period_dialog;
+                break;
+            case R.id.enhanced_test_dialog:
+                image_resource_id = R.drawable.intro_enhanced_test_dialog;
+                break;
+            case R.id.fully_random_test_dialog:
+                image_resource_id = R.drawable.intro_fully_random_test_dialog;
+                break;
         }
         Intent intent = new Intent(this, ImageActivity.class);
         intent.putExtra(IMAGE_RESOURCE_ID, image_resource_id);

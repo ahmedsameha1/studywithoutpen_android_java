@@ -10,7 +10,7 @@
         android:text="@string/fields"
         android:textSize="40sp"
         android:padding="5dp"
-        android:layout_margin="15dp"
+        android:layout_margin="10dp"
         android:id="@+id/textView"
         android:textColor="@color/colorAccent"
         android:layout_gravity="center"/>
@@ -18,18 +18,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp">
+        android:layout_margin="10dp">
 
         <ImageView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/intro_main"
+            android:src="@drawable/intro_main_scaled_width200"
             android:layout_marginStart="50dp"
-            android:background="@drawable/text_bordered"
             android:onClick="introImageClicked"
             android:id="@+id/intro_main"
-
             />
 
         <ImageView
@@ -40,12 +38,13 @@
             android:src="@drawable/intro_arrow"/>
 
         <ImageView
+            android:id="@+id/intro_main_menu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/intro_main_menu"
+            android:src="@drawable/intro_main_scaled_width200"
             android:layout_marginEnd="50dp"
-            android:background="@drawable/text_bordered"
+            android:onClick="introImageClicked"
             />
     </LinearLayout>
     <EditText

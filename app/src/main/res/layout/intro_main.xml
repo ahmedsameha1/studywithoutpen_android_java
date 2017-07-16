@@ -22,10 +22,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/intro_main"
+            android:src="@drawable/intro_main_scaled15"
             android:id="@+id/intro_main"
             android:layout_marginStart="50dp"
-            android:background="@drawable/text_bordered"
             android:onClick="introImageClicked"
             />
 
@@ -37,12 +36,13 @@
             android:src="@drawable/intro_arrow"/>
 
         <ImageView
+            android:id="@+id/intro_main_menu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/intro_main_menu"
+            android:src="@drawable/intro_main_menu_scaled15"
             android:layout_marginEnd="50dp"
-            android:background="@drawable/text_bordered"
+            android:onClick="introImageClicked"
             />
     </LinearLayout>
     <EditText
