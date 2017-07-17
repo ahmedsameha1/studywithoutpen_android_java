@@ -341,5 +341,7 @@
     <string name="question_will">السؤال سيصبح:</string>
     <string name="answer_will">الجواب سيصبح:</string>
     <string name="test">اختبار</string>
+    <string name="not_emulated">This field is not emulated!</string>
+    <string name="today_s_entries">Today\'s entries</string>
 </resources>
 

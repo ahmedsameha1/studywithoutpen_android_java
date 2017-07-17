@@ -233,7 +233,7 @@ public class FieldActivity extends AppCompatActivity implements
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
-                    if (id == SEARCH_ENTRIES_LOADER_ID && search_value != null ) {
+                    if (id == SEARCH_ENTRIES_LOADER_ID && search_value != null) {
                         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(FieldActivity.this,
                                 "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                         + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -268,11 +268,11 @@ public class FieldActivity extends AppCompatActivity implements
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 mAdapter.swapCursor(data);
-                if ( recyclerview_position != null ) {
+                if (recyclerview_position != null) {
                     recyclerView.getLayoutManager()
                             .onRestoreInstanceState(recyclerview_position);
                 }
-                if ( data.getCount() == 0 && search_value != null ) {
+                if (data.getCount() == 0 && search_value != null) {
                     not_found.setText(R.string.not_found);
                     not_found.setVisibility(View.VISIBLE);
                 } else {
@@ -407,7 +407,7 @@ public class FieldActivity extends AppCompatActivity implements
         }
         getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
         getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
-        ActivityUtility.antiCrossFade(content,mLoadingView,FieldActivity.this);
+        ActivityUtility.antiCrossFade(content, mLoadingView, FieldActivity.this);
     }
 
     @Override
@@ -442,7 +442,7 @@ public class FieldActivity extends AppCompatActivity implements
             is_load_entries = false;
             getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
             getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
-            ActivityUtility.antiCrossFade(content,mLoadingView,FieldActivity.this);
+            ActivityUtility.antiCrossFade(content, mLoadingView, FieldActivity.this);
         }
     }
 
@@ -527,7 +527,7 @@ public class FieldActivity extends AppCompatActivity implements
         savedInstanceState.putLong(FIELD_ID, current_field_id);
         savedInstanceState.putString(PAY_LOAD_STRING, pay_load);
         savedInstanceState.putBoolean(INITIAL_CHECK_SUPSCRIPTION, initialCheckSubscription);
-        if ( mAdapter.getCursor() != null ) {
+        if (mAdapter.getCursor() != null) {
             recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
         }
         savedInstanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerview_position);
@@ -550,8 +550,11 @@ public class FieldActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.field_activity_menu, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         MenuItem searchItem = menu.findItem(R.id.search);
+        if (!(databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED)) {
+            searchItem.setVisible(false);
+        }
         SearchView searchView = (SearchView) searchItem.getActionView();
-        if ( search_value != null ) {
+        if (search_value != null) {
             searchItem.expandActionView();
             searchView.setQuery(search_value, false);
         }
@@ -603,13 +606,27 @@ public class FieldActivity extends AppCompatActivity implements
                 startActivity(intent);
                 return true;
             case R.id.today_emulation:
-                final Intent intent1 = new Intent(this,
-                        SearchActivity.class);
-                // add query to the Intent Extras
-                intent1.setAction(Intent.ACTION_SEARCH);
-                intent1.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                intent1.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_TODAY_EMULATION);
-                startActivity(intent1);
+                if (!Emulation.isAnyThreadRunning()) {
+                    if ((databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED)) {
+                        final Intent intent1 = new Intent(this,
+                                SearchActivity.class);
+                        // add query to the Intent Extras
+                        intent1.setAction(Intent.ACTION_SEARCH);
+                        intent1.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                        intent1.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_TODAY_EMULATION);
+                        startActivity(intent1);
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.not_emulated, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        finish();
+                    }
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                    finish();
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -622,8 +639,8 @@ public class FieldActivity extends AppCompatActivity implements
         getLoaderManager().destroyLoader(GET_ENTRIES_LOADER_ID);
         getLoaderManager().destroyLoader(SEARCH_ENTRIES_LOADER_ID);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        ActivityUtility.antiCrossFade(content,mLoadingView,FieldActivity.this);
-        if ( is_load_entries ) {
+        ActivityUtility.antiCrossFade(content, mLoadingView, FieldActivity.this);
+        if (is_load_entries) {
             getLoaderManager().restartLoader(GET_ENTRIES_LOADER_ID, null, getFieldEntries);
         } else {
             getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, null, getFieldEntries);
@@ -745,7 +762,7 @@ public class FieldActivity extends AppCompatActivity implements
                     bundle.putInt(AskAboutContinuePreviousTestDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
                     fragment3.setArguments(bundle);
                     fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
-                }  else if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id)) {
+                } else if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id)) {
                     new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
                             .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
                                 Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
@@ -755,7 +772,7 @@ public class FieldActivity extends AppCompatActivity implements
                                 startActivity(intent);
                             })
                             .setNegativeButton(R.string.no, (dialogInterface, i) -> {
-                                cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST,question_data_type);
+                                cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, question_data_type);
                                 cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id);
                                 FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
                                 dialogFragment.setArguments(bundle);
@@ -817,6 +834,7 @@ public class FieldActivity extends AppCompatActivity implements
             toast.show();
         }
     }
+
     @Override
     public void substituteQuestion(long entry_id, String text) {
         cursorLoaderAndUpdateDatabase.substituteQuestion(entry_id, question_data_type, text);
@@ -832,9 +850,7 @@ public class FieldActivity extends AppCompatActivity implements
         Intent intent = new Intent(this, NewStudyActivity.class);
         intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
         intent.putExtra(ENTRY_ID, entry_id);
-        intent.putExtra(CURRENT_QUESTION, question);
-        intent.putExtra(CURRENT_ANSWER, answer);
-        if ( search_value != null ) {
+        if (search_value != null) {
             intent.putExtra(NewStudyActivity.SEARCH_VALUE, search_value);
         }
         startActivity(intent);

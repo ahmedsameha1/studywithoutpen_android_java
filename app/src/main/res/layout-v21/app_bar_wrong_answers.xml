@@ -24,4 +24,10 @@
 
     <include layout="@layout/content_wrong_answers" />
 
+    <ProgressBar android:id="@+id/loading"
+        style="?android:progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
 </android.support.design.widget.CoordinatorLayout>

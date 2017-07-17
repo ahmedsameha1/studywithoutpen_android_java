@@ -258,7 +258,7 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
         down.setOnClickListener(v -> {
             down_card_view.startAnimation(animAlpha);
             int position = Integer.parseInt(current_index.toString());
-            if ( position < entries.length - 2 ) {
+            if ( position < entries.length - 1 ) {
                 current_index.replace(0, current_index.length(), String.valueOf(++position));
                 currentQuestion = entries[position][0];
                 currentAnswer = entries[position][1];

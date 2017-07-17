@@ -160,8 +160,10 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             }
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, query);
-            if ( search_string_highlight != null ) {
+            if ( search_what != SEARCH_TODAY_EMULATION ) {
                 search_string_highlight.replace(0, search_string_highlight.length(), query);
+            } else {
+                search_string_highlight.delete(0, search_string_highlight.length());
             }
             getLoaderManager().destroyLoader(SEARCH_LOADER);
             getLoaderManager().restartLoader(SEARCH_LOADER, bundle, this);
@@ -177,6 +179,9 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchItem = menu.findItem(R.id.search);
+        if ( search_what == SEARCH_TODAY_EMULATION) {
+            searchItem.setVisible(false);
+        }
         searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         if ( search_value != null && !"".equals(search_value) ) {
             searchItem.expandActionView();
@@ -333,15 +338,16 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         Intent intent = new Intent(this, NewStudyActivity.class);
         intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
         intent.putExtra(ENTRY_ID, entry_id);
-        intent.putExtra(CURRENT_QUESTION, question);
-        intent.putExtra(CURRENT_ANSWER, answer);
-        if ( search_value.length() > 0 ) {
+        if ( search_value != null && search_value.length() > 0 ) {
             intent.putExtra(NewStudyActivity.SEARCH_VALUE, search_value);
             if (search_what == SEARCH_QUESTION) {
                 intent.putExtra(SEARCH_WHAT, SEARCH_QUESTION);
             } else if ( search_what == SEARCH_ANSWER ) {
                 intent.putExtra(SEARCH_WHAT, SEARCH_ANSWER);
             }
+        }
+        if ( search_what == SEARCH_TODAY_EMULATION ) {
+            intent.putExtra(SEARCH_WHAT, SEARCH_TODAY_EMULATION);
         }
         startActivity(intent);
     }

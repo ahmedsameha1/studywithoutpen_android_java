@@ -11,7 +11,9 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.StudyFragmentsTabAdapter;
@@ -21,12 +23,15 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class NewStudyActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String ENTRY_ID = "entry_id";
-    public static final String CURRENT_QUESTION = "currentQuestion";
-    public static final String CURRENT_ANSWER = "currentAnswer";
     public static final String SEARCH_VALUE = "search_value";
     public static final String DATA = "data";
     public static final String CURRENT_INDEX = "current_index";
@@ -36,8 +41,6 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
     public static final String CUSTOMABLE_TEXT = "customable_text";
     private long current_field_id;
     private long current_entry_id;
-    private String current_question;
-    private String current_answer;
     private String search_value;
     private int search_what;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
@@ -60,8 +63,6 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
         Intent intent = getIntent();
         current_field_id = intent.getLongExtra(Constants.CURRENT_FIELD_ID, 0);
         current_entry_id = intent.getLongExtra(ENTRY_ID, 0);
-        current_question = intent.getStringExtra(CURRENT_QUESTION);
-        current_answer = intent.getStringExtra(CURRENT_ANSWER);
         search_value = intent.getStringExtra(SEARCH_VALUE);
         search_what = intent.getIntExtra(SearchActivity.SEARCH_WHAT, 0);
         databaseReadOperations = new DatabaseReadOperations(this);
@@ -113,15 +114,40 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
         if ( id == GET_ENTRIES_LOADER_ID ) {
             // ordinary load of field entries
             if (search_value == null) {
-                cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this,
-                        "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                                + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
-                                + "ORDER BY " + sortOption.getSortString(),
-                        new String[]{current_field_id + ""});
+                if ( search_what != SearchActivity.SEARCH_TODAY_EMULATION ) {
+                    cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this,
+                            "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                    + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
+                                    + "ORDER BY " + sortOption.getSortString(),
+                            new String[]{current_field_id + ""});
+                } else {
+                    if ( !Emulation.isAnyThreadRunning() ) {
+                        Calendar today_calendar = Calendar.getInstance();
+                        today_calendar.setTimeInMillis(System.currentTimeMillis());
+                        today_calendar.set(Calendar.HOUR_OF_DAY, 0);
+                        today_calendar.set(Calendar.MINUTE, 5);
+                        today_calendar.set(Calendar.SECOND, 0);
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
+                        String today_emulation_date_string = simpleDateFormat.format(today_calendar.getTime());
+                        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(NewStudyActivity.this,
+                                "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                        + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                        + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                        + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " = ? " + " ORDER BY " + sortOption.getSortString(),
+                                new String[]{String.valueOf(current_field_id), today_emulation_date_string});
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
+                        finish();
+                    }
+                }
             } else if (search_what == SearchActivity.SEARCH_QUESTION) {
                 cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this,
                         "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
