@@ -26,6 +26,7 @@
             android:id="@+id/study_a_period"
             android:layout_marginStart="50dp"
             android:onClick="introImageClicked"
+            android:elevation="5dp"
             />
 
        <ImageView
@@ -43,18 +44,22 @@
             android:src="@drawable/intro_study_a_period_dialog_scaled15"
             android:layout_marginEnd="50dp"
             android:onClick="introImageClicked"
+            android:elevation="5dp"
             />
     </LinearLayout>
+
     <EditText
         android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:textSize="20sp"
-        android:textColor="@color/white_color"
-        android:focusable="false"
-        android:cursorVisible="false"
-        android:background="@null"
+        android:layout_height="0dp"
         android:layout_margin="5dp"
+        android:background="@null"
+        android:cursorVisible="false"
+        android:focusable="false"
         android:padding="5dp"
-        android:text="sss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nsss"/>
+        android:text="sss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nsss"
+        android:textColor="@color/white_color"
+        android:textSize="20sp"
+        android:layout_weight="1"
+        android:gravity="center"/>
 
 </LinearLayout>

@@ -39,14 +39,29 @@ public class IntroActivity extends AppIntro {
             case R.id.intro_main_menu:
                 image_resource_id = R.drawable.intro_main_menu;
                 break;
+            case R.id.study_a_period:
+                image_resource_id = R.drawable.intro_study_a_period;
+                break;
             case R.id.study_a_period_dialog:
                 image_resource_id = R.drawable.intro_study_a_period_dialog;
+                break;
+            case R.id.enhanced_test:
+                image_resource_id = R.drawable.intro_enhanced_test;
                 break;
             case R.id.enhanced_test_dialog:
                 image_resource_id = R.drawable.intro_enhanced_test_dialog;
                 break;
+            case R.id.fully_random_test:
+                image_resource_id = R.drawable.intro_fully_random_test;
+                break;
             case R.id.fully_random_test_dialog:
                 image_resource_id = R.drawable.intro_fully_random_test_dialog;
+                break;
+            case R.id.emulation:
+                image_resource_id = R.drawable.intro_emulation;
+                break;
+            case R.id.emulation_dialog_button:
+                image_resource_id = R.drawable.intro_field_properities_emulation_button;
                 break;
         }
         Intent intent = new Intent(this, ImageActivity.class);

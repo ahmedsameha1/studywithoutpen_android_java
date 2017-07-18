@@ -24,10 +24,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/intro_field_properities_emulation_button_scaled15"
+            android:src="@drawable/intro_field_properities_emulation_button_scaled_width270"
             android:id="@+id/emulation_dialog_button"
             android:layout_marginStart="50dp"
             android:onClick="introImageClicked"
+            android:elevation="5dp"
             />
 
        <ImageView
@@ -42,9 +43,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/intro_emulation_scaled15"
+            android:src="@drawable/intro_emulation_scaled_width270"
             android:layout_marginEnd="50dp"
             android:onClick="introImageClicked"
+            android:elevation="5dp"
             />
     </LinearLayout>
     <EditText

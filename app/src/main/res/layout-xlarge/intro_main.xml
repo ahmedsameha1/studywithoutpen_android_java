@@ -27,24 +27,22 @@
             android:src="@drawable/intro_main_scaled_width270"
             android:id="@+id/intro_main"
             android:layout_marginStart="50dp"
+            android:layout_marginEnd="30dp"
             android:onClick="introImageClicked"
+            android:elevation="5dp"
             />
 
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:layout_gravity="center"
-            android:src="@drawable/intro_arrow"/>
 
         <ImageView
             android:id="@+id/intro_main_menu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/intro_main_scaled_width270"
+            android:src="@drawable/intro_main_menu_scaled_width270"
             android:layout_marginEnd="50dp"
+            android:layout_marginStart="30dp"
             android:onClick="introImageClicked"
+            android:elevation="5dp"
             />
     </LinearLayout>
     <EditText

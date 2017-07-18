@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#64b5f6">
+    android:background="@drawable/intro_text_bordered_colored">
 
     <com.github.paolorotolo.appintro.AppIntroViewPager
         android:id="@+id/view_pager"
