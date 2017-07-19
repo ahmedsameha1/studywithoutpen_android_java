@@ -241,6 +241,7 @@ public class FullyRandomTestDialogFragment extends DialogFragment {
                     toast.show();
                 }
             });
+            enterNumber.requestFocus();
         });
         return alertDialog;
     }

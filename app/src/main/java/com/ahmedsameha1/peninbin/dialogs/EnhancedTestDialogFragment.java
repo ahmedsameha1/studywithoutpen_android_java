@@ -17,19 +17,18 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Money;
 
 /**
@@ -344,6 +343,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                     toast.show();
                 }
             });
+            enterNumber.requestFocus();
         });
         return alertDialog;
     }

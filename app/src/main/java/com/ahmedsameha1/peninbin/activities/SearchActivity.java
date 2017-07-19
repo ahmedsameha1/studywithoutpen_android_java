@@ -52,8 +52,6 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         DeleteEntryDialogFragment.Contact,
         FieldActivityRecyclerViewAdapter.Contact {
     public static final String ENTRY_ID = "entry_id";
-    public static final String CURRENT_QUESTION = "currentQuestion";
-    public static final String CURRENT_ANSWER = "currentAnswer";
     public static final String SCREEN_NAME = "SearchActivity";
     public static final int SEARCH_LOADER = 0;
     public static final String EDITED_ENTRY_ID = "edited_entry_id";
@@ -67,7 +65,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
     public static final int SEARCH_QUESTION = 1;
     public static final int SEARCH_ANSWER = 2;
-    public static final int SEARCH_TODAY_EMULATION = 3;
+    public static final int TODAY_ENTRIES = 3;
     public static final String SEARCH_WHAT = "search_what";
     public static final String SEARCH_VALUE = "search_value";
     public FieldActivityRecyclerViewAdapter mAdapter;
@@ -87,6 +85,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private Parcelable recyclerview_position;
     private String search_value;
     private MenuItem searchItem;
+    private DatabaseReadOperations databaseReadOperations;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,7 +100,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             search_what = getIntent().getIntExtra(SEARCH_WHAT, 0);
             search_value = getIntent().getStringExtra(SEARCH_VALUE);
         }
-        DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(this);
+        databaseReadOperations = new DatabaseReadOperations(this);
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
         content = (RelativeLayout) findViewById(R.id.content);
@@ -160,7 +159,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             }
             Bundle bundle = new Bundle();
             bundle.putString(QUERY_KEY, query);
-            if ( search_what != SEARCH_TODAY_EMULATION ) {
+            if (search_what != TODAY_ENTRIES) {
                 search_string_highlight.replace(0, search_string_highlight.length(), query);
             } else {
                 search_string_highlight.delete(0, search_string_highlight.length());
@@ -179,11 +178,11 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchItem = menu.findItem(R.id.search);
-        if ( search_what == SEARCH_TODAY_EMULATION) {
+        if (search_what == TODAY_ENTRIES) {
             searchItem.setVisible(false);
         }
         searchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        if ( search_value != null && !"".equals(search_value) ) {
+        if (search_value != null && !"".equals(search_value)) {
             searchItem.expandActionView();
             searchView.setQuery(search_value, false);
         }
@@ -211,7 +210,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         super.onSaveInstanceState(savedInsatanceState);
         savedInsatanceState.putLong(CURRENT_FIELD_ID, current_field_id);
         savedInsatanceState.putInt(SEARCH_WHAT, search_what);
-        if ( mAdapter.getCursor() != null ) {
+        if (mAdapter.getCursor() != null) {
             recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
         }
         savedInsatanceState.putParcelable(RECYCLERVIEW_POSITION, recyclerview_position);
@@ -241,26 +240,44 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
                             + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND "
                             + "  q LIKE ? COLLATE NOCASE ORDER BY " + sortOption.getSortString(),
                     new String[]{String.valueOf(current_field_id), searchString});
-        } else if ( search_what == SEARCH_TODAY_EMULATION ) {
-            if ( !Emulation.isAnyThreadRunning() ) {
+        } else if (search_what == TODAY_ENTRIES) {
+            if (!Emulation.isAnyThreadRunning()) {
                 Calendar today_calendar = Calendar.getInstance();
                 today_calendar.setTimeInMillis(System.currentTimeMillis());
-                today_calendar.set(Calendar.HOUR_OF_DAY, 0);
-                today_calendar.set(Calendar.MINUTE, 5);
-                today_calendar.set(Calendar.SECOND, 0);
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
-                String today_emulation_date_string = simpleDateFormat.format(today_calendar.getTime());
-                cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
-                        "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                                + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " = ? " + " ORDER BY " + sortOption.getSortString(),
-                        new String[]{String.valueOf(current_field_id), today_emulation_date_string});
+                if ((databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED)) {
+                    today_calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    today_calendar.set(Calendar.MINUTE, 5);
+                    today_calendar.set(Calendar.SECOND, 0);
+                    String today_emulation_date_string = simpleDateFormat.format(today_calendar.getTime());
+                    cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
+                            "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                    + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " = ? " + " ORDER BY " + sortOption.getSortString(),
+                            new String[]{String.valueOf(current_field_id), today_emulation_date_string});
+                } else {
+                    String end_date_string = simpleDateFormat.format(today_calendar.getTime());
+                    today_calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    today_calendar.set(Calendar.MINUTE, 0);
+                    today_calendar.set(Calendar.SECOND, 0);
+                    String start_date_string = simpleDateFormat.format(today_calendar.getTime());
+                    cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(SearchActivity.this,
+                            "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                    + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.CREATION_DATE + " >= datetime(?) AND se."
+                                    + Contract.CREATION_DATE + " < datetime(?) "
+                                    + " ORDER BY " + sortOption.getSortString(),
+                            new String[]{String.valueOf(current_field_id), start_date_string, end_date_string});
+                }
             } else {
                 Toast toast = Toast.makeText(SearchActivity.this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP,0,400);
+                toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
                 finish();
             }
@@ -283,7 +300,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
-        if ( recyclerview_position != null ) {
+        if (recyclerview_position != null) {
             recyclerView.getLayoutManager()
                     .onRestoreInstanceState(recyclerview_position);
         }
@@ -333,21 +350,22 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public void substituteAnswer(long entry_id, String text) {
         cursorLoaderAndUpdateDatabase.substituteAnswer(entry_id, question_data_type, text);
     }
+
     @Override
     public void startStudyActivity(long entry_id, String question, String answer) {
         Intent intent = new Intent(this, NewStudyActivity.class);
         intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
         intent.putExtra(ENTRY_ID, entry_id);
-        if ( search_value != null && search_value.length() > 0 ) {
+        if (search_value != null && search_value.length() > 0) {
             intent.putExtra(NewStudyActivity.SEARCH_VALUE, search_value);
             if (search_what == SEARCH_QUESTION) {
                 intent.putExtra(SEARCH_WHAT, SEARCH_QUESTION);
-            } else if ( search_what == SEARCH_ANSWER ) {
+            } else if (search_what == SEARCH_ANSWER) {
                 intent.putExtra(SEARCH_WHAT, SEARCH_ANSWER);
             }
         }
-        if ( search_what == SEARCH_TODAY_EMULATION ) {
-            intent.putExtra(SEARCH_WHAT, SEARCH_TODAY_EMULATION);
+        if (search_what == TODAY_ENTRIES) {
+            intent.putExtra(SEARCH_WHAT, TODAY_ENTRIES);
         }
         startActivity(intent);
     }

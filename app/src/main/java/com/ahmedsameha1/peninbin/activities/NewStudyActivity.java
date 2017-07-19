@@ -112,9 +112,10 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
         if ( id == GET_ENTRIES_LOADER_ID ) {
-            // ordinary load of field entries
+
             if (search_value == null) {
-                if ( search_what != SearchActivity.SEARCH_TODAY_EMULATION ) {
+                // ordinary load of field entries
+                if ( search_what != SearchActivity.TODAY_ENTRIES) {
                     cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this,
                             "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
                                     + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
@@ -123,27 +124,45 @@ public class NewStudyActivity extends AppCompatActivity implements LoaderManager
                                     + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? "
                                     + "ORDER BY " + sortOption.getSortString(),
-                            new String[]{current_field_id + ""});
+                            new String[]{String.valueOf(current_field_id)});
                 } else {
-                    if ( !Emulation.isAnyThreadRunning() ) {
+                    if (!Emulation.isAnyThreadRunning()) {
                         Calendar today_calendar = Calendar.getInstance();
                         today_calendar.setTimeInMillis(System.currentTimeMillis());
-                        today_calendar.set(Calendar.HOUR_OF_DAY, 0);
-                        today_calendar.set(Calendar.MINUTE, 5);
-                        today_calendar.set(Calendar.SECOND, 0);
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
-                        String today_emulation_date_string = simpleDateFormat.format(today_calendar.getTime());
-                        cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(NewStudyActivity.this,
-                                "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                                        + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                        + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " = ? " + " ORDER BY " + sortOption.getSortString(),
-                                new String[]{String.valueOf(current_field_id), today_emulation_date_string});
+                        if ((databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED)) {
+                            today_calendar.set(Calendar.HOUR_OF_DAY, 0);
+                            today_calendar.set(Calendar.MINUTE, 5);
+                            today_calendar.set(Calendar.SECOND, 0);
+                            String today_emulation_date_string = simpleDateFormat.format(today_calendar.getTime());
+                            cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this,
+                                    "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                            + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                            + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                            + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " = ? " + " ORDER BY " + sortOption.getSortString(),
+                                    new String[]{String.valueOf(current_field_id), today_emulation_date_string});
+                        } else {
+                            String end_date_string = simpleDateFormat.format(today_calendar.getTime());
+                            today_calendar.set(Calendar.HOUR_OF_DAY, 0);
+                            today_calendar.set(Calendar.MINUTE, 0);
+                            today_calendar.set(Calendar.SECOND, 0);
+                            String start_date_string = simpleDateFormat.format(today_calendar.getTime());
+                            cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this,
+                                    "SELECT " + " se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                            + " a, se." + Contract.String_Entry.COLUMN_ASKED_COUNT + ", se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                            + " FROM " + Contract.STring.TABLE_NAME + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                            + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                            + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                            + " WHERE " + " se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.CREATION_DATE + " >= datetime(?) AND se."
+                                            + Contract.CREATION_DATE + " < datetime(?) "
+                                            + " ORDER BY " + sortOption.getSortString(),
+                                    new String[]{String.valueOf(current_field_id), start_date_string, end_date_string});
+                        }
                     } else {
                         Toast toast = Toast.makeText(this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                         finish();
                     }

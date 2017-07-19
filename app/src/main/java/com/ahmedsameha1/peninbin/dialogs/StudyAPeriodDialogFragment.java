@@ -2,7 +2,6 @@ package com.ahmedsameha1.peninbin.dialogs;
 
 import android.app.AlarmManager;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -23,8 +21,6 @@ import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Money;
-
-import java.util.Date;
 
 /**
  * Created by ahmed on 9/23/2015.
@@ -207,6 +203,7 @@ public class StudyAPeriodDialogFragment extends DialogFragment {
                 number_of_tries_help_dialog_builder
                         .setMessage(R.string.enter_number_of_hours_help).create().show();
             });
+            enterDay.requestFocus();
         });
         return alertDialog;
     }

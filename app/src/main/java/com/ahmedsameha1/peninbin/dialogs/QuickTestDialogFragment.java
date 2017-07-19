@@ -21,11 +21,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -34,15 +31,14 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
-import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Constants;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import java.util.Calendar;
-
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
-import com.google.android.gms.analytics.Tracker;
-import com.google.android.gms.analytics.HitBuilders;
 
 /**
  * Created by ahmed on 2/8/2016.
@@ -295,6 +291,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                     e.printStackTrace();
                 }
             });
+            enterNumber.requestFocus();
         });
         return alertDialog;
     }

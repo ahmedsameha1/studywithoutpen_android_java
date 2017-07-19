@@ -607,20 +607,13 @@ public class FieldActivity extends AppCompatActivity implements
                 return true;
             case R.id.today_emulation:
                 if (!Emulation.isAnyThreadRunning()) {
-                    if ((databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED)) {
                         final Intent intent1 = new Intent(this,
                                 SearchActivity.class);
                         // add query to the Intent Extras
                         intent1.setAction(Intent.ACTION_SEARCH);
                         intent1.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                        intent1.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.SEARCH_TODAY_EMULATION);
+                        intent1.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.TODAY_ENTRIES);
                         startActivity(intent1);
-                    } else {
-                        Toast toast = Toast.makeText(this, R.string.not_emulated, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        finish();
-                    }
                 } else {
                     Toast toast = Toast.makeText(this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
