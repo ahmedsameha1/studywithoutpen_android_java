@@ -20,7 +20,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
 /**
  * Created by Ahmed on 7/3/16.
@@ -195,7 +194,7 @@ public class ImportTextFile {
             case FAILED_IMPORT_NOTIFICATION:
                 notificationBuilder =
                         new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_failed))
                                 .setContentText(context.getResources().getString(R.string.import_failed))
                                 .setTicker(context.getResources().getString(R.string.import_failed))
@@ -211,7 +210,7 @@ public class ImportTextFile {
             case FAILED_IMPORT_INVALID_FILE_NOTIFICATION:
                 notificationBuilder =
                         new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_failed))
                                 .setContentText(context.getResources().getString(R.string.invalid_file))
                                 .setTicker(context.getResources().getString(R.string.import_failed))
@@ -227,7 +226,7 @@ public class ImportTextFile {
             case SUCCESSFUL_IMPORT_NOTIFICATION:
                 notificationBuilder =
                         new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_completed))
                                 .setContentText(context.getResources().getString(R.string.import_completed))
                                 .setTicker(context.getResources().getString(R.string.import_completed))

@@ -9,6 +9,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.AppIntroSampleSlide;
 import com.ahmedsameha1.peninbin.secondary_activities.ImageActivity;
 import com.github.paolorotolo.appintro.AppIntro;
+import com.github.paolorotolo.appintro.AppIntroFragment;
 
 public class IntroActivity extends AppIntro {
 
@@ -17,7 +18,10 @@ public class IntroActivity extends AppIntro {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        addSlide(AppIntroFragment.newInstance(getString(R.string.start_excellance), "sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss",
+                R.drawable.intro_first_image, 0xF8BBD0));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_main));
+        addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_entry));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_study_period));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_enhanced_test));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_fully_random_test));
@@ -62,6 +66,9 @@ public class IntroActivity extends AppIntro {
                 break;
             case R.id.emulation_dialog_button:
                 image_resource_id = R.drawable.intro_field_properities_emulation_button;
+                break;
+            case R.id.intro_entry:
+                image_resource_id = R.drawable.intro_entry;
                 break;
         }
         Intent intent = new Intent(this, ImageActivity.class);

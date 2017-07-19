@@ -342,4 +342,5 @@
     <string name="enhanced_test">Enhanced Test</string>
     <string name="start_fully_random_test">Start a fully random test</string>
     <string name="wait_loading">Please, wait for loading</string>
+    <string name="start_excellance">Excel</string>
 </resources>

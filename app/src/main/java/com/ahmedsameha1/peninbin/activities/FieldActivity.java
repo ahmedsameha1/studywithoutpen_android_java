@@ -11,7 +11,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -636,7 +635,7 @@ public class FieldActivity extends AppCompatActivity implements
                         TaskStackBuilder stackBuilder = null;
                         notificationBuilder =
                                 new NotificationCompat.Builder(this)
-                                        .setSmallIcon(R.drawable.ic_launcher512)
+                                        .setSmallIcon(R.drawable.ic_launcher48)
                                         .setContentTitle(this.getResources().getString(R.string.proceed_now))
                                         .setContentText(this.getResources().getString(R.string.have_the_right))
                                         .setTicker(this.getResources().getString(R.string.have_the_right))
