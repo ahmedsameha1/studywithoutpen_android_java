@@ -1,6 +1,10 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -8,12 +12,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.app.LoaderManager;
-import android.content.Loader;
 import android.provider.AlarmClock;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
@@ -33,27 +34,25 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
-import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
-import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -97,6 +96,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 1;
     public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
+    public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 3;
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
@@ -132,7 +132,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
     private CardView check_card_view, next_hint_card_view, show_action_bar_card_view, continue_card_view;
     private DatabaseReadOperations databaseReadOperations;
-    private RetainedFragment retainedFragment;
     private Handler mHandler = new Handler();
     private long current_field_id;
     private TextToSpeech tts;
@@ -153,7 +152,128 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private int question_data_type;
     private boolean obfuscate;
     private boolean while_studying;
+    LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+            if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
+                        "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
+                                + " FROM " + Contract.STring.TABLE_NAME
+                                + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
+                        new String[]{current_field_id + "", "0"});
+            } else if (id == GET_ENTRIES_LOADER_ID) {
+                if (isEmulated) {
+                    String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                            .format(new Date(System.currentTimeMillis()));
+                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
+                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " , se." + Contract.COLUMN_ID
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND ? > "
+                                    + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
+                            new String[]{current_field_id + "", date_string});
+                } else {
+                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
+                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                            new String[]{current_field_id + ""});
+                }
+            } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
+                return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                        new String[]{current_field_type + ""});
+            }
+            return null;
+        }
 
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+            int id = loader.getId();
+            if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                StudyAPeriodActivity.this.cursor = cursor;
+                StudyAPeriodActivity.this.getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
+            } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
+                if (symbol == null && customable_text == null) {
+                    symbol = new String[cursor.getCount()];
+                    customable_text = new String[cursor.getCount()];
+                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                         cursor.moveToNext()) {
+                        symbol[cursor.getPosition()] = cursor.getString(1);
+                        customable_text[cursor.getPosition()] = cursor.getString(2);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+
+        }
+    };
+
+    private LoaderManager.LoaderCallbacks<String[][]> prepare_list_for_test_loader = new LoaderManager.LoaderCallbacks<String[][]>() {
+        @Override
+        public Loader<String[][]> onCreateLoader(int i, Bundle bundle) {
+            return new StudyAPeriodActivity.PrepareListForTest(StudyAPeriodActivity.this);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<String[][]> loader, String[][] list ) {
+            listForTest = list;
+            questionsNumber = listForTest.length;
+            if (studyAPeriodActivity.questionsNumber > 0) {
+                studyAPeriodActivity.while_studying = true;
+                if (studyAPeriodActivity.obfuscate) {
+                    studyAPeriodActivity.showQuestion.setText(ActivityUtility.spanText(studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][0], studyAPeriodActivity.showQuestion));
+                } else {
+                    studyAPeriodActivity.showQuestion.setText(studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][0]);
+                }
+                studyAPeriodActivity.time_of_answer = ActivityUtility.calculate_time_of_answer(studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][0], studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][1],
+                        studyAPeriodActivity.reading_question_letter_second, studyAPeriodActivity.find_answer_time, studyAPeriodActivity.typing_answer_letter_second);
+                studyAPeriodActivity.ifMoreThanOnce();
+                studyAPeriodActivity.showNumberOfQuetions.setText(Integer.toString(studyAPeriodActivity.questionsNumber));
+                if (studyAPeriodActivity.boolean_continue) {
+                    studyAPeriodActivity.remainingQuestionCounter.setText(Integer.toString(studyAPeriodActivity.questionsNumber - 1 - studyAPeriodActivity.currentQuestionCounter));
+                } else {
+                    studyAPeriodActivity.remainingQuestionCounter.setText(Integer.toString(studyAPeriodActivity.questionsNumber - 1));
+                }
+                studyAPeriodActivity.enterAnswer.requestFocus();
+                studyAPeriodActivity.scheduleWhatToDoAfterTimeOfAnswerElapsed();
+            } else {
+                Toast toast = Toast.makeText(studyAPeriodActivity, studyAPeriodActivity.getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                studyAPeriodActivity.finish();
+                ExitActivity.exit(studyAPeriodActivity);
+            }
+            ActivityUtility.crossFade(studyAPeriodActivity.content, studyAPeriodActivity.mLoadingView, studyAPeriodActivity);
+            if (!ActivityUtility.hasOpenedDialogs(studyAPeriodActivity)) {
+                studyAPeriodActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - studyAPeriodActivity.lastPause);
+                studyAPeriodActivity.tool_bar_timer.start();
+            }
+            getLoaderManager().destroyLoader(loader.getId());
+        }
+
+        @Override
+        public void onLoaderReset(Loader<String[][]> loader) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,95 +325,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         final CardView dont_know_card_view = (CardView) findViewById(R.id.dont_know_card_view);
         tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
-        // getting the reference of the fragment that holds the reference of list for test array
-        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
-        // if the reference to the fragment was null we create a new fragment object and add it to the activity
-        if (retainedFragment == null) {
-            retainedFragment = new RetainedFragment();
-            getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
-        }
-        LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-                if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
-                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " , se." + Contract.COLUMN_ID
-                                    + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_STUDY_PERIOD_ORDER + " >= ? ",
-                            new String[]{current_field_id + "", "0"});
-                } else if (id == GET_ENTRIES_LOADER_ID) {
-                    if (isEmulated) {
-                        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
-                                .format(new Date(System.currentTimeMillis()));
-                        return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
-                                "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a , se." + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " , se." + Contract.COLUMN_ID
-                                        + " FROM " + Contract.STring.TABLE_NAME
-                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND ? > "
-                                        + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
-                                new String[]{current_field_id + "", date_string});
-                    } else {
-                        return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this,
-                                "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a , se." + Contract.CREATION_DATE + " , se." + Contract.COLUMN_ID
-                                        + " FROM " + Contract.STring.TABLE_NAME
-                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                                new String[]{current_field_id + ""});
-                    }
-                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                    return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                            new String[]{current_field_type + ""});
-                }
-                return null;
-            }
 
-            @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-                int id = loader.getId();
-                if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    StudyAPeriodActivity.this.cursor = cursor;
-                    PrepareListForTest prepareListForTest = new PrepareListForTest();
-                    new Thread(() -> {
-                        if (boolean_continue) {
-                            listForTest = readFromLinkerTableStudyDuringColumn();
-                        } else {
-                            listForTest = prepareListForStudyFirstTime();
-                        }
-                        questionsNumber = listForTest.length;
-                        prepareListForTest.sendMessage(Message.obtain());
-                    }).start();
-                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                    if (symbol == null && customable_text == null) {
-                        symbol = new String[cursor.getCount()];
-                        customable_text = new String[cursor.getCount()];
-                        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-                             cursor.moveToNext()) {
-                            symbol[cursor.getPosition()] = cursor.getString(1);
-                            customable_text[cursor.getPosition()] = cursor.getString(2);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-
-            }
-        };
         check.setOnClickListener(view -> {
             check_card_view.startAnimation(animAlpha);
             result = checkAnAnswer();
@@ -433,8 +465,8 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                     dont_know.setEnabled(true);
                 }
                 if (symbol != null && customable_text != null) {
+                    String text = s.toString();
                     for (int i = 0; i < symbol.length; i++) {
-                        String text = s.toString();
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
@@ -561,12 +593,16 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             while_studying = savedInstanceState.getBoolean(WHILE_STUDYING);
-            listForTest = retainedFragment.getListForTest_StudyDuringActivity();
+            listForTest = (String[][]) savedInstanceState.getSerializable(LIST_FOR_TEST);
             if (listForTest == null) {
-                if (boolean_continue) {
-                    getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+                if ( getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null ) {
+                    getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
                 } else {
-                    getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+                    if (boolean_continue) {
+                        getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+                    } else {
+                        getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+                    }
                 }
             } else {
                 is_starting_after_destruction = true;
@@ -623,7 +659,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
 
                 @Override
                 protected Void doInBackground(Void... params) {
-                    while (true) {
+                    int i = 0;
+                    while (i < Constants.LONG_TIME) {
+                        i++;
                         if (listForTest != null) {
                             scheduleWhatToDoAfterTimeOfAnswerElapsed();
                             break;
@@ -784,7 +822,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
          or before the activity finishes
          or before the activity destroyed due a change of configuration*/
         mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-        retainedFragment.setListForTest_StudyDuringActivity(listForTest);
     }
 
  /*   @Override
@@ -1004,6 +1041,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         savedInstanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInstanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInstanceState.putBoolean(WHILE_STUDYING, while_studying);
+        savedInstanceState.putSerializable(LIST_FOR_TEST, listForTest);
         saveUserLayoutChanges(savedInstanceState);
                        /* Saving the remaining time till completion of the current timer of time of answer because the activity
         will be destroyed, not finishing normally.
@@ -1127,7 +1165,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
 
             @Override
             protected Void doInBackground(Void... params) {
-                while (true) {
+                int i = 0;
+                while (i < Constants.LONG_TIME) {
+                    i++;
                     if (listForTest != null) {
                         time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
                                 reading_question_letter_second, find_answer_time, typing_answer_letter_second);
@@ -1159,7 +1199,9 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
 
                 @Override
                 protected Void doInBackground(Void... params) {
-                    while (true) {
+                    int i = 0;
+                    while (i < Constants.LONG_TIME) {
+                        i++;
                         if (listForTest != null) {
                             scheduleWhatToDoAfterTimeOfAnswerElapsed();
                             break;
@@ -1228,40 +1270,25 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         }
     }
 
-    private static class PrepareListForTest extends Handler {
+    private static class PrepareListForTest extends AsyncTaskLoader<String[][]> {
+
+
+        public PrepareListForTest(Context context) {
+            super(context);
+        }
 
         @Override
-        public void handleMessage(Message msg) {
-            if (studyAPeriodActivity.questionsNumber > 0) {
-                studyAPeriodActivity.while_studying = true;
-                if (studyAPeriodActivity.obfuscate) {
-                    studyAPeriodActivity.showQuestion.setText(ActivityUtility.spanText(studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][0], studyAPeriodActivity.showQuestion));
-                } else {
-                    studyAPeriodActivity.showQuestion.setText(studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][0]);
-                }
-                studyAPeriodActivity.time_of_answer = ActivityUtility.calculate_time_of_answer(studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][0], studyAPeriodActivity.listForTest[studyAPeriodActivity.currentQuestionCounter][1],
-                        studyAPeriodActivity.reading_question_letter_second, studyAPeriodActivity.find_answer_time, studyAPeriodActivity.typing_answer_letter_second);
-                studyAPeriodActivity.ifMoreThanOnce();
-                studyAPeriodActivity.showNumberOfQuetions.setText(Integer.toString(studyAPeriodActivity.questionsNumber));
-                if (studyAPeriodActivity.boolean_continue) {
-                    studyAPeriodActivity.remainingQuestionCounter.setText(Integer.toString(studyAPeriodActivity.questionsNumber - 1 - studyAPeriodActivity.currentQuestionCounter));
-                } else {
-                    studyAPeriodActivity.remainingQuestionCounter.setText(Integer.toString(studyAPeriodActivity.questionsNumber - 1));
-                }
-                studyAPeriodActivity.enterAnswer.requestFocus();
-                studyAPeriodActivity.scheduleWhatToDoAfterTimeOfAnswerElapsed();
+        public String[][] loadInBackground() {
+            if (studyAPeriodActivity.boolean_continue) {
+                return studyAPeriodActivity.readFromLinkerTableStudyDuringColumn();
             } else {
-                Toast toast = Toast.makeText(studyAPeriodActivity, studyAPeriodActivity.getString(R.string.no_entries_in_this_time_range), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-                studyAPeriodActivity.finish();
-                ExitActivity.exit(studyAPeriodActivity);
+                return studyAPeriodActivity.prepareListForStudyFirstTime();
             }
-            ActivityUtility.crossFade(studyAPeriodActivity.content, studyAPeriodActivity.mLoadingView, studyAPeriodActivity);
-            if (!ActivityUtility.hasOpenedDialogs(studyAPeriodActivity)) {
-                studyAPeriodActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - studyAPeriodActivity.lastPause);
-                studyAPeriodActivity.tool_bar_timer.start();
-            }
+        }
+
+        @Override
+        protected void onStartLoading() {
+            forceLoad();
         }
     }
 }

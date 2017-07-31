@@ -16,7 +16,7 @@ public class WrongAnswersActivityRecyclerViewViewHolder extends RecyclerView.Vie
     public TextView showQuestion;
     public TextView showAnswer;
     public Spinner spinner;
-    public String question,answer;
+    public long entry_id;
 
     public WrongAnswersActivityRecyclerViewViewHolder(View view, IMyViewHolderClicks listener) {
         super(view);
@@ -28,10 +28,10 @@ public class WrongAnswersActivityRecyclerViewViewHolder extends RecyclerView.Vie
     }
     @Override
     public void onClick(View v) {
-        mListener.onClick(v, question,answer);
+        mListener.onClick(v, entry_id);
     }
 
     public interface IMyViewHolderClicks {
-        void onClick(View view, String currentQuestion, String currentAnswer);
+        void onClick(View view, long entry_id);
     }
 }

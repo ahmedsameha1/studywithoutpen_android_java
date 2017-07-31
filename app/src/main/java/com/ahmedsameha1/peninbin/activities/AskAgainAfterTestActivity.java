@@ -1,6 +1,8 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
@@ -10,7 +12,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -49,7 +50,6 @@ import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
-import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
@@ -87,7 +87,9 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private static final String SYMBOL = "symbol";
     public static final String RESULT = "result";
     private static final String CUSTOMABLE_TEXT = "customable_text";
-    public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
+    private static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 0;
+    public static final int GET_SPECIAL_TEXT_LOADER_ID = 1;
+    public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 2;
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
@@ -105,7 +107,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private static final String HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER = "how_much_time_remaining_from_time_for_answer";
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     public static final String BOOLEAN_CONTINUE = "boolean_continue";
-    private static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 0;
+
     public static final String PAUSING_ENHANCED = "pausing_enhanced";
     public static final String PAUSING_FULLY_RANDOM = "pausing_fully_random";
     private static final String IN_REPEATED = "in_repeated";
@@ -125,7 +127,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
     private CardView check_card_view, next_hint_card_view, show_action_bar_card_view, continue_card_view;
     private DatabaseReadOperations databaseReadOperations;
-    private RetainedFragment retainedFragment;
     private Handler mHandler = new Handler();
     private long current_field_id;
     private TextToSpeech tts;
@@ -137,7 +138,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
     private long lastPause;
-    private LoaderManager.LoaderCallbacks<Cursor> loader;
     private String[] symbol, customable_text;
     private int current_field_type;
     private boolean isStartingFirstTime, is_starting_after_destruction;
@@ -151,6 +151,100 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     boolean boolean_continue;
     private boolean while_studying;
     private boolean in_repeated;
+    private Cursor cursor;
+    private LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+            if (id == GET_SPECIAL_TEXT_LOADER_ID) {
+                return new CursorLoaderAndUpdateDatabase(AskAgainAfterTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                        new String[]{current_field_type + ""});
+            } else if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                String order_column = null;
+                if (test_type == Constants.TestType.ENHANCED_TEST) {
+                    order_column = Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER;
+                } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                    order_column = Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER;
+                }
+                return new CursorLoaderAndUpdateDatabase(AskAgainAfterTestActivity.this,
+                        "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                + " a , se." + order_column + " , se." + Contract.COLUMN_ID
+                                + " FROM " + Contract.STring.TABLE_NAME
+                                + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + order_column + " >= ? ",
+                        new String[]{String.valueOf(current_field_id), "0"});
+            }
+            return null;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+            int id = loader.getId();
+            if (id == GET_SPECIAL_TEXT_LOADER_ID) {
+                if (symbol == null && customable_text == null) {
+                    symbol = new String[cursor.getCount()];
+                    customable_text = new String[cursor.getCount()];
+                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                         cursor.moveToNext()) {
+                        symbol[cursor.getPosition()] = cursor.getString(1);
+                        customable_text[cursor.getPosition()] = cursor.getString(2);
+                    }
+                }
+            } else if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                AskAgainAfterTestActivity.this.cursor = cursor;
+                AskAgainAfterTestActivity.this.getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+
+        }
+    };
+
+    private LoaderManager.LoaderCallbacks<ArrayList<WrongItem>> prepare_list_for_test_loader = new LoaderManager.LoaderCallbacks<ArrayList<WrongItem>>() {
+        @Override
+        public Loader<ArrayList<WrongItem>> onCreateLoader(int i, Bundle bundle) {
+            return new AskAgainAfterTestActivity.PrepareListForTest(AskAgainAfterTestActivity.this);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<ArrayList<WrongItem>> loader, ArrayList<WrongItem> list) {
+            wrongItemArrayList = list;
+            askAgainAfterTestActivity.questionsNumber = askAgainAfterTestActivity.wrongItemArrayList.size();
+            askAgainAfterTestActivity.while_studying = true;
+            if (askAgainAfterTestActivity.obfuscate) {
+                askAgainAfterTestActivity.showQuestion.setText(ActivityUtility.spanText(askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getQuestion(), askAgainAfterTestActivity.showQuestion));
+            } else {
+                askAgainAfterTestActivity.showQuestion.setText(askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getQuestion());
+            }
+            askAgainAfterTestActivity.time_of_answer = ActivityUtility.calculate_time_of_answer(askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getQuestion(),
+                    askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getAnswer(),
+                    askAgainAfterTestActivity.reading_question_letter_second, askAgainAfterTestActivity.find_answer_time, askAgainAfterTestActivity.typing_answer_letter_second);
+            askAgainAfterTestActivity.ifMoreThanOnce();
+            askAgainAfterTestActivity.showNumberOfQuetions.setText(Integer.toString(askAgainAfterTestActivity.questionsNumber));
+            askAgainAfterTestActivity.remainingQuestionCounter.setText(Integer.toString(askAgainAfterTestActivity.questionsNumber - 1 - askAgainAfterTestActivity.currentQuestionCounter));
+            askAgainAfterTestActivity.enterAnswer.requestFocus();
+            askAgainAfterTestActivity.scheduleWhatToDoAfterTimeOfAnswerElapsed();
+            ActivityUtility.crossFade(askAgainAfterTestActivity.content, askAgainAfterTestActivity.mLoadingView, askAgainAfterTestActivity);
+            if (!ActivityUtility.hasOpenedDialogs(askAgainAfterTestActivity)) {
+                askAgainAfterTestActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - askAgainAfterTestActivity.lastPause);
+                askAgainAfterTestActivity.tool_bar_timer.start();
+            }
+            getLoaderManager().destroyLoader(loader.getId());
+        }
+
+        @Override
+        public void onLoaderReset(Loader<ArrayList<WrongItem>> loader) {
+
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,70 +294,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         show_action_bar_card_view = (CardView) findViewById(R.id.show_actionbar_card_view);
         tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
-        // getting the reference of the fragment that holds the reference of list for test array
-        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
-        // if the reference to the fragment was null we create a new fragment object and add it to the activity
-        if (retainedFragment == null) {
-            retainedFragment = new RetainedFragment();
-            getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
-        }
-        loader = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-                if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                    return new CursorLoaderAndUpdateDatabase(AskAgainAfterTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                            new String[]{current_field_type + ""});
-                } else if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    String order_column = null;
-                    if (test_type == Constants.TestType.ENHANCED_TEST) {
-                        order_column = Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER;
-                    } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
-                        order_column = Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_FULLY_RANDOM_TEST_ORDER;
-                    }
-                    return new CursorLoaderAndUpdateDatabase(AskAgainAfterTestActivity.this,
-                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + order_column + " , se." + Contract.COLUMN_ID
-                                    + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + order_column + " >= ? ",
-                            new String[]{String.valueOf(current_field_id), "0"});
-                }
-                return null;
-            }
 
-            @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-                int id = loader.getId();
-                if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                    if (symbol == null && customable_text == null) {
-                        symbol = new String[cursor.getCount()];
-                        customable_text = new String[cursor.getCount()];
-                        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-                             cursor.moveToNext()) {
-                            symbol[cursor.getPosition()] = cursor.getString(1);
-                            customable_text[cursor.getPosition()] = cursor.getString(2);
-                        }
-                    }
-                } else if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    PrepareListForTest prepareListForTest = new PrepareListForTest();
-                    new Thread(() -> {
-                        wrongItemArrayList = readDataFromCursor(cursor);
-                        prepareListForTest.sendMessage(Message.obtain());
-                    }).start();
-                }
-            }
-
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-
-            }
-        };
         check.setOnClickListener(view -> {
             check_card_view.startAnimation(animAlpha);
             result = checkAnAnswer();
@@ -411,8 +442,8 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                     dont_know.setEnabled(true);
                 }
                 if (symbol != null && customable_text != null) {
+                    String text = s.toString();
                     for (int i = 0; i < symbol.length; i++) {
-                        String text = s.toString();
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
@@ -564,9 +595,13 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             in_repeated = savedInstanceState.getBoolean(IN_REPEATED);
             while_studying = savedInstanceState.getBoolean(WHILE_STUDYING);
-            wrongItemArrayList = retainedFragment.getWrongItemArrayList_ask_again_after_test_activity();
+            wrongItemArrayList = (ArrayList<WrongItem>) savedInstanceState.getSerializable(LIST_FOR_TEST);
             if (wrongItemArrayList == null && boolean_continue) {
-                getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+                if ( getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null ) {
+                    getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
+                } else {
+                    getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+                }
             } else {
                 is_starting_after_destruction = true;
                 restoreUserLayoutChanges(savedInstanceState);
@@ -622,7 +657,9 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
 
                 @Override
                 protected Void doInBackground(Void... params) {
-                    while (true) {
+                    int i = 0;
+                    while (i < Constants.LONG_TIME) {
+                        i++;
                         if (wrongItemArrayList != null) {
                             scheduleWhatToDoAfterTimeOfAnswerElapsed();
                             break;
@@ -784,7 +821,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
          or before the activity finishes
          or before the activity destroyed due a change of configuration*/
         mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-        retainedFragment.setWrongItemArrayList_ask_again_after_test_activity(wrongItemArrayList);
     }
 
 
@@ -810,7 +846,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         }
     }
 
-    private ArrayList<WrongItem> readDataFromCursor(Cursor cursor) {
+    private ArrayList<WrongItem> readDataFromCursor() {
         ArrayList<WrongItem> array_list = new ArrayList<>(Collections.nCopies(cursor.getCount(), null));
         for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
             array_list.set(cursor.getInt(2), new WrongItem(cursor.getLong(3), cursor.getString(0), cursor.getString(1), null));
@@ -985,6 +1021,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         savedInstanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInstanceState.putBoolean(IN_REPEATED, in_repeated);
         savedInstanceState.putBoolean(WHILE_STUDYING, while_studying);
+        savedInstanceState.putSerializable(LIST_FOR_TEST, wrongItemArrayList);
         saveUserLayoutChanges(savedInstanceState);
                        /* Saving the remaining time till completion of the current timer of time of answer because the activity
         will be destroyed, not finishing normally.
@@ -1095,7 +1132,9 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
 
             @Override
             protected Void doInBackground(Void... params) {
-                while (true) {
+                int i = 0;
+                while (i < Constants.LONG_TIME) {
+                    i++;
                     if (wrongItemArrayList != null) {
                         time_of_answer = ActivityUtility.calculate_time_of_answer(wrongItemArrayList.get(currentQuestionCounter).getQuestion(), wrongItemArrayList.get(currentQuestionCounter).getAnswer(),
                                 reading_question_letter_second, find_answer_time, typing_answer_letter_second);
@@ -1127,7 +1166,9 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
 
                 @Override
                 protected Void doInBackground(Void... params) {
-                    while (true) {
+                    int i = 0;
+                    while (i < Constants.LONG_TIME) {
+                        i++;
                         if (wrongItemArrayList != null) {
                             scheduleWhatToDoAfterTimeOfAnswerElapsed();
                             break;
@@ -1201,30 +1242,22 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         }
     }
 
-    private static class PrepareListForTest extends Handler {
+
+    private static class PrepareListForTest extends AsyncTaskLoader<ArrayList<WrongItem>> {
+
+
+        public PrepareListForTest(Context context) {
+            super(context);
+        }
 
         @Override
-        public void handleMessage(Message msg) {
-            askAgainAfterTestActivity.questionsNumber = askAgainAfterTestActivity.wrongItemArrayList.size();
-            askAgainAfterTestActivity.while_studying = true;
-            if (askAgainAfterTestActivity.obfuscate) {
-                askAgainAfterTestActivity.showQuestion.setText(ActivityUtility.spanText(askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getQuestion(), askAgainAfterTestActivity.showQuestion));
-            } else {
-                askAgainAfterTestActivity.showQuestion.setText(askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getQuestion());
-            }
-            askAgainAfterTestActivity.time_of_answer = ActivityUtility.calculate_time_of_answer(askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getQuestion(),
-                    askAgainAfterTestActivity.wrongItemArrayList.get(askAgainAfterTestActivity.currentQuestionCounter).getAnswer(),
-                    askAgainAfterTestActivity.reading_question_letter_second, askAgainAfterTestActivity.find_answer_time, askAgainAfterTestActivity.typing_answer_letter_second);
-            askAgainAfterTestActivity.ifMoreThanOnce();
-            askAgainAfterTestActivity.showNumberOfQuetions.setText(Integer.toString(askAgainAfterTestActivity.questionsNumber));
-            askAgainAfterTestActivity.remainingQuestionCounter.setText(Integer.toString(askAgainAfterTestActivity.questionsNumber - 1 - askAgainAfterTestActivity.currentQuestionCounter));
-            askAgainAfterTestActivity.enterAnswer.requestFocus();
-            askAgainAfterTestActivity.scheduleWhatToDoAfterTimeOfAnswerElapsed();
-            ActivityUtility.crossFade(askAgainAfterTestActivity.content, askAgainAfterTestActivity.mLoadingView, askAgainAfterTestActivity);
-            if (!ActivityUtility.hasOpenedDialogs(askAgainAfterTestActivity)) {
-                askAgainAfterTestActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - askAgainAfterTestActivity.lastPause);
-                askAgainAfterTestActivity.tool_bar_timer.start();
-            }
+        public ArrayList<WrongItem> loadInBackground() {
+            return askAgainAfterTestActivity.readDataFromCursor();
+        }
+
+        @Override
+        protected void onStartLoading() {
+            forceLoad();
         }
     }
 }

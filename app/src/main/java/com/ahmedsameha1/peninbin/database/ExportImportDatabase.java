@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
@@ -42,7 +43,7 @@ public class ExportImportDatabase {
 
     public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String path, final String fileName) {
         exportThread = new Thread(() -> {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             exportFields(context, selectedFields, path, fileName);
         });
         exportThread.start();
@@ -50,7 +51,7 @@ public class ExportImportDatabase {
 
     public static void startImportThread(final Context context, final String file_path, final boolean importUserUsageData) {
         importThread = new Thread(() -> {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             importFields(context, file_path, importUserUsageData);
         });
         importThread.start();
@@ -58,7 +59,7 @@ public class ExportImportDatabase {
 
     public static void startImportInternalFieldThread(final Context context, SQLiteDatabase toImportDatabase, ArrayList<String> wanted_fields) {
         importInternalFieldThread = new Thread(() -> {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             importInternalFields(context, toImportDatabase, wanted_fields);
         });
         importInternalFieldThread.start();

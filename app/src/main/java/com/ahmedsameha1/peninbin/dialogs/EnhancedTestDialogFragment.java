@@ -254,7 +254,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                 }
             });
             positiveButton.setOnClickListener(v -> {
-                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity())) {
+                if (Money.getUserSubscriptionStatus(getActivity()) || Money.getUserAllowedDueAnError(getActivity()) ) {
                     try {
                         String trys_suffix = " " + getActivity().getString(R.string._try);
                         String try_string = enterTries.getText().toString();

@@ -83,7 +83,7 @@ public class AddEntryActivity extends AppCompatActivity implements
     private boolean fromFieldActivity;
     private Cursor cursor;
     private boolean field_chosen;
-    private LinearLayout showResult, questionLinearlayout, container;
+    private LinearLayout answer_linearlayout, question_linearlayout, container;
     private long current_field_id;
     private int question_data_type;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
@@ -131,8 +131,8 @@ public class AddEntryActivity extends AppCompatActivity implements
         enter_order = (EditText) findViewById(R.id.order);
         final TextView add_entry = (TextView) findViewById(R.id.add_entry);
         showActionbar = (TextView) findViewById(R.id.show_actionbar);
-        showResult = (LinearLayout) findViewById(R.id.answer_linearlayout);
-        questionLinearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
+        answer_linearlayout = (LinearLayout) findViewById(R.id.answer_linearlayout);
+        question_linearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
         container = (LinearLayout) findViewById(R.id.container);
         final CardView show_actionbar_cardview = (CardView) findViewById(R.id.show_actionbar_card_view);
         final CardView add_entry_cardview = (CardView) findViewById(R.id.add_entry_card_view);
@@ -382,16 +382,16 @@ public class AddEntryActivity extends AppCompatActivity implements
                     add_entry.setEnabled(false);
                 }
                 if (symbol != null && customable_text != null) {
+                    String text = editable.toString();
                     for (int i = 0; i < symbol.length; i++) {
-                        String text = editable.toString();
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enter_question.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enter_question.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            questionLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                            question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            question_linearlayout.setPadding(0, 0, 0, 0);
                             Runnable mRunnable = () -> {
-                                questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                                question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                question_linearlayout.setPadding(0, 0, 0, 0);
                             };
                             mHandler.postDelayed(mRunnable, 50);
                         }
@@ -416,16 +416,16 @@ public class AddEntryActivity extends AppCompatActivity implements
                     add_entry.setEnabled(false);
                 }
                 if (symbol != null && customable_text != null) {
+                    String text = editable.toString();
                     for (int i = 0; i < symbol.length; i++) {
-                        String text = editable.toString();
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enter_answer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enter_answer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            questionLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            questionLinearlayout.setPadding(0, 0, 0, 0);
+                            answer_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
+                            answer_linearlayout.setPadding(0, 0, 0, 0);
                             Runnable mRunnable = () -> {
-                                questionLinearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                questionLinearlayout.setPadding(0, 0, 0, 0);
+                                answer_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                                answer_linearlayout.setPadding(0, 0, 0, 0);
                             };
                             mHandler.postDelayed(mRunnable, 50);
                         }
@@ -515,8 +515,8 @@ public class AddEntryActivity extends AppCompatActivity implements
             case R.id.change_areas:
                 Bundle bundle = new Bundle();
                 bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
-                bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
-                bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
+                bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) question_linearlayout.getLayoutParams()).weight);
+                bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) answer_linearlayout.getLayoutParams()).weight);
                 ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
                 changeAreasDialogFragment.setArguments(bundle);
                 changeAreasDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
@@ -697,13 +697,13 @@ public class AddEntryActivity extends AppCompatActivity implements
 
     @Override
     public void changeAreas(float questionArea, float answerArea) {
-        LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams();
-        LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) showResult.getLayoutParams();
+        LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) question_linearlayout.getLayoutParams();
+        LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) answer_linearlayout.getLayoutParams();
         container.setWeightSum(questionArea + answerArea);
         question_params.weight = (float) (questionArea);
         answer_params.weight = (float) (answerArea);
-        questionLinearlayout.setLayoutParams(question_params);
-        showResult.setLayoutParams(answer_params);
+        question_linearlayout.setLayoutParams(question_params);
+        answer_linearlayout.setLayoutParams(answer_params);
     }
 
     @Override
@@ -713,8 +713,8 @@ public class AddEntryActivity extends AppCompatActivity implements
     }
 
     private void saveUserLayoutChanges(Bundle bundle) {
-        bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) questionLinearlayout.getLayoutParams()).weight);
-        bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) showResult.getLayoutParams()).weight);
+        bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) question_linearlayout.getLayoutParams()).weight);
+        bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) answer_linearlayout.getLayoutParams()).weight);
         bundle.putFloat(TEXT_SIZE, enter_question.getTextSize());
     }
 

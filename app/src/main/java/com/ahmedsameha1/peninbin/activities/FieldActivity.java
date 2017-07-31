@@ -90,9 +90,6 @@ public class FieldActivity extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener,
         FieldActivityRecyclerViewAdapter.Contact {
     public static final String SCREEN_NAME = "FieldActivity";
-    public static final String ENTRY_ID = "entry_id";
-    public static final String CURRENT_QUESTION = "currentQuestion";
-    public static final String CURRENT_ANSWER = "currentAnswer";
     public static final int STUDY_PERIOD = 0;
     public static final int ENHANCED_TEST = 1;
     public static final int FULLY_RANDOM_TEST = 2;
@@ -550,9 +547,6 @@ public class FieldActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.field_activity_menu, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         MenuItem searchItem = menu.findItem(R.id.search);
-        if (!(databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED)) {
-            searchItem.setVisible(false);
-        }
         SearchView searchView = (SearchView) searchItem.getActionView();
         if (search_value != null) {
             searchItem.expandActionView();
@@ -840,11 +834,11 @@ public class FieldActivity extends AppCompatActivity implements
 
     @Override
     public void startStudyActivity(long entry_id, String question, String answer) {
-        Intent intent = new Intent(this, NewStudyActivity.class);
+        Intent intent = new Intent(this, StudyActivity.class);
         intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-        intent.putExtra(ENTRY_ID, entry_id);
+        intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
         if (search_value != null) {
-            intent.putExtra(NewStudyActivity.SEARCH_VALUE, search_value);
+            intent.putExtra(StudyActivity.SEARCH_VALUE, search_value);
         }
         startActivity(intent);
     }

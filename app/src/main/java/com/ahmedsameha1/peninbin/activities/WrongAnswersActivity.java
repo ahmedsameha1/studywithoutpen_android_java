@@ -1,15 +1,13 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.content.DialogInterface;
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.app.LoaderManager;
-import android.content.Loader;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -21,22 +19,18 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.adapters.WrongAnswersActivityRecyclerViewAdapter;
+import com.ahmedsameha1.peninbin.adapters.WrongItem;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.adapters.WrongItem;
-import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
@@ -56,6 +50,8 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     public static final String SCREEN_NAME = "WrongAnswersActivity";
     public static final String WRONG_ITEM_LIST = "wrongItemList";
     private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
+    public static final int GET_ENTRIES_LOADER_ID = 0;
+    public static final int PREPARE_WRONG_LIST_LOADER_ID = 1;
     private static WrongAnswersActivity wrongAnswersActivity;
     private long current_field_id;
     private ArrayList<WrongItem> wrongItemList;
@@ -70,7 +66,26 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private View mLoadingView;
     private RelativeLayout content;
+    private LoaderManager.LoaderCallbacks<ArrayList<WrongItem>> prepare_wrong_list_loader = new LoaderManager.LoaderCallbacks<ArrayList<WrongItem>>() {
+        @Override
+        public Loader<ArrayList<WrongItem>> onCreateLoader(int i, Bundle bundle) {
+            return new WrongAnswersActivity.PrepareWrongList(WrongAnswersActivity.this);
+        }
 
+        @Override
+        public void onLoadFinished(Loader<ArrayList<WrongItem>> loader, ArrayList<WrongItem> list) {
+            wrongItemList = list;
+            mAdapter = new WrongAnswersActivityRecyclerViewAdapter(WrongAnswersActivity.this, wrongItemList, current_field_id);
+            recyclerView.setAdapter(mAdapter);
+            ActivityUtility.crossFade(content, mLoadingView, WrongAnswersActivity.this);
+            getLoaderManager().destroyLoader(loader.getId());
+        }
+
+        @Override
+        public void onLoaderReset(Loader<ArrayList<WrongItem>> loader) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,11 +118,19 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         content.setVisibility(View.GONE);
         if (savedInstanceState != null) {
             wrongItemList = (ArrayList<WrongItem>) savedInstanceState.getSerializable(WRONG_ITEM_LIST);
-            mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this, wrongItemList, current_field_id);
-            recyclerView.setAdapter(mAdapter);
-            ActivityUtility.crossFade(content, mLoadingView, WrongAnswersActivity.this);
+            if ( wrongItemList != null ) {
+                mAdapter = new WrongAnswersActivityRecyclerViewAdapter(this, wrongItemList, current_field_id);
+                recyclerView.setAdapter(mAdapter);
+                ActivityUtility.crossFade(content, mLoadingView, WrongAnswersActivity.this);
+            } else {
+                if ( getLoaderManager().getLoader(PREPARE_WRONG_LIST_LOADER_ID) != null ) {
+                    getLoaderManager().initLoader(PREPARE_WRONG_LIST_LOADER_ID, null, prepare_wrong_list_loader);
+                } else {
+                    getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, this);
+                }
+            }
         } else {
-            getLoaderManager().initLoader(0, null, this);
+            getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, this);
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
@@ -298,11 +321,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.cursor = data;
-        PrepareListForTest prepareListForTest = new PrepareListForTest();
-        new Thread(() -> {
-            wrongItemList = getWrongItems();
-            prepareListForTest.sendMessage(Message.obtain());
-        }).start();
+        getLoaderManager().initLoader(PREPARE_WRONG_LIST_LOADER_ID, null, prepare_wrong_list_loader);
     }
 
     @Override
@@ -310,13 +329,21 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
 
     }
 
-    private static class PrepareListForTest extends Handler {
+    private static class PrepareWrongList extends AsyncTaskLoader<ArrayList<WrongItem>> {
+
+
+        public PrepareWrongList(Context context) {
+            super(context);
+        }
 
         @Override
-        public void handleMessage(Message msg) {
-            wrongAnswersActivity.mAdapter = new WrongAnswersActivityRecyclerViewAdapter(wrongAnswersActivity, wrongAnswersActivity.wrongItemList, wrongAnswersActivity.current_field_id);
-            wrongAnswersActivity.recyclerView.setAdapter(wrongAnswersActivity.mAdapter);
-            ActivityUtility.crossFade(wrongAnswersActivity.content, wrongAnswersActivity.mLoadingView, wrongAnswersActivity);
+        public ArrayList<WrongItem> loadInBackground() {
+            return wrongAnswersActivity.getWrongItems();
+        }
+
+        @Override
+        protected void onStartLoading() {
+            forceLoad();
         }
     }
 }

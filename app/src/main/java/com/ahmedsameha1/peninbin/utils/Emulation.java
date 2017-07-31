@@ -7,8 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Process;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
@@ -34,7 +34,7 @@ public class Emulation {
 
     public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries) {
         emulate_thread = new Thread(() -> {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             emulate(context, field_id, number_of_entries);
         });
         emulate_thread.start();
@@ -43,7 +43,7 @@ public class Emulation {
 
     public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries, final long starting_entry) {
         emulate_thread = new Thread(() -> {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             emulate(context, field_id, number_of_entries, starting_entry);
         });
 
@@ -52,7 +52,7 @@ public class Emulation {
 
     public static void startReemulateThread(final Context context) {
         reemulate_thread = new Thread(() -> {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             repartition(context);
         });
 
@@ -61,7 +61,7 @@ public class Emulation {
 
     public static void startUnemulateThread(final Context context, final long field_id) {
         unemulate_thread = new Thread(() -> {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             disableEmulation(context, field_id);
         });
         unemulate_thread.start();

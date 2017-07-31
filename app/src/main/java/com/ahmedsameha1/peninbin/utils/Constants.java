@@ -7,6 +7,7 @@ public class Constants {
     public static final int NOT_EMULATED = 0;
     public static final String PAUSING = "pausing";
     public static final String CURRENT_FIELD_ID = "current_field_id";
+    public static final int LONG_TIME = 100000;
 
     public static abstract class FieldTypes {
         public static final int DEFAULT_TYPE = 0;

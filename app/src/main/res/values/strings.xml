@@ -351,6 +351,5 @@
     <string name="question_will">Question will be:</string>
     <string name="answer_will">Answer will be:</string>
     <string name="test">Test</string>
-    <string name="not_emulated">This field is not emulated!</string>
     <string name="today_s_entries">Today\'s entries</string>
 </resources>

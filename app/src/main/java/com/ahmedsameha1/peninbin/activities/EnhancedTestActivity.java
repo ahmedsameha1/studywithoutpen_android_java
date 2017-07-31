@@ -1,6 +1,8 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
@@ -9,7 +11,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
+import android.os.Process;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.AlarmClock;
@@ -45,7 +47,6 @@ import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
-import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
@@ -84,6 +85,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 1;
     public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
+    public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 3;
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
     public static final String DASH = "-";
@@ -145,7 +147,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private boolean locale_available = false;
     private boolean is_time_of_answer_elapsed = false;
     private DatabaseReadOperations databaseOperations;
-    private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
     private View mLoadingView;
     private RelativeLayout content;
     private String[] symbol, customable_text;
@@ -156,6 +157,120 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
     private boolean obfuscate;
     private int last_controlled_index, last_old_round_index;
+    private LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
+                        "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                + " a , se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " , se." + Contract.COLUMN_ID
+                                + " FROM " + Contract.STring.TABLE_NAME
+                                + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? ",
+                        new String[]{current_field_id + "", "0"});
+            } else if (id == GET_ENTRIES_LOADER_ID) {
+                if (isEmulated) {
+                    String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
+                            .format(new Date(System.currentTimeMillis()));
+                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
+                            "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                                    + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                    + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
+                                    + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL )",
+                            new String[]{current_field_id + "", date_string});
+                } else {
+                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
+                            "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
+                                    + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
+                                    + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
+                                    + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
+                                    + " FROM " + Contract.STring.TABLE_NAME
+                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
+                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
+                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
+                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
+                            new String[]{current_field_id + ""});
+                }
+            } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
+                return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
+                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
+                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
+                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
+                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
+                        new String[]{current_field_type + ""});
+            }
+            return null;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            int id = loader.getId();
+            if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                fieldEntriesCursor = data;
+                EnhancedTestActivity.this.getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
+            } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
+                if (symbol == null && customable_text == null) {
+                    symbol = new String[data.getCount()];
+                    customable_text = new String[data.getCount()];
+                    for (data.moveToFirst(); data.getPosition() < data.getCount();
+                         data.moveToNext()) {
+                        symbol[data.getPosition()] = data.getString(1);
+                        customable_text[data.getPosition()] = data.getString(2);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            int id = loader.getId();
+            if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+                fieldEntriesCursor = null;
+            }
+        }
+
+    };
+
+    private LoaderManager.LoaderCallbacks<String[][]> prepare_list_for_test_loader = new LoaderManager.LoaderCallbacks<String[][]>() {
+        @Override
+        public Loader<String[][]> onCreateLoader(int i, Bundle bundle) {
+            return new PrepareListForTest(EnhancedTestActivity.this);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<String[][]> loader, String[][] list ) {
+            listForTest = list;
+            if ( boolean_continue ) {
+                boolean_continue = false;
+            }
+            questionsNumber = listForTest.length;
+            while_testing = true;
+            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+            showQuestion();
+            enterAnswer.setEnabled(true);
+            enterAnswer.requestFocus();
+            ActivityUtility.crossFade(content, mLoadingView, EnhancedTestActivity.this);
+            if (!ActivityUtility.hasOpenedDialogs(EnhancedTestActivity.this)) {
+                tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+                tool_bar_timer.start();
+            }
+            getLoaderManager().destroyLoader(loader.getId());
+        }
+
+        @Override
+        public void onLoaderReset(Loader<String[][]> loader) {
+
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,13 +279,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         enhancedTestActivity = this;
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         boolean isReadAnswer;
-        // getting the reference of the fragment that holds the reference of list for test array
-        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
-        // if the reference to the fragment was null we create a new fragment object and add it to the activity
-        if (retainedFragment == null) {
-            retainedFragment = new RetainedFragment();
-            getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
-        }
         databaseOperations = new DatabaseReadOperations(this);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -228,104 +336,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
 
-
-            @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
-                            "SELECT " + " s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                    + " a , se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " , se." + Contract.COLUMN_ID
-                                    + " FROM " + Contract.STring.TABLE_NAME
-                                    + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                    + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                    + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                    + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND se." + Contract.String_Entry.COLUMN_PAUSED_ENHANCED_TEST_ORDER + " >= ? ",
-                            new String[]{current_field_id + "", "0"});
-                } else if (id == GET_ENTRIES_LOADER_ID) {
-                    if (isEmulated) {
-                        String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)
-                                .format(new Date(System.currentTimeMillis()));
-                        return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
-                                "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
-                                        + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                                        + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
-                                        + " FROM " + Contract.STring.TABLE_NAME
-                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? AND ( ? > " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
-                                        + " OR " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NULL )",
-                                new String[]{current_field_id + "", date_string});
-                    } else {
-                        return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this,
-                                "SELECT " + "se." + Contract.COLUMN_ID + ", s1." + Contract.STring.COLUMN_VALUE + " q , s2." + Contract.STring.COLUMN_VALUE
-                                        + " a , se." + Contract.String_Entry.COLUMN_RANK + " , se." + Contract.String_Entry.COLUMN_ASKED_COUNT
-                                        + " , se." + Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT
-                                        + " , se." + Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND
-                                        + " FROM " + Contract.STring.TABLE_NAME
-                                        + " s1 INNER JOIN " + Contract.String_Entry.TABLE_NAME + " se ON s1."
-                                        + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_QUESTION + " INNER JOIN "
-                                        + Contract.STring.TABLE_NAME + " s2 ON s2." + Contract.COLUMN_ID + " = se." + Contract.String_Entry.COLUMN_ANSWER
-                                        + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                                new String[]{current_field_id + ""});
-                    }
-                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                    return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                            new String[]{current_field_type + ""});
-                }
-                return null;
-            }
-
-            @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                int id = loader.getId();
-                if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    fieldEntriesCursor = data;
-                    PrepareListForTest prepareListForTest = new PrepareListForTest();
-                    new Thread(() -> {
-                        if (boolean_continue) {
-                            listForTest = readTestDataFromLinkerTable();
-                            boolean_continue = false;
-                        } else {
-                            if (percent_or_number == PERCENTAGE) {
-                                listForTest = getDataOfTest(percentage);
-                            } else if (percent_or_number == NUMBER) {
-                                listForTest = getDataOfTest(number);
-                            }
-                        }
-                        questionsNumber = listForTest.length;
-                        while_testing = true;
-                        prepareListForTest.sendMessage(Message.obtain());
-                    }).start();
-                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                    if (symbol == null && customable_text == null) {
-                        symbol = new String[data.getCount()];
-                        customable_text = new String[data.getCount()];
-                        for (data.moveToFirst(); data.getPosition() < data.getCount();
-                             data.moveToNext()) {
-                            symbol[data.getPosition()] = data.getString(1);
-                            customable_text[data.getPosition()] = data.getString(2);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-                int id = loader.getId();
-                if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
-                    fieldEntriesCursor = null;
-                }
-            }
-
-        };
         getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         check.setOnClickListener(view -> {
             check_card_view.startAnimation(animAlpha);
@@ -412,8 +423,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     check.setEnabled(false);
                 }
                 if (symbol != null && customable_text != null) {
+                    String text = s.toString();
                     for (int i = 0; i < symbol.length; i++) {
-                        String text = s.toString();
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
@@ -531,12 +542,16 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             last_controlled_index = savedInstanceState.getInt(LAST_CONTROLLED_INDEX);
             last_old_round_index = savedInstanceState.getInt(LAST_OLD_ROUND_INDEX);
-            listForTest = retainedFragment.getListForTest_EnhancedTestActivity();
+            listForTest = (String[][]) savedInstanceState.getSerializable(LIST_FOR_TEST);
             if (listForTest == null) {
-                if (boolean_continue) {
-                    getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+                if ( getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null ) {
+                    getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
                 } else {
-                    getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+                    if (boolean_continue) {
+                        getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+                    } else {
+                        getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+                    }
                 }
             } else {
                 is_starting_after_destruction = true;
@@ -902,7 +917,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
          or before the activity finishes
          or before the activity destroyed due a change of configuration*/
         mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-        retainedFragment.setListForTest_EnhancedTestActivity(listForTest);
         super.onPause();
 
     }
@@ -917,7 +931,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         if (while_testing) {
             new Thread(() -> {
                 Runnable pauseRunnable;
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(EnhancedTestActivity.this);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -946,14 +960,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
     }
 
-/*    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-            lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-            cursorLoaderAndUpdateDatabase.setElapsedPausedSessionTime(current_field_id,
-                    Constants.ElapsedPausedSessionTime.ENHANCED_TEST, lastPause);
-        ExitActivity.exit(this);
-    }*/
 
     @Override
     public void onSaveInstanceState(Bundle savedInsatanceState) {
@@ -979,6 +985,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInsatanceState.putInt(LAST_CONTROLLED_INDEX, last_controlled_index);
         savedInsatanceState.putInt(LAST_OLD_ROUND_INDEX, last_old_round_index);
+        savedInsatanceState.putSerializable(LIST_FOR_TEST, listForTest);
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
         /* Saving the remaining time till completion of the current timer of time of answer because the activity
@@ -1290,19 +1297,31 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
     }
 
-    private static class PrepareListForTest extends Handler {
+
+    private static class PrepareListForTest extends AsyncTaskLoader<String[][]> {
+
+
+        public PrepareListForTest(Context context) {
+            super(context);
+        }
 
         @Override
-        public void handleMessage(Message msg) {
-            enhancedTestActivity.showNumberOfQuestions.setText(Integer.toString(enhancedTestActivity.questionsNumber));
-            enhancedTestActivity.showQuestion();
-            enhancedTestActivity.enterAnswer.setEnabled(true);
-            enhancedTestActivity.enterAnswer.requestFocus();
-            ActivityUtility.crossFade(enhancedTestActivity.content, enhancedTestActivity.mLoadingView, enhancedTestActivity);
-            if (!ActivityUtility.hasOpenedDialogs(enhancedTestActivity)  ) {
-                enhancedTestActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - enhancedTestActivity.lastPause);
-                enhancedTestActivity.tool_bar_timer.start();
+        public String[][] loadInBackground() {
+            if (enhancedTestActivity.boolean_continue) {
+                return enhancedTestActivity.readTestDataFromLinkerTable();
+            } else {
+                if (enhancedTestActivity.percent_or_number == PERCENTAGE) {
+                    return enhancedTestActivity.getDataOfTest(enhancedTestActivity.percentage);
+                } else if (enhancedTestActivity.percent_or_number == NUMBER) {
+                    return enhancedTestActivity.getDataOfTest(enhancedTestActivity.number);
+                }
             }
+            return null;
+        }
+
+        @Override
+        protected void onStartLoading() {
+            forceLoad();
         }
     }
 }

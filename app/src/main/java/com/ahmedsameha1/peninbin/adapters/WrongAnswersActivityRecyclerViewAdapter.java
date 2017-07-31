@@ -11,8 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.activities.StudyWrongAnswersActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +36,14 @@ public class WrongAnswersActivityRecyclerViewAdapter extends
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.wrong_item_row, parent, false);
         WrongAnswersActivityRecyclerViewViewHolder wrongAnswersActivityRecyclerViewViewHolder =
-                new WrongAnswersActivityRecyclerViewViewHolder(itemView, (v, currentQuestion, currentAnswer) -> {
-                    Intent intent = new Intent(context, StudyWrongAnswersActivity.class);
+                new WrongAnswersActivityRecyclerViewViewHolder(itemView, (v, entry_id ) -> {
+                    Intent intent = new Intent(context, StudyActivity.class);
+                    intent.putExtra(Constants.CURRENT_FIELD_ID, field_id);
+                    intent.putExtra(StudyActivity.STUDY_WHAT, StudyActivity.WRONG);
+                    intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
                     Bundle bundle = new Bundle();
-                    bundle.putLong(Constants.CURRENT_FIELD_ID,field_id);
-                    bundle.putString(StudyWrongAnswersActivity.CURRENT_QUESTION,currentQuestion);
-                    bundle.putString(StudyWrongAnswersActivity.CURRENT_ANSWER, currentAnswer);
-                    bundle.putSerializable(StudyWrongAnswersActivity.WRONG_ITEM_LIST, ((ArrayList<WrongItem>) wrongItemList));
-                    intent.putExtra(StudyWrongAnswersActivity.WRONG_ITEM_LIST,bundle);
+                    bundle.putSerializable(StudyActivity.WRONG_ITEM_LIST, ((ArrayList<WrongItem>) wrongItemList));
+                    intent.putExtra(StudyActivity.WRONG_ITEM_LIST,bundle);
                     context.startActivity(intent);
                 });
         return wrongAnswersActivityRecyclerViewViewHolder;
@@ -52,10 +52,9 @@ public class WrongAnswersActivityRecyclerViewAdapter extends
     @Override
     public void onBindViewHolder(WrongAnswersActivityRecyclerViewViewHolder viewHolder, int position) {
         WrongItem wrongItem = wrongItemList.get(position);
-        viewHolder.question = wrongItem.getQuestion();
-        viewHolder.answer = wrongItem.getAnswer();
         viewHolder.showQuestion.setText(wrongItem.getQuestion());
         viewHolder.showAnswer.setText(wrongItem.getAnswer());
+        viewHolder.entry_id = wrongItem.getEntry_id();
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(context,
                 R.layout.wrong_item_spinner,R.id.wrong_answer_text,wrongItem.getWrongAnswers());
         viewHolder.spinner.setAdapter(arrayAdapter);

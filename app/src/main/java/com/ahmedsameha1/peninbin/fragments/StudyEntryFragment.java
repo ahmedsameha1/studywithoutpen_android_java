@@ -27,7 +27,7 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.NewStudyActivity;
+import com.ahmedsameha1.peninbin.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
@@ -44,7 +44,7 @@ import java.util.StringTokenizer;
  */
 
 public class StudyEntryFragment extends Fragment implements  TextToSpeech.OnInitListener,
-NewStudyActivity.Contact {
+StudyActivity.Contact {
     public static final String SCREEN_NAME = "StudyEntryFragment";
     public static final String CORRECT_ANSWERS_COUNTER = "correctAnswerCounter";
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
@@ -81,11 +81,11 @@ NewStudyActivity.Contact {
                                                  String[] symbol, String[] customable_text) {
         StudyEntryFragment instance = new StudyEntryFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(NewStudyActivity.DATA, entries);
-        bundle.putSerializable(NewStudyActivity.CURRENT_INDEX, current_index);
+        bundle.putSerializable(StudyActivity.DATA, entries);
+        bundle.putSerializable(StudyActivity.CURRENT_INDEX, current_index);
         bundle.putLong(CURRENT_FIELD_ID, current_field_id);
-        bundle.putStringArray(NewStudyActivity.SYMBOL, symbol);
-        bundle.putStringArray(NewStudyActivity.CUSTOMABLE_TEXT, customable_text);
+        bundle.putStringArray(StudyActivity.SYMBOL, symbol);
+        bundle.putStringArray(StudyActivity.CUSTOMABLE_TEXT, customable_text);
         instance.setArguments(bundle);
         return instance;
     }
@@ -93,11 +93,11 @@ NewStudyActivity.Contact {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        entries = (String[][]) getArguments().getSerializable(NewStudyActivity.DATA);
-        current_index = (StringBuilder) getArguments().getSerializable(NewStudyActivity.CURRENT_INDEX);
+        entries = (String[][]) getArguments().getSerializable(StudyActivity.DATA);
+        current_index = (StringBuilder) getArguments().getSerializable(StudyActivity.CURRENT_INDEX);
         current_field_id = getArguments().getLong(CURRENT_FIELD_ID, 0);
-        symbol = getArguments().getStringArray(NewStudyActivity.SYMBOL);
-        customable_text = getArguments().getStringArray(NewStudyActivity.CUSTOMABLE_TEXT);
+        symbol = getArguments().getStringArray(StudyActivity.SYMBOL);
+        customable_text = getArguments().getStringArray(StudyActivity.CUSTOMABLE_TEXT);
     }
 
     @Nullable
@@ -301,8 +301,8 @@ NewStudyActivity.Contact {
                     check.setEnabled(false);
                 }
                 if (symbol != null && customable_text != null) {
+                    String text = s.toString();
                     for (int i = 0; i < symbol.length; i++) {
-                        String text = s.toString();
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());

@@ -420,7 +420,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Log.e(TAG, e.getMessage());
             }
         }
-       /* sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
+/*        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);//
@@ -541,7 +541,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Emulation.modifyEmulationCreationDatesOfAppV53AndHigher(sqLiteDatabase);
         }
         if (oldVersion < 13 ) {
-            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV86(sqLiteDatabase);
+            ModifyDatabaseSchema.onUpgradeDatabaseToDBV13AppV87(sqLiteDatabase);
         }
     }
 

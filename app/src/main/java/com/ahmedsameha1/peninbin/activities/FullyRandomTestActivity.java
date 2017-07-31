@@ -1,18 +1,20 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.graphics.Color;
-import android.os.Message;
-import android.os.SystemClock;
-import android.provider.AlarmClock;
-import android.os.Bundle;
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Process;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.app.LoaderManager;
-import android.content.Loader;
+import android.provider.AlarmClock;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -32,22 +34,22 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
-import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
-import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
-import com.ahmedsameha1.peninbin.utils.CompareUtility;
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
-import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -79,6 +81,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 1;
     public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
+    public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 3;
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
     public static final String LIST_FOR_TEST = "listForTest";
@@ -129,7 +132,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     private boolean tts_available = false;
     private boolean is_time_of_answer_elapsed = false;
     private boolean locale_available = false;
-    private RetainedFragment retainedFragment; // to save the list for test array when the activity orientation change
     private RelativeLayout content;
     private View mLoadingView;
     private String[] symbol, customable_text;
@@ -139,7 +141,37 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
     private boolean obfuscate;
+    private LoaderManager.LoaderCallbacks<String[][]> prepare_list_for_test_loader = new LoaderManager.LoaderCallbacks<String[][]>() {
+        @Override
+        public Loader<String[][]> onCreateLoader(int i, Bundle bundle) {
+            return new PrepareListForTest(FullyRandomTestActivity.this);
+        }
 
+        @Override
+        public void onLoadFinished(Loader<String[][]> loader, String[][] list ) {
+            listForTest = list;
+            if ( boolean_continue ) {
+                boolean_continue = false;
+            }
+            questionsNumber = listForTest.length;
+            while_testing = true;
+            showNumberOfQuestions.setText(Integer.toString(questionsNumber));
+            showQuestion();
+            enterAnswer.setEnabled(true);
+            enterAnswer.requestFocus();
+            ActivityUtility.crossFade(content, mLoadingView, FullyRandomTestActivity.this);
+            if (!ActivityUtility.hasOpenedDialogs(FullyRandomTestActivity.this) ) {
+                tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+                tool_bar_timer.start();
+            }
+            getLoaderManager().destroyLoader(loader.getId());
+        }
+
+        @Override
+        public void onLoaderReset(Loader<String[][]> loader) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,13 +180,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         fullyRandomTestActivity = this;
         int question_area_size, answer_area_size, test_text_size, action_bar_shown;
         boolean isReadAnswer;
-        // getting the reference of the fragment that holds the reference of list for test array
-        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(LIST_FOR_TEST);
-        // if the reference to the fragment was null we create a new fragment object and add it to the activity
-        if (retainedFragment == null) {
-            retainedFragment = new RetainedFragment();
-            getFragmentManager().beginTransaction().add(retainedFragment, LIST_FOR_TEST).commit();
-        }
         databaseOperations = new DatabaseReadOperations(this);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -261,22 +286,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
                 int id = loader.getId();
                 if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     fieldEntriesCursor = data;
-                    PrepareListForTest prepareListForTest = new PrepareListForTest();
-                    new Thread(() -> {
-                        if (boolean_continue) {
-                            listForTest = readTestDataFromLinkerTable();
-                            boolean_continue = false;
-                        } else {
-                            if (percent_or_number == PERCENTAGE) {
-                                listForTest = getListForTest(percentage);
-                            } else if (percent_or_number == NUMBER) {
-                                listForTest = getListForTest(number);
-                            }
-                        }
-                        questionsNumber = listForTest.length;
-                        while_testing = true;
-                        prepareListForTest.sendMessage(Message.obtain());
-                    }).start();
+                    FullyRandomTestActivity.this.getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
                 } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
                     if (symbol == null && customable_text == null) {
                         symbol = new String[data.getCount()];
@@ -300,7 +310,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         };
         check.setOnClickListener(view -> {
             check_card_view.startAnimation(animAlpha);
-
             boolean result = checkAnAnswer();
             if (triesCounter < permitedTriesNumber && !result) {
                 if (obfuscate) {
@@ -383,8 +392,8 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
                     check.setEnabled(false);
                 }
                 if (symbol != null && customable_text != null) {
+                    String text = s.toString();
                     for (int i = 0; i < symbol.length; i++) {
-                        String text = s.toString();
                         if (customable_text[i] != null && text.contains(customable_text[i])) {
                             enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
                             enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
@@ -501,12 +510,16 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
             time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
-            listForTest = retainedFragment.getListForTest_FullyRandomTestActivity();
+            listForTest = (String[][]) savedInstanceState.getSerializable(LIST_FOR_TEST);
             if (listForTest == null) {
-                if (boolean_continue) {
-                    getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+                if ( getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null ) {
+                    getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
                 } else {
-                    getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+                    if (boolean_continue) {
+                        getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
+                    } else {
+                        getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, loader);
+                    }
                 }
             } else {
                 is_starting_after_destruction = true;
@@ -871,7 +884,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
          or before the activity finishes
          or before the activity destroyed due a change of configuration*/
         mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-        retainedFragment.setListForTest_FullyRandomTestActivity(listForTest);
     }
 
     @Override
@@ -884,7 +896,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         if (while_testing) {
             new Thread(() -> {
                 Runnable pauseRunnable;
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FullyRandomTestActivity.this);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -944,6 +956,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         savedInsatanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInsatanceState.putInt(TIME_FOR_ANSWER_DO_WHAT, time_of_answer_do_what);
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
+        savedInsatanceState.putSerializable(LIST_FOR_TEST, listForTest);
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
                /* Saving the remaining time till completion of the current timer of time of answer because the activity
@@ -1251,19 +1264,30 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         }
     }
 
-    private static class PrepareListForTest extends Handler {
+    private static class PrepareListForTest extends AsyncTaskLoader<String[][]> {
+
+
+        public PrepareListForTest(Context context) {
+            super(context);
+        }
 
         @Override
-        public void handleMessage(Message msg) {
-            fullyRandomTestActivity.showNumberOfQuestions.setText(Integer.toString(fullyRandomTestActivity.questionsNumber));
-            fullyRandomTestActivity.showQuestion();
-            fullyRandomTestActivity.enterAnswer.setEnabled(true);
-            fullyRandomTestActivity.enterAnswer.requestFocus();
-            ActivityUtility.crossFade(fullyRandomTestActivity.content, fullyRandomTestActivity.mLoadingView, fullyRandomTestActivity);
-            if (!ActivityUtility.hasOpenedDialogs(fullyRandomTestActivity) ) {
-                fullyRandomTestActivity.tool_bar_timer.setBase(SystemClock.elapsedRealtime() - fullyRandomTestActivity.lastPause);
-                fullyRandomTestActivity.tool_bar_timer.start();
+        public String[][] loadInBackground() {
+            if (fullyRandomTestActivity.boolean_continue) {
+                return fullyRandomTestActivity.readTestDataFromLinkerTable();
+            } else {
+                if (fullyRandomTestActivity.percent_or_number == PERCENTAGE) {
+                    return fullyRandomTestActivity.getListForTest(fullyRandomTestActivity.percentage);
+                } else if (fullyRandomTestActivity.percent_or_number == NUMBER) {
+                    return fullyRandomTestActivity.getListForTest(fullyRandomTestActivity.number);
+                }
             }
+            return null;
+        }
+
+        @Override
+        protected void onStartLoading() {
+            forceLoad();
         }
     }
 }

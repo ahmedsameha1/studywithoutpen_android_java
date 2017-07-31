@@ -353,11 +353,11 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void startStudyActivity(long entry_id, String question, String answer) {
-        Intent intent = new Intent(this, NewStudyActivity.class);
+        Intent intent = new Intent(this, StudyActivity.class);
         intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
         intent.putExtra(ENTRY_ID, entry_id);
         if (search_value != null && search_value.length() > 0) {
-            intent.putExtra(NewStudyActivity.SEARCH_VALUE, search_value);
+            intent.putExtra(StudyActivity.SEARCH_VALUE, search_value);
             if (search_what == SEARCH_QUESTION) {
                 intent.putExtra(SEARCH_WHAT, SEARCH_QUESTION);
             } else if (search_what == SEARCH_ANSWER) {
