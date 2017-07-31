@@ -18,7 +18,7 @@ public class IntroActivity extends AppIntro {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addSlide(AppIntroFragment.newInstance(getString(R.string.start_excellance), "sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss sssssss ssss sssssss ssssss sssss",
+        addSlide(AppIntroFragment.newInstance(getString(R.string.excel), getString(R.string.excel_memorizing_texts),
                 R.drawable.intro_first_image, 0xF8BBD0));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_main));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_entry));

@@ -343,4 +343,7 @@
     <string name="start_fully_random_test">Start a fully random test</string>
     <string name="wait_loading">Please, wait for loading</string>
     <string name="start_excellance">Excel</string>
+    <string name="excel">Excel</string>
+    <string name="excel_memorizing_texts">Excel at memorizing texts</string>
+    <string name="intro_main_text"></string>
 </resources>
