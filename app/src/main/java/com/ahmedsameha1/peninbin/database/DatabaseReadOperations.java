@@ -26,7 +26,7 @@ public class DatabaseReadOperations {
     }
 
     public Cursor getFieldList() {
-        String[] string = {Contract.COLUMN_ID, Contract.Field.COLUMN_FIELD_NAME, Contract.Field.COLUMN_FIELD_TYPE};
+        String[] string = {Contract.COLUMN_ID, Contract.Field.COLUMN_FIELD_NAME};
         return sqLiteDatabase.query(Contract.Field.TABLE_NAME, string, null, null, null, null, Contract.Field.COLUMN_USAGE_COUNT + " DESC");
     }
 
@@ -384,16 +384,6 @@ public class DatabaseReadOperations {
         return number == 1;
     }
 
-
-    public int getFieldType(long field_id) {
-        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_FIELD_TYPE},
-                Contract.COLUMN_ID + " = ? ",
-                new String[]{field_id + ""}, null, null, null);
-        cursor.moveToFirst();
-        int n = cursor.getInt(0);
-        cursor.close();
-        return n;
-    }
 
     public SortOptions getFieldSort(long field_id) {
         int sort = 0;

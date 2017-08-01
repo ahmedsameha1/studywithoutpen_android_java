@@ -7,12 +7,15 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
@@ -55,7 +58,7 @@ public class SymbolActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
-        getSupportActionBar().setTitle(field_type_array [current_field_type]);
+        getSupportActionBar().setTitle(getString(R.string.field_type) + " " + field_type_array [current_field_type]);
 /*        simpleCursorAdapter = new SimpleCursorAdapter(this, R.layout.symbol_lishview_row ,null,
                 new String[]{Contract.Symbol.COLUMN_VALUE, Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING},
                 new int[]{R.id.symbol,R.id.user_customized_string},0);*/
@@ -149,4 +152,25 @@ public class SymbolActivity extends AppCompatActivity implements
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; FieldActivity.this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.symbol_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.help:
+                new AlertDialog.Builder(this)
+                        .setMessage(R.string.percentage_or_number_help).create().show();// TODO: 7/31/17 set the message
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 }

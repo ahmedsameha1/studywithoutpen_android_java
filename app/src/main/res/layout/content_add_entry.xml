@@ -42,7 +42,7 @@
                     android:gravity="center"
                     android:hint="@string/enter_a_question"
                     android:imeOptions="flagNoExtractUi"
-                    android:inputType="textNoSuggestions|textMultiLine"
+                    android:inputType="textNoSuggestions|textVisiblePassword|textMultiLine"
                     android:maxLines="1000"
                     android:minLines="1"
                     android:padding="5dp"
@@ -84,7 +84,7 @@
                     android:gravity="center"
                     android:hint="@string/enter_an_answer"
                     android:imeOptions="flagNoExtractUi"
-                    android:inputType="textNoSuggestions|textMultiLine"
+                    android:inputType="textNoSuggestions|textVisiblePassword|textMultiLine"
                     android:maxLines="1000"
                     android:minLines="1"
 

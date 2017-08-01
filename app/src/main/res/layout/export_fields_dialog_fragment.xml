@@ -39,7 +39,7 @@
                 android:layout_margin="5dp"
                 android:hint="@string/file_name"
                 android:imeOptions="flagNoExtractUi"
-                android:inputType="textNoSuggestions|textMultiLine" />
+                android:inputType="textNoSuggestions|textVisiblePassword" />
 
         </RelativeLayout>
 

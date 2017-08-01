@@ -24,32 +24,13 @@ public class ModifyDatabaseSchema {
     static void onUpgradeDatabaseToDBV13AppV87(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
-            sqLiteDatabase.delete(Field.TABLE_NAME, Field.COLUMN_FIELD_TYPE + " = ? ",
+            sqLiteDatabase.delete(Field.TABLE_NAME, Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE + " = ? ",
                     new String[]{String.valueOf(Constants.FieldTypes.NOTEBOOK_TYPE_REMOVED_FEATURE_V68)});
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.KORAN_TYPE);
-            sqLiteDatabase.update(Field.TABLE_NAME, contentValues,
-                    Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.KORAN_TYPE_OLD_V68)});
-            contentValues = new ContentValues();
-            contentValues.put(Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE);
-            sqLiteDatabase.update(Field.TABLE_NAME, contentValues,
-                    Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE_OLD_V68)});
-            contentValues = new ContentValues();
-            contentValues.put(Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE, Constants.FieldTypes.KORAN_TYPE);
-            sqLiteDatabase.update(Contract.Field_Type_Symbol.TABLE_NAME, contentValues,
-                    Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ? ",
-                    new String[]{String.valueOf(Constants.FieldTypes.KORAN_TYPE_OLD_V68)});
-            contentValues = new ContentValues();
-            contentValues.put(Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE, Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE);
-            sqLiteDatabase.update(Contract.Field_Type_Symbol.TABLE_NAME, contentValues,
-                    Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ? ",
-                    new String[]{String.valueOf(Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE_OLD_V68)});
-            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+            String rename = "ALTER TABLE " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " RENAME TO " + "tempTable";
             sqLiteDatabase.execSQL(rename);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
             String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
                     + " , " + Field.COLUMN_FIELD_NAME
-                    + " , " + Field.COLUMN_FIELD_TYPE
                     + " , " + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
                     + " , " + Field.COLUMN_LOCALE
                     + " , " + Field.COLUMN_CHECK_TYPE
@@ -71,26 +52,25 @@ public class ModifyDatabaseSchema {
                     + " , " + Contract.CREATION_DATE
                     + " ) "
                     + "SELECT " + Contract.COLUMN_ID
-                    + " , " + Field.COLUMN_FIELD_NAME
-                    + " , " + Field.COLUMN_FIELD_TYPE
-                    + " , " + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Field.COLUMN_LOCALE
-                    + " , " + Field.COLUMN_CHECK_TYPE
-                    + " , " + Field.COLUMN_SORT_BY
-                    + " , " + Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Field.COLUMN_READ_ANSWER
-                    + " , " + Field.COLUMN_USAGE_COUNT
-                    + " , " + Field.COLUMN_CREATION_EMULATION_NUMBER
-                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
-                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
-                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
-                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION
-                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL
-                    + " , " + Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL
                     + " , " + Contract.CREATION_DATE
                     + " FROM " + "tempTable"
                     + ";";
@@ -138,7 +118,7 @@ public class ModifyDatabaseSchema {
             sqLiteDatabase.execSQL(copy);
             drop = "DROP TABLE IF EXISTS " + "tempTable" + ";";
             sqLiteDatabase.execSQL(drop);
-            contentValues = new ContentValues();
+            ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, 999999999);
             sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " IS NULL ", null);
             drop = "DROP TABLE IF EXISTS " + Contract.Not_String_Entry.TABLE_NAME + ";";
@@ -305,47 +285,47 @@ public class ModifyDatabaseSchema {
     public static void onUpgradeDatabaseToDBV9AppV40(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
-            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+            String rename = "ALTER TABLE " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " RENAME TO " + "tempTable";
             sqLiteDatabase.execSQL(rename);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
-            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
-                    + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
-                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Contract.Field.COLUMN_LOCALE
-                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
-                    + " , " + Contract.Field.COLUMN_SORT_BY
-                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Contract.Field.COLUMN_READ_ANSWER
-                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
-                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
+            String copy = "INSERT INTO " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
                     + " , " + Contract.CREATION_DATE
                     + " ) "
                     + "SELECT " + Contract.COLUMN_ID
-                    + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
-                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Contract.Field.COLUMN_LOCALE
-                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
-                    + " , " + Contract.Field.COLUMN_SORT_BY
-                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Contract.Field.COLUMN_READ_ANSWER
-                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
-                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
                     + " , " + Contract.CREATION_DATE
                     + " FROM " + "tempTable"
                     + ";";
@@ -488,9 +468,9 @@ public class ModifyDatabaseSchema {
         try {
             String rename = "ALTER TABLE " + Contract.Old_Field_DBV6_AppV32.TABLE_NAME + " RENAME TO " + "tempTable";
             sqLiteDatabase.execSQL(rename);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
-            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
+            String copy = "INSERT INTO " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " ( " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
                     + " , " + Contract.CREATION_DATE + " ) "
                     + "SELECT " + Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME
                     + "," + Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_TYPE
@@ -547,8 +527,8 @@ public class ModifyDatabaseSchema {
                         new String[]{linkerCursor.getString(1)},null,null,null,null);
                 answer_id_cursor.moveToFirst();
                 long answer_id = answer_id_cursor.getLong(0);
-                Cursor field_id_cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,new String[] { Contract.COLUMN_ID},
-                        Contract.Field.COLUMN_FIELD_NAME + " = ? ",
+                Cursor field_id_cursor = sqLiteDatabase.query(Contract.Old_Field_DBV12_AppV68.TABLE_NAME,new String[] { Contract.COLUMN_ID},
+                        Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{field},null,null,null,null);
                 field_id_cursor.moveToFirst();
                 long field_id = field_id_cursor.getLong(0);
@@ -660,41 +640,41 @@ public class ModifyDatabaseSchema {
     public static void onUpgradeDatabaseToDBV8AppV38(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
-            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+            String rename = "ALTER TABLE " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " RENAME TO " + "tempTable";
             sqLiteDatabase.execSQL(rename);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
-            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
-                    + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
-                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Contract.Field.COLUMN_LOCALE
-                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
-                    + " , " + Contract.Field.COLUMN_SORT_BY
-                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Contract.Field.COLUMN_READ_ANSWER
-                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
-                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
+            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
+            String copy = "INSERT INTO " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
                     + " , " + Contract.CREATION_DATE
                     + " ) "
                     + "SELECT " + Contract.COLUMN_ID
-                    + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
-                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Contract.Field.COLUMN_LOCALE
-                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
-                    + " , " + Contract.Field.COLUMN_SORT_BY
-                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Contract.Field.COLUMN_READ_ANSWER
-                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
-                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
                     + " , " + Contract.CREATION_DATE
                     + " FROM " + "tempTable"
                     + ";";

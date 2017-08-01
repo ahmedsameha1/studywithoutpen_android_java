@@ -117,7 +117,6 @@ public class AddEntryActivity extends AppCompatActivity implements
             }
         }
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
-        current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
@@ -149,7 +148,7 @@ public class AddEntryActivity extends AppCompatActivity implements
             public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 if (id == GET_FIELDS_LOADER_ID) {
                     return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this,
-                            "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_TYPE + ", " + Contract.Field.COLUMN_FIELD_NAME
+                            "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_NAME
                                     + " FROM " + Contract.Field.TABLE_NAME
                                     + " ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                             null);

@@ -2,8 +2,6 @@ package com.ahmedsameha1.peninbin.database;
 
 import android.provider.BaseColumns;
 
-import com.ahmedsameha1.peninbin.utils.Constants;
-
 
 /**
  * Created by ahmed on 7/11/2015.
@@ -26,7 +24,6 @@ public final class Contract {
         public static final int ZERO_RANDOM_QUICK_TESTS = 0;
         public static final String TABLE_NAME = "field";
         public static final String COLUMN_FIELD_NAME = "name";
-        public static final String COLUMN_FIELD_TYPE = "type";
         public static final String COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE = "string_or_blob";
         public static final String COLUMN_LOCALE = "locale";
         public static final String COLUMN_SORT_BY = "sort_by";
@@ -191,6 +188,48 @@ public final class Contract {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public static final String Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 = "created_at";
+    public static abstract class Old_Field_DBV12_AppV68 implements BaseColumns {
+        public static final int STRING_DATA_TYPE = 0;
+        public static final int NOT_STRING_DATA_TYPE = 1;
+        public static final int DO_NOT_READ_ANSWER = 0;
+        public static final int READ_ANSWER = 1;
+        public static final int DO_NOT_IGNORE_CASE = 3;
+        public static final int IGNORE_CASE = 2;
+        public static final int NON_STRICT_DO_NOT_IGNORE_CASE = 1;
+        public static final int NON_STRICT_IGNORE_CASE = 0;
+        public static final int SHOW_ACTION_BAR = 0;
+        public static final int DO_NOT_SHOW_ACTION_BAR = 1;
+        public static final int ZERO_RANDOM_QUICK_TESTS = 0;
+        public static final String TABLE_NAME = "field";
+        public static final String COLUMN_FIELD_NAME = "name";
+        public static final String COLUMN_FIELD_TYPE = "type";
+        public static final String COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE = "string_or_blob";
+        public static final String COLUMN_LOCALE = "locale";
+        public static final String COLUMN_SORT_BY = "sort_by";
+        public static final String COLUMN_LIST_TEXT_SIZE = "list_text_size";
+        public static final String COLUMN_QUESTION_AREA_SIZE = "question_area_size";
+        public static final String COLUMN_ANSWER_AREA_SIZE = "answer_area_size";
+        public static final String COLUMN_TEST_TEXT_SIZE = "test_text_size";
+        public static final String COLUMN_ACTION_BAR_SHOWN = "action_bar_shown";
+        public static final String COLUMN_READ_ANSWER = "read_answer";
+        public static final String COLUMN_USAGE_COUNT = "usage_count";
+        public static final String COLUMN_CREATION_EMULATION_NUMBER = "creation_emulation_number";
+        public static final String COLUMN_CHECK_TYPE = "check_type";
+        public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES = "random_quick_test_number_of_tries";
+        public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS = "random_quick_test_number_of_questions";
+        public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS = "random_quick_test_number_of_tests";
+        public static final String COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL = "random_quick_test_wrongness_level";
+        public static final String COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL = "random_quick_test_rank_level";
+        public static final String COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION = "random_quick_test_controlled_portion";
+        public static final String COLUMN_READING_QUESTION_LETTER_SECOND_TESTS = "reading_question_letter_second_tests";
+        public static final String COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS = "typing_answer_letter_second_tests";
+        public static final String COLUMN_FIND_ANSWER_TIME_TESTS = "find_answer_time_tests";
+        public static final String COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT = "reading_question_letter_second_study_till_correct";
+        public static final String COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT = "typing_answer_letter_second_study_till_correct";
+        public static final String COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT = "find_answer_time_study_till_correct";
+        public static final String COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT = "time_of_answer_tests_do_what";
+        public static final String COLUMN_OBFUSCATE_QUESTION = "obfuscate_question";
+    }
     public static abstract class Old_Study_Period_Paused_DBV12_AppV68 implements BaseColumns {
         public static final String TABLE_NAME = "study_period_paused";
         public static final String COLUMN_FIELD = "field";

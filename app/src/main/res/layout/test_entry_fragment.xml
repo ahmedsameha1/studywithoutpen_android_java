@@ -75,7 +75,7 @@
                 android:gravity="center"
                 android:hint="@string/answer"
                 android:imeOptions="flagNoExtractUi"
-                android:inputType="textNoSuggestions|textMultiLine"
+                android:inputType="textNoSuggestions|textVisiblePassword|textMultiLine"
                 android:maxLines="1000"
                 android:minLines="1"
                 android:padding="5dp"

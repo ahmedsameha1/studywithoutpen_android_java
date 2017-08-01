@@ -1128,7 +1128,7 @@ public class ExportImportDatabase {
         toImportDatabase.beginTransaction();
         try {
             toImportDatabase.execSQL(rename);
-            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_TABLE);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_TABLE);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_STRING_ENTRY_TABLE_OLD);
@@ -1233,7 +1233,7 @@ public class ExportImportDatabase {
         try {
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
             toImportDatabase.execSQL(rename);
-            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
             String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
                     + " , " + Contract.Field.COLUMN_FIELD_NAME
                     + " , " + Contract.Field.COLUMN_FIELD_TYPE
@@ -1325,7 +1325,7 @@ public class ExportImportDatabase {
         try {
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
             toImportDatabase.execSQL(rename);
-            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
             String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
                     + " , " + Contract.Field.COLUMN_FIELD_NAME
                     + " , " + Contract.Field.COLUMN_FIELD_TYPE
@@ -1455,7 +1455,7 @@ public class ExportImportDatabase {
                     Contract.Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE_OLD_V68)});
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
             toImportDatabase.execSQL(rename);
-            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
             String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
                     + " , " + Contract.Field.COLUMN_FIELD_NAME
                     + " , " + Contract.Field.COLUMN_FIELD_TYPE

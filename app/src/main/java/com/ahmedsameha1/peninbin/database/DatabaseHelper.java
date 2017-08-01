@@ -49,7 +49,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " ( "
             + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + Field.COLUMN_FIELD_NAME + " TEXT UNIQUE NOT NULL, "
-            + Field.COLUMN_FIELD_TYPE + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_LOCALE + " TEXT DEFAULT NULL, "
             + Field.COLUMN_CHECK_TYPE + " INTEGER NOT NULL DEFAULT " + Field.DO_NOT_IGNORE_CASE + ", "
@@ -291,6 +290,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public static final String CREATE_FIELD_DBV12_APPV68_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME
+            + " ( "
+            + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME + " TEXT UNIQUE NOT NULL, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE + " TEXT DEFAULT NULL, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE + " INTEGER NOT NULL DEFAULT " + Field.DO_NOT_IGNORE_CASE + ", "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE + " INTEGER NOT NULL DEFAULT 1, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE + " INTEGER NOT NULL DEFAULT 1, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER + " INTEGER NOT NULL DEFAULT " + Field.DO_NOT_READ_ANSWER + ", "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER + " INTEGER NOT NULL DEFAULT " + Constants.NOT_EMULATED + ", "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS + " INTEGER NOT NULL DEFAULT " + Field.ZERO_RANDOM_QUICK_TESTS + ", "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS + " INTEGER NOT NULL DEFAULT 0, " // not used
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION + " INTEGER NOT NULL DEFAULT -1, " // not used
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL + " INTEGER NOT NULL DEFAULT -1, "  // not used
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL + " INTEGER NOT NULL DEFAULT -1, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_FIND_ANSWER_TIME_TESTS + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT + " INTEGER NOT NULL DEFAULT " + Constants.TimeOfAnswer.NOTIFY + ", "
+            + Contract.Old_Field_DBV12_AppV68.COLUMN_OBFUSCATE_QUESTION + " INTEGER NOT NULL DEFAULT 0, "
+            + Contract.CREATION_DATE + " DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'))"
+            + " );";
     public static final String CREATE_STUDY_PERIOD_REPEATED_ENTRY_DBV12_APPV68_TABLE = "CREATE TABLE IF NOT EXISTS " + Old_Study_Period_Repeated_Entry_DBV12_AppV68.TABLE_NAME
             + " ( "
             + Contract.COLUMN_ID + " INTEGER PRIMARY KEY NOT NULL, "
