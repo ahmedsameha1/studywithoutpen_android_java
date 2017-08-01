@@ -345,5 +345,5 @@
     <string name="start_excellance">Excel</string>
     <string name="excel">Excel</string>
     <string name="excel_memorizing_texts">Excel at memorizing texts</string>
-    <string name="intro_main_text"></string>
+    <string name="intro_main_text">Texts that you want to study are placed in fields.\nYou can imagine the field like a school subject taught at school.\nYou can create fields yourself.\nYou can import fields from swp files.\nYou can import fields from formatted text files in a particular format.\nThe application comes to you with a set of pre-set fields.\nYou can export fields, for yourself, as a backup, or for others, to save the entry effort for them.\nYou and your colleagues can distribute the effort of entering of the texts that you wish to study among your group, and share, export and import the fields among your group.</string>
 </resources>
