@@ -66,7 +66,6 @@ public class AddEntryActivity extends AppCompatActivity implements
     private static final String SYMBOL = "symbol";
     private static final String CUSTOMABLE_TEXT = "customable_text";
     public static final int GET_FIELDS_LOADER_ID = 0;
-    public static final int GET_SPECIAL_TEXT_ID = 1;
     private static final String TEMP_SHARED_STRING = "temp_shared_string";
     private String JUST_CHANGE_FIELD = "just_change_field";
     private Spinner field_spinner;
@@ -88,8 +87,6 @@ public class AddEntryActivity extends AppCompatActivity implements
     private int question_data_type;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private Tracker mTracker;
-    private String[] symbol, customable_text;
-    private int current_field_type;
     private Handler mHandler = new Handler();
     private String temp_shared_string;
     private boolean just_change_field;
@@ -152,13 +149,6 @@ public class AddEntryActivity extends AppCompatActivity implements
                                     + " FROM " + Contract.Field.TABLE_NAME
                                     + " ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                             null);
-                } else if (id == GET_SPECIAL_TEXT_ID) {
-                    return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                            new String[]{current_field_type + ""});
                 }
                 return null;
             }
@@ -169,19 +159,6 @@ public class AddEntryActivity extends AppCompatActivity implements
                     simple_cursor_adapter.swapCursor(data);
                     cursor = data;
                     setSpinnerPosition(current_field_id);
-                } else if (loader.getId() == GET_SPECIAL_TEXT_ID) {
-                    if ((symbol == null && customable_text == null) || just_change_field ) {
-                        symbol = new String[data.getCount()];
-                        customable_text = new String[data.getCount()];
-                        for (data.moveToFirst(); data.getPosition() < data.getCount();
-                             data.moveToNext()) {
-                            symbol[data.getPosition()] = data.getString(1);
-                            customable_text[data.getPosition()] = data.getString(2);
-                        }
-                        if ( just_change_field ) {
-                            just_change_field = false;
-                        }
-                    }
                 }
             }
 
@@ -205,8 +182,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         rank_spinner.setSelection(Constants.Rank.LOW);
         setHints();
-        getLoaderManager().restartLoader(GET_FIELDS_LOADER_ID, null, loader);
-        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_ID, null, loader);
+        getLoaderManager().initLoader(GET_FIELDS_LOADER_ID, null, loader);
         enter_answer.requestFocus();
         changeAreas(question_area_size, answer_area_size);
         if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
@@ -295,8 +271,6 @@ public class AddEntryActivity extends AppCompatActivity implements
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Cursor c = (Cursor) parent.getSelectedItem();
                 current_field_id = c.getLong(0);
-                current_field_type = c.getInt(1);
-                getLoaderManager().restartLoader(GET_SPECIAL_TEXT_ID, null, loader);
                 just_change_field = true;
                 setHints();
             }
@@ -380,22 +354,6 @@ public class AddEntryActivity extends AppCompatActivity implements
                 } else {
                     add_entry.setEnabled(false);
                 }
-                if (symbol != null && customable_text != null) {
-                    String text = editable.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            enter_question.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            enter_question.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            question_linearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                question_linearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
-                }
             }
         });
         enter_answer.addTextChangedListener(new TextWatcher() {
@@ -413,22 +371,6 @@ public class AddEntryActivity extends AppCompatActivity implements
                     add_entry.setEnabled(true);
                 } else {
                     add_entry.setEnabled(false);
-                }
-                if (symbol != null && customable_text != null) {
-                    String text = editable.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            enter_answer.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            enter_answer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            answer_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            answer_linearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                answer_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                answer_linearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
                 }
             }
         });
@@ -565,8 +507,6 @@ public class AddEntryActivity extends AppCompatActivity implements
         savedInstanceState.putBoolean(FIELD_CHOSEN, field_chosen);
         savedInstanceState.putInt(SPINNER_POSITION, field_spinner.getSelectedItemPosition());
         savedInstanceState.putLong(TIMER_LAST_PAUSE, lastPause);
-        savedInstanceState.putStringArray(SYMBOL, symbol);
-        savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         savedInstanceState.putString(TEMP_SHARED_STRING, temp_shared_string);
         savedInstanceState.putBoolean(JUST_CHANGE_FIELD, just_change_field);
         saveUserLayoutChanges(savedInstanceState);
@@ -578,8 +518,6 @@ public class AddEntryActivity extends AppCompatActivity implements
         current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
         field_chosen = savedInstanceState.getBoolean(FIELD_CHOSEN);
         lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
-        customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
-        symbol = savedInstanceState.getStringArray(SYMBOL);
         temp_shared_string = savedInstanceState.getString(TEMP_SHARED_STRING);
         just_change_field = savedInstanceState.getBoolean(JUST_CHANGE_FIELD);
         restoreUserLayoutChanges(savedInstanceState);

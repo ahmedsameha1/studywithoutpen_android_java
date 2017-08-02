@@ -127,7 +127,6 @@ public class QuickTestActivity extends FullyRandomTest implements
     private Chronometer tool_bar_timer;
     private long lastPause;
     private String[] symbol, customable_text;
-    private int current_field_type;
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
     private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
@@ -179,7 +178,6 @@ public class QuickTestActivity extends FullyRandomTest implements
             int question_area_size, answer_area_size, test_text_size, action_bar_shown;
             boolean isReadAnswer;
             cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
-            current_field_type = databaseOperations.getFieldType(current_field_id);
             isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
             obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
             question_data_type = databaseOperations.getQuestionDataType(current_field_id);
@@ -264,13 +262,6 @@ public class QuickTestActivity extends FullyRandomTest implements
                                             + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                                     new String[]{String.valueOf(current_field_id)});
                         }
-                    } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                        return new CursorLoaderAndUpdateDatabase(QuickTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                                + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                                + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                                " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                                + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                                new String[]{String.valueOf(current_field_type)});
                     }
                     return null;
                 }

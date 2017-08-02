@@ -84,7 +84,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 1;
-    public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
     public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 3;
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
@@ -149,8 +148,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private DatabaseReadOperations databaseOperations;
     private View mLoadingView;
     private RelativeLayout content;
-    private String[] symbol, customable_text;
-    private int current_field_type;
     private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
@@ -199,13 +196,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                             new String[]{current_field_id + ""});
                 }
-            } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                return new CursorLoaderAndUpdateDatabase(EnhancedTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                        new String[]{current_field_type + ""});
             }
             return null;
         }
@@ -216,16 +206,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                 fieldEntriesCursor = data;
                 EnhancedTestActivity.this.getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
-            } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                if (symbol == null && customable_text == null) {
-                    symbol = new String[data.getCount()];
-                    customable_text = new String[data.getCount()];
-                    for (data.moveToFirst(); data.getPosition() < data.getCount();
-                         data.moveToNext()) {
-                        symbol[data.getPosition()] = data.getString(1);
-                        customable_text[data.getPosition()] = data.getString(2);
-                    }
-                }
             }
         }
 
@@ -283,7 +263,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
-        current_field_type = databaseOperations.getFieldType(current_field_id);
         isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
@@ -336,8 +315,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-
-        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         check.setOnClickListener(view -> {
             check_card_view.startAnimation(animAlpha);
             boolean result = checkAnAnswer();
@@ -421,22 +398,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 }
                 if (s.length() <= 0) {
                     check.setEnabled(false);
-                }
-                if (symbol != null && customable_text != null) {
-                    String text = s.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            show_result_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                show_result_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
                 }
             }
         });
@@ -534,10 +495,8 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             hints = savedInstanceState.getStringArrayList(HINTS);
             hintCounter = savedInstanceState.getInt(HINT_COUNTER);
             wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
-            customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
             time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
             time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
-            symbol = savedInstanceState.getStringArray(SYMBOL);
             before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             last_controlled_index = savedInstanceState.getInt(LAST_CONTROLLED_INDEX);
@@ -977,8 +936,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putInt(CONTENT_VISIBILITY, content.getVisibility());
         savedInsatanceState.putInt(LOADING_VISIBILITY, mLoadingView.getVisibility());
         savedInsatanceState.putLong(TIMER_LAST_PAUSE, lastPause);
-        savedInsatanceState.putStringArray(SYMBOL, symbol);
-        savedInsatanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         savedInsatanceState.putBoolean(BEFORE_SHOWING_RESULT_DIALOG, before_showing_result_dialog);
         savedInsatanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInsatanceState.putInt(TIME_FOR_ANSWER_DO_WHAT, time_of_answer_do_what);

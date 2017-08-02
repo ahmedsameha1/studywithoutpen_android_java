@@ -77,15 +77,12 @@ StudyActivity.Contact {
     private Tracker mTracker;
     private TextView show_answer;
 
-    public static StudyEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id,
-                                                 String[] symbol, String[] customable_text) {
+    public static StudyEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id) {
         StudyEntryFragment instance = new StudyEntryFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable(StudyActivity.DATA, entries);
         bundle.putSerializable(StudyActivity.CURRENT_INDEX, current_index);
         bundle.putLong(CURRENT_FIELD_ID, current_field_id);
-        bundle.putStringArray(StudyActivity.SYMBOL, symbol);
-        bundle.putStringArray(StudyActivity.CUSTOMABLE_TEXT, customable_text);
         instance.setArguments(bundle);
         return instance;
     }

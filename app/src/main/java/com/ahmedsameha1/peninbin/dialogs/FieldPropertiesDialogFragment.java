@@ -14,9 +14,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -24,18 +22,10 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EmulateFieldActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
-import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
-import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
@@ -43,6 +33,9 @@ import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+
+import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by ahmed on 28/04/16.
@@ -85,7 +78,6 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         isReadAnswer = databaseReadOperations.isReadAnswer(current_field_id);
         locale_short_name = databaseReadOperations.getFieldLocale(current_field_id);
         check_type = databaseReadOperations.getFieldCheckType(current_field_id);
-        field_type = databaseReadOperations.getFieldType(current_field_id);
         field_name = databaseReadOperations.getFieldName(current_field_id);
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
@@ -107,7 +99,6 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(dialog -> {
             final EditText new_field_name = (EditText) alertDialog.findViewById(R.id.enter_new_field_name);
             final Spinner select_check_type = (Spinner) alertDialog.findViewById(R.id.check_type_spinner);
-            final Spinner select_field_type = (Spinner) alertDialog.findViewById(R.id.field_type_spinner);
             read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
             select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
             Button emulate_field = (Button) alertDialog.findViewById(R.id.emulate_field);
@@ -118,16 +109,11 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                     : getResources().getString(R.string.enable_emulation));
             final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.check_type));
-            final ArrayAdapter<String> field_type_adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.field_type));
             check_type_adapter.setDropDownViewResource
                     (android.R.layout.simple_spinner_dropdown_item);
-            field_type_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             select_check_type.setAdapter(check_type_adapter);
-            select_field_type.setAdapter(field_type_adapter);
             select_check_type.setSelection(check_type);
             final int effective_field_type;
-            select_field_type.setSelection(field_type);
             effective_field_type = 0;
             final SpinnerWithHintAdapter spinnerWithHintAdapter =
                     new SpinnerWithHintAdapter(getActivity(), android.R.layout.simple_spinner_item, locale_display_names);
@@ -218,10 +204,6 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                             }
-                        }
-                        if (select_field_type.getSelectedItemPosition() != effective_field_type) {
-                                cursorLoaderAndUpdateDatabase.updateFieldType(current_field_id,
-                                        select_field_type.getSelectedItemPosition());
                         }
                         cursorLoaderAndUpdateDatabase.updateFieldCheckType(current_field_id, select_check_type.getSelectedItemPosition());
                         cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id, read_answer.isChecked());

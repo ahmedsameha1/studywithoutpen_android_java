@@ -87,10 +87,9 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
 
-    public void createField(String field_name, int field_type, int question_data_type, int check_type, boolean read_answer, String locale) {
+    public void createField(String field_name, int question_data_type, int check_type, boolean read_answer, String locale) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
-        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
         contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
         contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, check_type);
         contentValues.put(Contract.Field.COLUMN_READ_ANSWER, read_answer ? Contract.Field.READ_ANSWER : Contract.Field.DO_NOT_READ_ANSWER);
@@ -100,10 +99,9 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
 
-    public void createField(String field_name, int field_type, int question_data_type) {
+    public void createField(String field_name, int question_data_type) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
-        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
         contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
         sqLiteDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
     }
@@ -1471,12 +1469,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-    public void updateFieldType(long field_id, int field_type) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, field_type);
-        sqLiteOpenHelper.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
-                Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
-    }
 
     public void addOrderId(String order_id) {
         ContentValues contentValues = new ContentValues();

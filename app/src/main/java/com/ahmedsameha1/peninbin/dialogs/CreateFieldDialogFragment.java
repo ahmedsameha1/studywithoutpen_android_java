@@ -10,12 +10,10 @@ import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -69,34 +67,16 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
         alertDialog.setOnShowListener(dialog -> {
             final EditText enterFieldName = (EditText) alertDialog.findViewById(R.id.enter_field_name);
             final Spinner select_check_type = (Spinner) alertDialog.findViewById(R.id.check_type_spinner);
-            final Spinner select_field_type = (Spinner) alertDialog.findViewById(R.id.field_type_spinner);
             read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
             final Spinner select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
-            final LinearLayout show_default_field_options = (LinearLayout) alertDialog.findViewById(R.id.show_default_field_options);
-            final ArrayAdapter<String> field_type_adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.field_type));
             final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.check_type));
-            field_type_adapter.setDropDownViewResource
-                    (android.R.layout.simple_spinner_dropdown_item);
             check_type_adapter.setDropDownViewResource
                     (android.R.layout.simple_spinner_dropdown_item);
-            select_field_type.setAdapter(field_type_adapter);
             select_check_type.setAdapter(check_type_adapter);
             final SpinnerWithHintAdapter select_locale_adapter =
                     new SpinnerWithHintAdapter(getActivity(),android.R.layout.simple_spinner_item,locale_display_names);
-            Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            select_field_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                        show_default_field_options.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-
-                }
-            });
+            Button positive_button = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
             read_answer.setOnCheckedChangeListener((compoundButton, isChecked) -> {
                 if (isChecked) {
                     if (!tts_available) {
@@ -114,7 +94,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                     }
                 }
             });
-            b.setOnClickListener( view -> {
+            positive_button.setOnClickListener( view -> {
                     String fieldName = enterFieldName.getText().toString();
                         if (fieldName.equals("")) {
                             Toast toast = Toast.makeText(getActivity(), R.string.where_is_field_name, Toast.LENGTH_SHORT);
@@ -129,7 +109,6 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                             toast.setGravity(Gravity.TOP,0,400);
                             toast.show();
                         } else {
-                            int field_type = select_field_type.getSelectedItemPosition();
                             int check_type = select_check_type.getSelectedItemPosition();
                             if (  select_locale.getSelectedItemPosition() < select_locale_adapter.getCount()
                                     && select_locale.getSelectedItemPosition() >= 0 ) {
@@ -137,7 +116,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                 Locale locale = localeList.get(i);
                                 locale_short_name = locale.getLanguage() + "," + locale.getCountry();
                                 ((Contact)getActivity())
-                                        .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE,
+                                        .createField(fieldName, Contract.Field.STRING_DATA_TYPE,
                                                 check_type,read_answer.isChecked(),locale_short_name);
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory(MainActivity.ANALYTICS_CATEGORY)
@@ -145,7 +124,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                         .build());
                             } else {
                                 ((Contact)getActivity())
-                                        .createField(fieldName,field_type, Contract.Field.STRING_DATA_TYPE,
+                                        .createField(fieldName, Contract.Field.STRING_DATA_TYPE,
                                                 check_type,read_answer.isChecked(),null);
                             }
                             alertDialog.dismiss();
@@ -165,8 +144,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
         return view;
     }*/
     public interface Contact {
-    void createField(String field_name, int field_type, int question_data_type, int check_type, boolean read_answer, String locale);
-    void createField(String field_name, int field_type, int question_data_type);
+    void createField(String field_name, int question_data_type, int check_type, boolean read_answer, String locale);
 }
     public void onInit(int status) {
         try {

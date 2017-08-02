@@ -12,7 +12,6 @@ import android.support.v4.app.TaskStackBuilder;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.InvalidTextFileFormatException;
 
 import java.io.BufferedReader;
@@ -156,7 +155,7 @@ public class ImportTextFile {
                     }
                 } else {
                     if (!field_name.equals("")) {
-                        mySQLiteCursorLoader.createField(field_name, Constants.FieldTypes.DEFAULT_TYPE, Contract.Field.STRING_DATA_TYPE);
+                        mySQLiteCursorLoader.createField(field_name, Contract.Field.STRING_DATA_TYPE);
                         field_id = databaseOperations.getFieldId(field_name);
                         if (question.length() > 0 && answer.length() > 0) {
                             if (!databaseOperations.checkEntryDuplication(question, answer, field_id, Contract.Field.STRING_DATA_TYPE)) {

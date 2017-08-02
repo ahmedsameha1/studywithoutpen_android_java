@@ -37,7 +37,6 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
     public static final String DATA = "data";
     public static final String CURRENT_INDEX = "current_index";
     public static final int GET_ENTRIES_LOADER_ID = 0;
-    public static final int GET_SPECIAL_TEXT_LOADER_ID = 1;
     public static final int PREPARE_WRONG_LIST_LOADER_ID = 2;
     public static final int PREPARE_FIELD_LIST_LOADER_ID = 3;
     public static final int SHOW_LIST_LOADER_ID = 4;
@@ -60,10 +59,8 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
     private String[][] entries;
     private StringBuilder current_index;
     private View mLoadingView;
-    private int current_field_type;
-    private String[] symbol, customable_text;
     private int study_what;
-    private boolean customable_finished, loading_finished;
+    private boolean customable_finished;
     private ArrayList<WrongItem> wrongItemArrayList;
     private Cursor cursor;
     private LoaderManager.LoaderCallbacks<Object[]> prepare_field_list_loader = new LoaderManager.LoaderCallbacks<Object[]>() {
@@ -76,33 +73,15 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
         public void onLoadFinished(Loader<Object[]> loader, Object[] list ) {
             entries = (String[][]) list[0];
             current_index = (StringBuilder) list[1];
-            getLoaderManager().initLoader(SHOW_LIST_LOADER_ID, null, show_list_loader);
-            getLoaderManager().destroyLoader(loader.getId());
-        }
-
-        @Override
-        public void onLoaderReset(Loader<Object[]> loader) {
-
-        }
-    };
-    private LoaderManager.LoaderCallbacks<Void> show_list_loader = new LoaderManager.LoaderCallbacks<Void>() {
-        @Override
-        public Loader<Void> onCreateLoader(int i, Bundle bundle) {
-            return new StudyActivity.ShowList(StudyActivity.this);
-        }
-
-        @Override
-        public void onLoadFinished(Loader<Void> loader, Void voids ) {
             mViewPager.setAdapter(new StudyFragmentsTabAdapter
                     (StudyActivity.this, entries,
-                            current_index, current_field_id,
-                            symbol, customable_text));
+                            current_index, current_field_id));
             ActivityUtility.crossFade(mViewPager, mLoadingView, StudyActivity.this);
             getLoaderManager().destroyLoader(loader.getId());
         }
 
         @Override
-        public void onLoaderReset(Loader<Void> loader) {
+        public void onLoaderReset(Loader<Object[]> loader) {
 
         }
     };
@@ -116,7 +95,10 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
         public void onLoadFinished(Loader<Object[]> loader, Object[] list ) {
             entries = (String[][]) list[0];
             current_index = (StringBuilder) list[1];
-            getLoaderManager().initLoader(SHOW_LIST_LOADER_ID, null, show_list_loader);
+            mViewPager.setAdapter(new StudyFragmentsTabAdapter
+                    (StudyActivity.this, entries,
+                            current_index, current_field_id));
+            ActivityUtility.crossFade(mViewPager, mLoadingView, StudyActivity.this);
             getLoaderManager().destroyLoader(loader.getId());
         }
 
@@ -140,21 +122,16 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
         study_what = intent.getIntExtra(STUDY_WHAT, NORMAL);
         databaseReadOperations = new DatabaseReadOperations(this);
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
-        current_field_type = databaseReadOperations.getFieldType(current_field_id);
         TabLayout tableLayout = (TabLayout) findViewById(R.id.tablayout);
         mViewPager = (ViewPager) findViewById(R.id.container);
-//        mViewPager.setAdapter(new StudyFragmentsTabAdapter(getSupportFragmentManager()));
         tableLayout.setupWithViewPager(mViewPager);
         mLoadingView = findViewById(R.id.loading);
         mViewPager.setVisibility(View.GONE);
         if ( savedInstanceState != null) {
             entries = (String[][]) savedInstanceState.getSerializable(LIST_OF_ENTRIES);
-            customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
-            customable_finished = true;
-            symbol = savedInstanceState.getStringArray(SYMBOL);
             if ( entries != null) {
                 current_index = (StringBuilder) savedInstanceState.getSerializable(CURRENT_INDEX);
-                mViewPager.setAdapter(new StudyFragmentsTabAdapter(this, entries, current_index, current_field_id, symbol, customable_text));
+                mViewPager.setAdapter(new StudyFragmentsTabAdapter(this, entries, current_index, current_field_id));
                 ActivityUtility.crossFade(mViewPager,mLoadingView, this);
             } else {
                 if ( study_what == NORMAL ) {
@@ -168,7 +145,6 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
                 }
             }
         } else {
-            getLoaderManager().initLoader(GET_SPECIAL_TEXT_LOADER_ID, null, this);
             if ( study_what == NORMAL ) {
                 getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, this);
             } else if ( study_what == WRONG ) {
@@ -287,13 +263,6 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
                             new String[]{current_field_id + "", "%" + search_value + "%", current_field_id + "", "%" + search_value + "%"});
                 }
                 return cursorLoaderAndUpdateDatabase;
-        } else if ( id == GET_SPECIAL_TEXT_LOADER_ID ) {
-            return new CursorLoaderAndUpdateDatabase(StudyActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                    + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                    + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                    " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                    + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                    new String[]{String.valueOf(current_field_type)});
         }
         return null;
     }
@@ -303,17 +272,6 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
         if ( loader.getId() == GET_ENTRIES_LOADER_ID ) {
             this.cursor = cursor;
             getLoaderManager().initLoader(PREPARE_FIELD_LIST_LOADER_ID, null, prepare_field_list_loader);
-        } else if ( loader.getId() == GET_SPECIAL_TEXT_LOADER_ID ) {
-            if (symbol == null && customable_text == null) {
-                symbol = new String[cursor.getCount()];
-                customable_text = new String[cursor.getCount()];
-                for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-                     cursor.moveToNext()) {
-                    symbol[cursor.getPosition()] = cursor.getString(1);
-                    customable_text[cursor.getPosition()] = cursor.getString(2);
-                }
-                customable_finished = true;
-            }
         }
     }
 
@@ -326,8 +284,6 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(CURRENT_INDEX, current_index);
-        outState.putStringArray(SYMBOL, symbol);
-        outState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         outState.putSerializable(LIST_OF_ENTRIES, entries);
     }
 
@@ -383,35 +339,7 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
             forceLoad();
         }
     }
-    private static class ShowList extends AsyncTaskLoader<Void> {
 
-
-        public ShowList(Context context) {
-            super(context);
-        }
-
-        @Override
-        public Void loadInBackground() {
-            int i = 0;
-            while ( i < Constants.LONG_TIME ) {
-                i++;
-                if (studyActivity.customable_finished && studyActivity.entries != null) {
-                    break;
-                }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onStartLoading() {
-            forceLoad();
-        }
-    }
     public interface Contact {
         void changeCurrentTab();
     }

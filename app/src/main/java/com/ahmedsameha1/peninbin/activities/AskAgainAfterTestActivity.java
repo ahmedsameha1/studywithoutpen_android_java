@@ -88,7 +88,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     public static final String RESULT = "result";
     private static final String CUSTOMABLE_TEXT = "customable_text";
     private static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 0;
-    public static final int GET_SPECIAL_TEXT_LOADER_ID = 1;
     public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 2;
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
@@ -138,8 +137,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
     private long lastPause;
-    private String[] symbol, customable_text;
-    private int current_field_type;
     private boolean isStartingFirstTime, is_starting_after_destruction;
     private int time_of_answer, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
@@ -155,14 +152,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-            if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                return new CursorLoaderAndUpdateDatabase(AskAgainAfterTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                        new String[]{current_field_type + ""});
-            } else if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+            if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                 String order_column = null;
                 if (test_type == Constants.TestType.ENHANCED_TEST) {
                     order_column = Contract.String_Entry.COLUMN_PAUSED_STUDY_AGAIN_ENHANCED_TEST_ORDER;
@@ -185,17 +175,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
             int id = loader.getId();
-            if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                if (symbol == null && customable_text == null) {
-                    symbol = new String[cursor.getCount()];
-                    customable_text = new String[cursor.getCount()];
-                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-                         cursor.moveToNext()) {
-                        symbol[cursor.getPosition()] = cursor.getString(1);
-                        customable_text[cursor.getPosition()] = cursor.getString(2);
-                    }
-                }
-            } else if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
+            if (id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                 AskAgainAfterTestActivity.this.cursor = cursor;
                 AskAgainAfterTestActivity.this.getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
             }
@@ -258,7 +238,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         boolean_continue = getIntent().getBooleanExtra(BOOLEAN_CONTINUE, false);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         databaseReadOperations = new DatabaseReadOperations(this);
-        current_field_type = databaseReadOperations.getFieldType(current_field_id);
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
         obfuscate = databaseReadOperations.isObfuscateQuestion(current_field_id);
         int[] time_of_answer_data = databaseReadOperations.getTimeOfAnswerOfStudyTillCorrect(current_field_id);
@@ -441,22 +420,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                     check.setEnabled(false);
                     dont_know.setEnabled(true);
                 }
-                if (symbol != null && customable_text != null) {
-                    String text = s.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            show_result_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                show_result_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
-                }
             }
         });
         _continue.setOnClickListener(v -> {
@@ -532,8 +495,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
-
         showTries.setText(Integer.toString(triesCounter + 1));
         if (savedInstanceState == null) {
             content.setVisibility(View.GONE);
@@ -589,8 +550,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             hintCounter = savedInstanceState.getInt(HINT_COUNTER);
             result = savedInstanceState.getBoolean(RESULT);
             repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
-            customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
-            symbol = savedInstanceState.getStringArray(SYMBOL);
             time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             in_repeated = savedInstanceState.getBoolean(IN_REPEATED);
@@ -1015,8 +974,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         savedInstanceState.putInt(CONTENT_VISIBILITY, content.getVisibility());
         savedInstanceState.putInt(LOADING_VISIBILITY, mLoadingView.getVisibility());
         savedInstanceState.putLong(TIMER_LAST_PAUSE, lastPause);
-        savedInstanceState.putStringArray(SYMBOL, symbol);
-        savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         savedInstanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInstanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInstanceState.putBoolean(IN_REPEATED, in_repeated);

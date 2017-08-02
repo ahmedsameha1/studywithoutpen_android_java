@@ -60,8 +60,7 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     private EditText enterAnswer;
     private int correctAnswersCounter = 0;
     private long current_field_id, current_entry_id;
-    private LinearLayout answerLinearlayout, questionLinearlayout, container;
-    private Cursor fieldEntriesCursor;
+    private LinearLayout answerLinearlayout;
     private LoaderManager.LoaderCallbacks<Cursor> loader;
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
@@ -70,21 +69,17 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     private boolean tts_available = false;
     private boolean locale_available = false;
     private int check_type;
-    private String[] symbol, customable_text;
     private View root_view;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private Tracker mTracker;
 
 
-    public static TestEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id,
-                                                String[] symbol, String[] customable_text) {
+    public static TestEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id) {
         TestEntryFragment instance = new TestEntryFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable(StudyActivity.DATA, entries);
         bundle.putSerializable(StudyActivity.CURRENT_INDEX, current_index);
         bundle.putLong(CURRENT_FIELD_ID, current_field_id);
-        bundle.putStringArray(StudyActivity.SYMBOL, symbol);
-        bundle.putStringArray(StudyActivity.CUSTOMABLE_TEXT, customable_text);
         instance.setArguments(bundle);
         return instance;
     }
@@ -95,8 +90,6 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
         entries = (String[][]) getArguments().getSerializable(StudyActivity.DATA);
         current_index = (StringBuilder) getArguments().getSerializable(StudyActivity.CURRENT_INDEX);
         current_field_id = getArguments().getLong(CURRENT_FIELD_ID, 0);
-        symbol = getArguments().getStringArray(StudyActivity.SYMBOL);
-        customable_text = getArguments().getStringArray(StudyActivity.CUSTOMABLE_TEXT);
     }
 
   
@@ -119,8 +112,6 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
         correctAnswers = (TextView) root_view.findViewById(R.id.correct_answers);
         check = (TextView) root_view.findViewById(R.id.check);
         answerLinearlayout = (LinearLayout) root_view.findViewById(R.id.answer_linearlayout);
-        questionLinearlayout = (LinearLayout) root_view.findViewById(R.id.question_linearlayout);
-        container = (LinearLayout) root_view.findViewById(R.id.container);
         ImageButton up = (ImageButton) root_view.findViewById(R.id.up);
         final ImageButton down = (ImageButton) root_view.findViewById(R.id.down);
         final CardView check_card_view = (CardView) root_view.findViewById(R.id.check_card_view);
@@ -295,22 +286,6 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
                         check.setEnabled(true);
                 } else {
                     check.setEnabled(false);
-                }
-                if (symbol != null && customable_text != null) {
-                    String text = s.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            answerLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            answerLinearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                answerLinearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
                 }
             }
         });

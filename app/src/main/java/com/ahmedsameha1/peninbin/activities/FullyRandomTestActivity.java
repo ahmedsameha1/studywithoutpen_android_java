@@ -80,7 +80,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 1;
-    public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
     public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 3;
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
@@ -134,8 +133,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     private boolean locale_available = false;
     private RelativeLayout content;
     private View mLoadingView;
-    private String[] symbol, customable_text;
-    private int current_field_type;
     private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
@@ -184,7 +181,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
-        current_field_type = databaseOperations.getFieldType(current_field_id);
         question_data_type = databaseOperations.getQuestionDataType(current_field_id);
         isEmulated = databaseOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         obfuscate = databaseOperations.isObfuscateQuestion(current_field_id);
@@ -270,13 +266,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
                                         + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                                 new String[]{current_field_id + ""});
                     }
-                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                    return new CursorLoaderAndUpdateDatabase(FullyRandomTestActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                            + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                            + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                            " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                            + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                            new String[]{current_field_type + ""});
                 }
                 return null;
             }
@@ -287,16 +276,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
                 if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                     fieldEntriesCursor = data;
                     FullyRandomTestActivity.this.getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
-                } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                    if (symbol == null && customable_text == null) {
-                        symbol = new String[data.getCount()];
-                        customable_text = new String[data.getCount()];
-                        for (data.moveToFirst(); data.getPosition() < data.getCount();
-                             data.moveToNext()) {
-                            symbol[data.getPosition()] = data.getString(1);
-                            customable_text[data.getPosition()] = data.getString(2);
-                        }
-                    }
                 }
             }
 
@@ -391,22 +370,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
                 if (s.length() <= 0) {
                     check.setEnabled(false);
                 }
-                if (symbol != null && customable_text != null) {
-                    String text = s.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            show_result_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                show_result_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
-                }
             }
         });
         nextHint.setOnClickListener(view -> {
@@ -462,7 +425,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
             toast.setGravity(Gravity.TOP, 0, 400);
             toast.show();
         });
-        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         check_type = databaseOperations.getFieldCheckType(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
         answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
@@ -503,8 +465,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
             hints = savedInstanceState.getStringArrayList(HINTS);
             hintCounter = savedInstanceState.getInt(HINT_COUNTER);
             wrongAnswers = savedInstanceState.getStringArrayList(WRONG_ANSWERS);
-            customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
-            symbol = savedInstanceState.getStringArray(SYMBOL);
             before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
             time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
             time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
@@ -949,8 +909,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         savedInsatanceState.putInt(CONTENT_VISIBILITY, content.getVisibility());
         savedInsatanceState.putInt(LOADING_VISIBILITY, mLoadingView.getVisibility());
         savedInsatanceState.putBoolean(BOOLEAN_CONTINUE, boolean_continue);
-        savedInsatanceState.putStringArray(SYMBOL, symbol);
-        savedInsatanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         savedInsatanceState.putBoolean(BEFORE_SHOWING_RESULT_DIALOG, before_showing_result_dialog);
         savedInsatanceState.putLong(TIMER_LAST_PAUSE, lastPause);
         savedInsatanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);

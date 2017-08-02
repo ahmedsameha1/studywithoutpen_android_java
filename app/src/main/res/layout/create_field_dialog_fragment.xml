@@ -22,19 +22,6 @@
             android:paddingLeft="7dp"
             android:gravity="center"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginStart="5dp"
-            android:text="@string/field_type" />
-
-        <Spinner
-            android:id="@+id/field_type_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            android:layout_marginTop="6dp" />
 
         <LinearLayout
             android:id="@+id/show_default_field_options"

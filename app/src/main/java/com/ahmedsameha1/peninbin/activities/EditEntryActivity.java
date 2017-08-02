@@ -1,8 +1,6 @@
 package com.ahmedsameha1.peninbin.activities;
 
-import android.app.LoaderManager;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -74,9 +72,6 @@ public class EditEntryActivity extends AppCompatActivity implements
     private Tracker mTracker;
     private Chronometer timer;
     private long lastPause;
-    private LoaderManager.LoaderCallbacks<Cursor> get_symbol_string;
-    private String[] symbol, customable_text;
-    private int current_field_type;
     private int order;
     private Handler mHandler = new Handler();
 
@@ -92,7 +87,6 @@ public class EditEntryActivity extends AppCompatActivity implements
         currentAnswer = getIntent().getStringExtra(CURRENT_ANSWER);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         databaseOperations = new DatabaseReadOperations(this);
-        current_field_type = databaseOperations.getFieldType(current_field_id);
         rank = databaseOperations.getEntryRank(entry_id);
         order = databaseOperations.getEntryOrder(entry_id);
         action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
@@ -128,7 +122,6 @@ public class EditEntryActivity extends AppCompatActivity implements
         editAnswer.setText(currentAnswer);
         editQuestion.setText(currentQuestion);
         enter_order.setText(order == -1 ? "" : String.valueOf(order));
-        setHints(current_field_type);
         editAnswer.requestFocus();
         changeAreas(question_area_size, answer_area_size);
         if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
@@ -140,37 +133,6 @@ public class EditEntryActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        get_symbol_string = new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new CursorLoaderAndUpdateDatabase(EditEntryActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                        new String[]{current_field_type + ""});
-
-            }
-
-            @Override
-            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-                if (symbol == null && customable_text == null) {
-                    symbol = new String[data.getCount()];
-                    customable_text = new String[data.getCount()];
-                    for (data.moveToFirst(); data.getPosition() < data.getCount();
-                         data.moveToNext()) {
-                        symbol[data.getPosition()] = data.getString(1);
-                        customable_text[data.getPosition()] = data.getString(2);
-                    }
-                }
-            }
-
-            @Override
-            public void onLoaderReset(android.content.Loader<Cursor> loader) {
-
-            }
-        };
-        getLoaderManager().restartLoader(0, null, get_symbol_string);
         showActionbar.setOnClickListener( view ->  {
                 show_actionbar_card_view.startAnimation(animAlpha);
                 if (actionBarShown) {
@@ -235,22 +197,6 @@ public class EditEntryActivity extends AppCompatActivity implements
                 toast.show();
             }
         });
-/*        editQuestion.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                editQuestion.setText("");
-                editQuestion.requestFocus();
-                return true;
-            }
-        });
-        editAnswer.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                editAnswer.setText("");
-                editAnswer.requestFocus();
-                return true;
-            }
-        });*/
         editQuestion.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
             public void onSwipeLeft() {
@@ -293,22 +239,6 @@ public class EditEntryActivity extends AppCompatActivity implements
                 } else {
                     save.setEnabled(false);
                 }
-                if (symbol != null && customable_text != null) {
-                    String text = editable.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            editQuestion.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            editQuestion.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            question_linearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                question_linearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
-                }
             }
         });
         editAnswer.addTextChangedListener(new TextWatcher() {
@@ -326,22 +256,6 @@ public class EditEntryActivity extends AppCompatActivity implements
                     save.setEnabled(true);
                 } else {
                     save.setEnabled(false);
-                }
-                if (symbol != null && customable_text != null) {
-                    String text = editable.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            editAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            editAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            answer_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            answer_linearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                answer_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                answer_linearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
                 }
             }
         });
@@ -420,8 +334,6 @@ public class EditEntryActivity extends AppCompatActivity implements
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putLong(TIMER_LAST_PAUSE,lastPause);
-        savedInstanceState.putStringArray(SYMBOL, symbol);
-        savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         saveUserLayoutChanges(savedInstanceState);
     }
 
@@ -429,8 +341,6 @@ public class EditEntryActivity extends AppCompatActivity implements
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
-        customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
-        symbol = savedInstanceState.getStringArray(SYMBOL);
         restoreUserLayoutChanges(savedInstanceState);
     }
 

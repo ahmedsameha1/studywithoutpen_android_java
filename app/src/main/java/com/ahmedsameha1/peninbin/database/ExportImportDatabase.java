@@ -99,7 +99,7 @@ public class ExportImportDatabase {
             toExportDatabase.execSQL("PRAGMA foreign_keys=ON;");
             for (String tempFieldName : fieldNames) {
                 Cursor fieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,
-                        new String[]{Contract.Field.COLUMN_FIELD_NAME, Contract.Field.COLUMN_FIELD_TYPE,
+                        new String[]{Contract.Field.COLUMN_FIELD_NAME,
                                 Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, Contract.Field.COLUMN_SORT_BY,
                                 Contract.Field.COLUMN_LIST_TEXT_SIZE, Contract.Field.COLUMN_QUESTION_AREA_SIZE,
                                 Contract.Field.COLUMN_ANSWER_AREA_SIZE, Contract.Field.COLUMN_TEST_TEXT_SIZE,
@@ -116,35 +116,34 @@ public class ExportImportDatabase {
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{tempFieldName}, null, null, null, null);
                 fieldCursor.moveToFirst();
-                long temp_field_id = fieldCursor.getLong(11);
-                int question_data_type = fieldCursor.getInt(2);
+                long temp_field_id = fieldCursor.getLong(10);
+                int question_data_type = fieldCursor.getInt(1);
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(Contract.Field.COLUMN_FIELD_NAME, fieldCursor.getString(0));
-                contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, fieldCursor.getInt(1));
-                contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, fieldCursor.getInt(2));
-                contentValues.put(Contract.Field.COLUMN_SORT_BY, fieldCursor.getInt(3));
-                contentValues.put(Contract.Field.COLUMN_LIST_TEXT_SIZE, fieldCursor.getInt(4));
-                contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE, fieldCursor.getInt(5));
-                contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE, fieldCursor.getInt(6));
-                contentValues.put(Contract.Field.COLUMN_TEST_TEXT_SIZE, fieldCursor.getInt(7));
-                contentValues.put(Contract.Field.COLUMN_ACTION_BAR_SHOWN, fieldCursor.getInt(8));
-                contentValues.put(Contract.Field.COLUMN_USAGE_COUNT, fieldCursor.getInt(9));
-                contentValues.put(Contract.CREATION_DATE, fieldCursor.getString(10));
-                contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, fieldCursor.getInt(12));
-                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, fieldCursor.getInt(13));
-                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, fieldCursor.getInt(14));
-                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, fieldCursor.getInt(15));
-                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, fieldCursor.getInt(16));
-                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, fieldCursor.getInt(17));
-                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL, fieldCursor.getInt(18));
-                contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, fieldCursor.getInt(19));
-                contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS, fieldCursor.getInt(20));
-                contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, fieldCursor.getInt(21));
-                contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT, fieldCursor.getInt(22));
-                contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT, fieldCursor.getInt(23));
-                contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT, fieldCursor.getInt(24));
-                contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, fieldCursor.getInt(25));
-                contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, fieldCursor.getInt(26));
+                contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, fieldCursor.getInt(1));
+                contentValues.put(Contract.Field.COLUMN_SORT_BY, fieldCursor.getInt(2));
+                contentValues.put(Contract.Field.COLUMN_LIST_TEXT_SIZE, fieldCursor.getInt(3));
+                contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE, fieldCursor.getInt(4));
+                contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE, fieldCursor.getInt(5));
+                contentValues.put(Contract.Field.COLUMN_TEST_TEXT_SIZE, fieldCursor.getInt(6));
+                contentValues.put(Contract.Field.COLUMN_ACTION_BAR_SHOWN, fieldCursor.getInt(7));
+                contentValues.put(Contract.Field.COLUMN_USAGE_COUNT, fieldCursor.getInt(8));
+                contentValues.put(Contract.CREATION_DATE, fieldCursor.getString(9));
+                contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, fieldCursor.getInt(11));
+                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, fieldCursor.getInt(12));
+                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, fieldCursor.getInt(13));
+                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, fieldCursor.getInt(14));
+                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, fieldCursor.getInt(15));
+                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, fieldCursor.getInt(16));
+                contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL, fieldCursor.getInt(17));
+                contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, fieldCursor.getInt(18));
+                contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS, fieldCursor.getInt(19));
+                contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, fieldCursor.getInt(20));
+                contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT, fieldCursor.getInt(21));
+                contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT, fieldCursor.getInt(22));
+                contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT, fieldCursor.getInt(23));
+                contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, fieldCursor.getInt(24));
+                contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, fieldCursor.getInt(25));
                 Long field_id = toExportDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                 fieldCursor.close();
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -481,7 +480,7 @@ public class ExportImportDatabase {
         appDatabase.beginTransactionNonExclusive();
         try {
             Cursor toImportFieldCursor = toImportDatabase.query(Contract.Field.TABLE_NAME,
-                    new String[]{Contract.Field.COLUMN_FIELD_NAME, Contract.Field.COLUMN_FIELD_TYPE,
+                    new String[]{Contract.Field.COLUMN_FIELD_NAME,
                             Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, Contract.Field.COLUMN_SORT_BY,
                             Contract.Field.COLUMN_LIST_TEXT_SIZE, Contract.Field.COLUMN_QUESTION_AREA_SIZE,
                             Contract.Field.COLUMN_ANSWER_AREA_SIZE, Contract.Field.COLUMN_TEST_TEXT_SIZE,
@@ -500,7 +499,7 @@ public class ExportImportDatabase {
                  toImportFieldCursor.moveToNext()) {
 
                 Cursor appFieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,
-                        new String[]{Contract.Field.COLUMN_FIELD_TYPE},
+                        new String[]{Contract.Field.COLUMN_FIELD_NAME},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{toImportFieldCursor.getString(0)}, null, null, null, null);
                 long field_id = -1;
@@ -508,42 +507,40 @@ public class ExportImportDatabase {
                     if (importUserUsageData) {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, toImportFieldCursor.getString(0));
-                        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, toImportFieldCursor.getInt(1));
-                        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(2));
-                        contentValues.put(Contract.Field.COLUMN_SORT_BY, toImportFieldCursor.getInt(3));
-                        contentValues.put(Contract.Field.COLUMN_LIST_TEXT_SIZE, toImportFieldCursor.getInt(4));
-                        contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE, toImportFieldCursor.getInt(5));
-                        contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE, toImportFieldCursor.getInt(6));
-                        contentValues.put(Contract.Field.COLUMN_TEST_TEXT_SIZE, toImportFieldCursor.getInt(7));
-                        contentValues.put(Contract.Field.COLUMN_ACTION_BAR_SHOWN, toImportFieldCursor.getInt(8));
-                        contentValues.put(Contract.Field.COLUMN_USAGE_COUNT, toImportFieldCursor.getInt(9));
-                        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, toImportFieldCursor.getInt(12));
-                        contentValues.put(Contract.CREATION_DATE, toImportFieldCursor.getString(10));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, toImportFieldCursor.getInt(13));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, toImportFieldCursor.getInt(14));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, toImportFieldCursor.getInt(15));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, toImportFieldCursor.getInt(16));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, toImportFieldCursor.getInt(17));
-                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL, toImportFieldCursor.getInt(18));
-                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, toImportFieldCursor.getInt(19));
-                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS, toImportFieldCursor.getInt(20));
-                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, toImportFieldCursor.getInt(21));
-                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(22));
-                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(23));
-                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(24));
-                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, toImportFieldCursor.getInt(25));
-                        contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, toImportFieldCursor.getInt(26));
+                        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(1));
+                        contentValues.put(Contract.Field.COLUMN_SORT_BY, toImportFieldCursor.getInt(2));
+                        contentValues.put(Contract.Field.COLUMN_LIST_TEXT_SIZE, toImportFieldCursor.getInt(3));
+                        contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE, toImportFieldCursor.getInt(4));
+                        contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE, toImportFieldCursor.getInt(5));
+                        contentValues.put(Contract.Field.COLUMN_TEST_TEXT_SIZE, toImportFieldCursor.getInt(6));
+                        contentValues.put(Contract.Field.COLUMN_ACTION_BAR_SHOWN, toImportFieldCursor.getInt(7));
+                        contentValues.put(Contract.Field.COLUMN_USAGE_COUNT, toImportFieldCursor.getInt(8));
+                        contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, toImportFieldCursor.getInt(11));
+                        contentValues.put(Contract.CREATION_DATE, toImportFieldCursor.getString(9));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS, toImportFieldCursor.getInt(12));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES, toImportFieldCursor.getInt(13));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS, toImportFieldCursor.getInt(14));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION, toImportFieldCursor.getInt(15));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL, toImportFieldCursor.getInt(16));
+                        contentValues.put(Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL, toImportFieldCursor.getInt(17));
+                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, toImportFieldCursor.getInt(18));
+                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS, toImportFieldCursor.getInt(19));
+                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, toImportFieldCursor.getInt(20));
+                        contentValues.put(Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(21));
+                        contentValues.put(Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(22));
+                        contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(23));
+                        contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, toImportFieldCursor.getInt(24));
+                        contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, toImportFieldCursor.getInt(25));
                         field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                     } else {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, toImportFieldCursor.getString(0));
-                        contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, toImportFieldCursor.getInt(1));
-                        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(2));
+                        contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(1));
                         field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                     }
                     Cursor excluded_times_cursor = toImportDatabase.query(Contract.Excluded_Time.TABLE_NAME,
                             new String[]{Contract.Excluded_Time.COLUMN_STARTS, Contract.Excluded_Time.COLUMN_ENDS},
-                            Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(11) + ""}, null, null, null);
+                            Contract.Excluded_Time.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(10) + ""}, null, null, null);
                     for (excluded_times_cursor.moveToFirst(); excluded_times_cursor.getPosition() < excluded_times_cursor.getCount();
                          excluded_times_cursor.moveToNext()) {
                         ContentValues contentValues = new ContentValues();
@@ -555,7 +552,7 @@ public class ExportImportDatabase {
                     excluded_times_cursor.close();
                     Cursor field_notes_cursor = toImportDatabase.query(Contract.Field_Note.TABLE_NAME,
                             new String[]{Contract.Field_Note.COLUMN_NOTE},
-                            Contract.Field_Note.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(11) + ""}, null, null, null);
+                            Contract.Field_Note.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(10) + ""}, null, null, null);
                     for (field_notes_cursor.moveToFirst(); field_notes_cursor.getPosition() < field_notes_cursor.getCount();
                          field_notes_cursor.moveToNext()) {
                         ContentValues contentValues = new ContentValues();
@@ -566,9 +563,7 @@ public class ExportImportDatabase {
                     field_notes_cursor.close();
                 } else {
                     appFieldCursor.moveToFirst();
-                    if (toImportFieldCursor.getInt(1) != appFieldCursor.getInt(0)) {
-                        notImportedFieldsIDs.add(String.valueOf(toImportFieldCursor.getLong(11)));
-                    }
+                    notImportedFieldsIDs.add(String.valueOf(toImportFieldCursor.getLong(10)));
                 }
                 appFieldCursor.close();
             }
@@ -886,12 +881,12 @@ public class ExportImportDatabase {
         try {
             for (String temp_wanted_field : wanted_fields) {
                 Cursor toImportFieldCursor = toImportDatabase.query(Contract.Field.TABLE_NAME,
-                        new String[]{Contract.Field.COLUMN_FIELD_NAME, Contract.Field.COLUMN_FIELD_TYPE,
+                        new String[]{Contract.Field.COLUMN_FIELD_NAME,
                                 Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, Contract.COLUMN_ID},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ", new String[]{temp_wanted_field}, null, null, null);
                 toImportFieldCursor.moveToFirst();
                 Cursor appFieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,
-                        new String[]{Contract.Field.COLUMN_FIELD_TYPE},
+                        new String[]{Contract.Field.COLUMN_FIELD_NAME},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{toImportFieldCursor.getString(0)}, null, null, null, null);
                 long field_id = -1;
@@ -899,13 +894,12 @@ public class ExportImportDatabase {
 
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(Contract.Field.COLUMN_FIELD_NAME, toImportFieldCursor.getString(0));
-                    contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, toImportFieldCursor.getInt(1));
-                    contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(2));
+                    contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(1));
                     field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
 
                     Cursor field_notes_cursor = toImportDatabase.query(Contract.Field_Note.TABLE_NAME,
                             new String[]{Contract.Field_Note.COLUMN_NOTE},
-                            Contract.Field_Note.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(3) + ""}, null, null, null);
+                            Contract.Field_Note.COLUMN_FIELD + " = ? ", new String[]{toImportFieldCursor.getLong(2) + ""}, null, null, null);
                     for (field_notes_cursor.moveToFirst(); field_notes_cursor.getPosition() < field_notes_cursor.getCount();
                          field_notes_cursor.moveToNext()) {
                         contentValues = new ContentValues();
@@ -922,7 +916,7 @@ public class ExportImportDatabase {
                                     Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,
                                     Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
                             Contract.String_Entry.COLUMN_FIELD + " = ? ",
-                            new String[]{String.valueOf(toImportFieldCursor.getLong(3))}, null, null, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
+                            new String[]{String.valueOf(toImportFieldCursor.getLong(2))}, null, null, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
                                     + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
                     for (toImportStringEntryCursor.moveToFirst(); toImportStringEntryCursor.getPosition() < toImportStringEntryCursor.getCount();
                          toImportStringEntryCursor.moveToNext()) {
@@ -1136,8 +1130,8 @@ public class ExportImportDatabase {
             toImportDatabase.execSQL(DatabaseHelper.CREATE_ALTERNATIVE_ANSWER_STRING_TABLE);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_ALTERNATIVE_ANSWER_NOT_STRING_TABLE);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_EXCLUDED_TIME_TABLE);
-            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
+            String copy = "INSERT INTO " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " ( " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
                     + " , " + Contract.CREATION_DATE + " ) "
                     + "SELECT " + Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME
                     + "," + Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_TYPE
@@ -1192,8 +1186,8 @@ public class ExportImportDatabase {
                         new String[]{linkerCursor.getString(1)}, null, null, null, null);
                 answer_id_cursor.moveToFirst();
                 long answer_id = answer_id_cursor.getLong(0);
-                Cursor field_id_cursor = toImportDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.COLUMN_ID},
-                        Contract.Field.COLUMN_FIELD_NAME + " = ? ",
+                Cursor field_id_cursor = toImportDatabase.query(Contract.Old_Field_DBV12_AppV68.TABLE_NAME, new String[]{Contract.COLUMN_ID},
+                        Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{field}, null, null, null, null);
                 field_id_cursor.moveToFirst();
                 long field_id = field_id_cursor.getLong(0);
@@ -1231,41 +1225,41 @@ public class ExportImportDatabase {
     private static void upgradeImportedDatabaseFromDBV7ToDBV8(SQLiteDatabase toImportDatabase, String file_path) throws Exception {
         toImportDatabase.beginTransaction();
         try {
-            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+            String rename = "ALTER TABLE " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " RENAME TO " + "tempTable";
             toImportDatabase.execSQL(rename);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
-            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
-                    + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
-                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Contract.Field.COLUMN_LOCALE
-                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
-                    + " , " + Contract.Field.COLUMN_SORT_BY
-                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Contract.Field.COLUMN_READ_ANSWER
-                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
-                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
+            String copy = "INSERT INTO " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
                     + " , " + Contract.CREATION_DATE
                     + " ) "
                     + "SELECT " + Contract.COLUMN_ID
-                    + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
-                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Contract.Field.COLUMN_LOCALE
-                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
-                    + " , " + Contract.Field.COLUMN_SORT_BY
-                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Contract.Field.COLUMN_READ_ANSWER
-                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
-                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
                     + " , " + Contract.CREATION_DATE
                     + " FROM " + "tempTable"
                     + ";";
@@ -1323,47 +1317,47 @@ public class ExportImportDatabase {
     private static void upgradeImportedDatabaseFromDBV8ToDBV9(SQLiteDatabase toImportDatabase, String file_path) throws Exception {
         toImportDatabase.beginTransaction();
         try {
-            String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
+            String rename = "ALTER TABLE " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " RENAME TO " + "tempTable";
             toImportDatabase.execSQL(rename);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
-            String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
-                    + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
-                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Contract.Field.COLUMN_LOCALE
-                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
-                    + " , " + Contract.Field.COLUMN_SORT_BY
-                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Contract.Field.COLUMN_READ_ANSWER
-                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
-                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+            String copy = "INSERT INTO " + Contract.Old_Field_DBV12_AppV68.TABLE_NAME + " ( " + Contract.COLUMN_ID
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
                     + " , " + Contract.CREATION_DATE
                     + " ) "
                     + "SELECT " + Contract.COLUMN_ID
-                    + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
-                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Contract.Field.COLUMN_LOCALE
-                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
-                    + " , " + Contract.Field.COLUMN_SORT_BY
-                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Contract.Field.COLUMN_READ_ANSWER
-                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
-                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
                     + " , " + Contract.CREATION_DATE
                     + " FROM " + "tempTable"
                     + ";";
@@ -1443,22 +1437,14 @@ public class ExportImportDatabase {
     private static void upgradeImportedDatabaseFromDBV12ToDBV13(SQLiteDatabase toImportDatabase, String file_path) throws Exception {
         toImportDatabase.beginTransaction();
         try {
-            toImportDatabase.delete(Contract.Field.TABLE_NAME, Contract.Field.COLUMN_FIELD_TYPE + " = ? ",
+            toImportDatabase.delete(Contract.Field.TABLE_NAME, Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE + " = ? ",
                     new String[]{String.valueOf(Constants.FieldTypes.NOTEBOOK_TYPE_REMOVED_FEATURE_V68)});
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.KORAN_TYPE);
-            toImportDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                    Contract.Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.KORAN_TYPE_OLD_V68)});
-            contentValues = new ContentValues();
-            contentValues.put(Contract.Field.COLUMN_FIELD_TYPE, Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE);
-            toImportDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                    Contract.Field.COLUMN_FIELD_TYPE + " = ? ", new String[]{String.valueOf(Constants.FieldTypes.ENGLISH_DICTIONARY_TYPE_OLD_V68)});
+            ContentValues contentValues;
             String rename = "ALTER TABLE " + Contract.Field.TABLE_NAME + " RENAME TO " + "tempTable";
             toImportDatabase.execSQL(rename);
-            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_DBV12_APPV68_TABLE);
+            toImportDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TABLE);
             String copy = "INSERT INTO " + Contract.Field.TABLE_NAME + " ( " + Contract.COLUMN_ID
                     + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
                     + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
                     + " , " + Contract.Field.COLUMN_LOCALE
                     + " , " + Contract.Field.COLUMN_CHECK_TYPE
@@ -1480,26 +1466,25 @@ public class ExportImportDatabase {
                     + " , " + Contract.CREATION_DATE
                     + " ) "
                     + "SELECT " + Contract.COLUMN_ID
-                    + " , " + Contract.Field.COLUMN_FIELD_NAME
-                    + " , " + Contract.Field.COLUMN_FIELD_TYPE
-                    + " , " + Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
-                    + " , " + Contract.Field.COLUMN_LOCALE
-                    + " , " + Contract.Field.COLUMN_CHECK_TYPE
-                    + " , " + Contract.Field.COLUMN_SORT_BY
-                    + " , " + Contract.Field.COLUMN_LIST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_QUESTION_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_ANSWER_AREA_SIZE
-                    + " , " + Contract.Field.COLUMN_TEST_TEXT_SIZE
-                    + " , " + Contract.Field.COLUMN_ACTION_BAR_SHOWN
-                    + " , " + Contract.Field.COLUMN_READ_ANSWER
-                    + " , " + Contract.Field.COLUMN_USAGE_COUNT
-                    + " , " + Contract.Field.COLUMN_CREATION_EMULATION_NUMBER
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL
-                    + " , " + Contract.Field.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_NAME
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LOCALE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CHECK_TYPE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_SORT_BY
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_LIST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_QUESTION_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ANSWER_AREA_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_TEST_TEXT_SIZE
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_ACTION_BAR_SHOWN
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_READ_ANSWER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_USAGE_COUNT
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_CREATION_EMULATION_NUMBER
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TESTS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_CONTROLLED_PORTION
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_WRONGNESS_LEVEL
+                    + " , " + Contract.Old_Field_DBV12_AppV68.COLUMN_RANDOM_QUICK_TEST_RANK_LEVEL
                     + " , " + Contract.CREATION_DATE
                     + " FROM " + "tempTable"
                     + ";";
