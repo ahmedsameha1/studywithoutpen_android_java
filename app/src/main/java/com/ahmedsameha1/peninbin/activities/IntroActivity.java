@@ -20,6 +20,7 @@ public class IntroActivity extends AppIntro {
         super.onCreate(savedInstanceState);
         addSlide(AppIntroFragment.newInstance(getString(R.string.excel), getString(R.string.excel_memorizing_texts),
                 R.drawable.intro_first_image, 0xF8BBD0));
+        addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_app));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_main));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_entry));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_study_period));
