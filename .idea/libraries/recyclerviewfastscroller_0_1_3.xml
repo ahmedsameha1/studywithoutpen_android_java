@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="recyclerviewfastscroller-0.1.3">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.android/build-cache/d0a5813c881a3507795d073ecf9352f9667a5e96/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/d0a5813c881a3507795d073ecf9352f9667a5e96/output/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/xyz.danoz/recyclerviewfastscroller/0.1.3/732fdfa69ee6a296cf59ad1bae52f2328f04ddd2/recyclerviewfastscroller-0.1.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

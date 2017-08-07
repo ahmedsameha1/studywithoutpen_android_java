@@ -345,7 +345,9 @@
     <string name="start_excellance">Excel</string>
     <string name="excel">Excel</string>
     <string name="excel_memorizing_texts">Excel at memorizing texts</string>
-    <string name="intro_main_text">Texts that you want to study are placed in fields.\nYou can imagine the field like a school subject taught at school.\nYou can create fields yourself.\nYou can import fields from swp files.\nYou can import fields from formatted text files in a particular format.\nThe application comes to you with a set of pre-set fields.\nYou can export fields, for yourself, as a backup, or for others, to save the entry effort for them.\nYou and your colleagues can distribute the effort of entering of the texts that you wish to study among your group, and share, export and import the fields among your group.</string>
-    <string name="help_you_on">help you on:</string>
-    <string name="app_idea" />
+    <string name="intro_main_text">Texts that you want to study are placed in fields.\n\nYou can imagine the field like a school subject taught at school.\n\nYou can create fields yourself.\n\nYou can import fields from swp files.\n\nYou can import fields from specially formatted text files.\n\nThe application comes to you with a set of pre-set fields.\n\nYou can export fields, for yourself, as a backup, or for others, to save the entry effort for them.\n\nYou and your colleagues can distribute the effort of entering of the texts that you wish to study among your group, and share, export and import the fields among your group.</string>
+    <string name="help_you_on">helps you to:</string>
+    <string name="app_idea">Study text, the application compares the text you entered with the correct text for you.\n\nMemorize texts in a cumulative way, so that if you memorize a text today, you do not lose it after a year. If you do not increase, at least,  you do not decrease.\n\nReduce the chance of forgetting the texts you have memorized.\n\nNot to leave old texts so you forget them.\n\nKnow how to pronounce words, if you are memorizing vocabulary (depends on the text-to-speech application on your device).\n\nRepeat studying the new texts in multiple consecutive days, until it is installed in your mind.\n\nFocus on studying the texts that you often answer wrongly.\n\nFocus on studying the texts that you consider to be more important to you.\n\nTest yourself when you want.\n\nTest yourself at random times of the day, so stay prepared.\n\n
+
+</string>
 </resources>
