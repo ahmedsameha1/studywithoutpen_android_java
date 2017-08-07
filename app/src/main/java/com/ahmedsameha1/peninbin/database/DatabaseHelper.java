@@ -467,10 +467,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_EXCLUDED_TIME_TABLE);
         sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_BACKUP_TABLE);
         sqLiteDatabase.execSQL(CREATE_FIELD_NOTE_TABLE);
-        sqLiteDatabase.execSQL(CREATE_SYMBOL_TABLE);
-        sqLiteDatabase.execSQL(CREATE_FIELD_TYPE_SYMBOL_TABLE);
-        sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
-        SpecialText.addSpecialTextToDBV11(sqLiteDatabase);*/
+        sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);*/
     }
 
     private boolean checkDataBase() {
@@ -566,7 +563,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         if (oldVersion < 11) {
             ModifyDatabaseSchema.onUpgradeDatabaseToDBV11AppV47(sqLiteDatabase);
-            SpecialText.addSpecialTextToDBV11(sqLiteDatabase);
         }
         if (oldVersion < 12) {
             sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
@@ -581,5 +577,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onOpen(SQLiteDatabase sqLiteDatabase) {
         super.onOpen(sqLiteDatabase);
         sqLiteDatabase.setForeignKeyConstraintsEnabled(true);
-    }
+    }// TODO: 8/7/17 test the changes of the schema 
 }

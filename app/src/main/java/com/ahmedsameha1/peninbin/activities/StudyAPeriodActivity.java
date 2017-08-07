@@ -86,16 +86,12 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     public static final String QUESTION_LAYOUT = "user_defined_question_layout";
     public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
     public static final String TEXT_SIZE = "user_defined_question_text_size";
-    public static final String PAUSING = "pausing";
     private static final String CONTENT_VISIBILITY = "content_visibility";
     private static final String LOADING_VISIBILITY = "loading_visibility";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
-    private static final String SYMBOL = "symbol";
     public static final String RESULT = "result";
-    private static final String CUSTOMABLE_TEXT = "customable_text";
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int CONTINUE_PREVIOUS_SESSION_LOADER_ID = 1;
-    public static final int GET_SPECIAL_TEXT_LOADER_ID = 2;
     public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 3;
     public static final int INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
@@ -143,8 +139,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
     private long lastPause;
-    private String[] symbol, customable_text;
-    private int current_field_type;
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
     private int time_of_answer, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
@@ -190,13 +184,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                                     + " WHERE " + "se." + Contract.String_Entry.COLUMN_FIELD + " = ? ",
                             new String[]{current_field_id + ""});
                 }
-            } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                return new CursorLoaderAndUpdateDatabase(StudyAPeriodActivity.this, "SELECT ts." + Contract.COLUMN_ID + ", s."
-                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                        new String[]{current_field_type + ""});
             }
             return null;
         }
@@ -207,16 +194,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             if (id == GET_ENTRIES_LOADER_ID || id == CONTINUE_PREVIOUS_SESSION_LOADER_ID) {
                 StudyAPeriodActivity.this.cursor = cursor;
                 StudyAPeriodActivity.this.getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
-            } else if (id == GET_SPECIAL_TEXT_LOADER_ID) {
-                if (symbol == null && customable_text == null) {
-                    symbol = new String[cursor.getCount()];
-                    customable_text = new String[cursor.getCount()];
-                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-                         cursor.moveToNext()) {
-                        symbol[cursor.getPosition()] = cursor.getString(1);
-                        customable_text[cursor.getPosition()] = cursor.getString(2);
-                    }
-                }
             }
         }
 
@@ -287,7 +264,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         boolean_continue = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
         databaseReadOperations = new DatabaseReadOperations(this);
-        current_field_type = databaseReadOperations.getFieldType(current_field_id);
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
         isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         obfuscate = databaseReadOperations.isObfuscateQuestion(current_field_id);
@@ -464,22 +440,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                     check.setEnabled(false);
                     dont_know.setEnabled(true);
                 }
-                if (symbol != null && customable_text != null) {
-                    String text = s.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            show_result_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = () -> {
-                                show_result_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
-                }
             }
         });
         _continue.setOnClickListener(v -> {
@@ -559,7 +519,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
         if (savedInstanceState == null) {
             content.setVisibility(View.GONE);
             isStartingFirstTime = true;
@@ -588,8 +547,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             hintCounter = savedInstanceState.getInt(HINT_COUNTER);
             result = savedInstanceState.getBoolean(RESULT);
             repeatedEntries = savedInstanceState.getIntegerArrayList(REPEATED_ENTRIES);
-            customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
-            symbol = savedInstanceState.getStringArray(SYMBOL);
             time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             while_studying = savedInstanceState.getBoolean(WHILE_STUDYING);
@@ -1036,8 +993,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         savedInstanceState.putInt(CONTENT_VISIBILITY, content.getVisibility());
         savedInstanceState.putInt(LOADING_VISIBILITY, mLoadingView.getVisibility());
         savedInstanceState.putLong(TIMER_LAST_PAUSE, lastPause);
-        savedInstanceState.putStringArray(SYMBOL, symbol);
-        savedInstanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         savedInstanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInstanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInstanceState.putBoolean(WHILE_STUDYING, while_studying);

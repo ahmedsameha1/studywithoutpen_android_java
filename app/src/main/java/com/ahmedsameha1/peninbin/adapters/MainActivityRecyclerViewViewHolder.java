@@ -1,5 +1,6 @@
 package com.ahmedsameha1.peninbin.adapters;
 
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +23,7 @@ public class MainActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder 
     public ProgressBar progressBar;
     public boolean isDeleting;
     public IMyViewHolderClicks mListener;
+    public CardView cardView;
     public MainActivityRecyclerViewViewHolder(View view, IMyViewHolderClicks listener) {
         super(view);
         mListener = listener;
@@ -30,6 +32,7 @@ public class MainActivityRecyclerViewViewHolder extends RecyclerView.ViewHolder 
         actions = (LinearLayout) view.findViewById(R.id.main_recyclerview_item_actions);
         delete = (Button) view.findViewById(R.id.delete);
         progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+        cardView = (CardView) view.findViewById(R.id.card_view);
         view.setOnLongClickListener(this);
         view.setOnClickListener(this);
     }

@@ -2,11 +2,14 @@ package com.ahmedsameha1.peninbin.dialogs;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Process;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.ColorInt;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +29,8 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
+import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +47,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     private String locale_short_name;
     private CheckBox read_answer;
     private Tracker mTracker;
+    private int red = 255, green = 255, blue = 255;
     @Override
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
@@ -69,6 +75,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
             final Spinner select_check_type = (Spinner) alertDialog.findViewById(R.id.check_type_spinner);
             read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
             final Spinner select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
+            final Button pick_color = (Button) alertDialog.findViewById(R.id.color);
             final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.check_type));
             check_type_adapter.setDropDownViewResource
@@ -92,6 +99,29 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                         select_locale.setSelection(select_locale_adapter.getCount());
                         select_locale.setVisibility(View.VISIBLE);
                     }
+                }
+            });
+            pick_color.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ColorPicker colorPicker = new ColorPicker(getActivity(), red, green, blue);
+                    colorPicker.setCallback(new ColorPickerCallback() {
+                        @Override
+                        public void onColorChosen(@ColorInt int color) {
+                            Log.d("color", Integer.toString(color));
+                            Log.d("Red", Integer.toString(Color.red(color)));
+                            Log.d("Green", Integer.toString(Color.green(color)));
+                            Log.d("Blue", Integer.toString(Color.blue(color)));
+                            red = Color.red(color);
+                            green = Color.green(color);
+                            blue = Color.blue(color);
+                            pick_color.setBackgroundColor(color);
+                            Log.d("Pure Hex", Integer.toHexString(color));
+
+                            colorPicker.dismiss();
+                        }
+                    });
+                    colorPicker.show();
                 }
             });
             positive_button.setOnClickListener( view -> {

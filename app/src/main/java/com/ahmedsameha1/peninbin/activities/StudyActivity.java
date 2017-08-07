@@ -60,7 +60,6 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
     private StringBuilder current_index;
     private View mLoadingView;
     private int study_what;
-    private boolean customable_finished;
     private ArrayList<WrongItem> wrongItemArrayList;
     private Cursor cursor;
     private LoaderManager.LoaderCallbacks<Object[]> prepare_field_list_loader = new LoaderManager.LoaderCallbacks<Object[]>() {

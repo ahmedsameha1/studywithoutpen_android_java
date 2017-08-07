@@ -88,7 +88,7 @@ public class AboutDialogFragment extends DialogFragment {
                     .create().show());
             recyclerview_fast_scroller.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
                     .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.apache_license_v2))
-                    .create().show());
+                    .create().show());// TODO: 8/7/17 add the color picker library license
         });
         return alertDialog;
     }

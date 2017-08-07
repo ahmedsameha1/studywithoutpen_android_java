@@ -120,7 +120,6 @@ public class FieldActivity extends AppCompatActivity implements
     private static final String IS_LOAD_ENTRIES = "is_load_entries";
     private static final String SEARCH_VALUE = "search_value";
     private LoaderManager.LoaderCallbacks<Cursor> getFieldEntries;
-    protected int fieldType = 0;
     private long current_field_id;
     private SortOptions sortOption;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
@@ -162,7 +161,6 @@ public class FieldActivity extends AppCompatActivity implements
         }
         databaseReadOperations = new DatabaseReadOperations(this);
         question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
-        fieldType = databaseReadOperations.getFieldType(current_field_id);
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
         content = (RelativeLayout) findViewById(R.id.content);
         mLoadingView = findViewById(R.id.loading);
@@ -593,11 +591,6 @@ public class FieldActivity extends AppCompatActivity implements
                         .setCategory(ANALYTICS_CATEGORY)
                         .setAction(ActivityUtility.getVersionCode(this) + "sort")
                         .build());
-                return true;
-            case R.id.text_shortcuts:
-                Intent intent = new Intent(this, SymbolActivity.class);
-                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                startActivity(intent);
                 return true;
             case R.id.today_emulation:
                 if (!Emulation.isAnyThreadRunning()) {

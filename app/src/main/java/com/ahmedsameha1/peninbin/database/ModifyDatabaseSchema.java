@@ -181,6 +181,10 @@ public class ModifyDatabaseSchema {
             sqLiteDatabase.execSQL(copy);
             drop = "DROP TABLE IF EXISTS " + Contract.Old_Study_Period_Paused_DBV12_AppV68.TABLE_NAME + ";";
             sqLiteDatabase.execSQL(drop);
+            drop = "DROP TABLE IF EXISTS " + Contract.Symbol.TABLE_NAME + ";";
+            sqLiteDatabase.execSQL(drop);
+            drop = "DROP TABLE IF EXISTS " + Contract.Field_Type_Symbol.TABLE_NAME + ";";
+            sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();
@@ -192,7 +196,6 @@ public class ModifyDatabaseSchema {
         try {
             String drop = "DROP TABLE IF EXISTS " + Contract.Field_Type_Symbol.TABLE_NAME + ";";
             sqLiteDatabase.execSQL(drop);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TYPE_SYMBOL_TABLE);
             drop = "DROP TABLE IF EXISTS " + Contract.Old_Field_Type.TABLE_NAME + ";";
             sqLiteDatabase.execSQL(drop);
             ////
@@ -363,12 +366,6 @@ public class ModifyDatabaseSchema {
         }
     }
     public static void onUpgradeDatabaseToDBV10AppV43(SQLiteDatabase sqLiteDatabase) {
-        String CREATE_OLD_FIELD_TYPE_TABLE = "CREATE TABLE IF NOT EXISTS " + Contract.Old_Field_Type.TABLE_NAME
-                + " ( "
-                + Contract.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " TEXT NOT NULL, "
-                + " UNIQUE ( " + Contract.Old_Field_Type.COLUMN_TYPE_NAME + " )"
-                + " );";
         sqLiteDatabase.beginTransaction();
         try {
             String rename = "ALTER TABLE " + Contract.String_Entry.TABLE_NAME + " RENAME TO " + "tempTable";
@@ -410,9 +407,6 @@ public class ModifyDatabaseSchema {
             sqLiteDatabase.execSQL(drop);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_ENTRY_TABLE);
             sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_NOTE_TABLE);
-            sqLiteDatabase.execSQL(CREATE_OLD_FIELD_TYPE_TABLE);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_SYMBOL_TABLE);
-            sqLiteDatabase.execSQL(DatabaseHelper.CREATE_FIELD_TYPE_SYMBOL_TABLE);
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();

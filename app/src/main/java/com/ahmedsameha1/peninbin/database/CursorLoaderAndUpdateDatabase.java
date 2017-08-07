@@ -1438,38 +1438,6 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
         }
     }
 
-    protected ContentChangingTask buildUpdateCustomableText(CursorLoaderAndUpdateDatabase loader) {
-        return (new UpdateCustomableText(loader));
-    }
-
-    public void updateCustomableText(long id, String text) {
-        buildUpdateCustomableText(this).execute(sqLiteOpenHelper, id, text);
-    }
-
-    protected static class UpdateCustomableText extends ContentChangingTask {
-        UpdateCustomableText(CursorLoaderAndUpdateDatabase loader) {
-            super(loader);
-        }
-
-        @Override
-        protected Void doInBackground(Object... params) {
-            SQLiteOpenHelper db = (SQLiteOpenHelper) params[0];
-            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-            long id = (long) params[1];
-            String text = (String) params[2];
-            ContentValues contentValues = new ContentValues();
-            if (text != null) {
-                contentValues.put(Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING, text);
-            } else {
-                contentValues.putNull(Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING);
-            }
-            sqLiteDatabase.update(Contract.Field_Type_Symbol.TABLE_NAME, contentValues,
-                    Contract.COLUMN_ID + " = ? ", new String[]{id + ""});
-            return null;
-        }
-    }
-
-
     public void addOrderId(String order_id) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.GooglePaymentOrderID.COLUMN_ORDER_ID, order_id);

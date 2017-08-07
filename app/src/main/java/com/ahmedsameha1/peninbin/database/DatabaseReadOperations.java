@@ -653,24 +653,6 @@ public class DatabaseReadOperations {
         return there_is_entry_order;
     }
 
-    public boolean checkCustomableText( int field_type, String text ) {
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT s."
-                        + Contract.Symbol.COLUMN_VALUE + " , ts." + Contract.Field_Type_Symbol.COLUMN_USER_CUSTOMIZED_STRING
-                        + " FROM " + Contract.Field_Type_Symbol.TABLE_NAME + " ts INNER JOIN " + Contract.Symbol.TABLE_NAME +
-                        " s ON s." + Contract.COLUMN_ID + " = ts." + Contract.Field_Type_Symbol.COLUMN_SYMBOL
-                        + " WHERE " + Contract.Field_Type_Symbol.COLUMN_FIELD_TYPE + " = ?",
-                new String[]{ field_type + ""});
-        boolean contained = false;
-        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-             cursor.moveToNext()) {
-            if ( cursor.getString(0).contains(text) || ( cursor.getString(1) != null && cursor.getString(1).contains(text)) ) {
-                contained = true;
-                break;
-            }
-        }
-        cursor.close();
-        return contained;
-    }
 
     public Cursor searchExactlyFor(long field_id, int question_data_type, String searchString) {
         String date_string = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US)

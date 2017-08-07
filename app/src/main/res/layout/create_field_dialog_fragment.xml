@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone">
+            >
 
             <TextView
                 android:layout_width="match_parent"
@@ -60,5 +60,19 @@
                 android:layout_marginTop="6dp"
                 android:visibility="gone" />
         </LinearLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dp"
+            android:background="@color/black_color"
+            android:layout_marginTop="5dp">
+        <Button
+            android:id="@+id/color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/white_color"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            />
+        </FrameLayout>
     </LinearLayout>
 </ScrollView>

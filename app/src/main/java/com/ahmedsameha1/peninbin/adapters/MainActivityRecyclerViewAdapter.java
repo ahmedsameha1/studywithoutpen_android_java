@@ -90,6 +90,7 @@ public class MainActivityRecyclerViewAdapter extends
         ((LinearLayout.LayoutParams) viewHolder.actions.getLayoutParams()).bottomMargin = -50;
         viewHolder.actions.setVisibility(View.GONE);
         viewHolder.field_id = data.getLong(0);
+        viewHolder.cardView.setCardBackgroundColor(0xFFAAAAAA);
         final String fieldName = data.getString(1);
         viewHolder.delete.setOnClickListener(v -> {
             if ( (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + Constants.PAUSING + viewHolder.field_id)) &&
