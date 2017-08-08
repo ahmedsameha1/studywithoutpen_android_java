@@ -53,6 +53,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + Field.COLUMN_LOCALE + " TEXT DEFAULT NULL, "
             + Field.COLUMN_CHECK_TYPE + " INTEGER NOT NULL DEFAULT " + Field.DO_NOT_IGNORE_CASE + ", "
             + Field.COLUMN_SORT_BY + " INTEGER NOT NULL DEFAULT 0, "
+            + Field.COLUMN_COLOR + " INTEGER NOT NULL DEFAULT -1, "
             + Field.COLUMN_LIST_TEXT_SIZE + " INTEGER NOT NULL DEFAULT 0, "
             + Field.COLUMN_QUESTION_AREA_SIZE + " INTEGER NOT NULL DEFAULT 1, "
             + Field.COLUMN_ANSWER_AREA_SIZE + " INTEGER NOT NULL DEFAULT 1, "
@@ -436,7 +437,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        boolean dbExist = checkDataBase();
+/*        boolean dbExist = checkDataBase();
         if(dbExist) {
             Log.d(TAG, "Database exists.");
             deleteDb();
@@ -451,8 +452,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
             }
-        }
-/*        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
+        }*/
+        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_ENTRY_TABLE);//
@@ -467,7 +468,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_EXCLUDED_TIME_TABLE);
         sqLiteDatabase.execSQL(CREATE_SCHEDULED_TIME_BACKUP_TABLE);
         sqLiteDatabase.execSQL(CREATE_FIELD_NOTE_TABLE);
-        sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);*/
+        sqLiteDatabase.execSQL(CREATE_GOOGLE_PAYMENT_ORDER_ID_TABLE);
     }
 
     private boolean checkDataBase() {

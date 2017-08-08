@@ -27,6 +27,7 @@ public final class Contract {
         public static final String COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE = "string_or_blob";
         public static final String COLUMN_LOCALE = "locale";
         public static final String COLUMN_SORT_BY = "sort_by";
+        public static final String COLUMN_COLOR = "color";
         public static final String COLUMN_LIST_TEXT_SIZE = "list_text_size";
         public static final String COLUMN_QUESTION_AREA_SIZE = "question_area_size";
         public static final String COLUMN_ANSWER_AREA_SIZE = "answer_area_size";

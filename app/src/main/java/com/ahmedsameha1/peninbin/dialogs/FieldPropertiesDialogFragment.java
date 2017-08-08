@@ -3,11 +3,14 @@ package com.ahmedsameha1.peninbin.dialogs;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +36,8 @@ import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
+import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -63,6 +68,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
     private String field_name;
     private Tracker mTracker;
     private boolean emulated;
+    private int red = 255, green = 255, blue = 255, field_color, new_color = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,6 +85,11 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         locale_short_name = databaseReadOperations.getFieldLocale(current_field_id);
         check_type = databaseReadOperations.getFieldCheckType(current_field_id);
         field_name = databaseReadOperations.getFieldName(current_field_id);
+        field_color = databaseReadOperations.getFieldColor(current_field_id);
+        new_color = field_color;
+        red = Color.red(field_color);
+        green = Color.green(field_color);
+        blue = Color.blue(field_color);
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
         emulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
@@ -102,6 +113,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
             read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
             select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
             Button emulate_field = (Button) alertDialog.findViewById(R.id.emulate_field);
+            final Button pick_color = (Button) alertDialog.findViewById(R.id.color);
             positive_button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
             new_field_name.setText(field_name);
             read_answer.setChecked(isReadAnswer);
@@ -113,8 +125,6 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                     (android.R.layout.simple_spinner_dropdown_item);
             select_check_type.setAdapter(check_type_adapter);
             select_check_type.setSelection(check_type);
-            final int effective_field_type;
-            effective_field_type = 0;
             final SpinnerWithHintAdapter spinnerWithHintAdapter =
                     new SpinnerWithHintAdapter(getActivity(), android.R.layout.simple_spinner_item, locale_display_names);
 
@@ -128,7 +138,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
             } else {
                 read_answer.setChecked(false);
             }
-
+            pick_color.setBackgroundColor(field_color);
             read_answer.setOnCheckedChangeListener((compoundButton, isChecked) -> {
                 if (isChecked) {
                     if (!tts_available) {
@@ -144,6 +154,29 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                         select_locale.setSelection(spinnerWithHintAdapter.getCount());
                         select_locale.setVisibility(View.VISIBLE);
                     }
+                }
+            });
+            pick_color.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ColorPicker colorPicker = new ColorPicker(getActivity(), red, green, blue);
+                    colorPicker.setCallback(new ColorPickerCallback() {
+                        @Override
+                        public void onColorChosen(@ColorInt int color) {
+                            Log.d("color", Integer.toString(color));
+                            Log.d("Red", Integer.toString(Color.red(color)));
+                            Log.d("Green", Integer.toString(Color.green(color)));
+                            Log.d("Blue", Integer.toString(Color.blue(color)));
+                            red = Color.red(color);
+                            green = Color.green(color);
+                            blue = Color.blue(color);
+                            new_color = color;
+                            pick_color.setBackgroundColor(color);
+                            Log.d("Pure Hex", Integer.toHexString(color));
+                            colorPicker.dismiss();
+                        }
+                    });
+                    colorPicker.show();
                 }
             });
             emulate_field.setOnClickListener(v -> {
@@ -219,6 +252,9 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                     .build());
                         } else {
                             cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, null);
+                        }
+                        if ( new_color != field_color ) {
+                            cursorLoaderAndUpdateDatabase.updateFieldColor(current_field_id, new_color);
                         }
                         dismiss();
                     }

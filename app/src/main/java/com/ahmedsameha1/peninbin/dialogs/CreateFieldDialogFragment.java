@@ -47,7 +47,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     private String locale_short_name;
     private CheckBox read_answer;
     private Tracker mTracker;
-    private int red = 255, green = 255, blue = 255;
+    private int red = 255, green = 255, blue = 255, color = Color.WHITE;
     @Override
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
@@ -115,9 +115,9 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                             red = Color.red(color);
                             green = Color.green(color);
                             blue = Color.blue(color);
+                            CreateFieldDialogFragment.this.color = color;
                             pick_color.setBackgroundColor(color);
                             Log.d("Pure Hex", Integer.toHexString(color));
-
                             colorPicker.dismiss();
                         }
                     });
@@ -147,7 +147,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                 locale_short_name = locale.getLanguage() + "," + locale.getCountry();
                                 ((Contact)getActivity())
                                         .createField(fieldName, Contract.Field.STRING_DATA_TYPE,
-                                                check_type,read_answer.isChecked(),locale_short_name);
+                                                check_type,read_answer.isChecked(),locale_short_name, color);
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory(MainActivity.ANALYTICS_CATEGORY)
                                         .setAction(ActivityUtility.getVersionCode(getActivity()) + "selecting locale")
@@ -155,7 +155,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                             } else {
                                 ((Contact)getActivity())
                                         .createField(fieldName, Contract.Field.STRING_DATA_TYPE,
-                                                check_type,read_answer.isChecked(),null);
+                                                check_type,read_answer.isChecked(),null, color);
                             }
                             alertDialog.dismiss();
                         }
@@ -174,7 +174,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
         return view;
     }*/
     public interface Contact {
-    void createField(String field_name, int question_data_type, int check_type, boolean read_answer, String locale);
+    void createField(String field_name, int question_data_type, int check_type, boolean read_answer, String locale, int color);
 }
     public void onInit(int status) {
         try {

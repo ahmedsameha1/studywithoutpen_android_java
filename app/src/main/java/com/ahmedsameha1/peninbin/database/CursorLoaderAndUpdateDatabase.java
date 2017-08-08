@@ -87,11 +87,12 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
 
-    public void createField(String field_name, int question_data_type, int check_type, boolean read_answer, String locale) {
+    public void createField(String field_name, int question_data_type, int check_type, boolean read_answer, String locale, int color) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_FIELD_NAME, field_name);
         contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, question_data_type);
         contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, check_type);
+        contentValues.put(Contract.Field.COLUMN_COLOR, color);
         contentValues.put(Contract.Field.COLUMN_READ_ANSWER, read_answer ? Contract.Field.READ_ANSWER : Contract.Field.DO_NOT_READ_ANSWER);
         if (locale != null) {
             contentValues.put(Contract.Field.COLUMN_LOCALE, locale);
@@ -722,6 +723,12 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
                 Contract.COLUMN_ID + " = ? ", new String[]{current_field_id + ""});
     }
 
+    public void updateFieldColor(long field_id, int color ) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Field.COLUMN_COLOR, color);
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.Field.TABLE_NAME, contentValues,
+                Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+    }
 
     public void updateFieldSort(long field_id, SortOptions sortOption) {
         buildUpdateFieldSortTask(this).execute(sqLiteOpenHelper, field_id, sortOption);

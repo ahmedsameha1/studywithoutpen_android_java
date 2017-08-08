@@ -779,5 +779,15 @@ public class DatabaseReadOperations {
         c.close();
         return diff;
     }
+    public int getFieldColor(long field_id) {
+        int color;
+        Cursor c = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_COLOR},
+                Contract.COLUMN_ID + " = ? ",
+                new String[]{String.valueOf(field_id)}, null, null, null);
+        c.moveToFirst();
+        color = c.getInt(0);
+        c.close();
+        return color;
+    }
 }
 

@@ -112,7 +112,7 @@ public class ExportImportDatabase {
                                 Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS,
                                 Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT,
                                 Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT, Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT,
-                                Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, Contract.Field.COLUMN_OBFUSCATE_QUESTION},
+                                Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, Contract.Field.COLUMN_OBFUSCATE_QUESTION, Contract.Field.COLUMN_COLOR},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ",
                         new String[]{tempFieldName}, null, null, null, null);
                 fieldCursor.moveToFirst();
@@ -144,6 +144,7 @@ public class ExportImportDatabase {
                 contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT, fieldCursor.getInt(23));
                 contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, fieldCursor.getInt(24));
                 contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, fieldCursor.getInt(25));
+                contentValues.put(Contract.Field.COLUMN_COLOR, fieldCursor.getInt(26));
                 Long field_id = toExportDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                 fieldCursor.close();
                 if (question_data_type == Contract.Field.STRING_DATA_TYPE) {
@@ -493,7 +494,7 @@ public class ExportImportDatabase {
                             Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_TESTS, Contract.Field.COLUMN_FIND_ANSWER_TIME_TESTS,
                             Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_TESTS, Contract.Field.COLUMN_READING_QUESTION_LETTER_SECOND_STUDY_TILL_CORRECT,
                             Contract.Field.COLUMN_FIND_ANSWER_TIME_STUDY_TILL_CORRECT, Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT,
-                            Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, Contract.Field.COLUMN_OBFUSCATE_QUESTION},
+                            Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, Contract.Field.COLUMN_OBFUSCATE_QUESTION, Contract.Field.COLUMN_COLOR},
                     null, null, null, null, null);
             for (toImportFieldCursor.moveToFirst(); toImportFieldCursor.getPosition() < toImportFieldCursor.getCount();
                  toImportFieldCursor.moveToNext()) {
@@ -531,6 +532,7 @@ public class ExportImportDatabase {
                         contentValues.put(Contract.Field.COLUMN_TYPING_ANSWER_LETTER_SECOND_STUDY_TILL_CORRECT, toImportFieldCursor.getInt(23));
                         contentValues.put(Contract.Field.COLUMN_TIME_OF_ANSWER_TESTS_DO_WHAT, toImportFieldCursor.getInt(24));
                         contentValues.put(Contract.Field.COLUMN_OBFUSCATE_QUESTION, toImportFieldCursor.getInt(25));
+                        contentValues.put(Contract.Field.COLUMN_COLOR, toImportFieldCursor.getInt(26));
                         field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
                     } else {
                         ContentValues contentValues = new ContentValues();

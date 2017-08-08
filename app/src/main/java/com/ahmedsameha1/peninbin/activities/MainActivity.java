@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements
                     /*return new CursorLoader(MainActivity.this, uri, new String[]{"rowid _id", Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_TYPE, Contract.Old_Field_DBV6_AppV32.COLUMN_FIELD_NAME}, null, null,
                             "datetime(" + Contract.Old_COLUMN_NAME_CREATED_AT_DBV6_AppV32 + ") DESC");*/
                     mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(MainActivity.this,
-                            "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_NAME
+                            "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_NAME + ", " + Contract.Field.COLUMN_COLOR
                                     + " FROM " + Contract.Field.TABLE_NAME + "  ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
                             null);
                     return mySQLiteCursorLoader;
@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements
                     String query = args.getString(QUERY_KEY);
                     mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(MainActivity.this,
                             "SELECT " + Contract.COLUMN_ID + ", "
-                                    + Contract.Field.COLUMN_FIELD_NAME
+                                    + Contract.Field.COLUMN_FIELD_NAME + ", " + Contract.Field.COLUMN_COLOR
                                     + " FROM " + Contract.Field.TABLE_NAME + " WHERE " + Contract.Field.COLUMN_FIELD_NAME + " LIKE ? COLLATE NOCASE "
                                     + " ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC", new String[]{"%" + query + "%"});
                     return mySQLiteCursorLoader;
@@ -630,8 +630,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void createField(String field_name, int question_data_type, int check_type, boolean read_answer, String locale) {
-        mySQLiteCursorLoader.createField(field_name, question_data_type, check_type, read_answer, locale);
+    public void createField(String field_name, int question_data_type, int check_type, boolean read_answer, String locale, int color) {
+        mySQLiteCursorLoader.createField(field_name, question_data_type, check_type, read_answer, locale, color);
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
     }
 
