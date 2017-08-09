@@ -7,7 +7,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/fields"
+        android:text="@string/entries"
         android:textSize="45sp"
         android:padding="5dp"
         android:layout_margin="10dp"
@@ -33,14 +33,14 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:textSize="20sp"
-        android:textColor="@color/white_color"
         android:focusable="false"
         android:cursorVisible="false"
         android:background="@null"
         android:layout_margin="20dp"
         android:padding="5dp"
-        android:text="sss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nsss"
+        android:text="@string/intro_entry_text"
         android:layout_weight="0.9"
-        android:gravity="center"/>
+        android:textColor="@color/black_color"
+        android:lineSpacingExtra="3dp"/>
 
 </LinearLayout>
