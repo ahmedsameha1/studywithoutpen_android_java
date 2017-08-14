@@ -231,7 +231,7 @@
     <string name="emulation_has_disabled">اكتمل إلغاء محاكاة المجال</string>
     <string name="emulation_runing">انتظر حتى تنتهي عملية تفعيل/إلغاء المحاكاة الجارية</string>
     <string name="session_cancelation">إلغاء الجلسة</string>
-    <string name="if_you_want_select_the_starting_entry">إذا أردت، اختر المُدخل الأول</string>
+    <string name="if_you_want_select_the_starting_entry">اختر مُدخل البداية (اختياري)</string>
     <string name="everyday_entries_help" >أدخل عدد المدخلات التي  تريد أن تذاكرها يوميا. كل يوم سيحاكي التطبيق أنك أدخلت هذا العدد من المدخلات في  ذلك اليوم. لو كان المجال الذي تقوم بتفعيل المحاكاة فيه يحتوي على 1000 مدخل، وأدخلت هنا 5 سيأخذ هذا المجال 200 يوم حتى ينتهي. لو أنك  ستدخل مدخلات في هذا المجال مستقبلا ، سيقوم التطبيق بمحاكاة أنك أدخلت هذه المدخلات ابتداء من  اليوم 201، وهكذا.\nتؤثر المحاكاة في  وظائف الاختبار ووظيفة مذاكرة فترة، لن يحدث تأثير في  قائمة مدخلات المجال.</string>
     <string name="starting_entry_help" >إذا أردت، يمكنك اختيار مدخل واحد ليبدأ تفعيل المحاكاة ابتداء منه. هذا المدخل والمدخلات التالية له سيتم محاكاتها، المدخلات السابقة لن يتم محاكاتها.\n فقط المدخلات التي تم محاكاتها ستظهر في  وظيفة مذاكرة فترة، كل مدخل في تاريخ محاكاته.</string>
     <string name="external_storage_not_ready">التخزين الخارجي الخاص بجهازك غير جاهز، ربما توجد مشكلة مع sdcard</string>
@@ -343,5 +343,14 @@
     <string name="test">اختبار</string>
     <string name="today_s_entries">مُدخلات هذا اليوم</string>
     <string name="help">help</string>
+    <string name="friday">الجمعة</string>
+    <string name="thursday">الخميس</string>
+    <string name="wednesday">الأربعاء</string>
+    <string name="tuesday">الثلاثاء</string>
+    <string name="monday">الاثنين</string>
+    <string name="sunday">الأحد</string>
+    <string name="saturday">السبت</string>
+    <string name="exclude_days">You can exclude some days of the week</string>
+    <string name="exclude_days_help">يمكنك استثناء أيام من الأسبوع كي لا يتم تخصيص مُدخلات لها، مثل نهاية الأسبوع مثلا.\nسيتم توزيع المُدخلات على كل أيام الأسبوع ما عدا هذه الأيام.\nلكي تستثني يوم، انقر عليه بحيث تصبح خلفيته حمراء.</string>
 </resources>
 

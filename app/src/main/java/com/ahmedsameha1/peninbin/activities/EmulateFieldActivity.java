@@ -2,12 +2,9 @@ package com.ahmedsameha1.peninbin.activities;
 
 import android.app.LoaderManager;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -22,20 +19,18 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.adapters.CopyMoveEntriesActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.EmulateFieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.dialogs.CopyFieldDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 
 import java.util.ArrayList;
@@ -54,6 +49,9 @@ public class EmulateFieldActivity extends AppCompatActivity implements
     private long current_field_id;
     private RecyclerView recyclerView;
     private Parcelable recyclerview_position;
+    private boolean[] week_days_case = {true,true,true,true,true,true,true};
+    private Button[] week_days = new Button[7];
+    // TODO: 8/9/17 add the flexbox library license in about dialog
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +63,8 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         enter_number_of_entries = (EditText) findViewById(R.id.enter_number_of_entries);
         ImageButton number_of_entries_help = (ImageButton) findViewById(R.id.number_of_entries_help);
         ImageButton starting_entry_help = (ImageButton) findViewById(R.id.starting_entry_help);
+        ImageButton exclude_days_help = (ImageButton) findViewById(R.id.what_days_help);
+        prepareWeekDayArray();
         recyclerView = (RecyclerView) findViewById(R.id.copy_move_entries_activity_recyclerview);
         VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.fast_scroller);
         // Connect the recycler to the scroller (to let the scroller scroll the list)
@@ -128,6 +128,10 @@ public class EmulateFieldActivity extends AppCompatActivity implements
                         .setMessage(R.string.starting_entry_help).create().show();
 
         });
+        exclude_days_help.setOnClickListener( view ->  {
+                AlertDialog.Builder builder = new AlertDialog.Builder(EmulateFieldActivity.this);
+                builder.setMessage(R.string.exclude_days_help).create().show();
+        });
     }
 
 
@@ -153,9 +157,9 @@ public class EmulateFieldActivity extends AppCompatActivity implements
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                         if ( starting_entry_id.size() == 0 ) {
-                            Emulation.startEmulateThread(this, current_field_id, number_of_entries);
+                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, week_days_case);
                         } else {
-                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id.get(0));
+                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id.get(0), week_days_case);
                         }
                         ExitActivity.exit(this);
                         finish();
@@ -208,5 +212,57 @@ public class EmulateFieldActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
         recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
         outState.putParcelable(RECYCLERVIEW_POSITION, recyclerview_position);    }
+
+    private void prepareWeekDayArray() {
+        for ( int i = 0; i < week_days.length; i++ ) {
+            switch (i) {
+                case 1:
+                    week_days[0] = (Button) findViewById(R.id.sunday);
+                    break;
+                case 2:
+                    week_days[1] = (Button) findViewById(R.id.monday);
+                    break;
+                case 3:
+                    week_days[2] = (Button) findViewById(R.id.tuesday);
+                    break;
+                case 4:
+                    week_days[3] = (Button) findViewById(R.id.wednesday);
+                    break;
+                case 5:
+                    week_days[4] = (Button) findViewById(R.id.thursday);
+                    break;
+                case 6:
+                    week_days[5] = (Button) findViewById(R.id.friday);
+                    break;
+                case 0:
+                    week_days[6] = (Button) findViewById(R.id.saturday);
+                    break;
+            }
+        }
+        for ( int i = 0; i < week_days.length; i++ ) {
+            int n = i;
+            week_days[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    week_days_case[n] = !week_days_case[n];
+                    boolean all_days_not = true;
+                    for ( int k = 0; k < week_days_case.length; k++ ) {
+                        if ( week_days_case[k] ) {
+                            all_days_not = false;
+                            break;
+                        }
+                    }
+                    if ( all_days_not ) {
+                        week_days_case[n] = !week_days_case[n];
+                    }
+                    if (week_days_case[n]) {
+                        week_days[n].setBackgroundColor(0xff00ff00);
+                    } else {
+                        week_days[n].setBackgroundColor(0xffff0000);
+                    }
+                }
+            });
+        }
+    }
 
 }

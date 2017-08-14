@@ -36,6 +36,7 @@ public final class Contract {
         public static final String COLUMN_READ_ANSWER = "read_answer";
         public static final String COLUMN_USAGE_COUNT = "usage_count";
         public static final String COLUMN_CREATION_EMULATION_NUMBER = "creation_emulation_number";
+        public static final String COLUMN_CREATION_EMULATION_WHAT_DAYS = "creation_emulation_what_days";
         public static final String COLUMN_CHECK_TYPE = "check_type";
         public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_TRIES = "random_quick_test_number_of_tries";
         public static final String COLUMN_RANDOM_QUICK_TEST_NUMBER_OF_QUESTIONS = "random_quick_test_number_of_questions";

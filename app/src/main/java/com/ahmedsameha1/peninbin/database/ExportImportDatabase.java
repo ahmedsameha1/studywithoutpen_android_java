@@ -22,8 +22,14 @@ import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.InvalidStudyWithoutPenFileException;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+
+import static com.ahmedsameha1.peninbin.database.DatabaseHelper.DATABASE_NAME;
 
 /**
  * Created by ahmed on 1/5/2016.
@@ -379,12 +385,27 @@ public class ExportImportDatabase {
             }
         }
     }
-
+    private static String copyToBeImportedDatabaseFile(Context context, String filePath ) throws IOException {
+        String app_database_path = context.getApplicationContext().getDatabasePath(DATABASE_NAME).getAbsolutePath();
+        String copy_path = app_database_path.substring(0, app_database_path.length() - 4) + "copy";
+        OutputStream os = new FileOutputStream(copy_path);
+        InputStream is = new FileInputStream(filePath);
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = is.read(buffer)) > 0) {
+            os.write(buffer, 0, length);
+        }
+        is.close();
+        os.flush();
+        os.close();
+        return copy_path;
+    }
     private static void importFields(Context context, String filePath, boolean importUserUsageData) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         SQLiteDatabase toImportDatabase = null;
         try {
-            toImportDatabase = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READWRITE);
+            toImportDatabase = SQLiteDatabase.openDatabase(copyToBeImportedDatabaseFile(context, filePath),
+                    null, SQLiteDatabase.OPEN_READWRITE);
             Cursor cursor = toImportDatabase.query(Contract.Check.TABLE_NAME, new String[]{Contract.Check.COLUMN_CHECK_NUMBER},
                     null, null, null, null, null);
             cursor.moveToFirst();
@@ -884,7 +905,8 @@ public class ExportImportDatabase {
             for (String temp_wanted_field : wanted_fields) {
                 Cursor toImportFieldCursor = toImportDatabase.query(Contract.Field.TABLE_NAME,
                         new String[]{Contract.Field.COLUMN_FIELD_NAME,
-                                Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, Contract.COLUMN_ID},
+                                Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, Contract.COLUMN_ID,
+                                Contract.Field.COLUMN_SORT_BY, Contract.Field.COLUMN_READ_ANSWER},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ", new String[]{temp_wanted_field}, null, null, null);
                 toImportFieldCursor.moveToFirst();
                 Cursor appFieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,
@@ -897,6 +919,8 @@ public class ExportImportDatabase {
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(Contract.Field.COLUMN_FIELD_NAME, toImportFieldCursor.getString(0));
                     contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(1));
+                    contentValues.put(Contract.Field.COLUMN_SORT_BY, toImportFieldCursor.getInt(3));
+                    contentValues.put(Contract.Field.COLUMN_READ_ANSWER, toImportFieldCursor.getInt(4));
                     field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
 
                     Cursor field_notes_cursor = toImportDatabase.query(Contract.Field_Note.TABLE_NAME,
@@ -912,11 +936,7 @@ public class ExportImportDatabase {
                     field_notes_cursor.close();
                     Cursor toImportStringEntryCursor = toImportDatabase.query(Contract.String_Entry.TABLE_NAME,
                             new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
-                                    Contract.String_Entry.COLUMN_FIELD, Contract.String_Entry.COLUMN_ASKED_COUNT,
-                                    Contract.String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.String_Entry.COLUMN_RANK,
-                                    Contract.CREATION_DATE, Contract.COLUMN_ID,
-                                    Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,
-                                    Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
+                                    Contract.String_Entry.COLUMN_RANK, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
                             Contract.String_Entry.COLUMN_FIELD + " = ? ",
                             new String[]{String.valueOf(toImportFieldCursor.getLong(2))}, null, null, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
                                     + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
@@ -962,7 +982,8 @@ public class ExportImportDatabase {
                         contentValues1.put(Contract.String_Entry.COLUMN_QUESTION, question_id);
                         contentValues1.put(Contract.String_Entry.COLUMN_ANSWER, answer_id);
                         contentValues1.put(Contract.String_Entry.COLUMN_FIELD, field_id);
-                        contentValues1.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, toImportStringEntryCursor.getInt(10));
+                        contentValues1.put(Contract.String_Entry.COLUMN_RANK, toImportStringEntryCursor.getInt(2));
+                        contentValues1.put(Contract.String_Entry.COLUMN_ORDER_OF_ENTRY, toImportStringEntryCursor.getInt(3));
                         int number_of_entries_everyday = databaseReadOperations.isEmulated(field_id);
                         if (number_of_entries_everyday > Constants.NOT_EMULATED) {
                             contentValues1.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE,
@@ -970,6 +991,7 @@ public class ExportImportDatabase {
                         }
                         appDatabase.insertOrThrow(Contract.String_Entry.TABLE_NAME, null, contentValues1);
                     }
+                    toImportStringEntryCursor.close();
                 } else {
                     notImportedFieldsStrings.add(toImportFieldCursor.getString(0));
                     continue;

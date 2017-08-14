@@ -32,19 +32,19 @@ public class Emulation {
 
     private static Thread emulate_thread, unemulate_thread, reemulate_thread;
 
-    public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries) {
+    public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries, final boolean[] week_days_case) {
         emulate_thread = new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            emulate(context, field_id, number_of_entries);
+            emulate(context, field_id, number_of_entries, week_days_case);
         });
         emulate_thread.start();
     }
 
 
-    public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries, final long starting_entry) {
+    public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries, final long starting_entry, final boolean[] week_days_case) {
         emulate_thread = new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            emulate(context, field_id, number_of_entries, starting_entry);
+            emulate(context, field_id, number_of_entries, starting_entry, week_days_case);
         });
 
         emulate_thread.start();
@@ -67,129 +67,247 @@ public class Emulation {
         unemulate_thread.start();
     }
 
-    private static void partition(int number_of_everyday_entries, Cursor cursor, SQLiteDatabase sqLiteDatabase) {
+    private static void partition(int number_of_everyday_entries, Cursor cursor, boolean[] what_days, SQLiteDatabase sqLiteDatabase) {
+        ArrayList<Integer> not_days = new ArrayList<>(6);
+        for ( int i = 0; i < what_days.length; i++ ) {
+            if ( !what_days[i] ) {
+                not_days.add(i + 1);
+            }
+        }
         Calendar calendar = Calendar.getInstance();
         long long_utc = System.currentTimeMillis();
         calendar.setTimeInMillis(long_utc);
-//        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 5);
         calendar.set(Calendar.SECOND, 0);
-      /*  long emulated_creation_time_millis = System.currentTimeMillis();
-        Date date = new Date(emulated_creation_time_millis);*/
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
-        String emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
-        int number_of_days = cursor.getCount() / number_of_everyday_entries;
-        if (cursor.getCount() % number_of_everyday_entries > 0) {
-            number_of_days++;
-        }
-        sqLiteDatabase.beginTransaction();
-        try {
-            if (number_of_days <= 1) {
-                for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
-                     cursor.moveToNext()) {
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
-                    sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
-                            Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) + ""});
-                }
-            } else {
-                outter:
-                for (int i = 0; i < number_of_days; i++) {
-                    if (i >= 1) {
-                        /*emulated_creation_time_millis += AlarmManager.INTERVAL_DAY;
-                        date = new Date(emulated_creation_time_millis);*/
-//                        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
-                        calendar.add(Calendar.DAY_OF_MONTH, 1);
-                        emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
-                    }
-                    for (int k = 0; k < number_of_everyday_entries; k++) {
-                        if (i == 0 && k == 0) {
-                            cursor.moveToFirst();
-                        } else {
-                            cursor.moveToNext();
-                        }
-                        if (cursor.isAfterLast()) {
-                            break outter;
-                        }
+        if ( not_days.size() <= 0 ) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
+            String emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+            int number_of_days = cursor.getCount() / number_of_everyday_entries;
+            if (cursor.getCount() % number_of_everyday_entries > 0) {
+                number_of_days++;
+            }
+            sqLiteDatabase.beginTransaction();
+            try {
+                if (number_of_days <= 1) {
+                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                         cursor.moveToNext()) {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
                         sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
                                 Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) + ""});
                     }
-                }
-            }
-            sqLiteDatabase.setTransactionSuccessful();
-        } finally {
-            sqLiteDatabase.endTransaction();
-        }
-    }
-
-    private static void partition(int number_of_everyday_entries, ArrayList<Long> list_of_entries, SQLiteDatabase sqLiteDatabase) {
-        Calendar calendar = Calendar.getInstance();
-        long long_utc = System.currentTimeMillis();
-        calendar.setTimeInMillis(long_utc);
-//        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 5);
-        calendar.set(Calendar.SECOND, 0);
-      /*  long emulated_creation_time_millis = System.currentTimeMillis();
-        Date date = new Date(emulated_creation_time_millis);*/
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
-        String emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
-        int number_of_days = list_of_entries.size() / number_of_everyday_entries;
-        if (list_of_entries.size() % number_of_everyday_entries > 0) {
-            number_of_days++;
-        }
-        sqLiteDatabase.beginTransaction();
-        try {
-            if (number_of_days <= 1) {
-                for (Long temp : list_of_entries) {
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
-                    sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
-                            Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
-                }
-            } else {
-                int counter = -1;
-                outter:
-                for (int i = 0; i < number_of_days; i++) {
-                    if (i >= 1) {
-                      /*  emulated_creation_time_millis += AlarmManager.INTERVAL_DAY;
-                        date = new Date(emulated_creation_time_millis);*/
-//                        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
-                        calendar.add(Calendar.DAY_OF_MONTH, 1);
-                        emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
-                    }
-                    for (int k = 0; k < number_of_everyday_entries; k++) {
-                        if (++counter > list_of_entries.size() - 1) {
-                            break outter;
-                        } else {
+                } else {
+                    outter:
+                    for (int i = 0; i < number_of_days; i++) {
+                        if (i >= 1) {
+                            calendar.add(Calendar.DAY_OF_MONTH, 1);
+                            emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+                        }
+                        for (int k = 0; k < number_of_everyday_entries; k++) {
+                            if (i == 0 && k == 0) {
+                                cursor.moveToFirst();
+                            } else {
+                                cursor.moveToNext();
+                            }
+                            if (cursor.isAfterLast()) {
+                                break outter;
+                            }
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
                             sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
-                                    Contract.COLUMN_ID + " = ? ", new String[]{list_of_entries.get(counter) + ""});
+                                    Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) + ""});
                         }
                     }
                 }
+                sqLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sqLiteDatabase.endTransaction();
             }
-            sqLiteDatabase.setTransactionSuccessful();
-        } finally {
-            sqLiteDatabase.endTransaction();
+        } else {
+            do {
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+            } while ( not_days.contains(calendar.get(Calendar.DAY_OF_WEEK)) );
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
+            String emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+            int number_of_days = cursor.getCount() / number_of_everyday_entries;
+            if (cursor.getCount() % number_of_everyday_entries > 0) {
+                number_of_days++;
+            }
+            sqLiteDatabase.beginTransaction();
+            try {
+                if (number_of_days <= 1) {
+                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+                         cursor.moveToNext()) {
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
+                        sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                                Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) + ""});
+                    }
+                } else {
+                    outter:
+                    for (int i = 0; i < number_of_days; i++) {
+                        if (i >= 1) {
+                            do {
+                                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                            } while ( not_days.contains(calendar.get(Calendar.DAY_OF_WEEK)) );
+                            emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+                        }
+                        for (int k = 0; k < number_of_everyday_entries; k++) {
+                            if (i == 0 && k == 0) {
+                                cursor.moveToFirst();
+                            } else {
+                                cursor.moveToNext();
+                            }
+                            if (cursor.isAfterLast()) {
+                                break outter;
+                            }
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
+                            sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                                    Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) + ""});
+                        }
+                    }
+                }
+                sqLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sqLiteDatabase.endTransaction();
+            }
+        }
+    }
+
+    private static void partition(int number_of_everyday_entries, ArrayList<Long> list_of_entries, boolean[] what_days, SQLiteDatabase sqLiteDatabase) {
+        ArrayList<Integer> not_days = new ArrayList<>(6);
+        for ( int i = 0; i < what_days.length; i++ ) {
+            if ( !what_days[i] ) {
+                not_days.add(i + 1);
+            }
+        }
+        Calendar calendar = Calendar.getInstance();
+        long long_utc = System.currentTimeMillis();
+        calendar.setTimeInMillis(long_utc);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 5);
+        calendar.set(Calendar.SECOND, 0);
+        if ( not_days.size() <= 0 ) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
+            String emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+            int number_of_days = list_of_entries.size() / number_of_everyday_entries;
+            if (list_of_entries.size() % number_of_everyday_entries > 0) {
+                number_of_days++;
+            }
+            sqLiteDatabase.beginTransaction();
+            try {
+                if (number_of_days <= 1) {
+                    for (Long temp : list_of_entries) {
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
+                        sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                                Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
+                    }
+                } else {
+                    int counter = -1;
+                    outter:
+                    for (int i = 0; i < number_of_days; i++) {
+                        if (i >= 1) {
+                      /*  emulated_creation_time_millis += AlarmManager.INTERVAL_DAY;
+                        date = new Date(emulated_creation_time_millis);*/
+//                        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
+                            calendar.add(Calendar.DAY_OF_MONTH, 1);
+                            emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+                        }
+                        for (int k = 0; k < number_of_everyday_entries; k++) {
+                            if (++counter > list_of_entries.size() - 1) {
+                                break outter;
+                            } else {
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
+                                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                                        Contract.COLUMN_ID + " = ? ", new String[]{list_of_entries.get(counter) + ""});
+                            }
+                        }
+                    }
+                }
+                sqLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sqLiteDatabase.endTransaction();
+            }
+        } else {
+            do {
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+            } while ( not_days.contains(calendar.get(Calendar.DAY_OF_WEEK)) );
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
+            String emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+            int number_of_days = list_of_entries.size() / number_of_everyday_entries;
+            if (list_of_entries.size() % number_of_everyday_entries > 0) {
+                number_of_days++;
+            }
+            sqLiteDatabase.beginTransaction();
+            try {
+                if (number_of_days <= 1) {
+                    for (Long temp : list_of_entries) {
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
+                        sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                                Contract.COLUMN_ID + " = ? ", new String[]{temp + ""});
+                    }
+                } else {
+                    int counter = -1;
+                    outter:
+                    for (int i = 0; i < number_of_days; i++) {
+                        if (i >= 1) {
+                            do {
+                                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                            } while ( not_days.contains(calendar.get(Calendar.DAY_OF_WEEK)) );
+                            emulated_creation_time_string = simpleDateFormat.format(calendar.getTime());
+                        }
+                        for (int k = 0; k < number_of_everyday_entries; k++) {
+                            if (++counter > list_of_entries.size() - 1) {
+                                break outter;
+                            } else {
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, emulated_creation_time_string);
+                                sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues,
+                                        Contract.COLUMN_ID + " = ? ", new String[]{list_of_entries.get(counter) + ""});
+                            }
+                        }
+                    }
+                }
+                sqLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sqLiteDatabase.endTransaction();
+            }
         }
     }
     public static String getEmulationCreationDate(long field_id, int number_of_everyday_entries, SQLiteDatabase sqLiteDatabase) {
+        Cursor cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_CREATION_EMULATION_WHAT_DAYS},
+                Contract.COLUMN_ID + " = ? ", new String[] {String.valueOf(field_id)}, null, null, null);
+        cursor.moveToFirst();
+        String what_days = cursor.getString(0);
+        cursor.close();
+        ArrayList<Integer> not_days = new ArrayList<>(6);
+        for ( int i = 0; i < what_days.length(); i++ ) {
+            if ( what_days.charAt(i) == '0' ) {
+                not_days.add(i + 1);
+            }
+        }
         Calendar calendar_1 = Calendar.getInstance();
         long long_utc = System.currentTimeMillis();
         calendar_1.setTimeInMillis(long_utc);
-        calendar_1.add(Calendar.DAY_OF_MONTH, 1);
         calendar_1.set(Calendar.HOUR_OF_DAY, 0);
         calendar_1.set(Calendar.MINUTE, 5);
         calendar_1.set(Calendar.SECOND, 0);
+        if ( not_days.size() <= 0 ) {
+            calendar_1.add(Calendar.DAY_OF_MONTH, 1);
+        } else {
+            do {
+                calendar_1.add(Calendar.DAY_OF_MONTH, 1);
+            } while (not_days.contains(calendar_1.get(Calendar.DAY_OF_WEEK)));
+        }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
-        Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+        cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
                 new String[]{Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
                 Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + " IS NOT NULL",
                 new String[]{String.valueOf(field_id)}, null, null, "datetime(" + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE + ") DESC");
@@ -218,7 +336,13 @@ public class Emulation {
             }
             Calendar calendar_2 = Calendar.getInstance();
             calendar_2.setTime(utc_date_of_date_string);
-            calendar_2.add(Calendar.DAY_OF_MONTH, 1);
+            if ( not_days.size() <= 0 ) {
+                calendar_2.add(Calendar.DAY_OF_MONTH, 1);
+            } else {
+                do {
+                    calendar_2.add(Calendar.DAY_OF_MONTH, 1);
+                } while (not_days.contains(calendar_2.get(Calendar.DAY_OF_WEEK)));
+            }
             if (now_millis >= date_millis) {
                 if (fmt.format(calendar_date.getTime()).equals(fmt.format(calendar_now.getTime()))) {     // in the same day
                     if (remaining_this_day <= 0) {
@@ -241,17 +365,22 @@ public class Emulation {
         }
     }
 
-    private static void emulate(final Context context, final long field_id, final int number_of_entries) {
+    private static void emulate(final Context context, final long field_id, final int number_of_entries, final boolean[] week_days_case) {
+        String emulation_days_string = "";
+        for ( boolean bool: week_days_case ) {
+            emulation_days_string = bool ? emulation_days_string + 1 : emulation_days_string + 0;
+        }
         SQLiteDatabase sqLiteDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_CREATION_EMULATION_NUMBER, number_of_entries);
+        contentValues.put(Contract.Field.COLUMN_CREATION_EMULATION_WHAT_DAYS, emulation_days_string);
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+                Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
         Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                 Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null,
                 Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
                         + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
-        Emulation.partition(number_of_entries, cursor, sqLiteDatabase);
+        Emulation.partition(number_of_entries, cursor, week_days_case, sqLiteDatabase);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder notificationBuilder = null;
         Intent notifyIntent = null;
@@ -278,12 +407,17 @@ public class Emulation {
 
     }
 
-    private static void emulate(final Context context, final long field_id, final int number_of_entries, final long starting_entry) {
+    private static void emulate(final Context context, final long field_id, final int number_of_entries, final long starting_entry, final boolean[] week_days_case) {
+        String emulation_days_string = "";
+        for ( boolean bool: week_days_case ) {
+            emulation_days_string = bool ? emulation_days_string + 1 : emulation_days_string + 0;
+        }
         SQLiteDatabase sqLiteDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_CREATION_EMULATION_NUMBER, number_of_entries);
+        contentValues.put(Contract.Field.COLUMN_CREATION_EMULATION_WHAT_DAYS, emulation_days_string);
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+                Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
         Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID},
                 Contract.String_Entry.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null,
                 Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
@@ -300,7 +434,7 @@ public class Emulation {
             }
         }
         cursor.close();
-        Emulation.partition(number_of_entries, list_of_entries_from_starting_entry, sqLiteDatabase);
+        Emulation.partition(number_of_entries, list_of_entries_from_starting_entry, week_days_case, sqLiteDatabase);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder notificationBuilder = null;
         Intent notifyIntent = null;
@@ -331,6 +465,7 @@ public class Emulation {
         final SQLiteDatabase sqLiteDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
         final ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.Field.COLUMN_CREATION_EMULATION_NUMBER, Constants.NOT_EMULATED);
+        contentValues.putNull(Contract.Field.COLUMN_CREATION_EMULATION_WHAT_DAYS);
         sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
                 Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
 
@@ -418,20 +553,32 @@ public class Emulation {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Emulation.DATE_FORMAT_SQLITE, Locale.US);
         String today_emulation_date_string = simpleDateFormat.format(today_calendar.getTime());
         Cursor field_cursor = sqLiteDatabase.query(Contract.Field.TABLE_NAME,
-                new String[]{Contract.COLUMN_ID, Contract.Field.COLUMN_CREATION_EMULATION_NUMBER},
+                new String[]{Contract.COLUMN_ID, Contract.Field.COLUMN_CREATION_EMULATION_NUMBER, Contract.Field.COLUMN_CREATION_EMULATION_WHAT_DAYS},
                 Contract.Field.COLUMN_CREATION_EMULATION_NUMBER + " > ? ", new String[]{String.valueOf(Constants.NOT_EMULATED)},
                 null,null,null);
         if ( field_cursor.getCount() > 0 ) {
             for (field_cursor.moveToFirst(); field_cursor.getPosition() < field_cursor.getCount();
                  field_cursor.moveToNext()) {
+                long field_id = field_cursor.getLong(0);
+                int number_of_everyday_entries = field_cursor.getInt(1);
+                String what_days = field_cursor.getString(2);
+                ArrayList<Integer> not_days = new ArrayList<>(6);
+                for ( int i = 0; i < what_days.length(); i++ ) {
+                    if ( what_days.charAt(i) == '0') {
+                        not_days.add(i + 1);
+                    }
+                }
                 Calendar emulation_calendar = Calendar.getInstance();
                 emulation_calendar.setTimeInMillis(long_utc);
                 emulation_calendar.set(Calendar.HOUR_OF_DAY, 0);
                 emulation_calendar.set(Calendar.MINUTE, 5);
                 emulation_calendar.set(Calendar.SECOND, 0);
+                if ( not_days.size() > 0 ) {
+                    while ( not_days.contains(emulation_calendar.get(Calendar.DAY_OF_WEEK))) {
+                        emulation_calendar.add(Calendar.DAY_OF_MONTH, 1);
+                    }
+                }
                 String emulated_creation_time_string = simpleDateFormat.format(emulation_calendar.getTime());
-                long field_id = field_cursor.getLong(0);
-                int number_of_everyday_entries = field_cursor.getInt(1);
                 Cursor cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME, new String[]{Contract.COLUMN_ID, Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE},
                         Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE
                                 + " >= datetime(?) ", new String[]{String.valueOf(field_id), today_emulation_date_string}, null, null,
@@ -456,7 +603,13 @@ public class Emulation {
                         outter:
                         for (int i = 0; i < number_of_days; i++) {
                             if (i >= 1) {
-                                emulation_calendar.add(Calendar.DAY_OF_MONTH, 1);
+                                if ( not_days.size() <= 0 ) {
+                                    emulation_calendar.add(Calendar.DAY_OF_MONTH, 1);
+                                } else {
+                                    do {
+                                        emulation_calendar.add(Calendar.DAY_OF_MONTH, 1);
+                                    } while ( not_days.contains(emulation_calendar.get(Calendar.DAY_OF_WEEK)));
+                                }
                                 emulated_creation_time_string = simpleDateFormat.format(emulation_calendar.getTime());
                             }
                             for (int k = 0; k < number_of_everyday_entries; k++) {
@@ -485,5 +638,4 @@ public class Emulation {
             field_cursor.close();
         }
     }
-
 }

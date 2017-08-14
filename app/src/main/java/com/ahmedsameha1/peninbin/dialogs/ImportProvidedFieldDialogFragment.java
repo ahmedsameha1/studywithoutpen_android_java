@@ -13,7 +13,6 @@ import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
@@ -107,6 +106,12 @@ public class ImportProvidedFieldDialogFragment extends DialogFragment {
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     } else {
+                        Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                         ExportImportDatabase.startImportInternalFieldThread(getActivity(), temp_database, selectedFields);
                         dismiss();
                     }

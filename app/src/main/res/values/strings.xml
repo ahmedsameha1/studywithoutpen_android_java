@@ -239,7 +239,7 @@
     <string name="due_emulation_session_cancelation">Due running emulation process, some scheduled session has been canceled</string>
     <string name="emulation_disabled">Emulation Disabled</string>
     <string name="emulation_has_disabled">Disabling emulation of the field has completed</string>
-    <string name="if_you_want_select_the_starting_entry">IF YOU WANT, select the first entry</string>
+    <string name="if_you_want_select_the_starting_entry">Select the starting entry (optional)</string>
     <string name="everyday_entries_help">Enter the number of entries that you want to study everyday. Everyday, the app will emulate that you have entered this number of entries at that day. If the field that you enable emulation on it has 1000 entries, and you have entered 5 here, this field will take 200 days to finish. If you will add any entries to that field, the app will emulate that you have entered these entries from day 201, and so on.\nThe emulation affect on test features and study a period feature. The list of entries of the field will not be affected.</string>
     <string name="starting_entry_help">If you want, you can select one entry to start enabling the emulation from it. That entry and the next entries will be emulated, the previous entries will not be emulated.\nOnly the emulated entries will appear when using study a period feature, every entry at its emulation date.</string>
     <string name="field_emulated">If you have emulated the field today, the entries will appear starting from tomorrow</string>
@@ -353,4 +353,13 @@
     <string name="test">Test</string>
     <string name="today_s_entries">Today\'s entries</string>
     <string name="help">help</string>
+    <string name="friday">Friday</string>
+    <string name="thursday">Thursday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="monday">Monday</string>
+    <string name="sunday">Sunday</string>
+    <string name="saturday">Saturday</string>
+    <string name="exclude_days">You can exclude some days of week</string>
+    <string name="exclude_days_help">You can exclude some days of the week so that no entries are assigned to them, such as the weekend.\nEntries will be distributed for all days of the week except these days.\nTo exclude a day, click on it so that its background becomes red.</string>
 </resources>
