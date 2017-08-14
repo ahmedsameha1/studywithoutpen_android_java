@@ -22,7 +22,7 @@
         />
     <EditText
         android:layout_width="match_parent"
-        android:layout_height="800dp"
+        android:layout_height="900dp"
         android:textSize="30sp"
         android:focusable="false"
         android:cursorVisible="false"
