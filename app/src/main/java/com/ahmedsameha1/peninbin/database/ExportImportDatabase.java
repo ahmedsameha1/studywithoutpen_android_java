@@ -44,7 +44,6 @@ public class ExportImportDatabase {
     public static final String PATH = "path";
 
     private static Thread exportThread, importThread, importInternalFieldThread;
-    private static ArrayList<String> notImportedFieldsIDs;
     private static ArrayList<String> notImportedFieldsStrings;
 
     public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String path, final String fileName) {
@@ -385,26 +384,14 @@ public class ExportImportDatabase {
             }
         }
     }
-    private static String copyToBeImportedDatabaseFile(Context context, String filePath ) throws IOException {
-        String app_database_path = context.getApplicationContext().getDatabasePath(DATABASE_NAME).getAbsolutePath();
-        String copy_path = app_database_path.substring(0, app_database_path.length() - 4) + "copy";
-        OutputStream os = new FileOutputStream(copy_path);
-        InputStream is = new FileInputStream(filePath);
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = is.read(buffer)) > 0) {
-            os.write(buffer, 0, length);
-        }
-        is.close();
-        os.flush();
-        os.close();
-        return copy_path;
-    }
+
     private static void importFields(Context context, String filePath, boolean importUserUsageData) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         SQLiteDatabase toImportDatabase = null;
+        String copied_database_file_path = null;
         try {
-            toImportDatabase = SQLiteDatabase.openDatabase(copyToBeImportedDatabaseFile(context, filePath),
+            copied_database_file_path = copyToBeImportedDatabaseFile(context, filePath);
+            toImportDatabase = SQLiteDatabase.openDatabase(copied_database_file_path,
                     null, SQLiteDatabase.OPEN_READWRITE);
             Cursor cursor = toImportDatabase.query(Contract.Check.TABLE_NAME, new String[]{Contract.Check.COLUMN_CHECK_NUMBER},
                     null, null, null, null, null);
@@ -415,80 +402,44 @@ public class ExportImportDatabase {
                 throw new InvalidStudyWithoutPenFileException();
             }
             int databaseVersion = toImportDatabase.getVersion();
-            if (databaseVersion == 6) {
-                try {
-                    upgradeImportedDatabaseFromDBV6ToDBV7(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
-                    return;
-                }
-                importFields(context, toImportDatabase, importUserUsageData);
-                showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            } else if (databaseVersion == 7) {
-                try {
-                    upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
-                    return;
-                }
-                importFields(context, toImportDatabase, importUserUsageData);
-                showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            } else if (databaseVersion == 8) {
-                try {
-                    upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
-                    return;
-                }
-                importFields(context, toImportDatabase, importUserUsageData);
-                showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            } else if (databaseVersion == 9) {
-                try {
-                    upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
-                    return;
-                }
-                importFields(context, toImportDatabase, importUserUsageData);
-                showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            } else if (databaseVersion == 10 || databaseVersion == 11 || databaseVersion == 12) {
-                try {
-                    upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
-                    return;
-                }
-                importFields(context, toImportDatabase, importUserUsageData);
-                showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            } else if (databaseVersion == 13) {
-                importFields(context, toImportDatabase, importUserUsageData);
-                showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
-            } else {
+            if (databaseVersion < 6 || databaseVersion > 13) {
                 throw new InvalidStudyWithoutPenFileException();
             }
+            if (databaseVersion < 7) {
+                upgradeImportedDatabaseFromDBV6ToDBV7(toImportDatabase, filePath);
+            }
+            if (databaseVersion < 8) {
+                upgradeImportedDatabaseFromDBV7ToDBV8(toImportDatabase, filePath);
+            }
+            if (databaseVersion < 9) {
+                upgradeImportedDatabaseFromDBV8ToDBV9(toImportDatabase, filePath);
+            }
+            if (databaseVersion < 10) {
+                upgradeImportedDatabaseFromDBV9ToDBV10(toImportDatabase, filePath);
+            }
+            if (databaseVersion < 13) {
+                upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
+            }
+            importFields(context, toImportDatabase, importUserUsageData);
+            showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
         } catch (InvalidStudyWithoutPenFileException e) {
             showNotification(context, FAILED_IMPORT_INVALID_FILE_NOTIFICATION, notificationManager);
-        } catch (IOException | SQLiteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
         } finally {
             if (toImportDatabase != null) {
                 toImportDatabase.close();
+            }
+            if (copied_database_file_path != null) {
+                File file = new File(copied_database_file_path);
+                if (file.exists()) {
+                    file.delete();
+                }
+                file = new File(copied_database_file_path + "-journal");
+                if (file.exists()) {
+                    file.delete();
+                }
             }
         }
     }
@@ -496,8 +447,6 @@ public class ExportImportDatabase {
     private static void importFields(Context context, SQLiteDatabase toImportDatabase, boolean importUserUsageData)
             throws IOException, SQLiteException, InvalidStudyWithoutPenFileException {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
-        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notImportedFieldsIDs = new ArrayList<>();
         SQLiteDatabase appDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
         appDatabase.beginTransactionNonExclusive();
         try {
@@ -586,33 +535,10 @@ public class ExportImportDatabase {
                     field_notes_cursor.close();
                 } else {
                     appFieldCursor.moveToFirst();
-                    notImportedFieldsIDs.add(String.valueOf(toImportFieldCursor.getLong(10)));
                 }
                 appFieldCursor.close();
             }
             toImportFieldCursor.close();
-
-            String[] notImportedArray = notImportedFieldsIDs.size() <= 0 ? new String[]{""} : notImportedFieldsIDs.toArray(new String[notImportedFieldsIDs.size()]);
-            String placeholders = "( ";
-            if (notImportedArray.length <= 1) {
-                placeholders += "? )";
-            } else {
-                for (int i = 0; i < notImportedArray.length; i++) {
-                    if (i < notImportedArray.length - 1) {
-                        placeholders += "?, ";
-                    } else {
-                        placeholders += "? )";
-                    }
-                }
-            }
-            notImportedFieldsStrings = new ArrayList<String>();
-            for (String field_id : notImportedFieldsIDs) {
-                Cursor fieldNameCursor = toImportDatabase.query(Contract.Field.TABLE_NAME, new String[]{Contract.Field.COLUMN_FIELD_NAME},
-                        Contract.COLUMN_ID + " = ? ",
-                        new String[]{field_id}, null, null, null, null);
-                fieldNameCursor.moveToFirst();
-                notImportedFieldsStrings.add(fieldNameCursor.getString(0));
-            }
             Cursor toImportStringEntryCursor = toImportDatabase.query(Contract.String_Entry.TABLE_NAME,
                     new String[]{Contract.String_Entry.COLUMN_QUESTION, Contract.String_Entry.COLUMN_ANSWER,
                             Contract.String_Entry.COLUMN_FIELD, Contract.String_Entry.COLUMN_ASKED_COUNT,
@@ -620,8 +546,7 @@ public class ExportImportDatabase {
                             Contract.CREATION_DATE, Contract.COLUMN_ID,
                             Contract.String_Entry.COLUMN_REMIND_AT, Contract.String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND,
                             Contract.String_Entry.COLUMN_ORDER_OF_ENTRY},
-                    Contract.String_Entry.COLUMN_FIELD + " NOT IN " + placeholders,
-                    notImportedArray, null, null, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
+                  null, null, null, null, Contract.String_Entry.COLUMN_ORDER_OF_ENTRY + " ASC, "
                             + Contract.String_Entry.COLUMN_RANK + " DESC, " + "datetime(" + Contract.CREATION_DATE + ") ASC");
             for (toImportStringEntryCursor.moveToFirst(); toImportStringEntryCursor.getPosition() < toImportStringEntryCursor.getCount();
                  toImportStringEntryCursor.moveToNext()) {
@@ -767,8 +692,7 @@ public class ExportImportDatabase {
                             Contract.Not_String_Entry.COLUMN_WRONGLY_ANSWERED_COUNT, Contract.Not_String_Entry.COLUMN_RANK,
                             Contract.CREATION_DATE, Contract.COLUMN_ID,
                             Contract.Not_String_Entry.COLUMN_REMIND_AT, Contract.Not_String_Entry.COLUMN_WHETHER_ASKED_AT_CURRENT_TEST_ROUND},
-                    Contract.String_Entry.COLUMN_FIELD + " NOT IN " + placeholders,
-                    notImportedArray, null, null, null);
+                    null, null, null, null, null);
             for (toImportNotStringEntryCursor.moveToFirst(); toImportNotStringEntryCursor.getPosition() < toImportNotStringEntryCursor.getCount();
                  toImportNotStringEntryCursor.moveToNext()) {
                 Cursor questionCursor = toImportDatabase.query(Contract.Not_String.TABLE_NAME, new String[]{Contract.Not_String.COLUMN_VALUE},
@@ -886,9 +810,6 @@ public class ExportImportDatabase {
             }
             toImportNotStringEntryCursor.close();
             appDatabase.setTransactionSuccessful();
-            if (notImportedFieldsIDs.size() > 0) {
-                showNotification(context, NOT_IMPORTED_FIELDS, notificationManager);
-            }
         } finally {
             appDatabase.endTransaction();
         }
@@ -897,7 +818,6 @@ public class ExportImportDatabase {
     private static void importInternalFields(Context context, SQLiteDatabase toImportDatabase, ArrayList<String> wanted_fields) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notImportedFieldsIDs = new ArrayList<>();
         SQLiteDatabase appDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
         notImportedFieldsStrings = new ArrayList<String>();
         appDatabase.beginTransactionNonExclusive();
@@ -1568,4 +1488,19 @@ public class ExportImportDatabase {
         }
     }
 
+    private static String copyToBeImportedDatabaseFile(Context context, String filePath) throws IOException {
+        String app_database_path = context.getApplicationContext().getDatabasePath(DATABASE_NAME).getAbsolutePath();
+        String copy_path = app_database_path.substring(0, app_database_path.length() - 4) + "copy";
+        OutputStream os = new FileOutputStream(copy_path);
+        InputStream is = new FileInputStream(filePath);
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = is.read(buffer)) > 0) {
+            os.write(buffer, 0, length);
+        }
+        is.close();
+        os.flush();
+        os.close();
+        return copy_path;
+    }
 }

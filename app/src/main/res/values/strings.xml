@@ -76,7 +76,7 @@
     <string name="select_fields_export">Select all the fields that you want to export:</string>
     <string name="wait_until_current_export_import_emulation_finish">Wait until the current export/import/emulation process finishes!</string>
     <string name="export_import_file_path" translatable="false">%1$s%2$s%3$s</string>
-    <string name="not_imported_fields_notification">The following fields cannot be imported because you have fields with the same name but with different field type : %1$s.</string>
+    <string name="not_imported_fields_notification">The following fields cannot be imported because you have fields with the same name : %1$s.</string>
     <string name="show">Show</string>
     <string name="hide">Hide</string>
     <string name="greater_zero">The number of tries must be greater than 0!</string>

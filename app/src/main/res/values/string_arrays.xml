@@ -22,10 +22,10 @@
         <item>English Dictionary</item>
     </string-array>
     <string-array name="check_type">
-        <item>Ignore either letter case and spaces</item>
-        <item>Ignore spaces</item>
-        <item>Ignore letters case</item>
-        <item>Don\'t ignore either letters case or spaces</item>
+        <item>Do not check letter case or spaces</item>
+        <item>Do not check spaces</item>
+        <item>Do not check letters case</item>
+        <item>Check both letter case and spaces</item>
     </string-array>
     <string-array name="number_or_percentage">
         <item>Enter number of questions:</item>
