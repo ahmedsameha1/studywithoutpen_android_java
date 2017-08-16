@@ -123,6 +123,22 @@
                 android:padding="5dp"
                 android:text="@string/https_github_com_danoz73_recyclerviewfastscroller" />
 
+            <TextView
+                android:id="@+id/color_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:text="@string/color_picker" />
+
+   <TextView
+                android:id="@+id/flexlayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:text="@string/flexlayout" />
+
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

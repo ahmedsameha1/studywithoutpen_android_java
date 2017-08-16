@@ -256,8 +256,11 @@
             android:name=".receivers_services.MidnightService"
             android:exported="false" />
 
-        <activity android:name=".activities.StudyActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".activities.StudyActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".secondary_activities.SpeciallyFormattedTextFileHelpActivity"
+            android:screenOrientation="landscape"/>
     </application>
 
 </manifest>

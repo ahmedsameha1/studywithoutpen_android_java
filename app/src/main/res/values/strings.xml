@@ -215,7 +215,7 @@
     <string name="sort_by_entry_rank_asc">Sort by Entry Rank (ascending)</string>
     <string name="sort_by_entry_rank_desc">Sort by Entry Rank (descending)</string>
     <string name="some_entries_have_not_imported">At least, one entry has not imported</string>
-    <string name="import_from_text_file_help">The file must be text file txt\nEvery line in the text file must be formated as: \nfield name@@@question~~~answer\nOr:\nfield name@@@question~~~answer%%%rank of entry \nRank of entry is one digit: \n0\tLow \n1\tModerate \n2\tImportant \n3\tVital\nOr:\nfield name@@@question~~~answer###order of entry\nOrder of entry is a number which is larger than or equals zero and lower than billion</string>
+    <string name="import_from_text_file_help" formatted="false">The type of the file must be: text file with extention txt\nEvery line in the file represents one entry.\nThere is three formats for any line.\n\nFirst format:\nfield name@@@question~~~answer\nExample:\nEnglish/French@@@sun~~~soleil\n\nSecond format:\nfield name@@@question~~~answer%%%rank of entry\nWhere rank of entry is:\n0\tLow\n1\tModerate\n2\tImportant\n3\tVital\nExample:\nEnglish/French@@@sun~~~soleil%%%3\n\nThird format:\nfield name@@@question~~~answer###order of entry\nWhere order of entry is a number equals or greater than zero and smaller than a billion.\nExample:\nEnglish/French@@@sun~~~soleil###15\n\nAny line which is formatted in another format will cause the import process to fail.\n</string>
     <string name="text_contained_in_special_text">enter a text that is not contained of any other special text</string>
     <string name="special_text">Special Text</string>
     <string name="schedule_enhanced_test">schedule an enhanced test</string>
@@ -352,7 +352,6 @@
     <string name="answer_will">Answer will be:</string>
     <string name="test">Test</string>
     <string name="today_s_entries">Today\'s entries</string>
-    <string name="help">help</string>
     <string name="friday">Friday</string>
     <string name="thursday">Thursday</string>
     <string name="wednesday">Wednesday</string>
@@ -362,4 +361,6 @@
     <string name="saturday">Saturday</string>
     <string name="exclude_days">You can exclude some days of week</string>
     <string name="exclude_days_help">You can exclude some days of the week so that no entries are assigned to them, such as the weekend.\nEntries will be distributed for all days of the week except these days.\nTo exclude a day, click on it so that its background becomes red.</string>
+    <string name="flexlayout" translatable="false">https://github.com/google/flexbox-layout</string>
+    <string name="color_picker" translatable="false">https://github.com/Pes8/android-material-color-picker-dialog</string>
 </resources>

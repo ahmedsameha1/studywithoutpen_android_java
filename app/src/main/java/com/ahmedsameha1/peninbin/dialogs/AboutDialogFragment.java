@@ -47,6 +47,8 @@ public class AboutDialogFragment extends DialogFragment {
             final TextView circular_floating_action_menu_license = (TextView) alertDialog.findViewById(R.id.circular_floating_action_menu);
             final TextView terms_of_use = (TextView) alertDialog.findViewById(R.id.terms_of_use);
             final TextView recyclerview_fast_scroller = (TextView) alertDialog.findViewById(R.id.recyclerview_fast_scroller);
+            final TextView color_picker = (TextView) alertDialog.findViewById(R.id.color_picker);
+            final TextView flexlayout = (TextView) alertDialog.findViewById(R.id.flexlayout);
             PackageInfo pInfo = null;
             String version = null;
             try {
@@ -88,7 +90,13 @@ public class AboutDialogFragment extends DialogFragment {
                     .create().show());
             recyclerview_fast_scroller.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
                     .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.apache_license_v2))
-                    .create().show());// TODO: 8/7/17 add the color picker library license
+                    .create().show());
+            color_picker.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
+                    .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.mit_license))
+                    .create().show());
+            flexlayout.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
+                    .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.apache_license_v2))
+                    .create().show());
         });
         return alertDialog;
     }

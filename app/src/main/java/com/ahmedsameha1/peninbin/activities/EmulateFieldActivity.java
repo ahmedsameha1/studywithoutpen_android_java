@@ -51,7 +51,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
     private Parcelable recyclerview_position;
     private boolean[] week_days_case = {true,true,true,true,true,true,true};
     private Button[] week_days = new Button[7];
-    // TODO: 8/9/17 add the flexbox library license in about dialog
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

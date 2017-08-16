@@ -189,7 +189,7 @@
     <string name="text_file">ملف txt منسق بشكل خاص</string>
     <string name="exported_file_in">ملفك المُصَدَّر في:</string>
     <string name="ask_import_fields">هل تريد استيراد المجالات من هذا الملف؟</string>
-    <string name="import_from_text_file_help">يجب أن يكون الملف ملف نصي txt\nﻻ يمكنك استيراد مدخﻻت إلى المجاﻻت من نوع مفكرة\nيجب أن يكون كل سطر في الملف النصي إما على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب\nأو على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب%%%مستوى أهمية المُدخَل\nحيث مستوى أهمية المُدخَل رقم واحد:\n0\tمنخفض\n1\tمتوسط\n2\tمهم\n3\tحيوي\nأو على هذه الهيئة:\nاسم المجال@@@السؤال~~~الجواب###ترتيب المُدخَل\nحيث ترتيب المُدخَل هو رقم  أكبر من أو يساوي صفر وأصغر من مليار</string>
+    <string name="import_from_text_file_help" formatted="false">يجب أن يكون نوع الملف: ملف نصي امتداده txt\nكل سطر في الملف يمثل مُدخل واحد.\nهناك ثلاث تنسيقات للسطر\nالتنسيق الأول:\nاسم المجال@@@السؤال~~~الجواب\nمثال:\nعربي/انجليزي@@@يلعب~~~play\n\nالتنسيق الثاني:\nاسم المجال@@@السؤال~~~الجواب%%%مستوى أهمية المُدخَل\nحيث مستوى أهمية المُدخَل:\n0\tمنخفض\n1\tمتوسط\n2\tمهم\n3\tحيوي\nمثال:\nعربي/انجليزي@@@يلعب~~~play%%%2\n\nالتنسيق الثالث:\nاسم المجال@@@السؤال~~~الجواب###ترتيب المُدخَل\nحيث ترتيب المُدخَل: رقم أكبر من أو يساوي صفر وأصغر من مليار\nمثال:\nعربي/انجليزي@@@يلعب~~~play###15\n\nأي سطر منسق بغير هذا التنسيق سيتسبب في فشل عملية الاستيراد\n</string>
     <string name="facebook_page">صفحة Facebook</string>
     <string name="collect_data_about_usage">هذا التطبيق يجمع معلومات غير محددة  الهوية عن استخدامه.</string>
     <string name="version">إصدار:</string>
@@ -342,7 +342,6 @@
     <string name="answer_will">الجواب سيصبح:</string>
     <string name="test">اختبار</string>
     <string name="today_s_entries">مُدخلات هذا اليوم</string>
-    <string name="help">help</string>
     <string name="friday">الجمعة</string>
     <string name="thursday">الخميس</string>
     <string name="wednesday">الأربعاء</string>
@@ -350,7 +349,7 @@
     <string name="monday">الاثنين</string>
     <string name="sunday">الأحد</string>
     <string name="saturday">السبت</string>
-    <string name="exclude_days">You can exclude some days of the week</string>
+    <string name="exclude_days">تستطيع استثناء بعض أيام الأسبوع</string>
     <string name="exclude_days_help">يمكنك استثناء أيام من الأسبوع كي لا يتم تخصيص مُدخلات لها، مثل نهاية الأسبوع مثلا.\nسيتم توزيع المُدخلات على كل أيام الأسبوع ما عدا هذه الأيام.\nلكي تستثني يوم، انقر عليه بحيث تصبح خلفيته حمراء.</string>
 </resources>
 
