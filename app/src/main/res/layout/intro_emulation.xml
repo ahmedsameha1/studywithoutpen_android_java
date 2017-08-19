@@ -49,16 +49,15 @@
     </LinearLayout>
     <EditText
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="280dp"
         android:textSize="20sp"
-        android:textColor="@color/white_color"
         android:focusable="false"
         android:cursorVisible="false"
         android:background="@null"
-        android:layout_margin="5dp"
+        android:layout_margin="15dp"
         android:padding="5dp"
-        android:text="sss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nssssss\nsss"
-        android:layout_weight="1"
-        android:gravity="center"/>
+        android:text="@string/intro_emulation"
+        android:lineSpacingExtra="3dp"
+        android:textColor="@color/black_color"/>
 
 </LinearLayout>

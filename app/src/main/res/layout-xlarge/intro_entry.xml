@@ -39,8 +39,9 @@
         android:layout_margin="20dp"
         android:padding="5dp"
         android:text="@string/intro_entry_text"
-        android:layout_weight="0.9"
+        android:layout_weight="0.95"
         android:textColor="@color/black_color"
-        android:lineSpacingExtra="3dp"/>
+        android:lineSpacingExtra="3dp"
+        android:gravity="start"/>
 
 </LinearLayout>

@@ -1,16 +1,16 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
+import android.app.LoaderManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.Loader;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -25,11 +25,7 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
-import android.app.LoaderManager;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
-import android.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -49,27 +45,27 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
+import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.dialogs.AboutDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ImportFromWhatDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ImportProvidedFieldDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
-import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewAdapter;
-import com.ahmedsameha1.peninbin.database.Contract;
-
-import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.dialogs.CreateFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ExportFieldsDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FieldPropertiesDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ImportFromWhatDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ImportProvidedFieldDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
-import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
 import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
+import com.ahmedsameha1.peninbin.secondary_activities.IntroActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
@@ -77,7 +73,6 @@ import com.ahmedsameha1.peninbin.utils.PayloadString;
 import com.ahmedsameha1.peninbin.utils.ShowEula;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.android.vending.billing.IInAppBillingService;
-import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
@@ -243,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements
                 .setCategory(ANALYTICS_CATEGORY)
                 .setAction(ActivityUtility.getVersionCode(this) + "run the app")
                 .build());
-        startActivity(new Intent(this, IntroActivity.class));
+        IntroActivity.show(this);
     }
 
 

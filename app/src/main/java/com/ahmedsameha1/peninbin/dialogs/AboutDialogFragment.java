@@ -9,10 +9,12 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.secondary_activities.IntroActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -40,6 +42,7 @@ public class AboutDialogFragment extends DialogFragment {
         alertDialog.setOnShowListener(dialog -> {
             final Button facebook = (Button) alertDialog.findViewById(R.id.facebook);
             final Button contact_developer = (Button) alertDialog.findViewById(R.id.contact_developer);
+            final Button app_intro = (Button) alertDialog.findViewById(R.id.app_intro);
             final TextView version_textview = (TextView) alertDialog.findViewById(R.id.version);
             final TextView cwac_loaderex_license = (TextView) alertDialog.findViewById(R.id.cwac_loaderex);
             final TextView android_filepicker_license = (TextView) alertDialog.findViewById(R.id.android_filepicker);
@@ -47,6 +50,7 @@ public class AboutDialogFragment extends DialogFragment {
             final TextView circular_floating_action_menu_license = (TextView) alertDialog.findViewById(R.id.circular_floating_action_menu);
             final TextView terms_of_use = (TextView) alertDialog.findViewById(R.id.terms_of_use);
             final TextView recyclerview_fast_scroller = (TextView) alertDialog.findViewById(R.id.recyclerview_fast_scroller);
+            final TextView app_intro_license = (TextView) alertDialog.findViewById(R.id.app_intro_license);
             PackageInfo pInfo = null;
             String version = null;
             try {
@@ -64,6 +68,12 @@ public class AboutDialogFragment extends DialogFragment {
                         .setAction(ActivityUtility.getVersionCode(getActivity()) + "open facebook page")
                         .build());
                 dismiss();
+            });
+            app_intro.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getActivity().startActivity(new Intent(getActivity(), IntroActivity.class));
+                }
             });
             contact_developer.setOnClickListener(view -> {
                 Intent intent = new Intent(Intent.ACTION_SEND);
@@ -89,6 +99,14 @@ public class AboutDialogFragment extends DialogFragment {
             recyclerview_fast_scroller.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
                     .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.apache_license_v2))
                     .create().show());
+            app_intro_license.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(),R.raw.apache_license_v2))
+                            .create().show();
+                }
+            });
         });
         return alertDialog;
     }

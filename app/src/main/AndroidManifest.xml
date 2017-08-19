@@ -247,7 +247,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".activities.IntroActivity"
+            android:name=".secondary_activities.IntroActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".secondary_activities.ImageActivity"

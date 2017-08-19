@@ -36,15 +36,21 @@
 
         </LinearLayout>
 
-
-        <TextView
+        <Button
+            android:id="@+id/app_intro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/app_intro"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+        <Button
             android:id="@+id/terms_of_use"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="6dp"
-            android:padding="3dp"
-            android:text="@string/terms_of_use" />
+
+            android:text="@string/terms_of_use"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
 
         <Button
             android:id="@+id/contact_developer"
@@ -122,6 +128,14 @@
                 android:layout_margin="5dp"
                 android:padding="5dp"
                 android:text="@string/https_github_com_danoz73_recyclerviewfastscroller" />
+
+            <TextView
+                android:id="@+id/app_intro_license"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:text="@string/app_intro_license" />
 
         </LinearLayout>
     </LinearLayout>

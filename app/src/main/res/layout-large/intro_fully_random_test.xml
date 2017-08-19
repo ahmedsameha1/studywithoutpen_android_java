@@ -52,7 +52,8 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="0.9"
+        android:gravity="start"
         android:textSize="20sp"
         android:focusable="false"
         android:cursorVisible="false"

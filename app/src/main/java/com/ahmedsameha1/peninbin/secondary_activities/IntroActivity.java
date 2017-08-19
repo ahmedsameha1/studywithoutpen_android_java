@@ -1,19 +1,23 @@
-package com.ahmedsameha1.peninbin.activities;
+package com.ahmedsameha1.peninbin.secondary_activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.View;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.AppIntroSampleSlide;
-import com.ahmedsameha1.peninbin.secondary_activities.ImageActivity;
 import com.github.paolorotolo.appintro.AppIntro;
 import com.github.paolorotolo.appintro.AppIntroFragment;
 
 public class IntroActivity extends AppIntro {
 
     public static final String IMAGE_RESOURCE_ID = "image_resorce_id";
+    private static final String INTRO_KEY = "intro";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,6 +31,9 @@ public class IntroActivity extends AppIntro {
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_enhanced_test));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_fully_random_test));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_emulation));
+
+        showSkipButton(false);
+
     }
 
     @Override
@@ -75,5 +82,21 @@ public class IntroActivity extends AppIntro {
         Intent intent = new Intent(this, ImageActivity.class);
         intent.putExtra(IMAGE_RESOURCE_ID, image_resource_id);
         startActivity(intent);
+    }
+    @Override
+    public void onDonePressed(Fragment currentFragment) {
+        super.onDonePressed(currentFragment);
+        finish();
+    }
+
+    public static void show(Context context) {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences.Editor editor = prefs.edit();
+        boolean hasBeenShown = prefs.getBoolean(INTRO_KEY, false);
+        if ( ! hasBeenShown ) {
+            context.startActivity(new Intent(context, IntroActivity.class));
+            editor.putBoolean(INTRO_KEY, true);
+            editor.commit();
+        }
     }
 }

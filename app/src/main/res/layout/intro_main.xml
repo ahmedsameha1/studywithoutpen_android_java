@@ -52,7 +52,7 @@
         android:focusable="false"
         android:cursorVisible="false"
         android:background="@null"
-        android:layout_margin="5dp"
+        android:layout_margin="15dp"
         android:padding="5dp"
         android:text="@string/intro_main_text"
         />
