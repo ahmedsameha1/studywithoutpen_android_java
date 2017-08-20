@@ -1,0 +1,78 @@
+[
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/design_fab_out.xml",
+        "source": "/home/ahmed/.android/build-cache/ac67e65a4b3a8fe7328bef395c9484b4b3ccc0a0/output/res/anim/design_fab_out.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/design_snackbar_out.xml",
+        "source": "/home/ahmed/.android/build-cache/ac67e65a4b3a8fe7328bef395c9484b4b3ccc0a0/output/res/anim/design_snackbar_out.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_slide_out_top.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_slide_out_top.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/marked_item_animation.xml",
+        "source": "/home/ahmed/.android/build-cache/f86e7fe3e93a21836a9c496cd27373c9da365e4c/output/res/anim/marked_item_animation.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_popup_enter.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_popup_enter.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_popup_exit.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_popup_exit.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/design_fab_in.xml",
+        "source": "/home/ahmed/.android/build-cache/ac67e65a4b3a8fe7328bef395c9484b4b3ccc0a0/output/res/anim/design_fab_in.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_slide_in_bottom.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_slide_in_bottom.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/design_snackbar_in.xml",
+        "source": "/home/ahmed/.android/build-cache/ac67e65a4b3a8fe7328bef395c9484b4b3ccc0a0/output/res/anim/design_snackbar_in.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_slide_in_top.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_slide_in_top.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_fade_in.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_fade_in.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_grow_fade_in_from_bottom.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_grow_fade_in_from_bottom.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_slide_out_bottom.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_slide_out_bottom.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_fade_out.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_fade_out.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/unmarked_item_animation.xml",
+        "source": "/home/ahmed/.android/build-cache/f86e7fe3e93a21836a9c496cd27373c9da365e4c/output/res/anim/unmarked_item_animation.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/abc_shrink_fade_out_from_bottom.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/anim/abc_shrink_fade_out_from_bottom.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/anim_alpha.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/anim/anim_alpha.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/design_bottom_sheet_slide_in.xml",
+        "source": "/home/ahmed/.android/build-cache/ac67e65a4b3a8fe7328bef395c9484b4b3ccc0a0/output/res/anim/design_bottom_sheet_slide_in.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/anim/design_bottom_sheet_slide_out.xml",
+        "source": "/home/ahmed/.android/build-cache/ac67e65a4b3a8fe7328bef395c9484b4b3ccc0a0/output/res/anim/design_bottom_sheet_slide_out.xml"
+    }
+]

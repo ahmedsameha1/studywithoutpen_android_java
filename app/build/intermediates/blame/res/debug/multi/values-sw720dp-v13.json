@@ -1,0 +1,45 @@
+[
+    {
+        "outputFile": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-sw720dp-v13/values-sw720dp-v13.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endColumn": 57,
+                    "endOffset": 108
+                },
+                "from": {
+                    "file": "/home/ahmed/.android/build-cache/30563937aace936b0e2f7104ee979660c36f52a5/output/res/values-sw720dp-v13/values-sw720dp-v13.xml",
+                    "position": {
+                        "startLine": 2,
+                        "startColumn": 4,
+                        "startOffset": 55,
+                        "endColumn": 57,
+                        "endOffset": 108
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 3,
+                    "startColumn": 4,
+                    "startOffset": 113,
+                    "endColumn": 58,
+                    "endOffset": 167
+                },
+                "from": {
+                    "file": "/home/ahmed/.android/build-cache/30563937aace936b0e2f7104ee979660c36f52a5/output/res/values-sw720dp-v13/values-sw720dp-v13.xml",
+                    "position": {
+                        "startLine": 3,
+                        "startColumn": 4,
+                        "startOffset": 113,
+                        "endColumn": 58,
+                        "endOffset": 167
+                    }
+                }
+            }
+        ]
+    }
+]

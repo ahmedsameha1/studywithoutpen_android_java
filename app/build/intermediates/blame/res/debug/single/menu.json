@@ -1,0 +1,66 @@
+[
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/field_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/field_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/copy_move_entries_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/copy_move_entries_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/add_entry_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/add_entry_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/wrong_answers_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/wrong_answers_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/ask_again_after_test_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/ask_again_after_test_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/emulate_field_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/emulate_field_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/edit_entry_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/edit_entry_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/main_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/main_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/test_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/test_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/search_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/search_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/study_worng_answers_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/study_worng_answers_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/quick_test_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/quick_test_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/field_information_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/field_information_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/study_a_period_activity_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/study_a_period_activity_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/same_search_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/same_search_menu.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/menu/add_entry_options_menu.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/menu/add_entry_options_menu.xml"
+    }
+]

@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-land/content_study.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-land/content_study.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-land/content_add_entry.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-land/content_add_entry.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-land/materialcolorpicker__layout_color_picker.xml",
+        "source": "/home/ahmed/.android/build-cache/3e7d719ea82a715aa9c3141c78cf72a5b684a945/output/res/layout-land/materialcolorpicker__layout_color_picker.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-land/content_study_a_period.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-land/content_study_a_period.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-land/content_test.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-land/content_test.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-land/content_edit_entry.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-land/content_edit_entry.xml"
+    }
+]

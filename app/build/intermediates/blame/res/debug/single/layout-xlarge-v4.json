@@ -1,0 +1,34 @@
+[
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-xlarge-v4/intro_emulation.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-xlarge/intro_emulation.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-xlarge-v4/intro_study_period.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-xlarge/intro_study_period.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-xlarge-v4/intro_entry.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-xlarge/intro_entry.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-xlarge-v4/intro_main.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-xlarge/intro_main.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-xlarge-v4/intro_app.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-xlarge/intro_app.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-xlarge-v4/intro_enhanced_test.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-xlarge/intro_enhanced_test.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-xlarge-v4/intro_fully_random_test.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-xlarge/intro_fully_random_test.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-xlarge-v4/field_properties_dialog_fragment.xml",
+        "source": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/src/main/res/layout-xlarge/field_properties_dialog_fragment.xml"
+    }
+]

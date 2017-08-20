@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/enhanced_test"
+        android:textSize="45sp"
+        android:padding="5dp"
+        android:layout_margin="20dp"
+        android:id="@+id/textView"
+        android:textColor="@color/colorAccent"
+        android:layout_gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/intro_enhanced_test_scaled_width270"
+            android:id="@+id/enhanced_test"
+            android:layout_marginStart="50dp"
+            android:onClick="introImageClicked"
+            android:elevation="5dp"
+            />
+
+       <ImageView
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:layout_weight="0.5"
+           android:layout_gravity="center"
+           android:src="@drawable/intro_arrow"/>
+
+        <ImageView
+            android:id="@+id/enhanced_test_dialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/intro_enhanced_test_dialog_scaled_width270"
+            android:layout_marginEnd="50dp"
+            android:onClick="introImageClicked"
+            android:elevation="5dp"
+            />
+    </LinearLayout>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:textSize="20sp"
+        android:focusable="false"
+        android:cursorVisible="false"
+        android:background="@null"
+        android:layout_margin="20dp"
+        android:padding="5dp"
+        android:layout_weight="0.95"
+        android:textColor="@color/black_color"
+        android:lineSpacingExtra="3dp"
+        android:text="@string/intro_enhanced_test"
+        android:gravity="start"/>
+
+</LinearLayout>

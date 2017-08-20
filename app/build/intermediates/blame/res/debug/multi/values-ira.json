@@ -1,0 +1,102 @@
+[
+    {
+        "outputFile": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-ira/values-ira.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endColumn": 78,
+                    "endOffset": 129
+                },
+                "from": {
+                    "file": "/home/ahmed/.android/build-cache/3e7d719ea82a715aa9c3141c78cf72a5b684a945/output/res/values-ira/values-ira.xml",
+                    "position": {
+                        "startLine": 2,
+                        "startColumn": 4,
+                        "startOffset": 55,
+                        "endColumn": 78,
+                        "endOffset": 129
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 3,
+                    "startColumn": 4,
+                    "startOffset": 134,
+                    "endColumn": 70,
+                    "endOffset": 200
+                },
+                "from": {
+                    "file": "/home/ahmed/.android/build-cache/3e7d719ea82a715aa9c3141c78cf72a5b684a945/output/res/values-ira/values-ira.xml",
+                    "position": {
+                        "startLine": 3,
+                        "startColumn": 4,
+                        "startOffset": 134,
+                        "endColumn": 70,
+                        "endOffset": 200
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 4,
+                    "startColumn": 4,
+                    "startOffset": 205,
+                    "endColumn": 73,
+                    "endOffset": 274
+                },
+                "from": {
+                    "file": "/home/ahmed/.android/build-cache/3e7d719ea82a715aa9c3141c78cf72a5b684a945/output/res/values-ira/values-ira.xml",
+                    "position": {
+                        "startLine": 4,
+                        "startColumn": 4,
+                        "startOffset": 205,
+                        "endColumn": 73,
+                        "endOffset": 274
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 5,
+                    "startColumn": 4,
+                    "startOffset": 279,
+                    "endColumn": 81,
+                    "endOffset": 356
+                },
+                "from": {
+                    "file": "/home/ahmed/.android/build-cache/3e7d719ea82a715aa9c3141c78cf72a5b684a945/output/res/values-ira/values-ira.xml",
+                    "position": {
+                        "startLine": 5,
+                        "startColumn": 4,
+                        "startOffset": 279,
+                        "endColumn": 81,
+                        "endOffset": 356
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 6,
+                    "startColumn": 4,
+                    "startOffset": 361,
+                    "endColumn": 64,
+                    "endOffset": 421
+                },
+                "from": {
+                    "file": "/home/ahmed/.android/build-cache/3e7d719ea82a715aa9c3141c78cf72a5b684a945/output/res/values-ira/values-ira.xml",
+                    "position": {
+                        "startLine": 6,
+                        "startColumn": 4,
+                        "startOffset": 361,
+                        "endColumn": 64,
+                        "endOffset": 421
+                    }
+                }
+            }
+        ]
+    }
+]

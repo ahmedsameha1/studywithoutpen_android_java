@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <string-array name="check_type">
+        <item>لا تتحقق من حالة الأحرف والمسافات</item>
+        <item>لا تتحقق من المسافات</item>
+        <item>لا تتحقق من حالة الأحرف</item>
+        <item>تحقق من حالة الأحرف والمسافات</item>
+    </string-array>
+    <string-array name="field_activity_features">
+        <item>مذاكرة فترة</item>
+        <item>اختبار مُحَسَّن</item>
+        <item>اختبار عشوائي تماما</item>
+        <item>جَدْوِل موعدا</item>
+        <item>نسخ/نقل</item>
+        <item>خصائص المجال</item>
+        <item>معلومات المجال</item>
+    </string-array>
+    <string-array name="field_type">
+        <item>افتراضي</item>
+        <item>قرآن</item>
+        <item>معجم إنجليزية</item>
+    </string-array>
+    <string-array name="main_activity_features">
+        <item>تصدير مجالات</item>
+        <item>استيراد مجالات</item>
+        <item>استيراد مجال متوفر</item>
+        <item>اشترك</item>
+        <item>عن التطبيق</item>
+    </string-array>
+    <string-array name="number_or_percentage">
+        <item>أدخل عدد الأسئلة:</item>
+        <item>أدخل نسبة من مُدخَلات المجال:</item>
+    </string-array>
+    <string-array name="rank">
+        <item>منخفض</item>
+        <item>متوسط</item>
+        <item>هام</item>
+        <item>حيوي</item>
+    </string-array>
+    <string-array name="refreshing_messages">
+        <item>لو أنك تذاكر كل يوم 5 كلمات جديدة.
+وتقوم بمذاكرتها باستخدام خاصية مذاكرة فترة وتدخل الفترة 10 أيام، سيكون ما عليك  يوميا هو إدخال خمس كلمات، ومذاكرتها باستخدام وظيفة المذاكرة، ثم المذاكرة باستخدام خاصية مذاكرة فترة، 50 كلمة، 5 كلمات عن كل يوم.
+لو أنك بدأت هكذا من الصفر مع الإسبانية، ستكون بعد سنة قد ذاكرت ما يزيد عن 1800 كلمة إسبانية.
+لاحظ أنه يمكنك تسمع الكلمة في كل مرة تكتبها بشكل صحيح.
+كيف حال إسبانيتك بعد سنة؟</item>
+    <item>هل تواجه كلمات أجنبية جديدة كل يوم؟
+تستطيع أن تجعل هذه الكلمات في حوزتك، أنشئ مجالا لهذه الكلمات، ثم كلما واجهت كلمة جديدة، أدخلها، وذاكرها، ستحفظ كيف تُكتَب، وتعرف كيف ُتنطَق، وباستخدام خاصية مذاكرة فترة، أعد مذاكرتها لعدة أيام متوالية حتى لا تنسها.</item>
+    <item>هل يصعب عليك مذاكرة تصريفات الأفعال الشاذة؟
+أنشئ مجالا لتصريفات الأفعال، سيكون المُدخَل كالتالي: السؤال هو الصيغة الرئيسية للفعل، والجواب هو جميع تصريفات الفعل.</item>
+    <item>يمكنك أن تذاكرالتاريخ.
+أنشئ مجالا للتاريخ، السؤال سيكون هو الحدث التاريخي، والجواب هو السنة.</item>
+   <item>يمكنك أن تذاكر التعريفات.
+أنشئ مجالا للتعريفات، والسؤال سيكون ما تريد تعريفه، الجواب وهو التعريف نفسه.</item>
+    <item>يمكنك أن تذاكر الثوابت الفيزيائية.
+أنشئ مجالات للثوابت الفيزيائية، السؤال سيكون اسم الثابت أو رمزه والجواب سيكون قيمة الثابت.</item>
+    <item>يمكنك أن تذاكر أي نص تريد مذاكرته باستخدام التطبيق. ما دمت تستطيع إدخال النص على التطبيق، تستطيع أن تذاكره باستخدامه، لا تحصراستخدامك للتطبيق في اللغات.</item>
+    <item>شارك مجالاتك مع الآخرين، وهم سيشاركون مجالاتهم معك.
+إذا قمت و20 من أصدقائك بالعمل على معجم ستنهون إدخاله بسهولة، وتستطيعون أن تذاكرونه، أنتم وغيركم من الناس.</item>
+    <item>تذكر: يمكنك دائما أن تُصَّدِّر مجالاتك، وتستوردها  كملفات.</item>
+    </string-array>
+    <string name="Egypt_sim">"من لديه شريحة من مصر ، حاليا، لا يحتاج إلى اشتراك "</string>
+    <string name="Your_correct_answers_was">إجاباتك الصحيحة كانت </string>
+    <string name="_continue">استمر</string>
+    <string name="_day">يوم</string>
+    <string name="_hour">ساعة</string>
+    <string name="_question">سؤال</string>
+    <string name="_try">محاولة</string>
+    <string msgid="4600421777120114993" name="abc_action_bar_home_description">"التنقل إلى الشاشة الرئيسية"</string>
+    <string msgid="1397052879051804371" name="abc_action_bar_home_description_format">"%1$s، %2$s"</string>
+    <string msgid="6623331958280229229" name="abc_action_bar_home_subtitle_description_format">"%1$s، %2$s، %3$s"</string>
+    <string msgid="1594238315039666878" name="abc_action_bar_up_description">"التنقل إلى أعلى"</string>
+    <string msgid="3588849162933574182" name="abc_action_menu_overflow_description">"خيارات إضافية"</string>
+    <string msgid="4076576682505996667" name="abc_action_mode_done">"تم"</string>
+    <string msgid="7468859129482906941" name="abc_activity_chooser_view_see_all">"عرض الكل"</string>
+    <string msgid="2031811694353399454" name="abc_activitychooserview_choose_application">"اختيار تطبيق"</string>
+    <string msgid="121134116657445385" name="abc_capital_off">"إيقاف"</string>
+    <string msgid="3405795526292276155" name="abc_capital_on">"تشغيل"</string>
+    <string msgid="7723749260725869598" name="abc_search_hint">"بحث…"</string>
+    <string msgid="3691816814315814921" name="abc_searchview_description_clear">"محو طلب البحث"</string>
+    <string msgid="2550479030709304392" name="abc_searchview_description_query">"طلب البحث"</string>
+    <string msgid="8264924765203268293" name="abc_searchview_description_search">"بحث"</string>
+    <string msgid="8928215447528550784" name="abc_searchview_description_submit">"إرسال طلب البحث"</string>
+    <string msgid="893419373245838918" name="abc_searchview_description_voice">"البحث الصوتي"</string>
+    <string msgid="3421042268587513524" name="abc_shareactionprovider_share_with">"مشاركة مع"</string>
+    <string msgid="7165123711973476752" name="abc_shareactionprovider_share_with_application">"‏مشاركة مع %s"</string>
+    <string msgid="1603543279005712093" name="abc_toolbar_collapse_description">"تصغير"</string>
+    <string name="about_app">عن التطبيق</string>
+    <string name="add_entry">أضف مُدخلًا</string>
+    <string name="add_entry_finish">أضف مُدخلاً واخرج</string>
+    <string name="add_field_note">أضف ملحوظة</string>
+    <string name="agree">أوافق</string>
+    <string name="already_inserted">هذا المُدخل موجود بالفعل في هذا المجال!</string>
+    <string name="already_subscribed">لديك بالفعل اشتراك!</string>
+    <string name="answer">الجواب:</string>
+    <string name="answer_area">مساحة الجواب</string>
+    <string name="answer_area_help">هذا الرقم يمثل حصة مساحة الجواب في المساحة الإجمالية. إذا كنت تريد مساحة الجواب أن تكون أكبر، زد من هذا الرقم، إذا كنت تريد مساحة الجواب أن تكون أصغر، قلل من هذا الرقم. طبعا، كلما زادت مساحة الجواب كلما قلت مساحة السؤال.</string>
+    <string name="answer_will">الجواب سيصبح:</string>
+    <string name="app_idea">\tمذاكرة النصوص، فالتطبيق يقارن بين النص الذي أدخلته وبين النص الصحيح نيابة عنك!\n
+\tأن يكون حفظك تراكميا، فالذي تحفظه اليوم، لا تفقده بعد سنة، أي لا تنقص إن لم تكن تزيد.\n
+\tأن تقلل فرصة نسيانك للنصوص التي تحفظها.\n
+\tألا تترك النصوص القديمة حتى تُنسى.\n
+\tمعرفة كيفية نطق الكلمات، إذا كنت تذاكر مفردات لغة (يعتمد هذا على تطبيق تحويل النص إلى كلام على جهازك).\n
+\tتكرار مذاكرة النصوص الجديدة في أيام متتالية متعددة، حتى يتم تثبيتها في ذهنك.\n
+\tالتركيز على مذاكرة ما تكثر من الخطأ فيه من النصوص.\n
+\tالتركير على مذاكرة ما تعتبره أكثر أهمية لك من النصوص.\n
+\tاختبار نفسك عندما تريد.\n
+\tاختبار نفسك في أوقات عشوائية من اليوم، حتى تبقى مستعدا.\n</string>
+    <string name="app_intro">App Introduction</string>
+    <string name="app_intro_done_button">إنهاء</string>
+    <string name="app_intro_skip_button">تخطي</string>
+    <string name="ask_again">اسأل مرة أخرى</string>
+    <string name="ask_for_continue_previous_study_during">هل تريد استكمال جلسة الاستذكار السابقة؟</string>
+    <string name="ask_for_continue_previous_test">هل تريد استكمال جلسة الاختبار السابقة؟</string>
+    <string name="ask_import_fields">هل تريد استيراد المجالات من هذا الملف؟</string>
+    <string name="asked">سُئِل: %1$s</string>
+    <string name="asked_menu">سُئِل</string>
+    <string name="background_thread">انتظر حتى تنتهي عملية التصدير/الاستيراد/المحاكاة</string>
+    <string name="both_question_answer">يجب أن تدخل شيئا في كل من السؤال والجواب</string>
+    <string name="by_number">بالعدد</string>
+    <string name="by_percentage">بالنسبة المئوية</string>
+    <string name="cancel">إلغاء</string>
+    <string name="cannot_reach_service">لا يمكن الوصول للخدمة</string>
+    <string name="change_field_name">عَدِّل اسم المجال</string>
+    <string name="change_field_name_background_thread">لا يمكنك تغيير اسم المجال أثناء جريان عملية تصدير/استيراد/محاكاة</string>
+    <string name="change_text_size">غَيِّر حجم النص</string>
+    <string name="check">تَحَقق</string>
+    <string name="check_type">نوع التحقق:</string>
+    <string name="collect_data_about_usage">هذا التطبيق يجمع معلومات غير محددة  الهوية عن استخدامه.</string>
+    <string msgid="8585111718777012708" name="common_google_play_services_enable_button">"تمكين"</string>
+    <string msgid="7045129128108380659" name="common_google_play_services_enable_text">"‏لن يعمل <ns1:g id="APP_NAME">%1$s</ns1:g> ما لم يتم تمكين خدمات Google Play."</string>
+    <string msgid="3147157405986503375" name="common_google_play_services_enable_title">"‏تمكين خدمات Google Play"</string>
+    <string msgid="9115728400623041681" name="common_google_play_services_install_button">"تثبيت"</string>
+    <string msgid="8179894293032530091" name="common_google_play_services_install_text">"‏لن يتم تشغيل <ns1:g id="APP_NAME">%1$s</ns1:g> بدون خدمات Google Play، والتي لا تتوفر على جهازك."</string>
+    <string msgid="7442193194585196676" name="common_google_play_services_install_title">"‏الحصول على خدمات Google Play"</string>
+    <string msgid="180394615667698242" name="common_google_play_services_notification_ticker">"‏خطأ في خدمات Google Play"</string>
+    <string msgid="2518680582564677258" name="common_google_play_services_unknown_issue">"‏لدى <ns1:g id="APP_NAME">%1$s</ns1:g> مشكلة في خدمات Google Play. الرجاء إعادة المحاولة."</string>
+    <string msgid="5501187292256987189" name="common_google_play_services_unsupported_text">"‏لن يتم تشغيل <ns1:g id="APP_NAME">%1$s</ns1:g> بدون خدمات Google Play التي لا يوفرها جهازك."</string>
+    <string msgid="8172070149091615356" name="common_google_play_services_update_button">"تحديث"</string>
+    <string msgid="7773943415006962566" name="common_google_play_services_update_text">"‏لن يتم تشغيل <ns1:g id="APP_NAME">%1$s</ns1:g> ما لم يتم تحديث خدمات Google Play."</string>
+    <string msgid="8706675115216073244" name="common_google_play_services_update_title">"‏تحديث خدمات Google Play"</string>
+    <string msgid="7894275749778928941" name="common_google_play_services_updating_text">"‏لن يتم تشغيل <ns1:g id="APP_NAME">%1$s</ns1:g> بدون خدمات Google Play، والتي يتم تحديثها حاليًا."</string>
+    <string msgid="2804989272736383918" name="common_google_play_services_wear_update_text">"‏يجب توفر إصدار جديد من خدمات Google Play. سيتم تحديثها تلقائيًا قريبًا."</string>
+    <string msgid="5201977337835724196" name="common_open_on_phone">"فتح على الهاتف"</string>
+    <string msgid="3441753203274453993" name="common_signin_button_text">"تسجل الدخول"</string>
+    <string msgid="669893613918351210" name="common_signin_button_text_long">"‏تسجيل الدخول عبر Google"</string>
+    <string name="complete_or_cancel_last_study_session">لطفا أكمل أو ألغ أي جلسات موقوفة خاصة بهذا المجال، ﻷن هذا المُدخل في واحد من هذه الجلسات.</string>
+    <string name="contact_developer">اتصل بالمطور</string>
+    <string name="continue_last_study_agian">هل تريد إكمال جلسة (اسأل مرة أخرى) الغير منتهية؟</string>
+    <string name="control_the_entries_of_the_test">تحكم في مُدخلات الاختبار</string>
+    <string name="copy">نسخ</string>
+    <string name="copy_answer">انسخ الجواب</string>
+    <string name="copy_entries">نسخ مُدخلات</string>
+    <string name="copy_field">نسخ مجال</string>
+    <string name="copy_import_file_emulated">ستجد المجلد \"StudyWithoutPen\" في ذاكرة التخزين الداخلية لجهازك. انسخ الملف الذي ترغب في استيراده في هذا المجلد.</string>
+    <string name="copy_import_file_removable">ستجد المجلد \"StudyWithoutPen\" في ذاكرة التخزين الخارجية لجهازك (غالبا، الـ SD card). انسخ الملف الذي ترغب في استيراده في هذا المجلد.</string>
+    <string name="copy_in_the_following_folder">انسخ الملف الذي تريد استيراده في المجلد التالي:</string>
+    <string name="copy_move_entries">نسخ/نقل مُدخلات</string>
+    <string name="copy_question">انسخ السؤال</string>
+    <string name="create_field">إنشاء مجال</string>
+    <string name="day">أدخل عدد الأيام</string>
+    <string name="delete">حذف</string>
+    <string name="delete_an_entry">حذف مُدخَلٍ</string>
+    <string name="delete_entry">هل أنت متأكد من أنك تريد حذف هذا المُدخَل؟</string>
+    <string name="delete_field">حذف المجال</string>
+    <string name="delete_note">هل تريد حذف هذه الملاحظة؟</string>
+    <string name="disable_emulation">ألْغِ المُحاكاة</string>
+    <string name="dont_know">لا أعرف</string>
+    <string name="dont_schedule_tests_these_times">استثن أوقات من الاختبارات السريعة العشوائية</string>
+    <string name="drawer_close">أغلق</string>
+    <string name="drawer_open">افتح</string>
+    <string name="due_emulation_session_cancelation">بسبب عملية المحاكاة الجارية، تم إلغاء بعض  الجلسات المُجدولة</string>
+    <string name="edit">عَدِّل</string>
+    <string name="emulate_field">فَعِّل المحاكاة</string>
+    <string name="emulated_storage_notification">ستجد الملف المُصَدَّر في ذاكرة التخزين الداخلية لجهازك تحت مجلد يسمى \"StudyWithoutPen\". يمكنك  نسخ أو مشاركة الملف باستخدام مدير ملفات في جهازك أو باستخدام حاسوب</string>
+    <string name="emulation_completed">اكتملت المحاكاة</string>
+    <string name="emulation_disabled">ألغيت المحاكاة</string>
+    <string name="emulation_has_completed">اكتمل تفعيل محاكاة المجال</string>
+    <string name="emulation_has_disabled">اكتمل إلغاء محاكاة المجال</string>
+    <string name="emulation_runing">انتظر حتى تنتهي عملية تفعيل/إلغاء المحاكاة الجارية</string>
+    <string name="enable_emulation">فَعِّل المُحاكاة</string>
+    <string name="enhanced_test">اختبار مُحسَّن</string>
+    <string name="enhanced_test_time">وقت اختبار مُحَسَّن</string>
+    <string name="enter_a_question">أدخل سؤال\nالسؤال هنا هو: أي نص، ترغب في أن يكون دالاً على الجواب، الذي سوف تدخله أدناه. مهمة السؤال هي: عندما يقوم البرنامج بعرض السؤال عليك، فالمطلوب أن تُدخل الجواب المرتبط به، أي الجواب الذي ستدخله أدناه.</string>
+    <string name="enter_an_answer">أدخل جواب\nالجواب هنا هو: أي  نص تريد أن تذاكره.</string>
+    <string name="enter_date_time">انقر لتحديد التاريخ والوقت</string>
+    <string name="enter_field_name">أدخل اسم المجال</string>
+    <string name="enter_file_name_to_import">أدخل اسم الملف الذي تريد استيراده</string>
+    <string name="enter_new_field_name">أدخل اسم جديد للمجال</string>
+    <string name="enter_number_of_days_help">أدخل عدد الأيام الماضية من الآن. لنفترض أنك تريد أن تذاكر كافة المُدخلات التي كنت قد دخلتها في الأيام الخمسة الماضية، لذلك، أدخل 5 هنا. لاحظ أنه قد لا تُدخل أي شيء هنا. إذا قمت بإدخال رقم هنا ورقم للساعات أدناه، فإن التطبيق سيقوم بإضافتهما إلى بعضهما البعض، وسوف يجلب المُداخلات الخاصة بالفترة الناتجة.</string>
+    <string name="enter_number_of_hours_help">أدخل عدد الساعات الماضية من الآن. لنفترض أنك تريد أن تذاكر كافة المُدخلات التي كنت قد دخلتها في الساعات الخمسة الماضية، لذلك، أدخل 5 هنا. لاحظ أنه قد لا تُدخل أي شيء هنا. إذا قمت بإدخال رقم هنا ورقم للأيام أعلاه، فإن التطبيق سيقوم بإضافتهما إلى بعضهما البعض، وسوف يجلب المُداخلات الخاصة بالفترة الناتجة.</string>
+    <string name="enter_number_of_minutes">أدخل الدقائق</string>
+    <string name="enter_number_of_questions">أدخل عدد الأسئلة</string>
+    <string name="enter_number_of_tries_help">ادخل عدد المحاولات هنا. التطبيق سوف يدعك تستمر في محاولة إدخال الإجابة الصحيحة للسؤال الحالي حتى تصل عدد محاولاتك لهذا الرقم، بعدها سيحتسب التطبيق هذا المُدخل في المُدخلات التي أخطأت في إجابتها ثم ينتقل إلى السؤال التالي، إذا أدخلت إجابة صحيحة للسؤال الحالي قبل أن تصل عدد محاولاتك لهذا الرقم فلن يتم احتساب المُدخل على أنه من المُدخلات التي أخطأت في إجابتها.</string>
+    <string name="enter_percentage">النسبة المئوية من المجال (بدون %)</string>
+    <string name="enter_question_area_answer_area">أدخل قيمة لكل من مساحة السؤال ومساحة الجواب!</string>
+    <string name="enter_search_text">لطفا، أدخل نصا للبحث.</string>
+    <string name="enter_the_number_of__everyday_entries">أدخل عدد المُدخلات لكل يوم</string>
+    <string name="enter_the_time_of_answer">أدخل وقت الجواب</string>
+    <string name="enter_time_of_answer_help">ادخل الوقت الذي تريد التطبيق ان ينتظره قبل أن ينفذ الإجراء الذي حددته</string>
+    <string name="enter_tries_number">أدخل عدد المحاولات</string>
+    <string name="enter_values_of_tries_question_quick_tests">لطفا، أدخل عدد الأختبارات السريعة، عدد المحاولات، عدد الأسئلة.</string>
+    <string name="enter_your_answer">أدخل إجابتك</string>
+    <string name="entries">المُدخلات</string>
+    <string name="error">يوجد خطأ</string>
+    <string name="everyday_entries_help">أدخل عدد المدخلات التي  تريد أن تذاكرها يوميا. كل يوم سيحاكي التطبيق أنك أدخلت هذا العدد من المدخلات في  ذلك اليوم. لو كان المجال الذي تقوم بتفعيل المحاكاة فيه يحتوي على 1000 مدخل، وأدخلت هنا 5 سيأخذ هذا المجال 200 يوم حتى ينتهي. لو أنك  ستدخل مدخلات في هذا المجال مستقبلا ، سيقوم التطبيق بمحاكاة أنك أدخلت هذه المدخلات ابتداء من  اليوم 201، وهكذا.\nتؤثر المحاكاة في  وظائف الاختبار ووظيفة مذاكرة فترة، لن يحدث تأثير في  قائمة مدخلات المجال.</string>
+    <string name="excel">تَفَوَّق</string>
+    <string name="excel_memorizing_texts">تَفَوَّق في حفظ النصوص</string>
+    <string name="exclude_days">تستطيع استثناء بعض أيام الأسبوع</string>
+    <string name="exclude_days_help">يمكنك استثناء أيام من الأسبوع كي لا يتم تخصيص مُدخلات لها، مثل نهاية الأسبوع مثلا.\nسيتم توزيع المُدخلات على كل أيام الأسبوع ما عدا هذه الأيام.\nلكي تستثني يوم، انقر عليه بحيث تصبح خلفيته حمراء.</string>
+    <string name="export">صدِّر</string>
+    <string name="export_completed">اكتمل تصدير مجالاتك</string>
+    <string name="export_failed">لقد فشل تصدير المجالات</string>
+    <string name="exported_file_in">ملفك المُصَدَّر في:</string>
+    <string name="external_storage_not_ready">التخزين الخارجي الخاص بجهازك غير جاهز، ربما توجد مشكلة مع sdcard</string>
+    <string name="external_storage_unmounted">وحدة التخزين الخاصة بجهازك غير مُعَدَة لعملية التصدير!</string>
+    <string name="facebook_page">صفحة Facebook</string>
+    <string name="field_deletion_message">هل أنت متأكد من أنك تريد حذف المجال (%1$s)؟</string>
+    <string name="field_doesnot_exist">هذا المجال غير موجود</string>
+    <string name="field_emulated">لو كنت قمت بمحاكاة المجال اليوم، ستبدأ المُدخلات في الظهور من غد</string>
+    <string name="field_emulation">مُحاكاة مجال</string>
+    <string name="field_notes">مﻻحظات</string>
+    <string name="field_properties">خصائص المجال</string>
+    <string name="field_same_name">يوجد مجال بنفس الاسم!</string>
+    <string name="field_type">نوع المجال:</string>
+    <string name="field_with_same_name">هناك مجال بنفس اﻻسم!</string>
+    <string name="fields">المجالات</string>
+    <string name="file_name">أدخل اسم للملف الذي سيتم تصديره (حروف صغيرة):</string>
+    <string name="file_not_exist">هذا الملف غير موجود! تأكد من أنك نسخت الملف في المسار الموضح، وأنك أدخلت اسم الملف بشكل صحيح.</string>
+    <string name="file_path">مسار الملف: %1$s</string>
+    <string name="file_with_same_name">أدخل اسم آخر للملف. حاليا المجلد به ملف بنفس الاسم!</string>
+    <string name="fill_all_fields">لطفا، أدخل كل المطلوبات</string>
+    <string name="find_answer_suffix">" ثانية لتجد الجواب"</string>
+    <string name="find_file_manager">ابحث عن مدير ملفات</string>
+    <string name="finding_answer_help">"أدخل عدد الثواني التي تحتاجها لإيجاد الجواب. وقت الجواب سيتم احتسابه على أساس  هذا الرقم  مع رقم قراءة السؤال ورقم إدخال الجواب"</string>
+    <string name="first_character">"أول حرف هو: "</string>
+    <string name="first_entry">هذا أول مُدخل!</string>
+    <string name="first_letters">الحرف الأول:</string>
+    <string name="format_reading_per_letter_second">قراءة %1$s حرف/ثانية</string>
+    <string name="format_typing_per_letter_second">إدخال %1$s حرف/ثانية</string>
+    <string name="friday">الجمعة</string>
+    <string name="from">من</string>
+    <string name="fully_random_test">اختبار عشوائي تماما</string>
+    <string name="fully_random_test_time">وقت اختبار عشوائي تماما</string>
+    <string name="greater_than_zero">الرقمين يجب أن يكونا أكبر من صفر!</string>
+    <string name="greater_zero">عدد المحاولات يجب أن يكون أكبر من صفر!</string>
+    <string name="have_the_right">أنت مؤهل لاستخدام تلك الخاصية</string>
+    <string name="help_you_on">يساعدك على:</string>
+    <string name="hide">أخْفِ</string>
+    <string name="hint">مساعدة</string>
+    <string name="hour">أدخل عدد الساعات</string>
+    <string name="if_you_want_select_the_starting_entry">اختر مُدخل البداية (اختياري)</string>
+    <string name="ignore_case">تجاهل حالة الحرف أثناء التّحَقق.</string>
+    <string name="import_">استورد</string>
+    <string name="import_completed">اكتمل استيراد المجالات</string>
+    <string name="import_failed">لقد فشل استيراد المجالات</string>
+    <string name="import_fields_from">استورد مجالات من:</string>
+    <string formatted="false" name="import_from_text_file_help">يجب أن يكون نوع الملف: ملف نصي امتداده txt\nكل سطر في الملف يمثل مُدخل واحد.\nهناك ثلاث تنسيقات للسطر\nالتنسيق الأول:\nاسم المجال@@@السؤال~~~الجواب\nمثال:\nعربي/انجليزي@@@يلعب~~~play\n\nالتنسيق الثاني:\nاسم المجال@@@السؤال~~~الجواب%%%مستوى أهمية المُدخَل\nحيث مستوى أهمية المُدخَل:\n0\tمنخفض\n1\tمتوسط\n2\tمهم\n3\tحيوي\nمثال:\nعربي/انجليزي@@@يلعب~~~play%%%2\n\nالتنسيق الثالث:\nاسم المجال@@@السؤال~~~الجواب###ترتيب المُدخَل\nحيث ترتيب المُدخَل: رقم أكبر من أو يساوي صفر وأصغر من مليار\nمثال:\nعربي/انجليزي@@@يلعب~~~play###15\n\nأي سطر منسق بغير هذا التنسيق سيتسبب في فشل عملية الاستيراد\n</string>
+    <string name="import_provided_field">استورد مجال متوفر</string>
+    <string name="import_user_usage">لو كنت أنت من أنشأ هذا الملف، اختر نعم.\nلو كان أحد غيرك قد أنشأ هذا الملف ثم شاركه معك، اختر لا.</string>
+    <string name="intial_period">حاليا، انت لست محتاجا لاشتراك!</string>
+    <string name="intro_emulation">\tهل حاولت في وقت من الأوقات أن تحفظ معجما!!\n
+\tلكي تتقن لغة، عليك أن تحفظ على الأقل معجما صغيرا.\n
+\tهذا هو ما تحاول وظيفة (محاكاة مجال) تحقيقه.\n
+\tلنفترض أن لديك مجال يحتوي على 10000 مُدخل، يمثل 10000 معنى للغة ما، كيف تذاكرهم؟\n
+\tالحل هو أن تقسمهم على أيام، وهذا ما تفعله هذه الوظيفة.\n
+\tحدد عدد المُدخلات التي ستذاكرها في كل يوم، وستقوم هذه الوظيفة بتقسيم المُدخلات على الأيام بداية من اليوم التالي. مثلا، حدد 10 مُدخلات لكل يوم، سيتم تخصيص أول 10 مدخلات لليوم التالي، ثم يتم تخصيص الـ 10 مُدخلات التالية لليوم الذي يليه. لو أن المجال يحتوي على 10000 مُدخل سيتم تقسيم المُدخلات على 1000 يوم في المستقبل.\n
+\tتستطيع استثناء بعض أيام الأسبوع، مثل أن تستثني يوم الجمعة، وهذا سوف يؤدي إلى عدم تخصيص مُدخلات لأيام الجمعة.\n
+\tيتم التعامل مع المُدخلات التي تخصص لليوم، كأنك أنشأتها بنفسك، حيث يتم محاكاة أنك أنشأتها بتاريخ اليوم الذي خُصِّصَت له في الدقيقة الخامسة بعد منتصف الليل.\n
+\tبعد أن تنتهي عملية محاكاة المجال، يتم التعامل مع المُدخلات على أساس وقت الإنشاء الافتراضي وليس الفعلي.\n
+\tيعني هذا أنك تستطيع الاستفادة من وظيفة مذاكرة فترة، حيث ستعمل وظيفة مذاكرة فترة على جلب المُدخلات على أساس وقت الإنشاء الافتراضي وليس وقت الإنشاء الفعلي. فإذا حددت 5 أيام، ستقوم وظيفة مذاكرة فترة بجلب المُدخلات التي وقت إنشائها الافتراضي يقع خلال 5 أيام سابقة.\n
+\tكذلك ستعمل وظيفتي (اختبار مُحَسَّن) و(اختبار عشوائي تماما)، حيث ستعملان على أساس وقت الإنشاء الافتراضي، بمعنى أن المُدخلات التي وقت إنشائها الافتراضي لم يأت بعد ستعتبر كأنها غير موجودة، حيث أنها تعتبر لم تنشأ بعد، فلن يختبرك التطبيق في المُدخلات التي وقت إنشائها الافتراضي بعد أسبوع مثلا.\n
+\tإي مُدخلات سيتم إضافتها للمجال بعد انتهاء عملية محاكاته، سيتم تحديد وقت إنشاء افتراضي لها بعد آخر مُدخل في المجال، مثلا بعد محاكاة المجال الذي يحتوي على 10000 مُدخل، والذي سيستغرق 1000 يوم قادمة، إذا أضفت مُدخل لهذا المجال، سيتم تحديد وقت إنشائه الافتراضي في اليوم 1001 القادم.\n
+\tيمكنك الاستفادة من هذه الوظيفة في تثبيت عدد المُدخلات الجديدة التي عليك مذاكرتها يوميا، حيث يمكنك إضافة العدد الذي تريد من المُدخلات يوميا، ولن يتم تخصيص مُدخلات أكثر من العدد الذي حددته لليوم، وبهذا لن تكون مقيدا بمذاكرة عدد كبير من المُدخلات في يوم، ويوم آخر عدد صغير، بل يكون العدد ثابتا طالما لم تنتهي المُدخلات.\n
+\tيتم ترتيب المُدخلات قبل إجراء عملية محاكاة المجال، على أساس ترتيب المُدخل تصاعديا، ثم على أساس أهمية المُدخل تنازليا، ثم على أساس وقت الإنشاء الفعلي للمُدخل تصاعديا. المُدخلات التي وقت إنشائها الافتراضي خاص باليوم الحالي أو المستقبل يتم عمل محاكاة جديدة لها يوميا، وذلك حتي يتم مراعاة المُدخلات المحذوفة، وحتي يتم الحفاظ على الترتيب السابق ذكره سليما، مثال: لقد قمت بتعديل أهمية مُدخل من عادي إلى حيوي، عندما تحدث عملية إعادة المحاكاة، سيتم تقديم هذا المدخل الحيوي على المُدخلات الأقل منه في الأهمية فيصبح وقت إنشائه الافتراضي، أبكر من بقية المُدخلات الأقل منه في الأهمية.\n</string>
+    <string formatted="false" name="intro_enhanced_test">\tأنت تواجه خطر نسيان أي نص عندما تهمله دون مراجعة مستمرة.\n
+\tهذه هي المشكلة التي تحاول وظيفة (اختبار مُحسَّن) حلها.\n
+\tيمكنك التحكم في النصوص التي ستراجعها، بأن تنقر على خيار (تحكم في مُدخلات الاختبار)، ثم تختار النسبة التي تريد أن تتحكم فيها من المُدخلات التي ستظهر في الاختبار، مثال أريد التحكم في 50% من المُدخلات التي ستظهر في الاختبار..\n
+\tيتم التحكم في المُدخلات على أساس مستوى خطأك في الجواب على المُدخلات، وعلى أساس مستوى أهمية المُدخل المحددة مسبقا.\n
+\tتمكنك هذه الوظيفة من مراجعة النصوص التي تكثر من الخطأ في إجابتها. مثال: أريد أن أراجع المُدخلات التي أخطأت فيها بنسبة 60% أو أكثر.\n
+\tتمكنك هذه الوظيفة من مراجعة النصوص ذات الأهمية الأعلى عندك. مثال: أريد أن أراجع المُدخلات التي صنفتها مسبقا على أنها مهمة أو أعلى.\n
+\tالقسم غير المُتَحَكَّم فيه من الاختبار يعمل بنظام الدورة، حيث أن المُدخلات التي ستظهر اليوم في الاختبار، لن تظهر في الاختبارات المقبلة إلا عندما تظهر بقية المُدخلات في الدورة الحالية.\n
+\tنظام الدورة في القسم غير المُتَحَكَّم فيه من الاختبار يساعدك على عدم إهمال النصوص فتنساها. فبمجرد انتهاء الدورة الحالية تبدأ دورة جديدة، وهكذا حتى لا تَنسى.\n
+\tعندما ينتهي الاختبار تظهر نتيجتك، وتستطيع التعرف على ألمُدخلات التي أخطأت فيها خلال الاختبار، وتستطيع التعرف على ما هي أخطاءك الخاصة بكل مُدخل.\n
+\tتستطيع أعادة مذاكرة النصوص بنفس طريقة مذاكرة فترة، مع فارق واحد، هو أن المُدخلات التي ستظهر في جلسة إعادة المذاكرة هي المُدخلات التي أخطأت فيها في الاختبار، وهذا ما يسمح لك بألا تخرج إلا وقد أجبت من دون مساعدة من التطبيق على المُدخلات التي أخطأت فيها خلال الاختبار.\n</string>
+    <string name="intro_entry_text">\tالنصوص التي تريد مذاكرتها توضع في مُدخلات.\n
+\tالمُدخل يتكوَّن من جواب وسؤال. الجواب يكون في القسم السفلي من المُدخل، والسؤال يكون في القسم العلوي من المُدخل.\n
+\t(الجواب) هو النص الذي تريد مذاكرته.\n
+\t(السؤال) هو أي نص تريد أن تربطه بـ(الجواب)، بحيث إذا رأيت (السؤال) علمت ما هو (الجواب) المقصود.\n
+\tإذا كنت تذاكر لغة، فأقترح عليك أن تجعل الجواب هو الكلمة المراد مذاكرتها، وتجعل السؤال هو المعنى لهذه الكلمة في لغة أخرى تعرفها. بهذا سيكون المجال أشبه المُعجم.\n
+\tإذا ضغطت على المُدخل ضغطا طويلا يتم إظهار مجموعة من الأوامر التي تساعدك على التعامل مع المُدخل.\n
+\tيمكنك أن تبحث عن نص في المجال.\n</string>
+    <string name="intro_fully_random_test">\tأنت تريد معرفة ما هو مستواك الحقيقي.\n
+\tهذه هي المشكلة التي تحاول وظيفة (اختبار عشوائي تماما) حلها.\n
+\tتستطيع اختبار نفسك من خلال هذه الوظيفة ومعرفة ما هو مستواك.\n
+\tيتم اختيار المُدخلات التي تظهر في هذا الاختبار بشكل عشوائي.\n
+\tفي نهاية الاختبار، تظهر نتيجتك، و تستطيع التعرف على أخطائك.\n
+\tتستطيع أعادة مذاكرة النصوص بنفس طريقة مذاكرة فترة، مع فارق واحد، هو أن المُدخلات التي ستظهر في جلسة إعادة المذاكرة هي المُدخلات التي أخطأت فيها في الاختبار، وهذا ما يسمح لك بألا تخرج إلا وقد أجبت من دون مساعدة من التطبيق على المُدخلات التي أخطأت فيها خلال الاختبار.\n</string>
+    <string name="intro_main_text">\tتوضع النصوص التي ترغب في مذاكرتها في مُدخلات والتي تُنشأ داخل مجالات.\n\tيمكنك تَصَور المجال مثل مادة دارسية تدرسها في المدرسة.\n\tيمكنك إنشاء المجالات بنفسك.\n\tيمكنك استيراد المجالات من ملفات swp.\n\tيمكنك استيراد المجالات من ملفات نصية منسقة بتنسيق معين.\n\tيأتي التطبيق لك بمجموعة من المجالات المنشأة مسبقا.\n\tيمكنك تصدير المجالات، لنفسك، كنسخة احتياطية، أو لغيرك، لتوفير جهد الإدخال عليه.\n\tيمكنك أنت وزملائك أن توزعوا مجهود إدخال النصوص التي ترغبون في مذاكرتها فيما بينكم، وتقوموا بمشاركة المجالات وتصديرها واستيرادها فيما بينكم.</string>
+    <string name="intro_study_period_text">\tعندما تحفظ نص جديد ولا تكرر مذاكرته مرة بعد أخرى ربما تنساه سريعا\n
+\tوظيفة (مذاكرة فترة) تحاول حل هذه المشكلة.\n
+\tإنها تسمح لك بأن تكرر مذاكرة النصوص الجديدة عليك حتى لا تنساها سريعا\n
+\tحدد عدد الأيام التي تعتقد أنك إذا كررت فيها مذاكرة النصوص الجديدة تثبت في ذهنك.\n
+\tلو حددت 5 أيام، سيقوم التطبيق بجلب كل النصوص التي أدخلتها خلال 5 أيام ماضية، ويبدأ في سؤالك فيها.\n
+\tلا يسمح لك التطبيق بالانتقال إلى السؤال التالي حتى تجيب السؤال الحالي جوابا صحيحا.\n
+\tعندما ينتهي عدد محاولاتك للجواب، يقوم التطبيق بعرض الجواب الصحيح، ثم يعيد سؤالك مرة أخرى.\n
+\tويتكرر هذا حتى تجيب جوابا صحيحا، فيتم الانتقال للسؤال التالي.\n
+\tبعد انتهاء جميع الأسئلة بهذه الطريقة، سيعيد التطبيق سؤالك كل سؤال أخطأت فيه حتى انتهى عدد محاولاتك.\n
+\tويستمر هذا حتى تنهي الأسئلة التي أخطأت فيها في أول دورة.\n
+\tثم يعاد سؤالك في كل سؤال أخطأت فيه حتى انتهى عدد محاولاتك في الدورة الجديدة، ويستمر الأمر هكذا.\n
+\tولا تنتهي جلسة المذاكرة حتى تجيب على كل الأسئلة من دون مساعدة من التطبيق.\n
+\tلو ذاكرت كل يوم النصوص التي أدخلتها خلال 5 أيام ماضية بهذه الطريقة، سيكون كل نص قد أجبته جوابا صحيحا من دون مساعدة، 5 مرات خلال 5 أيام.\n
+\tإذا استمررت على هذا ستخرج النصوص القديمة الخاصة باليوم الأقدم وتدخل مكانها النصوص الجديدة الخاصة باليوم الأحدث.\n</string>
+    <string name="invalid_file">الملف المُستورَد هو ملف غير صالح.</string>
+    <string name="keep_answer">أضف المُدخل وأبق الجواب</string>
+    <string name="keep_question">أضف المُدخل وأبق السؤال</string>
+    <string name="kitkat_or_newer">هذه الخاصية تحتاج أندرويد كيت كات أو أحدث</string>
+    <string name="large_size">كبير</string>
+    <string name="last_character">"آخر حرف هو: "</string>
+    <string name="last_entry">هذا هو المُدخل الأخير</string>
+    <string name="last_letter">الحرف الأخير:</string>
+    <string name="letter_number">الحرف رقم:</string>
+    <string name="letter_per_second_suffix">" حرف/ثانية"</string>
+    <string name="locale_is_not_available">تم ألغاء تفعيل خاصية قراءة الجواب لعدم توفر اللغة.</string>
+    <string name="lowercase">كل الحروف صغيرة</string>
+    <string name="minute">دقيقة</string>
+    <string name="missing_data">بيانات مفقودة</string>
+    <string name="monday">الاثنين</string>
+    <string name="move">نقل</string>
+    <string name="move_entries">نقل مُدخلات</string>
+    <string name="need_internet">لطفا، فَعِّل اتصال إنترنت</string>
+    <string name="need_internet_try_again">لطفا، فَعِّل اتصال إنترنت ثم حاول مجددا</string>
+    <string name="no">لا</string>
+    <string name="no_entries_in_field">لا توجد مُدخلات في هذا المجال!</string>
+    <string name="no_entries_in_this_time_range">لا توجد مُدخلات خلال هذا المدى الزمني!</string>
+    <string name="no_field_name">أين اسم المجال؟!</string>
+    <string name="no_file_name_toast">أدخل اسم للملف الذي سيتم تصديره!</string>
+    <string name="no_timer_app">لا يوجد على جهازك تطبيق يستطيع تشغيل المؤقتات</string>
+    <string name="normal_size">عادي</string>
+    <string name="not_allowed_number">هذا الرقم غير مسموح به.</string>
+    <string name="not_found">غير موجود!</string>
+    <string name="not_imported_fields">بعض المجالات لا يمكن استيرادها!</string>
+    <string name="not_imported_fields_notification">المجالات التالية لا يمكن استيرادها بسبب وجود مجالات لديك لها نفس الأسماء ولكن لها أنواع مجالات مختلفة: %1$s.</string>
+    <string name="notified_if_eligible">سوف يتم تنبيهك إذا كنت مؤهلا لاستخدام تلك الخاصية</string>
+    <string name="notify_me">نَبِّهني</string>
+    <string name="number_of_characters">"عدد الأحرف هو: "</string>
+    <string name="number_of_entries">عدد المدخﻻت</string>
+    <string name="number_of_entries_less_than_number_of_questions">عدد المُدخلات في هذا المجال أقل من عدد الأسئلة.</string>
+    <string name="number_of_letters">عدد الحروف:</string>
+    <string name="number_of_moderate_or_higher_entries">عدد  المُدخﻻت\n(المتوسطة أو أعلى)</string>
+    <string name="number_of_questions">عدد الأسئلة: %1$s</string>
+    <string name="number_of_questions_smaller_than">أدخل عدد أسئلة أصغر من أو يساوي %1$d وأكبر من صفر.</string>
+    <string name="number_tests_lower_95">عدد الاختبارات يجب أن يكون أقل من 95</string>
+    <string name="obfuscate_question">شَوِّش السؤال</string>
+    <string name="obfuscate_question_help">"هذا الخيار يحاول جعل قراءة السؤال أصعب. لماذا؟ لزيادة انتباهك اثناء الجلسة. هذا الخيار يحاول أن يخرجك من وضع الطيار الآلي.  "</string>
+    <string name="of_questions"> من الأسئلة.</string>
+    <string name="ok">موافق</string>
+    <string name="only_one">واحد فقط!</string>
+    <string name="only_this_with_same_answer">لا توجد مُدخلات أخرى لها نفس الجواب</string>
+    <string name="only_this_with_same_question">لا توجد مُدخلات أخرى لها نفس السؤال</string>
+    <string name="open_app">اذهب إلى التطبيق</string>
+    <string name="open_file_manager">افتح مدير ملفات</string>
+    <string name="order">الترتيب</string>
+    <string name="pause_do_not_shutdown">هذا قد يستفرق بعض الوقت، لا تغلق البرنامج حتى يُعْلِمك التطبيق. يمكنك الضغط على مفتاح الذي يذهب بك إلى الصفحة الرئيسية للنظام، لكن لا تضغظ مفتاح العودة.</string>
+    <string name="pause_shutdown">Study Without Pen!: عملية الإيقاف اكتملت، يمكنك غلق التطبيق الآن.</string>
+    <string name="pause_studying_now">أوقف الاستذكار الآن!</string>
+    <string name="pause_testing_now">أوقف الاختبار الآن!</string>
+    <string name="percentage_between">أدخل رقما أكبر من صفر وأقل من أو يساوي مائة عند استعمال النسبة المئوية</string>
+    <string name="percentage_or_number_help">بالنسبة المئوية\nأدخل رقما أكبر من 0 وأصغر من أو يساوي 100. التطبيق هنا يسمح لك بتحديد عدد الأسئلة التي سيسألها لك عن طريق إدخال نسبة من عدد المُدخلات الموجودة في المجال الحالي. لنفترض أن المجال الحالي به 100 مُدخل، وأنت ستُدخِل 50 هنا. وفقا لهذا، التطبيق سوف يضرب 100 * 0.50، النتيجة 50، لذلك التطبيق سوف يسألك 50 سؤالا. لا تُدخِل علامة %.\nبالعدد\nأدخل رقما أكبر من 0 وأصغر من أو يساوي عدد المُدخلات الموجودة في المجال الحالي. التطبيق هنا يسمح لك بتحديد عدد الأسئلة التي سيسألها لك عن طريق إدخال رقم. لنفترض أنك ستُدخِل 50، لذلك التطبيق سوف يسألك 50 سؤال. لو أن المجال الحالي ليس به 50 مُدخلا، سيرفض التطبيق هذا الرقم.</string>
+    <string name="pick_date">اختر تاريخا</string>
+    <string name="please_create_field">لطفا، أنشئ مجالا</string>
+    <string name="please_enter_at_least_one_value">لطفا، أدخل على الأقل قيمة لليوم أول للساعة</string>
+    <string name="please_enter_number_of_question">أدخل عدد الآسئلة</string>
+    <string name="please_enter_percentage"> أدخل نسبة مئوية (بدون %)</string>
+    <string name="please_read">لطفا، اقرأ بعناية</string>
+    <string name="please_subscribe">لطفا اشترك</string>
+    <string name="plug_your_sdcard"> تأكد من أن بطاقة SD مُرَكَّبة في مكانها!</string>
+    <string name="proceed_now">استمر الآن</string>
+    <string name="purchase_error">يوجد خطأ خلال الشراء</string>
+    <string name="purchase_success">لقد اشتركت بنجاح. شكرا على ثقتك</string>
+    <string name="question">السؤال:</string>
+    <string name="question_area">مساحة السؤال</string>
+    <string name="question_area_help">هذا الرقم يمثل حصة مساحة السؤال في المساحة الإجمالية. إذا كنت تريد مساحة السؤال أن تكون أكبر، زد من هذا الرقم، إذا كنت تريد مساحة السؤال أن تكون أصغر، قلل من هذا الرقم. طبعا، كلما زادت مساحة السؤال كلما قلت مساحة الجواب.</string>
+    <string name="question_will">السؤال سيصبح:</string>
+    <string name="quick_test">اختبار سريع</string>
+    <string name="quick_test_has_completed">اكتمل الاختبار السريع</string>
+    <string name="quick_test_result">نتيجة الاختبار السريع</string>
+    <string name="quick_test_time">وقت الاختبار السريع</string>
+    <string name="quick_test_time_text">كن مستعدا دائما</string>
+    <string name="randomly_schedule_quick_tests">جَدْوِل لاختبارات سريعة في أوقات عشوائية</string>
+    <string name="read_answer">قراءة الجواب (لو أجبت بشكل صحيح!!)</string>
+    <string name="reading_letter_second_help">"أدخل عدد الحروف التي تستطيع قراءتها في الثانية. وقت الجواب سيتم احتسابه على أساس  هذا الرقم  مع رقم إيجاد الجواب ورقم إدخال الجواب"</string>
+    <string name="reading_prefix">"قراءة "</string>
+    <string name="reading_rate_x_letter_second">مُعدل القراءة - حرف/ثانية</string>
+    <string name="reg_reading_per_letter_second">قراءة 0*[1-9]+[0-9]* حرف/ثانية</string>
+    <string name="reg_typing_per_letter_second">إدخال 0*[1-9]+[0-9]* حرف/ثانية</string>
+    <string name="remaining_questions">الأسئلة المتبقية: %1$s</string>
+    <string name="reminder_canceled">تم إلغاء المُذكِّر</string>
+    <string name="reminder_set">تم تشغيل المُذكِّر</string>
+    <string name="removable_storage_notification">ستجد الملف المُصَدَّر في ذاكرة التخزين الخارجية لجهازك (غالبا ستكون الـ SD card)، تحت مجلد يسمى \"StudyWithoutPen\". يمكنك  نسخ أو مشاركة الملف باستخدام مدير ملفات في جهازك أو باستخدام حاسوب</string>
+    <string name="repartition_the_area">أعد تقسيم المساحة</string>
+    <string name="repeated_entry">يوجد مُدخل يحتوي على نفس السؤال ونفس الجواب، احذف هذا المُدخل إن أردت!</string>
+    <string name="same">مشابه</string>
+    <string name="same_answer">نفس الجواب</string>
+    <string name="same_question">نفس السؤال</string>
+    <string name="same_text">نفس النص!</string>
+    <string name="saturday">السبت</string>
+    <string name="save">حفظ</string>
+    <string name="schedule_enhanced_test">جَدْوِل اختبار مُحَسَّن</string>
+    <string name="schedule_fully_random_test">جَدْوِل اختبار عشوائي تماما</string>
+    <string name="schedule_quick_test">جَدْوِل موعدا لاختبار سريع</string>
+    <string name="schedule_random_quick_tests">جَدْوِل اختبارات سريعة في أوقات عشوائية</string>
+    <string name="schedule_study_perioid">جَدْوِل موعدا لمذاكرة فترة</string>
+    <string name="schedule_text">جَدْوِل موعدا لاختبار</string>
+    <string name="scheduled">تمت جدولة الموعد</string>
+    <string name="search">بحث</string>
+    <string name="search_hint">ابحث</string>
+    <string msgid="146198913615257606" name="search_menu_title">"البحث"</string>
+    <string name="search_text">أدخل نصا</string>
+    <string name="second">ثانية</string>
+    <string name="select_a_check_type">اختر نوع التَّحَقُّق</string>
+    <string name="select_a_field_type">لطفا، اختر نوعا للمجال!</string>
+    <string name="select_field">اختر مجالا</string>
+    <string name="select_fields_export">اختر كل المجالات التي ترغب في تصديرها:</string>
+    <string name="select_locale">اختر كيف سيقرأ الجواب:</string>
+    <string name="select_one">اختر واحدا!</string>
+    <string name="select_percentage_of_controlled_portion">الجزء المُتَحَكَم فيه:</string>
+    <string name="select_percentage_of_uncontrolled_portion">الجزء غير المُتَحَكَم فيه:</string>
+    <string name="select_rank">اختر المرتبة</string>
+    <string name="select_rank_level">اختر المرتبة</string>
+    <string name="select_text_size">اختر حجم النص</string>
+    <string name="select_wrongness_level">اختر مستوى الخطأ</string>
+    <string name="session_cancelation">إلغاء الجلسة</string>
+    <string name="set_time_of_answer">حدد وقت الجواب</string>
+    <string name="show">أظهِر</string>
+    <string name="show_entry">المُدخَل؟!</string>
+    <string name="show_next_question">انتقل للسؤال التالي</string>
+    <string name="shut_down_warning">يجب عدم إغلاق التطبيق حتى تكتمل العملية بنجاح.يمكنك الضغط على مفتاح الذي يذهب بك إلى الصفحة الرئيسية للنظام، لكن لا تضغظ مفتاح العودة.</string>
+    <string name="small_size">صغير</string>
+    <string name="some_entries_have_not_imported">على اﻷقل، مُدخَل واحد لم يتم استيراده</string>
+    <string name="some_start_later_than_end">لطفا، (إلى) لابد أن يكون بعد (من).</string>
+    <string name="something_both_question_answer">كل من السؤال والجواب يجب أن يحتويا شيئاً</string>
+    <string name="sort">رتِّب </string>
+    <string name="sort_answer_asc">رتب على حسب الجواب (أبجديا تصاعديا)</string>
+    <string name="sort_answer_desc">رتب على حسب الجواب (أبجديا تنازليا)</string>
+    <string name="sort_by_entry_order_asc">رتب على حسب ترتيب المُدخل (تصاعديا)</string>
+    <string name="sort_by_entry_order_desc">رتب على حسب ترتيب المُدخل (تنازليا)</string>
+    <string name="sort_by_entry_rank_asc">رتب على حسب أهمية المُدخل (تصاعديا)</string>
+    <string name="sort_by_entry_rank_desc">رتب على حسب أهمية المُدخل (تنازليا)</string>
+    <string name="sort_by_wrongness_level_ascending">رتب على حسب مستوى الخطأ (تصاعديا)</string>
+    <string name="sort_by_wrongness_level_descending">رتب على حسب مستوى الخطأ (تنازليا)</string>
+    <string name="sort_creation_asc">رتب على حسب تاريخ الإنشاء (تصاعديا)</string>
+    <string name="sort_creation_desc">الافتراضي: رتب على حسب تاريخ الإنشاء (تنازليا)</string>
+    <string name="sort_date_asc">رتب على حسب التاريخ (تصاعديا)</string>
+    <string name="sort_date_desc">رتب على حسب التاريخ (تنازليا)</string>
+    <string name="sort_question_asc">رتب على حسب السؤال (أبجديا تصاعديا)</string>
+    <string name="sort_question_desc">رتب على حسب السؤال (أبجديا تنازليا)</string>
+    <string name="special_text">نَص خاص</string>
+    <string name="start">ابدأ</string>
+    <string name="start_a_quick_test">ابدأ اختبارا سريعا</string>
+    <string name="start_a_test">ابدأ اختبار</string>
+    <string name="start_enhanced_test">ابدأ اختبار مُحسَّن</string>
+    <string name="start_excellance">Excel</string>
+    <string name="start_fully_random_test">ابدأ اختبار عشوائي تماما</string>
+    <string name="start_studying_a_period">ابدأ استذكار مُدخلات فترة</string>
+    <string name="starting_entry_help">إذا أردت، يمكنك اختيار مدخل واحد ليبدأ تفعيل المحاكاة ابتداء منه. هذا المدخل والمدخلات التالية له سيتم محاكاتها، المدخلات السابقة لن يتم محاكاتها.\n فقط المدخلات التي تم محاكاتها ستظهر في  وظيفة مذاكرة فترة، كل مدخل في تاريخ محاكاته.</string>
+    <string msgid="2869576371154716097" name="status_bar_notification_info_overflow">"+999"</string>
+    <string name="study">مذاكرة</string>
+    <string name="study_a_period">مذاكرة فترة</string>
+    <string name="study_period_time">وقت مذاكرة فترة</string>
+    <string name="study_without_pen_file">swp ملف</string>
+    <string name="studying_is_everyday_task">الاستذكار: مهمة يومية</string>
+    <string name="subscription1_description">افتح الوظائف المغلقة. يمكنك  طلب إعادة المال من المطور من خلال البريد الإلكتروني</string>
+    <string name="subscription_description">صفة الاشتراك</string>
+    <string name="substitute_answer">استبدل الجواب</string>
+    <string name="substitute_question">استبدل السؤال</string>
+    <string name="sunday">الأحد</string>
+    <string name="sure_disable_emulation">هل أنت متأكد من أنك تريد إلغاء المحاكاة لهذا المجال؟</string>
+    <string name="take_effect_next_midnight">إي تغيير سيتم تفعيله ابتداء من منتصف الليل القادم</string>
+    <string name="terms_of_use">شروط الاستخدام</string>
+    <string name="test">اختبار</string>
+    <string name="test_has_completed">اكتمل الاختبار</string>
+    <string name="test_result">نتيجة الاختبار</string>
+    <string name="test_time">وقت اختبار</string>
+    <string name="text_contained_in_special_text">أدخِل نص غير مُتَضَمَّن في أي نص خاص آخر</string>
+    <string name="text_file">ملف txt منسق بشكل خاص</string>
+    <string name="text_size_help">اختر حجم نص السؤال والجواب. لاحظ، هذا لا يؤثر على حجم الخط الذي تحدده في إعدادات النظام.</string>
+    <string name="the_number_of_questions">عدد الأسئلة</string>
+    <string name="the_number_of_quick_tests">عدد الاختبارات السريعة</string>
+    <string name="the_number_of_tries">عدد المحاولات</string>
+    <string name="thursday">الخميس</string>
+    <string name="time_in_past">هذا الوقت من الماضي</string>
+    <string name="time_of_answer">وقت الجواب</string>
+    <string name="time_out">انتهى الوقت</string>
+    <string name="time_to_find_the_answer">وقت إيجاد الإجابة</string>
+    <string name="timer">مؤقِّت</string>
+    <string name="to">إلى</string>
+    <string name="today_s_entries">مُدخلات هذا اليوم</string>
+    <string name="try_number">المحاولة رقم: %1$s</string>
+    <string name="tts_not_available">آلة تحويل النص إلى حديث غير متوفرة، لذلك ألغى التطبيق خاصية قراءة الجواب. اذهب إلى Google Play و نصب تطبيق  Text to Speech لكي تفعل هذه الخاصية.</string>
+    <string name="tuesday">الثلاثاء</string>
+    <string name="typing_letter_second_help">"أدخل عدد الحروف التي تستطيع إدخالها في الثانية. وقت الجواب سيتم احتسابه على أساس  هذا الرقم  مع رقم إيجاد الجواب ورقم قراءة السؤال"</string>
+    <string name="typing_prefix">"إدخال "</string>
+    <string name="typing_rate_x_letter_second">مُعدل الإدخال - حرف/ثانية</string>
+    <string name="version">إصدار:</string>
+    <string name="wait_loading">لطفا، انتظر التحميل</string>
+    <string name="wait_some_background_operation">لطفا، انتظر حتى تنتهي عملية في الخلفية</string>
+    <string name="wait_until_current_export_import_emulation_finish">انتظر حتي تنتهي عملية التصدير/الاستيراد/المحاكاة الحالية!</string>
+    <string name="wait_until_current_session_pausing_finish">لطفا، انتظر حتى تنهي عمليات إيقاف أي جلسة خاصة بهذا المجال. </string>
+    <string name="wait_until_study_during_pausing_finish">لطفا، انتظر حتى تنتهي عملية إيقاف جلسة المذاكرة لفترة الخاصة بهذا المجال.</string>
+    <string name="wait_until_test_pausing_finish">لطفا، انتظر حتى تنتهي عملية إيقاف جلسة الاختبار الخاصة بهذا المجال.</string>
+    <string name="wednesday">الأربعاء</string>
+    <string name="where_is_field_name">أين اسم المجال؟!</string>
+    <string name="where_is_note">أين الملحوظة؟!</string>
+    <string name="where_the_answer">أين الجواب؟!</string>
+    <string name="will_notify_when_process_complete">سيتم إعلامك عند انتهاء العملية،</string>
+    <string name="write_whatever">اكتب ما تشاء</string>
+    <string name="wrong_answers">الإجابات الخاطئة</string>
+    <string name="wrongly_answered">أجيب بشكل خاطئ: %1$s</string>
+    <string name="wrongly_answered_menu">أجيب بشكل خاطئ</string>
+    <string name="wrongness_level">مستوى الخطأ: %.0f%%</string>
+    <string name="yes">نعم</string>
+    <string name="zero_not_allowed">الصفر غير مسموح به، وعدد الاختبارات يجب أن يكون أقل من 95</string>
+</resources>

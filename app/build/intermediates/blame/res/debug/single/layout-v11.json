@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-v11/notification_media_cancel_action.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/layout-v11/notification_media_cancel_action.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_custom.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/layout-v11/notification_template_big_media_custom.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_narrow_custom.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/layout-v11/notification_template_big_media_narrow_custom.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/layout-v11/notification_template_big_media.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_narrow.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/layout-v11/notification_template_big_media_narrow.xml"
+    },
+    {
+        "merged": "/media/ahmed/Data/MYWORK/Android/Android Projects/studywithoutpen_android/app/build/intermediates/res/merged/debug/layout-v11/notification_media_action.xml",
+        "source": "/home/ahmed/.android/build-cache/8e951579448a63c66d630fe799dbd393c9dbc43f/output/res/layout-v11/notification_media_action.xml"
+    }
+]
