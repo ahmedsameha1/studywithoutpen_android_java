@@ -28,10 +28,9 @@ public class IntroActivity extends AppIntro {
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_main));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_entry));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_study_period));
-        addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_enhanced_test));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_fully_random_test));
+        addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_enhanced_test));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_emulation));
-
         showSkipButton(false);
 
     }
