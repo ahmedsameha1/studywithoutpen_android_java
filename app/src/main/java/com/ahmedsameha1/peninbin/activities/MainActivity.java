@@ -66,6 +66,7 @@ import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
 import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
 import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
+import com.ahmedsameha1.peninbin.secondary_activities.IntroActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
@@ -247,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements
                 .setCategory(ANALYTICS_CATEGORY)
                 .setAction(ActivityUtility.getVersionCode(this) + "run the app")
                 .build());
+        IntroActivity.show(this);
     }
 
 

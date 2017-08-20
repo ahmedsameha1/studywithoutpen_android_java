@@ -941,7 +941,7 @@ public class ExportImportDatabase {
             case FAILED_EXPORT_NOTIFICATION:
                 notificationBuilder =
                         new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.export_failed))
                                 .setContentText(context.getResources().getString(R.string.export_failed))
                                 .setTicker(context.getResources().getString(R.string.export_failed))
@@ -963,7 +963,7 @@ public class ExportImportDatabase {
             case FAILED_IMPORT_NOTIFICATION:
                 notificationBuilder =
                         new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_failed))
                                 .setContentText(context.getResources().getString(R.string.import_failed))
                                 .setTicker(context.getResources().getString(R.string.import_failed))
@@ -979,7 +979,7 @@ public class ExportImportDatabase {
             case FAILED_IMPORT_INVALID_FILE_NOTIFICATION:
                 notificationBuilder =
                         new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_failed))
                                 .setContentText(context.getResources().getString(R.string.invalid_file))
                                 .setTicker(context.getResources().getString(R.string.import_failed))
@@ -995,7 +995,7 @@ public class ExportImportDatabase {
             case SUCCESSFUL_IMPORT_NOTIFICATION:
                 notificationBuilder =
                         new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_completed))
                                 .setContentText(context.getResources().getString(R.string.import_completed))
                                 .setTicker(context.getResources().getString(R.string.import_completed))
@@ -1011,7 +1011,7 @@ public class ExportImportDatabase {
             case NOT_IMPORTED_FIELDS:
                 notificationBuilder =
                         new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.ic_launcher512)
+                                .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.not_imported_fields))
                                 .setContentText(context.getString(R.string.not_imported_fields))
                                 .setTicker(context.getResources().getString(R.string.not_imported_fields))
@@ -1039,7 +1039,7 @@ public class ExportImportDatabase {
         PendingIntent resultPendingIntent = null;
         notificationBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_launcher512)
+                        .setSmallIcon(R.drawable.ic_launcher48)
                         .setContentTitle(context.getResources().getString(R.string.export_completed))
                         .setContentText(context.getResources().getString(R.string.export_completed))
                         .setTicker(context.getResources().getString(R.string.export_completed))

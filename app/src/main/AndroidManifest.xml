@@ -261,6 +261,12 @@
             android:screenOrientation="portrait" />
         <activity android:name=".secondary_activities.SpeciallyFormattedTextFileHelpActivity"
             android:screenOrientation="landscape"/>
+        <activity
+            android:name=".secondary_activities.IntroActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".secondary_activities.ImageActivity"
+            android:noHistory="true"/>
     </application>
 
 </manifest>

@@ -387,7 +387,7 @@ public class Emulation {
         PendingIntent resultPendingIntent = null;
         notificationBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_launcher512)
+                        .setSmallIcon(R.drawable.ic_launcher48)
                         .setContentTitle(context.getResources().getString(R.string.emulation_completed))
                         .setContentText(context.getResources().getString(R.string.emulation_has_completed))
                         .setTicker(context.getResources().getString(R.string.emulation_has_completed))
@@ -441,7 +441,7 @@ public class Emulation {
         PendingIntent resultPendingIntent = null;
         notificationBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_launcher512)
+                        .setSmallIcon(R.drawable.ic_launcher48)
                         .setContentTitle(context.getResources().getString(R.string.emulation_completed))
                         .setContentText(context.getResources().getString(R.string.emulation_has_completed))
                         .setTicker(context.getResources().getString(R.string.emulation_has_completed))
@@ -479,7 +479,7 @@ public class Emulation {
         PendingIntent resultPendingIntent = null;
         notificationBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_launcher512)
+                        .setSmallIcon(R.drawable.ic_launcher48)
                         .setContentTitle(context.getResources().getString(R.string.emulation_disabled))
                         .setContentText(context.getResources().getString(R.string.emulation_has_disabled))
                         .setTicker(context.getResources().getString(R.string.emulation_has_disabled))
