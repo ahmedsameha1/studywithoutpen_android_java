@@ -52,6 +52,10 @@ public class ImportTextFile {
     private static ArrayList<Object[]> checkSort(String file_path) throws
             InvalidTextFileFormatException, IOException {
         ArrayList<Object[]> arrayList = new ArrayList<>();
+        String ends = file_path.substring(file_path.length() - 4);
+        if ( !ends.equalsIgnoreCase(".txt")) {
+            throw new InvalidTextFileFormatException();
+        }
         File file = new File(file_path);
         BufferedReader bufferedReader = null;
         boolean valid_structure = true;

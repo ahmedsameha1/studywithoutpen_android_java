@@ -185,6 +185,7 @@ public class ModifyDatabaseSchema {
             sqLiteDatabase.execSQL(drop);
             drop = "DROP TABLE IF EXISTS " + Contract.Field_Type_Symbol.TABLE_NAME + ";";
             sqLiteDatabase.execSQL(drop);
+            removeAbove500Texts(sqLiteDatabase);
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();
@@ -995,5 +996,18 @@ public class ModifyDatabaseSchema {
         Cursor cursor = sqLiteDatabase.query(Contract.OldField.TABLE_NAME, string,null,null,null,null,null);
         return cursor;
     }
-
+    public static void removeAbove500Texts( SQLiteDatabase sqLiteDatabase ) {
+        Cursor text_cursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME,
+                new String[] { Contract.COLUMN_ID},
+                "LENGTH( " + Contract.STring.COLUMN_VALUE + " ) > 500", null ,null,null,null);
+        for ( text_cursor.moveToFirst(); text_cursor.getPosition() < text_cursor.getCount() && text_cursor.getCount() > 0;
+              text_cursor.moveToNext() ) {
+            sqLiteDatabase.delete(Contract.String_Entry.TABLE_NAME,
+                    Contract.String_Entry.COLUMN_QUESTION + " = ? OR "
+            + Contract.String_Entry.COLUMN_ANSWER + " = ? ",
+                    new String[]{ text_cursor.getString(0), text_cursor.getString(0)});
+            sqLiteDatabase.delete(Contract.STring.TABLE_NAME, Contract.COLUMN_ID + " = ?", new String[]{text_cursor.getString(0)});
+        }
+        text_cursor.close();
+    }
 }

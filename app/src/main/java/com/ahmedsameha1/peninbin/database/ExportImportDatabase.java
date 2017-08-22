@@ -1476,6 +1476,7 @@ public class ExportImportDatabase {
             drop = "DROP TABLE IF EXISTS " + Contract.Not_String_Entry.TABLE_NAME + ";";
             toImportDatabase.execSQL(drop);
             toImportDatabase.execSQL(DatabaseHelper.CREATE_NOT_STRING_ENTRY_TABLE);
+            ModifyDatabaseSchema.removeAbove500Texts(toImportDatabase);
             toImportDatabase.setVersion(13);
             toImportDatabase.setTransactionSuccessful();
         } finally {
