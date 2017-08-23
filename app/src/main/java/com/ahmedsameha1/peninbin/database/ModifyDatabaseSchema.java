@@ -997,6 +997,7 @@ public class ModifyDatabaseSchema {
         return cursor;
     }
     public static void removeAbove500Texts( SQLiteDatabase sqLiteDatabase ) {
+        sqLiteDatabase.delete(Field.TABLE_NAME, "LENGTH( " + Field.COLUMN_FIELD_NAME + " ) > 500", null);
         Cursor text_cursor = sqLiteDatabase.query(Contract.STring.TABLE_NAME,
                 new String[] { Contract.COLUMN_ID},
                 "LENGTH( " + Contract.STring.COLUMN_VALUE + " ) > 500", null ,null,null,null);

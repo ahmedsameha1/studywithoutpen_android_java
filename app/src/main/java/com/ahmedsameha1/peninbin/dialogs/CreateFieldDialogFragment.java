@@ -9,6 +9,8 @@ import android.speech.tts.TextToSpeech;
 import android.support.annotation.ColorInt;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -124,6 +126,28 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                     colorPicker.show();
                 }
             });
+            enterFieldName.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if ( editable.length() > 500 ) {
+                        String limit500 = editable.toString().substring(0, 500);
+                        enterFieldName.setText(limit500);
+                        Toast toast = Toast.makeText(getActivity(), R.string.less_500, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
+                    }
+                }
+            });
             positive_button.setOnClickListener( view -> {
                     String fieldName = enterFieldName.getText().toString();
                         if (fieldName.equals("")) {
@@ -159,10 +183,6 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                             }
                             alertDialog.dismiss();
                         }
-
-
-
-
             });
         });
         return alertDialog;

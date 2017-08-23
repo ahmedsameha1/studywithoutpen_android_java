@@ -218,14 +218,20 @@ public class FieldActivityRecyclerViewAdapter extends
                     if (item_ != null && item_.coerceToText(context).toString().trim().length() > 0) {
                         String text = item_.coerceToText(context).toString().trim();
                         if (!text.equals(question)) {
-                            if (!databaseOperations.checkEntryDuplication(text, answer, field_id, question_data_type)) {
-                                new AlertDialog.Builder(context)
-                                        .setTitle(R.string.question_will)
-                                        .setMessage(text)
-                                        .setPositiveButton(R.string.ok, (d, i) -> ((Contact) context).substituteQuestion(entry_id, text))
-                                        .create().show();
+                            if (text.length() <= 500) {
+                                if (!databaseOperations.checkEntryDuplication(text, answer, field_id, question_data_type)) {
+                                    new AlertDialog.Builder(context)
+                                            .setTitle(R.string.question_will)
+                                            .setMessage(text)
+                                            .setPositiveButton(R.string.ok, (d, i) -> ((Contact) context).substituteQuestion(entry_id, text))
+                                            .create().show();
+                                } else {
+                                    Toast toast = Toast.makeText(context, R.string.already_inserted, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
                             } else {
-                                Toast toast = Toast.makeText(context, R.string.already_inserted, Toast.LENGTH_LONG);
+                                Toast toast = Toast.makeText(context, R.string.less_500, Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                             }
@@ -240,14 +246,20 @@ public class FieldActivityRecyclerViewAdapter extends
                     if (item_ != null && item_.getText() != null && item_.getText().toString().trim().length() > 0) {
                         String text = item_.getText().toString().trim();
                         if (!text.equals(answer)) {
-                            if (!databaseOperations.checkEntryDuplication(question, text, field_id, question_data_type)) {
-                                new AlertDialog.Builder(context)
-                                        .setTitle(R.string.answer_will)
-                                        .setMessage(text)
-                                        .setPositiveButton(R.string.ok, (d, i) -> ((Contact) context).substituteAnswer(entry_id, text))
-                                        .create().show();
+                            if (text.length() <= 500) {
+                                if (!databaseOperations.checkEntryDuplication(question, text, field_id, question_data_type)) {
+                                    new AlertDialog.Builder(context)
+                                            .setTitle(R.string.answer_will)
+                                            .setMessage(text)
+                                            .setPositiveButton(R.string.ok, (d, i) -> ((Contact) context).substituteAnswer(entry_id, text))
+                                            .create().show();
+                                } else {
+                                    Toast toast = Toast.makeText(context, R.string.already_inserted, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
                             } else {
-                                Toast toast = Toast.makeText(context, R.string.already_inserted, Toast.LENGTH_LONG);
+                                Toast toast = Toast.makeText(context, R.string.less_500, Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                             }
@@ -275,7 +287,9 @@ public class FieldActivityRecyclerViewAdapter extends
 
     public interface Contact {
         void substituteQuestion(long entry_id, String text);
+
         void substituteAnswer(long entry_id, String text);
+
         void startStudyActivity(long entry_id, String question, String answer);
     }
 }

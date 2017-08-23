@@ -96,7 +96,7 @@ public class CompareUtility {
             return 3;
         } else {
             return 0;
-        }// TODO: 8/22/17 add limit 500 to field name
+        }
     }
 
 
