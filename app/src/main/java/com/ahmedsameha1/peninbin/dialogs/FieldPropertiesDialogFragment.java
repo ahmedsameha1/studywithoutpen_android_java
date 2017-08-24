@@ -10,6 +10,8 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -210,6 +212,28 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                     Toast toast = Toast.makeText(getActivity(), R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
+                }
+            });
+            new_field_name.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if ( editable.length() > 500 ) {
+                        String limit500 = editable.toString().substring(0, 500);
+                        new_field_name.setText(limit500);
+                        Toast toast = Toast.makeText(getActivity(), R.string.less_500, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP,0,400);
+                        toast.show();
+                    }
                 }
             });
             positive_button.setOnClickListener(view -> {

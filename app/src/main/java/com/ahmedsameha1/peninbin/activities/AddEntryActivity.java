@@ -354,6 +354,16 @@ public class AddEntryActivity extends AppCompatActivity implements
                 } else {
                     add_entry.setEnabled(false);
                 }
+                if ( editable.length() > 500 ) {
+                    String limit500 = editable.toString().substring(0, 500);
+                    enter_question.setText(limit500);
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.less_500, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                    toast = Toast.makeText(AddEntryActivity.this, R.string.shrink_500, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                }
             }
         });
         enter_answer.addTextChangedListener(new TextWatcher() {
@@ -371,6 +381,16 @@ public class AddEntryActivity extends AppCompatActivity implements
                     add_entry.setEnabled(true);
                 } else {
                     add_entry.setEnabled(false);
+                }
+                if ( editable.length() > 500 ) {
+                    String limit500 = editable.toString().substring(0, 500);
+                    enter_answer.setText(limit500);
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.less_500, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                    toast = Toast.makeText(AddEntryActivity.this, R.string.shrink_500, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
                 }
             }
         });

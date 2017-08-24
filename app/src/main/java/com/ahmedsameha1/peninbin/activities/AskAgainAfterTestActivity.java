@@ -1062,11 +1062,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                tts.speak("Hello", TextToSpeech.QUEUE_ADD, null, null);
-            } else {
-                tts.speak("Hello", TextToSpeech.QUEUE_ADD, null);
-            }
         }
     }
 

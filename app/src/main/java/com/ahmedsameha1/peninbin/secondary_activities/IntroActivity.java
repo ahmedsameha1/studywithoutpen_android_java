@@ -19,6 +19,8 @@ public class IntroActivity extends AppIntro {
     public static final String IMAGE_RESOURCE_ID = "image_resorce_id";
     private static final String INTRO_KEY = "intro";
 
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +36,10 @@ public class IntroActivity extends AppIntro {
         showSkipButton(false);
 
     }
+    @Override
+    public void onBackPressed() {
 
+    }
     @Override
     protected int getLayoutId() {
         return R.layout.intro_change_background_color;

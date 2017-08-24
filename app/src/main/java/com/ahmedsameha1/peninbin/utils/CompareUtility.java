@@ -1,9 +1,5 @@
 package com.ahmedsameha1.peninbin.utils;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-
 /**
  * Created by ahmed on 02/05/16.
  */
@@ -89,9 +85,9 @@ public class CompareUtility {
     }
 
     public static int checkTextLineToImport( String text_line ) {
-        String pattern1 = "^(?!(.*(@@@).*){2,}|(.*(~~~).*){2,}|(.*(%%%).*){2,}|(.*(###).*){2,}).+@@@.+~~~.*[^%]%%%[0-3]$";
-        String pattern2 = "^(?!(.*(@@@).*){2,}|(.*(~~~).*){2,}|(.*(%%%).*){2,}|(.*(###).*){2,}).+@@@.+~~~.*[^#]###\\d{1,9}$";
-        String pattern3 = "^(?!(.*(@@@).*){2,}|(.*(~~~).*){2,}|(.*(%%%).*){2,}|(.*(###).*){2,}).+@@@.+~~~.+$";
+        String pattern1 = "^(?!(.*(@@@).*){2,}|(.*(~~~).*){2,}|(.*(%%%).*){2,}|(.*(###).*)+).{1,500}@@@.{1,500}~~~.{0,499}[^%]%%%[0-3]$";
+        String pattern2 = "^(?!(.*(@@@).*){2,}|(.*(~~~).*){2,}|(.*(%%%).*)+|(.*(###).*){2,}).{1,500}@@@.{1,500}~~~.{0,499}[^#]###\\d{1,9}$";
+        String pattern3 = "^(?!(.*(@@@).*){2,}|(.*(~~~).*){2,}|(.*(%%%).*)+|(.*(###).*)+).{1,500}@@@.{1,500}~~~.{1,500}$";
         if ( text_line.matches(pattern1) ) {
             return 1;
         } else if ( text_line.matches(pattern2) ) {
