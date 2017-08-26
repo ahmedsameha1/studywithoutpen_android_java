@@ -13,6 +13,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
@@ -133,68 +134,74 @@ public class EditEntryActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        showActionbar.setOnClickListener( view ->  {
+        showActionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 show_actionbar_card_view.startAnimation(animAlpha);
                 if (actionBarShown) {
-                    getSupportActionBar().hide();
+                    EditEntryActivity.this.getSupportActionBar().hide();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.show);
                     cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
                 } else {
-                    getSupportActionBar().show();
+                    EditEntryActivity.this.getSupportActionBar().show();
                     actionBarShown = (!actionBarShown);
                     showActionbar.setText(R.string.hide);
                     cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
                 }
+            }
         });
-        save.setOnClickListener( view -> {
-            try {
-                save_card_view.startAnimation(animAlpha);
-                String editedQuestion = editQuestion.getText().toString().trim();
-                String editedAnswer = editAnswer.getText().toString().trim();
-            int edited_order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    save_card_view.startAnimation(animAlpha);
+                    String editedQuestion = editQuestion.getText().toString().trim();
+                    String editedAnswer = editAnswer.getText().toString().trim();
+                    int edited_order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
 
-            if (editedQuestion.length() > 0 && editedAnswer.length() > 0) {
-                            editQuestion.setEnabled(false);
-                            editAnswer.setEnabled(false);
-                            if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)
-                                    || rank != rank_spinner.getSelectedItemPosition() || edited_order != order ) {
-                                if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
-                                    if (!databaseOperations.checkEntryDuplication(editedQuestion, editedAnswer, current_field_id, question_data_type)) {
-                                        //                                    cursorLoaderAndUpdateDatabase.editEntry(entry_id,question_data_type,editedQuestion,editedAnswer);
-                                        Intent intent = new Intent();
-                                        intent.putExtra(FieldActivity.EDITED_ENTRY_ID, entry_id);
-                                        intent.putExtra(FieldActivity.EDITED_QUESTION, editedQuestion);
-                                        intent.putExtra(FieldActivity.EDITED_ANSWER, editedAnswer);
-                                        intent.putExtra(FieldActivity.EDITED_RANK, rank_spinner.getSelectedItemPosition());
-                                        intent.putExtra(FieldActivity.EDITED_ORDER, edited_order);
-                                        setResult(RESULT_OK, intent);
-                                    } else {
-                                        Toast toast = Toast.makeText(EditEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                } else {
+                    if (editedQuestion.length() > 0 && editedAnswer.length() > 0) {
+                        editQuestion.setEnabled(false);
+                        editAnswer.setEnabled(false);
+                        if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)
+                                || rank != rank_spinner.getSelectedItemPosition() || edited_order != order) {
+                            if (!editedQuestion.equals(currentQuestion) || !editedAnswer.equals(currentAnswer)) {
+                                if (!databaseOperations.checkEntryDuplication(editedQuestion, editedAnswer, current_field_id, question_data_type)) {
+                                    //                                    cursorLoaderAndUpdateDatabase.editEntry(entry_id,question_data_type,editedQuestion,editedAnswer);
                                     Intent intent = new Intent();
                                     intent.putExtra(FieldActivity.EDITED_ENTRY_ID, entry_id);
                                     intent.putExtra(FieldActivity.EDITED_QUESTION, editedQuestion);
                                     intent.putExtra(FieldActivity.EDITED_ANSWER, editedAnswer);
                                     intent.putExtra(FieldActivity.EDITED_RANK, rank_spinner.getSelectedItemPosition());
                                     intent.putExtra(FieldActivity.EDITED_ORDER, edited_order);
-                                    setResult(RESULT_OK, intent);
+                                    EditEntryActivity.this.setResult(RESULT_OK, intent);
+                                } else {
+                                    Toast toast = Toast.makeText(EditEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
                                 }
+                            } else {
+                                Intent intent = new Intent();
+                                intent.putExtra(FieldActivity.EDITED_ENTRY_ID, entry_id);
+                                intent.putExtra(FieldActivity.EDITED_QUESTION, editedQuestion);
+                                intent.putExtra(FieldActivity.EDITED_ANSWER, editedAnswer);
+                                intent.putExtra(FieldActivity.EDITED_RANK, rank_spinner.getSelectedItemPosition());
+                                intent.putExtra(FieldActivity.EDITED_ORDER, edited_order);
+                                EditEntryActivity.this.setResult(RESULT_OK, intent);
                             }
+                        }
 
-                    finish();
-                } else {
-                    Toast toast = Toast.makeText(EditEntryActivity.this, R.string.something_both_question_answer, Toast.LENGTH_LONG);
+                        EditEntryActivity.this.finish();
+                    } else {
+                        Toast toast = Toast.makeText(EditEntryActivity.this, R.string.something_both_question_answer, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                } catch (NumberFormatException nfe) {
+                    Toast toast = Toast.makeText(EditEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-            } catch ( NumberFormatException nfe ) {
-                Toast toast = Toast.makeText(EditEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
             }
         });
         editQuestion.setOnTouchListener(new OnSwipeTouchListener(this) {

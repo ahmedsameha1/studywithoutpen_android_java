@@ -1,22 +1,21 @@
 package com.ahmedsameha1.peninbin.dialogs;
 
-import android.support.v7.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
-import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
-import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.WrongAnswersActivity;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
 
@@ -58,45 +57,57 @@ public class ShowTestResultDialogFragment extends DialogFragment {
         final AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage(message)
                 .setTitle(R.string.test_result)
                 .setPositiveButton(R.string.wrong_answers, null )
-                .setNegativeButton(R.string.cancel, (dialog, which) -> {
-                    getActivity().finish();
-                    ExitActivity.exit(getActivity());
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ShowTestResultDialogFragment.this.getActivity().finish();
+                        ExitActivity.exit(ShowTestResultDialogFragment.this.getActivity());
+                    }
                 })
                 .create();
-        alertDialog.setOnKeyListener((dialog, keyCode, event) -> {
+        alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    getActivity().finish();
-                    ExitActivity.exit(getActivity());
+                    ShowTestResultDialogFragment.this.getActivity().finish();
+                    ExitActivity.exit(ShowTestResultDialogFragment.this.getActivity());
                     return false;
                 }
 
-            return true;
+                return true;
 
+            }
         });
         alertDialog.setCanceledOnTouchOutside(false);
-        alertDialog.setOnShowListener(dialog -> {
-            Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view -> {
-                Bundle bundle = new Bundle();
-                bundle.putLong(Constants.CURRENT_FIELD_ID,current_field_id);
-                bundle.putInt(TEST_TYPE, test_type);
-                bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItemList);
-                bundle.putInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER, getArguments()
-                        .getInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER));
-                Intent intent = new Intent(getActivity(),WrongAnswersActivity.class);
-                intent.putExtra(WrongAnswersActivity.WRONG_ITEM_LIST,bundle);
-                startActivity(intent);
-                getActivity().finish();
-                dismiss();
-            });
-            if ( wrongAnswersNumber <= 0 ) {
-                b.setEnabled(false);
-            }
-            if ( test_type == Constants.TestType.ENHANCED_TEST) {
-                mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id,question_data_type);
-            } else if ( test_type == Constants.TestType.FULLY_RANDOM_TEST) {
-                mySQLiteCursorLoader.resetEntriesTestOrderFullyRandomTest(current_field_id,question_data_type);
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Bundle bundle = new Bundle();
+                        bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
+                        bundle.putInt(TEST_TYPE, test_type);
+                        bundle.putSerializable(WrongAnswersActivity.WRONG_ITEM_LIST, wrongItemList);
+                        bundle.putInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER, ShowTestResultDialogFragment.this.getArguments()
+                                .getInt(EnhancedTestActivity.PERMITED_TRIES_NUMBER));
+                        Intent intent = new Intent(ShowTestResultDialogFragment.this.getActivity(), WrongAnswersActivity.class);
+                        intent.putExtra(WrongAnswersActivity.WRONG_ITEM_LIST, bundle);
+                        ShowTestResultDialogFragment.this.startActivity(intent);
+                        ShowTestResultDialogFragment.this.getActivity().finish();
+                        ShowTestResultDialogFragment.this.dismiss();
+                    }
+                });
+                if (wrongAnswersNumber <= 0) {
+                    b.setEnabled(false);
+                }
+                if (test_type == Constants.TestType.ENHANCED_TEST) {
+                    mySQLiteCursorLoader.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
+                } else if (test_type == Constants.TestType.FULLY_RANDOM_TEST) {
+                    mySQLiteCursorLoader.resetEntriesTestOrderFullyRandomTest(current_field_id, question_data_type);
+                }
             }
         });
 

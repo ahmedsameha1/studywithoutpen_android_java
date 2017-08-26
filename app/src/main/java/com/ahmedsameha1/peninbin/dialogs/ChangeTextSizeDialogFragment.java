@@ -63,58 +63,69 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                 builder.setTitle(R.string.select_text_size)
                         .setView(inflater.inflate(R.layout.change_text_size_dialog_fragment,null))
                 .setPositiveButton(R.string.ok,null).create();
-        alertDialog.setOnShowListener(dialog -> {
-            final ImageButton text_size_help = (ImageButton) alertDialog.findViewById(R.id.text_size_help);
-            final RadioGroup radioGroup = (RadioGroup) alertDialog.findViewById(R.id.text_size_radio_group);
-            switch (textSize) {
-                case LARGE_SIZE:
-                    radioGroup.check(R.id.large_size);
-                    break;
-                case NORMAL_SIZE:
-                    radioGroup.check(R.id.normal_size);
-                    break;
-                case SMALL_SIZE:
-                    radioGroup.check(R.id.small_size);
-                    break;
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                final ImageButton text_size_help = (ImageButton) alertDialog.findViewById(R.id.text_size_help);
+                final RadioGroup radioGroup = (RadioGroup) alertDialog.findViewById(R.id.text_size_radio_group);
+                switch (textSize) {
+                    case LARGE_SIZE:
+                        radioGroup.check(R.id.large_size);
+                        break;
+                    case NORMAL_SIZE:
+                        radioGroup.check(R.id.normal_size);
+                        break;
+                    case SMALL_SIZE:
+                        radioGroup.check(R.id.small_size);
+                        break;
+                }
+                Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        switch (radioGroup.getCheckedRadioButtonId()) {
+                            case R.id.large_size:
+                                ((ChangeTextSize) ChangeTextSizeDialogFragment.this.getActivity()).changeTextSize((float) LARGE_SIZE);
+                                mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id, SAVE_LARGE_SIZE);
+                                break;
+                            case R.id.normal_size:
+                                ((ChangeTextSize) ChangeTextSizeDialogFragment.this.getActivity()).changeTextSize((float) NORMAL_SIZE);
+                                mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id, SAVE_NORMAL_SIZE);
+                                break;
+                            case R.id.small_size:
+                                ((ChangeTextSize) ChangeTextSizeDialogFragment.this.getActivity()).changeTextSize((float) SMALL_SIZE);
+                                mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id, SAVE_SMALL_SIZE);
+                                break;
+                        }
+                        ((ActivityUtility.ActivityTimers) ChangeTextSizeDialogFragment.this.getActivity()).manageTimersDueDialogsShow(true);
+                        ChangeTextSizeDialogFragment.this.dismiss();
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("Utilities")
+                                .setAction(ActivityUtility.getVersionCode(ChangeTextSizeDialogFragment.this.getActivity()) + "change text size")
+                                .build());
+                    }
+                });
+                text_size_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(ChangeTextSizeDialogFragment.this.getActivity());
+                        number_of_tries_help_dialog_builder
+                                .setMessage(R.string.text_size_help).create().show();
+                    }
+                });
+                ((ActivityUtility.ActivityTimers) ChangeTextSizeDialogFragment.this.getActivity()).manageTimersDueDialogsShow(false);
+                alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                    @Override
+                    public boolean onKey(DialogInterface dialog1, int keyCode, KeyEvent event) {
+                        if (keyCode == KeyEvent.KEYCODE_BACK) {
+                            ((ActivityUtility.ActivityTimers) ChangeTextSizeDialogFragment.this.getActivity()).manageTimersDueDialogsShow(true);
+                            return false;
+                        }
+                        return false;
+
+                    }
+                });
             }
-            Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            positiveButton.setOnClickListener(v -> {
-                switch (radioGroup.getCheckedRadioButtonId()) {
-                    case R.id.large_size:
-                        ((ChangeTextSize)getActivity()).changeTextSize((float)LARGE_SIZE);
-                        mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id,SAVE_LARGE_SIZE);
-                        break;
-                    case R.id.normal_size:
-                        ((ChangeTextSize)getActivity()).changeTextSize((float)NORMAL_SIZE);
-                        mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id,SAVE_NORMAL_SIZE);
-                        break;
-                    case R.id.small_size:
-                        ((ChangeTextSize)getActivity()).changeTextSize((float) SMALL_SIZE);
-                        mySQLiteCursorLoader.updateFieldTestTextSize(current_field_id,SAVE_SMALL_SIZE);
-                        break;
-                }
-                ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
-                dismiss();
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory("Utilities")
-                        .setAction(ActivityUtility.getVersionCode(getActivity()) + "change text size")
-                        .build());
-            });
-            text_size_help.setOnClickListener(v -> {
-                AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(getActivity());
-                number_of_tries_help_dialog_builder
-                        .setMessage(R.string.text_size_help).create().show();
-            });
-            alertDialog.setOnKeyListener((dialog1, keyCode, event) -> {
-
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(true);
-                    return false;
-                }
-                return false;
-
-            });
-            ((ActivityUtility.ActivityTimers) getActivity()).manageTimersDueDialogsShow(false);
         });
         alertDialog.setCanceledOnTouchOutside(false);
         return alertDialog;

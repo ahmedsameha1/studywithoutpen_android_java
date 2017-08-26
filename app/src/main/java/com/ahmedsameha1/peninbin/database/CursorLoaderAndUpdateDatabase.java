@@ -1102,45 +1102,51 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader {
     }
 
     public void deleteField(final long field_id, final Handler handler, final MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder) {
-        Thread pauseThread = new Thread(() -> {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-            Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time_Backup.TABLE_NAME,
-                    new String[]{Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST},
-                    Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null, null);
-            if (cursor.getCount() > 0) {
-                AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
-                    Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
-                    intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    alarmManager.cancel(pendingIntent);
+        Thread pauseThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time_Backup.TABLE_NAME,
+                        new String[]{Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST},
+                        Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null, null);
+                if (cursor.getCount() > 0) {
+                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
+                        Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.cancel(pendingIntent);
+                    }
                 }
-            }
-            cursor.close();
-            cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
-                    new String[]{Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST},
-                    Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " IS NOT NULL"
-                    , new String[]{field_id + ""}, null, null, null);
-            if (cursor.getCount() > 0) {
-                AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
-                    Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
-                    intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    alarmManager.cancel(pendingIntent);
+                cursor.close();
+                cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
+                        new String[]{Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST},
+                        Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " IS NOT NULL"
+                        , new String[]{field_id + ""}, null, null, null);
+                if (cursor.getCount() > 0) {
+                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
+                        Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
+                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.cancel(pendingIntent);
+                    }
                 }
+                cursor.close();
+                sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
+                        Contract.COLUMN_ID + " = ? ",
+                        new String[]{field_id + ""});
+
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        CursorLoaderAndUpdateDatabase.this.onContentChanged();
+                        mainActivityRecyclerViewViewHolder.isDeleting = false;
+                    }
+                };
+                handler.post(runnable);
+
             }
-            cursor.close();
-            sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
-                    Contract.COLUMN_ID + " = ? ",
-                    new String[]{field_id + ""});
-
-            Runnable runnable = () -> {
-                CursorLoaderAndUpdateDatabase.this.onContentChanged();
-                mainActivityRecyclerViewViewHolder.isDeleting = false;
-            };
-            handler.post(runnable);
-
         });
         pauseThread.start();
     }

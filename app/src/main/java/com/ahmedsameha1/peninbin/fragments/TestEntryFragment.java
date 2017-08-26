@@ -130,9 +130,11 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
         mTracker = application.getDefaultTracker();
         mTracker.setScreenName(ActivityUtility.getVersionCode(getActivity()) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
-        check.setOnClickListener(v -> {
-            check_card_view.startAnimation(animAlpha);
-            String entered_answer = enterAnswer.getText().toString();
+        check.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                check_card_view.startAnimation(animAlpha);
+                String entered_answer = enterAnswer.getText().toString();
 
 
                 if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
@@ -153,9 +155,12 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     }
                     enterAnswer.setText("");
-                    mRunnable = () -> {
-                        answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                        answerLinearlayout.setPadding(0, 0, 0, 0);
+                    mRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
                     };
                     mHandler.postDelayed(mRunnable, RETURN_TIME);
                 } else if (check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE) {
@@ -176,9 +181,12 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     }
                     enterAnswer.setText("");
-                    mRunnable = () -> {
-                        answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                        answerLinearlayout.setPadding(0, 0, 0, 0);
+                    mRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
                     };
                     mHandler.postDelayed(mRunnable, RETURN_TIME);
                 } else if (check_type == Contract.Field.IGNORE_CASE) {
@@ -199,9 +207,12 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     }
                     enterAnswer.setText("");
-                    mRunnable = () -> {
-                        answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                        answerLinearlayout.setPadding(0, 0, 0, 0);
+                    mRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
                     };
                     mHandler.postDelayed(mRunnable, RETURN_TIME);
                 } else if (check_type == Contract.Field.DO_NOT_IGNORE_CASE) {
@@ -222,45 +233,55 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
                         answerLinearlayout.setPadding(0, 0, 0, 0);
                     }
                     enterAnswer.setText("");
-                    mRunnable = () -> {
-                        answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                        answerLinearlayout.setPadding(0, 0, 0, 0);
+                    mRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            answerLinearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                            answerLinearlayout.setPadding(0, 0, 0, 0);
+                        }
                     };
                     mHandler.postDelayed(mRunnable, RETURN_TIME);
                 }
-        });
-        up.setOnClickListener(v -> {
-            up_card_view.startAnimation(animAlpha);
-            int position = Integer.parseInt(current_index.toString());
-            if ( position > 0 ) {
-                current_index.replace(0, current_index.length(), String.valueOf(--position));
-                currentQuestion = entries[position][0];
-                currentAnswer = entries[position][1];
-                correctAnswersCounter = 0;
-                correctAnswers.setText(String.valueOf(correctAnswersCounter));
-                show_question.setText(currentQuestion);
-                enterAnswer.setText("");
-            } else {
-                Toast toast = Toast.makeText(getActivity(), R.string.first_entry, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
             }
         });
-        down.setOnClickListener(v -> {
-            down_card_view.startAnimation(animAlpha);
-            int position = Integer.parseInt(current_index.toString());
-            if ( position < entries.length - 1 ) {
-                current_index.replace(0, current_index.length(), String.valueOf(++position));
-                currentQuestion = entries[position][0];
-                currentAnswer = entries[position][1];
-                correctAnswersCounter = 0;
-                correctAnswers.setText(String.valueOf(correctAnswersCounter));
-                show_question.setText(currentQuestion);
-                enterAnswer.setText("");
-            } else {
-                Toast toast = Toast.makeText(getActivity(), R.string.last_entry, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
+        up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                up_card_view.startAnimation(animAlpha);
+                int position = Integer.parseInt(current_index.toString());
+                if (position > 0) {
+                    current_index.replace(0, current_index.length(), String.valueOf(--position));
+                    currentQuestion = entries[position][0];
+                    currentAnswer = entries[position][1];
+                    correctAnswersCounter = 0;
+                    correctAnswers.setText(String.valueOf(correctAnswersCounter));
+                    show_question.setText(currentQuestion);
+                    enterAnswer.setText("");
+                } else {
+                    Toast toast = Toast.makeText(TestEntryFragment.this.getActivity(), R.string.first_entry, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            }
+        });
+        down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                down_card_view.startAnimation(animAlpha);
+                int position = Integer.parseInt(current_index.toString());
+                if (position < entries.length - 1) {
+                    current_index.replace(0, current_index.length(), String.valueOf(++position));
+                    currentQuestion = entries[position][0];
+                    currentAnswer = entries[position][1];
+                    correctAnswersCounter = 0;
+                    correctAnswers.setText(String.valueOf(correctAnswersCounter));
+                    show_question.setText(currentQuestion);
+                    enterAnswer.setText("");
+                } else {
+                    Toast toast = Toast.makeText(TestEntryFragment.this.getActivity(), R.string.last_entry, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
             }
         });
 

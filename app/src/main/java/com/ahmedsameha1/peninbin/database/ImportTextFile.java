@@ -20,6 +20,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Ahmed on 7/3/16.
@@ -35,9 +36,12 @@ public class ImportTextFile {
 
 
     public static void startImportThread(final Context context, final String file_path) {
-        importThread = new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            importFields(context, file_path);
+        importThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                importFields(context, file_path);
+            }
         });
         importThread.start();
     }
@@ -98,33 +102,36 @@ public class ImportTextFile {
             text_line = bufferedReader.readLine();
         }
         bufferedReader.close();
-        Collections.sort(arrayList, (entry1, entry2) -> {
-            if ((Integer) entry1[ORDER] == -1 && (Integer) entry2[ORDER] == -1) {
-                if ((Integer) entry1[RANK] == -1 && (Integer) entry2[RANK] == -1) {
-                    return 0;
-                } else if ((Integer) entry1[RANK] == -1) {
-                    return 1;
-                } else if ((Integer) entry2[RANK] == -1) {
-                    return -1;
+        Collections.sort(arrayList, new Comparator<Object[]>() {
+            @Override
+            public int compare(Object[] entry1, Object[] entry2) {
+                if ((Integer) entry1[ORDER] == -1 && (Integer) entry2[ORDER] == -1) {
+                    if ((Integer) entry1[RANK] == -1 && (Integer) entry2[RANK] == -1) {
+                        return 0;
+                    } else if ((Integer) entry1[RANK] == -1) {
+                        return 1;
+                    } else if ((Integer) entry2[RANK] == -1) {
+                        return -1;
+                    }
+                } else {
+                    if ((Integer) entry1[ORDER] == -1) {
+                        return 1;
+                    } else if ((Integer) entry2[ORDER] == -1) {
+                        return -1;
+                    }
                 }
-            } else {
-                if ((Integer) entry1[ORDER] == -1) {
-                    return 1;
-                } else if ((Integer) entry2[ORDER] == -1) {
-                    return -1;
-                }
-            }
 
-            if ((Integer) entry1[ORDER] < (Integer) entry2[ORDER]) {
-                return -1;
-            } else if ((Integer) entry1[ORDER] > (Integer) entry2[ORDER]) {
-                return 1;
-            } else if ((Integer) entry1[RANK] > (Integer) entry2[RANK]) {
-                return -1;
-            } else if ((Integer) entry1[RANK] < (Integer) entry2[RANK]) {
-                return 1;
-            } else {
-                return 0;
+                if ((Integer) entry1[ORDER] < (Integer) entry2[ORDER]) {
+                    return -1;
+                } else if ((Integer) entry1[ORDER] > (Integer) entry2[ORDER]) {
+                    return 1;
+                } else if ((Integer) entry1[RANK] > (Integer) entry2[RANK]) {
+                    return -1;
+                } else if ((Integer) entry1[RANK] < (Integer) entry2[RANK]) {
+                    return 1;
+                } else {
+                    return 0;
+                }
             }
         });
         return arrayList;

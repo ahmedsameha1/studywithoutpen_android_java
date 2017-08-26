@@ -6,18 +6,14 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.text.Layout;
 import android.text.Spannable;
-import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -32,8 +28,8 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by me on 07/11/16.
@@ -242,57 +238,63 @@ public class ActivityUtility {
             }
         }
         if (rank >= Constants.Rank.LOW && wrongness_postion > 0) {
-            Collections.sort(controlled_arraylist, (element1, element2) -> {
-                int element1_rank = (int) element1[4];
-                double element1_wrongness = (double) element1[3];
-                int element2_rank = (int) element2[4];
-                double element2_wrongness = (double) element2[3];
-                int element1_asked_count = (int) element1[6];
-                int element2_asked_count = (int) element2[6];
-                if (element1_wrongness > element2_wrongness) {
-                    return -1;
-                } else if (element1_wrongness < element2_wrongness) {
-                    return 1;
-                } else {
-                    if (element1_asked_count > element2_asked_count) {
+            Collections.sort(controlled_arraylist, new Comparator<Object[]>() {
+                @Override
+                public int compare(Object[] element1, Object[] element2) {
+                    int element1_rank = (int) element1[4];
+                    double element1_wrongness = (double) element1[3];
+                    int element2_rank = (int) element2[4];
+                    double element2_wrongness = (double) element2[3];
+                    int element1_asked_count = (int) element1[6];
+                    int element2_asked_count = (int) element2[6];
+                    if (element1_wrongness > element2_wrongness) {
                         return -1;
-                    } else if (element1_asked_count < element2_asked_count) {
+                    } else if (element1_wrongness < element2_wrongness) {
                         return 1;
                     } else {
-                        if (element1_rank > element2_rank) {
+                        if (element1_asked_count > element2_asked_count) {
                             return -1;
-                        } else if (element1_rank < element2_rank) {
+                        } else if (element1_asked_count < element2_asked_count) {
                             return 1;
                         } else {
-                            return 0;
+                            if (element1_rank > element2_rank) {
+                                return -1;
+                            } else if (element1_rank < element2_rank) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
                         }
                     }
                 }
             });
         } else if (rank > Constants.Rank.LOW && wrongness_postion == 0) {
-            Collections.sort(controlled_arraylist, (element1, element2) -> {
-                int element1_rank = (int) element1[4];
-                double element1_wrongness = (double) element1[3];
-                int element2_rank = (int) element2[4];
-                double element2_wrongness = (double) element2[3];
-                int element1_asked_count = (int) element1[6];
-                int element2_asked_count = (int) element2[6];
-                if (element1_rank > element2_rank) {
-                    return -1;
-                } else if (element1_rank < element2_rank) {
-                    return 1;
-                } else { // rank is the same
-                    if (element1_wrongness > element2_wrongness) {
+            Collections.sort(controlled_arraylist, new Comparator<Object[]>() {
+                @Override
+                public int compare(Object[] element1, Object[] element2) {
+                    int element1_rank = (int) element1[4];
+                    double element1_wrongness = (double) element1[3];
+                    int element2_rank = (int) element2[4];
+                    double element2_wrongness = (double) element2[3];
+                    int element1_asked_count = (int) element1[6];
+                    int element2_asked_count = (int) element2[6];
+                    if (element1_rank > element2_rank) {
                         return -1;
-                    } else if (element1_wrongness < element2_wrongness) {
+                    } else if (element1_rank < element2_rank) {
                         return 1;
-                    } else { // wrongness and rank are the same
-                        if ( element1_asked_count > element2_asked_count ) {
+                    } else { // rank is the same
+                        if (element1_wrongness > element2_wrongness) {
                             return -1;
-                        } else if ( element1_asked_count < element2_asked_count ) {
+                        } else if (element1_wrongness < element2_wrongness) {
                             return 1;
-                        } else {
-                            return 0;
+                        } else { // wrongness and rank are the same
+                            if (element1_asked_count > element2_asked_count) {
+                                return -1;
+                            } else if (element1_asked_count < element2_asked_count) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
                         }
                     }
                 }
@@ -665,7 +667,7 @@ public class ActivityUtility {
     }
 
 
-    public static void crossFade(View content, View mLoadingView, Context context) {
+    public static void crossFade(View content, final View mLoadingView, Context context) {
         int mShortAnimationDuration = context.getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
         // Set the content view to 0% opacity but visible, so that it is visible

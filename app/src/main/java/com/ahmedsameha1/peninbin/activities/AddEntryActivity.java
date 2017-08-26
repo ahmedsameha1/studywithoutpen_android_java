@@ -18,6 +18,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -194,77 +195,89 @@ public class AddEntryActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        add_entry.setOnClickListener(view -> {
-            try {
-            add_entry_cardview.startAnimation(animAlpha);
-            String question = enter_question.getText().toString().trim();
-            String answer = enter_answer.getText().toString().trim();
-            int order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
-            if (question.length() > 0 && answer.length() > 0) {
-                if (fromFieldActivity) {
+        add_entry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    add_entry_cardview.startAnimation(animAlpha);
+                    String question = enter_question.getText().toString().trim();
+                    String answer = enter_answer.getText().toString().trim();
+                    int order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
+                    if (question.length() > 0 && answer.length() > 0) {
+                        if (fromFieldActivity) {
 
-                    if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
-                        mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
-                                current_field_id, rank_spinner.getSelectedItemPosition(), order);
-                    } else {
-                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    }
+                            if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                                mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                        current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                            } else {
+                                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
 
-                    enter_question.setText("");
-                    enter_answer.setText("");
-                    enter_order.setText("");
-                } else {
-                    if (field_chosen) {
-                        if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
-                            mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
-                                    current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                            enter_question.setText("");
+                            enter_answer.setText("");
+                            enter_order.setText("");
                         } else {
-                            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
-                        }
+                            if (field_chosen) {
+                                if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                                    mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                            current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                                } else {
+                                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
 
-                        enter_question.setText("");
-                        enter_answer.setText("");
-                        enter_order.setText("");
+                                enter_question.setText("");
+                                enter_answer.setText("");
+                                enter_order.setText("");
+                            } else {
+                                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
+                        }
+                        enter_question.requestFocus();
                     } else {
-                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
                     }
+                } catch (NumberFormatException nfe) {
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
                 }
-                enter_question.requestFocus();
-            } else {
-                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
             }
-        } catch ( NumberFormatException nfe ) {
-            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
-        }
         });
-        add_entry.setOnLongClickListener( view -> {
-            PopupMenu popup = new PopupMenu(this, view);
-            getMenuInflater().inflate(R.menu.add_entry_options_menu, popup.getMenu());
-            popup.setOnMenuItemClickListener(item -> {
-                if ( item.getItemId() == R.id.keep_question ) {
-                    addEntryKeepQuestion();
-                } else {
-                    addEntryKeepAnswer();
-                }
+        add_entry.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                PopupMenu popup = new PopupMenu(AddEntryActivity.this, view);
+                AddEntryActivity.this.getMenuInflater().inflate(R.menu.add_entry_options_menu, popup.getMenu());
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (item.getItemId() == R.id.keep_question) {
+                            AddEntryActivity.this.addEntryKeepQuestion();
+                        } else {
+                            AddEntryActivity.this.addEntryKeepAnswer();
+                        }
+                        return true;
+                    }
+                });
+                popup.show();
                 return true;
-            });
-            popup.show();
-            return true;
+            }
         });
 
-        field_spinner.setOnTouchListener((v, event) -> {
-            field_chosen = true;
-            return false;
+        field_spinner.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                field_chosen = true;
+                return false;
+            }
         });
         field_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -281,18 +294,21 @@ public class AddEntryActivity extends AppCompatActivity implements
             }
         });
 
-        showActionbar.setOnClickListener(view -> {
-            show_actionbar_cardview.startAnimation(animAlpha);
-            if (actionBarShown) {
-                getSupportActionBar().hide();
-                actionBarShown = (!actionBarShown);
-                showActionbar.setText(R.string.show);
-                mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
-            } else {
-                getSupportActionBar().show();
-                actionBarShown = (!actionBarShown);
-                showActionbar.setText(R.string.hide);
-                mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+        showActionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                show_actionbar_cardview.startAnimation(animAlpha);
+                if (actionBarShown) {
+                    AddEntryActivity.this.getSupportActionBar().hide();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.show);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                } else {
+                    AddEntryActivity.this.getSupportActionBar().show();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.hide);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+                }
             }
         });
         enter_answer.setOnTouchListener(new OnSwipeTouchListener(this) {

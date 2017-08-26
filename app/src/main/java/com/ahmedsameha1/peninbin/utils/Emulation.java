@@ -33,36 +33,48 @@ public class Emulation {
     private static Thread emulate_thread, unemulate_thread, reemulate_thread;
 
     public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries, final boolean[] week_days_case) {
-        emulate_thread = new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            emulate(context, field_id, number_of_entries, week_days_case);
+        emulate_thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                emulate(context, field_id, number_of_entries, week_days_case);
+            }
         });
         emulate_thread.start();
     }
 
 
     public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries, final long starting_entry, final boolean[] week_days_case) {
-        emulate_thread = new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            emulate(context, field_id, number_of_entries, starting_entry, week_days_case);
+        emulate_thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                emulate(context, field_id, number_of_entries, starting_entry, week_days_case);
+            }
         });
 
         emulate_thread.start();
     }
 
     public static void startReemulateThread(final Context context) {
-        reemulate_thread = new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            repartition(context);
+        reemulate_thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                repartition(context);
+            }
         });
 
         reemulate_thread.start();
     }
 
     public static void startUnemulateThread(final Context context, final long field_id) {
-        unemulate_thread = new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            disableEmulation(context, field_id);
+        unemulate_thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                disableEmulation(context, field_id);
+            }
         });
         unemulate_thread.start();
     }

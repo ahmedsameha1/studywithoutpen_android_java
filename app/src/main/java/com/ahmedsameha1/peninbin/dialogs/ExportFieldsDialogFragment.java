@@ -56,39 +56,43 @@ public class ExportFieldsDialogFragment extends DialogFragment {
         final AlertDialog alertDialog = builder.setView(inflater.inflate(R.layout.export_fields_dialog_fragment, null))
                 .setPositiveButton(R.string.export, null)
                 .setNegativeButton(R.string.cancel, null).create();
-        alertDialog.setOnShowListener(dialog -> {
-            databaseOperations = new DatabaseReadOperations(context);
-            enterFileName = (EditText) alertDialog.findViewById(R.id.file_name);
-            listView = (ListView) alertDialog.findViewById(R.id.export_fields_list_view);
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                databaseOperations = new DatabaseReadOperations(context);
+                enterFileName = (EditText) alertDialog.findViewById(R.id.file_name);
+                listView = (ListView) alertDialog.findViewById(R.id.export_fields_list_view);
 
-            SimpleCursorAdapter simpleCursorAdapter =
-                    new SimpleCursorAdapter(context,
-                            android.R.layout.simple_list_item_multiple_choice,
-                            databaseOperations.getFieldList(),
-                            new String[]{Contract.Field.COLUMN_FIELD_NAME},
-                            new int[]{android.R.id.text1}, 0);
-            listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-            listView.setAdapter(simpleCursorAdapter);
-            Button positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            positiveButton.setOnClickListener(v -> {
-                String fileName = enterFileName.getText().toString();
-                SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
-                final ArrayList<String> selectedFields = new ArrayList<String>();
-                for (int i = 0; i < sparseBooleanArray.size(); i++) {
-                    int key = sparseBooleanArray.keyAt(i);
-                    if (sparseBooleanArray.get(key)) {
-                        selectedFields.add(((Cursor) listView.getItemAtPosition(key)).getString(1));
-                    }
-                }
-                if (selectedFields.size() <= 0) {
-                    Toast toast = Toast.makeText(context, R.string.select_one, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP,0,400);
-                    toast.show();
-                } else if (fileName.length() <= 0) {
-                    Toast toast = Toast.makeText(context, R.string.no_file_name_toast, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP,0,400);
-                    toast.show();
-                } else {
+                SimpleCursorAdapter simpleCursorAdapter =
+                        new SimpleCursorAdapter(context,
+                                android.R.layout.simple_list_item_multiple_choice,
+                                databaseOperations.getFieldList(),
+                                new String[]{Contract.Field.COLUMN_FIELD_NAME},
+                                new int[]{android.R.id.text1}, 0);
+                listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+                listView.setAdapter(simpleCursorAdapter);
+                Button positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String fileName = enterFileName.getText().toString();
+                        SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
+                        final ArrayList<String> selectedFields = new ArrayList<String>();
+                        for (int i = 0; i < sparseBooleanArray.size(); i++) {
+                            int key = sparseBooleanArray.keyAt(i);
+                            if (sparseBooleanArray.get(key)) {
+                                selectedFields.add(((Cursor) listView.getItemAtPosition(key)).getString(1));
+                            }
+                        }
+                        if (selectedFields.size() <= 0) {
+                            Toast toast = Toast.makeText(context, R.string.select_one, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        } else if (fileName.length() <= 0) {
+                            Toast toast = Toast.makeText(context, R.string.no_file_name_toast, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        } else {
                     /*File file = new File(Environment.getExternalStorageDirectory().getPath()
                             + File.separator + ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME + File.separator + fileName.toLowerCase());
                     if (Environment.getExternalStorageState().equals(Environment.MEDIA_REMOVED)) {
@@ -112,10 +116,12 @@ public class ExportFieldsDialogFragment extends DialogFragment {
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();*/
 //                                ExportImportDatabase.startExportThread(context, selectedFields, path, fileName);
-                    ((Contact)getActivity()).exportFields(selectedFields,fileName);
-                    dismiss();
-                }
-            });
+                            ((Contact) ExportFieldsDialogFragment.this.getActivity()).exportFields(selectedFields, fileName);
+                            ExportFieldsDialogFragment.this.dismiss();
+                        }
+                    }
+                });
+            }
         });
         return alertDialog;
     }

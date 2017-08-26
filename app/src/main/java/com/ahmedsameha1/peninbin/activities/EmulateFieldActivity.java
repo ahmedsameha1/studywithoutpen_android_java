@@ -117,20 +117,29 @@ public class EmulateFieldActivity extends AppCompatActivity implements
                 }
             }
         });
-        number_of_entries_help.setOnClickListener( view ->  {
+        number_of_entries_help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(EmulateFieldActivity.this);
                 number_of_tries_help_dialog_builder
                         .setMessage(R.string.everyday_entries_help).create().show();
+            }
         });
-        starting_entry_help.setOnClickListener( view ->  {
+        starting_entry_help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 AlertDialog.Builder number_of_tries_help_dialog_builder = new AlertDialog.Builder(EmulateFieldActivity.this);
                 number_of_tries_help_dialog_builder
                         .setMessage(R.string.starting_entry_help).create().show();
 
+            }
         });
-        exclude_days_help.setOnClickListener( view ->  {
+        exclude_days_help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(EmulateFieldActivity.this);
                 builder.setMessage(R.string.exclude_days_help).create().show();
+            }
         });
     }
 
@@ -240,7 +249,7 @@ public class EmulateFieldActivity extends AppCompatActivity implements
             }
         }
         for ( int i = 0; i < week_days.length; i++ ) {
-            int n = i;
+            final int n = i;
             week_days[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

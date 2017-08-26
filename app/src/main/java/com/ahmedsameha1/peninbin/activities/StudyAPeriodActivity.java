@@ -142,7 +142,12 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
     private int time_of_answer, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
-    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
+    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = new Runnable() {
+        @Override
+        public void run() {
+            DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
+        }
+    };
     private int question_data_type;
     private boolean obfuscate;
     private boolean while_studying;
@@ -302,85 +307,12 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
 
-        check.setOnClickListener(view -> {
-            check_card_view.startAnimation(animAlpha);
-            result = checkAnAnswer();
-            if (triesCounter < permitedTriesNumber && !result) {
-                if (obfuscate) {
-                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
-                } else {
-                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                }
-                time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
-                        reading_question_letter_second, find_answer_time, typing_answer_letter_second);
-                showTries.setText(Integer.toString(triesCounter + 1));
-            } else if (!result) {
-                enterAnswer.setText(listForTest[currentQuestionCounter][1]);
-                triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                showTries.setText(Integer.toString(triesCounter + 1));
-                check.setEnabled(false);
-                _continue.setEnabled(true);
-                enterAnswer.setEnabled(false);
-            } else {
-                triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                showTries.setText(Integer.toString(triesCounter + 1));
-                cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                currentQuestionCounter++;
-                if (currentQuestionCounter >= questionsNumber) {
-                    currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                    questionsNumber = 0;
-                    enterAnswer.setHint(R.string.enter_your_answer);
-                    hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                    if (repeatedEntries.size() > 0) {
-                        listForTest = prepareListForStudySecondAndMore(repeatedEntries);
-                        questionsNumber = listForTest.length;
-                        repeatedEntries.clear();
-                        if (obfuscate) {
-                            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
-                        } else {
-                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
-                        }
-                        time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
-                                reading_question_letter_second, find_answer_time, typing_answer_letter_second);
-                        showNumberOfQuetions.setText(Integer.toString(questionsNumber));
-                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                        ifMoreThanOnce();
-                        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-                        time_of_starting_time_of_answer = -1;
-                        scheduleWhatToDoAfterTimeOfAnswerElapsed();
-                    } else {
-                        check.setEnabled(false);
-                        dont_know.setEnabled(false);
-                        while_studying = false;
-                        cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_PERIOD, question_data_type);
-                        cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id);
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
-                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-                        String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
-                        Toast toast = Toast.makeText(StudyAPeriodActivity.this, time, Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        if (tts_available) {
-                            new AsyncTask<Void, Void, Void>() {
-
-                                @Override
-                                protected Void doInBackground(Void... params) {
-                                    while (true) {
-                                        if (!tts.isSpeaking()) {
-                                            finish();
-                                            ExitActivity.exit(StudyAPeriodActivity.this);
-                                            break;
-                                        }
-                                    }
-                                    return null;
-                                }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
-                        } else {
-                            finish();
-                            ExitActivity.exit(StudyAPeriodActivity.this);
-                        }
-                    }
-                } else {
+        check.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                check_card_view.startAnimation(animAlpha);
+                result = StudyAPeriodActivity.this.checkAnAnswer();
+                if (triesCounter < permitedTriesNumber && !result) {
                     if (obfuscate) {
                         showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
                     } else {
@@ -389,31 +321,110 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                     time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
                             reading_question_letter_second, find_answer_time, typing_answer_letter_second);
                     showTries.setText(Integer.toString(triesCounter + 1));
-                    ifMoreThanOnce();
-                    remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
-                    hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                    mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-                    time_of_starting_time_of_answer = -1;
-                    scheduleWhatToDoAfterTimeOfAnswerElapsed();
-                }
-                show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                show_question_linearlayout.setPadding(0, 0, 0, 0);
-                showQuestion.setTextColor(Color.WHITE);
-                is_time_of_answer_elapsed = false;
-            }
-            enterAnswer.setHint(R.string.enter_your_answer);
-        });
-        nextHint.setOnClickListener(v -> {
-            next_hint_card_view.startAnimation(animAlpha);
-            if (hints != null) {
-                if (enterAnswer.getText().toString().length() <= 0) {
-                    enterAnswer.setHint(hints.get(hintCounter++));
+                } else if (!result) {
+                    enterAnswer.setText(listForTest[currentQuestionCounter][1]);
+                    triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                    showTries.setText(Integer.toString(triesCounter + 1));
+                    check.setEnabled(false);
+                    _continue.setEnabled(true);
+                    enterAnswer.setEnabled(false);
                 } else {
-                    Toast toast = Toast.makeText(StudyAPeriodActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
+                    triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                    showTries.setText(Integer.toString(triesCounter + 1));
+                    cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+                    currentQuestionCounter++;
+                    if (currentQuestionCounter >= questionsNumber) {
+                        currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                        questionsNumber = 0;
+                        enterAnswer.setHint(R.string.enter_your_answer);
+                        hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                        if (repeatedEntries.size() > 0) {
+                            listForTest = StudyAPeriodActivity.this.prepareListForStudySecondAndMore(repeatedEntries);
+                            questionsNumber = listForTest.length;
+                            repeatedEntries.clear();
+                            if (obfuscate) {
+                                showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
+                            } else {
+                                showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                            }
+                            time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
+                                    reading_question_letter_second, find_answer_time, typing_answer_letter_second);
+                            showNumberOfQuetions.setText(Integer.toString(questionsNumber));
+                            remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                            StudyAPeriodActivity.this.ifMoreThanOnce();
+                            mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                            time_of_starting_time_of_answer = -1;
+                            StudyAPeriodActivity.this.scheduleWhatToDoAfterTimeOfAnswerElapsed();
+                        } else {
+                            check.setEnabled(false);
+                            dont_know.setEnabled(false);
+                            while_studying = false;
+                            cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_PERIOD, question_data_type);
+                            cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_PERIOD, current_field_id);
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+                            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                            String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
+                            Toast toast = Toast.makeText(StudyAPeriodActivity.this, time, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                            if (tts_available) {
+                                new AsyncTask<Void, Void, Void>() {
+
+                                    @Override
+                                    protected Void doInBackground(Void... params) {
+                                        while (true) {
+                                            if (!tts.isSpeaking()) {
+                                                finish();
+                                                ExitActivity.exit(StudyAPeriodActivity.this);
+                                                break;
+                                            }
+                                        }
+                                        return null;
+                                    }
+                                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+                            } else {
+                                StudyAPeriodActivity.this.finish();
+                                ExitActivity.exit(StudyAPeriodActivity.this);
+                            }
+                        }
+                    } else {
+                        if (obfuscate) {
+                            showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
+                        } else {
+                            showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                        }
+                        time_of_answer = ActivityUtility.calculate_time_of_answer(listForTest[currentQuestionCounter][0], listForTest[currentQuestionCounter][1],
+                                reading_question_letter_second, find_answer_time, typing_answer_letter_second);
+                        showTries.setText(Integer.toString(triesCounter + 1));
+                        StudyAPeriodActivity.this.ifMoreThanOnce();
+                        remainingQuestionCounter.setText(Integer.toString(questionsNumber - 1 - currentQuestionCounter));
+                        hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                        time_of_starting_time_of_answer = -1;
+                        StudyAPeriodActivity.this.scheduleWhatToDoAfterTimeOfAnswerElapsed();
+                    }
+                    show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                    show_question_linearlayout.setPadding(0, 0, 0, 0);
+                    showQuestion.setTextColor(Color.WHITE);
+                    is_time_of_answer_elapsed = false;
                 }
-                hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+                enterAnswer.setHint(R.string.enter_your_answer);
+            }
+        });
+        nextHint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                next_hint_card_view.startAnimation(animAlpha);
+                if (hints != null) {
+                    if (enterAnswer.getText().toString().length() <= 0) {
+                        enterAnswer.setHint(hints.get(hintCounter++));
+                    } else {
+                        Toast toast = Toast.makeText(StudyAPeriodActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
+                }
             }
         });
         enterAnswer.addTextChangedListener(new TextWatcher() {
@@ -442,59 +453,77 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 }
             }
         });
-        _continue.setOnClickListener(v -> {
-            continue_card_view.startAnimation(animAlpha);
-            enterAnswer.setText("");
-            _continue.setEnabled(false);
-            enterAnswer.setEnabled(true);
+        _continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                continue_card_view.startAnimation(animAlpha);
+                enterAnswer.setText("");
+                _continue.setEnabled(false);
+                enterAnswer.setEnabled(true);
 
-            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.toggleSoftInputFromWindow(enterAnswer.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
-            enterAnswer.requestFocus();
-            enterAnswer.setHint(R.string.enter_your_answer);
-            if (permitedTriesNumber == 1) {
-                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                InputMethodManager inputMethodManager = (InputMethodManager) StudyAPeriodActivity.this.getSystemService(INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInputFromWindow(enterAnswer.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+                enterAnswer.requestFocus();
+                enterAnswer.setHint(R.string.enter_your_answer);
+                if (permitedTriesNumber == 1) {
+                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                    show_result_linearlayout.setPadding(0, 0, 0, 0);
+                }
             }
         });
-        dont_know.setOnClickListener(view -> {
-            dont_know_card_view.startAnimation(animAlpha);
-            dontKnow();
-        });
-        showActionbar.setOnClickListener(v -> {
-            show_action_bar_card_view.startAnimation(animAlpha);
-            if (actionBarShown) {
-                getSupportActionBar().hide();
-                actionBarShown = (!actionBarShown);
-                showActionbar.setText(R.string.show);
-                cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
-            } else {
-                getSupportActionBar().show();
-                actionBarShown = (!actionBarShown);
-                showActionbar.setText(R.string.hide);
-                cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+        dont_know.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dont_know_card_view.startAnimation(animAlpha);
+                StudyAPeriodActivity.this.dontKnow();
             }
         });
-        showNumberOfQuetions.setOnClickListener(v -> {
-            v.startAnimation(animAlpha);
-            Toast toast = Toast.makeText(StudyAPeriodActivity.this,
-                    getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
+        showActionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                show_action_bar_card_view.startAnimation(animAlpha);
+                if (actionBarShown) {
+                    StudyAPeriodActivity.this.getSupportActionBar().hide();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.show);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                } else {
+                    StudyAPeriodActivity.this.getSupportActionBar().show();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.hide);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+                }
+            }
         });
-        remainingQuestionCounter.setOnClickListener(v -> {
-            v.startAnimation(animAlpha);
-            Toast toast = Toast.makeText(StudyAPeriodActivity.this,
-                    getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
+        showNumberOfQuetions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.startAnimation(animAlpha);
+                Toast toast = Toast.makeText(StudyAPeriodActivity.this,
+                        StudyAPeriodActivity.this.getString(R.string.number_of_questions, showNumberOfQuetions.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
         });
-        showTries.setOnClickListener(v -> {
-            v.startAnimation(animAlpha);
-            Toast toast = Toast.makeText(StudyAPeriodActivity.this,
-                    getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
+        remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.startAnimation(animAlpha);
+                Toast toast = Toast.makeText(StudyAPeriodActivity.this,
+                        StudyAPeriodActivity.this.getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        });
+        showTries.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.startAnimation(animAlpha);
+                Toast toast = Toast.makeText(StudyAPeriodActivity.this,
+                        StudyAPeriodActivity.this.getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
         });
         setSupportActionBar(toolbar);
         if (action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR) {
@@ -654,25 +683,31 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         }
         UsageLastTime.updateUsageLastTime(this);
         if (while_studying) {
-            new Thread(() -> {
-                Runnable pauseRunnable;
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try {
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyAPeriodActivity.this);
-                    if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + Constants.PAUSING + current_field_id)) {
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean(StudyAPeriodActivity.class.getName() + Constants.PAUSING + current_field_id, true);
-                        editor.commit();
-                        toPause();
-                    }
-                } finally {
-                    pauseRunnable = () -> {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Runnable pauseRunnable;
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    try {
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyAPeriodActivity.this);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.remove(StudyAPeriodActivity.class.getName() + Constants.PAUSING + current_field_id);
-                        editor.commit();
-                    };
-                    mHandler.post(pauseRunnable);
+                        if (!sharedPreferences.contains(StudyAPeriodActivity.class.getName() + Constants.PAUSING + current_field_id)) {
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean(StudyAPeriodActivity.class.getName() + Constants.PAUSING + current_field_id, true);
+                            editor.commit();
+                            StudyAPeriodActivity.this.toPause();
+                        }
+                    } finally {
+                        pauseRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(StudyAPeriodActivity.this);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.remove(StudyAPeriodActivity.class.getName() + Constants.PAUSING + current_field_id);
+                                editor.commit();
+                            }
+                        };
+                        mHandler.post(pauseRunnable);
+                    }
                 }
             }).start();
         }
@@ -1097,15 +1132,18 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
 
 
     private void setNormalEnterAnswerBackground() {
-        Runnable mRunnable = () -> {
-            show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-            show_result_linearlayout.setPadding(0, 0, 0, 0);
+        Runnable mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+            }
         };
         mHandler.postDelayed(mRunnable, RETURN_TIME);
     }
 
     @Override
-    public void setTimeOfAnswer(int reading_question_letter_second, int find_answer_time, int typing_answer_letter_second, boolean time_for_answer_saved) {
+    public void setTimeOfAnswer(final int reading_question_letter_second, final int find_answer_time, final int typing_answer_letter_second, boolean time_for_answer_saved) {
         this.reading_question_letter_second = reading_question_letter_second;
         this.find_answer_time = find_answer_time;
         this.typing_answer_letter_second = typing_answer_letter_second;

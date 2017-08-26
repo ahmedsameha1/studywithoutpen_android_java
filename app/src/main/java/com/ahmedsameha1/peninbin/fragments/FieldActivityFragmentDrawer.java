@@ -114,7 +114,12 @@ public class FieldActivityFragmentDrawer extends Fragment {
         };
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerLayout.post(() -> mDrawerToggle.syncState());
+        mDrawerLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mDrawerToggle.syncState();
+            }
+        });
 
     }
 

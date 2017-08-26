@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -109,185 +110,200 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                         .setPositiveButton(R.string.ok, null)
                         .setNegativeButton(R.string.cancel, null).create();
 
-        alertDialog.setOnShowListener(dialog -> {
-            final EditText new_field_name = (EditText) alertDialog.findViewById(R.id.enter_new_field_name);
-            final Spinner select_check_type = (Spinner) alertDialog.findViewById(R.id.check_type_spinner);
-            read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
-            select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
-            Button emulate_field = (Button) alertDialog.findViewById(R.id.emulate_field);
-            final Button pick_color = (Button) alertDialog.findViewById(R.id.color);
-            positive_button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            new_field_name.setText(field_name);
-            read_answer.setChecked(isReadAnswer);
-            emulate_field.setText(emulated ? getResources().getString(R.string.disable_emulation)
-                    : getResources().getString(R.string.enable_emulation));
-            final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.check_type));
-            check_type_adapter.setDropDownViewResource
-                    (android.R.layout.simple_spinner_dropdown_item);
-            select_check_type.setAdapter(check_type_adapter);
-            select_check_type.setSelection(check_type);
-            final SpinnerWithHintAdapter spinnerWithHintAdapter =
-                    new SpinnerWithHintAdapter(getActivity(), android.R.layout.simple_spinner_item, locale_display_names);
-
-
-            if (tts_available && locale_available) {
-                spinnerWithHintAdapter.setDropDownViewResource
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                final EditText new_field_name = (EditText) alertDialog.findViewById(R.id.enter_new_field_name);
+                final Spinner select_check_type = (Spinner) alertDialog.findViewById(R.id.check_type_spinner);
+                read_answer = (CheckBox) alertDialog.findViewById(R.id.read_answer);
+                select_locale = (Spinner) alertDialog.findViewById(R.id.locales_spinner);
+                Button emulate_field = (Button) alertDialog.findViewById(R.id.emulate_field);
+                final Button pick_color = (Button) alertDialog.findViewById(R.id.color);
+                positive_button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                new_field_name.setText(field_name);
+                read_answer.setChecked(isReadAnswer);
+                emulate_field.setText(emulated ? FieldPropertiesDialogFragment.this.getResources().getString(R.string.disable_emulation)
+                        : FieldPropertiesDialogFragment.this.getResources().getString(R.string.enable_emulation));
+                final ArrayAdapter<String> check_type_adapter = new ArrayAdapter<String>(FieldPropertiesDialogFragment.this.getActivity(),
+                        android.R.layout.simple_spinner_item, FieldPropertiesDialogFragment.this.getResources().getStringArray(R.array.check_type));
+                check_type_adapter.setDropDownViewResource
                         (android.R.layout.simple_spinner_dropdown_item);
-                select_locale.setAdapter(spinnerWithHintAdapter);
-                select_locale.setSelection(index_of_locale);
-                select_locale.setVisibility(View.VISIBLE);
-            } else {
-                read_answer.setChecked(false);
-            }
-            pick_color.setBackgroundColor(field_color);
-            read_answer.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-                if (isChecked) {
-                    if (!tts_available) {
-                        Intent installIntent = new Intent();
-                        installIntent.setAction(
-                                TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                        startActivity(installIntent);
-                        dismiss();
-                    } else {
-                        spinnerWithHintAdapter.setDropDownViewResource
-                                (android.R.layout.simple_spinner_dropdown_item);
-                        select_locale.setAdapter(spinnerWithHintAdapter);
-                        select_locale.setSelection(spinnerWithHintAdapter.getCount());
-                        select_locale.setVisibility(View.VISIBLE);
-                    }
-                }
-            });
-            pick_color.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ColorPicker colorPicker = new ColorPicker(getActivity(), red, green, blue);
-                    colorPicker.setCallback(new ColorPickerCallback() {
-                        @Override
-                        public void onColorChosen(@ColorInt int color) {
-                            Log.d("color", Integer.toString(color));
-                            Log.d("Red", Integer.toString(Color.red(color)));
-                            Log.d("Green", Integer.toString(Color.green(color)));
-                            Log.d("Blue", Integer.toString(Color.blue(color)));
-                            red = Color.red(color);
-                            green = Color.green(color);
-                            blue = Color.blue(color);
-                            new_color = color;
-                            pick_color.setBackgroundColor(color);
-                            Log.d("Pure Hex", Integer.toHexString(color));
-                            colorPicker.dismiss();
-                        }
-                    });
-                    colorPicker.show();
-                }
-            });
-            emulate_field.setOnClickListener(v -> {
-                if (!Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
-                        && !ImportTextFile.isThreadRunning() ) {
-                    if (emulated) {
-                        AlertDialog.Builder builder2 = new AlertDialog.Builder(getActivity());
-                        builder2.setMessage(getString(R.string.sure_disable_emulation))
-                                .setPositiveButton(R.string.ok, (dialog1, which) -> {
-                                    Emulation.startUnemulateThread(getActivity(),current_field_id);
-                                    alertDialog.dismiss();
-                                    dismiss();
-                                })
-                                .setNegativeButton(R.string.cancel,null)
-                                .create().show();
+                select_check_type.setAdapter(check_type_adapter);
+                select_check_type.setSelection(check_type);
+                final SpinnerWithHintAdapter spinnerWithHintAdapter =
+                        new SpinnerWithHintAdapter(FieldPropertiesDialogFragment.this.getActivity(), android.R.layout.simple_spinner_item, locale_display_names);
 
-                    } else {
-                        if ( databaseReadOperations.getRealEntriesNumber(current_field_id,
-                                Contract.Field.STRING_DATA_TYPE) > 0 ) {
-                            Intent intent = new Intent(getActivity(), EmulateFieldActivity.class);
-                            intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
-                            getActivity().startActivity(intent);
-                            dismiss();
+
+                if (tts_available && locale_available) {
+                    spinnerWithHintAdapter.setDropDownViewResource
+                            (android.R.layout.simple_spinner_dropdown_item);
+                    select_locale.setAdapter(spinnerWithHintAdapter);
+                    select_locale.setSelection(index_of_locale);
+                    select_locale.setVisibility(View.VISIBLE);
+                } else {
+                    read_answer.setChecked(false);
+                }
+                pick_color.setBackgroundColor(field_color);
+                read_answer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                        if (isChecked) {
+                            if (!tts_available) {
+                                Intent installIntent = new Intent();
+                                installIntent.setAction(
+                                        TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                                FieldPropertiesDialogFragment.this.startActivity(installIntent);
+                                FieldPropertiesDialogFragment.this.dismiss();
+                            } else {
+                                spinnerWithHintAdapter.setDropDownViewResource
+                                        (android.R.layout.simple_spinner_dropdown_item);
+                                select_locale.setAdapter(spinnerWithHintAdapter);
+                                select_locale.setSelection(spinnerWithHintAdapter.getCount());
+                                select_locale.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                });
+                pick_color.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        final ColorPicker colorPicker = new ColorPicker(getActivity(), red, green, blue);
+                        colorPicker.setCallback(new ColorPickerCallback() {
+                            @Override
+                            public void onColorChosen(@ColorInt int color) {
+                                Log.d("color", Integer.toString(color));
+                                Log.d("Red", Integer.toString(Color.red(color)));
+                                Log.d("Green", Integer.toString(Color.green(color)));
+                                Log.d("Blue", Integer.toString(Color.blue(color)));
+                                red = Color.red(color);
+                                green = Color.green(color);
+                                blue = Color.blue(color);
+                                new_color = color;
+                                pick_color.setBackgroundColor(color);
+                                Log.d("Pure Hex", Integer.toHexString(color));
+                                colorPicker.dismiss();
+                            }
+                        });
+                        colorPicker.show();
+                    }
+                });
+                emulate_field.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (!Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                                && !ImportTextFile.isThreadRunning()) {
+                            if (emulated) {
+                                AlertDialog.Builder builder2 = new AlertDialog.Builder(FieldPropertiesDialogFragment.this.getActivity());
+                                builder2.setMessage(FieldPropertiesDialogFragment.this.getString(R.string.sure_disable_emulation))
+                                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog1, int which) {
+                                                Emulation.startUnemulateThread(FieldPropertiesDialogFragment.this.getActivity(), current_field_id);
+                                                alertDialog.dismiss();
+                                                FieldPropertiesDialogFragment.this.dismiss();
+                                            }
+                                        })
+                                        .setNegativeButton(R.string.cancel, null)
+                                        .create().show();
+
+                            } else {
+                                if (databaseReadOperations.getRealEntriesNumber(current_field_id,
+                                        Contract.Field.STRING_DATA_TYPE) > 0) {
+                                    Intent intent = new Intent(FieldPropertiesDialogFragment.this.getActivity(), EmulateFieldActivity.class);
+                                    intent.putExtra(FieldActivity.FIELD_ID, current_field_id);
+                                    FieldPropertiesDialogFragment.this.getActivity().startActivity(intent);
+                                    FieldPropertiesDialogFragment.this.dismiss();
+                                } else {
+                                    Toast toast = Toast.makeText(FieldPropertiesDialogFragment.this.getActivity(), R.string.no_entries_in_field, Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
+                            }
                         } else {
-                            Toast toast = Toast.makeText(getActivity(), R.string.no_entries_in_field, Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(FieldPropertiesDialogFragment.this.getActivity(), R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
                         }
                     }
-                } else {
-                    Toast toast = Toast.makeText(getActivity(), R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
-            });
-            new_field_name.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                });
+                new_field_name.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                }
-
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                }
-
-                @Override
-                public void afterTextChanged(Editable editable) {
-                    if ( editable.length() > 500 ) {
-                        String limit500 = editable.toString().substring(0, 500);
-                        new_field_name.setText(limit500);
-                        Toast toast = Toast.makeText(getActivity(), R.string.less_500, Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP,0,400);
-                        toast.show();
                     }
-                }
-            });
-            positive_button.setOnClickListener(view -> {
-                if (new_field_name.getText().toString().length() > 0) {
-                    if (read_answer.isChecked() && select_locale.getSelectedItemPosition() == spinnerWithHintAdapter.getCount()) {
-                        Toast toast = Toast.makeText(getActivity(), R.string.select_locale, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    } else if (select_check_type.getSelectedItemPosition() == check_type_adapter.getCount()) {
-                        Toast toast = Toast.makeText(getActivity(), R.string.select_a_check_type, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    } else if ((!new_field_name.getText().toString().equals(field_name)) && databaseReadOperations.checkFieldDuplication(new_field_name.getText().toString())) {
-                        Toast toast = Toast.makeText(getActivity(), R.string.field_same_name, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    } else {
-                        if (!new_field_name.getText().toString().equals(field_name)) {
-                            if (!Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
-                                    && !ImportTextFile.isThreadRunning() ) {
-                                cursorLoaderAndUpdateDatabase.updateFieldName(current_field_id, new_field_name.getText().toString());
-                                ((Contact) getActivity()).updateFieldName(new_field_name.getText().toString());
-                            } else {
-                                Toast toast = Toast.makeText(getActivity(), R.string.change_field_name_background_thread, Toast.LENGTH_SHORT);
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        if (editable.length() > 500) {
+                            String limit500 = editable.toString().substring(0, 500);
+                            new_field_name.setText(limit500);
+                            Toast toast = Toast.makeText(getActivity(), R.string.less_500, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
+                    }
+                });
+                positive_button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (new_field_name.getText().toString().length() > 0) {
+                            if (read_answer.isChecked() && select_locale.getSelectedItemPosition() == spinnerWithHintAdapter.getCount()) {
+                                Toast toast = Toast.makeText(FieldPropertiesDialogFragment.this.getActivity(), R.string.select_locale, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
+                            } else if (select_check_type.getSelectedItemPosition() == check_type_adapter.getCount()) {
+                                Toast toast = Toast.makeText(FieldPropertiesDialogFragment.this.getActivity(), R.string.select_a_check_type, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            } else if ((!new_field_name.getText().toString().equals(field_name)) && databaseReadOperations.checkFieldDuplication(new_field_name.getText().toString())) {
+                                Toast toast = Toast.makeText(FieldPropertiesDialogFragment.this.getActivity(), R.string.field_same_name, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            } else {
+                                if (!new_field_name.getText().toString().equals(field_name)) {
+                                    if (!Emulation.isAnyThreadRunning() && !ExportImportDatabase.isAnyThreadRunning()
+                                            && !ImportTextFile.isThreadRunning()) {
+                                        cursorLoaderAndUpdateDatabase.updateFieldName(current_field_id, new_field_name.getText().toString());
+                                        ((Contact) FieldPropertiesDialogFragment.this.getActivity()).updateFieldName(new_field_name.getText().toString());
+                                    } else {
+                                        Toast toast = Toast.makeText(FieldPropertiesDialogFragment.this.getActivity(), R.string.change_field_name_background_thread, Toast.LENGTH_SHORT);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                    }
+                                }
+                                cursorLoaderAndUpdateDatabase.updateFieldCheckType(current_field_id, select_check_type.getSelectedItemPosition());
+                                cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id, read_answer.isChecked());
+                                int selected_locale_position = select_locale.getSelectedItemPosition();
+                                if (selected_locale_position < spinnerWithHintAdapter.getCount()
+                                        && selected_locale_position >= 0) {
+                                    Locale locale = localeList.get(selected_locale_position);
+                                    locale_short_name = locale.getLanguage() + "," + locale.getCountry();
+                                    cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, locale_short_name);
+                                    mTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory(FieldActivity.ANALYTICS_CATEGORY)
+                                            .setAction(ActivityUtility.getVersionCode(FieldPropertiesDialogFragment.this.getActivity()) + "selecting locale")
+                                            .build());
+                                } else {
+                                    cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, null);
+                                }
+                                if (new_color != field_color) {
+                                    cursorLoaderAndUpdateDatabase.updateFieldColor(current_field_id, new_color);
+                                }
+                                FieldPropertiesDialogFragment.this.dismiss();
                             }
-                        }
-                        cursorLoaderAndUpdateDatabase.updateFieldCheckType(current_field_id, select_check_type.getSelectedItemPosition());
-                        cursorLoaderAndUpdateDatabase.updateFieldReadAnswer(current_field_id, read_answer.isChecked());
-                        int selected_locale_position = select_locale.getSelectedItemPosition();
-                        if (selected_locale_position < spinnerWithHintAdapter.getCount()
-                                && selected_locale_position >= 0) {
-                            Locale locale = localeList.get(selected_locale_position);
-                            locale_short_name = locale.getLanguage() + "," + locale.getCountry();
-                            cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, locale_short_name);
-                            mTracker.send(new HitBuilders.EventBuilder()
-                                    .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                    .setAction(ActivityUtility.getVersionCode(getActivity()) + "selecting locale")
-                                    .build());
                         } else {
-                            cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, null);
+                            Toast toast = Toast.makeText(FieldPropertiesDialogFragment.this.getActivity(), R.string.no_field_name, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
                         }
-                        if ( new_color != field_color ) {
-                            cursorLoaderAndUpdateDatabase.updateFieldColor(current_field_id, new_color);
-                        }
-                        dismiss();
                     }
-                } else {
-                    Toast toast = Toast.makeText(getActivity(), R.string.no_field_name, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
-            });
+                });
+            }
         });
         return alertDialog;
     }

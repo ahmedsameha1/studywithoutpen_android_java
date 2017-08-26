@@ -6,6 +6,7 @@ import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -200,11 +201,14 @@ public class FieldActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        fab.setOnClickListener(view -> {
-            Intent intent = new Intent(FieldActivity.this, AddEntryActivity.class);
-            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-            intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, true);
-            startActivity(intent);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(FieldActivity.this, AddEntryActivity.class);
+                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, true);
+                FieldActivity.this.startActivity(intent);
+            }
         });
         mServiceConn = new ServiceConnection() {
             @Override
@@ -676,7 +680,7 @@ public class FieldActivity extends AppCompatActivity implements
 
     private void startEnhancedTest() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
-        Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle();
         bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
         boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         if (!sharedPreferences.contains(EnhancedTestActivity.class.getName() + Constants.PAUSING + current_field_id)
@@ -690,21 +694,27 @@ public class FieldActivity extends AppCompatActivity implements
                     fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
                 } else if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id)) {
                     new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
-                            .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
-                                Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                                intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
-                                intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
-                                startActivity(intent);
+                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Intent intent = new Intent(FieldActivity.this, AskAgainAfterTestActivity.class);
+                                    intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                                    intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                                    intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                    FieldActivity.this.startActivity(intent);
+                                }
                             })
-                            .setNegativeButton(R.string.no, (dialogInterface, i) -> {
-                                cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, question_data_type);
-                                cursorLoaderAndUpdateDatabase.
-                                        clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,
-                                                current_field_id);
-                                EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
-                                dialogFragment.setArguments(bundle);
-                                dialogFragment.show(getSupportFragmentManager(), EnhancedTestDialogFragment.ENHANCED_TEST_DIALOG_FRAGMENT);
+                            .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, question_data_type);
+                                    cursorLoaderAndUpdateDatabase.
+                                            clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,
+                                                    current_field_id);
+                                    EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
+                                    dialogFragment.setArguments(bundle);
+                                    dialogFragment.show(FieldActivity.this.getSupportFragmentManager(), EnhancedTestDialogFragment.ENHANCED_TEST_DIALOG_FRAGMENT);
+                                }
                             }).create().show();
                 } else {
                     EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
@@ -730,7 +740,7 @@ public class FieldActivity extends AppCompatActivity implements
 
     private void startFullyRandomTest() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
-        Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle();
         bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
         boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         if (!sharedPreferences.contains(FullyRandomTestActivity.class.getName() + Constants.PAUSING + current_field_id)
@@ -744,19 +754,25 @@ public class FieldActivity extends AppCompatActivity implements
                     fragment3.show(getSupportFragmentManager(), CHECK_IF_CONTINUE_TEST_SESSION);
                 } else if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id)) {
                     new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
-                            .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
-                                Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                                intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
-                                intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
-                                startActivity(intent);
+                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Intent intent = new Intent(FieldActivity.this, AskAgainAfterTestActivity.class);
+                                    intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                                    intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                                    intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                    FieldActivity.this.startActivity(intent);
+                                }
                             })
-                            .setNegativeButton(R.string.no, (dialogInterface, i) -> {
-                                cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, question_data_type);
-                                cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id);
-                                FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
-                                dialogFragment.setArguments(bundle);
-                                dialogFragment.show(getSupportFragmentManager(), FullyRandomTestDialogFragment.FULLY_RANDOM_TEST_DIALOG_FRAGMENT);
+                            .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, question_data_type);
+                                    cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id);
+                                    FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
+                                    dialogFragment.setArguments(bundle);
+                                    dialogFragment.show(FieldActivity.this.getSupportFragmentManager(), FullyRandomTestDialogFragment.FULLY_RANDOM_TEST_DIALOG_FRAGMENT);
+                                }
                             }).create().show();
                 } else {
                     FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();

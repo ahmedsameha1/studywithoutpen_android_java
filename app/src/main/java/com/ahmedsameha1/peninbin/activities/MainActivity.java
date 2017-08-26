@@ -7,6 +7,7 @@ import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -75,6 +76,7 @@ import com.ahmedsameha1.peninbin.utils.PayloadString;
 import com.ahmedsameha1.peninbin.utils.ShowEula;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.android.vending.billing.IInAppBillingService;
+import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
@@ -454,29 +456,32 @@ public class MainActivity extends AppCompatActivity implements
                         new AlertDialog.Builder(this)
                                 .setTitle(R.string.subscription_description)
                                 .setMessage(R.string.subscription1_description)
-                                .setPositiveButton(R.string.proceed_now, (dialog, which) -> {
-                                    pay_load = PayloadString.getString();
-                                    try {
-                                        Bundle bundle = billingService.getBuyIntent(3, MainActivity.this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
-                                                pay_load);
-                                        int response_code = bundle.getInt(Money.RESPONSE_CODE);
-                                        if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
-                                            PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
-                                            startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
-                                        } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
-                                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                                .setPositiveButton(R.string.proceed_now, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        pay_load = PayloadString.getString();
+                                        try {
+                                            Bundle bundle = billingService.getBuyIntent(3, MainActivity.this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
+                                                    pay_load);
+                                            int response_code = bundle.getInt(Money.RESPONSE_CODE);
+                                            if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
+                                                PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
+                                                MainActivity.this.startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
+                                            } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
+                                                Toast toast1 = Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
+                                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                                toast1.show();
+                                            } else {
+                                                Toast toast1 = Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.purchase_error), Toast.LENGTH_SHORT);
+                                                toast1.setGravity(Gravity.TOP, 0, 400);
+                                                toast1.show();
+                                            }
+                                        } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
+                                            Toast toast1 = Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.purchase_error), Toast.LENGTH_SHORT);
                                             toast1.setGravity(Gravity.TOP, 0, 400);
                                             toast1.show();
-                                        } else {
-                                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                                            toast1.setGravity(Gravity.TOP, 0, 400);
-                                            toast1.show();
+                                            e.printStackTrace();
                                         }
-                                    } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
-                                        Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                                        toast1.setGravity(Gravity.TOP, 0, 400);
-                                        toast1.show();
-                                        e.printStackTrace();
                                     }
                                 })
                                 .create().show();
@@ -581,36 +586,42 @@ public class MainActivity extends AppCompatActivity implements
                 .addSubActionView(button2)
                 .attachTo(fab)
                 .build();
-        button1.setOnClickListener(view -> {
-            if (mAdapter.getItemCount() > 0) {
-                Intent intent = new Intent(MainActivity.this, AddEntryActivity.class);
-                intent.putExtra(Constants.CURRENT_FIELD_ID, first_field_id);
-                intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
-                startActivity(intent);
-            } else {
+        button1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mAdapter.getItemCount() > 0) {
+                    Intent intent = new Intent(MainActivity.this, AddEntryActivity.class);
+                    intent.putExtra(Constants.CURRENT_FIELD_ID, first_field_id);
+                    intent.putExtra(AddEntryActivity.FROM_FIELD_ACTIVITY, false);
+                    MainActivity.this.startActivity(intent);
+                } else {
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
+                    CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
+                    fragment.setArguments(bundle);
+                    fragment.show(MainActivity.this.getSupportFragmentManager(), CREATE_NEW_FIELD);
+                }
+                actionMenu.close(false);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction(ActivityUtility.getVersionCode(MainActivity.this) + "add entry from main activity")
+                        .build());
+            }
+        });
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 Bundle bundle = new Bundle();
                 bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
                 CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
                 fragment.setArguments(bundle);
-                fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
+                fragment.show(MainActivity.this.getSupportFragmentManager(), CREATE_NEW_FIELD);
+                actionMenu.close(true);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(ANALYTICS_CATEGORY)
+                        .setAction(ActivityUtility.getVersionCode(MainActivity.this) + "create field")
+                        .build());
             }
-            actionMenu.close(false);
-            mTracker.send(new HitBuilders.EventBuilder()
-                    .setCategory(ANALYTICS_CATEGORY)
-                    .setAction(ActivityUtility.getVersionCode(this) +"add entry from main activity")
-                    .build());
-        });
-        button2.setOnClickListener(view -> {
-            Bundle bundle = new Bundle();
-            bundle.putBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE, tts_available);
-            CreateFieldDialogFragment fragment = new CreateFieldDialogFragment();
-            fragment.setArguments(bundle);
-            fragment.show(getSupportFragmentManager(), CREATE_NEW_FIELD);
-            actionMenu.close(true);
-            mTracker.send(new HitBuilders.EventBuilder()
-                    .setCategory(ANALYTICS_CATEGORY)
-                    .setAction(ActivityUtility.getVersionCode(this) +"create field")
-                    .build());
         });
     }
 
@@ -653,20 +664,23 @@ public class MainActivity extends AppCompatActivity implements
 
         FilePickerDialog dialog = new FilePickerDialog(MainActivity.this, properties);
 
-        dialog.setDialogSelectionListener(files -> {
-            //files is the array of the paths of files selected by the Application User.
-            if (files.length > 0) {
-                ExportImportDatabase.startExportThread(MainActivity.this, to_export_fields, files[0], to_export_file_name);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction(ActivityUtility.getVersionCode(this) +"export field")
-                        .build());
-                Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
-                toast = Toast.makeText(MainActivity.this, R.string.shut_down_warning, Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.TOP, 0, 400);
-                toast.show();
+        dialog.setDialogSelectionListener(new DialogSelectionListener() {
+            @Override
+            public void onSelectedFilePaths(String[] files) {
+                //files is the array of the paths of files selected by the Application User.
+                if (files.length > 0) {
+                    ExportImportDatabase.startExportThread(MainActivity.this, to_export_fields, files[0], to_export_file_name);
+                    mTracker.send(new HitBuilders.EventBuilder()
+                            .setCategory(ANALYTICS_CATEGORY)
+                            .setAction(ActivityUtility.getVersionCode(MainActivity.this) + "export field")
+                            .build());
+                    Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                    toast = Toast.makeText(MainActivity.this, R.string.shut_down_warning, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
             }
         });
 

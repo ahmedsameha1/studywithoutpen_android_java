@@ -47,25 +47,34 @@ public class ExportImportDatabase {
     private static ArrayList<String> notImportedFieldsStrings;
 
     public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String path, final String fileName) {
-        exportThread = new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            exportFields(context, selectedFields, path, fileName);
+        exportThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                exportFields(context, selectedFields, path, fileName);
+            }
         });
         exportThread.start();
     }
 
     public static void startImportThread(final Context context, final String file_path, final boolean importUserUsageData) {
-        importThread = new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            importFields(context, file_path, importUserUsageData);
+        importThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                importFields(context, file_path, importUserUsageData);
+            }
         });
         importThread.start();
     }
 
-    public static void startImportInternalFieldThread(final Context context, SQLiteDatabase toImportDatabase, ArrayList<String> wanted_fields) {
-        importInternalFieldThread = new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            importInternalFields(context, toImportDatabase, wanted_fields);
+    public static void startImportInternalFieldThread(final Context context, final SQLiteDatabase toImportDatabase, final ArrayList<String> wanted_fields) {
+        importInternalFieldThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                importInternalFields(context, toImportDatabase, wanted_fields);
+            }
         });
         importInternalFieldThread.start();
     }

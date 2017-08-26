@@ -151,7 +151,12 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
-    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = this::DoWhatYouHaveToDoAfterTimeOfAnswerElapsed;
+    private Runnable what_to_do_after_time_of_answer_elapsed_runnable = new Runnable() {
+        @Override
+        public void run() {
+            DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
+        }
+    };
     private boolean obfuscate;
     private int last_controlled_index, last_old_round_index;
     private LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -315,64 +320,70 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
-        check.setOnClickListener(view -> {
-            check_card_view.startAnimation(animAlpha);
-            boolean result = checkAnAnswer();
-            if (triesCounter < permitedTriesNumber && !result) {
-                if (obfuscate) {
-                    showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
+        check.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                check_card_view.startAnimation(animAlpha);
+                boolean result = EnhancedTestActivity.this.checkAnAnswer();
+                if (triesCounter < permitedTriesNumber && !result) {
+                    if (obfuscate) {
+                        showQuestion.setText(ActivityUtility.spanText(listForTest[currentQuestionCounter][0], showQuestion));
+                    } else {
+                        showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                    }
+                    showTries.setText(Integer.toString(triesCounter + 1));
                 } else {
-                    showQuestion.setText(listForTest[currentQuestionCounter][0]);
+                    triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
+                    cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+                    ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
+                            last_controlled_index, last_old_round_index, isEmulated);
+                    currentQuestionCounter++;
+                    if (currentQuestionCounter >= questionsNumber) {
+                        check.setEnabled(false);
+                        dont_know.setEnabled(false);
+                        before_showing_result_dialog = true;
+                        show_result_dialog_runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                showQuestion.setText(R.string.test_has_completed);
+                                enterAnswer.setText(R.string.test_has_completed);
+                                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                                show_result_linearlayout.setPadding(0, 0, 0, 0);
+                                EnhancedTestActivity.this.show_result_dialog();
+                            }
+                        };
+                        mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                        String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
+                        Toast toast = Toast.makeText(EnhancedTestActivity.this, time, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
+                        while_testing = false;
+                        enterAnswer.setEnabled(false);
+                        showNumberOfQuestions.setText("");
+                        remainingQuestionCounter.setText("");
+                        showTries.setText("");
+                        enterAnswer.setHint(R.string.enter_your_answer);
+                        hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
+                        cursorLoaderAndUpdateDatabase.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
+                        cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
+                        mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
+                        time_of_starting_time_of_answer = -1;
+                        is_time_of_answer_elapsed = false;
+                        lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
+                        tool_bar_timer.stop();
+                    } else {
+                        EnhancedTestActivity.this.showQuestion();
+                    }
                 }
-                showTries.setText(Integer.toString(triesCounter + 1));
-            } else {
-                triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
-                cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
-                        last_controlled_index, last_old_round_index, isEmulated);
-                currentQuestionCounter++;
-                if (currentQuestionCounter >= questionsNumber) {
-                    check.setEnabled(false);
-                    dont_know.setEnabled(false);
-                    before_showing_result_dialog = true;
-                    show_result_dialog_runnable = () -> {
-                        showQuestion.setText(R.string.test_has_completed);
-                        enterAnswer.setText(R.string.test_has_completed);
-                        show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                        show_result_linearlayout.setPadding(0, 0, 0, 0);
-                        show_result_dialog();
-                    };
-                    mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
-                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-                    String time = simpleDateFormat.format(new Date(SystemClock.elapsedRealtime() - tool_bar_timer.getBase()));
-                    Toast toast = Toast.makeText(EnhancedTestActivity.this, time, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                    currentQuestionCounter = INITIAL_VALUE_OF_CURRENT_QUESTION_COUNTER;
-                    while_testing = false;
-                    enterAnswer.setEnabled(false);
-                    showNumberOfQuestions.setText("");
-                    remainingQuestionCounter.setText("");
-                    showTries.setText("");
-                    enterAnswer.setHint(R.string.enter_your_answer);
-                    hintCounter = INITIAL_VALUE_OF_HINT_COUNTER;
-                    cursorLoaderAndUpdateDatabase.resetEntriesTestOrderEnhancedTest(current_field_id, question_data_type);
-                    cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
-                    mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-                    time_of_starting_time_of_answer = -1;
-                    is_time_of_answer_elapsed = false;
-                    lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
-                    tool_bar_timer.stop();
-                } else {
-                    showQuestion();
+                enterAnswer.setHint(R.string.enter_your_answer);
+                if (triesCounter == INITIAL_VALUE_OF_TRIES_COUNTER) {
+                    show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                    show_question_linearlayout.setPadding(0, 0, 0, 0);
+                    showQuestion.setTextColor(Color.WHITE);
                 }
-            }
-            enterAnswer.setHint(R.string.enter_your_answer);
-            if (triesCounter == INITIAL_VALUE_OF_TRIES_COUNTER) {
-                show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                show_question_linearlayout.setPadding(0, 0, 0, 0);
-                showQuestion.setTextColor(Color.WHITE);
             }
         });
         enterAnswer.addTextChangedListener(new TextWatcher() {
@@ -401,58 +412,76 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 }
             }
         });
-        nextHint.setOnClickListener(view -> {
-            next_hint_card_view.startAnimation(animAlpha);
-            if (hints != null) {
-                if (enterAnswer.getText().toString().length() <= 0) {
-                    enterAnswer.setHint(hints.get(hintCounter++));
-                } else {
-                    Toast toast = Toast.makeText(EnhancedTestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
+        nextHint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                next_hint_card_view.startAnimation(animAlpha);
+                if (hints != null) {
+                    if (enterAnswer.getText().toString().length() <= 0) {
+                        enterAnswer.setHint(hints.get(hintCounter++));
+                    } else {
+                        Toast toast = Toast.makeText(EnhancedTestActivity.this, hints.get(hintCounter++), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                    hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
                 }
-                hintCounter = hintCounter > (hints.size() - 1) ? INITIAL_VALUE_OF_HINT_COUNTER : hintCounter;
             }
         });
-        dont_know.setOnClickListener(view -> {
-            dont_know_card_view.startAnimation(animAlpha);
-            dontKnow();
-        });
-        showActionbar.setOnClickListener(view -> {
-            show_actionbar_card_view.startAnimation(animAlpha);
-            if (actionBarShown) {
-                getSupportActionBar().hide();
-                actionBarShown = (!actionBarShown);
-                showActionbar.setText(R.string.show);
-                cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
-            } else {
-                getSupportActionBar().show();
-                actionBarShown = (!actionBarShown);
-                showActionbar.setText(R.string.hide);
-                cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+        dont_know.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dont_know_card_view.startAnimation(animAlpha);
+                EnhancedTestActivity.this.dontKnow();
             }
         });
-        showNumberOfQuestions.setOnClickListener(view -> {
-            view.startAnimation(animAlpha);
-            Toast toast = Toast.makeText(EnhancedTestActivity.this,
-                    getString(R.string.number_of_questions, showNumberOfQuestions.getText().toString()), Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
+        showActionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                show_actionbar_card_view.startAnimation(animAlpha);
+                if (actionBarShown) {
+                    EnhancedTestActivity.this.getSupportActionBar().hide();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.show);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                } else {
+                    EnhancedTestActivity.this.getSupportActionBar().show();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.hide);
+                    cursorLoaderAndUpdateDatabase.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+                }
+            }
+        });
+        showNumberOfQuestions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.startAnimation(animAlpha);
+                Toast toast = Toast.makeText(EnhancedTestActivity.this,
+                        EnhancedTestActivity.this.getString(R.string.number_of_questions, showNumberOfQuestions.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
 
+            }
         });
-        remainingQuestionCounter.setOnClickListener(view -> {
-            view.startAnimation(animAlpha);
-            Toast toast = Toast.makeText(EnhancedTestActivity.this,
-                    getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
+        remainingQuestionCounter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.startAnimation(animAlpha);
+                Toast toast = Toast.makeText(EnhancedTestActivity.this,
+                        EnhancedTestActivity.this.getString(R.string.remaining_questions, remainingQuestionCounter.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
         });
-        showTries.setOnClickListener(view -> {
-            view.startAnimation(animAlpha);
-            Toast toast = Toast.makeText(EnhancedTestActivity.this,
-                    getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 400);
-            toast.show();
+        showTries.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.startAnimation(animAlpha);
+                Toast toast = Toast.makeText(EnhancedTestActivity.this,
+                        EnhancedTestActivity.this.getString(R.string.try_number, showTries.getText().toString()), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
         });
         check_type = databaseOperations.getFieldCheckType(current_field_id);
         question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
@@ -888,32 +917,38 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
         UsageLastTime.updateUsageLastTime(this);
         if (while_testing) {
-            new Thread(() -> {
-                Runnable pauseRunnable;
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try {
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(EnhancedTestActivity.this);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean(EnhancedTestActivity.class.getName() + Constants.PAUSING + current_field_id, true);
-                    editor.commit();
-                    if (!databaseOperations.checkEntriesForAnyTestOrderEnhancedTest(current_field_id, question_data_type)) {
-                        cursorLoaderAndUpdateDatabase.putEntriesTestOrderEnhancedTest(
-                                question_data_type, listForTest);
-                    }
-                    cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
-                    int[] array = new int[3];
-                    array[0] = currentQuestionCounter;
-                    array[1] = wrongAnswersCounter;
-                    array[2] = permitedTriesNumber;
-                    cursorLoaderAndUpdateDatabase.putTestPausedDataEnhancedTest(current_field_id, array, lastPause);
-                } finally {
-                    pauseRunnable = () -> {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Runnable pauseRunnable;
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    try {
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(EnhancedTestActivity.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.remove(EnhancedTestActivity.class.getName() + Constants.PAUSING + current_field_id);
+                        editor.putBoolean(EnhancedTestActivity.class.getName() + Constants.PAUSING + current_field_id, true);
                         editor.commit();
-                    };
-                    mHandler.post(pauseRunnable);
+                        if (!databaseOperations.checkEntriesForAnyTestOrderEnhancedTest(current_field_id, question_data_type)) {
+                            cursorLoaderAndUpdateDatabase.putEntriesTestOrderEnhancedTest(
+                                    question_data_type, listForTest);
+                        }
+                        cursorLoaderAndUpdateDatabase.clearThisFieldFromTestPausedEnhancedTest(current_field_id);
+                        int[] array = new int[3];
+                        array[0] = currentQuestionCounter;
+                        array[1] = wrongAnswersCounter;
+                        array[2] = permitedTriesNumber;
+                        cursorLoaderAndUpdateDatabase.putTestPausedDataEnhancedTest(current_field_id, array, lastPause);
+                    } finally {
+                        pauseRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(EnhancedTestActivity.this);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.remove(EnhancedTestActivity.class.getName() + Constants.PAUSING + current_field_id);
+                                editor.commit();
+                            }
+                        };
+                        mHandler.post(pauseRunnable);
+                    }
                 }
             }).start();
         }
@@ -1068,9 +1103,12 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     }
 
     private void setNormalEnterAnswerBackground() {
-        Runnable mRunnable = () -> {
-            show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-            show_result_linearlayout.setPadding(0, 0, 0, 0);
+        Runnable mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                show_result_linearlayout.setPadding(0, 0, 0, 0);
+            }
         };
         mHandler.postDelayed(mRunnable, RETURN_TIME);
     }
@@ -1128,12 +1166,15 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 check.setEnabled(false);
                 dont_know.setEnabled(false);
                 before_showing_result_dialog = true;
-                show_result_dialog_runnable = () -> {
-                    showQuestion.setText(R.string.test_has_completed);
-                    enterAnswer.setText(R.string.test_has_completed);
-                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                    show_result_linearlayout.setPadding(0, 0, 0, 0);
-                    show_result_dialog();
+                show_result_dialog_runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showQuestion.setText(R.string.test_has_completed);
+                        enterAnswer.setText(R.string.test_has_completed);
+                        show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                        show_result_linearlayout.setPadding(0, 0, 0, 0);
+                        EnhancedTestActivity.this.show_result_dialog();
+                    }
                 };
                 mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -1161,9 +1202,12 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 showQuestion();
                 show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
                 show_question_linearlayout.setPadding(0, 0, 0, 0);
-                Runnable mRunnable = () -> {
-                    show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                    show_question_linearlayout.setPadding(0, 0, 0, 0);
+                Runnable mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                        show_question_linearlayout.setPadding(0, 0, 0, 0);
+                    }
                 };
                 mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
             }
@@ -1196,12 +1240,15 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             check.setEnabled(false);
             dont_know.setEnabled(false);
             before_showing_result_dialog = true;
-            show_result_dialog_runnable = () -> {
-                showQuestion.setText(R.string.test_has_completed);
-                enterAnswer.setText(R.string.test_has_completed);
-                show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                show_result_dialog();
+            show_result_dialog_runnable = new Runnable() {
+                @Override
+                public void run() {
+                    showQuestion.setText(R.string.test_has_completed);
+                    enterAnswer.setText(R.string.test_has_completed);
+                    show_result_linearlayout.setBackgroundResource(R.drawable.enter_answer_background);
+                    show_result_linearlayout.setPadding(0, 0, 0, 0);
+                    EnhancedTestActivity.this.show_result_dialog();
+                }
             };
             mHandler.postDelayed(show_result_dialog_runnable, RETURN_TIME);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -1229,9 +1276,12 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             showQuestion();
             show_question_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
             show_question_linearlayout.setPadding(0, 0, 0, 0);
-            Runnable mRunnable = () -> {
-                show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                show_question_linearlayout.setPadding(0, 0, 0, 0);
+            Runnable mRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    show_question_linearlayout.setBackgroundResource(R.drawable.show_question_background);
+                    show_question_linearlayout.setPadding(0, 0, 0, 0);
+                }
             };
             mHandler.postDelayed(mRunnable, MOVE_NEXT_NOTIFICATION_TIME);
         }

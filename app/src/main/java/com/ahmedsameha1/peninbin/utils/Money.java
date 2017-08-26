@@ -160,97 +160,100 @@ public class Money {
     public static void checkSubscription (final Context context, final IInAppBillingService billingService ) {
         AnalyticsApplication application = (AnalyticsApplication) (((Activity) context).getApplication());
         final Tracker mTracker = application.getDefaultTracker();
-        (new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            if ( context.getPackageManager().checkPermission(Manifest.permission.GET_ACCOUNTS, context.getPackageName() ) == PERMISSION_GRANTED ) {
-                Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-                Account[] accounts = AccountManager.get(context).getAccounts();
-                for (Account account : accounts) {
-                    if (emailPattern.matcher(account.name).matches()) {
-                        String possibleEmail = account.name;
-                        if (possibleEmail.equalsIgnoreCase("ahmedmsameha1@gmail.com")) {
-                            putUserSubscriptionStatus(context, true);
-                            removeAllGetPurchasesErrors(context);
-                            return;
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                if (context.getPackageManager().checkPermission(Manifest.permission.GET_ACCOUNTS, context.getPackageName()) == PERMISSION_GRANTED) {
+                    Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+                    Account[] accounts = AccountManager.get(context).getAccounts();
+                    for (Account account : accounts) {
+                        if (emailPattern.matcher(account.name).matches()) {
+                            String possibleEmail = account.name;
+                            if (possibleEmail.equalsIgnoreCase("ahmedmsameha1@gmail.com")) {
+                                putUserSubscriptionStatus(context, true);
+                                removeAllGetPurchasesErrors(context);
+                                return;
+                            }
                         }
                     }
                 }
-            }
-            // allow the users in the initial time to use the app without subscription
-            if ( isInInitialPeriod(context) ) {
-                putUserSubscriptionStatus(context, true);
-                removeAllGetPurchasesErrors(context);
-                return;
-            }
-            try {
-                Bundle items_bundle = billingService.getPurchases(3,context.getPackageName(), SUBSCRIPTION_TYPE, null);
-                int response_code = items_bundle.getInt(RESPONSE_CODE);
-                if ( response_code == BILLING_RESPONSE_RESULT_OK ) {
+                // allow the users in the initial time to use the app without subscription
+                if (isInInitialPeriod(context)) {
+                    putUserSubscriptionStatus(context, true);
                     removeAllGetPurchasesErrors(context);
-                    if (!items_bundle.containsKey(RESPONSE_INAPP_ITEM_LIST)
-                            || !items_bundle.containsKey(RESPONSE_INAPP_PURCHASE_DATA_LIST)
-                            || !items_bundle.containsKey(RESPONSE_INAPP_SIGNATURE_LIST)) {
-                        putUserSubscriptionStatus(context, false);
-                        putUnsolvableErrorGetPurchases(context, true);  // consedered security error
-                    } else {
-                        ArrayList<String> owned_item_list = items_bundle.getStringArrayList(
-                                RESPONSE_INAPP_ITEM_LIST);
-                        ArrayList<String> owned_item_data_list = items_bundle.getStringArrayList(
-                                RESPONSE_INAPP_PURCHASE_DATA_LIST);
-                        ArrayList<String> owned_item_signature_list = items_bundle.getStringArrayList(
-                                RESPONSE_INAPP_SIGNATURE_LIST);
-                        if ( owned_item_data_list.size() > 0 ) {
-                            if (Security.verifyPurchase(get64(piece1 + piece2 + piece3 + piece4 + piece5 + piece6
-                                    + piece7 + piece8 + piece9 + piece10 + piece11, context.getResources().getIntArray(R.array.values))
-                                    , owned_item_data_list.get(0), owned_item_signature_list.get(0))) {
-                                putUserSubscriptionStatus(context, true);
+                    return;
+                }
+                try {
+                    Bundle items_bundle = billingService.getPurchases(3, context.getPackageName(), SUBSCRIPTION_TYPE, null);
+                    int response_code = items_bundle.getInt(RESPONSE_CODE);
+                    if (response_code == BILLING_RESPONSE_RESULT_OK) {
+                        removeAllGetPurchasesErrors(context);
+                        if (!items_bundle.containsKey(RESPONSE_INAPP_ITEM_LIST)
+                                || !items_bundle.containsKey(RESPONSE_INAPP_PURCHASE_DATA_LIST)
+                                || !items_bundle.containsKey(RESPONSE_INAPP_SIGNATURE_LIST)) {
+                            putUserSubscriptionStatus(context, false);
+                            putUnsolvableErrorGetPurchases(context, true);  // consedered security error
+                        } else {
+                            ArrayList<String> owned_item_list = items_bundle.getStringArrayList(
+                                    RESPONSE_INAPP_ITEM_LIST);
+                            ArrayList<String> owned_item_data_list = items_bundle.getStringArrayList(
+                                    RESPONSE_INAPP_PURCHASE_DATA_LIST);
+                            ArrayList<String> owned_item_signature_list = items_bundle.getStringArrayList(
+                                    RESPONSE_INAPP_SIGNATURE_LIST);
+                            if (owned_item_data_list.size() > 0) {
+                                if (Security.verifyPurchase(get64(piece1 + piece2 + piece3 + piece4 + piece5 + piece6
+                                                + piece7 + piece8 + piece9 + piece10 + piece11, context.getResources().getIntArray(R.array.values))
+                                        , owned_item_data_list.get(0), owned_item_signature_list.get(0))) {
+                                    putUserSubscriptionStatus(context, true);
+                                } else {
+                                    putUserSubscriptionStatus(context, false);
+                                    putUnsolvableErrorGetPurchases(context, true);   // security error
+                                    mTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory(MONEY)
+                                            .setAction(ActivityUtility.getVersionCode(context) + "security error")
+                                            .build());
+                                }
                             } else {
                                 putUserSubscriptionStatus(context, false);
-                                putUnsolvableErrorGetPurchases(context, true);   // security error
-                                mTracker.send(new HitBuilders.EventBuilder()
-                                        .setCategory(MONEY)
-                                        .setAction(ActivityUtility.getVersionCode(context) + "security error")
-                                        .build());
                             }
-                        } else {
-                            putUserSubscriptionStatus(context, false);
                         }
+                    } else if (response_code == BILLING_RESPONSE_RESULT_USER_CANCELED ||
+                            response_code == BILLING_RESPONSE_RESULT_ITEM_UNAVAILABLE ||
+                            response_code == BILLING_RESPONSE_RESULT_DEVELOPER_ERROR ||
+                            response_code == BILLING_RESPONSE_RESULT_ERROR ||
+                            response_code == BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED ||
+                            response_code == BILLING_RESPONSE_RESULT_ITEM_NOT_OWNED) {
+                        allowUserDueAnError(context);
+                        putUserSubscriptionStatus(context, false);
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory(MONEY)
+                                .setAction(ActivityUtility.getVersionCode(context) + "allow user due error")
+                                .build());
+                    } else if (response_code == BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
+                        putNetworkDownGetPurchasesesStatus(context, true);
+                        putUserSubscriptionStatus(context, false);
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory(MONEY)
+                                .setAction(ActivityUtility.getVersionCode(context) + "network error on money")
+                                .build());
+                    } else if (response_code == BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE) {
+                        putUnsolvableErrorGetPurchases(context, true);
+                        putUserSubscriptionStatus(context, false);
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory(MONEY)
+                                .setAction(ActivityUtility.getVersionCode(context) + "billing unavailable error money")
+                                .build());
                     }
-                } else if ( response_code == BILLING_RESPONSE_RESULT_USER_CANCELED ||
-                        response_code == BILLING_RESPONSE_RESULT_ITEM_UNAVAILABLE ||
-                        response_code == BILLING_RESPONSE_RESULT_DEVELOPER_ERROR ||
-                        response_code == BILLING_RESPONSE_RESULT_ERROR ||
-                        response_code == BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED ||
-                        response_code == BILLING_RESPONSE_RESULT_ITEM_NOT_OWNED ) {
-                    allowUserDueAnError(context);
+                } catch (RemoteException e) {
                     putUserSubscriptionStatus(context, false);
+                    allowUserDueAnError(context);
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(MONEY)
                             .setAction(ActivityUtility.getVersionCode(context) + "allow user due error")
                             .build());
-                } else if ( response_code == BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
-                    putNetworkDownGetPurchasesesStatus(context, true);
-                    putUserSubscriptionStatus(context, false);
-                    mTracker.send(new HitBuilders.EventBuilder()
-                            .setCategory(MONEY)
-                            .setAction(ActivityUtility.getVersionCode(context) + "network error on money")
-                            .build());
-                } else if ( response_code == BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE ) {
-                    putUnsolvableErrorGetPurchases(context, true);
-                    putUserSubscriptionStatus(context, false);
-                    mTracker.send(new HitBuilders.EventBuilder()
-                            .setCategory(MONEY)
-                            .setAction(ActivityUtility.getVersionCode(context) + "billing unavailable error money")
-                            .build());
+                    e.printStackTrace();
                 }
-            } catch (RemoteException e) {
-                putUserSubscriptionStatus(context, false);
-                allowUserDueAnError(context);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(MONEY)
-                        .setAction(ActivityUtility.getVersionCode(context) + "allow user due error")
-                        .build());
-                e.printStackTrace();
             }
         })).start();
     }

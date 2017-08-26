@@ -3,6 +3,7 @@ package com.ahmedsameha1.peninbin.dialogs;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -11,6 +12,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -22,6 +24,7 @@ import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.secondary_activities.SpeciallyFormattedTextFileHelpActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
@@ -52,91 +55,110 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
         LayoutInflater inflater = ((Activity) context).getLayoutInflater();
         final AlertDialog alertDialog = builder.setView(inflater.inflate(R.layout.import_from_what_dialog_fragment, null))
                 .create();
-        alertDialog.setOnShowListener(dialog -> {
-            Button app_file = (Button) alertDialog.findViewById(R.id.app_file);
-            Button text_file = (Button) alertDialog.findViewById(R.id.text_file);
-            ImageButton text_file_help = (ImageButton) alertDialog.findViewById(R.id.text_file_help);
-            app_file.setOnClickListener(v -> {
-                // This always works
-                DialogProperties properties=new DialogProperties();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button app_file = (Button) alertDialog.findViewById(R.id.app_file);
+                Button text_file = (Button) alertDialog.findViewById(R.id.text_file);
+                ImageButton text_file_help = (ImageButton) alertDialog.findViewById(R.id.text_file_help);
+                app_file.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // This always works
+                        DialogProperties properties = new DialogProperties();
 
-                properties.selection_mode= DialogConfigs.SINGLE_MODE;
-                properties.selection_type= DialogConfigs.FILE_SELECT;
-                properties.root=Environment.getExternalStorageDirectory();
-                properties.error_dir=Environment.getExternalStorageDirectory();
-                properties.extensions=null;
+                        properties.selection_mode = DialogConfigs.SINGLE_MODE;
+                        properties.selection_type = DialogConfigs.FILE_SELECT;
+                        properties.root = Environment.getExternalStorageDirectory();
+                        properties.error_dir = Environment.getExternalStorageDirectory();
+                        properties.extensions = null;
 
-                FilePickerDialog dialog14 = new FilePickerDialog(context,properties);
+                        FilePickerDialog dialog14 = new FilePickerDialog(context, properties);
 
-                dialog14.setDialogSelectionListener(files -> {
-                    //files is the array of the paths of files selected by the Application User.
-                    if ( files.length > 0 ) {
-                        AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(context);
-                        importUserUsageData
-                                .setMessage(R.string.import_user_usage)
-                                .setNegativeButton(R.string.no, (dialog13, which) -> {
-                                    Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
-                                    toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
-                                    ExportImportDatabase.startImportThread(context, files [0],false);
-                                    mTracker.send(new HitBuilders.EventBuilder()
-                                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from app file")
-                                            .build());
-                                })
-                                .setPositiveButton(R.string.yes, (dialog12, which) -> {
-                                    Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
-                                    toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
-                                    ExportImportDatabase.startImportThread(context,files [0],true);
-                                    mTracker.send(new HitBuilders.EventBuilder()
-                                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from app file")
-                                            .build());
-                                })
-                                .create().show();
+                        dialog14.setDialogSelectionListener(new DialogSelectionListener() {
+                            @Override
+                            public void onSelectedFilePaths(final String[] files) {
+                                //files is the array of the paths of files selected by the Application User.
+                                if (files.length > 0) {
+                                    AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(context);
+                                    importUserUsageData
+                                            .setMessage(R.string.import_user_usage)
+                                            .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog13, int which) {
+                                                    Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                                    toast.show();
+                                                    toast = Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG);
+                                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                                    toast.show();
+                                                    ExportImportDatabase.startImportThread(context, files[0], false);
+                                                    mTracker.send(new HitBuilders.EventBuilder()
+                                                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from app file")
+                                                            .build());
+                                                }
+                                            })
+                                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog12, int which) {
+                                                    Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                                    toast.show();
+                                                    toast = Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG);
+                                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                                    toast.show();
+                                                    ExportImportDatabase.startImportThread(context, files[0], true);
+                                                    mTracker.send(new HitBuilders.EventBuilder()
+                                                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from app file")
+                                                            .build());
+                                                }
+                                            })
+                                            .create().show();
+                                }
+                            }
+                        });
+
+                        dialog14.show();
+                        ImportFromWhatDialogFragment.this.dismiss();
                     }
                 });
+                text_file.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        DialogProperties properties = new DialogProperties();
 
-                dialog14.show();
-                dismiss();
-            });
-            text_file.setOnClickListener(v -> {
-                DialogProperties properties=new DialogProperties();
+                        properties.selection_mode = DialogConfigs.SINGLE_MODE;
+                        properties.selection_type = DialogConfigs.FILE_SELECT;
+                        properties.root = Environment.getExternalStorageDirectory();
+                        properties.error_dir = Environment.getExternalStorageDirectory();
+                        properties.extensions = null;
 
-                properties.selection_mode= DialogConfigs.SINGLE_MODE;
-                properties.selection_type= DialogConfigs.FILE_SELECT;
-                properties.root=Environment.getExternalStorageDirectory();
-                properties.error_dir=Environment.getExternalStorageDirectory();
-                properties.extensions=null;
+                        FilePickerDialog dialog1 = new FilePickerDialog(context, properties);
 
-                FilePickerDialog dialog1 = new FilePickerDialog(context,properties);
+                        dialog1.setDialogSelectionListener(new DialogSelectionListener() {
+                            @Override
+                            public void onSelectedFilePaths(String[] files) {
+                                //files is the array of the paths of files selected by the Application User.
+                                if (files.length > 0) {
+                                    Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                    toast = Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                    ImportTextFile.startImportThread(context, files[0]);
+                                    mTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from text file")
+                                            .build());
+                                }
+                            }
+                        });
 
-                dialog1.setDialogSelectionListener(files -> {
-                    //files is the array of the paths of files selected by the Application User.
-                    if ( files.length > 0 ) {
-                        Toast toast = Toast.makeText(context,R.string.will_notify_when_process_complete,Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        toast = Toast.makeText(context,R.string.shut_down_warning,Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        ImportTextFile.startImportThread(context, files [0]);
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                .setAction(ActivityUtility.getVersionCode(context) + "import field from text file")
-                                .build());
-                    }
-                });
-
-                dialog1.show();
-                // This always works
+                        dialog1.show();
+                        // This always works
                 /*Intent i = new Intent(context, FilePickerActivity.class);
                 // This works if you defined the intent filter
                 // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
@@ -153,11 +175,16 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                 i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
 
                 getActivity().startActivityForResult(i, TEXT_FILE_CODE);*/
-                dismiss();
-            });
-            text_file_help.setOnClickListener(view -> {
-                startActivity(new Intent(getActivity(), SpeciallyFormattedTextFileHelpActivity.class));
-            });
+                        ImportFromWhatDialogFragment.this.dismiss();
+                    }
+                });
+                text_file_help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ImportFromWhatDialogFragment.this.startActivity(new Intent(getActivity(), SpeciallyFormattedTextFileHelpActivity.class));
+                    }
+                });
+            }
         });
         return alertDialog;
     }

@@ -1,30 +1,30 @@
 package com.ahmedsameha1.peninbin.secondary_activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Gravity;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.AskAgainAfterTestActivity;
+import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.AskAboutContinuePreviousTestDialogFragment;
+import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.QuickTestDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.StudyAPeriodDialogFragment;
-import com.ahmedsameha1.peninbin.dialogs.EnhancedTestDialogFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 
@@ -42,14 +42,14 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_notification_dialogs);
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(this);
-        CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
-        long current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, -1);
+        final CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(this);
+        final long current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, -1);
         if ( databaseReadOperations.checkFieldExists(current_field_id) ) {
             int dialog_type = getIntent().getIntExtra(DIALOG_TYPE, -1);
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            int question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
+            final int question_data_type = databaseReadOperations.getQuestionDataType(current_field_id);
             boolean isEmulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
-            Bundle bundle = new Bundle();
+            final Bundle bundle = new Bundle();
             bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
             bundle.putBoolean(FROM_NOTIFICATION, true);
             switch (dialog_type) {
@@ -72,21 +72,27 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                                 fragment3.show(getSupportFragmentManager(), FieldActivity.CHECK_IF_CONTINUE_TEST_SESSION);
                             } else if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, current_field_id)) {
                                 new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
-                                        .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
-                                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
-                                            intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
-                                            startActivity(intent);
+                                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                Intent intent = new Intent(ShowNotificationDialogsActivity.this, AskAgainAfterTestActivity.class);
+                                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                                                intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.ENHANCED_TEST);
+                                                intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                                ShowNotificationDialogsActivity.this.startActivity(intent);
+                                            }
                                         })
-                                        .setNegativeButton(R.string.no, (dialogInterface, i) -> {
-                                            cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, question_data_type);
-                                            cursorLoaderAndUpdateDatabase.
-                                                    clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,
-                                                            current_field_id);
-                                            EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
-                                            dialogFragment.setArguments(bundle);
-                                            dialogFragment.show(getSupportFragmentManager(), EnhancedTestDialogFragment.ENHANCED_TEST_DIALOG_FRAGMENT);
+                                        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST, question_data_type);
+                                                cursorLoaderAndUpdateDatabase.
+                                                        clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_ENHANCED_TEST,
+                                                                current_field_id);
+                                                EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
+                                                dialogFragment.setArguments(bundle);
+                                                dialogFragment.show(ShowNotificationDialogsActivity.this.getSupportFragmentManager(), EnhancedTestDialogFragment.ENHANCED_TEST_DIALOG_FRAGMENT);
+                                            }
                                         }).create();
                             } else {
                                 EnhancedTestDialogFragment dialogFragment = new EnhancedTestDialogFragment();
@@ -121,19 +127,25 @@ public class ShowNotificationDialogsActivity extends AppCompatActivity {
                                 fragment3.show(getSupportFragmentManager(), FieldActivity.CHECK_IF_CONTINUE_TEST_SESSION);
                             } else if (databaseReadOperations.isThisFieldStudyTillCorrectPaused(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id)) {
                                 new AlertDialog.Builder(this).setMessage(R.string.continue_last_study_agian)
-                                        .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
-                                            Intent intent = new Intent(this, AskAgainAfterTestActivity.class);
-                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                                            intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
-                                            intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
-                                            startActivity(intent);
+                                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                Intent intent = new Intent(ShowNotificationDialogsActivity.this, AskAgainAfterTestActivity.class);
+                                                intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                                                intent.putExtra(ShowTestResultDialogFragment.TEST_TYPE, Constants.TestType.FULLY_RANDOM_TEST);
+                                                intent.putExtra(AskAgainAfterTestActivity.BOOLEAN_CONTINUE, true);
+                                                ShowNotificationDialogsActivity.this.startActivity(intent);
+                                            }
                                         })
-                                        .setNegativeButton(R.string.no, (dialogInterface, i) -> {
-                                            cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST,question_data_type);
-                                            cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id);
-                                            FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
-                                            dialogFragment.setArguments(bundle);
-                                            dialogFragment.show(getSupportFragmentManager(), FullyRandomTestDialogFragment.FULLY_RANDOM_TEST_DIALOG_FRAGMENT);
+                                        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                cursorLoaderAndUpdateDatabase.resetEntriesStudyPeriodOrder(current_field_id, Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, question_data_type);
+                                                cursorLoaderAndUpdateDatabase.clearThisFieldFromStudyTillCorrectPausedAndFromStudyTillCorrectRepeatedEntries(Constants.Study_Till_Correct.STUDY_AGAIN_FULLY_RANDOM_TEST, current_field_id);
+                                                FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();
+                                                dialogFragment.setArguments(bundle);
+                                                dialogFragment.show(ShowNotificationDialogsActivity.this.getSupportFragmentManager(), FullyRandomTestDialogFragment.FULLY_RANDOM_TEST_DIALOG_FRAGMENT);
+                                            }
                                         }).create();
                             }else {
                                 FullyRandomTestDialogFragment dialogFragment = new FullyRandomTestDialogFragment();

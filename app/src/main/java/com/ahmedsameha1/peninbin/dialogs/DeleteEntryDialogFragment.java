@@ -31,12 +31,20 @@ public class DeleteEntryDialogFragment extends DialogFragment {
 //        LayoutInflater inflater = getActivity().getLayoutInflater();
         builder.setMessage(R.string.delete_entry)
                 .setTitle(R.string.delete_an_entry)
-                .setPositiveButton(R.string.delete, (dialog, which) -> ((Contact) getActivity()).deleteEntry(entry_id,question_data_type)
+                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ((Contact) DeleteEntryDialogFragment.this.getActivity()).deleteEntry(entry_id, question_data_type);
+                            }
+                        }
                 )
 
 
-        .setNegativeButton(R.string.cancel, (dialog, which) -> {
-        }
+        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }
 
         );
                     return builder.create();

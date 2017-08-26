@@ -36,13 +36,19 @@ public class DeleteFieldDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity()).setTitle(R.string.delete_field).setMessage(message)
-                .setPositiveButton(R.string.ok, (dialog, which) -> {
-                    ((Contact) getActivity()).deleteField(field_id, mainActivityRecyclerViewViewHolder);
-                    mainActivityRecyclerViewViewHolder.progressBar.setVisibility(View.VISIBLE);
-                    mainActivityRecyclerViewViewHolder.isDeleting = true;
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ((Contact) DeleteFieldDialogFragment.this.getActivity()).deleteField(field_id, mainActivityRecyclerViewViewHolder);
+                        mainActivityRecyclerViewViewHolder.progressBar.setVisibility(View.VISIBLE);
+                        mainActivityRecyclerViewViewHolder.isDeleting = true;
+                    }
                 })
-                .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
+                    }
                 }).create();
     }
     public interface Contact {

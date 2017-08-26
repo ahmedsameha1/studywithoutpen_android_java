@@ -8,7 +8,6 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.RadioButton;
 
 import com.ahmedsameha1.peninbin.R;
@@ -48,16 +47,17 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
         final View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.emulate_field_activity_recyclerview_row, parent, false);
         EmulateFieldActivityRecyclerViewViewHolder emulateFieldActivityRecyclerViewViewHolder =
-                new EmulateFieldActivityRecyclerViewViewHolder(itemView, (entry_id, checked) -> {
-                    if ( checked ) {
+                new EmulateFieldActivityRecyclerViewViewHolder(itemView, new EmulateFieldActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
+                    @Override
+                    public void onCheckChanged(long entry_id, boolean checked) {
+                        if (checked) {
 //                            list_of_entries.add(entry_id);
 
-                        if( lastChecked != null )
-                        {
-                            lastChecked.setChecked(false);
+                            if (lastChecked != null) {
+                                lastChecked.setChecked(false);
 
-                        }
-                        starting_entry_id.clear();
+                            }
+                            starting_entry_id.clear();
                             starting_entry_id.add(entry_id);
                             lastChecked = ((RadioButton) itemView.findViewById(R.id.copy));
 
@@ -69,10 +69,11 @@ public class EmulateFieldActivityRecyclerViewAdapter extends
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
                         }*/
-                    } else {
+                        } else {
 //                            list_of_entries.remove(entry_id);
-                        starting_entry_id.clear();
-                        lastChecked = null;
+                            starting_entry_id.clear();
+                            lastChecked = null;
+                        }
                     }
                 });
         return emulateFieldActivityRecyclerViewViewHolder;

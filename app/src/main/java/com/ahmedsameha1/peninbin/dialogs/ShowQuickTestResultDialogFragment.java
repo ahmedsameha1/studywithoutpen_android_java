@@ -2,7 +2,6 @@ package com.ahmedsameha1.peninbin.dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -10,9 +9,6 @@ import android.view.KeyEvent;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.activities.FieldActivity;
-import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 
 import java.text.NumberFormat;
@@ -40,21 +36,27 @@ public class ShowQuickTestResultDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage(message)
                 .setTitle(R.string.quick_test_result)
-                .setNegativeButton(R.string.ok, (dialog, which) -> {
-                    getActivity().finish();
-                    ExitActivity.exit(getActivity());
+                .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ShowQuickTestResultDialogFragment.this.getActivity().finish();
+                        ExitActivity.exit(ShowQuickTestResultDialogFragment.this.getActivity());
+                    }
                 })
                 .create();
-        alertDialog.setOnKeyListener((dialog, keyCode, event) -> {
+        alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    getActivity().finish();
-                    ExitActivity.exit(getActivity());
+                    ShowQuickTestResultDialogFragment.this.getActivity().finish();
+                    ExitActivity.exit(ShowQuickTestResultDialogFragment.this.getActivity());
                     return false;
                 }
 
-            return true;
+                return true;
 
+            }
         });
         alertDialog.setCanceledOnTouchOutside(false);
 

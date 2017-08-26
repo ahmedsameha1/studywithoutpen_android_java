@@ -36,15 +36,18 @@ public class WrongAnswersActivityRecyclerViewAdapter extends
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.wrong_item_row, parent, false);
         WrongAnswersActivityRecyclerViewViewHolder wrongAnswersActivityRecyclerViewViewHolder =
-                new WrongAnswersActivityRecyclerViewViewHolder(itemView, (v, entry_id ) -> {
-                    Intent intent = new Intent(context, StudyActivity.class);
-                    intent.putExtra(Constants.CURRENT_FIELD_ID, field_id);
-                    intent.putExtra(StudyActivity.STUDY_WHAT, StudyActivity.WRONG);
-                    intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable(StudyActivity.WRONG_ITEM_LIST, ((ArrayList<WrongItem>) wrongItemList));
-                    intent.putExtra(StudyActivity.WRONG_ITEM_LIST,bundle);
-                    context.startActivity(intent);
+                new WrongAnswersActivityRecyclerViewViewHolder(itemView, new WrongAnswersActivityRecyclerViewViewHolder.IMyViewHolderClicks() {
+                    @Override
+                    public void onClick(View v, long entry_id) {
+                        Intent intent = new Intent(context, StudyActivity.class);
+                        intent.putExtra(Constants.CURRENT_FIELD_ID, field_id);
+                        intent.putExtra(StudyActivity.STUDY_WHAT, StudyActivity.WRONG);
+                        intent.putExtra(StudyActivity.ENTRY_ID, entry_id);
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable(StudyActivity.WRONG_ITEM_LIST, ((ArrayList<WrongItem>) wrongItemList));
+                        intent.putExtra(StudyActivity.WRONG_ITEM_LIST, bundle);
+                        context.startActivity(intent);
+                    }
                 });
         return wrongAnswersActivityRecyclerViewViewHolder;
     }
