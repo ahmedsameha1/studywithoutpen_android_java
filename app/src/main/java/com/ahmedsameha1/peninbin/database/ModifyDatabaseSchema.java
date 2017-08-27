@@ -21,7 +21,7 @@ import java.util.StringTokenizer;
  */
 public class ModifyDatabaseSchema {
 
-    static void onUpgradeDatabaseToDBV13AppV89(SQLiteDatabase sqLiteDatabase) {
+    static void onUpgradeDatabaseToDBV13AppV90(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
         try {
             sqLiteDatabase.delete(Field.TABLE_NAME, Contract.Old_Field_DBV12_AppV68.COLUMN_FIELD_TYPE + " = ? ",

@@ -75,7 +75,8 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/MyMaterialTheme">
+        android:theme="@style/MyMaterialTheme"
+        android:largeHeap="true">
         <activity
             android:name=".activities.FieldActivity"
             android:label="@string/app_name"
