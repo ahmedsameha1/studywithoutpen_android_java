@@ -33,6 +33,7 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -128,7 +129,7 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
         }
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
-        mTracker.setScreenName(ActivityUtility.getVersionCode(getActivity()) + SCREEN_NAME);
+        mTracker.setScreenName((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(getActivity()) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
         check.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -77,6 +77,7 @@ public class Money {
     public static final String RESPONSE_INAPP_SIGNATURE_LIST = "INAPP_DATA_SIGNATURE_LIST";
     private static final String UNSOLVABLE_ERROR_GETPURCHASES = "unsolvable_error_getpurchases";
     public static final String MONEY = "money";
+    private static final String ME = "me";
 
 
     /**
@@ -132,10 +133,22 @@ public class Money {
         return sharedPreferences.getBoolean(USER_SUBSCRIPTION_STATUS, false);
     }
 
+    public static boolean getMe( Context context ) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean(ME, false);
+    }
+
     public static void putUserSubscriptionStatus( Context context, boolean status ) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(USER_SUBSCRIPTION_STATUS, status);
+        editor.commit();
+    }
+
+    public static void putMe( Context context, boolean status ) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(ME, status);
         editor.commit();
     }
 
@@ -172,14 +185,20 @@ public class Money {
                             String possibleEmail = account.name;
                             if (possibleEmail.equalsIgnoreCase("ahmedmsameha1@gmail.com")) {
                                 putUserSubscriptionStatus(context, true);
+                                putMe(context, true);
                                 removeAllGetPurchasesErrors(context);
                                 return;
                             }
                         }
                     }
                 }
+                putMe(context, false);
                 // allow the users in the initial time to use the app without subscription
                 if (isInInitialPeriod(context)) {
+                    mTracker.send(new HitBuilders.EventBuilder()
+                            .setCategory(MONEY)
+                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "in initial period")
+                            .build());
                     putUserSubscriptionStatus(context, true);
                     removeAllGetPurchasesErrors(context);
                     return;
@@ -211,7 +230,7 @@ public class Money {
                                     putUnsolvableErrorGetPurchases(context, true);   // security error
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(MONEY)
-                                            .setAction(ActivityUtility.getVersionCode(context) + "security error")
+                                            .setAction((Money.getMe(context) ? "ME" : "") + (Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "security error")
                                             .build());
                                 }
                             } else {
@@ -228,21 +247,21 @@ public class Money {
                         putUserSubscriptionStatus(context, false);
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(MONEY)
-                                .setAction(ActivityUtility.getVersionCode(context) + "allow user due error")
+                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "allow user due error")
                                 .build());
                     } else if (response_code == BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
                         putNetworkDownGetPurchasesesStatus(context, true);
                         putUserSubscriptionStatus(context, false);
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(MONEY)
-                                .setAction(ActivityUtility.getVersionCode(context) + "network error on money")
+                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "network error on money")
                                 .build());
                     } else if (response_code == BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE) {
                         putUnsolvableErrorGetPurchases(context, true);
                         putUserSubscriptionStatus(context, false);
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(MONEY)
-                                .setAction(ActivityUtility.getVersionCode(context) + "billing unavailable error money")
+                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "billing unavailable error money")
                                 .build());
                     }
                 } catch (RemoteException e) {
@@ -250,7 +269,7 @@ public class Money {
                     allowUserDueAnError(context);
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(MONEY)
-                            .setAction(ActivityUtility.getVersionCode(context) + "allow user due error")
+                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "allow user due error")
                             .build());
                     e.printStackTrace();
                 }
@@ -388,9 +407,9 @@ public class Money {
         }
         if ( first_install_time >= 0 ) {
             if ( isInEgypt(context) ) {
-                return System.currentTimeMillis() <= first_install_time + (AlarmManager.INTERVAL_DAY * 90);
+                return System.currentTimeMillis() <= (first_install_time + (AlarmManager.INTERVAL_DAY * 90));
             } else {
-                return System.currentTimeMillis() <= first_install_time + (AlarmManager.INTERVAL_DAY * 30);
+                return System.currentTimeMillis() <= (first_install_time + (AlarmManager.INTERVAL_DAY * 30));
             }
         } else {
             return false;

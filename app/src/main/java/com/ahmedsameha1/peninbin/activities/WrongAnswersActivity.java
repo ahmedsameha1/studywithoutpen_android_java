@@ -36,6 +36,7 @@ import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -163,7 +164,7 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
+        mTracker.setScreenName((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

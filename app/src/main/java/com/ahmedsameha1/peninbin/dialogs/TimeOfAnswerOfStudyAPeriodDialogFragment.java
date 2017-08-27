@@ -30,6 +30,7 @@ import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -244,7 +245,7 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
                                         TimeOfAnswerOfStudyAPeriodDialogFragment.this.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory("Utilities")
-                                                .setAction(ActivityUtility.getVersionCode(TimeOfAnswerOfStudyAPeriodDialogFragment.this.getActivity()) + "time of answer")
+                                                .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(TimeOfAnswerOfStudyAPeriodDialogFragment.this.getActivity()) + "time of answer")
                                                 .build());
                                     }
                                 } else {

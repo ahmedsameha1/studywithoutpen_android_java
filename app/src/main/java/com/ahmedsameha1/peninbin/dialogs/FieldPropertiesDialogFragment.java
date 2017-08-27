@@ -37,6 +37,7 @@ import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
@@ -286,7 +287,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                     cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, locale_short_name);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                            .setAction(ActivityUtility.getVersionCode(FieldPropertiesDialogFragment.this.getActivity()) + "selecting locale")
+                                            .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(FieldPropertiesDialogFragment.this.getActivity()) + "selecting locale")
                                             .build());
                                 } else {
                                     cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, null);

@@ -1,10 +1,10 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.app.LoaderManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.LoaderManager;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.AlarmClock;
@@ -32,17 +32,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.dialogs.ChangeAreasDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
@@ -435,7 +435,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         super.onResume();
         timer.setBase(SystemClock.elapsedRealtime() - lastPause);
         timer.start();
-        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
+        mTracker.setScreenName((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

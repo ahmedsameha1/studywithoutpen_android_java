@@ -29,6 +29,7 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -103,7 +104,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         ScheduleInFieldDialogFragment.this.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction(ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule a quick test")
+                                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule a quick test")
                                                 .build());
                     /*Log.i("time Picker",hourOfDay +" " + minute);
                     calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
@@ -164,7 +165,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         ScheduleInFieldDialogFragment.this.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction(ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule an enhanced test")
+                                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule an enhanced test")
                                                 .build());
                                     }
                                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
@@ -207,7 +208,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         ScheduleInFieldDialogFragment.this.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction(ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule a fully random test")
+                                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule a fully random test")
                                                 .build());
                                     }
                                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
@@ -250,7 +251,7 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         ScheduleInFieldDialogFragment.this.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction(ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule a study a period")
+                                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule a study a period")
                                                 .build());
                                     }
                                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();

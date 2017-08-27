@@ -34,6 +34,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
@@ -346,7 +347,7 @@ public class EditEntryActivity extends AppCompatActivity implements
         super.onResume();
         timer.setBase( SystemClock.elapsedRealtime() - lastPause);
         timer.start();
-        mTracker.setScreenName(ActivityUtility.getVersionCode(this) +SCREEN_NAME);
+        mTracker.setScreenName((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) +SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

@@ -46,6 +46,7 @@ import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -591,7 +592,7 @@ public class QuickTestActivity extends FullyRandomTest implements
         if (is_starting_after_destruction) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName(ActivityUtility.getVersionCode(this) + SCREEN_NAME);
+        mTracker.setScreenName((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

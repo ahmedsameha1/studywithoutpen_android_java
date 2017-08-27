@@ -75,7 +75,7 @@ public class ExportFieldsDialogFragment extends DialogFragment {
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        String fileName = enterFileName.getText().toString();
+                        final String fileName = enterFileName.getText().toString();
                         SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
                         final ArrayList<String> selectedFields = new ArrayList<String>();
                         for (int i = 0; i < sparseBooleanArray.size(); i++) {
@@ -93,31 +93,13 @@ public class ExportFieldsDialogFragment extends DialogFragment {
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
                         } else {
-                    /*File file = new File(Environment.getExternalStorageDirectory().getPath()
-                            + File.separator + ExportImportDatabase.EXPORT_IMPORT_DIRECTORY_NAME + File.separator + fileName.toLowerCase());
-                    if (Environment.getExternalStorageState().equals(Environment.MEDIA_REMOVED)) {
-                        Toast toast = Toast.makeText(context, R.string.plug_your_sdcard, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,400);
-                        toast.show();
-                    } else if (Environment.getExternalStorageState().equals(Environment.MEDIA_UNMOUNTED)) {
-                        Toast toast = Toast.makeText(context, R.string.external_storage_unmounted, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP,0,400);
-                        toast.show();
-                    } else if (file.exists()) {
-                        Toast toast = Toast.makeText(context, R.string.file_with_same_name, Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP,0,400);
-                        toast.show();
-                    } else {
-                        alertDialog.dismiss();
-                        Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        toast = Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();*/
-//                                ExportImportDatabase.startExportThread(context, selectedFields, path, fileName);
-                            ((Contact) ExportFieldsDialogFragment.this.getActivity()).exportFields(selectedFields, fileName);
-                            ExportFieldsDialogFragment.this.dismiss();
+                            new AlertDialog.Builder(getActivity()).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    ((Contact) ExportFieldsDialogFragment.this.getActivity()).exportFields(selectedFields, fileName);
+                                    ExportFieldsDialogFragment.this.dismiss();
+                                }
+                            }).create().show();
                         }
                     }
                 });

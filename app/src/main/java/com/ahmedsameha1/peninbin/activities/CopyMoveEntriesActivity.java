@@ -35,6 +35,7 @@ import com.ahmedsameha1.peninbin.dialogs.CopyFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -191,7 +192,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction(ActivityUtility.getVersionCode(this) + "sort")
+                        .setAction((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "sort")
                         .build());
                 return true;
             default:

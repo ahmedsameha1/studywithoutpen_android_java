@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements
         new ShowEula(this).show();
         mTracker.send(new HitBuilders.EventBuilder()
                 .setCategory(ANALYTICS_CATEGORY)
-                .setAction(ActivityUtility.getVersionCode(this) + "run the app")
+                .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "run the app")
                 .build());
         IntroActivity.show(this);
     }
@@ -337,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements
                                 toast1.show();
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory(ANALYTICS_CATEGORY)
-                                        .setAction(ActivityUtility.getVersionCode(this) + "somebody has just completed a subscription")
+                                        .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "somebody has just completed a subscription")
                                         .build());
                             } else {
                                 Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
@@ -497,7 +497,7 @@ public class MainActivity extends AppCompatActivity implements
                         toast.show();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(Money.MONEY)
-                                .setAction(ActivityUtility.getVersionCode(this) + " initial period")
+                                .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + " initial period")
                                 .build());
                     } else {
                         Toast toast = Toast.makeText(this, R.string.already_subscribed, Toast.LENGTH_SHORT);
@@ -505,13 +505,13 @@ public class MainActivity extends AppCompatActivity implements
                         toast.show();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(Money.MONEY)
-                                .setAction(ActivityUtility.getVersionCode(this) + "already subscribed")
+                                .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "already subscribed")
                                 .build());
                     }
                 }
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(Money.MONEY)
-                        .setAction(ActivityUtility.getVersionCode(this) + "click to subscribe")
+                        .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "click to subscribe")
                         .build());
 
               /*  Uri uri = Uri.parse("market://details?id=" + getPackageName());
@@ -604,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements
                 actionMenu.close(false);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction(ActivityUtility.getVersionCode(MainActivity.this) + "add entry from main activity")
+                        .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(MainActivity.this) + "add entry from main activity")
                         .build());
             }
         });
@@ -619,7 +619,7 @@ public class MainActivity extends AppCompatActivity implements
                 actionMenu.close(true);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction(ActivityUtility.getVersionCode(MainActivity.this) + "create field")
+                        .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(MainActivity.this) + "create field")
                         .build());
             }
         });
@@ -638,7 +638,7 @@ public class MainActivity extends AppCompatActivity implements
         mySQLiteCursorLoader.deleteField(field_id, mHandler, mainActivityRecyclerViewViewHolder);
         mTracker.send(new HitBuilders.EventBuilder()
                 .setCategory(ANALYTICS_CATEGORY)
-                .setAction(ActivityUtility.getVersionCode(this) +"delete field")
+                .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) +"delete field")
                 .build());
     }
 
@@ -672,7 +672,7 @@ public class MainActivity extends AppCompatActivity implements
                     ExportImportDatabase.startExportThread(MainActivity.this, to_export_fields, files[0], to_export_file_name);
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(ANALYTICS_CATEGORY)
-                            .setAction(ActivityUtility.getVersionCode(MainActivity.this) + "export field")
+                            .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(MainActivity.this) + "export field")
                             .build());
                     Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.TOP, 0, 400);

@@ -31,6 +31,7 @@ import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
@@ -183,7 +184,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                                 check_type, read_answer.isChecked(), locale_short_name, color);
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                        .setAction(ActivityUtility.getVersionCode(CreateFieldDialogFragment.this.getActivity()) + "selecting locale")
+                                        .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(CreateFieldDialogFragment.this.getActivity()) + "selecting locale")
                                         .build());
                             } else {
                                 ((Contact) CreateFieldDialogFragment.this.getActivity())

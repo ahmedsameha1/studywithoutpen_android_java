@@ -16,6 +16,7 @@ import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -59,7 +60,7 @@ public class AddFieldNoteDialogFragment extends DialogFragment  {
                             ((Contact) AddFieldNoteDialogFragment.this.getActivity()).addFieldNote(note);
                             mTracker.send(new HitBuilders.EventBuilder()
                                     .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                    .setAction(ActivityUtility.getVersionCode(AddFieldNoteDialogFragment.this.getActivity()) + "add field note")
+                                    .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(AddFieldNoteDialogFragment.this.getActivity()) + "add field note")
                                     .build());
                             AddFieldNoteDialogFragment.this.dismiss();
                         } else {

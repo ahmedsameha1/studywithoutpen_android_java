@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -18,7 +19,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-import android.support.v7.app.AlertDialog;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
@@ -26,9 +26,10 @@ import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 /**
@@ -87,7 +88,7 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                                 ChangeAreasDialogFragment.this.dismiss();
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory("Utilities")
-                                        .setAction(ActivityUtility.getVersionCode(ChangeAreasDialogFragment.this.getActivity()) + "change areas size")
+                                        .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(ChangeAreasDialogFragment.this.getActivity()) + "change areas size")
                                         .build());
                             } else {
                                 Toast toast = Toast.makeText(ChangeAreasDialogFragment.this.getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);

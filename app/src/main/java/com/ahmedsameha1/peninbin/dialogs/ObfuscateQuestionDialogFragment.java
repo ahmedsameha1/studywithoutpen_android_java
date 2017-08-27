@@ -21,10 +21,11 @@ import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -77,7 +78,7 @@ public class ObfuscateQuestionDialogFragment extends DialogFragment {
                         ObfuscateQuestionDialogFragment.this.dismiss();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory("Utilities")
-                                .setAction(ActivityUtility.getVersionCode(ObfuscateQuestionDialogFragment.this.getActivity()) + "obfuscate text")
+                                .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(ObfuscateQuestionDialogFragment.this.getActivity()) + "obfuscate text")
                                 .build());
                     }
                 });

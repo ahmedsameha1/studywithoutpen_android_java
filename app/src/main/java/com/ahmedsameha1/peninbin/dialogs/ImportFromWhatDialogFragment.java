@@ -24,6 +24,7 @@ import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.secondary_activities.SpeciallyFormattedTextFileHelpActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
@@ -73,7 +74,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                         properties.error_dir = Environment.getExternalStorageDirectory();
                         properties.extensions = null;
 
-                        FilePickerDialog dialog14 = new FilePickerDialog(context, properties);
+                        final FilePickerDialog dialog14 = new FilePickerDialog(context, properties);
 
                         dialog14.setDialogSelectionListener(new DialogSelectionListener() {
                             @Override
@@ -95,7 +96,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                                     ExportImportDatabase.startImportThread(context, files[0], false);
                                                     mTracker.send(new HitBuilders.EventBuilder()
                                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from app file")
+                                                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "import field from app file")
                                                             .build());
                                                 }
                                             })
@@ -111,7 +112,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                                     ExportImportDatabase.startImportThread(context, files[0], true);
                                                     mTracker.send(new HitBuilders.EventBuilder()
                                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from app file")
+                                                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "import field from app file")
                                                             .build());
                                                 }
                                             })
@@ -119,9 +120,13 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                 }
                             }
                         });
-
-                        dialog14.show();
-                        ImportFromWhatDialogFragment.this.dismiss();
+                        new AlertDialog.Builder(getActivity()).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialog14.show();
+                                ImportFromWhatDialogFragment.this.dismiss();
+                            }
+                        }).create().show();
                     }
                 });
                 text_file.setOnClickListener(new View.OnClickListener() {
@@ -135,7 +140,7 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                         properties.error_dir = Environment.getExternalStorageDirectory();
                         properties.extensions = null;
 
-                        FilePickerDialog dialog1 = new FilePickerDialog(context, properties);
+                        final FilePickerDialog dialog1 = new FilePickerDialog(context, properties);
 
                         dialog1.setDialogSelectionListener(new DialogSelectionListener() {
                             @Override
@@ -151,31 +156,19 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                     ImportTextFile.startImportThread(context, files[0]);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                            .setAction(ActivityUtility.getVersionCode(context) + "import field from text file")
+                                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "import field from text file")
                                             .build());
                                 }
                             }
                         });
+                        new AlertDialog.Builder(getActivity()).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialog1.show();
+                                ImportFromWhatDialogFragment.this.dismiss();
+                            }
+                        }).create().show();
 
-                        dialog1.show();
-                        // This always works
-                /*Intent i = new Intent(context, FilePickerActivity.class);
-                // This works if you defined the intent filter
-                // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-
-                // Set these depending on your use case. These are the defaults.
-                i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
-                i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
-                i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
-
-                // Configure initial directory by specifying a String.
-                // You could specify a String like "/storage/emulated/0/", but that can
-                // dangerous. Always use Android's API calls to get paths to the SD-card or
-                // internal memory.
-                i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-                getActivity().startActivityForResult(i, TEXT_FILE_CODE);*/
-                        ImportFromWhatDialogFragment.this.dismiss();
                     }
                 });
                 text_file_help.setOnClickListener(new View.OnClickListener() {

@@ -7,23 +7,24 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
-import android.support.v7.app.AlertDialog;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 /**
@@ -101,7 +102,7 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                         ChangeTextSizeDialogFragment.this.dismiss();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory("Utilities")
-                                .setAction(ActivityUtility.getVersionCode(ChangeTextSizeDialogFragment.this.getActivity()) + "change text size")
+                                .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(ChangeTextSizeDialogFragment.this.getActivity()) + "change text size")
                                 .build());
                     }
                 });
