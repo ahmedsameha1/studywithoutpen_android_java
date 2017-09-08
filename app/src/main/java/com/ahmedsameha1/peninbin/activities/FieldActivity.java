@@ -482,7 +482,7 @@ public class FieldActivity extends AppCompatActivity implements
                 fieldPropertiesDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "field properties")
+                        .setAction((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "field properties")
                         .build());
                 break;
             case SCHEDULE_IN_FIELD:
@@ -593,7 +593,7 @@ public class FieldActivity extends AppCompatActivity implements
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "sort")
+                        .setAction((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "sort")
                         .build());
                 return true;
             case R.id.today_emulation:

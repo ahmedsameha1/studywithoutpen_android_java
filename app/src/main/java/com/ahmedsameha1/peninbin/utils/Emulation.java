@@ -7,13 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
+import com.ahmedsameha1.peninbin.intent_services.EnableEmulationIntentService;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -30,53 +30,20 @@ public class Emulation {
 
     public static final String DATE_FORMAT_SQLITE = "yyyy-MM-dd HH:mm:ss";
 
-    private static Thread emulate_thread, unemulate_thread, reemulate_thread;
+    private static boolean reemulate_is_running = false;
+    private static boolean unemulate_is_running = false;
 
-    public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries, final boolean[] week_days_case) {
-        emulate_thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                emulate(context, field_id, number_of_entries, week_days_case);
-            }
-        });
-        emulate_thread.start();
-    }
-
-
-    public static void startEmulateThread(final Context context, final long field_id, final int number_of_entries, final long starting_entry, final boolean[] week_days_case) {
-        emulate_thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                emulate(context, field_id, number_of_entries, starting_entry, week_days_case);
-            }
-        });
-
-        emulate_thread.start();
-    }
 
     public static void startReemulateThread(final Context context) {
-        reemulate_thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                repartition(context);
-            }
-        });
-
-        reemulate_thread.start();
+        reemulate_is_running = true;
+        repartition(context);
+        reemulate_is_running = false;
     }
 
     public static void startUnemulateThread(final Context context, final long field_id) {
-        unemulate_thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                disableEmulation(context, field_id);
-            }
-        });
-        unemulate_thread.start();
+        unemulate_is_running = true;
+        disableEmulation(context, field_id);
+        unemulate_is_running = false;
     }
 
     private static void partition(int number_of_everyday_entries, Cursor cursor, boolean[] what_days, SQLiteDatabase sqLiteDatabase) {
@@ -377,7 +344,7 @@ public class Emulation {
         }
     }
 
-    private static void emulate(final Context context, final long field_id, final int number_of_entries, final boolean[] week_days_case) {
+    public static void emulate(final Context context, final long field_id, final int number_of_entries, final boolean[] week_days_case) {
         String emulation_days_string = "";
         for ( boolean bool: week_days_case ) {
             emulation_days_string = bool ? emulation_days_string + 1 : emulation_days_string + 0;
@@ -419,7 +386,7 @@ public class Emulation {
 
     }
 
-    private static void emulate(final Context context, final long field_id, final int number_of_entries, final long starting_entry, final boolean[] week_days_case) {
+    public static void emulate(final Context context, final long field_id, final int number_of_entries, final long starting_entry, final boolean[] week_days_case) {
         String emulation_days_string = "";
         for ( boolean bool: week_days_case ) {
             emulation_days_string = bool ? emulation_days_string + 1 : emulation_days_string + 0;
@@ -511,9 +478,9 @@ public class Emulation {
     }
 
     public static boolean isAnyThreadRunning() {
-        if ( (emulate_thread == null || !emulate_thread.isAlive())
-                && (unemulate_thread == null || !unemulate_thread.isAlive())
-                && ( reemulate_thread == null || !reemulate_thread.isAlive()) ) {
+        if ( !EnableEmulationIntentService.is_running
+                && !unemulate_is_running
+                && !reemulate_is_running ) {
             return false;
         }
         return true;
@@ -545,6 +512,7 @@ public class Emulation {
                 contentValues.put(Contract.String_Entry.COLUMN_CREATION_EMULATED_DATE, modified_date_string);
                 sqLiteDatabase.update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{cursor.getLong(0) +""});
             }
+            cursor.close();
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();

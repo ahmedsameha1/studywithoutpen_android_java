@@ -75,8 +75,8 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/MyMaterialTheme"
-        android:largeHeap="true">
+        android:largeHeap="true"
+        android:theme="@style/MyMaterialTheme">
         <activity
             android:name=".activities.FieldActivity"
             android:label="@string/app_name"
@@ -254,20 +254,40 @@
             android:exported="true" />
 
         <service
-            android:name=".receivers_services.MidnightService"
+            android:name=".intent_services.MidnightService"
             android:exported="false" />
 
         <activity
             android:name=".activities.StudyActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".secondary_activities.SpeciallyFormattedTextFileHelpActivity"
-            android:screenOrientation="landscape"/>
+        <activity
+            android:name=".secondary_activities.SpeciallyFormattedTextFileHelpActivity"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".secondary_activities.IntroActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".secondary_activities.ImageActivity"
+            android:noHistory="true" />
 
-        <activity android:name=".secondary_activities.ImageActivity"
-            android:noHistory="true"/>
+        <service
+            android:name=".intent_services.CheckSubscriptionIntentService"
+            android:exported="false" />
+        <service
+            android:name=".intent_services.ImportTextFileIntentService"
+            android:exported="false" />
+        <service
+            android:name=".intent_services.ImportSWPFileIntentService"
+            android:exported="false" />
+        <service
+            android:name=".intent_services.ExportFieldsIntentService"
+            android:exported="false" />
+        <service
+            android:name=".intent_services.ImportProvidedFieldsIntentService"
+            android:exported="false" />
+        <service
+            android:name=".intent_services.EnableEmulationIntentService"
+            android:exported="false" />
     </application>
 
 </manifest>

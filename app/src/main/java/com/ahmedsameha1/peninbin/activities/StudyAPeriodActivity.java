@@ -672,7 +672,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         if (is_starting_after_destruction) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + this.getLocalClassName());
+        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + this.getLocalClassName());
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

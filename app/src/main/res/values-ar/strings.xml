@@ -124,8 +124,6 @@
     <string name="sort_date_asc">رتب على حسب التاريخ (تصاعديا)</string>
     <string name="sort_creation_desc">الافتراضي: رتب على حسب تاريخ الإنشاء (تنازليا)</string>
     <string name="sort_creation_asc">رتب على حسب تاريخ الإنشاء (تصاعديا)</string>
-    <string name="pause_do_not_shutdown">هذا قد يستفرق بعض الوقت، لا تغلق البرنامج حتى يُعْلِمك التطبيق. يمكنك الضغط على مفتاح الذي يذهب بك إلى الصفحة الرئيسية للنظام، لكن لا تضغظ مفتاح العودة.</string>
-    <string name="pause_shutdown">Study Without Pen!: عملية الإيقاف اكتملت، يمكنك غلق التطبيق الآن.</string>
     <string name="wait_until_test_pausing_finish">لطفا، انتظر حتى تنتهي عملية إيقاف جلسة الاختبار الخاصة بهذا المجال.</string>
     <string name="wait_until_study_during_pausing_finish" >لطفا، انتظر حتى تنتهي عملية إيقاف جلسة المذاكرة لفترة الخاصة بهذا المجال.</string>
     <string name="wait_until_current_session_pausing_finish">لطفا، انتظر حتى تنهي عمليات إيقاف أي جلسة خاصة بهذا المجال. </string>
@@ -421,5 +419,12 @@
     <string name="less_500">يجب أن يكون أقل من 500 حرف.</string>
     <string name="shrink_500">تم تقليصه إلى 500 حرف.</string>
     <string name="intellectual_property">يلزم مراعاة حقوق الملكية الفكرية.</string>
+    <string name="import_notifi">استيراد مجالات</string>
+    <string name="import_swp_notifi_content">استيراد مجالات من ملف swp</string>
+    <string name="import_txt_notifi_content">استيراد محالات من ملف نصي</string>
+    <string name="export_notifi">تصدير مجالات</string>
+    <string name="export_notifi_content">تصدير مجالات لملف swp</string>
+    <string name="import_provided_field_notifi_content">استيراد مجالات من المجالات المتوفرة</string>
+    <string name="enable_emulation_notifi">تفعيل المحاكاة</string>
 </resources>
 

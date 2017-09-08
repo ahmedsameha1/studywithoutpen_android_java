@@ -9,14 +9,17 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
+import com.ahmedsameha1.peninbin.intent_services.ExportFieldsIntentService;
+import com.ahmedsameha1.peninbin.intent_services.ImportProvidedFieldsIntentService;
+import com.ahmedsameha1.peninbin.intent_services.ImportSWPFileIntentService;
 import com.ahmedsameha1.peninbin.secondary_activities.ExportSuccessfulActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.NotImportedFieldsActivity;
-import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.InvalidStudyWithoutPenFileException;
@@ -42,53 +45,17 @@ public class ExportImportDatabase {
     public static final int NOT_IMPORTED_FIELDS = 6;
     public static final int SUCCESFUL_EXPORT_NOTIFICATION = 7;
     public static final String PATH = "path";
-
-    private static Thread exportThread, importThread, importInternalFieldThread;
     private static ArrayList<String> notImportedFieldsStrings;
 
-    public static void startExportThread(final Context context, final ArrayList<String> selectedFields, final String path, final String fileName) {
-        exportThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                exportFields(context, selectedFields, path, fileName);
-            }
-        });
-        exportThread.start();
-    }
-
-    public static void startImportThread(final Context context, final String file_path, final boolean importUserUsageData) {
-        importThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                importFields(context, file_path, importUserUsageData);
-            }
-        });
-        importThread.start();
-    }
-
-    public static void startImportInternalFieldThread(final Context context, final SQLiteDatabase toImportDatabase, final ArrayList<String> wanted_fields) {
-        importInternalFieldThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                importInternalFields(context, toImportDatabase, wanted_fields);
-            }
-        });
-        importInternalFieldThread.start();
-    }
-
     public static boolean isAnyThreadRunning() {
-        if ((exportThread == null || !exportThread.isAlive()) &&
-                (importThread == null || !importThread.isAlive()) &&
-                (importInternalFieldThread == null || !importInternalFieldThread.isAlive())) {
+        if ( !ExportFieldsIntentService.isRunning &&
+                !ImportSWPFileIntentService.isRunning && !ImportProvidedFieldsIntentService.isRunning) {
             return false;
         }
         return true;
     }
 
-    private static void exportFields(Context context, ArrayList<String> fieldNames, String path, String user_fileName) {
+    public static void exportFields(Context context, ArrayList<String> fieldNames, String path, String user_fileName) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         SQLiteDatabase appDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
         SQLiteDatabase toExportDatabase = null;
@@ -394,7 +361,7 @@ public class ExportImportDatabase {
         }
     }
 
-    private static void importFields(Context context, String filePath, boolean importUserUsageData) {
+    public static void importFields(Context context, String filePath, boolean importUserUsageData) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         SQLiteDatabase toImportDatabase = null;
         String copied_database_file_path = null;
@@ -692,6 +659,7 @@ public class ExportImportDatabase {
                     alternativeAnswerCursor.close();
                 }
                 string_alternative_cursor.close();
+                Log.d("import", "entry_imported");
             }
             toImportStringEntryCursor.close();
 
@@ -824,7 +792,7 @@ public class ExportImportDatabase {
         }
     }
 
-    private static void importInternalFields(Context context, SQLiteDatabase toImportDatabase, ArrayList<String> wanted_fields) {
+    public static void importInternalFields(Context context, SQLiteDatabase toImportDatabase, ArrayList<String> wanted_fields) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         SQLiteDatabase appDatabase = DatabaseHelper.getInstance(context).getWritableDatabase();
@@ -835,7 +803,8 @@ public class ExportImportDatabase {
                 Cursor toImportFieldCursor = toImportDatabase.query(Contract.Field.TABLE_NAME,
                         new String[]{Contract.Field.COLUMN_FIELD_NAME,
                                 Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, Contract.COLUMN_ID,
-                                Contract.Field.COLUMN_SORT_BY, Contract.Field.COLUMN_READ_ANSWER},
+                                Contract.Field.COLUMN_SORT_BY, Contract.Field.COLUMN_READ_ANSWER, Contract.Field.COLUMN_LOCALE,
+                                Contract.Field.COLUMN_CHECK_TYPE},
                         Contract.Field.COLUMN_FIELD_NAME + " = ? ", new String[]{temp_wanted_field}, null, null, null);
                 toImportFieldCursor.moveToFirst();
                 Cursor appFieldCursor = appDatabase.query(Contract.Field.TABLE_NAME,
@@ -850,6 +819,8 @@ public class ExportImportDatabase {
                     contentValues.put(Contract.Field.COLUMN_ENTRY_QUESTION_COLUMN_DATA_TYPE, toImportFieldCursor.getInt(1));
                     contentValues.put(Contract.Field.COLUMN_SORT_BY, toImportFieldCursor.getInt(3));
                     contentValues.put(Contract.Field.COLUMN_READ_ANSWER, toImportFieldCursor.getInt(4));
+                    contentValues.put(Contract.Field.COLUMN_LOCALE, toImportFieldCursor.getString(5));
+                    contentValues.put(Contract.Field.COLUMN_CHECK_TYPE, toImportFieldCursor.getInt(6));
                     field_id = appDatabase.insert(Contract.Field.TABLE_NAME, null, contentValues);
 
                     Cursor field_notes_cursor = toImportDatabase.query(Contract.Field_Note.TABLE_NAME,

@@ -5,12 +5,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
+import com.ahmedsameha1.peninbin.intent_services.ImportTextFileIntentService;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.utils.InvalidTextFileFormatException;
 
@@ -26,28 +26,15 @@ import java.util.Comparator;
  * Created by Ahmed on 7/3/16.
  */
 public class ImportTextFile {
-    public static final String EXPORT_IMPORT_DIRECTORY_NAME = "StudyWithoutPen";
     private static final int FAILED_IMPORT_NOTIFICATION = 0;
     private static final int FAILED_IMPORT_INVALID_FILE_NOTIFICATION = 1;
     private static final int SUCCESSFUL_IMPORT_NOTIFICATION = 2;
     private static final int ORDER = 4;
     private static final int RANK = 3;
-    private static Thread importThread;
 
-
-    public static void startImportThread(final Context context, final String file_path) {
-        importThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                importFields(context, file_path);
-            }
-        });
-        importThread.start();
-    }
 
     public static boolean isThreadRunning() {
-        if (importThread == null || !importThread.isAlive()) {
+        if ( !ImportTextFileIntentService.isRunning ) {
             return false;
         }
         return true;

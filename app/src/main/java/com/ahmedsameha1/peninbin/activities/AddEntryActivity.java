@@ -1,6 +1,10 @@
 package com.ahmedsameha1.peninbin.activities;
 
+import android.annotation.SuppressLint;
 import android.app.LoaderManager;
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
@@ -11,6 +15,7 @@ import android.provider.AlarmClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -435,7 +440,7 @@ public class AddEntryActivity extends AppCompatActivity implements
         super.onResume();
         timer.setBase(SystemClock.elapsedRealtime() - lastPause);
         timer.start();
-        mTracker.setScreenName((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
+        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
@@ -466,6 +471,7 @@ public class AddEntryActivity extends AppCompatActivity implements
             }
         }
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -477,9 +483,28 @@ public class AddEntryActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.add_entry_activity_menu, menu);
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Bundle appData = new Bundle();
+                appData.putLong(SearchActivity.CURRENT_FIELD_ID, current_field_id);
+                searchView.setAppSearchData(appData); // pass the search context data
+
+                return false; // we do not need to start the search activity manually, the system does it for us
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchActivity.class)));
+        searchView.setIconifiedByDefault(false);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will

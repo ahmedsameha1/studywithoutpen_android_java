@@ -128,8 +128,6 @@
     <string name="sort_date_asc">Sort by Date (ascending)</string>
     <string name="sort_creation_desc">Default: Sort by Creation Date (descending)</string>
     <string name="sort_creation_asc">Sort by Creation Date (ascending)</string>
-    <string name="pause_do_not_shutdown">This may take some time, so don\'t close the app untill it notifies you. You can press home button, but don\'t press back button.</string>
-    <string name="pause_shutdown">Study Without Pen!: the pause operation completed, you can close the app now.</string>
     <string name="wait_until_test_pausing_finish">Please, wait until the current test session pause opertation of this field finishes.</string>
     <string name="wait_until_study_during_pausing_finish">Please, wait until the current study a period session pause opertation of this field finishes.</string>
     <string name="wait_until_current_session_pausing_finish">Please, wait until any pausing operations of this field finish</string>
@@ -381,4 +379,11 @@
     <string name="less_500">Must be less than 500 letter.</string>
     <string name="shrink_500">Has been shrunk to 500 letter.</string>
     <string name="intellectual_property">Intellectual property rights need to be taken into account.</string>
+    <string name="import_notifi">Importing fields</string>
+    <string name="import_swp_notifi_content">Importing fields from swp file</string>
+    <string name="import_txt_notifi_content">Importing fields from text file</string>
+    <string name="export_notifi">Exporting Fields</string>
+    <string name="export_notifi_content">Exporting fields to swp file</string>
+    <string name="import_provided_field_notifi_content">Import fields from the provided fields</string>
+    <string name="enable_emulation_notifi">Enabling emulation</string>
 </resources>

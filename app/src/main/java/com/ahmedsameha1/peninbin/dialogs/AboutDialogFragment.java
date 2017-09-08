@@ -74,7 +74,7 @@ public class AboutDialogFragment extends DialogFragment {
                         AboutDialogFragment.this.startActivity(browserIntent);
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(ANALYTICS_CATEGORY)
-                                .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(AboutDialogFragment.this.getActivity()) + "open facebook page")
+                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(AboutDialogFragment.this.getActivity()) + "open facebook page")
                                 .build());
                         AboutDialogFragment.this.dismiss();
                     }

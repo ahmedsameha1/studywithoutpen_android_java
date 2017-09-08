@@ -88,7 +88,7 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                                 ChangeAreasDialogFragment.this.dismiss();
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory("Utilities")
-                                        .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(ChangeAreasDialogFragment.this.getActivity()) + "change areas size")
+                                        .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(ChangeAreasDialogFragment.this.getActivity()) + "change areas size")
                                         .build());
                             } else {
                                 Toast toast = Toast.makeText(ChangeAreasDialogFragment.this.getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);

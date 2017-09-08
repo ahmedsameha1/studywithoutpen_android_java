@@ -25,6 +25,7 @@ import com.ahmedsameha1.peninbin.database.Contract.Alternative_Answer_Not_String
 import com.ahmedsameha1.peninbin.database.Contract.Old_Question_DBV6_AppV32;
 import com.ahmedsameha1.peninbin.database.Contract.Old_Answer_DBV6_AppV32;
 import com.ahmedsameha1.peninbin.database.Contract.Old_Linker_DBV6_AppV32;
+import com.ahmedsameha1.peninbin.receivers_services.BootCompletedReceiver;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 
@@ -454,6 +455,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Log.e(TAG, e.getMessage());
             }
         }
+        BootCompletedReceiver.copyProvidedDatabaseFile(context);
 /*        sqLiteDatabase.execSQL(CREATE_FIELD_TABLE);//
         sqLiteDatabase.execSQL(CREATE_STRING_TABLE);//
         sqLiteDatabase.execSQL(CREATE_NOT_STRING_TABLE);//

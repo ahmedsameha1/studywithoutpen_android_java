@@ -99,7 +99,7 @@ public class TimerDialogFragment extends DialogFragment {
                                 TimerDialogFragment.this.dismiss();
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory("Utilities")
-                                        .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(TimerDialogFragment.this.getActivity()) + "start timer")
+                                        .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(TimerDialogFragment.this.getActivity()) + "start timer")
                                         .build());
                             } else {
                                 Toast toast = Toast.makeText(TimerDialogFragment.this.getActivity(), R.string.enter_number_of_minutes, Toast.LENGTH_SHORT);

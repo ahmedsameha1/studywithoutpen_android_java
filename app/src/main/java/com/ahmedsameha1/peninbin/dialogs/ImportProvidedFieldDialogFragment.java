@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -22,13 +23,8 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
+import com.ahmedsameha1.peninbin.intent_services.ImportProvidedFieldsIntentService;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 
 import static com.ahmedsameha1.peninbin.database.DatabaseHelper.DATABASE_NAME;
@@ -66,26 +62,10 @@ public class ImportProvidedFieldDialogFragment extends DialogFragment {
                 try {
                     String app_database_path = context.getApplicationContext().getDatabasePath(DATABASE_NAME).getAbsolutePath();
                     String temp_database_path = app_database_path.substring(0, app_database_path.length() - 4) + "temp";
-                    File temp_database_file = new File(temp_database_path);
-                    if (!temp_database_file.exists()) {
-                        OutputStream os = new FileOutputStream(temp_database_path);
-                        InputStream is = context.getAssets().open("sqlite" + File.separator + DATABASE_NAME);
-                        byte[] buffer = new byte[1024];
-                        int length;
-                        while ((length = is.read(buffer)) > 0) {
-                            os.write(buffer, 0, length);
-                        }
-                        is.close();
-                        os.flush();
-                        os.close();
-                    }
                     final SQLiteDatabase temp_database = SQLiteDatabase.openDatabase(temp_database_path, null, SQLiteDatabase.OPEN_READWRITE);
-                    if (temp_database == null) {
-                        throw new IOException();
-                    }
                     databaseOperations = new DatabaseReadOperations(context);
                     listView = (ListView) alertDialog.findViewById(R.id.export_fields_list_view);
-                    Cursor field_cursor = temp_database.query(Contract.Field.TABLE_NAME, new String[]{Contract.COLUMN_ID, Contract.Field.COLUMN_FIELD_NAME},
+                    final Cursor field_cursor = temp_database.query(Contract.Field.TABLE_NAME, new String[]{Contract.COLUMN_ID, Contract.Field.COLUMN_FIELD_NAME},
                             null, null, null, null, null);
                     SimpleCursorAdapter simpleCursorAdapter =
                             new SimpleCursorAdapter(context,
@@ -112,18 +92,18 @@ public class ImportProvidedFieldDialogFragment extends DialogFragment {
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
                             } else {
-                                Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                                Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
                                 toast.show();
-                                toast = Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
-                                ExportImportDatabase.startImportInternalFieldThread(ImportProvidedFieldDialogFragment.this.getActivity(), temp_database, selectedFields);
+                                temp_database.close();
+                                Intent intent = new Intent(context, ImportProvidedFieldsIntentService.class);
+                                intent.putExtra(ImportProvidedFieldsIntentService.FIELDS, selectedFields);
+                                context.startService(intent);
                                 ImportProvidedFieldDialogFragment.this.dismiss();
                             }
                         }
                     });
-                } catch (IOException ioe) {
+                } catch (Exception e) {
                     Toast toast = Toast.makeText(context, R.string.error, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
@@ -134,4 +114,5 @@ public class ImportProvidedFieldDialogFragment extends DialogFragment {
         });
         return alertDialog;
     }
+
 }

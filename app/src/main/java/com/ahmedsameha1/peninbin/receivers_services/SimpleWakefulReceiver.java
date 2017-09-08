@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
+import com.ahmedsameha1.peninbin.intent_services.MidnightService;
+
 public class SimpleWakefulReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {

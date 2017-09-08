@@ -269,7 +269,7 @@ public class TimeOfAnswerOfTestsDialogFragment extends DialogFragment {
                                         TimeOfAnswerOfTestsDialogFragment.this.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory("Utilities")
-                                                .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(TimeOfAnswerOfTestsDialogFragment.this.getActivity()) + "time of answer")
+                                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(TimeOfAnswerOfTestsDialogFragment.this.getActivity()) + "time of answer")
                                                 .build());
                                     }
                                 } else {

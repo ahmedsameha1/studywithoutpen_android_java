@@ -1,8 +1,6 @@
 package com.ahmedsameha1.peninbin.fragments;
 
-import android.app.LoaderManager;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,12 +46,10 @@ public class StudyEntryFragment extends Fragment implements  TextToSpeech.OnInit
 StudyActivity.Contact {
     public static final String SCREEN_NAME = "StudyEntryFragment";
     public static final String CORRECT_ANSWERS_COUNTER = "correctAnswerCounter";
-    public static final String QUESTION_LAYOUT = "user_defined_question_layout";
-    public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
-    public static final String TEXT_SIZE = "user_defined_question_text_size";
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
     public static final String CURRENT_FIELD_ID = "currentField";
+    private static final String ENTRIES = "entries";
     private String[][] entries;
     private StringBuilder current_index;
     private long current_field_id;
@@ -61,10 +57,7 @@ StudyActivity.Contact {
     private TextView correctAnswers, check, show_question;
     private EditText enterAnswer;
     private int correctAnswersCounter = 0;
-    private long  current_entry_id;
-    private LinearLayout answerLinearlayout, questionLinearlayout, container;
-    private Cursor fieldEntriesCursor;
-    private LoaderManager.LoaderCallbacks<Cursor> loader;
+    private LinearLayout answerLinearlayout;
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
     private DatabaseReadOperations databaseOperations;
@@ -72,7 +65,6 @@ StudyActivity.Contact {
     private boolean tts_available = false;
     private boolean locale_available = false;
     private int check_type;
-    private String[] symbol, customable_text;
     private View root_view;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private Tracker mTracker;
@@ -91,11 +83,13 @@ StudyActivity.Contact {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        entries = (String[][]) getArguments().getSerializable(StudyActivity.DATA);
+        if ( savedInstanceState != null ) {
+            entries = (String[][]) savedInstanceState.getSerializable(ENTRIES);
+        } else {
+            entries = (String[][]) getArguments().getSerializable(StudyActivity.DATA);
+        }
         current_index = (StringBuilder) getArguments().getSerializable(StudyActivity.CURRENT_INDEX);
         current_field_id = getArguments().getLong(CURRENT_FIELD_ID, 0);
-        symbol = getArguments().getStringArray(StudyActivity.SYMBOL);
-        customable_text = getArguments().getStringArray(StudyActivity.CUSTOMABLE_TEXT);
     }
 
     @Nullable
@@ -119,8 +113,6 @@ StudyActivity.Contact {
         correctAnswers = (TextView) root_view.findViewById(R.id.correct_answers);
         check = (TextView) root_view.findViewById(R.id.check);
         answerLinearlayout = (LinearLayout) root_view.findViewById(R.id.answer_linearlayout);
-        questionLinearlayout = (LinearLayout) root_view.findViewById(R.id.question_linearlayout);
-        container = (LinearLayout) root_view.findViewById(R.id.container);
         ImageButton up = (ImageButton) root_view.findViewById(R.id.up);
         final ImageButton down = (ImageButton) root_view.findViewById(R.id.down);
         final CardView check_card_view = (CardView) root_view.findViewById(R.id.check_card_view);
@@ -137,7 +129,7 @@ StudyActivity.Contact {
         }
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
-        mTracker.setScreenName((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(getActivity()) + SCREEN_NAME);
+        mTracker.setScreenName((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(getActivity()) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
         check.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -319,25 +311,6 @@ StudyActivity.Contact {
                 } else {
                     check.setEnabled(false);
                 }
-                if (symbol != null && customable_text != null) {
-                    String text = s.toString();
-                    for (int i = 0; i < symbol.length; i++) {
-                        if (customable_text[i] != null && text.contains(customable_text[i])) {
-                            enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
-                            enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                            answerLinearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                            answerLinearlayout.setPadding(0, 0, 0, 0);
-                            Runnable mRunnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    answerLinearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                    answerLinearlayout.setPadding(0, 0, 0, 0);
-                                }
-                            };
-                            mHandler.postDelayed(mRunnable, 50);
-                        }
-                    }
-                }
             }
         });
         show_question.setMovementMethod(new ScrollingMovementMethod());
@@ -352,6 +325,7 @@ StudyActivity.Contact {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
+        outState.putSerializable(ENTRIES,entries);
     }
 
     @Override

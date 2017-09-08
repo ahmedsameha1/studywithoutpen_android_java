@@ -62,7 +62,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     public static final String EDITED_ORDER = "edited_order";
     public static final int EDIT_ENTRY = 0;
     private static final String QUERY_KEY = "query_key";
-    private static final String CURRENT_FIELD_ID = "current_field_id";
+    static final String CURRENT_FIELD_ID = "current_field_id";
     private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
     public static final int SEARCH_QUESTION = 1;
     public static final int SEARCH_ANSWER = 2;
@@ -97,7 +97,11 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             recyclerview_position = savedInstanceState.getParcelable(RECYCLERVIEW_POSITION);
             search_value = savedInstanceState.getString(SEARCH_VALUE);
         } else {
-            current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
+            if ( getIntent().hasExtra(SearchManager.APP_DATA) ) {
+                current_field_id = getIntent().getBundleExtra(SearchManager.APP_DATA).getLong(CURRENT_FIELD_ID);
+            } else {
+                current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
+            }
             search_what = getIntent().getIntExtra(SEARCH_WHAT, 0);
             search_value = getIntent().getStringExtra(SEARCH_VALUE);
         }
@@ -138,7 +142,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     protected void onResume() {
         super.onResume();
         handleIntent(getIntent());
-        mTracker.setScreenName((Money.getMe(this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
+        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 

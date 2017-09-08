@@ -184,7 +184,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                                 check_type, read_answer.isChecked(), locale_short_name, color);
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                        .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(CreateFieldDialogFragment.this.getActivity()) + "selecting locale")
+                                        .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(CreateFieldDialogFragment.this.getActivity()) + "selecting locale")
                                         .build());
                             } else {
                                 ((Contact) CreateFieldDialogFragment.this.getActivity())

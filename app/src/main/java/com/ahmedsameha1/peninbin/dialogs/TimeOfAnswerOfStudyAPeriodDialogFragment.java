@@ -245,7 +245,7 @@ public class TimeOfAnswerOfStudyAPeriodDialogFragment extends DialogFragment {
                                         TimeOfAnswerOfStudyAPeriodDialogFragment.this.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory("Utilities")
-                                                .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(TimeOfAnswerOfStudyAPeriodDialogFragment.this.getActivity()) + "time of answer")
+                                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(TimeOfAnswerOfStudyAPeriodDialogFragment.this.getActivity()) + "time of answer")
                                                 .build());
                                     }
                                 } else {

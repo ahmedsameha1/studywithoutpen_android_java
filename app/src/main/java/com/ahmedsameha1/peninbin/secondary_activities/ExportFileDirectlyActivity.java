@@ -11,7 +11,7 @@ import android.view.Gravity;
 import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
+import com.ahmedsameha1.peninbin.intent_services.ImportSWPFileIntentService;
 import com.ahmedsameha1.peninbin.utils.ShowEula;
 
 /**
@@ -40,27 +40,27 @@ public class ExportFileDirectlyActivity extends AppCompatActivity {
                                 .setNegativeButton("NO", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog12, int which12) {
-                                        Toast toast = Toast.makeText(ExportFileDirectlyActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                        toast = Toast.makeText(ExportFileDirectlyActivity.this, R.string.shut_down_warning, Toast.LENGTH_LONG);
+                                        Toast toast = Toast.makeText(ExportFileDirectlyActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_SHORT);
                                         toast.setGravity(Gravity.TOP, 0, 400);
                                         toast.show();
                                         ExportFileDirectlyActivity.this.finish();
-                                        ExportImportDatabase.startImportThread(ExportFileDirectlyActivity.this, intent.getData().getPath(), false);
+                                        Intent intent1 = new Intent(ExportFileDirectlyActivity.this.getBaseContext(), ImportSWPFileIntentService.class);
+                                        intent1.putExtra(ImportSWPFileIntentService.FILE_PATH, intent1.getData().getPath());
+                                        intent1.putExtra(ImportSWPFileIntentService.USER_USAGE, false);
+                                        startService(intent1);
                                     }
                                 })
                                 .setPositiveButton("YES", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog1, int which1) {
-                                        Toast toast = Toast.makeText(ExportFileDirectlyActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                        toast = Toast.makeText(ExportFileDirectlyActivity.this, R.string.shut_down_warning, Toast.LENGTH_LONG);
+                                        Toast toast = Toast.makeText(ExportFileDirectlyActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_SHORT);
                                         toast.setGravity(Gravity.TOP, 0, 400);
                                         toast.show();
                                         ExportFileDirectlyActivity.this.finish();
-                                        ExportImportDatabase.startImportThread(ExportFileDirectlyActivity.this, intent.getData().getPath(), true);
+                                        Intent intent1 = new Intent(ExportFileDirectlyActivity.this.getBaseContext(), ImportSWPFileIntentService.class);
+                                        intent1.putExtra(ImportSWPFileIntentService.FILE_PATH, intent1.getData().getPath());
+                                        intent1.putExtra(ImportSWPFileIntentService.USER_USAGE, true);
+                                        startService(intent1);
                                     }
                                 })
                                 .create().show();

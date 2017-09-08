@@ -39,9 +39,6 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
     public static final int GET_ENTRIES_LOADER_ID = 0;
     public static final int PREPARE_WRONG_LIST_LOADER_ID = 2;
     public static final int PREPARE_FIELD_LIST_LOADER_ID = 3;
-    public static final int SHOW_LIST_LOADER_ID = 4;
-    public static final String SYMBOL = "symbol";
-    public static final String CUSTOMABLE_TEXT = "customable_text";
     public static final String STUDY_WHAT = "study_what";
     public static final String WRONG_ITEM_LIST = "wrongItemList";
     public static final int NORMAL = 0;

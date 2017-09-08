@@ -287,7 +287,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                     cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, locale_short_name);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                            .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(FieldPropertiesDialogFragment.this.getActivity()) + "selecting locale")
+                                            .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(FieldPropertiesDialogFragment.this.getActivity()) + "selecting locale")
                                             .build());
                                 } else {
                                     cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, null);

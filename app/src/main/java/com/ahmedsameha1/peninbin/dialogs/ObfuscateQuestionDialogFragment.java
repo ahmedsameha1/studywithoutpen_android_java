@@ -78,7 +78,7 @@ public class ObfuscateQuestionDialogFragment extends DialogFragment {
                         ObfuscateQuestionDialogFragment.this.dismiss();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory("Utilities")
-                                .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(ObfuscateQuestionDialogFragment.this.getActivity()) + "obfuscate text")
+                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(ObfuscateQuestionDialogFragment.this.getActivity()) + "obfuscate text")
                                 .build());
                     }
                 });

@@ -20,8 +20,8 @@ import android.widget.Toast;
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
-import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
-import com.ahmedsameha1.peninbin.database.ImportTextFile;
+import com.ahmedsameha1.peninbin.intent_services.ImportSWPFileIntentService;
+import com.ahmedsameha1.peninbin.intent_services.ImportTextFileIntentService;
 import com.ahmedsameha1.peninbin.secondary_activities.SpeciallyFormattedTextFileHelpActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Money;
@@ -90,13 +90,13 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                                     Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
                                                     toast.setGravity(Gravity.TOP, 0, 400);
                                                     toast.show();
-                                                    toast = Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG);
-                                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                                    toast.show();
-                                                    ExportImportDatabase.startImportThread(context, files[0], false);
+                                                    Intent intent = new Intent(((Activity) context).getBaseContext(), ImportSWPFileIntentService.class);
+                                                    intent.putExtra(ImportSWPFileIntentService.FILE_PATH, files[0]);
+                                                    intent.putExtra(ImportSWPFileIntentService.USER_USAGE, false);
+                                                    context.startService(intent);
                                                     mTracker.send(new HitBuilders.EventBuilder()
                                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "import field from app file")
+                                                            .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "import field from app file")
                                                             .build());
                                                 }
                                             })
@@ -106,13 +106,13 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                                                     Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
                                                     toast.setGravity(Gravity.TOP, 0, 400);
                                                     toast.show();
-                                                    toast = Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG);
-                                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                                    toast.show();
-                                                    ExportImportDatabase.startImportThread(context, files[0], true);
+                                                    Intent intent = new Intent(((Activity) context).getBaseContext(), ImportSWPFileIntentService.class);
+                                                    intent.putExtra(ImportSWPFileIntentService.FILE_PATH, files[0]);
+                                                    intent.putExtra(ImportSWPFileIntentService.USER_USAGE, true);
+                                                    context.startService(intent);
                                                     mTracker.send(new HitBuilders.EventBuilder()
                                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "import field from app file")
+                                                            .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "import field from app file")
                                                             .build());
                                                 }
                                             })
@@ -147,16 +147,15 @@ public class ImportFromWhatDialogFragment extends DialogFragment {
                             public void onSelectedFilePaths(String[] files) {
                                 //files is the array of the paths of files selected by the Application User.
                                 if (files.length > 0) {
-                                    Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                                    Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_SHORT);
                                     toast.setGravity(Gravity.TOP, 0, 400);
                                     toast.show();
-                                    toast = Toast.makeText(context, R.string.shut_down_warning, Toast.LENGTH_LONG);
-                                    toast.setGravity(Gravity.TOP, 0, 400);
-                                    toast.show();
-                                    ImportTextFile.startImportThread(context, files[0]);
+                                    Intent intent = new Intent(((Activity) context).getBaseContext(), ImportTextFileIntentService.class);
+                                    intent.putExtra(ImportTextFileIntentService.FILE_PATH, files[0]);
+                                    context.startService(intent);
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "import field from text file")
+                                            .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "import field from text file")
                                             .build());
                                 }
                             }

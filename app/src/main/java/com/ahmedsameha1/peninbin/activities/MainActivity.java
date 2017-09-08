@@ -65,6 +65,8 @@ import com.ahmedsameha1.peninbin.dialogs.ImportFromWhatDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ImportProvidedFieldDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
+import com.ahmedsameha1.peninbin.intent_services.CheckSubscriptionIntentService;
+import com.ahmedsameha1.peninbin.intent_services.ExportFieldsIntentService;
 import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
 import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
 import com.ahmedsameha1.peninbin.secondary_activities.IntroActivity;
@@ -196,7 +198,6 @@ public class MainActivity extends AppCompatActivity implements
             public void onServiceConnected(ComponentName name,
                                            IBinder service) {
                 billingService = IInAppBillingService.Stub.asInterface(service);
-                Money.checkSubscription(MainActivity.this, billingService);
             }
         };
         getFields = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -240,23 +241,27 @@ public class MainActivity extends AppCompatActivity implements
             }
         };
         getLoaderManager();
+//        fff();
+        new ShowEula(this).show();
+        IntroActivity.show(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         Intent serviceIntent =
                 new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
         bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
-//        fff();
-        new ShowEula(this).show();
-        mTracker.send(new HitBuilders.EventBuilder()
-                .setCategory(ANALYTICS_CATEGORY)
-                .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "run the app")
-                .build());
-        IntroActivity.show(this);
+        startService(new Intent(getBaseContext(), CheckSubscriptionIntentService.class));
     }
-
 
     @Override
     protected void onStop() {
         super.onStop();
+        if (billingService != null) {
+            unbindService(mServiceConn);
+        }
         UsageLastTime.updateUsageLastTime(this);
     }
 
@@ -337,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements
                                 toast1.show();
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory(ANALYTICS_CATEGORY)
-                                        .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "somebody has just completed a subscription")
+                                        .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "somebody has just completed a subscription")
                                         .build());
                             } else {
                                 Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
@@ -497,7 +502,7 @@ public class MainActivity extends AppCompatActivity implements
                         toast.show();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(Money.MONEY)
-                                .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + " initial period")
+                                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "try to subscribe - initial period")
                                 .build());
                     } else {
                         Toast toast = Toast.makeText(this, R.string.already_subscribed, Toast.LENGTH_SHORT);
@@ -505,13 +510,13 @@ public class MainActivity extends AppCompatActivity implements
                         toast.show();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(Money.MONEY)
-                                .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "already subscribed")
+                                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "already subscribed")
                                 .build());
                     }
                 }
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(Money.MONEY)
-                        .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) + "click to subscribe")
+                        .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "click to subscribe")
                         .build());
 
               /*  Uri uri = Uri.parse("market://details?id=" + getPackageName());
@@ -604,7 +609,7 @@ public class MainActivity extends AppCompatActivity implements
                 actionMenu.close(false);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(MainActivity.this) + "add entry from main activity")
+                        .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(MainActivity.this) + "add entry from main activity")
                         .build());
             }
         });
@@ -619,26 +624,19 @@ public class MainActivity extends AppCompatActivity implements
                 actionMenu.close(true);
                 mTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(ANALYTICS_CATEGORY)
-                        .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(MainActivity.this) + "create field")
+                        .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(MainActivity.this) + "create field")
                         .build());
             }
         });
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (billingService != null) {
-            unbindService(mServiceConn);
-        }
-    }
 
     @Override
     public void deleteField(long field_id, MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder) {
         mySQLiteCursorLoader.deleteField(field_id, mHandler, mainActivityRecyclerViewViewHolder);
         mTracker.send(new HitBuilders.EventBuilder()
                 .setCategory(ANALYTICS_CATEGORY)
-                .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(this) +"delete field")
+                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) +"delete field")
                 .build());
     }
 
@@ -669,15 +667,16 @@ public class MainActivity extends AppCompatActivity implements
             public void onSelectedFilePaths(String[] files) {
                 //files is the array of the paths of files selected by the Application User.
                 if (files.length > 0) {
-                    ExportImportDatabase.startExportThread(MainActivity.this, to_export_fields, files[0], to_export_file_name);
+                    Intent intent = new Intent(getBaseContext(), ExportFieldsIntentService.class);
+                    intent.putExtra(ExportFieldsIntentService.SELECTED_FIELDS, to_export_fields);
+                    intent.putExtra(ExportFieldsIntentService.FILE_PATH, files[0]);
+                    intent.putExtra(ExportFieldsIntentService.FILE_NAME, to_export_file_name);
+                    startService(intent);
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(ANALYTICS_CATEGORY)
-                            .setAction((Money.getMe(MainActivity.this) ? "ME" : "") + ActivityUtility.getVersionCode(MainActivity.this) + "export field")
+                            .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(MainActivity.this) + "export field")
                             .build());
-                    Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                    toast = Toast.makeText(MainActivity.this, R.string.shut_down_warning, Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }

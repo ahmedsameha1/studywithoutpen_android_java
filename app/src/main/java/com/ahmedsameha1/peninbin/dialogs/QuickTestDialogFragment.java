@@ -248,7 +248,7 @@ public class QuickTestDialogFragment extends DialogFragment {
                                         QuickTestDialogFragment.this.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(QuickTestDialogFragment.this.getActivity()) + "schedule a random quick test")
+                                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(QuickTestDialogFragment.this.getActivity()) + "schedule a random quick test")
                                                 .build());
                                     } else {
                                         Toast toast = Toast.makeText(QuickTestDialogFragment.this.getActivity(), QuickTestDialogFragment.this.getString(R.string.percentage_between), Toast.LENGTH_LONG);

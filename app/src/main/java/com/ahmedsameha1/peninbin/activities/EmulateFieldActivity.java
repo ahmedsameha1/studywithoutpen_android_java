@@ -1,6 +1,7 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.LoaderManager;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -30,8 +31,8 @@ import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.intent_services.EnableEmulationIntentService;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
-import com.ahmedsameha1.peninbin.utils.Emulation;
 
 import java.util.ArrayList;
 
@@ -165,11 +166,14 @@ public class EmulateFieldActivity extends AppCompatActivity implements
                         Toast toast = Toast.makeText(EmulateFieldActivity.this, "This operation may take some time", Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
-                        if ( starting_entry_id.size() == 0 ) {
-                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, week_days_case);
-                        } else {
-                            Emulation.startEmulateThread(this, current_field_id, number_of_entries, starting_entry_id.get(0), week_days_case);
+                        Intent intent = new Intent(getBaseContext(), EnableEmulationIntentService.class);
+                        intent.putExtra(EnableEmulationIntentService.FIELD_ID, current_field_id);
+                        intent.putExtra(EnableEmulationIntentService.NUMBER_OF_ENTRIES, number_of_entries);
+                        intent.putExtra(EnableEmulationIntentService.WEEK_DAYS_CASE, week_days_case);
+                        if ( starting_entry_id.size() != 0 ) {
+                            intent.putExtra(EnableEmulationIntentService.STARTING_ENTRY, starting_entry_id.get(0));
                         }
+                        startService(intent);
                         ExitActivity.exit(this);
                         finish();
                     } else {

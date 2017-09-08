@@ -49,18 +49,16 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     public static final String SCREEN_NAME = "TestEntryFragment";
     public static final String CURRENT_FIELD_ID = "currentField";
     public static final String CORRECT_ANSWERS_COUNTER = "correctAnswerCounter";
-    public static final String QUESTION_LAYOUT = "user_defined_question_layout";
-    public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
-    public static final String TEXT_SIZE = "user_defined_question_text_size";
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
+    private static final String ENTRIES = "entries";
     private String[][] entries;
     private StringBuilder current_index;
     private String currentQuestion, currentAnswer;
     private TextView correctAnswers, check, show_question;
     private EditText enterAnswer;
     private int correctAnswersCounter = 0;
-    private long current_field_id, current_entry_id;
+    private long current_field_id;
     private LinearLayout answerLinearlayout;
     private LoaderManager.LoaderCallbacks<Cursor> loader;
     private Handler mHandler = new Handler();
@@ -88,7 +86,11 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        entries = (String[][]) getArguments().getSerializable(StudyActivity.DATA);
+        if ( savedInstanceState != null ) {
+            entries = (String[][]) savedInstanceState.getSerializable(ENTRIES);
+        } else {
+            entries = (String[][]) getArguments().getSerializable(StudyActivity.DATA);
+        }
         current_index = (StringBuilder) getArguments().getSerializable(StudyActivity.CURRENT_INDEX);
         current_field_id = getArguments().getLong(CURRENT_FIELD_ID, 0);
     }
@@ -129,7 +131,7 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
         }
         AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         mTracker = application.getDefaultTracker();
-        mTracker.setScreenName((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(getActivity()) + SCREEN_NAME);
+        mTracker.setScreenName((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(getActivity()) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
         check.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -323,6 +325,7 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
+        outState.putSerializable(ENTRIES,entries);
     }
 
     @Override

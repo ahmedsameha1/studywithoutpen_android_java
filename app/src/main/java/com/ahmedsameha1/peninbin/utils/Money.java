@@ -3,14 +3,13 @@ package com.ahmedsameha1.peninbin.utils;
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Service;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Process;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
@@ -76,51 +75,53 @@ public class Money {
     public static final String RESPONSE_INAPP_PURCHASE_DATA_LIST = "INAPP_PURCHASE_DATA_LIST";
     public static final String RESPONSE_INAPP_SIGNATURE_LIST = "INAPP_DATA_SIGNATURE_LIST";
     private static final String UNSOLVABLE_ERROR_GETPURCHASES = "unsolvable_error_getpurchases";
-    public static final String MONEY = "money";
+    public static final String MONEY = "Money";
     private static final String ME = "me";
+    public static final String TRACKING_ME = "ME ";
 
 
     /**
      * get the real public key
-     * @param s the wrong public key
+     *
+     * @param s     the wrong public key
      * @param array the array of positions
      * @return the real public key
      */
 
     public static String get64(String s, int[] array) {
         String right_string = "";
-        for ( int i = 0; i < array.length; i++ ) {
+        for (int i = 0; i < array.length; i++) {
             right_string += s.charAt(array[i]);
         }
         return right_string;
     }
 
 
-    public static boolean getUserAllowedDueAnError( Context context ) {
+    public static boolean getUserAllowedDueAnError(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(USER_ALLOWED_DUE_AN_ERROR, false);
     }
 
-    private static void allowUserDueAnError( Context context ) {
+    private static void allowUserDueAnError(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(USER_ALLOWED_DUE_AN_ERROR, true);
         editor.commit();
     }
 
-    private static void disallowUserDueAnError( Context context ) {
+    private static void disallowUserDueAnError(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(USER_ALLOWED_DUE_AN_ERROR, false);
         editor.commit();
     }
 
-    public static boolean getNetworkDownGetPurchasesesStatus( Context context ) {
+    public static boolean getNetworkDownGetPurchasesesStatus(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(NETWORK_DOWN_GET_PURCHASES_STATUS, false);
     }
 
-    private static void putNetworkDownGetPurchasesesStatus( Context context, boolean status ) {
+    private static void putNetworkDownGetPurchasesesStatus(Context context, boolean status) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(NETWORK_DOWN_GET_PURCHASES_STATUS, status);
@@ -128,24 +129,24 @@ public class Money {
     }
 
 
-    public static boolean getUserSubscriptionStatus( Context context ) {
+    public static boolean getUserSubscriptionStatus(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(USER_SUBSCRIPTION_STATUS, false);
     }
 
-    public static boolean getMe( Context context ) {
+    public static boolean getMe(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(ME, false);
     }
 
-    public static void putUserSubscriptionStatus( Context context, boolean status ) {
+    public static void putUserSubscriptionStatus(Context context, boolean status) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(USER_SUBSCRIPTION_STATUS, status);
         editor.commit();
     }
 
-    public static void putMe( Context context, boolean status ) {
+    public static void putMe(Context context, boolean status) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(ME, status);
@@ -158,25 +159,21 @@ public class Money {
         putUnsolvableErrorGetPurchases(context, false);
     }
 
-    private static void putUnsolvableErrorGetPurchases ( Context context , boolean state ) {
+    private static void putUnsolvableErrorGetPurchases(Context context, boolean state) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(UNSOLVABLE_ERROR_GETPURCHASES, state);
         editor.commit();
     }
 
-    public static boolean getUnsolvableErrorGetPurchases ( Context context ) {
+    public static boolean getUnsolvableErrorGetPurchases(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(UNSOLVABLE_ERROR_GETPURCHASES, false);
     }
 
-    public static void checkSubscription (final Context context, final IInAppBillingService billingService ) {
-        AnalyticsApplication application = (AnalyticsApplication) (((Activity) context).getApplication());
+    public static void checkSubscription(final Context context, final IInAppBillingService billingService) {
+        AnalyticsApplication application = (AnalyticsApplication) (((Service) context).getApplication());
         final Tracker mTracker = application.getDefaultTracker();
-        (new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 if (context.getPackageManager().checkPermission(Manifest.permission.GET_ACCOUNTS, context.getPackageName()) == PERMISSION_GRANTED) {
                     Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
                     Account[] accounts = AccountManager.get(context).getAccounts();
@@ -197,7 +194,7 @@ public class Money {
                 if (isInInitialPeriod(context)) {
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(MONEY)
-                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "in initial period")
+                            .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "in initial period")
                             .build());
                     putUserSubscriptionStatus(context, true);
                     removeAllGetPurchasesErrors(context);
@@ -225,12 +222,16 @@ public class Money {
                                                 + piece7 + piece8 + piece9 + piece10 + piece11, context.getResources().getIntArray(R.array.values))
                                         , owned_item_data_list.get(0), owned_item_signature_list.get(0))) {
                                     putUserSubscriptionStatus(context, true);
+                                    mTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory(MONEY)
+                                            .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "user currentrly subscribed")
+                                            .build());
                                 } else {
                                     putUserSubscriptionStatus(context, false);
                                     putUnsolvableErrorGetPurchases(context, true);   // security error
                                     mTracker.send(new HitBuilders.EventBuilder()
                                             .setCategory(MONEY)
-                                            .setAction((Money.getMe(context) ? "ME" : "") + (Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "security error")
+                                            .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "security error")
                                             .build());
                                 }
                             } else {
@@ -247,21 +248,21 @@ public class Money {
                         putUserSubscriptionStatus(context, false);
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(MONEY)
-                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "allow user due error")
+                                .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "allow user due error")
                                 .build());
                     } else if (response_code == BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
                         putNetworkDownGetPurchasesesStatus(context, true);
                         putUserSubscriptionStatus(context, false);
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(MONEY)
-                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "network error on money")
+                                .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "network error on money")
                                 .build());
                     } else if (response_code == BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE) {
                         putUnsolvableErrorGetPurchases(context, true);
                         putUserSubscriptionStatus(context, false);
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(MONEY)
-                                .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "billing unavailable error money")
+                                .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "billing unavailable error money")
                                 .build());
                     }
                 } catch (RemoteException e) {
@@ -269,12 +270,10 @@ public class Money {
                     allowUserDueAnError(context);
                     mTracker.send(new HitBuilders.EventBuilder()
                             .setCategory(MONEY)
-                            .setAction((Money.getMe(context) ? "ME" : "") + ActivityUtility.getVersionCode(context) + "allow user due error")
+                            .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "allow user due error")
                             .build());
                     e.printStackTrace();
                 }
-            }
-        })).start();
     }
 
 
@@ -292,9 +291,10 @@ public class Money {
          * the verified purchase. The data is in JSON format and signed
          * with a private key. The data also contains the { PurchaseState}
          * and product ID of the purchase.
+         *
          * @param base64PublicKey the base64-encoded public key to use for verifying.
-         * @param signedData the signed JSON string (signed, not encrypted)
-         * @param signature the signature for the data, signed with the private key
+         * @param signedData      the signed JSON string (signed, not encrypted)
+         * @param signature       the signature for the data, signed with the private key
          */
         public static boolean verifyPurchase(String base64PublicKey, String signedData, String signature) {
             if (TextUtils.isEmpty(signedData) || TextUtils.isEmpty(base64PublicKey) ||
@@ -331,9 +331,9 @@ public class Money {
          * Verifies that the signature from the server matches the computed
          * signature on the data.  Returns true if the data is correctly signed.
          *
-         * @param publicKey public key associated with the developer account
+         * @param publicKey  public key associated with the developer account
          * @param signedData signed data from server
-         * @param signature server signature
+         * @param signature  server signature
          * @return true if the data and signature match
          */
         public static boolean verify(PublicKey publicKey, String signedData, String signature) {
@@ -367,6 +367,7 @@ public class Money {
 
     /**
      * Get ISO 3166-1 alpha-2 country code for this device (or null if not available)
+     *
      * @param context Context reference to get the TelephonyManager instance from
      * @return country code or null
      */
@@ -376,17 +377,17 @@ public class Money {
             final String simCountry = tm.getSimCountryIso();
             if (simCountry != null && simCountry.length() == 2) { // SIM country code is available
                 return simCountry.toLowerCase(Locale.US);
-            }
-            else if (tm.getPhoneType() != TelephonyManager.PHONE_TYPE_CDMA) { // device is not 3G (would be unreliable)
+            } else if (tm.getPhoneType() != TelephonyManager.PHONE_TYPE_CDMA) { // device is not 3G (would be unreliable)
                 String networkCountry = tm.getNetworkCountryIso();
                 if (networkCountry != null && networkCountry.length() == 2) { // network country code is available
                     return networkCountry.toLowerCase(Locale.US);
                 }
             }
+        } catch (Exception e) {
         }
-        catch (Exception e) { }
         return null;
     }
+
     public static boolean isInEgypt(Context context) {
         String country = getUserCountry(context);
 
@@ -396,17 +397,17 @@ public class Money {
         return false;
     }
 
-    public static boolean isInInitialPeriod(Context context ) {
+    public static boolean isInInitialPeriod(Context context) {
         long first_install_time = -1;
         PackageInfo pi = null;
         try {
             pi = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
-            first_install_time =  pi.firstInstallTime;
+            first_install_time = pi.firstInstallTime;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-        if ( first_install_time >= 0 ) {
-            if ( isInEgypt(context) ) {
+        if (first_install_time >= 0) {
+            if (isInEgypt(context)) {
                 return System.currentTimeMillis() <= (first_install_time + (AlarmManager.INTERVAL_DAY * 90));
             } else {
                 return System.currentTimeMillis() <= (first_install_time + (AlarmManager.INTERVAL_DAY * 30));

@@ -60,7 +60,7 @@ public class AddFieldNoteDialogFragment extends DialogFragment  {
                             ((Contact) AddFieldNoteDialogFragment.this.getActivity()).addFieldNote(note);
                             mTracker.send(new HitBuilders.EventBuilder()
                                     .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                    .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(AddFieldNoteDialogFragment.this.getActivity()) + "add field note")
+                                    .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(AddFieldNoteDialogFragment.this.getActivity()) + "add field note")
                                     .build());
                             AddFieldNoteDialogFragment.this.dismiss();
                         } else {

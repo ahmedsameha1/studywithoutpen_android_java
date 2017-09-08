@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -17,16 +16,21 @@ import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
 import com.ahmedsameha1.peninbin.activities.MainActivity;
 import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
-import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
+
+import static com.ahmedsameha1.peninbin.database.DatabaseHelper.DATABASE_NAME;
 
 /**
  * Created by ahmed on 24/05/16.
@@ -34,14 +38,21 @@ import java.util.Map;
 public class BootCompletedReceiver extends BroadcastReceiver {
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(Context context, Intent intent) {// TODO: 9/7/17 test import from provided fields after update app 
+        if ( intent.getAction().equals("android.intent.action.MY_PACKAGE_REPLACED") ) {
+            deleteOldProvidedDatabaseFile(context);
+        }
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED") ||
                 intent.getAction().equals("android.intent.action.MY_PACKAGE_REPLACED")) {
             Log.i("boot receiver", "running");
             rescheduleMidnightService(context);
             rescheduleAllSessions(context);
             removePendingPausingSharedPreference(context);
+            copyProvidedDatabaseFile(context);
         }
+
+
+
     }
 
     private void rescheduleAllSessions(Context context) {
@@ -138,5 +149,40 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             }
         }
         editor.commit();
+    }
+
+    public static void copyProvidedDatabaseFile(Context context) {
+        String app_database_path = context.getApplicationContext().getDatabasePath(DATABASE_NAME).getAbsolutePath();
+        String temp_database_path = app_database_path.substring(0, app_database_path.length() - 4) + "temp";
+        File temp_database_file = new File(temp_database_path);
+        try {
+            if (!temp_database_file.exists()) {
+                OutputStream os = new FileOutputStream(temp_database_path);
+                InputStream is = context.getAssets().open("sqlite" + File.separator + DATABASE_NAME);
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = is.read(buffer)) > 0) {
+                    os.write(buffer, 0, length);
+                }
+                is.close();
+                os.flush();
+                os.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteOldProvidedDatabaseFile(Context context) {
+        String app_database_path = context.getApplicationContext().getDatabasePath(DATABASE_NAME).getAbsolutePath();
+        String temp_database_path = app_database_path.substring(0, app_database_path.length() - 4) + "temp";
+        File temp_database_file = new File(temp_database_path);
+        try {
+            if (!temp_database_file.exists()) {
+                temp_database_file.delete();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

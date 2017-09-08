@@ -102,7 +102,7 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                         ChangeTextSizeDialogFragment.this.dismiss();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory("Utilities")
-                                .setAction((Money.getMe(getActivity()) ? "ME" : "") + ActivityUtility.getVersionCode(ChangeTextSizeDialogFragment.this.getActivity()) + "change text size")
+                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(ChangeTextSizeDialogFragment.this.getActivity()) + "change text size")
                                 .build());
                     }
                 });
