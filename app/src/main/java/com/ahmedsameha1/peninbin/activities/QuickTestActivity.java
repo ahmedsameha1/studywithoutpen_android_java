@@ -787,7 +787,7 @@ public class QuickTestActivity extends FullyRandomTest implements
 
     @Override
     protected void onPause() {
-        if (!ActivityUtility.hasOpenedDialogs(this)) {
+        if (!ActivityUtility.hasOpenedDialogs(this) && while_testing ) {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }

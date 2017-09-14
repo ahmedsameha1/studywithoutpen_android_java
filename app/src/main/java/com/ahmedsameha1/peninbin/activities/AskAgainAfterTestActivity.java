@@ -810,7 +810,7 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        if (!ActivityUtility.hasOpenedDialogs(this)) {
+        if (!ActivityUtility.hasOpenedDialogs(this) && while_studying ) {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }

@@ -140,7 +140,7 @@ public class StudyAPeriodDialogFragment extends DialogFragment {
                 positive.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (Money.getUserSubscriptionStatus(StudyAPeriodDialogFragment.this.getActivity()) || Money.getUserAllowedDueAnError(StudyAPeriodDialogFragment.this.getActivity())) {
+                        if (Money.getUserSubscriptionStatus(StudyAPeriodDialogFragment.this.getActivity()) || Money.getUserAllowedDueAnError(StudyAPeriodDialogFragment.this.getActivity()) ) {
                             try {
                                 String trys_suffix = " " + StudyAPeriodDialogFragment.this.getActivity().getString(R.string._try);
                                 String day_suffix = " " + StudyAPeriodDialogFragment.this.getActivity().getString(R.string._day);

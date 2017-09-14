@@ -898,7 +898,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
     @Override
     protected void onPause() {
-        if (!ActivityUtility.hasOpenedDialogs(this)) {
+        if (!ActivityUtility.hasOpenedDialogs(this) && while_testing ) {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }
@@ -907,7 +907,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
          or before the activity destroyed due a change of configuration*/
         mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
         super.onPause();
-
     }
 
     @Override
