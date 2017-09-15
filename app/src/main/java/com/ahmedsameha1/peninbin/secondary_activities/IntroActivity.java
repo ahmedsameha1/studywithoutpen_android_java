@@ -8,16 +8,24 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.View;
+import android.widget.Toast;
 
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.AppIntroSampleSlide;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Money;
 import com.github.paolorotolo.appintro.AppIntro;
 import com.github.paolorotolo.appintro.AppIntroFragment;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 public class IntroActivity extends AppIntro {
 
     public static final String IMAGE_RESOURCE_ID = "image_resorce_id";
     private static final String INTRO_KEY = "intro";
+    private Tracker mTracker;
+    private long time;
 
 
 
@@ -34,12 +42,11 @@ public class IntroActivity extends AppIntro {
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_enhanced_test));
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_emulation));
         showSkipButton(false);
-
+        time = System.currentTimeMillis();
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
     }
-    @Override
-    public void onBackPressed() {
 
-    }
     @Override
     protected int getLayoutId() {
         return R.layout.intro_change_background_color;
@@ -91,6 +98,17 @@ public class IntroActivity extends AppIntro {
     public void onDonePressed(Fragment currentFragment) {
         super.onDonePressed(currentFragment);
         finish();
+    }
+
+    @Override
+    public void onSlideChanged(@Nullable Fragment oldFragment, @Nullable Fragment newFragment) {
+        super.onSlideChanged(oldFragment, newFragment);
+        Toast.makeText(this, String.valueOf((System.currentTimeMillis() - time) / 1000), Toast.LENGTH_SHORT).show();
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Intro")
+                .setAction((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + String.valueOf((System.currentTimeMillis() - time) / 1000))
+                .build());
+        time = System.currentTimeMillis();
     }
 
     public static void show(Context context) {

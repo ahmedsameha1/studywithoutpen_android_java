@@ -50,6 +50,7 @@ StudyActivity.Contact {
     public static final int RETURN_TIME = 1000;
     public static final String CURRENT_FIELD_ID = "currentField";
     private static final String ENTRIES = "entries";
+    private static final String RETAINED_FRAGMENT = "retained_fragment";
     private String[][] entries;
     private StringBuilder current_index;
     private long current_field_id;
@@ -69,6 +70,7 @@ StudyActivity.Contact {
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private Tracker mTracker;
     private TextView show_answer;
+    private RetainedFragment retainedFragment;
 
     public static StudyEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id) {
         StudyEntryFragment instance = new StudyEntryFragment();
@@ -83,8 +85,15 @@ StudyActivity.Contact {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // getting the reference of the fragment that holds the reference of list for test array
+        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(RETAINED_FRAGMENT);
+        // if the reference to the fragment was null we create a new fragment object and add it to the activity
+        if (retainedFragment == null) {
+            retainedFragment = new RetainedFragment();
+            getFragmentManager().beginTransaction().add(retainedFragment, RETAINED_FRAGMENT).commit();
+        }
         if ( savedInstanceState != null ) {
-            entries = (String[][]) savedInstanceState.getSerializable(ENTRIES);
+            entries = retainedFragment.getListForTestStudyEntryFragment();
         } else {
             entries = (String[][]) getArguments().getSerializable(StudyActivity.DATA);
         }
@@ -325,7 +334,7 @@ StudyActivity.Contact {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
-        outState.putSerializable(ENTRIES,entries);
+        retainedFragment.setListForTestStudyEntryFragment(entries);
     }
 
     @Override

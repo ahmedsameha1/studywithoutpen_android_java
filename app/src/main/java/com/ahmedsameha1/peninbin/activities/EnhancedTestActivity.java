@@ -47,6 +47,7 @@ import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
+import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
@@ -111,8 +112,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private static final String CONTENT_VISIBILITY = "content_visibility";
     private static final String LOADING_VISIBILITY = "loading_visibility";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
-    private static final String SYMBOL = "symbol";
-    private static final String CUSTOMABLE_TEXT = "customable_text";
     private static final String BEFORE_SHOWING_RESULT_DIALOG = "before_showing_result_dialog";
     public static final String TIME_BETWEEN_ANSWERS_PASSED = "time_between_answers_passed";
     private static final String HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER = "how_much_time_remaining_from_time_for_answer";
@@ -121,6 +120,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
     public static final String LAST_CONTROLLED_INDEX = "last_controlled_index";
     public static final String LAST_OLD_ROUND_INDEX = "last_old_round_index";
+    private static final String RETAINED_FRAGMENT = "retained_fragment";
     private static EnhancedTestActivity enhancedTestActivity;
     private long current_field_id;
     private String[][] listForTest;
@@ -149,6 +149,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private DatabaseReadOperations databaseOperations;
     private View mLoadingView;
     private RelativeLayout content;
+    private RetainedFragment retainedFragment;
     private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
@@ -304,6 +305,13 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
         final CardView dont_know_card_view = (CardView) findViewById(R.id.dont_know_card_view);
         tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
+        // getting the reference of the fragment that holds the reference of list for test array
+        retainedFragment = (RetainedFragment) getSupportFragmentManager().findFragmentByTag(RETAINED_FRAGMENT);
+        // if the reference to the fragment was null we create a new fragment object and add it to the activity
+        if (retainedFragment == null) {
+            retainedFragment = new RetainedFragment();
+            getSupportFragmentManager().beginTransaction().add(retainedFragment, RETAINED_FRAGMENT).commit();
+        }
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
         showQuestion.setMovementMethod(new ScrollingMovementMethod());
         setSupportActionBar(toolbar);
@@ -531,7 +539,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             last_controlled_index = savedInstanceState.getInt(LAST_CONTROLLED_INDEX);
             last_old_round_index = savedInstanceState.getInt(LAST_OLD_ROUND_INDEX);
-            listForTest = (String[][]) savedInstanceState.getSerializable(LIST_FOR_TEST);
+            listForTest = retainedFragment.getListForTestEnhancedTest();
             if (listForTest == null) {
                 if ( getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null ) {
                     getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
@@ -977,7 +985,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInsatanceState.putInt(LAST_CONTROLLED_INDEX, last_controlled_index);
         savedInsatanceState.putInt(LAST_OLD_ROUND_INDEX, last_old_round_index);
-        savedInsatanceState.putSerializable(LIST_FOR_TEST, listForTest);
+        retainedFragment.setListForTestEnhancedTest(listForTest);
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
         /* Saving the remaining time till completion of the current timer of time of answer because the activity

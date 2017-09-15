@@ -48,6 +48,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
+import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
@@ -112,6 +113,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     public static final String PERMITED_TRIES_NUMBER = "permitedTriesNumber";
     private static final String WHILE_STUDYING = "while_studying";
+    private static final String RETAINED_FRAGMENT = "retained_fragment";
     private static StudyAPeriodActivity studyAPeriodActivity;
     private long startingTime;
     boolean boolean_continue, actionBarShown, is_time_of_answer_elapsed = false;
@@ -139,6 +141,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private View mLoadingView;
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
+    private RetainedFragment retainedFragment;
     private long lastPause;
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
     private int time_of_answer, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
@@ -307,7 +310,13 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         final CardView dont_know_card_view = (CardView) findViewById(R.id.dont_know_card_view);
         tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
         final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
-
+        // getting the reference of the fragment that holds the reference of list for test array
+        retainedFragment = (RetainedFragment) getSupportFragmentManager().findFragmentByTag(RETAINED_FRAGMENT);
+        // if the reference to the fragment was null we create a new fragment object and add it to the activity
+        if (retainedFragment == null) {
+            retainedFragment = new RetainedFragment();
+            getSupportFragmentManager().beginTransaction().add(retainedFragment, RETAINED_FRAGMENT).commit();
+        }
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -580,7 +589,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
             time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             while_studying = savedInstanceState.getBoolean(WHILE_STUDYING);
-            listForTest = (String[][]) savedInstanceState.getSerializable(LIST_FOR_TEST);
+            listForTest = retainedFragment.getListForTestStudyAPeriod();
             if (listForTest == null) {
                 if ( getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null ) {
                     getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
@@ -1032,7 +1041,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         savedInstanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInstanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInstanceState.putBoolean(WHILE_STUDYING, while_studying);
-        savedInstanceState.putSerializable(LIST_FOR_TEST, listForTest);
+        retainedFragment.setListForTestStudyAPeriod(listForTest);
         saveUserLayoutChanges(savedInstanceState);
                        /* Saving the remaining time till completion of the current timer of time of answer because the activity
         will be destroyed, not finishing normally.

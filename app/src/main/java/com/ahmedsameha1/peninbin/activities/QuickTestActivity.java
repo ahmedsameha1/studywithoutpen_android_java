@@ -41,6 +41,7 @@ import com.ahmedsameha1.peninbin.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowQuickTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
+import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
@@ -78,7 +79,6 @@ public class QuickTestActivity extends FullyRandomTest implements
     public static final int INITIAL_VALUE_OF_TRIES_COUNTER = 0;
     public static final int INITIAL_VALUE_OF_HINT_COUNTER = 0;
     public static final int GET_ENTRIES_LOADER_ID = 0;
-    public static final int GET_SPECIAL_TEXT_LOADER_ID = 1;
     public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 2;
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
@@ -98,14 +98,13 @@ public class QuickTestActivity extends FullyRandomTest implements
     private static final String CONTENT_VISIBILITY = "content_visibility";
     private static final String LOADING_VISIBILITY = "loading_visibility";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
-    private static final String SYMBOL = "symbol";
-    private static final String CUSTOMABLE_TEXT = "customable_text";
     private static final String BEFORE_SHOWING_RESULT_DIALOG = "before_showing_result_dialog";
     public static final String TIME_BETWEEN_ANSWERS_PASSED = "time_between_answers_passed";
     private static final String HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER = "how_much_time_remaining_from_time_for_answer";
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
+    private static final String RETAINED_FRAGMENT = "retained_fragment";
     private static QuickTestActivity quickTestActivity;
     private ArrayList<String> hints;
     private boolean actionBarShown;
@@ -125,9 +124,9 @@ public class QuickTestActivity extends FullyRandomTest implements
     private boolean locale_available = false;
     private View mLoadingView;
     private RelativeLayout content;
+    private RetainedFragment retainedFragment;
     private Chronometer tool_bar_timer;
     private long lastPause;
-    private String[] symbol, customable_text;
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
     private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
@@ -217,6 +216,13 @@ public class QuickTestActivity extends FullyRandomTest implements
             final CardView next_hint_card_view = (CardView) findViewById(R.id.next_hint_card_view);
             final CardView dont_know_card_view = (CardView) findViewById(R.id.dont_know_card_view);
             tool_bar_timer = (Chronometer) findViewById(R.id.chronometer);
+            // getting the reference of the fragment that holds the reference of list for test array
+            retainedFragment = (RetainedFragment) getSupportFragmentManager().findFragmentByTag(RETAINED_FRAGMENT);
+            // if the reference to the fragment was null we create a new fragment object and add it to the activity
+            if (retainedFragment == null) {
+                retainedFragment = new RetainedFragment();
+                getSupportFragmentManager().beginTransaction().add(retainedFragment, RETAINED_FRAGMENT).commit();
+            }
             final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
 
             showQuestion.setMovementMethod(new ScrollingMovementMethod());
@@ -277,16 +283,6 @@ public class QuickTestActivity extends FullyRandomTest implements
                     if (loader.getId() == GET_ENTRIES_LOADER_ID) {
                         fieldEntriesCursor = data;
                         QuickTestActivity.this.getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
-                    } else if (loader.getId() == GET_SPECIAL_TEXT_LOADER_ID) {
-                        if (symbol == null && customable_text == null) {
-                            symbol = new String[data.getCount()];
-                            customable_text = new String[data.getCount()];
-                            for (data.moveToFirst(); data.getPosition() < data.getCount();
-                                 data.moveToNext()) {
-                                symbol[data.getPosition()] = data.getString(1);
-                                customable_text[data.getPosition()] = data.getString(2);
-                            }
-                        }
                     }
                 }
 
@@ -384,25 +380,6 @@ public class QuickTestActivity extends FullyRandomTest implements
                     if (s.length() <= 0) {
                         check.setEnabled(false);
                     }
-                    if (symbol != null && customable_text != null) {
-                        String text = s.toString();
-                        for (int i = 0; i < symbol.length; i++) {
-                            if (customable_text[i] != null && text.contains(customable_text[i])) {
-                                enterAnswer.setText(text.replaceAll(customable_text[i], symbol[i]));
-                                enterAnswer.setSelection(text.lastIndexOf(customable_text[i]) + symbol[i].length());
-                                show_result_linearlayout.setBackgroundResource(R.drawable.move_next_notification_background);
-                                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                                Runnable mRunnable = new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        show_result_linearlayout.setBackgroundResource(R.drawable.show_question_background);
-                                        show_result_linearlayout.setPadding(0, 0, 0, 0);
-                                    }
-                                };
-                                mHandler.postDelayed(mRunnable, 50);
-                            }
-                        }
-                    }
                 }
             });
             nextHint.setOnClickListener(new View.OnClickListener() {
@@ -475,7 +452,6 @@ public class QuickTestActivity extends FullyRandomTest implements
                     toast.show();
                 }
             });
-            getLoaderManager().restartLoader(GET_SPECIAL_TEXT_LOADER_ID, null, loader);
             check_type = databaseOperations.getFieldCheckType(current_field_id);
             question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
             answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
@@ -505,13 +481,11 @@ public class QuickTestActivity extends FullyRandomTest implements
                 questionsNumber = savedInstanceState.getInt(NUMBER_OF_QUESTIONS);
                 hints = savedInstanceState.getStringArrayList(HINTS);
                 hintCounter = savedInstanceState.getInt(HINT_COUNTER);
-                customable_text = savedInstanceState.getStringArray(CUSTOMABLE_TEXT);
-                symbol = savedInstanceState.getStringArray(SYMBOL);
                 before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
                 time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
                 time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
                 is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
-                listForTest = (String[][]) savedInstanceState.getSerializable(LIST_FOR_TEST);
+                listForTest = retainedFragment.getListForTestQuickTest();
                 if (listForTest == null) {
                     if ( getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null ) {
                         getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
@@ -822,13 +796,11 @@ public class QuickTestActivity extends FullyRandomTest implements
         savedInsatanceState.putInt(CONTENT_VISIBILITY, content.getVisibility());
         savedInsatanceState.putInt(LOADING_VISIBILITY, mLoadingView.getVisibility());
         savedInsatanceState.putLong(TIMER_LAST_PAUSE, lastPause);
-        savedInsatanceState.putStringArray(SYMBOL, symbol);
-        savedInsatanceState.putStringArray(CUSTOMABLE_TEXT, customable_text);
         savedInsatanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInsatanceState.putInt(TIME_FOR_ANSWER_DO_WHAT, time_of_answer_do_what);
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInsatanceState.putBoolean(BEFORE_SHOWING_RESULT_DIALOG, before_showing_result_dialog);
-        savedInsatanceState.putSerializable(LIST_FOR_TEST, listForTest);
+        retainedFragment.setListForTestQuickTest(listForTest);
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
                        /* Saving the remaining time till completion of the current timer of time of answer because the activity

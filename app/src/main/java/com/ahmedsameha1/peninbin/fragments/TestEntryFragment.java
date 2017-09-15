@@ -52,6 +52,7 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
     private static final String ENTRIES = "entries";
+    private static final String RETAINED_FRAGMENT = "retained_fragment";
     private String[][] entries;
     private StringBuilder current_index;
     private String currentQuestion, currentAnswer;
@@ -71,6 +72,7 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     private View root_view;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private Tracker mTracker;
+    private RetainedFragment retainedFragment;
 
 
     public static TestEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id) {
@@ -86,8 +88,15 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // getting the reference of the fragment that holds the reference of list for test array
+        retainedFragment = (RetainedFragment) getFragmentManager().findFragmentByTag(RETAINED_FRAGMENT);
+        // if the reference to the fragment was null we create a new fragment object and add it to the activity
+        if (retainedFragment == null) {
+            retainedFragment = new RetainedFragment();
+            getFragmentManager().beginTransaction().add(retainedFragment, RETAINED_FRAGMENT).commit();
+        }
         if ( savedInstanceState != null ) {
-            entries = (String[][]) savedInstanceState.getSerializable(ENTRIES);
+            entries = retainedFragment.getListForTestTestEntryFragment();
         } else {
             entries = (String[][]) getArguments().getSerializable(StudyActivity.DATA);
         }
@@ -325,7 +334,7 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
-        outState.putSerializable(ENTRIES,entries);
+        retainedFragment.setListForTestTestEntryFragment(entries);
     }
 
     @Override

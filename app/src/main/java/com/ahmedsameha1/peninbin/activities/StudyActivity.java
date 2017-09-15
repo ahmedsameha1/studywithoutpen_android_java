@@ -21,6 +21,7 @@ import com.ahmedsameha1.peninbin.adapters.WrongItem;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
@@ -44,6 +45,8 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
     public static final int NORMAL = 0;
     public static final int WRONG = 1;
     private static final String LIST_OF_ENTRIES = "list_of_entries";
+    private static final String RETAINED_FRAGMENT = "retained_fragment";
+    private static final String CURRENT_TAB_POSITION = "current_tab_position";
     private static StudyActivity studyActivity;
     private long current_field_id;
     private long current_entry_id;
@@ -58,6 +61,8 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
     private View mLoadingView;
     private int study_what;
     private ArrayList<WrongItem> wrongItemArrayList;
+    private int current_tab_position;
+    private RetainedFragment retainedFragment;
     private Cursor cursor;
     private LoaderManager.LoaderCallbacks<Object[]> prepare_field_list_loader = new LoaderManager.LoaderCallbacks<Object[]>() {
         @Override
@@ -120,11 +125,18 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
         sortOption = databaseReadOperations.getFieldSort(current_field_id);
         TabLayout tableLayout = (TabLayout) findViewById(R.id.tablayout);
         mViewPager = (ViewPager) findViewById(R.id.container);
+        // getting the reference of the fragment that holds the reference of list for test array
+        retainedFragment = (RetainedFragment) getSupportFragmentManager().findFragmentByTag(RETAINED_FRAGMENT);
+        // if the reference to the fragment was null we create a new fragment object and add it to the activity
+        if (retainedFragment == null) {
+            retainedFragment = new RetainedFragment();
+            getSupportFragmentManager().beginTransaction().add(retainedFragment, RETAINED_FRAGMENT).commit();
+        }
         tableLayout.setupWithViewPager(mViewPager);
         mLoadingView = findViewById(R.id.loading);
         mViewPager.setVisibility(View.GONE);
         if ( savedInstanceState != null) {
-            entries = (String[][]) savedInstanceState.getSerializable(LIST_OF_ENTRIES);
+            entries = retainedFragment.getListForTestStudyActivity();
             if ( entries != null) {
                 current_index = (StringBuilder) savedInstanceState.getSerializable(CURRENT_INDEX);
                 mViewPager.setAdapter(new StudyFragmentsTabAdapter(this, entries, current_index, current_field_id));
@@ -140,6 +152,7 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
                     getLoaderManager().initLoader(PREPARE_WRONG_LIST_LOADER_ID, null, prepare_wrong_list_loader);
                 }
             }
+            current_tab_position = savedInstanceState.getInt(CURRENT_TAB_POSITION);
         } else {
             if ( study_what == NORMAL ) {
                 getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, this);
@@ -152,9 +165,14 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                for (Fragment fragment: getSupportFragmentManager ().getFragments() ) {
-                    ( (Contact) fragment).changeCurrentTab();
+                if ( position != current_tab_position ) {
+                    for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+                        if (fragment instanceof Contact) {
+                            ((Contact) fragment).changeCurrentTab();
+                        }
+                    }
                 }
+                current_tab_position = position;
             }
         });
     }
@@ -280,7 +298,8 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(CURRENT_INDEX, current_index);
-        outState.putSerializable(LIST_OF_ENTRIES, entries);
+        outState.putInt(CURRENT_TAB_POSITION, current_tab_position);
+        retainedFragment.setListForTestStudyActivity(entries);
     }
 
     private static class PrepareWrongList extends AsyncTaskLoader<Object[]> {

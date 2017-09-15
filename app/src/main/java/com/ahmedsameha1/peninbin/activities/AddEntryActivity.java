@@ -69,8 +69,6 @@ public class AddEntryActivity extends AppCompatActivity implements
     public static final String TEXT_SIZE = "user_defined_question_text_size";
     private static final String CURRENT_FIELD_ID = "current_field_id";
     private static final String TIMER_LAST_PAUSE = "timer_last_pause";
-    private static final String SYMBOL = "symbol";
-    private static final String CUSTOMABLE_TEXT = "customable_text";
     public static final int GET_FIELDS_LOADER_ID = 0;
     private static final String TEMP_SHARED_STRING = "temp_shared_string";
     private String JUST_CHANGE_FIELD = "just_change_field";
