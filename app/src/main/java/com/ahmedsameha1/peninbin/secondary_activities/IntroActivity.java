@@ -8,7 +8,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.View;
-import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
@@ -103,7 +102,6 @@ public class IntroActivity extends AppIntro {
     @Override
     public void onSlideChanged(@Nullable Fragment oldFragment, @Nullable Fragment newFragment) {
         super.onSlideChanged(oldFragment, newFragment);
-        Toast.makeText(this, String.valueOf((System.currentTimeMillis() - time) / 1000), Toast.LENGTH_SHORT).show();
         mTracker.send(new HitBuilders.EventBuilder()
                 .setCategory("Intro")
                 .setAction((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + String.valueOf((System.currentTimeMillis() - time) / 1000))
