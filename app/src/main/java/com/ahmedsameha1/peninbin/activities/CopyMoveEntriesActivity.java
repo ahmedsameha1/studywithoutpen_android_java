@@ -40,7 +40,7 @@ import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
 
@@ -61,7 +61,7 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
     private static final String SEARCH_VALUE = "search_value";
     public static final String FIELD_ID = "field_id";
     private CopyMoveEntriesActivityRecyclerViewAdapter mAdapter;
-    private ArrayList<Long> list_of_entries = new ArrayList<>();
+    private HashSet<Long> list_of_entries = new HashSet<>();
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private long current_field_id;
     private SortOptions sortOption;

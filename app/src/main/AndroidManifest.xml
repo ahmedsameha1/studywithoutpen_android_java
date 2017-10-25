@@ -333,6 +333,15 @@
         <service
             android:name=".intent_services.EnableEmulationIntentService"
             android:exported="false" />
+        <service
+            android:name=".intent_services.WrongAnswerNotProvidedIntentService"
+            android:exported="false" />
+        <service
+            android:name=".intent_services.PrepareAnswerRegexIntentService"
+            android:exported="false" />
+        <service
+            android:name=".intent_services.WrongAnswerProvidedIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

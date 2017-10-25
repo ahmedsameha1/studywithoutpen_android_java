@@ -1,5 +1,6 @@
 package com.ahmedsameha1.peninbin.fragments;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -128,10 +129,14 @@ StudyActivity.Contact {
         final CardView up_card_view = (CardView) root_view.findViewById(R.id.up_card_view);
         final CardView down_card_view = (CardView) root_view.findViewById(R.id.down_card_view);
         final Animation animAlpha = AnimationUtils.loadAnimation(getActivity(), R.anim.anim_alpha);
-        if (isReadAnswer) {
-            Intent checkIntent = new Intent();
-            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        try {
+            if (isReadAnswer) {
+                Intent checkIntent = new Intent();
+                checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+                startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+            }
+        } catch (ActivityNotFoundException e ) {
+
         }
         if ( savedInstanceState != null ) {
             correctAnswersCounter = savedInstanceState.getInt(CORRECT_ANSWERS_COUNTER);

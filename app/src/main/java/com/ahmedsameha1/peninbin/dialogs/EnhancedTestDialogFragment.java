@@ -268,7 +268,7 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (Money.getUserSubscriptionStatus(EnhancedTestDialogFragment.this.getActivity()) || Money.getUserAllowedDueAnError(EnhancedTestDialogFragment.this.getActivity())  ) {
+                        if (Money.getUserSubscriptionStatus(EnhancedTestDialogFragment.this.getActivity()) || Money.getUserAllowedDueAnError(EnhancedTestDialogFragment.this.getActivity()) || true ) { // TODO: 10/4/17 must remover before publish 
                             try {
                                 String trys_suffix = " " + EnhancedTestDialogFragment.this.getActivity().getString(R.string._try);
                                 String try_string = enterTries.getText().toString();

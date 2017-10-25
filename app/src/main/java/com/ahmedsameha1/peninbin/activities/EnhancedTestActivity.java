@@ -1,13 +1,17 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.LoaderManager;
+import android.content.ActivityNotFoundException;
 import android.content.AsyncTaskLoader;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +20,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.AlarmClock;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -48,6 +53,8 @@ import com.ahmedsameha1.peninbin.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimerDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
+import com.ahmedsameha1.peninbin.intent_services.PrepareAnswerRegexIntentService;
+import com.ahmedsameha1.peninbin.intent_services.WrongAnswerNotProvidedIntentService;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
@@ -121,6 +128,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     public static final String LAST_CONTROLLED_INDEX = "last_controlled_index";
     public static final String LAST_OLD_ROUND_INDEX = "last_old_round_index";
     private static final String RETAINED_FRAGMENT = "retained_fragment";
+    private static final String ANSWERS_REGEX = "answers_regex";
     private static EnhancedTestActivity enhancedTestActivity;
     private long current_field_id;
     private String[][] listForTest;
@@ -153,14 +161,25 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private Runnable show_result_dialog_runnable;
     private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
+
+    private boolean obfuscate;
+    private int last_controlled_index, last_old_round_index;
+    private String[] answers_regex;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = new Runnable() {
         @Override
         public void run() {
             DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
         }
     };
-    private boolean obfuscate;
-    private int last_controlled_index, last_old_round_index;
+    private BroadcastReceiver answer_regex_broadcast_reciever = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                answers_regex = intent.getStringArrayExtra(PrepareAnswerRegexIntentService.RESULT);
+                LocalBroadcastManager.getInstance(EnhancedTestActivity.this).unregisterReceiver(this);
+            }
+        }
+    };
     private LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -233,9 +252,9 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
 
         @Override
-        public void onLoadFinished(Loader<String[][]> loader, String[][] list ) {
+        public void onLoadFinished(Loader<String[][]> loader, String[][] list) {
             listForTest = list;
-            if ( boolean_continue ) {
+            if (boolean_continue) {
                 boolean_continue = false;
             }
             questionsNumber = listForTest.length;
@@ -250,6 +269,15 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 tool_bar_timer.start();
             }
             getLoaderManager().destroyLoader(loader.getId());
+            if (answers_regex == null
+                    && !PrepareAnswerRegexIntentService
+                    .checkRunningForThisActivity(EnhancedTestActivity.class.getName(), current_field_id)) {
+                Intent intent = new Intent(EnhancedTestActivity.this, PrepareAnswerRegexIntentService.class);
+                intent.putExtra(PrepareAnswerRegexIntentService.FIELD_ID, current_field_id);
+                intent.putExtra(PrepareAnswerRegexIntentService.CHECK_TYPE, check_type);
+                intent.putExtra(PrepareAnswerRegexIntentService.ACTIVITY_NAME, EnhancedTestActivity.class.getName());
+                startService(intent);
+            }
         }
 
         @Override
@@ -322,10 +350,14 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         actionBarShown = getSupportActionBar().isShowing();
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
-        if (isReadAnswer) {
-            Intent checkIntent = new Intent();
-            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        try {
+            if (isReadAnswer) {
+                Intent checkIntent = new Intent();
+                checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+                startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+            }
+        } catch (ActivityNotFoundException e) {
+
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
@@ -345,7 +377,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                     cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                     ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
-                            last_controlled_index, last_old_round_index, isEmulated);
+                            last_controlled_index, last_old_round_index, isEmulated, EnhancedTestActivity.this);
                     currentQuestionCounter++;
                     if (currentQuestionCounter >= questionsNumber) {
                         check.setEnabled(false);
@@ -539,9 +571,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             last_controlled_index = savedInstanceState.getInt(LAST_CONTROLLED_INDEX);
             last_old_round_index = savedInstanceState.getInt(LAST_OLD_ROUND_INDEX);
+            answers_regex = savedInstanceState.getStringArray(ANSWERS_REGEX);
             listForTest = retainedFragment.getListForTestEnhancedTest();
             if (listForTest == null) {
-                if ( getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null ) {
+                if (getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null) {
                     getLoaderManager().initLoader(PREPARE_LIST_FOR_TEST_LOADER_ID, null, prepare_list_for_test_loader);
                 } else {
                     if (boolean_continue) {
@@ -584,6 +617,15 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                         if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
                             enterAnswer.setHint(hints.get(hintCounter - 1));
                         }
+                        if (answers_regex == null
+                                && !PrepareAnswerRegexIntentService
+                                .checkRunningForThisActivity(EnhancedTestActivity.class.getName(), current_field_id)) {
+                            Intent intent = new Intent(this, PrepareAnswerRegexIntentService.class);
+                            intent.putExtra(PrepareAnswerRegexIntentService.FIELD_ID, current_field_id);
+                            intent.putExtra(PrepareAnswerRegexIntentService.CHECK_TYPE, check_type);
+                            intent.putExtra(PrepareAnswerRegexIntentService.ACTIVITY_NAME, EnhancedTestActivity.class.getName());
+                            startService(intent);
+                        }
                     }
 
                 } else {
@@ -596,7 +638,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (!ActivityUtility.hasOpenedDialogs(this) && while_testing ) {
+        if (!ActivityUtility.hasOpenedDialogs(this) && while_testing) {
             tool_bar_timer.setBase(SystemClock.elapsedRealtime() - lastPause);
             tool_bar_timer.start();
             // to set the timer on the tool_bar_timer after recreation of activity due configuration change to the last value
@@ -620,6 +662,10 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         }
         mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        if (answers_regex == null) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(answer_regex_broadcast_reciever,
+                    new IntentFilter(PrepareAnswerRegexIntentService.RESULT));
+        }
     }
 
 
@@ -755,118 +801,57 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
         boolean result = false;
+        final String current_answer = enterAnswer.getText().toString();
         if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
-            if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
-                if (locale_available) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
-                    } else {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
-                    }
-                }
-                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = true;
-            } else {
-                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = false;
-                wrongAnswers.add(enterAnswer.getText().toString());
-            }
-            enterAnswer.setText("");
-            triesCounter++;
-            if (triesCounter == permitedTriesNumber && !result) {
-                wrongAnswersCounter++;
-                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                wrongAnswers = null;
-            }
+            result = CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], current_answer);
         } else if (check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE) {
-            if (CompareUtility.nonStrictCompare(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
-                if (locale_available) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
-                    } else {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
-                    }
-                }
-                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = true;
-            } else {
-                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = false;
-                wrongAnswers.add(enterAnswer.getText().toString());
-            }
-            enterAnswer.setText("");
-            triesCounter++;
-            if (triesCounter == permitedTriesNumber && !result) {
-                wrongAnswersCounter++;
-                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                wrongAnswers = null;
-            }
+            result = CompareUtility.nonStrictCompare(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString());
         } else if (check_type == Contract.Field.IGNORE_CASE) {
-            if (enterAnswer.getText().toString().equalsIgnoreCase(listForTest[currentQuestionCounter][1])) {
-                if (locale_available) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
-                    } else {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
-                    }
-                }
-                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = true;
-            } else {
-                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = false;
-                wrongAnswers.add(enterAnswer.getText().toString());
-            }
-            enterAnswer.setText("");
-            triesCounter++;
-            if (triesCounter == permitedTriesNumber && !result) {
-                wrongAnswersCounter++;
-                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                wrongAnswers = null;
-            }
+            result = current_answer.equalsIgnoreCase(listForTest[currentQuestionCounter][1]);
         } else if (check_type == Contract.Field.DO_NOT_IGNORE_CASE) {
-            if (enterAnswer.getText().toString().equals(listForTest[currentQuestionCounter][1])) {
-                if (locale_available) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
-                    } else {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
-                    }
+            result = current_answer.equals(listForTest[currentQuestionCounter][1]);
+        }
+        if (result) {
+            if (locale_available) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
+                } else {
+                    tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                 }
-                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = true;
+            }
+            show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+            show_result_linearlayout.setPadding(0, 0, 0, 0);
+            setNormalEnterAnswerBackground();
+        } else {
+            show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+            show_result_linearlayout.setPadding(0, 0, 0, 0);
+            setNormalEnterAnswerBackground();
+            result = false;
+            wrongAnswers.add(enterAnswer.getText().toString());
+            if (answers_regex == null) {
+                Intent intent = new Intent(this, WrongAnswerNotProvidedIntentService.class);
+                intent.putExtra(WrongAnswerNotProvidedIntentService.CHECK_TYPE, check_type);
+                intent.putExtra(WrongAnswerNotProvidedIntentService.FIELD_ID, current_field_id);
+                intent.putExtra(WrongAnswerNotProvidedIntentService.ANSWER, current_answer);
+                startService(intent);
             } else {
-                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = false;
-                wrongAnswers.add(enterAnswer.getText().toString());
+                new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Void[] objects) {
+                        cursorLoaderAndUpdateDatabase.increaseWrongAnswersForEntriesWithSameAnswer(answers_regex, current_answer, check_type);
+                        return null;
+                    }
+                }.execute();
             }
-            enterAnswer.setText("");
-            triesCounter++;
-            if (triesCounter == permitedTriesNumber && !result) {
-                wrongAnswersCounter++;
-                cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                wrongAnswers = null;
-            }
+        }
+        enterAnswer.setText("");
+        triesCounter++;
+        if (triesCounter == permitedTriesNumber && !result) {
+            wrongAnswersCounter++;
+            cursorLoaderAndUpdateDatabase.putEntryWrongAnswersEnhancedTest(Long.parseLong(listForTest[currentQuestionCounter][2]), wrongAnswers, question_data_type);
+            cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+            wrongAnswers = null;
         }
         return result;
     }
@@ -884,29 +869,11 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         return listForTest;
     }
 
-    private long getEntry_id(String queston, String answer) {
-        long entry_id = 0;
-        boolean which_cursor = getIntent().getBooleanExtra(LAST_SESSION_OR_NEW_ONE, false);
-        for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
-             fieldEntriesCursor.moveToNext()) {
-            if (which_cursor) { // continue previous session
-                if (fieldEntriesCursor.getString(0).equals(queston) && fieldEntriesCursor.getString(1).equals(answer)) {
-                    entry_id = fieldEntriesCursor.getLong(3);
-                    break;
-                }
-            } else {
-                if (fieldEntriesCursor.getString(1).equals(queston) && fieldEntriesCursor.getString(2).equals(answer)) {
-                    entry_id = fieldEntriesCursor.getLong(0);
-                    break;
-                }
-            }
-        }
-        return entry_id;
-    }
 
     @Override
     protected void onPause() {
-        if (!ActivityUtility.hasOpenedDialogs(this) && while_testing ) {
+        super.onPause();
+        if (!ActivityUtility.hasOpenedDialogs(this) && while_testing) {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }
@@ -914,7 +881,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
          or before the activity finishes
          or before the activity destroyed due a change of configuration*/
         mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(answer_regex_broadcast_reciever);
     }
 
     @Override
@@ -985,6 +952,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInsatanceState.putInt(LAST_CONTROLLED_INDEX, last_controlled_index);
         savedInsatanceState.putInt(LAST_OLD_ROUND_INDEX, last_old_round_index);
+        savedInsatanceState.putStringArray(ANSWERS_REGEX, answers_regex);
         retainedFragment.setListForTestEnhancedTest(listForTest);
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);
@@ -1147,7 +1115,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                 scheduleWhatToDoAfterTimeOfAnswerElapsed();
             }
         } else {
-            if ( while_testing ) {
+            if (while_testing) {
                 lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
                 tool_bar_timer.stop();
             }
@@ -1168,7 +1136,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
             cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
             ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
-                    last_controlled_index, last_old_round_index, isEmulated);
+                    last_controlled_index, last_old_round_index, isEmulated, EnhancedTestActivity.this);
             currentQuestionCounter++;
             if (currentQuestionCounter >= questionsNumber) {
                 check.setEnabled(false);
@@ -1241,7 +1209,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
         cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
         ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
-                last_controlled_index, last_old_round_index, isEmulated);
+                last_controlled_index, last_old_round_index, isEmulated, EnhancedTestActivity.this);
         currentQuestionCounter++;
         showQuestion.setTextColor(Color.WHITE);
         if (currentQuestionCounter >= questionsNumber) {

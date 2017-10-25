@@ -14,7 +14,7 @@ import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Created by ahmed on 3/13/2016.
@@ -23,11 +23,11 @@ public class CopyMoveEntriesActivityRecyclerViewAdapter extends
         CursorRecyclerViewAdapter<CopyMoveEntriesActivityRecyclerViewViewHolder> {
     private long current_field_id;
     private StringBuilder search_string;
-    private ArrayList<Long> list_of_entries;
+    private HashSet<Long> list_of_entries;
     private DatabaseReadOperations databaseReadOperations;
     private Context context;
 
-    public CopyMoveEntriesActivityRecyclerViewAdapter(Context context, Cursor data, ArrayList<Long> list, long field_id, StringBuilder search_string) {
+    public CopyMoveEntriesActivityRecyclerViewAdapter(Context context, Cursor data, HashSet<Long> list, long field_id, StringBuilder search_string) {
         super(context, data);
         list_of_entries = list;
         this.current_field_id = field_id;

@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Process;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.ColorInt;
@@ -40,6 +42,7 @@ import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
 /**
  * Created by ahmed on 7/21/2015.
  */
@@ -53,6 +56,12 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     private CheckBox read_answer;
     private Tracker mTracker;
     private int red = 255, green = 255, blue = 255, color = Color.WHITE;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            read_answer.setVisibility(View.GONE);
+        }
+    };
     @Override
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
@@ -238,7 +247,7 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                 toast.show();
                             }
                             if (read_answer != null) {
-                                read_answer.setVisibility(View.GONE);
+                                handler.sendMessage(Message.obtain());
                                 break;
                             }
                         }

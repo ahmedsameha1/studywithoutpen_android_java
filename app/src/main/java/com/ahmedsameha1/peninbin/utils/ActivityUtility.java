@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.text.Spannable;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
@@ -36,6 +37,7 @@ import java.util.List;
  */
 
 public class ActivityUtility {
+    public static final int ALL_CONTROLLED = -2;
 
     public static ArrayList<String> getHints(Context context, long current_field_id, int question_data_type, String question, String answer) {
         DatabaseReadOperations databaseReadOperations = new DatabaseReadOperations(context);
@@ -323,9 +325,10 @@ public class ActivityUtility {
         void manageTimersDueDialogsShow(boolean isCounting);
     }
 
+    // TODO: 10/5/17 you have to test this method
     public static Object[] prepareListForTest(Cursor fieldEntriesCursor, int numberOfQuestions, int controlled_portion,
                                               int rank_level, int wrongness_level) {
-        final int CONTROLLED_MARKER = 0, OLD_ROUND_MARKER = 1;
+        final int CONTROLLED_MARKER = 0, OLD_ROUND_MARKER = 1, NO_OLD_ROUND = -1, NO_CONTROLLED = -1;
         String[][] listForTest = new String[numberOfQuestions][3];
         String[][] list_of_entries_asked_current_round = new String[fieldEntriesCursor.getCount()][2];
         String[][] list_of_entries_did_not_asked_current_round = new String[fieldEntriesCursor.getCount()][2];
@@ -334,7 +337,7 @@ public class ActivityUtility {
         int[] markers = new int[2];
         Object[] result = new Object[2];
         if (wrongness_level == -1 && rank_level == -1 && controlled_portion == -1) {
-            markers[CONTROLLED_MARKER] = -1; // indicates that there is no controlled entries
+            markers[CONTROLLED_MARKER] = NO_CONTROLLED; // indicates that there is no controlled entries
             int asked = 0, didnot_asked = 0;
             for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
                  fieldEntriesCursor.moveToNext()) {
@@ -409,7 +412,7 @@ public class ActivityUtility {
             long[] uncontrolled_entries_ids = (long[]) arrayList.get(2);
             int[] uncontrolled_entries_whether_asked = (int[]) arrayList.get(3);
             if (controlled_arraylist == null) {
-                markers[CONTROLLED_MARKER] = -1; // indicates that there is no controlled entries
+                markers[CONTROLLED_MARKER] = NO_CONTROLLED; // indicates that there is no controlled entries
                 int asked = 0, didnot_asked = 0;
                 for (int n = 0; n < uncontrolled_entries.length; n++) {
                     if (uncontrolled_entries_whether_asked[n] == Constants.TestRound.ASKED_AT_CURRENT_ROUND) {
@@ -465,9 +468,11 @@ public class ActivityUtility {
                     listForTest[n][2] = String.valueOf(element[0]);
                 }
                 markers[CONTROLLED_MARKER] = numberOfQuestions - 1; // the index of the last controlled entry
-                markers[OLD_ROUND_MARKER] = -1; // indicates that there is no entries from the old round
+                markers[OLD_ROUND_MARKER] = ALL_CONTROLLED; // indicates that there is no entries from the old round
                 shuffleArray(listForTest);
-                return listForTest;
+                result[0] = listForTest;
+                result[1] = markers;
+                return result;
             } else {
                 if (number_of_controlled_questions > controlled_arraylist.size()) {
                     number_of_controlled_questions = controlled_arraylist.size();
@@ -606,63 +611,75 @@ public class ActivityUtility {
         }
     }
 
+    public static void showNewRoundDialog(Context context) {
+                new AlertDialog.Builder(context)
+                        .setMessage(R.string.new_round_dialog)
+                        .create().show();
+    }
 
     /**
      * This method take care of the round work of the old and new round entries
      * It assume that controlled entries comes first in the array of test then the old round entries then the new round entries
      */
     public static void updateRoundData(long current_field_id, String[][] listForTest, CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase,
-                                       int currentQuestionCounter, int last_controlled_index, int last_old_round_index, boolean isEmulated) {
-        // There is no controlled entries and there is no old round entries and the current question counter at the first entry in the array of test
-        // so we rest all the entries round and start a new round
-        if (last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter == 0) {
-            cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
-            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-        }
-        // Because the current question counter is greater than 0 so the old round has ended and we are working on the new round
-        else if (last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter > 0) {
-            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-        }
-        // there is no controlled entries and there is old round entries we have not finished the old round entries
-        else if (last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter <= last_old_round_index) {
-            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-        }
-        // there is no controlled entries and there is old round entries we have just finished the old round entries
-        // so we rest all the entries round and start a new round
-        else if (last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter > last_old_round_index) {
-            // resting all the entries round and start a new round
-            // this will be true only if there is entries from a new round
-            if (currentQuestionCounter == last_old_round_index + 1) {
+                                       int currentQuestionCounter, int last_controlled_index, int last_old_round_index, boolean isEmulated, Context context) {
+        // this method will take action only if there is uncontrolled entries. if all entries are controlled it will take no action
+        if ( last_old_round_index != ALL_CONTROLLED ) {
+            // There is no controlled entries and there is no old round entries and the current question counter at the first entry in the array of test
+            // so we rest all the entries round and start a new round
+            if (last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter == 0) {
                 cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
+                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+                showNewRoundDialog(context);
             }
-            // we are working in the new round
-            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-        }
-        // There is controlled entries and we are working on them and they are not related with rounds so no action is taken
-        else if (last_controlled_index > -1 && currentQuestionCounter <= last_controlled_index) {
-            // No Action
-        }
+            // Because the current question counter is greater than 0 so the old round has ended and we are working on the new round
+            else if (last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter > 0) {
+                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+            }
+            // there is no controlled entries and there is old round entries we have not finished the old round entries
+            else if (last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter <= last_old_round_index) {
+                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+            }
+            // there is no controlled entries and there is old round entries we have just finished the old round entries
+            // so we rest all the entries round and start a new round
+            else if (last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter > last_old_round_index) {
+                // resting all the entries round and start a new round
+                // this will be true only if there is entries from a new round
+                if (currentQuestionCounter == last_old_round_index + 1) {
+                    cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
+                    showNewRoundDialog(context);
+                }
+                // we are working in the new round
+                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+            }
+            // There is controlled entries and we are working on them and they are not related with rounds so no action is taken
+            else if (last_controlled_index > -1 && currentQuestionCounter <= last_controlled_index) {
+                // No Action
+            }
         /* if the there is controlled entries and there is no old round entries and there is no new round entries this method will not be called
          because the last controlled index will be the last entries of the test array, we will not handle this case */
-        //==================
-        // In the following case there must be a new round entries and we are on the first new round entries
-        else if (last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter == last_controlled_index + 1) {
-            cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
-            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-        }
-        // we are working in the new round
-        else if (last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter > last_controlled_index + 1) {
-            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-        }
-        // there is controlled entries and old round entries and we are on the old round entries
-        else if (last_controlled_index > -1 && last_old_round_index > -1 && currentQuestionCounter > last_controlled_index) {
-            // resting all the entries round and start a new round
-            // this will be true only if there is entries from a new round
-            if (currentQuestionCounter == last_old_round_index + 1) {
+            //==================
+            // In the following case there must be a new round entries and we are on the first new round entries
+            else if (last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter == last_controlled_index + 1) {
                 cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
+                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+                showNewRoundDialog(context);
             }
             // we are working in the new round
-            cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+            else if (last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter > last_controlled_index + 1) {
+                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+            }
+            // there is controlled entries and old round entries and we are on the old round entries
+            else if (last_controlled_index > -1 && last_old_round_index > -1 && currentQuestionCounter > last_controlled_index) {
+                // resting all the entries round and start a new round
+                // this will be true only if there is entries from a new round
+                if (currentQuestionCounter == last_old_round_index + 1) {
+                    cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
+                    showNewRoundDialog(context);
+                }
+                // we are working in the new round
+                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
+            }
         }
     }
 

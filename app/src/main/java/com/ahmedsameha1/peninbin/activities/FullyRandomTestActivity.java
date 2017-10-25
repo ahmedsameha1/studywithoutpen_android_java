@@ -1,6 +1,7 @@
 package com.ahmedsameha1.peninbin.activities;
 
 import android.app.LoaderManager;
+import android.content.ActivityNotFoundException;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Intent;
@@ -239,10 +240,14 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         actionBarShown = getSupportActionBar().isShowing();
         showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
         isReadAnswer = databaseOperations.isReadAnswer(current_field_id);
-        if (isReadAnswer) {
-            Intent checkIntent = new Intent();
-            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        try {
+            if (isReadAnswer) {
+                Intent checkIntent = new Intent();
+                checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+                startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+            }
+        } catch (ActivityNotFoundException e) {
+
         }
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
