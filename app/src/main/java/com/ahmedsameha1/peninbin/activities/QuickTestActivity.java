@@ -3,16 +3,20 @@ package com.ahmedsameha1.peninbin.activities;
 import android.app.LoaderManager;
 import android.content.ActivityNotFoundException;
 import android.content.AsyncTaskLoader;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -43,6 +47,8 @@ import com.ahmedsameha1.peninbin.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.ShowQuickTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.dialogs.TimeOfAnswerOfTestsDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.RetainedFragment;
+import com.ahmedsameha1.peninbin.intent_services.PrepareAnswerRegexIntentService;
+import com.ahmedsameha1.peninbin.intent_services.WrongAnswerNotProvidedIntentService;
 import com.ahmedsameha1.peninbin.secondary_activities.ExitActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
@@ -106,6 +112,7 @@ public class QuickTestActivity extends FullyRandomTest implements
     private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
     private static final String RETAINED_FRAGMENT = "retained_fragment";
+    private static final String ANSWERS_REGEX = "answers_regex";
     private static QuickTestActivity quickTestActivity;
     private ArrayList<String> hints;
     private boolean actionBarShown;
@@ -133,13 +140,23 @@ public class QuickTestActivity extends FullyRandomTest implements
     private int time_of_answer, time_of_answer_do_what, reading_question_letter_second, typing_answer_letter_second, find_answer_time;
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
     private boolean is_time_of_answer_elapsed = false;
+    private String[] answers_regex;
+    private boolean obfuscate;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = new Runnable() {
         @Override
         public void run() {
             DoWhatYouHaveToDoAfterTimeOfAnswerElapsed();
         }
     };
-    private boolean obfuscate;
+    private BroadcastReceiver answer_regex_broadcast_reciever = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                answers_regex = intent.getStringArrayExtra(PrepareAnswerRegexIntentService.RESULT);
+                LocalBroadcastManager.getInstance(QuickTestActivity.this).unregisterReceiver(this);
+            }
+        }
+    };
     private LoaderManager.LoaderCallbacks<String[][]> prepare_list_for_test_loader = new LoaderManager.LoaderCallbacks<String[][]>() {
         @Override
         public Loader<String[][]> onCreateLoader(int i, Bundle bundle) {
@@ -165,6 +182,15 @@ public class QuickTestActivity extends FullyRandomTest implements
                 quickTestActivity.tool_bar_timer.start();
             }
             getLoaderManager().destroyLoader(loader.getId());
+            if (answers_regex == null
+                    && !PrepareAnswerRegexIntentService
+                    .checkRunningForThisActivity(QuickTestActivity.class.getName(), current_field_id)) {
+                Intent intent = new Intent(QuickTestActivity.this, PrepareAnswerRegexIntentService.class);
+                intent.putExtra(PrepareAnswerRegexIntentService.FIELD_ID, current_field_id);
+                intent.putExtra(PrepareAnswerRegexIntentService.CHECK_TYPE, check_type);
+                intent.putExtra(PrepareAnswerRegexIntentService.ACTIVITY_NAME, QuickTestActivity.class.getName());
+                startService(intent);
+            }
         }
 
         @Override
@@ -490,6 +516,7 @@ public class QuickTestActivity extends FullyRandomTest implements
                 time_of_answer_do_what = savedInstanceState.getInt(TIME_FOR_ANSWER_DO_WHAT);
                 time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
                 is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
+                answers_regex = savedInstanceState.getStringArray(ANSWERS_REGEX);
                 listForTest = retainedFragment.getListForTestQuickTest();
                 if (listForTest == null) {
                     if ( getLoaderManager().getLoader(PREPARE_LIST_FOR_TEST_LOADER_ID) != null ) {
@@ -530,6 +557,15 @@ public class QuickTestActivity extends FullyRandomTest implements
                             }
                             if (hintCounter > 0 && enterAnswer.getText().toString().length() <= 0) {
                                 enterAnswer.setHint(hints.get(hintCounter - 1));
+                            }
+                            if (answers_regex == null
+                                    && !PrepareAnswerRegexIntentService
+                                    .checkRunningForThisActivity(QuickTestActivity.class.getName(), current_field_id)) {
+                                Intent intent = new Intent(this, PrepareAnswerRegexIntentService.class);
+                                intent.putExtra(PrepareAnswerRegexIntentService.FIELD_ID, current_field_id);
+                                intent.putExtra(PrepareAnswerRegexIntentService.CHECK_TYPE, check_type);
+                                intent.putExtra(PrepareAnswerRegexIntentService.ACTIVITY_NAME, QuickTestActivity.class.getName());
+                                startService(intent);
                             }
                         }
                     } else {
@@ -573,6 +609,10 @@ public class QuickTestActivity extends FullyRandomTest implements
         }
         mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        if (answers_regex == null) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(answer_regex_broadcast_reciever,
+                    new IntentFilter(PrepareAnswerRegexIntentService.RESULT));
+        }
     }
 
     @Override
@@ -659,106 +699,53 @@ public class QuickTestActivity extends FullyRandomTest implements
     @SuppressWarnings("deprecation")
     private boolean checkAnAnswer() {
         boolean result = false;
+        final String current_answer = enterAnswer.getText().toString();
         if (check_type == Contract.Field.NON_STRICT_IGNORE_CASE) {
-            if (CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
-                if (locale_available) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
-                    } else {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
-                    }
-                }
-                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = true;
-            } else {
-                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = false;
-            }
-            enterAnswer.setText("");
-            triesCounter++;
-            if (triesCounter == permitedTriesNumber && !result) {
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                wrongAnswersCounter++;
-            }
+            result = CompareUtility.nonStrictCompareIgnoreCase(listForTest[currentQuestionCounter][1], current_answer);
         } else if (check_type == Contract.Field.NON_STRICT_DO_NOT_IGNORE_CASE) {
-            if (CompareUtility.nonStrictCompare(listForTest[currentQuestionCounter][1], enterAnswer.getText().toString())) {
-                if (locale_available) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
-                    } else {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
-                    }
-                }
-                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = true;
-            } else {
-                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = false;
-            }
-            enterAnswer.setText("");
-            triesCounter++;
-            if (triesCounter == permitedTriesNumber && !result) {
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                wrongAnswersCounter++;
-            }
+            result = CompareUtility.nonStrictCompare(listForTest[currentQuestionCounter][1], current_answer);
         } else if (check_type == Contract.Field.IGNORE_CASE) {
-            if (enterAnswer.getText().toString().equalsIgnoreCase(listForTest[currentQuestionCounter][1])) {
-                if (locale_available) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
-                    } else {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
-                    }
-                }
-                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = true;
-            } else {
-                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = false;
-            }
-            enterAnswer.setText("");
-            triesCounter++;
-            if (triesCounter == permitedTriesNumber && !result) {
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                wrongAnswersCounter++;
-            }
+            result = current_answer.equalsIgnoreCase(listForTest[currentQuestionCounter][1]);
         } else if (check_type == Contract.Field.DO_NOT_IGNORE_CASE) {
-            if (enterAnswer.getText().toString().equals(listForTest[currentQuestionCounter][1])) {
-                if (locale_available) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
-                    } else {
-                        tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
-                    }
+            result = current_answer.equals(listForTest[currentQuestionCounter][1]);
+        }
+        if ( result ) {
+            if (locale_available) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null, null);
+                } else {
+                    tts.speak(listForTest[currentQuestionCounter][1], TextToSpeech.QUEUE_ADD, null);
                 }
-                show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = true;
+            }
+            show_result_linearlayout.setBackgroundResource(R.drawable.correct_answer_background);
+            show_result_linearlayout.setPadding(0, 0, 0, 0);
+            setNormalEnterAnswerBackground();
+        } else {
+            show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
+            show_result_linearlayout.setPadding(0, 0, 0, 0);
+            setNormalEnterAnswerBackground();
+            if (answers_regex == null) {
+                Intent intent = new Intent(this, WrongAnswerNotProvidedIntentService.class);
+                intent.putExtra(WrongAnswerNotProvidedIntentService.CHECK_TYPE, check_type);
+                intent.putExtra(WrongAnswerNotProvidedIntentService.FIELD_ID, current_field_id);
+                intent.putExtra(WrongAnswerNotProvidedIntentService.ANSWER, current_answer);
+                startService(intent);
             } else {
-                show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
-                show_result_linearlayout.setPadding(0, 0, 0, 0);
-                setNormalEnterAnswerBackground();
-                result = false;
+                new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Void[] objects) {
+                        cursorLoaderAndUpdateDatabase.increaseWrongAnswersForEntriesWithSameAnswer(answers_regex, current_answer, check_type);
+                        return null;
+                    }
+                }.execute();
             }
-            enterAnswer.setText("");
-            triesCounter++;
-            if (triesCounter == permitedTriesNumber && !result) {
-                cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                wrongAnswersCounter++;
-            }
+        }
+        enterAnswer.setText("");
+        triesCounter++;
+        if (triesCounter == permitedTriesNumber && !result) {
+            cursorLoaderAndUpdateDatabase.increaseEntryWrongAnsweredCountByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
+            wrongAnswersCounter++;
         }
         return result;
     }
@@ -766,6 +753,7 @@ public class QuickTestActivity extends FullyRandomTest implements
 
     @Override
     protected void onPause() {
+        super.onPause();
         if (!ActivityUtility.hasOpenedDialogs(this) && while_testing ) {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
@@ -774,7 +762,7 @@ public class QuickTestActivity extends FullyRandomTest implements
          or before the activity finishes
          or before the activity destroyed due a change of configuration*/
         mHandler.removeCallbacks(what_to_do_after_time_of_answer_elapsed_runnable);
-        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(answer_regex_broadcast_reciever);
     }
 
     @Override
@@ -805,6 +793,7 @@ public class QuickTestActivity extends FullyRandomTest implements
         savedInsatanceState.putInt(TIME_FOR_ANSWER_DO_WHAT, time_of_answer_do_what);
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInsatanceState.putBoolean(BEFORE_SHOWING_RESULT_DIALOG, before_showing_result_dialog);
+        savedInsatanceState.putStringArray(ANSWERS_REGEX, answers_regex);
         retainedFragment.setListForTestQuickTest(listForTest);
         saveUserLayoutChanges(savedInsatanceState);
         mHandler.removeCallbacks(show_result_dialog_runnable);

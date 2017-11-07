@@ -826,7 +826,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             show_result_linearlayout.setBackgroundResource(R.drawable.wrong_answer_background);
             show_result_linearlayout.setPadding(0, 0, 0, 0);
             setNormalEnterAnswerBackground();
-            result = false;
             wrongAnswers.add(enterAnswer.getText().toString());
             if (answers_regex == null) {
                 Intent intent = new Intent(this, WrongAnswerNotProvidedIntentService.class);

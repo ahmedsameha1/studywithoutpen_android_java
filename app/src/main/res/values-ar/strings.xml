@@ -426,6 +426,6 @@
     <string name="export_notifi_content">تصدير مجالات لملف swp</string>
     <string name="import_provided_field_notifi_content">استيراد مجالات من المجالات المتوفرة</string>
     <string name="enable_emulation_notifi">تفعيل المحاكاة</string>
-    <string name="new_round_dialog">Starting a new round</string>
+    <string name="new_round_dialog">بداية دورة جديدة</string>
 </resources>
 
