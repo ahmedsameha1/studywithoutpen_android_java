@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.StudyActivity;
+import com.ahmedsameha1.peninbin.view.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.util.ArrayList;

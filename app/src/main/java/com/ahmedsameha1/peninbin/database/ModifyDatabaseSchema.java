@@ -8,8 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
+import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.view.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.Contract.Field;
 import com.ahmedsameha1.peninbin.utils.Constants;
 

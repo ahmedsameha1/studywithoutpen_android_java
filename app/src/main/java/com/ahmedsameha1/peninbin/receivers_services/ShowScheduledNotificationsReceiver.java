@@ -12,14 +12,14 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.activities.MainActivity;
-import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
+import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.view.activities.MainActivity;
+import com.ahmedsameha1.peninbin.view.activities.QuickTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.secondary_activities.RefreshingAppUsageActivity;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 

@@ -1,0 +1,726 @@
+package com.ahmedsameha1.peninbin.view.activities;
+
+import android.app.LoaderManager;
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.provider.AlarmClock;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Chronometer;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.database.Contract;
+import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
+import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.view.dialogs.ChangeAreasDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.ChangeTextSizeDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.TimerDialogFragment;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Money;
+import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
+/**
+ * Created by Ahmed on 3/19/16.
+ */
+public class AddEntryActivity extends AppCompatActivity implements
+        ChangeAreasDialogFragment.ChangeAreas,
+        ChangeTextSizeDialogFragment.ChangeTextSize,
+        ActivityUtility.ActivityTimers {
+    public static final String SCREEN_NAME = "AddEntryActivity";
+    public static final String FROM_FIELD_ACTIVITY = "from_field_activity";
+    private static final String FIELD_CHOSEN = "field_chosen";
+    private static final String SPINNER_POSITION = "spinner_position";
+    public static final String QUESTION_LAYOUT = "user_defined_question_layout";
+    public static final String ANSWER_LAYOUT = "user_defined_answer_layout";
+    public static final String TEXT_SIZE = "user_defined_question_text_size";
+    private static final String CURRENT_FIELD_ID = "current_field_id";
+    private static final String TIMER_LAST_PAUSE = "timer_last_pause";
+    public static final int GET_FIELDS_LOADER_ID = 0;
+    private static final String TEMP_SHARED_STRING = "temp_shared_string";
+    private String JUST_CHANGE_FIELD = "just_change_field";
+    private Spinner field_spinner;
+    private EditText enter_question;
+    private EditText enter_answer;
+    private EditText enter_order;
+    private TextView showActionbar;
+    private Spinner rank_spinner;
+    private SimpleCursorAdapter simple_cursor_adapter;
+    private Chronometer timer;
+    private long lastPause;
+    private DatabaseReadOperations databaseOperations;
+    private boolean actionBarShown;
+    private boolean fromFieldActivity;
+    private Cursor cursor;
+    private boolean field_chosen;
+    private LinearLayout answer_linearlayout, question_linearlayout, container;
+    private long current_field_id;
+    private int question_data_type;
+    private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
+    private Tracker mTracker;
+    private Handler mHandler = new Handler();
+    private String temp_shared_string;
+    private boolean just_change_field;
+
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add_entry);
+        int question_area_size, answer_area_size, test_text_size, action_bar_shown;
+        databaseOperations = new DatabaseReadOperations(this);
+        fromFieldActivity = getIntent().getBooleanExtra(FROM_FIELD_ACTIVITY, false);
+        current_field_id = getIntent().getLongExtra(Constants.CURRENT_FIELD_ID, 0);
+        if (current_field_id == 0) {
+            Cursor cursor = databaseOperations.getFieldList();
+            if (cursor.moveToFirst()) {
+                current_field_id = cursor.getLong(0);
+            } else {
+                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.please_create_field, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+                finish();
+                return;
+            }
+        }
+        mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(this);
+        question_data_type = databaseOperations.getQuestionDataType(current_field_id);
+        action_bar_shown = databaseOperations.getFieldActionBarShown(current_field_id);
+        question_area_size = databaseOperations.getFieldQuestionAreaSize(current_field_id);
+        answer_area_size = databaseOperations.getFieldAnswerAreaSize(current_field_id);
+        test_text_size = databaseOperations.getFieldTestTextSize(current_field_id);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        field_spinner = (Spinner) findViewById(R.id.field_spinner);
+        rank_spinner = (Spinner) findViewById(R.id.rank_spinner);
+        enter_question = (EditText) findViewById(R.id.question);
+        enter_answer = (EditText) findViewById(R.id.answer);
+        enter_order = (EditText) findViewById(R.id.order);
+        final TextView add_entry = (TextView) findViewById(R.id.add_entry);
+        showActionbar = (TextView) findViewById(R.id.show_actionbar);
+        answer_linearlayout = (LinearLayout) findViewById(R.id.answer_linearlayout);
+        question_linearlayout = (LinearLayout) findViewById(R.id.question_linearlayout);
+        container = (LinearLayout) findViewById(R.id.container);
+        final CardView show_actionbar_cardview = (CardView) findViewById(R.id.show_actionbar_card_view);
+        final CardView add_entry_cardview = (CardView) findViewById(R.id.add_entry_card_view);
+        timer = (Chronometer) findViewById(R.id.chronometer);
+        final Animation animAlpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        if (action_bar_shown == Contract.Field.DO_NOT_SHOW_ACTION_BAR) {
+            getSupportActionBar().hide();
+        }
+        actionBarShown = getSupportActionBar().isShowing();
+        LoaderManager.LoaderCallbacks<Cursor> loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                if (id == GET_FIELDS_LOADER_ID) {
+                    return new CursorLoaderAndUpdateDatabase(AddEntryActivity.this,
+                            "SELECT " + Contract.COLUMN_ID + ", " + Contract.Field.COLUMN_FIELD_NAME
+                                    + " FROM " + Contract.Field.TABLE_NAME
+                                    + " ORDER BY " + Contract.Field.COLUMN_USAGE_COUNT + " DESC",
+                            null);
+                }
+                return null;
+            }
+
+            @Override
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+                if (loader.getId() == GET_FIELDS_LOADER_ID) {
+                    simple_cursor_adapter.swapCursor(data);
+                    cursor = data;
+                    setSpinnerPosition(current_field_id);
+                }
+            }
+
+            @Override
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+                if (loader.getId() == GET_FIELDS_LOADER_ID) {
+                    simple_cursor_adapter.swapCursor(null);
+                }
+            }
+        };
+
+
+        simple_cursor_adapter = new SimpleCursorAdapter(this, R.layout.field_spinner, null,
+                new String[]{Contract.Field.COLUMN_FIELD_NAME}, new int[]{R.id.list_item}, 0);
+        final ArrayAdapter rank_spinner_adapter = new ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.rank));
+        field_spinner.setAdapter(simple_cursor_adapter);
+        rank_spinner.setAdapter(rank_spinner_adapter);
+        rank_spinner_adapter.setDropDownViewResource
+                (android.R.layout.simple_spinner_dropdown_item);
+        showActionbar.setText(actionBarShown ? R.string.hide : R.string.show);
+        rank_spinner.setSelection(Constants.Rank.LOW);
+        setHints();
+        getLoaderManager().initLoader(GET_FIELDS_LOADER_ID, null, loader);
+        enter_answer.requestFocus();
+        changeAreas(question_area_size, answer_area_size);
+        if (test_text_size == ChangeTextSizeDialogFragment.SAVE_SMALL_SIZE) {
+            changeTextSize(ChangeTextSizeDialogFragment.SMALL_SIZE);
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_NORMAL_SIZE) {
+            changeTextSize(ChangeTextSizeDialogFragment.NORMAL_SIZE);
+        } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
+            changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
+        }
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+        add_entry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    add_entry_cardview.startAnimation(animAlpha);
+                    String question = enter_question.getText().toString().trim();
+                    String answer = enter_answer.getText().toString().trim();
+                    int order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
+                    if (question.length() > 0 && answer.length() > 0) {
+                        if (fromFieldActivity) {
+
+                            if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                                mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                        current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                            } else {
+                                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
+
+                            enter_question.setText("");
+                            enter_answer.setText("");
+                            enter_order.setText("");
+                        } else {
+                            if (field_chosen) {
+                                if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                                    mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                            current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                                } else {
+                                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
+
+                                enter_question.setText("");
+                                enter_answer.setText("");
+                                enter_order.setText("");
+                            } else {
+                                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
+                        }
+                        enter_question.requestFocus();
+                    } else {
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                } catch (NumberFormatException nfe) {
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            }
+        });
+        add_entry.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                PopupMenu popup = new PopupMenu(AddEntryActivity.this, view);
+                AddEntryActivity.this.getMenuInflater().inflate(R.menu.add_entry_options_menu, popup.getMenu());
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (item.getItemId() == R.id.keep_question) {
+                            AddEntryActivity.this.addEntryKeepQuestion();
+                        } else {
+                            AddEntryActivity.this.addEntryKeepAnswer();
+                        }
+                        return true;
+                    }
+                });
+                popup.show();
+                return true;
+            }
+        });
+
+        field_spinner.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                field_chosen = true;
+                return false;
+            }
+        });
+        field_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Cursor c = (Cursor) parent.getSelectedItem();
+                current_field_id = c.getLong(0);
+                just_change_field = true;
+                setHints();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        showActionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                show_actionbar_cardview.startAnimation(animAlpha);
+                if (actionBarShown) {
+                    AddEntryActivity.this.getSupportActionBar().hide();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.show);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.DO_NOT_SHOW_ACTION_BAR);
+                } else {
+                    AddEntryActivity.this.getSupportActionBar().show();
+                    actionBarShown = (!actionBarShown);
+                    showActionbar.setText(R.string.hide);
+                    mySQLiteCursorLoader.updateFieldActionBarShown(current_field_id, Contract.Field.SHOW_ACTION_BAR);
+                }
+            }
+        });
+        enter_answer.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft() {
+                enter_answer.setText("");
+                enter_answer.requestFocus();
+            }
+
+            @Override
+            public void onSwipeRight() {
+                if ( temp_shared_string != null ) {
+                    EditText editText = (EditText) view;
+                    int sel = editText.getSelectionEnd();
+                    if ( sel == -1 ) {
+                        editText.setText(editText.getText() + temp_shared_string);
+                    } else {
+                        editText.setText(editText.getText().toString().substring(0,sel)
+                                + temp_shared_string + editText.getText().toString().substring(sel));
+                    }
+                }
+            }
+        });
+        enter_question.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft() {
+                enter_question.setText("");
+                enter_question.requestFocus();
+            }
+
+            @Override
+            public void onSwipeRight() {
+                if ( temp_shared_string != null ) {
+                    EditText editText = (EditText) view;
+                    int sel = editText.getSelectionEnd();
+                    if ( sel == -1 ) {
+                        editText.setText(editText.getText() + temp_shared_string);
+                    } else {
+                        editText.setText(editText.getText().toString().substring(0,sel)
+                                + temp_shared_string + editText.getText().toString().substring(sel));
+                    }
+                }
+            }
+        });
+
+        enter_question.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.length() > 0 && enter_answer.getText().length() > 0) {
+                    add_entry.setEnabled(true);
+                } else {
+                    add_entry.setEnabled(false);
+                }
+                if ( editable.length() > 500 ) {
+                    String limit500 = editable.toString().substring(0, 500);
+                    enter_question.setText(limit500);
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.less_500, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                    toast = Toast.makeText(AddEntryActivity.this, R.string.shrink_500, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                }
+            }
+        });
+        enter_answer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.length() > 0 && enter_question.getText().length() > 0) {
+                    add_entry.setEnabled(true);
+                } else {
+                    add_entry.setEnabled(false);
+                }
+                if ( editable.length() > 500 ) {
+                    String limit500 = editable.toString().substring(0, 500);
+                    enter_answer.setText(limit500);
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.less_500, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                    toast = Toast.makeText(AddEntryActivity.this, R.string.shrink_500, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,400);
+                    toast.show();
+                }
+            }
+        });
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                temp_shared_string = sharedText;
+                if (sharedText != null) {
+                    enter_question.setText(sharedText);
+                }
+            }
+        }
+    }
+
+    private void setHints() {
+        enter_question.setHint(R.string.enter_a_question);
+        enter_answer.setHint(R.string.enter_an_answer);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        timer.setBase(SystemClock.elapsedRealtime() - lastPause);
+        timer.start();
+        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+
+    @Override
+    protected void onPause() {
+        lastPause = SystemClock.elapsedRealtime() - timer.getBase();
+        timer.stop();
+        super.onPause();
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if (sharedText != null) {
+                    temp_shared_string = sharedText;
+                    if ( enter_question.getText().length() == 0 && enter_question.getText().length() == 0 )  {
+                        enter_question.setText(sharedText);
+                    } else if ( enter_question.getText().length() == 0 ) {
+                        enter_question.setText(sharedText);
+                    } else if ( enter_answer.getText().length() == 0 ) {
+                        enter_answer.setText(sharedText);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        UsageLastTime.updateUsageLastTime(this);
+        temp_shared_string = null;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.add_entry_activity_menu, menu);
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Bundle appData = new Bundle();
+                appData.putLong(SearchActivity.CURRENT_FIELD_ID, current_field_id);
+                searchView.setAppSearchData(appData); // pass the search context data
+
+                return false; // we do not need to start the search activity manually, the system does it for us
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchActivity.class)));
+        searchView.setIconifiedByDefault(false);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        switch (id) {
+            case R.id.change_areas:
+                Bundle bundle = new Bundle();
+                bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
+                bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) question_linearlayout.getLayoutParams()).weight);
+                bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) answer_linearlayout.getLayoutParams()).weight);
+                ChangeAreasDialogFragment changeAreasDialogFragment = new ChangeAreasDialogFragment();
+                changeAreasDialogFragment.setArguments(bundle);
+                changeAreasDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                return true;
+            case R.id.change_text_size:
+                Bundle bundle1 = new Bundle();
+                bundle1.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
+                float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
+                bundle1.putFloat(TEXT_SIZE, (enter_question.getTextSize() / scaledDensity));
+                ChangeTextSizeDialogFragment changeTextSizeDialogFragment = new ChangeTextSizeDialogFragment();
+                changeTextSizeDialogFragment.setArguments(bundle1);
+                changeTextSizeDialogFragment.show(getSupportFragmentManager(), ChangeAreasDialogFragment.CHANGE_AREAS_DIALOG_FRAGMENT);
+                return true;
+
+            case R.id.timer:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        Bundle bundle4 = new Bundle();
+                        bundle4.putString(TimerDialogFragment.MESSAGE, getString(R.string.app_name) + " " + getString(R.string.add_entry));
+                        TimerDialogFragment timerDialogFragment = new TimerDialogFragment();
+                        timerDialogFragment.setArguments(bundle4);
+                        timerDialogFragment.show(getSupportFragmentManager(), TimerDialogFragment.class.getName());
+                    } else {
+                        Toast toast = Toast.makeText(this, R.string.no_timer_app, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.kitkat_or_newer, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putLong(CURRENT_FIELD_ID, current_field_id);
+        savedInstanceState.putBoolean(FIELD_CHOSEN, field_chosen);
+        savedInstanceState.putInt(SPINNER_POSITION, field_spinner.getSelectedItemPosition());
+        savedInstanceState.putLong(TIMER_LAST_PAUSE, lastPause);
+        savedInstanceState.putString(TEMP_SHARED_STRING, temp_shared_string);
+        savedInstanceState.putBoolean(JUST_CHANGE_FIELD, just_change_field);
+        saveUserLayoutChanges(savedInstanceState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        current_field_id = savedInstanceState.getLong(CURRENT_FIELD_ID);
+        field_chosen = savedInstanceState.getBoolean(FIELD_CHOSEN);
+        lastPause = savedInstanceState.getLong(TIMER_LAST_PAUSE);
+        temp_shared_string = savedInstanceState.getString(TEMP_SHARED_STRING);
+        just_change_field = savedInstanceState.getBoolean(JUST_CHANGE_FIELD);
+        restoreUserLayoutChanges(savedInstanceState);
+    }
+
+    private void setSpinnerPosition(long field_id) {
+        for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount();
+             cursor.moveToNext()) {
+            long id = cursor.getLong(0);
+            if (id == field_id) {
+                field_spinner.setSelection(cursor.getPosition());
+                return;
+            }
+        }
+    }
+
+
+    private void addEntryKeepQuestion(){
+        try {
+            String question = enter_question.getText().toString().trim();
+            String answer = enter_answer.getText().toString().trim();
+            int order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
+            if (question.length() > 0 && answer.length() > 0) {
+                if (fromFieldActivity) {
+
+                    if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                        mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                    } else {
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                    enter_answer.setText("");
+                    enter_order.setText("");
+                } else {
+                    if (field_chosen) {
+                        if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                            mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                    current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                        } else {
+                            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
+                        enter_answer.setText("");
+                        enter_order.setText("");
+                    } else {
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                }
+                enter_answer.requestFocus();
+            } else {
+                Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        } catch ( NumberFormatException nfe ) {
+            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+    }
+    private void addEntryKeepAnswer(){
+        try {
+        String question = enter_question.getText().toString().trim();
+        String answer = enter_answer.getText().toString().trim();
+        int order = "".equals(enter_order.getText().toString()) ? 999999999 : Integer.parseInt(enter_order.getText().toString());
+        if (question.length() > 0 && answer.length() > 0) {
+            if (fromFieldActivity) {
+
+                if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                    mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                            current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                } else {
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+                enter_question.setText("");
+                enter_order.setText("");
+            } else {
+                if (field_chosen) {
+                    if (!databaseOperations.checkEntryDuplication(question, answer, current_field_id, question_data_type)) {
+                        mySQLiteCursorLoader.insertEntry(question_data_type, question, answer,
+                                current_field_id, rank_spinner.getSelectedItemPosition(), order);
+                    } else {
+                        Toast toast = Toast.makeText(AddEntryActivity.this, R.string.already_inserted, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                    }
+                    enter_question.setText("");
+                    enter_order.setText("");
+                } else {
+                    Toast toast = Toast.makeText(AddEntryActivity.this, R.string.select_field, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            }
+            enter_question.requestFocus();
+        } else {
+            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.both_question_answer, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+        } catch ( NumberFormatException nfe ) {
+            Toast toast = Toast.makeText(AddEntryActivity.this, R.string.not_allowed_number, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP, 0, 400);
+            toast.show();
+        }
+    }
+
+    @Override
+    public void changeAreas(float questionArea, float answerArea) {
+        LinearLayout.LayoutParams question_params = (LinearLayout.LayoutParams) question_linearlayout.getLayoutParams();
+        LinearLayout.LayoutParams answer_params = (LinearLayout.LayoutParams) answer_linearlayout.getLayoutParams();
+        container.setWeightSum(questionArea + answerArea);
+        question_params.weight = (float) (questionArea);
+        answer_params.weight = (float) (answerArea);
+        question_linearlayout.setLayoutParams(question_params);
+        answer_linearlayout.setLayoutParams(answer_params);
+    }
+
+    @Override
+    public void changeTextSize(float textSize) {
+        enter_question.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+        enter_answer.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+    }
+
+    private void saveUserLayoutChanges(Bundle bundle) {
+        bundle.putFloat(QUESTION_LAYOUT, ((LinearLayout.LayoutParams) question_linearlayout.getLayoutParams()).weight);
+        bundle.putFloat(ANSWER_LAYOUT, ((LinearLayout.LayoutParams) answer_linearlayout.getLayoutParams()).weight);
+        bundle.putFloat(TEXT_SIZE, enter_question.getTextSize());
+    }
+
+    private void restoreUserLayoutChanges(Bundle bundle) {
+        changeAreas(bundle.getFloat(QUESTION_LAYOUT), bundle.getFloat(ANSWER_LAYOUT));
+        enter_question.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
+        enter_answer.setTextSize(TypedValue.COMPLEX_UNIT_PX, bundle.getFloat(TEXT_SIZE));
+    }
+
+    @Override
+    public void manageTimersDueDialogsShow(boolean isCounting) {
+
+    }
+}

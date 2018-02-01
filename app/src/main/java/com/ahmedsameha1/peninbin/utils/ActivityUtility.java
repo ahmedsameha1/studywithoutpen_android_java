@@ -25,6 +25,7 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -612,73 +613,46 @@ public class ActivityUtility {
     }
 
     public static void showNewRoundDialog(Context context) {
-                new AlertDialog.Builder(context)
-                        .setMessage(R.string.new_round_dialog)
-                        .create().show();
+        new AlertDialog.Builder(context)
+                .setMessage(R.string.new_round_dialog)
+                .create().show();
     }
-
     /**
      * This method take care of the round work of the old and new round entries
      * It assume that controlled entries comes first in the array of test then the old round entries then the new round entries
      */
-    public static void updateRoundData(long current_field_id, String[][] listForTest, CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase,
-                                       int currentQuestionCounter, int last_controlled_index, int last_old_round_index, boolean isEmulated, Context context) {
+    public static void updateRoundData(long current_field_id, String[][] listForTest,
+                                       CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase,
+                                       int currentQuestionCounter,
+                                       int last_controlled_index, int last_old_round_index,
+                                       boolean isEmulated, Context context) {
         // this method will take action only if there is uncontrolled entries. if all entries are controlled it will take no action
-        if ( last_old_round_index != ALL_CONTROLLED ) {
-            // There is no controlled entries and there is no old round entries and the current question counter at the first entry in the array of test
-            // so we rest all the entries round and start a new round
-            if (last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter == 0) {
-                cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
-                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                showNewRoundDialog(context);
-            }
-            // Because the current question counter is greater than 0 so the old round has ended and we are working on the new round
-            else if (last_controlled_index == -1 && last_old_round_index == -1 && currentQuestionCounter > 0) {
-                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-            }
-            // there is no controlled entries and there is old round entries we have not finished the old round entries
-            else if (last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter <= last_old_round_index) {
-                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-            }
-            // there is no controlled entries and there is old round entries we have just finished the old round entries
-            // so we rest all the entries round and start a new round
-            else if (last_controlled_index == -1 && last_old_round_index > -1 && currentQuestionCounter > last_old_round_index) {
-                // resting all the entries round and start a new round
-                // this will be true only if there is entries from a new round
-                if (currentQuestionCounter == last_old_round_index + 1) {
+        if (last_old_round_index != ALL_CONTROLLED) {
+            if (last_controlled_index == -1) {
+                // there is no controlled entries
+                if (last_old_round_index == -1 && currentQuestionCounter == 0) {
+                    // there is not old round entries
+                    // because there is no controlled entries and there is no old round index, so all entries are new round
+                    // we are in the first entry of the new round
+                    // we will reset all the entries to start a new round
                     cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
                     showNewRoundDialog(context);
+                    Log.d("updateRoundData", "case1");
                 }
-                // we are working in the new round
                 cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-            }
-            // There is controlled entries and we are working on them and they are not related with rounds so no action is taken
-            else if (last_controlled_index > -1 && currentQuestionCounter <= last_controlled_index) {
-                // No Action
-            }
-        /* if the there is controlled entries and there is no old round entries and there is no new round entries this method will not be called
-         because the last controlled index will be the last entries of the test array, we will not handle this case */
-            //==================
-            // In the following case there must be a new round entries and we are on the first new round entries
-            else if (last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter == last_controlled_index + 1) {
-                cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
-                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-                showNewRoundDialog(context);
-            }
-            // we are working in the new round
-            else if (last_controlled_index > -1 && last_old_round_index == -1 && currentQuestionCounter > last_controlled_index + 1) {
-                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
-            }
-            // there is controlled entries and old round entries and we are on the old round entries
-            else if (last_controlled_index > -1 && last_old_round_index > -1 && currentQuestionCounter > last_controlled_index) {
-                // resting all the entries round and start a new round
-                // this will be true only if there is entries from a new round
-                if (currentQuestionCounter == last_old_round_index + 1) {
-                    cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
-                    showNewRoundDialog(context);
+            } else {
+                // there is controlled entries
+                // if we on the controlled entries, there is no action will be taken
+                if ( currentQuestionCounter > last_controlled_index ) {
+                    // we are in the round entries part
+                    if ( currentQuestionCounter == ( last_old_round_index + 1 ) ) {
+                        // we are in the first entry of the new round
+                        cursorLoaderAndUpdateDatabase.restWhetherAskedCurrentTestRound(current_field_id, isEmulated);
+                        showNewRoundDialog(context);
+                        Log.d("updateRoundData", "case2");
+                    }
+                    cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
                 }
-                // we are working in the new round
-                cursorLoaderAndUpdateDatabase.makeAskedCurrentTestRound(Long.parseLong(listForTest[currentQuestionCounter][2]));
             }
         }
     }
@@ -726,6 +700,7 @@ public class ActivityUtility {
                 .setDuration(mShortAnimationDuration)
                 .setListener(null);
     }
+
     public static Spannable prepare_search_spans(String text, StringBuilder search_value) {
         Spannable spannable = Spannable.Factory.getInstance().newSpannable(text);
         if (search_value.length() > 0) {
@@ -792,5 +767,19 @@ public class ActivityUtility {
             }
         }
         return spannable;
+    }
+
+    public static String[][] getArrayFromSerializable(Serializable serializable) {
+        //   long time = System.currentTimeMillis();
+        Object[] objects = (Object[]) serializable;
+        String[][] array = null;
+        if (objects != null) {
+            array = new String[objects.length][];
+            for (int i = 0; i < array.length; i++) {
+                array[i] = (String[]) objects[i];
+            }
+        }
+//        Log.d("time", System.currentTimeMillis() - time +"");
+        return array;
     }
 }

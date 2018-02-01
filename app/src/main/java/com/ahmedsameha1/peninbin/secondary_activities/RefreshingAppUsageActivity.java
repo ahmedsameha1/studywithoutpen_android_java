@@ -8,7 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.MainActivity;
+import com.ahmedsameha1.peninbin.view.activities.MainActivity;
 
 import java.util.Random;
 

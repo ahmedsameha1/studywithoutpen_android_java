@@ -10,16 +10,16 @@ import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.ahmedsameha1.peninbin.activities.AskAgainAfterTestActivity;
-import com.ahmedsameha1.peninbin.activities.EnhancedTestActivity;
-import com.ahmedsameha1.peninbin.activities.FullyRandomTestActivity;
-import com.ahmedsameha1.peninbin.activities.MainActivity;
-import com.ahmedsameha1.peninbin.activities.QuickTestActivity;
-import com.ahmedsameha1.peninbin.activities.StudyAPeriodActivity;
+import com.ahmedsameha1.peninbin.view.activities.AskAgainAfterTestActivity;
+import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
+import com.ahmedsameha1.peninbin.view.activities.FullyRandomTestActivity;
+import com.ahmedsameha1.peninbin.view.activities.MainActivity;
+import com.ahmedsameha1.peninbin.view.activities.QuickTestActivity;
+import com.ahmedsameha1.peninbin.view.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.dialogs.ScheduleInFieldDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.ScheduleInFieldDialogFragment;
 import com.ahmedsameha1.peninbin.utils.Constants;
 
 import java.io.File;

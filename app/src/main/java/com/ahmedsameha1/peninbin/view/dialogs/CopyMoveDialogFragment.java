@@ -1,0 +1,79 @@
+package com.ahmedsameha1.peninbin.view.dialogs;
+
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+
+import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.view.activities.CopyMoveEntriesActivity;
+import com.ahmedsameha1.peninbin.view.activities.FieldActivity;
+import com.ahmedsameha1.peninbin.utils.Constants;
+
+/**
+ * Created by ahmed on 12/20/2015.
+ */
+public class CopyMoveDialogFragment extends DialogFragment {
+
+    public static final String COPY_MOVE_DIALOG_FRAGMENT = "copy_move_dialog_fragment";
+    private long current_field_id;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        final AlertDialog alertDialog = builder.setView(inflater.inflate(R.layout.copy_move_dialog_fragment, null))
+                .create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button copy_field = (Button) alertDialog.findViewById(R.id.copy_field);
+                Button copy_move_entries = (Button) alertDialog.findViewById(R.id.copy_move_entries);
+
+                copy_field.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick( View view){
+                    CopyFieldDialogFragment copyFieldDialogFragment = new CopyFieldDialogFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(CopyFieldDialogFragment.WHAT_TO_DO, Constants.CopyMove.COPY_FIELD);
+                    copyFieldDialogFragment.setArguments(bundle);
+                    copyFieldDialogFragment.show(CopyMoveDialogFragment.this.getActivity().getSupportFragmentManager(),
+                            CopyFieldDialogFragment.COPY_FIELD_DIALOG_FRAGMENT);
+                    CopyMoveDialogFragment.this.dismiss();
+                }}
+                );
+                copy_move_entries.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent1 = new Intent(CopyMoveDialogFragment.this.getActivity(), CopyMoveEntriesActivity.class);
+                        intent1.putExtra(FieldActivity.FIELD_ID, current_field_id);
+                        CopyMoveDialogFragment.this.startActivity(intent1);
+                        CopyMoveDialogFragment.this.dismiss();
+                    }
+                });
+
+
+            }
+        });
+        return alertDialog;
+    }
+
+
+}
+
+

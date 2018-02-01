@@ -14,7 +14,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.activities.MainActivity;
+import com.ahmedsameha1.peninbin.view.activities.MainActivity;
 import com.ahmedsameha1.peninbin.intent_services.ExportFieldsIntentService;
 import com.ahmedsameha1.peninbin.intent_services.ImportProvidedFieldsIntentService;
 import com.ahmedsameha1.peninbin.intent_services.ImportSWPFileIntentService;
