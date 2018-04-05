@@ -88,7 +88,7 @@ StudyActivity.Contact {
         if ( savedInstanceState != null ) {
             entries = ActivityUtility.getArrayFromSerializable(savedInstanceState.getSerializable(ENTRIES));
         } else {
-            entries = (String[][]) getArguments().getSerializable(StudyActivity.DATA);
+            entries = ActivityUtility.getArrayFromSerializable(getArguments().getSerializable(StudyActivity.DATA));
         }
         current_index = (StringBuilder) getArguments().getSerializable(StudyActivity.CURRENT_INDEX);
         current_field_id = getArguments().getLong(CURRENT_FIELD_ID, 0);
