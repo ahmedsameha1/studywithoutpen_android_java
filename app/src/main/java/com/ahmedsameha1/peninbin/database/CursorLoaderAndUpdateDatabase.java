@@ -755,7 +755,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.Field.COLUMN_SORT_BY, sortOption.getSortOptionPosition());
             sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+                    Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
             return (null);
         }
     }
@@ -785,7 +785,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
             contentValues.put(Contract.Field.COLUMN_QUESTION_AREA_SIZE, question_area_size);
             contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE, answer_area_size);
             sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+                    Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
             return (null);
         }
     }
@@ -969,7 +969,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.Field.COLUMN_ANSWER_AREA_SIZE, answer_area_size);
             sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+                    Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
             return (null);
         }
     }
@@ -997,7 +997,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.Field.COLUMN_TEST_TEXT_SIZE, test_text_size);
             sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+                    Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
             return (null);
         }
     }
@@ -1025,7 +1025,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contract.Field.COLUMN_ACTION_BAR_SHOWN, action_bar_shown);
             sqLiteDatabase.update(Contract.Field.TABLE_NAME, contentValues,
-                    Contract.COLUMN_ID + " = ? ", new String[]{field_id + ""});
+                    Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(field_id)});
             return (null);
         }
     }
@@ -1111,7 +1111,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 Cursor cursor = sqLiteDatabase.query(Contract.Scheduled_Time_Backup.TABLE_NAME,
                         new String[]{Contract.Scheduled_Time_Backup.COLUMN_PENDINGINTENT_REQUEST},
-                        Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? ", new String[]{field_id + ""}, null, null, null);
+                        Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? ", new String[]{String.valueOf(field_id)}, null, null, null);
                 if (cursor.getCount() > 0) {
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                     for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
@@ -1125,7 +1125,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
                 cursor = sqLiteDatabase.query(Contract.String_Entry.TABLE_NAME,
                         new String[]{Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST},
                         Contract.String_Entry.COLUMN_FIELD + " = ? AND " + Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST + " IS NOT NULL"
-                        , new String[]{field_id + ""}, null, null, null);
+                        , new String[]{String.valueOf(field_id)}, null, null, null);
                 if (cursor.getCount() > 0) {
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                     for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
@@ -1138,7 +1138,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
                 cursor.close();
                 sqLiteDatabase.delete(Contract.Field.TABLE_NAME,
                         Contract.COLUMN_ID + " = ? ",
-                        new String[]{field_id + ""});
+                        new String[]{String.valueOf(field_id)});
 
                 Runnable runnable = new Runnable() {
                     @Override
@@ -1166,13 +1166,13 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
     public void clearThisFieldFromTestPausedEnhancedTest(long field_id) {
         sqLiteDatabase.delete(Contract.Test_Paused.TABLE_NAME,
                 Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
-                new String[]{field_id + "", Constants.TestType.ENHANCED_TEST + ""});
+                new String[]{String.valueOf(field_id), Constants.TestType.ENHANCED_TEST + ""});
     }
 
     public void clearThisFieldFromTestPausedFullyRandomTest(long field_id) {
         sqLiteDatabase.delete(Contract.Test_Paused.TABLE_NAME,
                 Contract.Test_Paused.COLUMN_FIELD + " = ? AND " + Contract.Test_Paused.COLUMN_TEST_TYPE + " = ? ",
-                new String[]{field_id + "", Constants.TestType.FULLY_RANDOM_TEST + ""});
+                new String[]{String.valueOf(field_id), Constants.TestType.FULLY_RANDOM_TEST + ""});
     }
 
 
@@ -1371,7 +1371,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
     public void deleteScheduledTimeForBackup(long field_id, int session_type, long time) {
         sqLiteDatabase.delete(Contract.Scheduled_Time_Backup.TABLE_NAME, Contract.Scheduled_Time_Backup.COLUMN_FIELD + " = ? AND "
                         + Contract.Scheduled_Time_Backup.COLUMN_SESSION_TYPE + " = ? AND " + Contract.Scheduled_Time_Backup.COLUMN_TIME + " = ?",
-                new String[]{field_id + "", session_type + "", time + ""});
+                new String[]{String.valueOf(field_id), session_type + "", time + ""});
     }
 
     private static void cleanSTringTable(SQLiteDatabase sqLiteDatabase) {
@@ -1400,7 +1400,7 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
         ContentValues contentValues = new ContentValues();
         contentValues.putNull(Contract.String_Entry.COLUMN_REMIND_AT);
         contentValues.putNull(Contract.String_Entry.COLUMN_REMIND_AT_PENDINGINTENT_REQUEST);
-        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{entry_id + ""});
+        sqLiteOpenHelper.getWritableDatabase().update(Contract.String_Entry.TABLE_NAME, contentValues, Contract.COLUMN_ID + " = ? ", new String[]{String.valueOf(entry_id)});
     }
 
     protected ContentChangingTask buildAddFieldNoteTask(CursorLoaderAndUpdateDatabase loader) {
