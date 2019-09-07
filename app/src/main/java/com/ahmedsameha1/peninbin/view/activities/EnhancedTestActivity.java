@@ -127,7 +127,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
     public static final String LAST_CONTROLLED_INDEX = "last_controlled_index";
-    public static final String LAST_OLD_ROUND_INDEX = "last_old_round_index";
+    public static final String POINT_OF_RESET = "pointOfReset";
     private static final String ANSWERS_REGEX = "answers_regex";
     private static EnhancedTestActivity enhancedTestActivity;
     private long current_field_id;
@@ -162,7 +162,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private long time_of_starting_time_of_answer = -1, effective_time_of_answer;
 
     private boolean obfuscate;
-    private int last_controlled_index, last_old_round_index;
+    private int last_controlled_index, pointOfReset;
     private String[] answers_regex;
     private Runnable what_to_do_after_time_of_answer_elapsed_runnable = new Runnable() {
         @Override
@@ -369,7 +369,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
                     triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
                     cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
                     ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
-                            last_controlled_index, last_old_round_index, isEmulated, EnhancedTestActivity.this);
+                            last_controlled_index, pointOfReset, isEmulated);
                     currentQuestionCounter++;
                     if (currentQuestionCounter >= questionsNumber) {
                         check.setEnabled(false);
@@ -562,7 +562,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             before_showing_result_dialog = savedInstanceState.getBoolean(BEFORE_SHOWING_RESULT_DIALOG);
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             last_controlled_index = savedInstanceState.getInt(LAST_CONTROLLED_INDEX);
-            last_old_round_index = savedInstanceState.getInt(LAST_OLD_ROUND_INDEX);
+            pointOfReset = savedInstanceState.getInt(POINT_OF_RESET);
             answers_regex = savedInstanceState.getStringArray(ANSWERS_REGEX);
             listForTest = ActivityUtility.getArrayFromSerializable(savedInstanceState.getSerializable(LIST_FOR_TEST));
             if (listForTest == null) {
@@ -749,18 +749,20 @@ public class EnhancedTestActivity extends AppCompatActivity implements
 
     private String[][] getDataOfTest(double percent) {
         int numberOfQuestions = (int) ((percent / 100) * fieldEntriesCursor.getCount()) > 0 ? (int) ((percent / 100) * fieldEntriesCursor.getCount()) : 1;
-        Object[] data = ActivityUtility.prepareListForTest(fieldEntriesCursor, numberOfQuestions, controlled_portion, rank_level, wrongness_level);
+        Object[] data = ActivityUtility.prepareListForTest(cursorLoaderAndUpdateDatabase, current_field_id, isEmulated,
+                fieldEntriesCursor, numberOfQuestions, controlled_portion, rank_level, wrongness_level);
         int[] markers = (int[]) data[1];
         last_controlled_index = markers[0];
-        last_old_round_index = markers[1];
+        pointOfReset = markers[1];
         return (String[][]) data[0];
     }
 
     private String[][] getDataOfTest(int numberOfQuestions) {
-        Object[] data = ActivityUtility.prepareListForTest(fieldEntriesCursor, numberOfQuestions, controlled_portion, rank_level, wrongness_level);
+        Object[] data = ActivityUtility.prepareListForTest(cursorLoaderAndUpdateDatabase, current_field_id, isEmulated,
+                fieldEntriesCursor, numberOfQuestions, controlled_portion, rank_level, wrongness_level);
         int[] markers = (int[]) data[1];
         last_controlled_index = markers[0];
-        last_old_round_index = markers[1];
+        pointOfReset = markers[1];
         return (String[][]) data[0];
     }
 
@@ -926,7 +928,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         savedInsatanceState.putInt(TIME_FOR_ANSWER_DO_WHAT, time_of_answer_do_what);
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
         savedInsatanceState.putInt(LAST_CONTROLLED_INDEX, last_controlled_index);
-        savedInsatanceState.putInt(LAST_OLD_ROUND_INDEX, last_old_round_index);
+        savedInsatanceState.putInt(POINT_OF_RESET, pointOfReset);
         savedInsatanceState.putStringArray(ANSWERS_REGEX, answers_regex);
         savedInsatanceState.putSerializable(LIST_FOR_TEST, listForTest);
         saveUserLayoutChanges(savedInsatanceState);
@@ -1111,7 +1113,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
             triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
             cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
             ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
-                    last_controlled_index, last_old_round_index, isEmulated, EnhancedTestActivity.this);
+                    last_controlled_index, pointOfReset, isEmulated);
             currentQuestionCounter++;
             if (currentQuestionCounter >= questionsNumber) {
                 check.setEnabled(false);
@@ -1184,7 +1186,7 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         triesCounter = INITIAL_VALUE_OF_TRIES_COUNTER;
         cursorLoaderAndUpdateDatabase.increaseEntryAskedByOne(Long.parseLong(listForTest[currentQuestionCounter][2]));
         ActivityUtility.updateRoundData(current_field_id, listForTest, cursorLoaderAndUpdateDatabase, currentQuestionCounter,
-                last_controlled_index, last_old_round_index, isEmulated, EnhancedTestActivity.this);
+                last_controlled_index, pointOfReset, isEmulated);
         currentQuestionCounter++;
         showQuestion.setTextColor(Color.WHITE);
         if (currentQuestionCounter >= questionsNumber) {
