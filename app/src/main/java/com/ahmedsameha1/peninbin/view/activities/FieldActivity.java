@@ -46,6 +46,7 @@ import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
+import com.ahmedsameha1.peninbin.utils.IntentServicesUtility;
 import com.ahmedsameha1.peninbin.view.dialogs.AskAboutContinuePreviousStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.AskAboutContinuePreviousTestDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.CopyFieldDialogFragment;
@@ -79,6 +80,8 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
+
+import static com.ahmedsameha1.peninbin.utils.Constants.CHANNEL_ID;
 
 
 public class FieldActivity extends AppCompatActivity implements
@@ -659,7 +662,7 @@ public class FieldActivity extends AppCompatActivity implements
                         PendingIntent resultPendingIntent = null;
                         TaskStackBuilder stackBuilder = null;
                         notificationBuilder =
-                                new NotificationCompat.Builder(this)
+                                new NotificationCompat.Builder(this, IntentServicesUtility.createNotificationChannel(this))
                                         .setSmallIcon(R.drawable.ic_launcher48)
                                         .setContentTitle(this.getResources().getString(R.string.proceed_now))
                                         .setContentText(this.getResources().getString(R.string.have_the_right))

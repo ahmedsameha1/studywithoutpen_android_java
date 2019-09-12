@@ -384,7 +384,7 @@
     <string name="import_txt_notifi_content">Importing fields from text file</string>
     <string name="export_notifi">Exporting Fields</string>
     <string name="export_notifi_content">Exporting fields to swp file</string>
-    <string name="import_provided_field_notifi_content">Import fields from the provided fields</string>
+    <string name="import_provided_field_notifi_content">Importing fields from the provided fields</string>
     <string name="enable_emulation_notifi">Enabling emulation</string>
     <string name="new_round_dialog">Starting a new round</string>
 </resources>

@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.IntentServicesUtility;
 import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.view.activities.MainActivity;
 import com.ahmedsameha1.peninbin.view.activities.QuickTestActivity;
@@ -64,7 +65,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                     }
                     contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
-                            new NotificationCompat.Builder(context)
+                            new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                     .setSmallIcon(R.drawable.ic_launcher48)
                                     .setContentTitle(context.getString(R.string.quick_test_time))
                                     .setContentText(current_field_name)
@@ -77,7 +78,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                     quick_test_intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                     contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
-                            new NotificationCompat.Builder(context)
+                            new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                     .setSmallIcon(R.drawable.ic_launcher48)
                                     .setContentTitle(context.getString(R.string.enhanced_test_time))
                                     .setContentText(current_field_name)
@@ -90,7 +91,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                     fully_random_test_intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                     contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), fully_random_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
-                            new NotificationCompat.Builder(context)
+                            new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                     .setSmallIcon(R.drawable.ic_launcher48)
                                     .setContentTitle(context.getString(R.string.fully_random_test_time))
                                     .setContentText(current_field_name)
@@ -103,7 +104,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                     quick_test_intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                     contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), quick_test_intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notificationBuilder =
-                            new NotificationCompat.Builder(context)
+                            new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                     .setSmallIcon(R.drawable.ic_launcher48)
                                     .setContentTitle(context.getString(R.string.study_period_time))
                                     .setContentText(current_field_name)
@@ -116,7 +117,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                 TaskStackBuilder stackBuilder = null;
                 Intent notifyIntent = new Intent(context, MainActivity.class);
                 notificationBuilder =
-                        new NotificationCompat.Builder(context)
+                        new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                 .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.session_cancelation))
                                 .setContentText(context.getResources().getString(R.string.due_emulation_session_cancelation))
@@ -148,7 +149,7 @@ public class ShowScheduledNotificationsReceiver extends BroadcastReceiver {
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             contentIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), refreshing_intent, PendingIntent.FLAG_UPDATE_CURRENT);
             notificationBuilder =
-                    new android.support.v4.app.NotificationCompat.Builder(context)
+                    new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                             .setSmallIcon(R.drawable.ic_launcher48)
                             .setContentTitle(context.getString(R.string.app_name))
                             .setContentText(context.getString(R.string.studying_is_everyday_task))

@@ -23,6 +23,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.ahmedsameha1.peninbin.utils.Constants.CHANNEL_ID;
+
 /**
  * Created by me on 22/09/16.
  */
@@ -365,7 +367,7 @@ public class Emulation {
         Intent notifyIntent = null;
         PendingIntent resultPendingIntent = null;
         notificationBuilder =
-                new NotificationCompat.Builder(context)
+                new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                         .setSmallIcon(R.drawable.ic_launcher48)
                         .setContentTitle(context.getResources().getString(R.string.emulation_completed))
                         .setContentText(context.getResources().getString(R.string.emulation_has_completed))
@@ -419,7 +421,7 @@ public class Emulation {
         Intent notifyIntent = null;
         PendingIntent resultPendingIntent = null;
         notificationBuilder =
-                new NotificationCompat.Builder(context)
+                new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                         .setSmallIcon(R.drawable.ic_launcher48)
                         .setContentTitle(context.getResources().getString(R.string.emulation_completed))
                         .setContentText(context.getResources().getString(R.string.emulation_has_completed))
@@ -457,7 +459,7 @@ public class Emulation {
         Intent notifyIntent = null;
         PendingIntent resultPendingIntent = null;
         notificationBuilder =
-                new NotificationCompat.Builder(context)
+                new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                         .setSmallIcon(R.drawable.ic_launcher48)
                         .setContentTitle(context.getResources().getString(R.string.emulation_disabled))
                         .setContentText(context.getResources().getString(R.string.emulation_has_disabled))

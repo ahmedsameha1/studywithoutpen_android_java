@@ -9,6 +9,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.IntentServicesUtility;
 import com.ahmedsameha1.peninbin.view.activities.MainActivity;
 import com.ahmedsameha1.peninbin.intent_services.ImportTextFileIntentService;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
@@ -191,7 +192,7 @@ public class ImportTextFile {
         switch (notificationId) {
             case FAILED_IMPORT_NOTIFICATION:
                 notificationBuilder =
-                        new NotificationCompat.Builder(context)
+                        new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                 .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_failed))
                                 .setContentText(context.getResources().getString(R.string.import_failed))
@@ -207,7 +208,7 @@ public class ImportTextFile {
                 break;
             case FAILED_IMPORT_INVALID_FILE_NOTIFICATION:
                 notificationBuilder =
-                        new NotificationCompat.Builder(context)
+                        new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                 .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_failed))
                                 .setContentText(context.getResources().getString(R.string.invalid_file))
@@ -223,7 +224,7 @@ public class ImportTextFile {
                 break;
             case SUCCESSFUL_IMPORT_NOTIFICATION:
                 notificationBuilder =
-                        new NotificationCompat.Builder(context)
+                        new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                 .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_completed))
                                 .setContentText(context.getResources().getString(R.string.import_completed))

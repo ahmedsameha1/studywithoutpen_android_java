@@ -14,6 +14,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.IntentServicesUtility;
 import com.ahmedsameha1.peninbin.view.activities.MainActivity;
 import com.ahmedsameha1.peninbin.intent_services.ExportFieldsIntentService;
 import com.ahmedsameha1.peninbin.intent_services.ImportProvidedFieldsIntentService;
@@ -920,7 +921,7 @@ public class ExportImportDatabase {
         switch (notificationId) {
             case FAILED_EXPORT_NOTIFICATION:
                 notificationBuilder =
-                        new NotificationCompat.Builder(context)
+                        new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                 .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.export_failed))
                                 .setContentText(context.getResources().getString(R.string.export_failed))
@@ -942,7 +943,7 @@ public class ExportImportDatabase {
                 break;
             case FAILED_IMPORT_NOTIFICATION:
                 notificationBuilder =
-                        new NotificationCompat.Builder(context)
+                        new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                 .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_failed))
                                 .setContentText(context.getResources().getString(R.string.import_failed))
@@ -958,7 +959,7 @@ public class ExportImportDatabase {
                 break;
             case FAILED_IMPORT_INVALID_FILE_NOTIFICATION:
                 notificationBuilder =
-                        new NotificationCompat.Builder(context)
+                        new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                 .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_failed))
                                 .setContentText(context.getResources().getString(R.string.invalid_file))
@@ -974,7 +975,7 @@ public class ExportImportDatabase {
                 break;
             case SUCCESSFUL_IMPORT_NOTIFICATION:
                 notificationBuilder =
-                        new NotificationCompat.Builder(context)
+                        new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                 .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.import_completed))
                                 .setContentText(context.getResources().getString(R.string.import_completed))
@@ -990,7 +991,7 @@ public class ExportImportDatabase {
                 break;
             case NOT_IMPORTED_FIELDS:
                 notificationBuilder =
-                        new NotificationCompat.Builder(context)
+                        new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                                 .setSmallIcon(R.drawable.ic_launcher48)
                                 .setContentTitle(context.getResources().getString(R.string.not_imported_fields))
                                 .setContentText(context.getString(R.string.not_imported_fields))
@@ -1018,7 +1019,7 @@ public class ExportImportDatabase {
         Intent notifyIntent = null;
         PendingIntent resultPendingIntent = null;
         notificationBuilder =
-                new NotificationCompat.Builder(context)
+                new NotificationCompat.Builder(context, IntentServicesUtility.createNotificationChannel(context))
                         .setSmallIcon(R.drawable.ic_launcher48)
                         .setContentTitle(context.getResources().getString(R.string.export_completed))
                         .setContentText(context.getResources().getString(R.string.export_completed))

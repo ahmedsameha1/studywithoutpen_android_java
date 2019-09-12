@@ -38,7 +38,7 @@ import static com.ahmedsameha1.peninbin.database.DatabaseHelper.DATABASE_NAME;
 public class BootCompletedReceiver extends BroadcastReceiver {
 
     @Override
-    public void onReceive(Context context, Intent intent) {// TODO: 9/7/17 test import from provided fields after update app 
+    public void onReceive(Context context, Intent intent) {
         if ( intent.getAction().equals("android.intent.action.MY_PACKAGE_REPLACED") ) {
             deleteOldProvidedDatabaseFile(context);
         }
