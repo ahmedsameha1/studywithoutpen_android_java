@@ -36,7 +36,7 @@ public class ExportFieldsIntentService extends IntentService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                 notificationIntent, 0);
 
-        Notification notification = new NotificationCompat.Builder(this)
+        Notification notification = new NotificationCompat.Builder(this, IntentServicesUtility.createNotificationChannel(this))
                 .setSmallIcon(R.drawable.ic_launcher48)
                 .setContentTitle(getString(R.string.export_notifi))
                 .setContentText(getString(R.string.export_notifi_content))
