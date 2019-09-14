@@ -387,4 +387,5 @@
     <string name="import_provided_field_notifi_content">Importing fields from the provided fields</string>
     <string name="enable_emulation_notifi">Enabling emulation</string>
     <string name="new_round_dialog">Starting a new round</string>
+    <string name="denied_permission">Sorry, we need this permission to run this feature!</string>
 </resources>

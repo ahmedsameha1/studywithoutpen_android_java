@@ -1,5 +1,6 @@
 package com.ahmedsameha1.peninbin.view.activities;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.LoaderManager;
 import android.app.PendingIntent;
@@ -18,6 +19,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -26,7 +28,9 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -130,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String PAY_LOAD_STRING = "pay_load_string";
     private static final String BUY_INTENT = "BUY_INTENT";
     private static final int BUY_FLOW_REQUEST_CODE = 6475;
+    private static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION = 16463;
     private Handler mHandler = new Handler();
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private MainActivityRecyclerViewAdapter mAdapter;
@@ -422,14 +427,32 @@ public class MainActivity extends AppCompatActivity implements
         switch (position) {
             case EXPORT_FIELD:
                 if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                    if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
-                            && !Emulation.isAnyThreadRunning()) {
-                        ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
-                        exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                                    && !Emulation.isAnyThreadRunning()) {
+                                ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                                exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                            } else {
+                                Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 400);
+                                toast.show();
+                            }
+                        } else {
+                            ActivityCompat.requestPermissions(this,
+                                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION);
+                        }
                     } else {
-                        Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
+                        if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                                && !Emulation.isAnyThreadRunning()) {
+                            ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                            exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                        } else {
+                            Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
                     }
                 } else {
                     Toast toast = Toast.makeText(this, R.string.external_storage_not_ready, Toast.LENGTH_SHORT);
@@ -766,5 +789,26 @@ public class MainActivity extends AppCompatActivity implements
         cal.set(Calendar.SECOND, 0);
         Log.i("Time Zone", cal.getTimeZone().getDisplayName());
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                        && !Emulation.isAnyThreadRunning()) {
+                    ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                    exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            } else {
+                Toast toast = Toast.makeText(MainActivity.this, R.string.denied_permission, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        }
     }
 }
