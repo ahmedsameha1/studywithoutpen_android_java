@@ -595,6 +595,7 @@ public class MainActivity extends AppCompatActivity implements
         } catch ( IllegalArgumentException e ) {
             e.printStackTrace();
         }
+        ActivityUtility.closeOpenedDialogs(this);
     }
 
     private void addFab() {

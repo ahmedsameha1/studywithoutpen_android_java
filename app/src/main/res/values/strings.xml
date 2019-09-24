@@ -388,4 +388,5 @@
     <string name="enable_emulation_notifi">Enabling emulation</string>
     <string name="new_round_dialog">Starting a new round</string>
     <string name="denied_permission">Sorry, we need this permission to run this feature!</string>
+    <string name="select_field_to_copy_to">To:</string>
 </resources>

@@ -40,7 +40,7 @@ public class CopyFieldDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final AlertDialog alertDialog =
-                builder.setTitle(R.string.select_field)
+                builder.setTitle(R.string.select_field_to_copy_to)
                         .setView(inflater.inflate(R.layout.copy_field_dialog_fragment, null))
                         .setPositiveButton(R.string.ok, null).create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {

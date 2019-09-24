@@ -301,6 +301,7 @@ public class FieldActivity extends AppCompatActivity implements
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
+        ActivityUtility.closeOpenedDialogs(this);
     }
 
     @Override

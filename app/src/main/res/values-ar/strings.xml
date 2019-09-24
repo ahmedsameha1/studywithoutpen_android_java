@@ -428,5 +428,6 @@
     <string name="enable_emulation_notifi">تفعيل المحاكاة</string>
     <string name="new_round_dialog">بداية دورة جديدة</string>
     <string name="denied_permission">معذرة، نحن نحتاج هذا التصريح لتشغيل هذه الخاصية</string>
+    <string name="select_field_to_copy_to">إلى:</string>
 </resources>
 
