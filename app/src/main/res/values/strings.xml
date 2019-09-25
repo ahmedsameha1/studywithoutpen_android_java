@@ -188,7 +188,7 @@
     <string name="reminder_canceled">The reminder has been canceled</string>
     <string name="import_fields_from">Import fields from:</string>
     <string name="study_without_pen_file">swp File</string>
-    <string name="text_file">specially formated txt file</string>
+    <string name="text_file">specially formatted txt file</string>
     <string name="exported_file_in">your exported file is in:</string>
     <string name="ask_import_fields">Do you want to import the fields from this file?</string>
     <string name="facebook_page">Facebook Page</string>
