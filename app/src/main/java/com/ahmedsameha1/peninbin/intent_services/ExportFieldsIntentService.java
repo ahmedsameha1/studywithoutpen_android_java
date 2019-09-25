@@ -1,10 +1,15 @@
 package com.ahmedsameha1.peninbin.intent_services;
 
+import android.Manifest;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.IntentServicesUtility;
@@ -44,7 +49,13 @@ public class ExportFieldsIntentService extends IntentService {
                 .setOngoing(true)
                 .setContentIntent(pendingIntent).build();
 
-        startForeground((int) System.currentTimeMillis(), notification);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) == PackageManager.PERMISSION_GRANTED) {
+                startForeground((int) System.currentTimeMillis(), notification);
+            }
+        } else {
+            startForeground((int) System.currentTimeMillis(), notification);
+        }
     }
 
     @Override
