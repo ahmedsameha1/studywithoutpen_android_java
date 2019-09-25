@@ -103,7 +103,6 @@
     <string name="text_size_help">Choose the size of the text of the question and answer. Note, this doesn\'t influence the size of text that you determine in the system settings.</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
-    <string name="appbar_scrolling_view_behavior" translatable="false">android.support.design.widget.AppBarLayout$ScrollingViewBehavior</string>
     <string name="select_a_field_type">Please, select a field type!</string>
     <string name="add_entry">Add Entry</string>
     <string name="add_entry_finish">Add Entry and Exit</string>

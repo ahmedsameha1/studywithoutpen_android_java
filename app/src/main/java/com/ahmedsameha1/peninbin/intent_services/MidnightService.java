@@ -4,8 +4,8 @@ import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.support.v4.content.WakefulBroadcastReceiver;
-import android.support.v7.app.AppCompatActivity;
+import androidx.legacy.content.WakefulBroadcastReceiver;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 
 import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;

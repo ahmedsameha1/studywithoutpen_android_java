@@ -5,7 +5,7 @@ package com.ahmedsameha1.peninbin.receivers_services;
  */
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.WakefulBroadcastReceiver;
+import androidx.legacy.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
 import com.ahmedsameha1.peninbin.intent_services.MidnightService;

@@ -32,7 +32,7 @@
                 android:background="@drawable/show_question_background"
                 android:padding="0dp">
 
-                <android.support.v7.widget.CardView
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android.support.v7.cardview:cardBackgroundColor="@android:color/transparent"
@@ -57,7 +57,7 @@
                         android:ellipsize="none"
                         android:maxLines="1000"
                         android:scrollHorizontally="false"/>
-                </android.support.v7.widget.CardView>
+                </androidx.cardview.widget.CardView>
             </LinearLayout>
 
             <LinearLayout
@@ -69,7 +69,7 @@
                 android:background="@drawable/enter_answer_background"
                 android:padding="0dp">
 
-                <android.support.v7.widget.CardView
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android.support.v7.cardview:cardBackgroundColor="@android:color/transparent"
@@ -98,7 +98,7 @@
                         android:ellipsize="none"
                         android:maxLines="1000"
                         android:scrollHorizontally="false"/>
-                </android.support.v7.widget.CardView>
+                </androidx.cardview.widget.CardView>
             </LinearLayout>
 
 
@@ -113,7 +113,7 @@
             android:layout_marginTop="2dp"
             android:layout_weight="0">
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/show_actionbar_card_view"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -133,9 +133,9 @@
                     android:gravity="center"
                     android:padding="2dp"
                     android:textColor="@drawable/textview_enabled_disabled_selector" />
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/check_card_view"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -156,9 +156,9 @@
                     android:text="@string/check"
                     android:textColor="@drawable/textview_enabled_disabled_selector"
                     android:textStyle="bold" />
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/continue_card_view"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -179,9 +179,9 @@
                     android:padding="2dp"
                     android:text="@string/_continue"
                     android:textColor="@drawable/textview_enabled_disabled_selector" />
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/next_hint_card_view"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -204,8 +204,8 @@
                     android:padding="2dp"
                     android:text="@string/hint"
                     android:textColor="@drawable/textview_enabled_disabled_selector" />
-            </android.support.v7.widget.CardView>
-            <android.support.v7.widget.CardView
+            </androidx.cardview.widget.CardView>
+            <androidx.cardview.widget.CardView
                 android:id="@+id/dont_know_card_view"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -227,7 +227,7 @@
                     android:padding="2dp"
                     android:text="@string/dont_know"
                     android:textColor="@drawable/textview_enabled_disabled_selector" />
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
         </LinearLayout>
     </LinearLayout>
 

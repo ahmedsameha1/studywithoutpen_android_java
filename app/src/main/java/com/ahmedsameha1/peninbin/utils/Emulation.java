@@ -7,7 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.view.activities.FieldActivity;
@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-
-import static com.ahmedsameha1.peninbin.utils.Constants.CHANNEL_ID;
 
 /**
  * Created by me on 22/09/16.
