@@ -156,25 +156,22 @@
         <activity
             android:name=".view.activities.EnhancedTestActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask"
-            android:taskAffinity=".tests"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
             android:name=".view.activities.QuickTestActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:launchMode="singleTask"
-            android:taskAffinity=".tests"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
             android:name=".view.activities.FullyRandomTestActivity"
-            android:launchMode="singleTask"
-            android:taskAffinity=".tests"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
             android:name=".view.activities.AddEntryActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysVisible">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -214,14 +211,12 @@
         <activity
             android:name=".view.activities.StudyAPeriodActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask"
-            android:taskAffinity=".tests"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
             android:name=".view.activities.AskAgainAfterTestActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask"
-            android:taskAffinity=".tests"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
             android:name=".view.activities.FieldInformationActivity"
