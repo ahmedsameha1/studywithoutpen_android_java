@@ -708,7 +708,7 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
                 intent.putExtra(PauseIntentService.STUDY_A_PERIOD_REPEATED_ENTRIES, repeatedEntries);
                 intent.putExtra(PauseIntentService.LAST_PAUSE, lastPause);
                 String key = UUID.randomUUID().toString();
-                DataHolder.setData(key, listForTest);
+                DataHolder.setListForTest(key, listForTest);
                 intent.putExtra(PauseIntentService.KEY, key);
                 intent.putExtra(PauseIntentService.ACTIVITY_NAME, StudyAPeriodActivity.class.getName());
                 startService(intent);

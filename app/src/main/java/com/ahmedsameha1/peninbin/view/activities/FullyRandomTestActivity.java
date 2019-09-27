@@ -94,7 +94,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     public static final int PREPARE_LIST_FOR_TEST_LOADER_ID = 3;
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
-    public static final String LIST_FOR_TEST = "listForTest";
     public static final String CURRENT_QUESTION_COUNTER = "currentQuestionCounter";
     public static final String TRIES_COUNTER = "triesCounter";
     public static final String NEXT_BUTTON_STATE = "newtButtonState";
@@ -119,7 +118,8 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     private static final String TIME_FOR_ANSWER_SAVED = "time_for_answer_saved";
     private static final String TIME_FOR_ANSWER_DO_WHAT = "time_for_answer_do_what";
     private static final long MOVE_NEXT_NOTIFICATION_TIME = 300;
-    private static final String ANSWERS_REGEX = "answers_regex";
+    public static final String ANSWERS_REGEX_KEY = "answers_regex_key";
+    public static final String LIST_FOR_TEST_KEY = "list_for_test_key";
     private static FullyRandomTestActivity fullyRandomTestActivity;
     private ArrayList<String> hints, wrongAnswers;
     private boolean boolean_continue = false, actionBarShown, before_showing_result_dialog, time_of_answer_saved;
@@ -530,8 +530,8 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
             time_of_answer_saved = savedInstanceState.getBoolean(TIME_FOR_ANSWER_SAVED);
             is_time_of_answer_elapsed = savedInstanceState.getBoolean(TIME_BETWEEN_ANSWERS_PASSED);
             boolean nextState = savedInstanceState.getBoolean(NEXT_BUTTON_STATE);
-            listForTest = ActivityUtility.getArrayFromSerializable(savedInstanceState.getSerializable(LIST_FOR_TEST));
-            answers_regex = savedInstanceState.getStringArray(ANSWERS_REGEX);
+            listForTest = DataHolder.getListForTest(savedInstanceState.getString(LIST_FOR_TEST_KEY));
+            answers_regex = DataHolder.getAnswersRegexes(savedInstanceState.getString(ANSWERS_REGEX_KEY));
             if (listForTest == null) {
                 if (while_testing) {
                     getLoaderManager().initLoader(CONTINUE_PREVIOUS_SESSION_LOADER_ID, null, loader);
@@ -838,7 +838,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
             array[1] = wrongAnswersCounter;
             array[2] = permitedTriesNumber;
             String key = UUID.randomUUID().toString();
-            DataHolder.setData(key, listForTest);
+            DataHolder.setListForTest(key, listForTest);
             Intent intent = new Intent(FullyRandomTestActivity.this.getBaseContext(), PauseIntentService.class);
             intent.putExtra(PauseIntentService.CURRENT_FIELD_ID, current_field_id);
             intent.putExtra(PauseIntentService.QUESTION_DATA_TYPE, question_data_type);
@@ -870,9 +870,13 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         savedInsatanceState.putBoolean(TIME_BETWEEN_ANSWERS_PASSED, is_time_of_answer_elapsed);
         savedInsatanceState.putInt(TIME_FOR_ANSWER_DO_WHAT, time_of_answer_do_what);
         savedInsatanceState.putBoolean(TIME_FOR_ANSWER_SAVED, time_of_answer_saved);
-        savedInsatanceState.putStringArray(ANSWERS_REGEX, answers_regex);
-        savedInsatanceState.putSerializable(LIST_FOR_TEST, listForTest);
         saveUserLayoutChanges(savedInsatanceState);
+        String key = UUID.randomUUID().toString();
+        savedInsatanceState.putString(ANSWERS_REGEX_KEY, key);
+        DataHolder.setAnswersRegexes(key, answers_regex);
+        key = UUID.randomUUID().toString();
+        savedInsatanceState.putString(LIST_FOR_TEST_KEY, key);
+        DataHolder.setListForTest(key, listForTest);
         mHandler.removeCallbacks(show_result_dialog_runnable);
                /* Saving the remaining time till completion of the current timer of time of answer because the activity
         will be destroyed, not finishing normally.

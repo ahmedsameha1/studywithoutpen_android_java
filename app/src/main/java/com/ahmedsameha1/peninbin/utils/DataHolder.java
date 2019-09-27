@@ -9,17 +9,22 @@ import java.util.HashMap;
 public enum DataHolder {
     INSTANCE;
 
-    private HashMap<String, String[][]> entries_arrays = new HashMap<>();
+    private HashMap<String, String[][]> listsForTest = new HashMap<>();
+    private HashMap<String, String[]> answers_regexes = new HashMap<>();
 
-    public static boolean hasData() {
-        return INSTANCE.entries_arrays != null;
+    public static void setListForTest(String key, final String[][] entries_array) {
+        INSTANCE.listsForTest.put(key, entries_array);
     }
 
-    public static void setData(String key, final String[][] entries_array) {
-        INSTANCE.entries_arrays.put(key, entries_array);
+    public static void setAnswersRegexes(String key, final String[] answers_regexes) {
+        INSTANCE.answers_regexes.put(key, answers_regexes);
     }
 
-    public static String[][] getData(String key) {
-        return INSTANCE.entries_arrays.remove(key);
+    public static String[][] getListForTest(String key) {
+        return INSTANCE.listsForTest.remove(key);
+    }
+
+    public static String[] getAnswersRegexes(String key) {
+        return INSTANCE.answers_regexes.remove(key);
     }
 }

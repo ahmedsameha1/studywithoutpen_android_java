@@ -58,7 +58,7 @@ public class PauseIntentService extends IntentService {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             String activity_name = intent.getStringExtra(ACTIVITY_NAME);
-            String[][] list_for_test = DataHolder.getData(intent.getStringExtra(KEY));
+            String[][] list_for_test = DataHolder.getListForTest(intent.getStringExtra(KEY));
             long current_field_id = intent.getLongExtra(CURRENT_FIELD_ID, 0);
             int[] array = intent.getIntArrayExtra(CURRENT_NUMBERS);
             long last_pause = intent.getLongExtra(LAST_PAUSE, 0);
