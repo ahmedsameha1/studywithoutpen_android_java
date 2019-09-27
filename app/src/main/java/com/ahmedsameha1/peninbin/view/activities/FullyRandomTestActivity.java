@@ -796,7 +796,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         return result;
     }
 
-    private String[][] readTestDataFromLinkerTable() {
+    private String[][] getTestDataFromCursor() {
         String[][] listForTest = new String[fieldEntriesCursor.getCount()][3];
         for (fieldEntriesCursor.moveToFirst(); fieldEntriesCursor.getPosition() < fieldEntriesCursor.getCount();
              fieldEntriesCursor.moveToNext()) {
@@ -814,6 +814,11 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         if (!ActivityUtility.hasOpenedDialogs(this) && while_testing ) {
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
+        }
+        // call this method to prevent the dialogs from being shown after the recreation of the activity
+        // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
+        if (while_testing) { // don't close dialogs (exactly the result dialog) if the test already has finished
+            ActivityUtility.closeOpenedDialogs(this);
         }
         /* Canceling the timers of time of answer when the user go away from the activity
          or before the activity finishes
@@ -890,11 +895,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         in case the activity destroyed while a dialog is shown */
         else if (ActivityUtility.hasOpenedDialogs(this) && time_of_answer > 0) {
             savedInsatanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000);
-        }
-        // call this method to prevent the dialogs from being shown after the recreation of the activity
-        // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
-        if (while_testing) { // don't close dialogs (exactly the result dialog) if the test already has finished
-            ActivityUtility.closeOpenedDialogs(this);
         }
         super.onSaveInstanceState(savedInsatanceState);
     }
@@ -1203,7 +1203,7 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         @Override
         public String[][] loadInBackground() {
             if (fullyRandomTestActivity.boolean_continue) {
-                return fullyRandomTestActivity.readTestDataFromLinkerTable();
+                return fullyRandomTestActivity.getTestDataFromCursor();
             } else {
                 if (fullyRandomTestActivity.percent_or_number == PERCENTAGE) {
                     return fullyRandomTestActivity.getListForTest(fullyRandomTestActivity.percentage);

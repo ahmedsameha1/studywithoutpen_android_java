@@ -845,6 +845,9 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
             lastPause = SystemClock.elapsedRealtime() - tool_bar_timer.getBase();
             tool_bar_timer.stop();
         }
+        // call this method to prevent the dialogs from being shown after the recreation of the activity
+        // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
+        ActivityUtility.closeOpenedDialogs(this);
         /* Canceling the timers of time of answer when the user go away from the activity
          or before the activity finishes
          or before the activity destroyed due a change of configuration*/
@@ -1053,9 +1056,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         else if (ActivityUtility.hasOpenedDialogs(this) && time_of_answer > 0) {
             savedInstanceState.putLong(HOW_MUCH_TIME_REMAINING_FROM_TIME_FOR_ANSWER, time_of_answer * 1000);
         }
-        // call this method to prevent the dialogs from being shown after the recreation of the activity
-        // this to prevent the call of manageTimersDueDialogsShow() when the dialog is shown while it really will not appear
-        ActivityUtility.closeOpenedDialogs(this);
         super.onSaveInstanceState(savedInstanceState);
     }
 
