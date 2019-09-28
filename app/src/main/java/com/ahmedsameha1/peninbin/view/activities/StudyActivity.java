@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+
+import com.ahmedsameha1.peninbin.utils.DataHolder;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
@@ -30,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.UUID;
 
 public class StudyActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String ENTRY_ID = "entry_id";
@@ -43,9 +46,8 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
     public static final String WRONG_ITEM_LIST = "wrongItemList";
     public static final int NORMAL = 0;
     public static final int WRONG = 1;
-    private static final String RETAINED_FRAGMENT = "retained_fragment";
     private static final String CURRENT_TAB_POSITION = "current_tab_position";
-    private static final String ENTRIES = "entries";
+    public static final String ENTRIES_STUDY_ACTIVITY_KEY = "entries_study_activity_key";
     private static StudyActivity studyActivity;
     private long current_field_id;
     private long current_entry_id;
@@ -127,7 +129,7 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
         mLoadingView = findViewById(R.id.loading);
         mViewPager.setVisibility(View.GONE);
         if ( savedInstanceState != null) {
-            entries = ActivityUtility.getArrayFromSerializable(savedInstanceState.getSerializable(ENTRIES));
+            entries = DataHolder.getEntries(savedInstanceState.getString(ENTRIES_STUDY_ACTIVITY_KEY));
             if ( entries != null) {
                 current_index = (StringBuilder) savedInstanceState.getSerializable(CURRENT_INDEX);
                 mViewPager.setAdapter(new StudyFragmentsTabAdapter(this, entries, current_index, current_field_id));
@@ -290,7 +292,9 @@ public class StudyActivity extends AppCompatActivity implements LoaderManager.Lo
         super.onSaveInstanceState(outState);
         outState.putSerializable(CURRENT_INDEX, current_index);
         outState.putInt(CURRENT_TAB_POSITION, current_tab_position);
-        outState.putSerializable(ENTRIES, entries);
+        String key = UUID.randomUUID().toString();
+        outState.putString(ENTRIES_STUDY_ACTIVITY_KEY, key);
+        DataHolder.setEntries(key, entries);
     }
 
     private static class PrepareWrongList extends AsyncTaskLoader<Object[]> {

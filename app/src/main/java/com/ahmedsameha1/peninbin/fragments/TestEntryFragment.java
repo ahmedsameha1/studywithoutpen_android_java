@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
+import com.ahmedsameha1.peninbin.utils.DataHolder;
 import com.ahmedsameha1.peninbin.view.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -40,6 +41,7 @@ import com.google.android.gms.analytics.Tracker;
 
 import java.util.Locale;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 /**
  * Created by ahmed on 7/6/17.
@@ -52,8 +54,8 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     public static final String CORRECT_ANSWERS_COUNTER = "correctAnswerCounter";
     private static final int MY_DATA_CHECK_CODE = 1234;
     public static final int RETURN_TIME = 1000;
-    private static final String ENTRIES = "entries";
-    private static final String RETAINED_FRAGMENT = "retained_fragment";
+    public static final String ENTRIES_TEST_FRAGMENT_KEY = "entries_test_fragment_key";
+    public static final String DATA_KEY = "data_key";
     private String[][] entries;
     private StringBuilder current_index;
     private String currentQuestion, currentAnswer;
@@ -78,7 +80,9 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     public static TestEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id) {
         TestEntryFragment instance = new TestEntryFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(StudyActivity.DATA, entries);
+        String key = UUID.randomUUID().toString();
+        bundle.putString(DATA_KEY, key);
+        DataHolder.setEntries(key, entries);
         bundle.putSerializable(StudyActivity.CURRENT_INDEX, current_index);
         bundle.putLong(CURRENT_FIELD_ID, current_field_id);
         instance.setArguments(bundle);
@@ -89,9 +93,9 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if ( savedInstanceState != null ) {
-            entries = ActivityUtility.getArrayFromSerializable(savedInstanceState.getSerializable(ENTRIES));
+            entries = DataHolder.getEntries(savedInstanceState.getString(ENTRIES_TEST_FRAGMENT_KEY));
         } else {
-            entries = ActivityUtility.getArrayFromSerializable(getArguments().getSerializable(StudyActivity.DATA));
+            entries = DataHolder.getEntries(getArguments().getString(DATA_KEY));
         }
         current_index = (StringBuilder) getArguments().getSerializable(StudyActivity.CURRENT_INDEX);
         current_field_id = getArguments().getLong(CURRENT_FIELD_ID, 0);
@@ -331,7 +335,9 @@ public class TestEntryFragment extends Fragment implements  TextToSpeech.OnInitL
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(CORRECT_ANSWERS_COUNTER, correctAnswersCounter);
-        outState.putSerializable(ENTRIES, entries);
+        String key = UUID.randomUUID().toString();
+        outState.putString(ENTRIES_TEST_FRAGMENT_KEY, key);
+        DataHolder.setEntries(key, entries);
     }
 
     @Override

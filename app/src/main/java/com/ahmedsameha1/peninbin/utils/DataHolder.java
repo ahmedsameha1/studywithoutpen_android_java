@@ -11,6 +11,7 @@ public enum DataHolder {
 
     private HashMap<String, String[][]> listsForTest = new HashMap<>();
     private HashMap<String, String[]> answers_regexes = new HashMap<>();
+    private HashMap<String, String[][]> entries = new HashMap<>();
 
     public static void setListForTest(String key, final String[][] entries_array) {
         INSTANCE.listsForTest.put(key, entries_array);
@@ -26,5 +27,13 @@ public enum DataHolder {
 
     public static String[] getAnswersRegexes(String key) {
         return INSTANCE.answers_regexes.remove(key);
+    }
+
+    public static void setEntries(String key, String[][] entries) {
+        INSTANCE.entries.put(key, entries);
+    }
+
+    public static String[][] getEntries(String key) {
+        return INSTANCE.entries.remove(key);
     }
 }
