@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
         int spanCount = 2;
-        int spacing = 3;
+        int spacing = getRecyclerViewSpacing();
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing, true));
         addFab();
         runFirstTimeAppRunOnly();
@@ -810,6 +810,14 @@ public class MainActivity extends AppCompatActivity implements
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
+        }
+    }
+
+    private int getRecyclerViewSpacing() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return 16;
+        } else {
+            return 3;
         }
     }
 }
