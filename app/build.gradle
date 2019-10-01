@@ -8,8 +8,8 @@ android {
         applicationId "com.ahmedsameha1.peninbin"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 103
-        versionName "3.57"
+        versionCode 105
+        versionName "3.59"
         multiDexEnabled true
     }
 
