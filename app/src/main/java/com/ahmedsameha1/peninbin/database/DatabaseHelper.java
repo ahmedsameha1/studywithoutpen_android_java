@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import android.os.Build;
 import android.util.Log;
 
 import com.ahmedsameha1.peninbin.database.Contract.Field;
@@ -509,7 +510,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onConfigure(SQLiteDatabase sqLiteDatabase) {
         super.onConfigure(sqLiteDatabase);
-        sqLiteDatabase.enableWriteAheadLogging();
+        if (Build.VERSION.SDK_INT < 28) {
+            sqLiteDatabase.enableWriteAheadLogging();
+        } else {
+            sqLiteDatabase.disableWriteAheadLogging();
+        }
     }
 
     @Override
