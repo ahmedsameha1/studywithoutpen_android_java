@@ -1,6 +1,7 @@
 package com.ahmedsameha1.peninbin.view.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.LoaderManager;
 import android.app.PendingIntent;
@@ -28,19 +29,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
-import androidx.annotation.NonNull;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.MenuItemCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SearchView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -49,6 +37,20 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MenuItemCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
@@ -60,6 +62,22 @@ import com.ahmedsameha1.peninbin.database.DatabaseHelper;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
+import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
+import com.ahmedsameha1.peninbin.intent_services.CheckSubscriptionIntentService;
+import com.ahmedsameha1.peninbin.intent_services.ExportFieldsIntentService;
+import com.ahmedsameha1.peninbin.intent_services.ImportSWPFileIntentService;
+import com.ahmedsameha1.peninbin.intent_services.ImportTextFileIntentService;
+import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
+import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
+import com.ahmedsameha1.peninbin.secondary_activities.IntroActivity;
+import com.ahmedsameha1.peninbin.secondary_activities.SpeciallyFormattedTextFileHelpActivity;
+import com.ahmedsameha1.peninbin.utils.ActivityUtility;
+import com.ahmedsameha1.peninbin.utils.Constants;
+import com.ahmedsameha1.peninbin.utils.Emulation;
+import com.ahmedsameha1.peninbin.utils.Money;
+import com.ahmedsameha1.peninbin.utils.PayloadString;
+import com.ahmedsameha1.peninbin.utils.ShowEula;
+import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.ahmedsameha1.peninbin.view.dialogs.AboutDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.CreateFieldDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.DeleteFieldDialogFragment;
@@ -68,19 +86,6 @@ import com.ahmedsameha1.peninbin.view.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ImportFromWhatDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ImportProvidedFieldDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ScheduleInFieldDialogFragment;
-import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
-import com.ahmedsameha1.peninbin.intent_services.CheckSubscriptionIntentService;
-import com.ahmedsameha1.peninbin.intent_services.ExportFieldsIntentService;
-import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
-import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
-import com.ahmedsameha1.peninbin.secondary_activities.IntroActivity;
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
-import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.utils.Emulation;
-import com.ahmedsameha1.peninbin.utils.Money;
-import com.ahmedsameha1.peninbin.utils.PayloadString;
-import com.ahmedsameha1.peninbin.utils.ShowEula;
-import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.android.vending.billing.IInAppBillingService;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
@@ -88,6 +93,7 @@ import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
@@ -107,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements
         DeleteFieldDialogFragment.Contact,
         CreateFieldDialogFragment.Contact,
         ExportFieldsDialogFragment.Contact,
+        ImportFromWhatDialogFragment.Contact,
         SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST = "mid_night_service_pendingintent_request";
     public static final String SCREEN_NAME = "MainActivity";
@@ -163,12 +170,12 @@ public class MainActivity extends AppCompatActivity implements
         drawerFragment = (MainActivityFragmentDrawer)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         try {
-            DatabaseHelper.getInstance(this).getWritableDatabase().rawQuery("SELECT _id FROM field",null);
+            DatabaseHelper.getInstance(this).getWritableDatabase().rawQuery("SELECT _id FROM field", null);
         } catch (android.database.sqlite.SQLiteException e) {
             DatabaseHelper.getInstance(this).close();
 //            recreate();
         }
-        if ( savedInstanceState != null ) {
+        if (savedInstanceState != null) {
             recyclerview_position = savedInstanceState.getParcelable(RECYCLERVIEW_POSITION);
         }
         setSupportActionBar(toolbar);
@@ -231,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 mAdapter.swapCursor(data);
-                if ( recyclerview_position != null ) {
+                if (recyclerview_position != null) {
                     recyclerView.getLayoutManager()
                             .onRestoreInstanceState(recyclerview_position);
                 }
@@ -338,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements
                             JSONObject jo = new JSONObject(purchaseData);
                             String pay_load = jo.getString("developerPayload");
                             String order_id = jo.getString("orderId");
-                            if ( pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id) ) {
+                            if (pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id)) {
                                 Money.putUserSubscriptionStatus(this, true);
                                 Money.removeAllGetPurchasesErrors(this);
                                 new CursorLoaderAndUpdateDatabase(this).addOrderId(order_id);
@@ -479,7 +486,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 break;
             case SUBSCRIBE:
-                if ( !Money.getUserSubscriptionStatus(this) ) {
+                if (!Money.getUserSubscriptionStatus(this)) {
                     if (NetworkReceiver.isOnline(this)) {
                         new AlertDialog.Builder(this)
                                 .setTitle(R.string.subscription_description)
@@ -519,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements
                         toast.show();
                     }
                 } else {
-                    if ( Money.isInInitialPeriod(this) ) {
+                    if (Money.isInInitialPeriod(this)) {
                         Toast toast = Toast.makeText(this, R.string.intial_period, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 400);
                         toast.show();
@@ -592,7 +599,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onPause();
         try {
             unregisterReceiver(networkReceiver);
-        } catch ( IllegalArgumentException e ) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
         ActivityUtility.closeOpenedDialogs(this);
@@ -660,7 +667,7 @@ public class MainActivity extends AppCompatActivity implements
         mySQLiteCursorLoader.deleteField(field_id, mHandler, mainActivityRecyclerViewViewHolder);
         mTracker.send(new HitBuilders.EventBuilder()
                 .setCategory(ANALYTICS_CATEGORY)
-                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) +"delete field")
+                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "delete field")
                 .build());
     }
 
@@ -708,6 +715,123 @@ public class MainActivity extends AppCompatActivity implements
         });
 
         dialog.show();
+    }
+
+    @Override
+    public void importFieldsFromAppFile(DialogFragment dialogFragment) {
+        if (Build.VERSION.SDK_INT <= 27) {
+            DialogProperties properties = new DialogProperties();
+            properties.selection_mode = DialogConfigs.SINGLE_MODE;
+            properties.selection_type = DialogConfigs.FILE_SELECT;
+            properties.root = Environment.getExternalStorageDirectory();
+            properties.error_dir = Environment.getExternalStorageDirectory();
+            properties.extensions = null;
+            final FilePickerDialog dialog14 = new FilePickerDialog(this, properties);
+
+            dialog14.setDialogSelectionListener(new DialogSelectionListener() {
+                @Override
+                public void onSelectedFilePaths(final String[] files) {
+                    //files is the array of the paths of files selected by the Application User.
+                    if (files.length > 0) {
+                        AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(MainActivity.this);
+                        importUserUsageData
+                                .setMessage(R.string.import_user_usage)
+                                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog13, int which) {
+                                        Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                        Intent intent = new Intent(MainActivity.this, ImportSWPFileIntentService.class);
+                                        intent.putExtra(ImportSWPFileIntentService.FILE_PATH, files[0]);
+                                        intent.putExtra(ImportSWPFileIntentService.USER_USAGE, false);
+                                        MainActivity.this.startService(intent);
+                                        mTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "")
+                                                        + ActivityUtility.getVersionCode(MainActivity.this) + "import field from app file")
+                                                .build());
+                                    }
+                                })
+                                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog12, int which) {
+                                        Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                        Intent intent = new Intent(MainActivity.this, ImportSWPFileIntentService.class);
+                                        intent.putExtra(ImportSWPFileIntentService.FILE_PATH, files[0]);
+                                        intent.putExtra(ImportSWPFileIntentService.USER_USAGE, true);
+                                        MainActivity.this.startService(intent);
+                                        mTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "")
+                                                        + ActivityUtility.getVersionCode(MainActivity.this) + "import field from app file")
+                                                .build());
+                                    }
+                                })
+                                .create().show();
+                    }
+                }
+            });
+            new AlertDialog.Builder(MainActivity.this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialog14.show();
+                    dialogFragment.dismiss();
+                }
+            }).create().show();
+        } else {
+
+        }
+    }
+
+    @Override
+    public void importFieldsFromTextFile(DialogFragment dialogFragment) {
+        if (Build.VERSION.SDK_INT <= 27) {
+            Context context = this;
+            DialogProperties properties = new DialogProperties();
+            properties.selection_mode = DialogConfigs.SINGLE_MODE;
+            properties.selection_type = DialogConfigs.FILE_SELECT;
+            properties.root = Environment.getExternalStorageDirectory();
+            properties.error_dir = Environment.getExternalStorageDirectory();
+            properties.extensions = null;
+
+            final FilePickerDialog dialog1 = new FilePickerDialog(context, properties);
+
+            dialog1.setDialogSelectionListener(new DialogSelectionListener() {
+                @Override
+                public void onSelectedFilePaths(String[] files) {
+                    //files is the array of the paths of files selected by the Application User.
+                    if (files.length > 0) {
+                        Toast toast = Toast.makeText(context, R.string.will_notify_when_process_complete, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
+                        Intent intent = new Intent(((Activity) context).getBaseContext(), ImportTextFileIntentService.class);
+                        intent.putExtra(ImportTextFileIntentService.FILE_PATH, files[0]);
+                        context.startService(intent);
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory(MainActivity.ANALYTICS_CATEGORY)
+                                .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "import field from text file")
+                                .build());
+                    }
+                }
+            });
+            new AlertDialog.Builder(context).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialog1.show();
+                    dialogFragment.dismiss();
+                }
+            }).create().show();
+        } else {
+
+        }
+    }
+
+    @Override
+    public void textFileHelp(DialogFragment dialogFragment) {
+        startActivity(new Intent(this, SpeciallyFormattedTextFileHelpActivity.class));
     }
 
     @Override
