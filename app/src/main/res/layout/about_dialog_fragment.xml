@@ -163,6 +163,15 @@
                 android:gravity="left"
                 android:text="@string/app_intro_license" />
 
+            <TextView
+                android:id="@+id/simple_storage_license"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:gravity="left"
+                android:text="@string/simple_storage_license" />
+
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -58,6 +58,7 @@ public class AboutDialogFragment extends DialogFragment {
                 final TextView color_picker = (TextView) alertDialog.findViewById(R.id.color_picker);
                 final TextView flexlayout = (TextView) alertDialog.findViewById(R.id.flexlayout);
                 final TextView app_intro_license = (TextView) alertDialog.findViewById(R.id.app_intro_license);
+                final TextView simple_storage_license = (TextView) alertDialog.findViewById(R.id.simple_storage_license);
                 PackageInfo pInfo = null;
                 String version = null;
                 try {
@@ -159,6 +160,14 @@ public class AboutDialogFragment extends DialogFragment {
                     }
                 });
                 app_intro_license.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        new AlertDialog.Builder(getActivity())
+                                .setMessage(ActivityUtility.getTextFileFromRawDirectory(getActivity(), R.raw.apache_license_v2))
+                                .create().show();
+                    }
+                });
+                simple_storage_license.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         new AlertDialog.Builder(getActivity())
