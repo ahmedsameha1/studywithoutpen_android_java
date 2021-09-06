@@ -5,6 +5,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
@@ -19,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -125,6 +128,90 @@ public class ImportTextFile {
         return arrayList;
     }
 
+    private static ArrayList<Object[]> checkSort(Context context, Uri uri) throws
+            InvalidTextFileFormatException, IOException {
+        ArrayList<Object[]> arrayList = new ArrayList<>();
+        String file_name = uri.getPath();
+        String ends = file_name.substring(file_name.length() - 4);
+        if ( !ends.equalsIgnoreCase(".txt")) {
+            throw new InvalidTextFileFormatException();
+        }
+        BufferedReader bufferedReader = null;
+        boolean valid_structure = true;
+
+        bufferedReader = new BufferedReader(new InputStreamReader(context.getContentResolver().openInputStream(uri)));
+        String line = bufferedReader.readLine();
+        while (line != null) {
+            int result = CompareUtility.checkTextLineToImport(line);
+            if (result == 0) {
+                valid_structure = false;
+                break;
+            }
+            line = bufferedReader.readLine();
+        }
+        if (!valid_structure) {
+            throw new InvalidTextFileFormatException();
+        }
+        bufferedReader = new BufferedReader(new InputStreamReader(context.getContentResolver().openInputStream(uri)));
+        String text_line = bufferedReader.readLine();
+        while (text_line != null) {
+            int field_separator_index = text_line.indexOf("@@@");
+            int question_separator_index = text_line.indexOf("~~~");
+            String field_name = text_line.substring(0, field_separator_index);
+            String question = text_line.substring(field_separator_index + 3, question_separator_index);
+            String answer = null;
+            int order = -1;
+            int rank = -1;
+            if (text_line.contains("%%%")) {
+                int answer_separator_index = text_line.indexOf("%%%");
+                answer = text_line.substring(question_separator_index + 3, answer_separator_index);
+                rank = Integer.parseInt(text_line.substring(answer_separator_index + 3));
+            } else if (text_line.contains("###")) {
+                int answer_separator_index = text_line.indexOf("###");
+                answer = text_line.substring(question_separator_index + 3, answer_separator_index);
+                order = Integer.parseInt(text_line.substring(answer_separator_index + 3));
+            } else {
+                answer = text_line.substring(question_separator_index + 3);
+            }
+            arrayList.add(new Object[]{field_name, question, answer, rank, order});
+            text_line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
+        Collections.sort(arrayList, new Comparator<Object[]>() {
+            @Override
+            public int compare(Object[] entry1, Object[] entry2) {
+                if ((Integer) entry1[ORDER] == -1 && (Integer) entry2[ORDER] == -1) {
+                    if ((Integer) entry1[RANK] == -1 && (Integer) entry2[RANK] == -1) {
+                        return 0;
+                    } else if ((Integer) entry1[RANK] == -1) {
+                        return 1;
+                    } else if ((Integer) entry2[RANK] == -1) {
+                        return -1;
+                    }
+                } else {
+                    if ((Integer) entry1[ORDER] == -1) {
+                        return 1;
+                    } else if ((Integer) entry2[ORDER] == -1) {
+                        return -1;
+                    }
+                }
+
+                if ((Integer) entry1[ORDER] < (Integer) entry2[ORDER]) {
+                    return -1;
+                } else if ((Integer) entry1[ORDER] > (Integer) entry2[ORDER]) {
+                    return 1;
+                } else if ((Integer) entry1[RANK] > (Integer) entry2[RANK]) {
+                    return -1;
+                } else if ((Integer) entry1[RANK] < (Integer) entry2[RANK]) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+        return arrayList;
+    }
+
     public static void importFields(Context context, String file_path) {
         CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
         SQLiteDatabase sqLiteDatabase = mySQLiteCursorLoader.getSqLiteDatabase();
@@ -150,6 +237,65 @@ public class ImportTextFile {
                                 } else {
                                     mySQLiteCursorLoader.insertEntry(Contract.Field.STRING_DATA_TYPE, question, answer, field_id);
                                 }
+                        }
+                    }
+                } else {
+                    if (!field_name.equals("")) {
+                        mySQLiteCursorLoader.createField(field_name, Contract.Field.STRING_DATA_TYPE);
+                        field_id = databaseOperations.getFieldId(field_name);
+                        if (question.length() > 0 && answer.length() > 0) {
+                            if (!databaseOperations.checkEntryDuplication(question, answer, field_id, Contract.Field.STRING_DATA_TYPE)) {
+                                if (rank >= 0) {
+                                    mySQLiteCursorLoader.insertEntryWithRank(Contract.Field.STRING_DATA_TYPE, question, answer, field_id, rank);
+                                } else if (order >= 0) {
+                                    mySQLiteCursorLoader.insertEntryWithOrder(Contract.Field.STRING_DATA_TYPE, question, answer, field_id, order);
+                                } else {
+                                    mySQLiteCursorLoader.insertEntry(Contract.Field.STRING_DATA_TYPE, question, answer, field_id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+            showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
+        } catch (InvalidTextFileFormatException e) {
+            showNotification(context, FAILED_IMPORT_INVALID_FILE_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
+        } catch (IOException e) {
+            showNotification(context, FAILED_IMPORT_NOTIFICATION, (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
+        }
+        finally {
+            if ( sqLiteDatabase.inTransaction() ) {
+                sqLiteDatabase.endTransaction();
+            }
+        }
+    }
+
+    public static void importFields(Context context, Uri uri) {
+        CursorLoaderAndUpdateDatabase mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(context);
+        SQLiteDatabase sqLiteDatabase = mySQLiteCursorLoader.getSqLiteDatabase();
+        try {
+            ArrayList<Object[]> arrayList = checkSort(context, uri);
+            sqLiteDatabase.beginTransactionNonExclusive();
+            DatabaseReadOperations databaseOperations = new DatabaseReadOperations(context);
+            for (Object[] temp : arrayList) {
+                String field_name = (String) temp[0];
+                String question = ((String) temp[1]).trim();
+                String answer = ((String) temp[2]).trim();
+                int order = (int) temp[ORDER];
+                int rank = (int) temp[RANK];
+                long field_id = -1;
+                if (databaseOperations.checkFieldDuplication(field_name)) {
+                    field_id = databaseOperations.getFieldId(field_name);
+                    if (question.length() > 0 && answer.length() > 0) {
+                        if (!databaseOperations.checkEntryDuplication(question, answer, field_id, Contract.Field.STRING_DATA_TYPE)) {
+                            if (rank >= 0) {
+                                mySQLiteCursorLoader.insertEntryWithRank(Contract.Field.STRING_DATA_TYPE, question, answer, field_id, rank);
+                            } else if (order >= 0) {
+                                mySQLiteCursorLoader.insertEntryWithOrder(Contract.Field.STRING_DATA_TYPE, question, answer, field_id, order);
+                            } else {
+                                mySQLiteCursorLoader.insertEntry(Contract.Field.STRING_DATA_TYPE, question, answer, field_id);
+                            }
                         }
                     }
                 } else {

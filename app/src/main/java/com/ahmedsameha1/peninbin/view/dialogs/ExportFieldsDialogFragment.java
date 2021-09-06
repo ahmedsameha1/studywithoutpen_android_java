@@ -93,13 +93,9 @@ public class ExportFieldsDialogFragment extends DialogFragment {
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
                         } else {
-                            new AlertDialog.Builder(getActivity()).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    ((Contact) ExportFieldsDialogFragment.this.getActivity()).exportFields(selectedFields, fileName);
-                                    ExportFieldsDialogFragment.this.dismiss();
-                                }
-                            }).create().show();
+                            ((Contact) ExportFieldsDialogFragment.this.getActivity()).exportFields(selectedFields, fileName);
+                            ExportFieldsDialogFragment.this.dismiss();
+
                         }
                     }
                 });

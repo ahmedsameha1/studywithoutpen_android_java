@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
@@ -24,6 +25,7 @@ import com.ahmedsameha1.peninbin.database.ImportTextFile;
  */
 public class ImportTextFileIntentService extends IntentService {
     public static final String FILE_PATH = "file_path";
+    public static final String URI = "uri";
     public static boolean isRunning = false;
 
 
@@ -58,11 +60,19 @@ public class ImportTextFileIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
-            String file_path = intent.getStringExtra(FILE_PATH);
-            isRunning = true;
-            ImportTextFile.importFields(this, file_path);
-            isRunning = false;
-            stopForeground(true);
+            if (intent.hasExtra(FILE_PATH)) {
+                String file_path = intent.getStringExtra(FILE_PATH);
+                isRunning = true;
+                ImportTextFile.importFields(this, file_path);
+                isRunning = false;
+                stopForeground(true);
+            } else if (intent.hasExtra(URI)){
+                Uri uri = Uri.parse(intent.getStringExtra(URI));
+                isRunning = true;
+                ImportTextFile.importFields(this, uri);
+                isRunning = false;
+                stopForeground(true);
+            }
         }
     }
 

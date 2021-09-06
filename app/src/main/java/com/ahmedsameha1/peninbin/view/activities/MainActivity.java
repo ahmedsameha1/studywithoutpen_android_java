@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String BUY_INTENT = "BUY_INTENT";
     private static final int BUY_FLOW_REQUEST_CODE = 6475;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION = 16463;
+    private static final int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 1646574;
     private Handler mHandler = new Handler();
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private MainActivityRecyclerViewAdapter mAdapter;
@@ -328,6 +329,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         // Check which request we're responding to
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 tts_available = true;
@@ -439,8 +441,13 @@ public class MainActivity extends AppCompatActivity implements
                                 == PackageManager.PERMISSION_GRANTED) {
                             if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
                                     && !Emulation.isAnyThreadRunning()) {
-                                ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
-                                exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                                new AlertDialog.Builder(this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                                        exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                                    }
+                                }).create().show();
                             } else {
                                 Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
@@ -453,8 +460,13 @@ public class MainActivity extends AppCompatActivity implements
                     } else {
                         if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
                                 && !Emulation.isAnyThreadRunning()) {
-                            ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
-                            exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                            new AlertDialog.Builder(this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                                    exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                                }
+                            }).create().show();
                         } else {
                             Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
@@ -470,14 +482,25 @@ public class MainActivity extends AppCompatActivity implements
             case IMPORT_FIELD:
                 if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY) ||
                         Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                    if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
-                            && !Emulation.isAnyThreadRunning()) {
-                        ImportFromWhatDialogFragment importFromWhatDialogFragment = new ImportFromWhatDialogFragment();
-                        importFromWhatDialogFragment.show(getSupportFragmentManager(), importFromWhatDialogFragment.IMPORT_FROM_WHAT_DIALOG_FRAGMENT);
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                                && !Emulation.isAnyThreadRunning()) {
+                            new AlertDialog.Builder(MainActivity.this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    ImportFromWhatDialogFragment importFromWhatDialogFragment = new ImportFromWhatDialogFragment();
+                                    importFromWhatDialogFragment.show(getSupportFragmentManager(), importFromWhatDialogFragment.IMPORT_FROM_WHAT_DIALOG_FRAGMENT);
+                                }
+                            }).create().show();
+                        } else {
+                            Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP, 0, 400);
+                            toast.show();
+                        }
                     } else {
-                        Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
+                        ActivityCompat.requestPermissions(this,
+                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_PERMISSION);
                     }
                 } else {
                     Toast toast = Toast.makeText(this, R.string.external_storage_not_ready, Toast.LENGTH_SHORT);
@@ -727,7 +750,6 @@ public class MainActivity extends AppCompatActivity implements
             properties.error_dir = Environment.getExternalStorageDirectory();
             properties.extensions = null;
             final FilePickerDialog dialog14 = new FilePickerDialog(this, properties);
-
             dialog14.setDialogSelectionListener(new DialogSelectionListener() {
                 @Override
                 public void onSelectedFilePaths(final String[] files) {
@@ -746,6 +768,7 @@ public class MainActivity extends AppCompatActivity implements
                                         intent.putExtra(ImportSWPFileIntentService.FILE_PATH, files[0]);
                                         intent.putExtra(ImportSWPFileIntentService.USER_USAGE, false);
                                         MainActivity.this.startService(intent);
+                                        dialogFragment.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory(MainActivity.ANALYTICS_CATEGORY)
                                                 .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "")
@@ -763,6 +786,7 @@ public class MainActivity extends AppCompatActivity implements
                                         intent.putExtra(ImportSWPFileIntentService.FILE_PATH, files[0]);
                                         intent.putExtra(ImportSWPFileIntentService.USER_USAGE, true);
                                         MainActivity.this.startService(intent);
+                                        dialogFragment.dismiss();
                                         mTracker.send(new HitBuilders.EventBuilder()
                                                 .setCategory(MainActivity.ANALYTICS_CATEGORY)
                                                 .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "")
@@ -774,15 +798,23 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }
             });
-            new AlertDialog.Builder(MainActivity.this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            dialog14.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialog14.show();
+                public void onCancel(DialogInterface dialogInterface) {
                     dialogFragment.dismiss();
                 }
-            }).create().show();
+            });
+            dialog14.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    dialogFragment.dismiss();
+                }
+            });
+            dialog14.show();
         } else {
-
+            Intent intent = new Intent(MainActivity.this, UseSimpleStorageActivity.class);
+            intent.putExtra(UseSimpleStorageActivity.IMPORT_FROM_WHAT, UseSimpleStorageActivity.FROM_APP_FILE);
+            startActivity(intent);
         }
     }
 
@@ -810,6 +842,7 @@ public class MainActivity extends AppCompatActivity implements
                         Intent intent = new Intent(((Activity) context).getBaseContext(), ImportTextFileIntentService.class);
                         intent.putExtra(ImportTextFileIntentService.FILE_PATH, files[0]);
                         context.startService(intent);
+                        dialogFragment.dismiss();
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory(MainActivity.ANALYTICS_CATEGORY)
                                 .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "import field from text file")
@@ -817,15 +850,23 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }
             });
-            new AlertDialog.Builder(context).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            dialog1.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialog1.show();
+                public void onCancel(DialogInterface dialogInterface) {
                     dialogFragment.dismiss();
                 }
-            }).create().show();
+            });
+            dialog1.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    dialogFragment.dismiss();
+                }
+            });
+            dialog1.show();
         } else {
-
+            Intent intent = new Intent(this, UseSimpleStorageActivity.class);
+            intent.putExtra(UseSimpleStorageActivity.IMPORT_FROM_WHAT, UseSimpleStorageActivity.FROM_TEXT_FILE);
+            startActivity(intent);
         }
     }
 
@@ -918,12 +959,39 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
                         && !Emulation.isAnyThreadRunning()) {
-                    ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
-                    exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                    new AlertDialog.Builder(this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                            exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
+                        }
+                    }).create().show();
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                }
+            } else {
+                Toast toast = Toast.makeText(MainActivity.this, R.string.denied_permission, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 400);
+                toast.show();
+            }
+        } else if (requestCode == REQUEST_READ_EXTERNAL_STORAGE_PERMISSION){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                        && !Emulation.isAnyThreadRunning()) {
+                    new AlertDialog.Builder(MainActivity.this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ImportFromWhatDialogFragment importFromWhatDialogFragment = new ImportFromWhatDialogFragment();
+                            importFromWhatDialogFragment.show(getSupportFragmentManager(), importFromWhatDialogFragment.IMPORT_FROM_WHAT_DIALOG_FRAGMENT);
+                        }
+                    }).create().show();
                 } else {
                     Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);

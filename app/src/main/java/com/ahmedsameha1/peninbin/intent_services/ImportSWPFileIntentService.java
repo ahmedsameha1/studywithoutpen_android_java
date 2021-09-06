@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
@@ -25,6 +26,7 @@ import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 public class ImportSWPFileIntentService extends IntentService {
     public static final String FILE_PATH = "file_path";
     public static final String USER_USAGE = "user_usage";
+    public static final String URI = "uri";
     public static boolean isRunning = false;
 
     public ImportSWPFileIntentService() {
@@ -58,12 +60,21 @@ public class ImportSWPFileIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
-            isRunning = true;
-            String file_path = intent.getStringExtra(FILE_PATH);
-            boolean importUserUsageData = intent.getBooleanExtra(USER_USAGE, false);
-            ExportImportDatabase.importFields(this, file_path, importUserUsageData);
-            isRunning = false;
-            stopForeground(true);
+            if (intent.hasExtra(FILE_PATH)) {
+                isRunning = true;
+                String file_path = intent.getStringExtra(FILE_PATH);
+                boolean importUserUsageData = intent.getBooleanExtra(USER_USAGE, false);
+                ExportImportDatabase.importFields(this, file_path, importUserUsageData);
+                isRunning = false;
+                stopForeground(true);
+            } else if (intent.hasExtra(URI)) {
+                isRunning = true;
+                Uri uri = Uri.parse(intent.getStringExtra(URI));
+                boolean importUserUsageData = intent.getBooleanExtra(USER_USAGE, false);
+                ExportImportDatabase.importFields(this, uri, importUserUsageData);
+                isRunning = false;
+                stopForeground(true);
+            }
         }
     }
 }

@@ -11,6 +11,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
+
+import android.net.Uri;
 import android.util.Log;
 
 import com.ahmedsameha1.peninbin.R;
@@ -396,6 +398,50 @@ public class ExportImportDatabase {
             }
             if (databaseVersion < 13) {
                 upgradeImportedDatabaseFromDBV12ToDBV13(toImportDatabase, filePath);
+            }
+            importFields(context, toImportDatabase, importUserUsageData);
+            showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
+        } catch (InvalidStudyWithoutPenFileException e) {
+            showNotification(context, FAILED_IMPORT_INVALID_FILE_NOTIFICATION, notificationManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showNotification(context, FAILED_IMPORT_NOTIFICATION, notificationManager);
+        } finally {
+            if (toImportDatabase != null) {
+                toImportDatabase.close();
+            }
+            if (copied_database_file_path != null) {
+                File file = new File(copied_database_file_path);
+                if (file.exists()) {
+                    file.delete();
+                }
+                file = new File(copied_database_file_path + "-journal");
+                if (file.exists()) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    public static void importFields(Context context, Uri uri, boolean importUserUsageData) {
+        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        SQLiteDatabase toImportDatabase = null;
+        String copied_database_file_path = null;
+        try {
+            copied_database_file_path = copyToBeImportedDatabaseFile(context, uri);
+            toImportDatabase = SQLiteDatabase.openDatabase(copied_database_file_path,
+                    null, SQLiteDatabase.OPEN_READWRITE);
+            Cursor cursor = toImportDatabase.query(Contract.Check.TABLE_NAME, new String[]{Contract.Check.COLUMN_CHECK_NUMBER},
+                    null, null, null, null, null);
+            cursor.moveToFirst();
+            int checkNumber = cursor.getInt(0);
+            cursor.close();
+            if (checkNumber != Contract.Check.CHECK_NUMBER) {
+                throw new InvalidStudyWithoutPenFileException();
+            }
+            int databaseVersion = toImportDatabase.getVersion();
+            if (databaseVersion < 6 || databaseVersion > 13) {
+                throw new InvalidStudyWithoutPenFileException();
             }
             importFields(context, toImportDatabase, importUserUsageData);
             showNotification(context, SUCCESSFUL_IMPORT_NOTIFICATION, notificationManager);
@@ -1475,6 +1521,22 @@ public class ExportImportDatabase {
         String copy_path = app_database_path.substring(0, app_database_path.length() - 4) + "copy";
         OutputStream os = new FileOutputStream(copy_path);
         InputStream is = new FileInputStream(filePath);
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = is.read(buffer)) > 0) {
+            os.write(buffer, 0, length);
+        }
+        is.close();
+        os.flush();
+        os.close();
+        return copy_path;
+    }
+
+    private static String copyToBeImportedDatabaseFile(Context context, Uri uri) throws IOException {
+        String app_database_path = context.getApplicationContext().getDatabasePath(DATABASE_NAME).getAbsolutePath();
+        String copy_path = app_database_path.substring(0, app_database_path.length() - 4) + "copy";
+        OutputStream os = new FileOutputStream(copy_path);
+        InputStream is = context.getContentResolver().openInputStream(uri);
         byte[] buffer = new byte[1024];
         int length;
         while ((length = is.read(buffer)) > 0) {
