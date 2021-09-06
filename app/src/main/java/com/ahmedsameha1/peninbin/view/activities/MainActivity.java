@@ -131,10 +131,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final int IMPORT_PROVIDED_FIELD = 2;
     private static final int SUBSCRIBE = 3;
     public static final int ABOUT = 4;
-    /*    private static final int FACEBOOK = 3;
-        public static final int DROPBOX = 4;*/
     private static final int MY_DATA_CHECK_CODE = 1234;
-    private static final int DIRECTORY_CODE = 15;
     private static final String TO_EXPORT_FIELDS = "to_export_fields";
     private static final String TO_EXPORT_FILE_NAME = "to_export_file_name";
     private static final String RECYCLERVIEW_POSITION = "recyclerview_position";
@@ -146,8 +143,6 @@ public class MainActivity extends AppCompatActivity implements
     private Handler mHandler = new Handler();
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private MainActivityRecyclerViewAdapter mAdapter;
-
-
     private LoaderManager.LoaderCallbacks<Cursor> getFields;
     private long first_field_id;
     private boolean tts_available = false;
@@ -254,7 +249,6 @@ public class MainActivity extends AppCompatActivity implements
             }
         };
         getLoaderManager();
-//        fff();
         new ShowEula(this).show();
         IntroActivity.show(this);
     }
@@ -285,7 +279,6 @@ public class MainActivity extends AppCompatActivity implements
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
-//            calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
             calendar.add(Calendar.DAY_OF_MONTH, 1);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
@@ -299,8 +292,6 @@ public class MainActivity extends AppCompatActivity implements
             Log.i("time of service", calendar.getTimeInMillis() + "");
             Log.i("Time Zone", calendar.getTimeZone().getDisplayName());
             editor.putInt(MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST, request);
-
-
             editor.putBoolean(RUN_FIRST_TIME, false);
             PackageManager manager = getPackageManager();
             try {
@@ -571,20 +562,6 @@ public class MainActivity extends AppCompatActivity implements
                         .setCategory(Money.MONEY)
                         .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "click to subscribe")
                         .build());
-
-              /*  Uri uri = Uri.parse("market://details?id=" + getPackageName());
-                Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
-                try {
-                    startActivity(myAppLinkToMarket);
-                } catch (ActivityNotFoundException e) {
-                    Toast toast = Toast.makeText(this, "Unable to find market app", Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction("open review")
-                        .build());*/
                 break;
             case ABOUT:
                 AboutDialogFragment aboutDialogFragment = new AboutDialogFragment();
@@ -707,7 +684,6 @@ public class MainActivity extends AppCompatActivity implements
         to_export_file_name = file_name;
         // This always works
         DialogProperties properties = new DialogProperties();
-
         properties.selection_mode = DialogConfigs.SINGLE_MODE;
         properties.selection_type = DialogConfigs.DIR_SELECT;
         properties.root = Environment.getExternalStorageDirectory();
@@ -938,23 +914,6 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         }
-    }
-
-    private void fff() {
-        ArrayList<long[]> data = new DatabaseReadOperations(this).getBackupSchedulingData();
-        Log.i("scheduled time number:", data.size() + "");
-        for (long[] session : data) {
-            if (session[1] == ScheduleInFieldDialogFragment.QUICK_TEST) {
-                Log.i("scheduled time:", session[2] + "");
-            }
-        }
-        Calendar cal = new GregorianCalendar(TimeZone.getDefault());
-        cal.add(Calendar.DAY_OF_MONTH, 1);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        Log.i("Time Zone", cal.getTimeZone().getDisplayName());
-
     }
 
     @Override
