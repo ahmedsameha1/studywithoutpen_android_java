@@ -131,7 +131,14 @@ public class MidnightService extends IntentService {
                         intent.putExtra(ScheduleInFieldDialogFragment.TIME, random);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                         int request = (int) System.currentTimeMillis();
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        PendingIntent pendingIntent = null;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            pendingIntent = PendingIntent.getBroadcast(this, request, intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                        } else {
+                            pendingIntent = PendingIntent.getBroadcast(this, request, intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
+                        }
                         alarmManager.set(AlarmManager.RTC, random, pendingIntent);
                         cursorLoaderAndUpdateDatabase.addScheduledTimeForBackup(field_id, ScheduleInFieldDialogFragment.QUICK_TEST, random, request);
 
@@ -151,7 +158,14 @@ public class MidnightService extends IntentService {
             Intent intent = new Intent(this, ShowScheduledNotificationsReceiver.class);
             intent.putExtra(ScheduleInFieldDialogFragment.SCHEDULE_WHAT, ScheduleInFieldDialogFragment.REFRESHING_USAGE_OF_APP);
             intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                pendingIntent = PendingIntent.getBroadcast(this, (int) System.currentTimeMillis(),
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            } else {
+                pendingIntent = PendingIntent.getBroadcast(this, (int) System.currentTimeMillis(),
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
             alarmManager.set(AlarmManager.RTC, random, pendingIntent);
         }
     }

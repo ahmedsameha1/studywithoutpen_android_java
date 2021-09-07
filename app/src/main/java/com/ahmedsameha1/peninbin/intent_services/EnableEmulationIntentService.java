@@ -39,8 +39,14 @@ public class EnableEmulationIntentService extends IntentService {
         super.onCreate();
         Intent notificationIntent = new Intent(this, MainActivity.class);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
+        PendingIntent pendingIntent = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            pendingIntent = PendingIntent.getActivity(this, 0,
+                    notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            pendingIntent = PendingIntent.getActivity(this, 0,
+                    notificationIntent, 0);
+        }
 
         Notification notification = new NotificationCompat.Builder(this, IntentServicesUtility.createNotificationChannel(this))
                 .setSmallIcon(R.drawable.ic_launcher48)

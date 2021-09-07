@@ -286,7 +286,14 @@ public class MainActivity extends AppCompatActivity implements
             Intent intent = new Intent(this, SimpleWakefulReceiver.class);
             int request = (int) System.currentTimeMillis();
             intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-            PendingIntent pintent = PendingIntent.getBroadcast(this, request, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pintent = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                pintent = PendingIntent.getBroadcast(this, request, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            } else {
+                pintent = PendingIntent.getBroadcast(this, request, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+            }
             AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
             Log.i("time of service", calendar.getTimeInMillis() + "");

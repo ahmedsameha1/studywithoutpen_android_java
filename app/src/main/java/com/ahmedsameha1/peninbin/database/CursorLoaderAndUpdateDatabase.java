@@ -1117,7 +1117,14 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
                     for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        PendingIntent pendingIntent = null;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0),
+                                    intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                        } else {
+                            pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0),
+                                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        }
                         alarmManager.cancel(pendingIntent);
                     }
                 }
@@ -1131,7 +1138,15 @@ public class CursorLoaderAndUpdateDatabase extends AbstractCursorLoader implemen
                     for (cursor.moveToFirst(); cursor.getPosition() < cursor.getCount(); cursor.moveToNext()) {
                         Intent intent = new Intent(context, ShowScheduledNotificationsReceiver.class);
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        PendingIntent pendingIntent = null;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                        } else {
+                            pendingIntent = PendingIntent.getBroadcast(context, cursor.getInt(0), intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        }
                         alarmManager.cancel(pendingIntent);
                     }
                 }

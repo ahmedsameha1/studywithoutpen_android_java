@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
 import com.ahmedsameha1.peninbin.R;
@@ -977,13 +978,23 @@ public class ExportImportDatabase {
                 notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, FAILED_EXPORT_NOTIFICATION);
                 notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                resultPendingIntent =
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                notifyIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    resultPendingIntent =
+                            PendingIntent.getActivity(
+                                    context,
+                                    0,
+                                    notifyIntent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                            );
+                } else {
+                    resultPendingIntent =
+                            PendingIntent.getActivity(
+                                    context,
+                                    0,
+                                    notifyIntent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT
+                            );
+                }
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
@@ -1047,13 +1058,23 @@ public class ExportImportDatabase {
                 notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, notImportedFieldsStrings);
                 notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                resultPendingIntent =
-                        PendingIntent.getActivity(
-                                context,
-                                (int) System.currentTimeMillis(),
-                                notifyIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    resultPendingIntent =
+                            PendingIntent.getActivity(
+                                    context,
+                                    (int) System.currentTimeMillis(),
+                                    notifyIntent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                            );
+                } else {
+                    resultPendingIntent =
+                            PendingIntent.getActivity(
+                                    context,
+                                    (int) System.currentTimeMillis(),
+                                    notifyIntent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT
+                            );
+                }
                 notificationBuilder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(notificationId, notificationBuilder.build());
                 break;
@@ -1076,13 +1097,23 @@ public class ExportImportDatabase {
         notifyIntent.putExtra(ExportSuccessfulActivity.NOTIFICATION_ID, SUCCESFUL_EXPORT_NOTIFICATION);
         notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        resultPendingIntent =
-                PendingIntent.getActivity(
-                        context,
-                        (int) System.currentTimeMillis(),
-                        notifyIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            resultPendingIntent =
+                    PendingIntent.getActivity(
+                            context,
+                            (int) System.currentTimeMillis(),
+                            notifyIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                    );
+        } else {
+            resultPendingIntent =
+                    PendingIntent.getActivity(
+                            context,
+                            (int) System.currentTimeMillis(),
+                            notifyIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+        }
 
         notificationBuilder.setContentIntent(resultPendingIntent);
         notificationManager.notify(notificationId, notificationBuilder.build());
