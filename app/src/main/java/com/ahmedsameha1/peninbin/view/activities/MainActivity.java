@@ -87,6 +87,7 @@ import com.ahmedsameha1.peninbin.view.dialogs.ImportFromWhatDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ImportProvidedFieldDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ScheduleInFieldDialogFragment;
 import com.android.vending.billing.IInAppBillingService;
+import com.anggrayudi.storage.SimpleStorageHelper;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
@@ -104,6 +105,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
+import kotlin.Unit;
 
 /**
  * Created by ahmed on 7/26/2015.
@@ -140,6 +143,9 @@ public class MainActivity extends AppCompatActivity implements
     private static final int BUY_FLOW_REQUEST_CODE = 6475;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION = 16463;
     private static final int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 1646574;
+    public static final String IMPORT_FROM_WHAT = "import_from_app_file";
+    public static final int FROM_APP_FILE = 287;
+    public static final int FROM_TEXT_FILE = 61687;
     private Handler mHandler = new Handler();
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private MainActivityRecyclerViewAdapter mAdapter;
@@ -155,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements
     private String pay_load;
     private RecyclerView recyclerView;
     private Parcelable recyclerview_position;
+    private SimpleStorageHelper simpleStorageHelper = new SimpleStorageHelper(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -248,6 +255,48 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.swapCursor(null);
             }
         };
+        simpleStorageHelper.setOnFileSelected((requestCode, documentFileList) -> {
+            if (documentFileList.size() == 1) {
+                if (requestCode == FROM_APP_FILE) {
+                    AlertDialog.Builder importUserUsageData = new AlertDialog.Builder(this);
+                    importUserUsageData
+                            .setMessage(R.string.import_user_usage)
+                            .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog13, int which) {
+                                    Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                    Intent intent = new Intent(MainActivity.this, ImportSWPFileIntentService.class);
+                                    intent.putExtra(ImportSWPFileIntentService.URI, documentFileList.get(0).getUri().toString());
+                                    intent.putExtra(ImportSWPFileIntentService.USER_USAGE, false);
+                                    MainActivity.this.startService(intent);
+                                }
+                            })
+                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog12, int which) {
+                                    Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                    Intent intent = new Intent(MainActivity.this, ImportSWPFileIntentService.class);
+                                    intent.putExtra(ImportSWPFileIntentService.URI, documentFileList.get(0).getUri().toString());
+                                    intent.putExtra(ImportSWPFileIntentService.USER_USAGE, true);
+                                    MainActivity.this.startService(intent);
+                                }
+                            })
+                            .create().show();
+                } else if (requestCode == FROM_TEXT_FILE) {
+                    Toast toast = Toast.makeText(this, R.string.will_notify_when_process_complete, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 400);
+                    toast.show();
+                    Intent intent = new Intent(this, ImportTextFileIntentService.class);
+                    intent.putExtra(ImportTextFileIntentService.URI, documentFileList.get(0).getUri().toString());
+                    this.startService(intent);
+                }
+            }
+            return Unit.INSTANCE;
+        });
         getLoaderManager();
         new ShowEula(this).show();
         IntroActivity.show(this);
@@ -321,6 +370,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         // Check which request we're responding to
         super.onActivityResult(requestCode, resultCode, data);
+        simpleStorageHelper.getStorage().onActivityResult(requestCode, resultCode, data);
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 tts_available = true;
@@ -788,9 +838,7 @@ public class MainActivity extends AppCompatActivity implements
             });
             dialog14.show();
         } else {
-            Intent intent = new Intent(MainActivity.this, UseSimpleStorageActivity.class);
-            intent.putExtra(UseSimpleStorageActivity.IMPORT_FROM_WHAT, UseSimpleStorageActivity.FROM_APP_FILE);
-            startActivity(intent);
+            simpleStorageHelper.openFilePicker(FROM_APP_FILE);
         }
     }
 
@@ -840,9 +888,7 @@ public class MainActivity extends AppCompatActivity implements
             });
             dialog1.show();
         } else {
-            Intent intent = new Intent(this, UseSimpleStorageActivity.class);
-            intent.putExtra(UseSimpleStorageActivity.IMPORT_FROM_WHAT, UseSimpleStorageActivity.FROM_TEXT_FILE);
-            startActivity(intent);
+            simpleStorageHelper.openFilePicker(FROM_TEXT_FILE);
         }
     }
 
@@ -853,6 +899,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        simpleStorageHelper.onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
         outState.putStringArrayList(TO_EXPORT_FIELDS, to_export_fields);
         outState.putString(TO_EXPORT_FILE_NAME, to_export_file_name);
@@ -864,6 +911,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        simpleStorageHelper.onRestoreInstanceState(savedInstanceState);
         to_export_fields = savedInstanceState.getStringArrayList(TO_EXPORT_FIELDS);
         to_export_file_name = savedInstanceState.getString(TO_EXPORT_FILE_NAME);
         pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
@@ -919,6 +967,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        simpleStorageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
