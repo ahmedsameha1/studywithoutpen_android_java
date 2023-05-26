@@ -11,8 +11,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.Loader;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -26,7 +24,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
@@ -52,7 +49,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.MainActivityRecyclerViewViewHolder;
@@ -63,11 +59,9 @@ import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.fragments.MainActivityFragmentDrawer;
-import com.ahmedsameha1.peninbin.intent_services.CheckSubscriptionIntentService;
 import com.ahmedsameha1.peninbin.intent_services.ExportFieldsIntentService;
 import com.ahmedsameha1.peninbin.intent_services.ImportSWPFileIntentService;
 import com.ahmedsameha1.peninbin.intent_services.ImportTextFileIntentService;
-import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
 import com.ahmedsameha1.peninbin.receivers_services.SimpleWakefulReceiver;
 import com.ahmedsameha1.peninbin.secondary_activities.IntroActivity;
 import com.ahmedsameha1.peninbin.secondary_activities.SpeciallyFormattedTextFileHelpActivity;
@@ -75,7 +69,6 @@ import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
-import com.ahmedsameha1.peninbin.utils.PayloadString;
 import com.ahmedsameha1.peninbin.utils.ShowEula;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.ahmedsameha1.peninbin.view.dialogs.AboutDialogFragment;
@@ -85,15 +78,12 @@ import com.ahmedsameha1.peninbin.view.dialogs.ExportFieldsDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.FieldPropertiesDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ImportFromWhatDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ImportProvidedFieldDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.ScheduleInFieldDialogFragment;
 import com.android.vending.billing.IInAppBillingService;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
@@ -103,8 +93,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
 import kotlin.Unit;
 
@@ -116,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements
         DeleteFieldDialogFragment.Contact,
         CreateFieldDialogFragment.Contact,
         ExportFieldsDialogFragment.Contact,
-        ImportFromWhatDialogFragment.Contact,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        ImportFromWhatDialogFragment.Contact
+        {
     public static final String MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST = "mid_night_service_pendingintent_request";
     public static final String SCREEN_NAME = "MainActivity";
     private static final String RUN_FIRST_TIME = "run_first_time";
@@ -152,12 +140,10 @@ public class MainActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> getFields;
     private long first_field_id;
     private boolean tts_available = false;
-    private Tracker mTracker;
     private String to_export_file_name;
     private ArrayList<String> to_export_fields;
     private IInAppBillingService billingService;
     private ServiceConnection mServiceConn;
-    private NetworkReceiver networkReceiver;
     private String pay_load;
     private RecyclerView recyclerView;
     private Parcelable recyclerview_position;
@@ -201,8 +187,6 @@ public class MainActivity extends AppCompatActivity implements
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing, true));
         addFab();
         runFirstTimeAppRunOnly();
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         mServiceConn = new ServiceConnection() {
             @Override
             public void onServiceDisconnected(ComponentName name) {
@@ -309,7 +293,6 @@ public class MainActivity extends AppCompatActivity implements
                 new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
         bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
-        startService(new Intent(getBaseContext(), CheckSubscriptionIntentService.class));
     }
 
     @Override
@@ -395,10 +378,6 @@ public class MainActivity extends AppCompatActivity implements
                                 Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_success), Toast.LENGTH_LONG);
                                 toast1.setGravity(Gravity.TOP, 0, 400);
                                 toast1.show();
-                                mTracker.send(new HitBuilders.EventBuilder()
-                                        .setCategory(ANALYTICS_CATEGORY)
-                                        .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "somebody has just completed a subscription")
-                                        .build());
                             } else {
                                 Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
                                 toast1.setGravity(Gravity.TOP, 0, 400);
@@ -550,68 +529,6 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 break;
             case SUBSCRIBE:
-                if (!Money.getUserSubscriptionStatus(this)) {
-                    if (NetworkReceiver.isOnline(this)) {
-                        new AlertDialog.Builder(this)
-                                .setTitle(R.string.subscription_description)
-                                .setMessage(R.string.subscription1_description)
-                                .setPositiveButton(R.string.proceed_now, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        pay_load = PayloadString.getString();
-                                        try {
-                                            Bundle bundle = billingService.getBuyIntent(3, MainActivity.this.getPackageName(), "subscription1", Money.SUBSCRIPTION_TYPE,
-                                                    pay_load);
-                                            int response_code = bundle.getInt(Money.RESPONSE_CODE);
-                                            if (response_code == Money.BILLING_RESPONSE_RESULT_OK) {
-                                                PendingIntent pendingIntent = bundle.getParcelable(BUY_INTENT);
-                                                MainActivity.this.startIntentSenderForResult(pendingIntent.getIntentSender(), BUY_FLOW_REQUEST_CODE, new Intent(), 0, 0, 0);
-                                            } else if (response_code == Money.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
-                                                Toast toast1 = Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.cannot_reach_service), Toast.LENGTH_SHORT);
-                                                toast1.setGravity(Gravity.TOP, 0, 400);
-                                                toast1.show();
-                                            } else {
-                                                Toast toast1 = Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                                                toast1.setGravity(Gravity.TOP, 0, 400);
-                                                toast1.show();
-                                            }
-                                        } catch (IntentSender.SendIntentException | RemoteException | NullPointerException e) {
-                                            Toast toast1 = Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.purchase_error), Toast.LENGTH_SHORT);
-                                            toast1.setGravity(Gravity.TOP, 0, 400);
-                                            toast1.show();
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                })
-                                .create().show();
-                    } else {
-                        Toast toast = Toast.makeText(this, R.string.need_internet_try_again, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                    }
-                } else {
-                    if (Money.isInInitialPeriod(this)) {
-                        Toast toast = Toast.makeText(this, R.string.intial_period, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory(Money.MONEY)
-                                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "try to subscribe - initial period")
-                                .build());
-                    } else {
-                        Toast toast = Toast.makeText(this, R.string.already_subscribed, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP, 0, 400);
-                        toast.show();
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory(Money.MONEY)
-                                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "already subscribed")
-                                .build());
-                    }
-                }
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(Money.MONEY)
-                        .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "click to subscribe")
-                        .build());
                 break;
             case ABOUT:
                 AboutDialogFragment aboutDialogFragment = new AboutDialogFragment();
@@ -635,23 +552,11 @@ public class MainActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(GET_FIELDS_ID, null, getFields);
-        if (Money.getNetworkDownGetPurchasesesStatus(this)) {
-            IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
-            networkReceiver = new NetworkReceiver(billingService);
-            registerReceiver(networkReceiver, intentFilter);
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        try {
-            unregisterReceiver(networkReceiver);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
         ActivityUtility.closeOpenedDialogs(this);
     }
 
@@ -688,10 +593,6 @@ public class MainActivity extends AppCompatActivity implements
                     fragment.show(MainActivity.this.getSupportFragmentManager(), CREATE_NEW_FIELD);
                 }
                 actionMenu.close(false);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(MainActivity.this) + "add entry from main activity")
-                        .build());
             }
         });
         button2.setOnClickListener(new View.OnClickListener() {
@@ -703,10 +604,6 @@ public class MainActivity extends AppCompatActivity implements
                 fragment.setArguments(bundle);
                 fragment.show(MainActivity.this.getSupportFragmentManager(), CREATE_NEW_FIELD);
                 actionMenu.close(true);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(MainActivity.this) + "create field")
-                        .build());
             }
         });
     }
@@ -715,10 +612,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void deleteField(long field_id, MainActivityRecyclerViewViewHolder mainActivityRecyclerViewViewHolder) {
         mySQLiteCursorLoader.deleteField(field_id, mHandler, mainActivityRecyclerViewViewHolder);
-        mTracker.send(new HitBuilders.EventBuilder()
-                .setCategory(ANALYTICS_CATEGORY)
-                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "delete field")
-                .build());
     }
 
     @Override
@@ -752,10 +645,6 @@ public class MainActivity extends AppCompatActivity implements
                     intent.putExtra(ExportFieldsIntentService.FILE_PATH, files[0]);
                     intent.putExtra(ExportFieldsIntentService.FILE_NAME, to_export_file_name);
                     startService(intent);
-                    mTracker.send(new HitBuilders.EventBuilder()
-                            .setCategory(ANALYTICS_CATEGORY)
-                            .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(MainActivity.this) + "export field")
-                            .build());
                     Toast toast = Toast.makeText(MainActivity.this, R.string.will_notify_when_process_complete, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
@@ -795,11 +684,6 @@ public class MainActivity extends AppCompatActivity implements
                                         intent.putExtra(ImportSWPFileIntentService.USER_USAGE, false);
                                         MainActivity.this.startService(intent);
                                         dialogFragment.dismiss();
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "")
-                                                        + ActivityUtility.getVersionCode(MainActivity.this) + "import field from app file")
-                                                .build());
                                     }
                                 })
                                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
@@ -813,11 +697,6 @@ public class MainActivity extends AppCompatActivity implements
                                         intent.putExtra(ImportSWPFileIntentService.USER_USAGE, true);
                                         MainActivity.this.startService(intent);
                                         dialogFragment.dismiss();
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                                .setAction((Money.getMe(MainActivity.this) ? Money.TRACKING_ME : "")
-                                                        + ActivityUtility.getVersionCode(MainActivity.this) + "import field from app file")
-                                                .build());
                                     }
                                 })
                                 .create().show();
@@ -867,10 +746,6 @@ public class MainActivity extends AppCompatActivity implements
                         intent.putExtra(ImportTextFileIntentService.FILE_PATH, files[0]);
                         context.startService(intent);
                         dialogFragment.dismiss();
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "import field from text file")
-                                .build());
                     }
                 }
             });
@@ -915,18 +790,6 @@ public class MainActivity extends AppCompatActivity implements
         to_export_fields = savedInstanceState.getStringArrayList(TO_EXPORT_FIELDS);
         to_export_file_name = savedInstanceState.getString(TO_EXPORT_FILE_NAME);
         pay_load = savedInstanceState.getString(PAY_LOAD_STRING);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(Money.NETWORK_DOWN_GET_PURCHASES_STATUS)) {
-            if (!Money.getNetworkDownGetPurchasesesStatus(this)) {
-                if (Money.getUserSubscriptionStatus(this)) {
-                    unregisterReceiver(networkReceiver);
-                    sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
-                }
-            }
-        }
     }
 
     public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {

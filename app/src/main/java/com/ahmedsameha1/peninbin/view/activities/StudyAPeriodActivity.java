@@ -38,7 +38,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -57,8 +56,6 @@ import com.ahmedsameha1.peninbin.utils.DataHolder;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -138,7 +135,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
     private boolean tts_available = false;
     private boolean locale_available = false;
     private int check_type;
-    private Tracker mTracker;
     private View mLoadingView;
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
@@ -553,8 +549,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
         }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         if (savedInstanceState == null) {
             content.setVisibility(View.GONE);
             isStartingFirstTime = true;
@@ -682,8 +676,6 @@ public class StudyAPeriodActivity extends AppCompatActivity implements
         if (is_starting_after_destruction) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + this.getLocalClassName());
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override

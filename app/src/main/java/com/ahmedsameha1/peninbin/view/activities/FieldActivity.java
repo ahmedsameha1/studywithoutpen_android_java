@@ -1,37 +1,19 @@
 package com.ahmedsameha1.peninbin.view.activities;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.LoaderManager;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.Loader;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import android.app.LoaderManager;
-import android.content.Loader;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.TaskStackBuilder;
-import androidx.core.view.MenuItemCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,37 +22,44 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.MenuItemCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.FieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.utils.IntentServicesUtility;
-import com.ahmedsameha1.peninbin.view.dialogs.AskAboutContinuePreviousStudyAPeriodDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.AskAboutContinuePreviousTestDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.CopyFieldDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.CopyMoveDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.DeleteEntryDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.FieldPropertiesDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.ScheduleInFieldDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.ShowTestResultDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.SortEntriesDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.StudyAPeriodDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.EnhancedTestDialogFragment;
-import com.ahmedsameha1.peninbin.view.dialogs.FullyRandomTestDialogFragment;
 import com.ahmedsameha1.peninbin.fragments.FieldActivityFragmentDrawer;
-import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.receivers_services.NetworkReceiver;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
+import com.ahmedsameha1.peninbin.view.dialogs.AskAboutContinuePreviousStudyAPeriodDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.AskAboutContinuePreviousTestDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.CopyFieldDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.CopyMoveDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.DeleteEntryDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.EnhancedTestDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.FieldPropertiesDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.FullyRandomTestDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.ScheduleInFieldDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.ShowTestResultDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.SortEntriesDialogFragment;
+import com.ahmedsameha1.peninbin.view.dialogs.StudyAPeriodDialogFragment;
 import com.android.vending.billing.IInAppBillingService;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,7 +78,6 @@ public class FieldActivity extends AppCompatActivity implements
         FieldPropertiesDialogFragment.Contact,
         CopyFieldDialogFragment.CopyField,
         TextToSpeech.OnInitListener,
-        SharedPreferences.OnSharedPreferenceChangeListener,
         FieldActivityRecyclerViewAdapter.Contact {
     public static final String SCREEN_NAME = "FieldActivity";
     public static final int STUDY_PERIOD = 0;
@@ -134,10 +122,8 @@ public class FieldActivity extends AppCompatActivity implements
     private boolean is_load_entries = true;
     private String search_value;
     private int question_data_type;
-    private Tracker mTracker;
     private IInAppBillingService billingService;
     private ServiceConnection mServiceConn;
-    private NetworkReceiver networkReceiver;
     private SharedPreferences sharedPreferences;
     private String pay_load;
     private boolean initialCheckSubscription = true;
@@ -200,8 +186,6 @@ public class FieldActivity extends AppCompatActivity implements
         } catch (ActivityNotFoundException e) {
             e.printStackTrace();
         }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -211,24 +195,6 @@ public class FieldActivity extends AppCompatActivity implements
                 FieldActivity.this.startActivity(intent);
             }
         });
-        mServiceConn = new ServiceConnection() {
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                billingService = null;
-            }
-
-            @Override
-            public void onServiceConnected(ComponentName name,
-                                           IBinder service) {
-                billingService = IInAppBillingService.Stub.asInterface(service);
-                if (Money.getNetworkDownGetPurchasesesStatus(FieldActivity.this) &&
-                        NetworkReceiver.isOnline(FieldActivity.this)) {
-                    Money.checkSubscription(FieldActivity.this, billingService);
-                    sharedPreferences = PreferenceManager.getDefaultSharedPreferences(FieldActivity.this);
-                    sharedPreferences.registerOnSharedPreferenceChangeListener(FieldActivity.this);
-                }
-            }
-        };
         getFieldEntries = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -294,21 +260,7 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        try {
-            unregisterReceiver(networkReceiver);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
         ActivityUtility.closeOpenedDialogs(this);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Intent serviceIntent =
-                new Intent("com.android.vending.billing.InAppBillingService.BIND");
-        serviceIntent.setPackage("com.android.vending");
-        bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
     }
 
     /*
@@ -319,6 +271,7 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == EDIT_ENTRY) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
@@ -392,11 +345,6 @@ public class FieldActivity extends AppCompatActivity implements
             search_string_highlight.replace(0, search_string_highlight.length(), search_value);
             getLoaderManager().restartLoader(SEARCH_ENTRIES_LOADER_ID, null, getFieldEntries);
         }
-        if (Money.getNetworkDownGetPurchasesesStatus(this)) {
-            IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
-            networkReceiver = new NetworkReceiver(billingService);
-            registerReceiver(networkReceiver, intentFilter);
-        }
     }
 
     @Override
@@ -430,6 +378,7 @@ public class FieldActivity extends AppCompatActivity implements
     }
 
     public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         setIntent(intent);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerview_position = recyclerView.getLayoutManager().onSaveInstanceState();
@@ -452,7 +401,6 @@ public class FieldActivity extends AppCompatActivity implements
     public void onDrawerItemSelected(View view, int position) {
         Bundle bundle = new Bundle();
         bundle.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
-        boolean user_eligible = Money.getUserSubscriptionStatus(this);
         switch (position) {
             case ENHANCED_TEST:
                 startEnhancedTest();
@@ -482,42 +430,25 @@ public class FieldActivity extends AppCompatActivity implements
                 FieldPropertiesDialogFragment fieldPropertiesDialogFragment = new FieldPropertiesDialogFragment();
                 fieldPropertiesDialogFragment.setArguments(bundle);
                 fieldPropertiesDialogFragment.show(getSupportFragmentManager(), FIELD_OPTIONS_DIALOG);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "field properties")
-                        .build());
                 break;
             case SCHEDULE_IN_FIELD:
-                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
-                    ScheduleInFieldDialogFragment scheduleInFieldDialogFragment = new ScheduleInFieldDialogFragment();
-                    Bundle bundle1 = new Bundle();
-                    bundle1.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
-                    scheduleInFieldDialogFragment.setArguments(bundle1);
-                    scheduleInFieldDialogFragment.show(getSupportFragmentManager(), ScheduleInFieldDialogFragment.SCHEDULE_IN_FIELD);
-                } else {
-                    Toast toast = Toast.makeText(this, R.string.please_subscribe, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
+                ScheduleInFieldDialogFragment scheduleInFieldDialogFragment = new ScheduleInFieldDialogFragment();
+                Bundle bundle1 = new Bundle();
+                bundle1.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
+                scheduleInFieldDialogFragment.setArguments(bundle1);
+                scheduleInFieldDialogFragment.show(getSupportFragmentManager(), ScheduleInFieldDialogFragment.SCHEDULE_IN_FIELD);
                 break;
             case Field_INFORMATION:
                 Intent intent = new Intent(this, FieldInformationActivity.class);
                 intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
                 startActivity(intent);
                 break;
-
             case COPY_MOVE:
-                if (user_eligible || Money.getUserAllowedDueAnError(this)) {
-                    CopyMoveDialogFragment copyMoveDialogFragment = new CopyMoveDialogFragment();
-                    Bundle bundle2 = new Bundle();
-                    bundle2.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
-                    copyMoveDialogFragment.setArguments(bundle2);
-                    copyMoveDialogFragment.show(getSupportFragmentManager(), CopyMoveDialogFragment.COPY_MOVE_DIALOG_FRAGMENT);
-                } else {
-                    Toast toast = Toast.makeText(this, R.string.please_subscribe, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 400);
-                    toast.show();
-                }
+                CopyMoveDialogFragment copyMoveDialogFragment = new CopyMoveDialogFragment();
+                Bundle bundle2 = new Bundle();
+                bundle2.putLong(Constants.CURRENT_FIELD_ID, current_field_id);
+                copyMoveDialogFragment.setArguments(bundle2);
+                copyMoveDialogFragment.show(getSupportFragmentManager(), CopyMoveDialogFragment.COPY_MOVE_DIALOG_FRAGMENT);
                 break;
         }
     }
@@ -593,20 +524,16 @@ public class FieldActivity extends AppCompatActivity implements
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "sort")
-                        .build());
                 return true;
             case R.id.today_emulation:
                 if (!Emulation.isAnyThreadRunning()) {
-                        final Intent intent1 = new Intent(this,
-                                SearchActivity.class);
-                        // add query to the Intent Extras
-                        intent1.setAction(Intent.ACTION_SEARCH);
-                        intent1.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                        intent1.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.TODAY_ENTRIES);
-                        startActivity(intent1);
+                    final Intent intent1 = new Intent(this,
+                            SearchActivity.class);
+                    // add query to the Intent Extras
+                    intent1.setAction(Intent.ACTION_SEARCH);
+                    intent1.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                    intent1.putExtra(SearchActivity.SEARCH_WHAT, SearchActivity.TODAY_ENTRIES);
+                    startActivity(intent1);
                 } else {
                     Toast toast = Toast.makeText(this, R.string.wait_some_background_operation, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 400);
@@ -646,38 +573,6 @@ public class FieldActivity extends AppCompatActivity implements
     @Override
     public void copyField(long field_id) {
         cursorLoaderAndUpdateDatabase.copyField(current_field_id, field_id);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(Money.NETWORK_DOWN_GET_PURCHASES_STATUS)) {
-            if (!Money.getNetworkDownGetPurchasesesStatus(this)) {
-                if (Money.getUserSubscriptionStatus(this)) {
-                    unregisterReceiver(networkReceiver);
-                    sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
-                    if (!initialCheckSubscription) {
-                        NotificationCompat.Builder notificationBuilder = null;
-                        Intent notifyIntent = null;
-                        PendingIntent resultPendingIntent = null;
-                        TaskStackBuilder stackBuilder = null;
-                        notificationBuilder =
-                                new NotificationCompat.Builder(this, IntentServicesUtility.createNotificationChannel(this))
-                                        .setSmallIcon(R.drawable.ic_launcher48)
-                                        .setContentTitle(this.getResources().getString(R.string.proceed_now))
-                                        .setContentText(this.getResources().getString(R.string.have_the_right))
-                                        .setTicker(this.getResources().getString(R.string.have_the_right))
-                                        .setAutoCancel(true);
-                        notifyIntent = new Intent(this, MainActivity.class);
-                        stackBuilder = TaskStackBuilder.create(this);
-                        stackBuilder.addParentStack(MainActivity.class);
-                        stackBuilder.addNextIntent(notifyIntent);
-                        resultPendingIntent = stackBuilder.getPendingIntent((int) System.currentTimeMillis(), PendingIntent.FLAG_UPDATE_CURRENT);
-                        notificationBuilder.setContentIntent(resultPendingIntent);
-                        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify((int) System.currentTimeMillis(), notificationBuilder.build());
-                    }
-                }
-            }
-        }
     }
 
     private void startEnhancedTest() {

@@ -4,14 +4,12 @@
     package="com.ahmedsameha1.peninbin"
     android:installLocation="auto">
 
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.FORGROUND_SERVICE" />
 
@@ -118,7 +116,6 @@
     </compatible-screens>
 
     <application
-        android:name=".AnalyticsApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -128,7 +125,8 @@
         <activity
             android:name=".view.activities.FieldActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -174,6 +172,7 @@
             android:name=".view.activities.AddEntryActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
+            android:exported="true"
             android:windowSoftInputMode="stateAlwaysVisible">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -187,6 +186,7 @@
             android:name=".view.activities.CopyMoveEntriesActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
+            android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -248,6 +248,7 @@
         <activity
             android:name=".view.activities.SearchActivity"
             android:label="@string/app_name"
+            android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -260,6 +261,7 @@
         <activity
             android:name=".secondary_activities.ExportFileDirectlyActivity"
             android:label="@string/app_name"
+            android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -288,7 +290,9 @@
             android:name=".receivers_services.SimpleWakefulReceiver"
             android:enabled="true"
             android:exported="false" />
-        <receiver android:name=".receivers_services.BootCompletedReceiver">
+        <receiver android:name=".receivers_services.BootCompletedReceiver"
+            android:exported="true"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -318,9 +322,6 @@
             android:name=".secondary_activities.ImageActivity"
             android:noHistory="true" />
 
-        <service
-            android:name=".intent_services.CheckSubscriptionIntentService"
-            android:exported="false" />
         <service
             android:name=".intent_services.ImportTextFileIntentService"
             android:exported="false" />

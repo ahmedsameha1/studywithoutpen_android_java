@@ -1,28 +1,15 @@
 package com.ahmedsameha1.peninbin.utils;
 
-import android.Manifest;
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.AlarmManager;
-import android.app.Service;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
-import android.util.Patterns;
-
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
-import com.ahmedsameha1.peninbin.R;
-import com.android.vending.billing.IInAppBillingService;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -32,11 +19,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
 import java.util.Locale;
-import java.util.regex.Pattern;
-
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 /**
  * Created by me on 15/10/16.
@@ -170,112 +153,6 @@ public class Money {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(UNSOLVABLE_ERROR_GETPURCHASES, false);
     }
-
-    public static void checkSubscription(final Context context, final IInAppBillingService billingService) {
-        AnalyticsApplication application = (AnalyticsApplication) (((Service) context).getApplication());
-        final Tracker mTracker = application.getDefaultTracker();
-                if (context.getPackageManager().checkPermission(Manifest.permission.GET_ACCOUNTS, context.getPackageName()) == PERMISSION_GRANTED) {
-                    Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-                    Account[] accounts = AccountManager.get(context).getAccounts();
-                    for (Account account : accounts) {
-                        if (emailPattern.matcher(account.name).matches()) {
-                            String possibleEmail = account.name;
-                            if (possibleEmail.equalsIgnoreCase("ahmedmsameha1@gmail.com")) {
-                                putUserSubscriptionStatus(context, true);
-                                putMe(context, true);
-                                removeAllGetPurchasesErrors(context);
-                                return;
-                            }
-                        }
-                    }
-                }
-                putMe(context, false);
-                // allow the users in the initial time to use the app without subscription
-                if (isInInitialPeriod(context)) {
-                    mTracker.send(new HitBuilders.EventBuilder()
-                            .setCategory(MONEY)
-                            .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "in initial period")
-                            .build());
-                    putUserSubscriptionStatus(context, true);
-                    removeAllGetPurchasesErrors(context);
-                    return;
-                }
-                try {
-                    Bundle items_bundle = billingService.getPurchases(3, context.getPackageName(), SUBSCRIPTION_TYPE, null);
-                    int response_code = items_bundle.getInt(RESPONSE_CODE);
-                    if (response_code == BILLING_RESPONSE_RESULT_OK) {
-                        removeAllGetPurchasesErrors(context);
-                        if (!items_bundle.containsKey(RESPONSE_INAPP_ITEM_LIST)
-                                || !items_bundle.containsKey(RESPONSE_INAPP_PURCHASE_DATA_LIST)
-                                || !items_bundle.containsKey(RESPONSE_INAPP_SIGNATURE_LIST)) {
-                            putUserSubscriptionStatus(context, false);
-                            putUnsolvableErrorGetPurchases(context, true);  // consedered security error
-                        } else {
-                            ArrayList<String> owned_item_list = items_bundle.getStringArrayList(
-                                    RESPONSE_INAPP_ITEM_LIST);
-                            ArrayList<String> owned_item_data_list = items_bundle.getStringArrayList(
-                                    RESPONSE_INAPP_PURCHASE_DATA_LIST);
-                            ArrayList<String> owned_item_signature_list = items_bundle.getStringArrayList(
-                                    RESPONSE_INAPP_SIGNATURE_LIST);
-                            if (owned_item_data_list.size() > 0) {
-                                if (Security.verifyPurchase(get64(piece1 + piece2 + piece3 + piece4 + piece5 + piece6
-                                                + piece7 + piece8 + piece9 + piece10 + piece11, context.getResources().getIntArray(R.array.values))
-                                        , owned_item_data_list.get(0), owned_item_signature_list.get(0))) {
-                                    putUserSubscriptionStatus(context, true);
-                                    mTracker.send(new HitBuilders.EventBuilder()
-                                            .setCategory(MONEY)
-                                            .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "user currentrly subscribed")
-                                            .build());
-                                } else {
-                                    putUserSubscriptionStatus(context, false);
-                                    putUnsolvableErrorGetPurchases(context, true);   // security error
-                                    mTracker.send(new HitBuilders.EventBuilder()
-                                            .setCategory(MONEY)
-                                            .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "security error")
-                                            .build());
-                                }
-                            } else {
-                                putUserSubscriptionStatus(context, false);
-                            }
-                        }
-                    } else if (response_code == BILLING_RESPONSE_RESULT_USER_CANCELED ||
-                            response_code == BILLING_RESPONSE_RESULT_ITEM_UNAVAILABLE ||
-                            response_code == BILLING_RESPONSE_RESULT_DEVELOPER_ERROR ||
-                            response_code == BILLING_RESPONSE_RESULT_ERROR ||
-                            response_code == BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED ||
-                            response_code == BILLING_RESPONSE_RESULT_ITEM_NOT_OWNED) {
-                        allowUserDueAnError(context);
-                        putUserSubscriptionStatus(context, false);
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory(MONEY)
-                                .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "allow user due error")
-                                .build());
-                    } else if (response_code == BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE) {
-                        putNetworkDownGetPurchasesesStatus(context, true);
-                        putUserSubscriptionStatus(context, false);
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory(MONEY)
-                                .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "network error on money")
-                                .build());
-                    } else if (response_code == BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE) {
-                        putUnsolvableErrorGetPurchases(context, true);
-                        putUserSubscriptionStatus(context, false);
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory(MONEY)
-                                .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "billing unavailable error money")
-                                .build());
-                    }
-                } catch (RemoteException e) {
-                    putUserSubscriptionStatus(context, false);
-                    allowUserDueAnError(context);
-                    mTracker.send(new HitBuilders.EventBuilder()
-                            .setCategory(MONEY)
-                            .setAction((Money.getMe(context) ? TRACKING_ME : "") + ActivityUtility.getVersionCode(context) + "allow user due error")
-                            .build());
-                    e.printStackTrace();
-                }
-    }
-
 
     /**
      * Created by me on 19/10/16.

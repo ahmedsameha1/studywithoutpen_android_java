@@ -40,7 +40,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -61,8 +60,6 @@ import com.ahmedsameha1.peninbin.utils.DataHolder;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -144,7 +141,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
     private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuestions, check, nextHint, showActionbar, dont_know;
     private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
     private Handler mHandler = new Handler();
-    private Tracker mTracker;
     private Chronometer tool_bar_timer;
     private long lastPause;
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
@@ -351,8 +347,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         } catch (ActivityNotFoundException e) {
 
         }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -652,8 +646,6 @@ public class EnhancedTestActivity extends AppCompatActivity implements
         if (is_starting_after_destruction) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
         if (answers_regex == null) {
             LocalBroadcastManager.getInstance(this).registerReceiver(answer_regex_broadcast_reciever,
                     new IntentFilter(PrepareAnswerRegexIntentService.RESULT));

@@ -26,7 +26,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.view.activities.MainActivity;
 import com.ahmedsameha1.peninbin.adapters.SpinnerWithHintAdapter;
@@ -34,8 +33,6 @@ import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
 import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
 
@@ -54,7 +51,6 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
     private DatabaseReadOperations databaseOperations;
     private String locale_short_name;
     private CheckBox read_answer;
-    private Tracker mTracker;
     private int red = 255, green = 255, blue = 255, color = Color.WHITE;
     private Handler handler = new Handler() {
         @Override
@@ -68,8 +64,6 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
         tts_available = getArguments().getBoolean(FieldPropertiesDialogFragment.TTS_AVAILABLE);
         textToSpeech = new TextToSpeech(getActivity().getApplicationContext(), this);
         databaseOperations = new DatabaseReadOperations(getActivity());
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
         setRetainInstance(true);
     }
     @Override
@@ -191,10 +185,6 @@ public class CreateFieldDialogFragment extends DialogFragment implements TextToS
                                 ((Contact) CreateFieldDialogFragment.this.getActivity())
                                         .createField(fieldName, Contract.Field.STRING_DATA_TYPE,
                                                 check_type, read_answer.isChecked(), locale_short_name, color);
-                                mTracker.send(new HitBuilders.EventBuilder()
-                                        .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                        .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(CreateFieldDialogFragment.this.getActivity()) + "selecting locale")
-                                        .build());
                             } else {
                                 ((Contact) CreateFieldDialogFragment.this.getActivity())
                                         .createField(fieldName, Contract.Field.STRING_DATA_TYPE,

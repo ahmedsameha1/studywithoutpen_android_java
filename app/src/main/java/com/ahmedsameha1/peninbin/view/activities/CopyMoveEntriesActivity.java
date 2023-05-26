@@ -24,7 +24,6 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.CopyMoveEntriesActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
@@ -37,8 +36,6 @@ import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.util.HashSet;
 
@@ -72,7 +69,6 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
     private RelativeLayout content;
     private boolean is_load_entries = true;
     private StringBuilder search_string_highlight = new StringBuilder();
-    private Tracker mTracker;
 
 
     @Override
@@ -108,8 +104,6 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
         int spanCount = 1;
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         getLoaderManager();
     }
 
@@ -190,10 +184,6 @@ public class CopyMoveEntriesActivity extends AppCompatActivity implements
                 SortEntriesDialogFragment sortEntriesDialogFragment = new SortEntriesDialogFragment();
                 sortEntriesDialogFragment.setArguments(bundle);
                 sortEntriesDialogFragment.show(getSupportFragmentManager(), SORT_DIALOG);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(ANALYTICS_CATEGORY)
-                        .setAction((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + "sort")
-                        .build());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

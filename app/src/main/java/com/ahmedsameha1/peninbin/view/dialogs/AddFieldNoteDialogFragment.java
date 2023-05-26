@@ -12,13 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.view.activities.MainActivity;
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
-import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 /**
  * Created by ahmed on 7/21/2015.
@@ -26,13 +20,9 @@ import com.google.android.gms.analytics.Tracker;
 public class AddFieldNoteDialogFragment extends DialogFragment  {
     public static final String ADD_FIELD_NOTE_DIALOG_FRAGMENT = "add_field_note_dialog_fragment";
 
-    private Tracker mTracker;
-
     @Override
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
         setRetainInstance(true);
     }
     @Override
@@ -58,10 +48,6 @@ public class AddFieldNoteDialogFragment extends DialogFragment  {
                         String note = enter_note.getText().toString();
                         if (note.length() > 0) {
                             ((Contact) AddFieldNoteDialogFragment.this.getActivity()).addFieldNote(note);
-                            mTracker.send(new HitBuilders.EventBuilder()
-                                    .setCategory(MainActivity.ANALYTICS_CATEGORY)
-                                    .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(AddFieldNoteDialogFragment.this.getActivity()) + "add field note")
-                                    .build());
                             AddFieldNoteDialogFragment.this.dismiss();
                         } else {
                             Toast toast = Toast.makeText(AddFieldNoteDialogFragment.this.getActivity(), R.string.where_is_note, Toast.LENGTH_SHORT);

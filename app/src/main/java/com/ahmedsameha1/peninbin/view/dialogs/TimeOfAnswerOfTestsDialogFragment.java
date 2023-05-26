@@ -23,7 +23,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.view.activities.FullyRandomTestActivity;
@@ -33,8 +32,6 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 /**
  * Created by ahmed on 12/30/16.
@@ -53,7 +50,6 @@ public class TimeOfAnswerOfTestsDialogFragment extends DialogFragment {
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private int current_time_of_answer_do_what;
     private boolean time_of_answer_saved;
-    private Tracker mTracker;
     private int reading_question_letter_second, find_answer_time, typing_answer_letter_second;
 
     @Override
@@ -66,8 +62,6 @@ public class TimeOfAnswerOfTestsDialogFragment extends DialogFragment {
         current_time_of_answer_do_what = getArguments().getInt(CURRENT_TIME_OF_ANSWER_DO_WHAT);
         time_of_answer_saved = getArguments().getBoolean(TIME_OF_ANSWER_SAVED);
         cursorLoaderAndUpdateDatabase = new CursorLoaderAndUpdateDatabase(getActivity());
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
         Activity activity = getActivity();
         if (!(activity instanceof EnhancedTestActivity || activity instanceof FullyRandomTestActivity ||
                 activity instanceof QuickTestActivity || activity instanceof StudyAPeriodActivity)) {
@@ -267,10 +261,6 @@ public class TimeOfAnswerOfTestsDialogFragment extends DialogFragment {
                                         }
                                         ((ActivityUtility.ActivityTimers) TimeOfAnswerOfTestsDialogFragment.this.getActivity()).manageTimersDueDialogsShow(true);
                                         TimeOfAnswerOfTestsDialogFragment.this.dismiss();
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory("Utilities")
-                                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(TimeOfAnswerOfTestsDialogFragment.this.getActivity()) + "time of answer")
-                                                .build());
                                     }
                                 } else {
                                     Toast toast = Toast.makeText(TimeOfAnswerOfTestsDialogFragment.this.getActivity(), TimeOfAnswerOfTestsDialogFragment.this.getString(R.string.missing_data), Toast.LENGTH_SHORT);

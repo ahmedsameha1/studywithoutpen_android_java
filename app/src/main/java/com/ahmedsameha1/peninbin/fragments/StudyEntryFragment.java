@@ -24,18 +24,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.DataHolder;
 import com.ahmedsameha1.peninbin.view.activities.StudyActivity;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.CompareUtility;
-import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -71,7 +66,6 @@ StudyActivity.Contact {
     private int check_type;
     private View root_view;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
-    private Tracker mTracker;
     private TextView show_answer;
 
     public static StudyEntryFragment newInstance(String[][] entries, StringBuilder current_index, long current_field_id) {
@@ -137,10 +131,6 @@ StudyActivity.Contact {
         if ( savedInstanceState != null ) {
             correctAnswersCounter = savedInstanceState.getInt(CORRECT_ANSWERS_COUNTER);
         }
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
-        mTracker.setScreenName((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(getActivity()) + SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

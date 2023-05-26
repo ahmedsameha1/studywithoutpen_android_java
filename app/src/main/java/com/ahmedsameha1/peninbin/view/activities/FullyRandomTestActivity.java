@@ -39,7 +39,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -61,8 +60,6 @@ import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -131,7 +128,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
     private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuestions, check, nextHint, showActionbar, dont_know;
     private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
     private Handler mHandler = new Handler();
-    private Tracker mTracker;
     private boolean isEmulated, isStartingFirstTime, is_starting_after_destruction;
     private Chronometer tool_bar_timer;
     private long lastPause;
@@ -265,8 +261,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         } catch (ActivityNotFoundException e) {
 
         }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         loader = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -623,8 +617,6 @@ public class FullyRandomTestActivity extends FullyRandomTest implements
         if (is_starting_after_destruction) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
         if (answers_regex == null) {
             LocalBroadcastManager.getInstance(this).registerReceiver(answer_regex_broadcast_reciever,
                     new IntentFilter(PrepareAnswerRegexIntentService.RESULT));

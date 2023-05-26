@@ -3,15 +3,14 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 31
 
     defaultConfig {
         applicationId "com.ahmedsameha1.peninbin"
         minSdkVersion 19
-        targetSdkVersion 29
-        versionCode 107
-        versionName "3.61"
+        targetSdkVersion 31
+        versionCode 110
+        versionName "3.62"
         multiDexEnabled true
     }
 
@@ -45,7 +44,6 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
-    implementation 'com.google.android.gms:play-services-analytics:17.0.1'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.github.angads25:filepicker:1.0.6'
     implementation 'com.oguzdev:CircularFloatingActionMenu:1.0.2'

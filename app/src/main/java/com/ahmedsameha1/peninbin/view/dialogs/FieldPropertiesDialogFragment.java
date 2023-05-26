@@ -24,7 +24,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.view.activities.EmulateFieldActivity;
 import com.ahmedsameha1.peninbin.view.activities.FieldActivity;
@@ -38,8 +37,6 @@ import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
 import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
 
@@ -70,7 +67,6 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
     private Button positive_button;
     private int index_of_locale;
     private String field_name;
-    private Tracker mTracker;
     private boolean emulated;
     private int red = 255, green = 255, blue = 255, field_color, new_color = 0;
 
@@ -94,8 +90,6 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
         red = Color.red(field_color);
         green = Color.green(field_color);
         blue = Color.blue(field_color);
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
         emulated = databaseReadOperations.isEmulated(current_field_id) > Constants.NOT_EMULATED;
         setRetainInstance(true);
     }
@@ -285,10 +279,6 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                     Locale locale = localeList.get(selected_locale_position);
                                     locale_short_name = locale.getLanguage() + "," + locale.getCountry();
                                     cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, locale_short_name);
-                                    mTracker.send(new HitBuilders.EventBuilder()
-                                            .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                            .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(FieldPropertiesDialogFragment.this.getActivity()) + "selecting locale")
-                                            .build());
                                 } else {
                                     cursorLoaderAndUpdateDatabase.updateFieldLocale(current_field_id, null);
                                 }

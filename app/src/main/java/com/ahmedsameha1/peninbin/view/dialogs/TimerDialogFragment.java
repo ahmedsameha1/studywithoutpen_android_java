@@ -18,27 +18,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 /**
  * Created by ahmed on 7/21/2015.
  */
 public class TimerDialogFragment extends DialogFragment {
     public static final String MESSAGE = "message";
-    private Tracker mTracker;
     private String message;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
         message = getArguments().getString(MESSAGE);
-        mTracker = application.getDefaultTracker();
         setRetainInstance(true);
     }
 
@@ -97,10 +91,6 @@ public class TimerDialogFragment extends DialogFragment {
                                 TimerDialogFragment.this.startActivity(intent);
                                 ((ActivityUtility.ActivityTimers) TimerDialogFragment.this.getActivity()).manageTimersDueDialogsShow(true);
                                 TimerDialogFragment.this.dismiss();
-                                mTracker.send(new HitBuilders.EventBuilder()
-                                        .setCategory("Utilities")
-                                        .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(TimerDialogFragment.this.getActivity()) + "start timer")
-                                        .build());
                             } else {
                                 Toast toast = Toast.makeText(TimerDialogFragment.this.getActivity(), R.string.enter_number_of_minutes, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);

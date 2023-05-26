@@ -26,7 +26,6 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.view.activities.FieldActivity;
@@ -36,8 +35,6 @@ import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsRe
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.util.Calendar;
 
@@ -56,7 +53,6 @@ public class QuickTestDialogFragment extends DialogFragment {
     private int year, monthOfYear, dayOfMonth, hourOfDay, minute;
     private AlarmManager alarmManager;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
-    private Tracker mTracker;
     private String number_suffix;
 
     @Override
@@ -70,8 +66,6 @@ public class QuickTestDialogFragment extends DialogFragment {
         minute = getArguments().getInt(MINUTE);
         alarmManager = (AlarmManager) getActivity().getSystemService(AppCompatActivity.ALARM_SERVICE);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
         setRetainInstance(true);
     }
 
@@ -246,10 +240,6 @@ public class QuickTestDialogFragment extends DialogFragment {
                                         });
                                         snackbar.show();
                                         QuickTestDialogFragment.this.dismiss();
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(QuickTestDialogFragment.this.getActivity()) + "schedule a random quick test")
-                                                .build());
                                     } else {
                                         Toast toast = Toast.makeText(QuickTestDialogFragment.this.getActivity(), QuickTestDialogFragment.this.getString(R.string.percentage_between), Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.TOP, 0, 400);

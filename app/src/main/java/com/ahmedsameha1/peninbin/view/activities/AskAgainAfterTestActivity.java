@@ -38,7 +38,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.WrongItem;
 import com.ahmedsameha1.peninbin.database.Contract;
@@ -57,8 +56,6 @@ import com.ahmedsameha1.peninbin.view.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ShowTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.TimeOfAnswerOfStudyAPeriodDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.TimerDialogFragment;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -134,7 +131,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
     private boolean tts_available = false;
     private boolean locale_available = false;
     private int check_type;
-    private Tracker mTracker;
     private View mLoadingView;
     private RelativeLayout content;
     private Chronometer tool_bar_timer;
@@ -530,8 +526,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
         }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         showTries.setText(Integer.toString(triesCounter + 1));
         if (savedInstanceState == null) {
             content.setVisibility(View.GONE);
@@ -679,8 +673,6 @@ public class AskAgainAfterTestActivity extends AppCompatActivity implements
         if (is_starting_after_destruction) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + this.getLocalClassName());
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
 

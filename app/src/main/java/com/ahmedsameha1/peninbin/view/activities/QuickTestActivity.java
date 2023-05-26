@@ -36,7 +36,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -56,8 +55,6 @@ import com.ahmedsameha1.peninbin.view.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ObfuscateQuestionDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.ShowQuickTestResultDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.TimeOfAnswerOfTestsDialogFragment;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -124,7 +121,6 @@ public class QuickTestActivity extends FullyRandomTest implements
     private TextView showQuestion, remainingQuestionCounter, showTries, showNumberOfQuestions, check, nextHint, showActionbar, dont_know;
     private LinearLayout show_result_linearlayout, show_question_linearlayout, container;
     private Handler mHandler = new Handler();
-    private Tracker mTracker;
     private int question_data_type;
     private int check_type;
     private TextToSpeech tts;
@@ -261,8 +257,6 @@ public class QuickTestActivity extends FullyRandomTest implements
             } catch (ActivityNotFoundException e) {
 
             }
-            AnalyticsApplication application = (AnalyticsApplication) getApplication();
-            mTracker = application.getDefaultTracker();
             loader = new LoaderManager.LoaderCallbacks<Cursor>() {
 
                 @Override
@@ -598,8 +592,6 @@ public class QuickTestActivity extends FullyRandomTest implements
         if (is_starting_after_destruction) {
             is_starting_after_destruction = false;
         }
-        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
         if (answers_regex == null) {
             LocalBroadcastManager.getInstance(this).registerReceiver(answer_regex_broadcast_reciever,
                     new IntentFilter(PrepareAnswerRegexIntentService.RESULT));

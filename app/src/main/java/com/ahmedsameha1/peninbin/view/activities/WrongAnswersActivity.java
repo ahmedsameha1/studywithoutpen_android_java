@@ -23,7 +23,6 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
 import com.ahmedsameha1.peninbin.adapters.WrongAnswersActivityRecyclerViewAdapter;
@@ -38,8 +37,6 @@ import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
 
@@ -63,7 +60,6 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     private DatabaseReadOperations databaseOperations;
     private int test_type;
     private int question_data_type;
-    private Tracker mTracker;
     private int permited_tries_number;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private View mLoadingView;
@@ -134,8 +130,6 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
         } else {
             getLoaderManager().initLoader(GET_ENTRIES_LOADER_ID, null, this);
         }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
     }
 
     private ArrayList<WrongItem> getWrongItems() {
@@ -164,8 +158,6 @@ public class WrongAnswersActivity extends AppCompatActivity implements LoaderMan
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override

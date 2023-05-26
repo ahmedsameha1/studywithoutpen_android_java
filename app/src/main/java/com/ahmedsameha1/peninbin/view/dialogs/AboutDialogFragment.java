@@ -14,25 +14,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.secondary_activities.IntroActivity;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
-import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 public class AboutDialogFragment extends DialogFragment {
     public static final String ANALYTICS_CATEGORY = "Main Activity Category";
 
 
 
-    private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
     }
 
     @Override
@@ -73,10 +66,6 @@ public class AboutDialogFragment extends DialogFragment {
                     public void onClick(View view) {
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/Study-Without-Pen-App-1503679869949785/"));
                         AboutDialogFragment.this.startActivity(browserIntent);
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory(ANALYTICS_CATEGORY)
-                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(AboutDialogFragment.this.getActivity()) + "open facebook page")
-                                .build());
                         AboutDialogFragment.this.dismiss();
                     }
                 });

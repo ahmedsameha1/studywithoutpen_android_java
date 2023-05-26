@@ -5,9 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -24,13 +21,16 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+
 import com.ahmedsameha1.peninbin.R;
-import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.database.DatabaseReadOperations;
 import com.ahmedsameha1.peninbin.secondary_activities.ShowNotificationDialogsActivity;
 import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.utils.Money;
+import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
 
 /**
  * Created by ahmed on 2/8/2016.
@@ -268,93 +268,87 @@ public class EnhancedTestDialogFragment extends DialogFragment {
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (Money.getUserSubscriptionStatus(EnhancedTestDialogFragment.this.getActivity()) || Money.getUserAllowedDueAnError(EnhancedTestDialogFragment.this.getActivity()) ) {
-                            try {
-                                String trys_suffix = " " + EnhancedTestDialogFragment.this.getActivity().getString(R.string._try);
-                                String try_string = enterTries.getText().toString();
-                                String number_string = enterNumber.getText().toString();
-                                int trys;
-                                if (try_string.length() > 0) {
-                                    trys = Integer.parseInt(try_string.substring(0, try_string.length() - trys_suffix.length()));
-                                } else {
-                                    trys = 1;
-                                }
-                                if (number_string.length() > 0) {
-                                    Double number = Double.parseDouble(number_string.substring(0, number_string.length() - number_suffix.length()));
-                                    if (number_or_percentage.getSelectedItemPosition() == 1) {
-                                        if (number <= 100 && number > 0) {
-                                            Intent intent = new Intent(EnhancedTestDialogFragment.this.getActivity(), EnhancedTestActivity.class);
-                                            intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
-                                            intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, number);
-                                            intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                                            intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE, false);
-                                            if (control_test_entries.isChecked()) {
-                                                intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
-                                                intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
-                                                intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
-                                            }
-                                            EnhancedTestDialogFragment.this.startActivity(intent);
-                                            if (from_notification) {
-                                                EnhancedTestDialogFragment.this.getActivity().finish();
-                                            }
-                                            EnhancedTestDialogFragment.this.dismiss();
-                                        } else {
-                                            Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(), EnhancedTestDialogFragment.this.getString(R.string.percentage_between), Toast.LENGTH_LONG);
-                                            toast.setGravity(Gravity.TOP, 0, 400);
-                                            toast.show();
-                                        }
-                                    } else {
-                                        DatabaseReadOperations databaseOperations = new DatabaseReadOperations(EnhancedTestDialogFragment.this.getActivity());
-                                        int currentNumberOfEntries =
-                                                databaseOperations.getEntriesNumberForTests(current_field_id, databaseOperations.getQuestionDataType(current_field_id));
-                                        int numberInt = Double.valueOf(number).intValue();
-                                        if (numberInt > 0 && numberInt <= currentNumberOfEntries) {
-                                            Intent intent = new Intent(EnhancedTestDialogFragment.this.getActivity(), EnhancedTestActivity.class);
-                                            intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
-                                            intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, numberInt);
-                                            intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
-                                            intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
-                                            intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE, false);
-                                            if (control_test_entries.isChecked()) {
-                                                intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
-                                                intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
-                                                intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
-                                            }
-                                            EnhancedTestDialogFragment.this.startActivity(intent);
-                                            if (from_notification) {
-                                                EnhancedTestDialogFragment.this.getActivity().finish();
-                                            }
-                                            EnhancedTestDialogFragment.this.dismiss();
-                                        } else {
-                                            Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(),
-                                                    EnhancedTestDialogFragment.this.getString(R.string.number_of_questions_smaller_than, currentNumberOfEntries), Toast.LENGTH_LONG);
-                                            toast.setGravity(Gravity.TOP, 0, 400);
-                                            toast.show();
-                                        }
-                                    }
-                                } else {
-                                    if (number_or_percentage.getSelectedItemPosition() == 1) {
-                                        Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(), R.string.please_enter_percentage, Toast.LENGTH_SHORT);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    } else {
-                                        Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(), R.string.please_enter_number_of_question, Toast.LENGTH_SHORT);
-                                        toast.setGravity(Gravity.TOP, 0, 400);
-                                        toast.show();
-                                    }
-                                }
-                            } catch (NumberFormatException e) {
-                                Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
-                            } catch (Resources.NotFoundException e) {
-                                e.printStackTrace();
+                        try {
+                            String trys_suffix = " " + EnhancedTestDialogFragment.this.getActivity().getString(R.string._try);
+                            String try_string = enterTries.getText().toString();
+                            String number_string = enterNumber.getText().toString();
+                            int trys;
+                            if (try_string.length() > 0) {
+                                trys = Integer.parseInt(try_string.substring(0, try_string.length() - trys_suffix.length()));
+                            } else {
+                                trys = 1;
                             }
-                        } else {
-                            Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(), R.string.please_subscribe, Toast.LENGTH_SHORT);
+                            if (number_string.length() > 0) {
+                                Double number = Double.parseDouble(number_string.substring(0, number_string.length() - number_suffix.length()));
+                                if (number_or_percentage.getSelectedItemPosition() == 1) {
+                                    if (number <= 100 && number > 0) {
+                                        Intent intent = new Intent(EnhancedTestDialogFragment.this.getActivity(), EnhancedTestActivity.class);
+                                        intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.PERCENTAGE);
+                                        intent.putExtra(EnhancedTestActivity.QUESTION_PERCENTAGE, number);
+                                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
+                                        intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                                        intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE, false);
+                                        if (control_test_entries.isChecked()) {
+                                            intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
+                                            intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
+                                            intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
+                                        }
+                                        EnhancedTestDialogFragment.this.startActivity(intent);
+                                        if (from_notification) {
+                                            EnhancedTestDialogFragment.this.getActivity().finish();
+                                        }
+                                        EnhancedTestDialogFragment.this.dismiss();
+                                    } else {
+                                        Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(), EnhancedTestDialogFragment.this.getString(R.string.percentage_between), Toast.LENGTH_LONG);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                    }
+                                } else {
+                                    DatabaseReadOperations databaseOperations = new DatabaseReadOperations(EnhancedTestDialogFragment.this.getActivity());
+                                    int currentNumberOfEntries =
+                                            databaseOperations.getEntriesNumberForTests(current_field_id, databaseOperations.getQuestionDataType(current_field_id));
+                                    int numberInt = Double.valueOf(number).intValue();
+                                    if (numberInt > 0 && numberInt <= currentNumberOfEntries) {
+                                        Intent intent = new Intent(EnhancedTestDialogFragment.this.getActivity(), EnhancedTestActivity.class);
+                                        intent.putExtra(EnhancedTestActivity.PERCENTAGE_OR_NUMBER, EnhancedTestActivity.NUMBER);
+                                        intent.putExtra(EnhancedTestActivity.QUESTION_NUMBER, numberInt);
+                                        intent.putExtra(EnhancedTestActivity.PERMITED_TRIES_NUMBER, trys);
+                                        intent.putExtra(Constants.CURRENT_FIELD_ID, current_field_id);
+                                        intent.putExtra(EnhancedTestActivity.LAST_SESSION_OR_NEW_ONE, false);
+                                        if (control_test_entries.isChecked()) {
+                                            intent.putExtra(EnhancedTestActivity.CONTROLLED_PORTION, controlled_portion.getSelectedItemPosition());
+                                            intent.putExtra(EnhancedTestActivity.RANK_LEVEL, rank.getSelectedItemPosition());
+                                            intent.putExtra(EnhancedTestActivity.WRONGNESS_LEVEL, wrongness.getSelectedItemPosition());
+                                        }
+                                        EnhancedTestDialogFragment.this.startActivity(intent);
+                                        if (from_notification) {
+                                            EnhancedTestDialogFragment.this.getActivity().finish();
+                                        }
+                                        EnhancedTestDialogFragment.this.dismiss();
+                                    } else {
+                                        Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(),
+                                                EnhancedTestDialogFragment.this.getString(R.string.number_of_questions_smaller_than, currentNumberOfEntries), Toast.LENGTH_LONG);
+                                        toast.setGravity(Gravity.TOP, 0, 400);
+                                        toast.show();
+                                    }
+                                }
+                            } else {
+                                if (number_or_percentage.getSelectedItemPosition() == 1) {
+                                    Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(), R.string.please_enter_percentage, Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                } else {
+                                    Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(), R.string.please_enter_number_of_question, Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.TOP, 0, 400);
+                                    toast.show();
+                                }
+                            }
+                        } catch (NumberFormatException e) {
+                            Toast toast = Toast.makeText(EnhancedTestDialogFragment.this.getActivity(), R.string.not_allowed_number, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP, 0, 400);
                             toast.show();
+                        } catch (Resources.NotFoundException e) {
+                            e.printStackTrace();
                         }
                     }
                 });

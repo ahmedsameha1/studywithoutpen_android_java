@@ -23,7 +23,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.adapters.FieldActivityRecyclerViewAdapter;
 import com.ahmedsameha1.peninbin.adapters.LinearSpacingItemDecoration;
@@ -37,8 +36,6 @@ import com.ahmedsameha1.peninbin.utils.Emulation;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -73,7 +70,6 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private long current_field_id;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
     private SortOptions sortOption;
-    private Tracker mTracker;
     private StringBuilder search_string_highlight = new StringBuilder();
     private int question_data_type;
     private SearchView searchView;
@@ -128,8 +124,6 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         int spacing = 14;
         recyclerView.addItemDecoration(new LinearSpacingItemDecoration(spanCount, spacing, true));
         getLoaderManager();
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
     }
 
     public void onNewIntent(Intent intent) {
@@ -142,8 +136,6 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     protected void onResume() {
         super.onResume();
         handleIntent(getIntent());
-        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override

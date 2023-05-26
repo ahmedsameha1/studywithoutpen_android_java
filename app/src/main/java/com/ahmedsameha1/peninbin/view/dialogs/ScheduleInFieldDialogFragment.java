@@ -22,16 +22,11 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.view.activities.FieldActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.receivers_services.ShowScheduledNotificationsReceiver;
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.util.Calendar;
 /**
@@ -51,7 +46,6 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
     private long current_field_id;
     private AlarmManager alarmManager;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
-    private Tracker mTracker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,8 +53,6 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
         current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         alarmManager = (AlarmManager) getActivity().getSystemService(AppCompatActivity.ALARM_SERVICE);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
     }
     @NonNull
     @Override
@@ -102,10 +94,6 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         quickTestDialogFragment.setArguments(bundle);
                                         quickTestDialogFragment.show(ScheduleInFieldDialogFragment.this.getActivity().getSupportFragmentManager(), QuickTestDialogFragment.QUICK_TEST_DIALOG);
                                         ScheduleInFieldDialogFragment.this.dismiss();
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule a quick test")
-                                                .build());
                     /*Log.i("time Picker",hourOfDay +" " + minute);
                     calendar_picked_date_time.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
                     Intent intent = new Intent(getActivity(), ShowScheduledNotificationsReceiver.class);
@@ -163,10 +151,6 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         });
                                         snackbar.show();
                                         ScheduleInFieldDialogFragment.this.dismiss();
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule an enhanced test")
-                                                .build());
                                     }
                                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
                             }
@@ -206,10 +190,6 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         });
                                         snackbar.show();
                                         ScheduleInFieldDialogFragment.this.dismiss();
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule a fully random test")
-                                                .build());
                                     }
                                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
                             }
@@ -249,10 +229,6 @@ public class ScheduleInFieldDialogFragment extends DialogFragment {
                                         });
                                         snackbar.show();
                                         ScheduleInFieldDialogFragment.this.dismiss();
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory(FieldActivity.ANALYTICS_CATEGORY)
-                                                .setAction((Money.getMe(context) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(ScheduleInFieldDialogFragment.this.getActivity()) + "schedule a study a period")
-                                                .build());
                                     }
                                 }, calendar_picked_date_time.get(Calendar.HOUR_OF_DAY), calendar_picked_date_time.get(Calendar.MINUTE), false).show();
                             }

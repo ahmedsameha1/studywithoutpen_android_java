@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.view.activities.FullyRandomTestActivity;
@@ -25,8 +24,6 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 /**
  * Created by ahmed on 2/8/2016.
  */
@@ -40,15 +37,12 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
     private int textSize;
     private long current_field_id;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
-    private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         current_field_id = getArguments().getLong(Constants.CURRENT_FIELD_ID);
         textSize = (int) getArguments().getFloat(StudyAPeriodActivity.TEXT_SIZE);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
         Activity activity = getActivity();
         if ( !(activity instanceof EnhancedTestActivity || activity instanceof FullyRandomTestActivity ||
                 activity instanceof QuickTestActivity || activity instanceof StudyAPeriodActivity) ) {
@@ -100,10 +94,6 @@ public class ChangeTextSizeDialogFragment extends DialogFragment {
                         }
                         ((ActivityUtility.ActivityTimers) ChangeTextSizeDialogFragment.this.getActivity()).manageTimersDueDialogsShow(true);
                         ChangeTextSizeDialogFragment.this.dismiss();
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory("Utilities")
-                                .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(ChangeTextSizeDialogFragment.this.getActivity()) + "change text size")
-                                .build());
                     }
                 });
                 text_size_help.setOnClickListener(new View.OnClickListener() {

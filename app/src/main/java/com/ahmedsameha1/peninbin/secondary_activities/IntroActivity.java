@@ -9,21 +9,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import android.view.View;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.fragments.AppIntroSampleSlide;
-import com.ahmedsameha1.peninbin.utils.ActivityUtility;
-import com.ahmedsameha1.peninbin.utils.Money;
 import com.github.paolorotolo.appintro.AppIntro;
 import com.github.paolorotolo.appintro.AppIntroFragment;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 public class IntroActivity extends AppIntro {
 
     public static final String IMAGE_RESOURCE_ID = "image_resorce_id";
     private static final String INTRO_KEY = "intro";
-    private Tracker mTracker;
     private long time;
 
 
@@ -42,8 +36,6 @@ public class IntroActivity extends AppIntro {
         addSlide(AppIntroSampleSlide.newInstance(R.layout.intro_emulation));
         showSkipButton(false);
         time = System.currentTimeMillis();
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
     }
 
     @Override
@@ -102,10 +94,6 @@ public class IntroActivity extends AppIntro {
     @Override
     public void onSlideChanged(@Nullable Fragment oldFragment, @Nullable Fragment newFragment) {
         super.onSlideChanged(oldFragment, newFragment);
-        mTracker.send(new HitBuilders.EventBuilder()
-                .setCategory("Intro")
-                .setAction((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) + String.valueOf((System.currentTimeMillis() - time) / 1000))
-                .build());
         time = System.currentTimeMillis();
     }
 

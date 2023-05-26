@@ -24,7 +24,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.database.Contract;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
@@ -37,8 +36,6 @@ import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 /**
  * Created by Ahmed on 3/25/16.
@@ -71,7 +68,6 @@ public class EditEntryActivity extends AppCompatActivity implements
     private long entry_id;
     private int question_data_type, rank;
     private CursorLoaderAndUpdateDatabase cursorLoaderAndUpdateDatabase;
-    private Tracker mTracker;
     private Chronometer timer;
     private long lastPause;
     private int order;
@@ -133,8 +129,6 @@ public class EditEntryActivity extends AppCompatActivity implements
         } else if (test_text_size == ChangeTextSizeDialogFragment.SAVE_LARGE_SIZE) {
             changeTextSize(ChangeTextSizeDialogFragment.LARGE_SIZE);
         }
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
         showActionbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -347,8 +341,6 @@ public class EditEntryActivity extends AppCompatActivity implements
         super.onResume();
         timer.setBase( SystemClock.elapsedRealtime() - lastPause);
         timer.start();
-        mTracker.setScreenName((Money.getMe(this) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(this) +SCREEN_NAME);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override

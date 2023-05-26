@@ -20,7 +20,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.ahmedsameha1.peninbin.AnalyticsApplication;
 import com.ahmedsameha1.peninbin.R;
 import com.ahmedsameha1.peninbin.view.activities.EnhancedTestActivity;
 import com.ahmedsameha1.peninbin.view.activities.FullyRandomTestActivity;
@@ -30,8 +29,6 @@ import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Money;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 /**
  * Created by ahmed on 2/7/2016.
  */
@@ -40,7 +37,6 @@ public class ChangeAreasDialogFragment extends DialogFragment{
     private float initialQuestionArea,initialAnsweArea;
     private CursorLoaderAndUpdateDatabase mySQLiteCursorLoader;
     private long current_field_id;
-    private Tracker mTracker;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,8 +44,6 @@ public class ChangeAreasDialogFragment extends DialogFragment{
         initialQuestionArea = getArguments().getFloat(StudyAPeriodActivity.QUESTION_LAYOUT);
         initialAnsweArea = getArguments().getFloat(StudyAPeriodActivity.ANSWER_LAYOUT);
         mySQLiteCursorLoader = new CursorLoaderAndUpdateDatabase(getActivity());
-        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
-        mTracker = application.getDefaultTracker();
         Activity activity = getActivity();
         if ( !(activity instanceof EnhancedTestActivity || activity instanceof FullyRandomTestActivity ||
                 activity instanceof QuickTestActivity || activity instanceof StudyAPeriodActivity) ) {
@@ -86,10 +80,6 @@ public class ChangeAreasDialogFragment extends DialogFragment{
                                 mySQLiteCursorLoader.updateFieldAreasSize(current_field_id, questionArea, answerArea);
                                 ((ActivityUtility.ActivityTimers) ChangeAreasDialogFragment.this.getActivity()).manageTimersDueDialogsShow(true);
                                 ChangeAreasDialogFragment.this.dismiss();
-                                mTracker.send(new HitBuilders.EventBuilder()
-                                        .setCategory("Utilities")
-                                        .setAction((Money.getMe(getActivity()) ? Money.TRACKING_ME : "") + ActivityUtility.getVersionCode(ChangeAreasDialogFragment.this.getActivity()) + "change areas size")
-                                        .build());
                             } else {
                                 Toast toast = Toast.makeText(ChangeAreasDialogFragment.this.getActivity(), R.string.enter_question_area_answer_area, Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.TOP, 0, 400);
