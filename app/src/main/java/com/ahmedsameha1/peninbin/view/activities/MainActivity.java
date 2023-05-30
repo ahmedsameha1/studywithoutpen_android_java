@@ -68,7 +68,6 @@ import com.ahmedsameha1.peninbin.secondary_activities.SpeciallyFormattedTextFile
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
-import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.ShowEula;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 import com.ahmedsameha1.peninbin.view.dialogs.AboutDialogFragment;
@@ -358,52 +357,6 @@ public class MainActivity extends AppCompatActivity implements
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 tts_available = true;
             }
-        } else if (requestCode == BUY_FLOW_REQUEST_CODE) {
-            int response_code = data.getIntExtra(Money.RESPONSE_CODE, 0);
-            String purchaseData = data.getStringExtra(Money.RESPONSE_INAPP_PURCHASE_DATA);
-            String dataSignature = data.getStringExtra(Money.RESPONSE_INAPP_SIGNATURE);
-            if (resultCode == RESULT_OK && response_code == Money.BILLING_RESPONSE_RESULT_OK) {
-                if (purchaseData != null && dataSignature != null) {
-                    try {
-                        if (Money.Security.verifyPurchase(Money.get64(Money.piece1 + Money.piece2 + Money.piece3 + Money.piece4 + Money.piece5 + Money.piece6
-                                        + Money.piece7 + Money.piece8 + Money.piece9 + Money.piece10 + Money.piece11, getResources().getIntArray(R.array.values))
-                                , purchaseData, dataSignature)) {
-                            JSONObject jo = new JSONObject(purchaseData);
-                            String pay_load = jo.getString("developerPayload");
-                            String order_id = jo.getString("orderId");
-                            if (pay_load.equals(this.pay_load) && new DatabaseReadOperations(this).isOrderIdUnique(order_id)) {
-                                Money.putUserSubscriptionStatus(this, true);
-                                Money.removeAllGetPurchasesErrors(this);
-                                new CursorLoaderAndUpdateDatabase(this).addOrderId(order_id);
-                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_success), Toast.LENGTH_LONG);
-                                toast1.setGravity(Gravity.TOP, 0, 400);
-                                toast1.show();
-                            } else {
-                                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
-                                toast1.setGravity(Gravity.TOP, 0, 400);
-                                toast1.show();
-                            }
-                        } else {
-                            Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
-                            toast1.setGravity(Gravity.TOP, 0, 400);
-                            toast1.show();
-                        }
-                    } catch (JSONException e) {
-                        Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
-                        toast1.setGravity(Gravity.TOP, 0, 400);
-                        toast1.show();
-                        e.printStackTrace();
-                    }
-                } else {
-                    Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
-                    toast1.setGravity(Gravity.TOP, 0, 400);
-                    toast1.show();
-                }
-            } else {
-                Toast toast1 = Toast.makeText(MainActivity.this, getString(R.string.purchase_error), Toast.LENGTH_LONG);
-                toast1.setGravity(Gravity.TOP, 0, 400);
-                toast1.show();
-            }
         }
     }
 
@@ -527,8 +480,6 @@ public class MainActivity extends AppCompatActivity implements
                     toast.setGravity(Gravity.TOP, 0, 400);
                     toast.show();
                 }
-                break;
-            case SUBSCRIBE:
                 break;
             case ABOUT:
                 AboutDialogFragment aboutDialogFragment = new AboutDialogFragment();

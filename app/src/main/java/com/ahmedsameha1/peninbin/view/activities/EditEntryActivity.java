@@ -33,7 +33,6 @@ import com.ahmedsameha1.peninbin.view.dialogs.ChangeTextSizeDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.DeleteEntryDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.OnSwipeTouchListener;
 import com.ahmedsameha1.peninbin.utils.UsageLastTime;
 

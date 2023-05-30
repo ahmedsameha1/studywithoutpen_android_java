@@ -4,7 +4,6 @@
         <item>Export Fields</item>
         <item>Import Fields</item>
         <item>Import Provided Field</item>
-        <item>Subscribe</item>
         <item>About</item>
     </string-array>
     <string-array name="field_activity_features">

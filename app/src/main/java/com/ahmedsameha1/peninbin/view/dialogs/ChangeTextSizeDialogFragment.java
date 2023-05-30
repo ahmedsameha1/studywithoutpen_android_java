@@ -23,7 +23,6 @@ import com.ahmedsameha1.peninbin.view.activities.StudyAPeriodActivity;
 import com.ahmedsameha1.peninbin.database.CursorLoaderAndUpdateDatabase;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.utils.Money;
 /**
  * Created by ahmed on 2/8/2016.
  */

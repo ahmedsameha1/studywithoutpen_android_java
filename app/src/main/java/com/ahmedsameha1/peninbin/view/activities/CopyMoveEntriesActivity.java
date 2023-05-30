@@ -34,7 +34,6 @@ import com.ahmedsameha1.peninbin.view.dialogs.CopyFieldDialogFragment;
 import com.ahmedsameha1.peninbin.view.dialogs.SortEntriesDialogFragment;
 import com.ahmedsameha1.peninbin.utils.ActivityUtility;
 import com.ahmedsameha1.peninbin.utils.Constants;
-import com.ahmedsameha1.peninbin.utils.Money;
 import com.ahmedsameha1.peninbin.utils.SortOptions;
 
 import java.util.HashSet;
