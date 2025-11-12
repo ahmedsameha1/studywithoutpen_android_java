@@ -5,11 +5,11 @@ apply plugin: 'kotlin-android'
 android {
     defaultConfig {
         applicationId "com.ahmedsameha1.peninbin"
-        compileSdk 34
-        minSdkVersion 19
-        targetSdkVersion 34
-        versionCode 112
-        versionName "3.63"
+        compileSdk = 36
+        minSdkVersion 21
+        targetSdkVersion 36
+        versionCode 114
+        versionName "3.64"
         multiDexEnabled true
     }
 
@@ -51,10 +51,15 @@ dependencies {
     implementation 'com.github.angads25:filepicker:1.0.6'
     implementation 'com.oguzdev:CircularFloatingActionMenu:1.0.2'
     implementation 'xyz.danoz:recyclerviewfastscroller:0.1.3'
-    implementation 'com.pes.materialcolorpicker:library:1.2.0'
-    implementation 'com.google.android:flexbox:0.3.0'
+    implementation 'com.cameron.materialcolorpicker:materialcolorpicker:2.0.0'
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
     implementation 'com.github.AppIntro:AppIntro:5.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation "com.anggrayudi:storage:0.13.0"
 
+}
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }

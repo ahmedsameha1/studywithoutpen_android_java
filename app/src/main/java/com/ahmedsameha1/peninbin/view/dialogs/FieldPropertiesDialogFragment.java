@@ -35,8 +35,8 @@ import com.ahmedsameha1.peninbin.database.ExportImportDatabase;
 import com.ahmedsameha1.peninbin.database.ImportTextFile;
 import com.ahmedsameha1.peninbin.utils.Constants;
 import com.ahmedsameha1.peninbin.utils.Emulation;
-import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
-import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
+import com.cameron.materialcolorpicker.ColorPicker;
+import com.cameron.materialcolorpicker.ColorPickerCallback;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -163,7 +163,7 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                         final ColorPicker colorPicker = new ColorPicker(getActivity(), red, green, blue);
                         colorPicker.setCallback(new ColorPickerCallback() {
                             @Override
-                            public void onColorChosen(@ColorInt int color) {
+                            public void onColorChosen(@ColorInt int color, String hex, String hexNoAlpha) {
                                 Log.d("color", Integer.toString(color));
                                 Log.d("Red", Integer.toString(Color.red(color)));
                                 Log.d("Green", Integer.toString(Color.green(color)));
@@ -175,6 +175,11 @@ public class FieldPropertiesDialogFragment extends DialogFragment {
                                 pick_color.setBackgroundColor(color);
                                 Log.d("Pure Hex", Integer.toHexString(color));
                                 colorPicker.dismiss();
+                            }
+
+                            @Override
+                            public void onColorChanged(int i, String s, String s1) {
+
                             }
                         });
                         colorPicker.show();

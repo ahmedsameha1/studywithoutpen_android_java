@@ -31,7 +31,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/text_bordered_transperant"
                 android:ellipsize="none"
-                android:enabled="false"
+                android:enabled="true"
                 android:gravity="center"
                 android:hint="@string/question"
                 android:maxLines="1000"

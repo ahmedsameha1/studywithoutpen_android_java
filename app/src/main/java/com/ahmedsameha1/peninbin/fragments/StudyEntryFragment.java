@@ -314,6 +314,7 @@ StudyActivity.Contact {
             }
         });
         show_question.setMovementMethod(new ScrollingMovementMethod());
+        show_answer.setMovementMethod(new ScrollingMovementMethod());
         currentQuestion = entries[Integer.parseInt(current_index.toString())][0];
         currentAnswer = entries[Integer.parseInt(current_index.toString())][1];
         show_question.setText(currentQuestion);
