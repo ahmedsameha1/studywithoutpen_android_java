@@ -103,8 +103,7 @@ public class MainActivity extends AppCompatActivity implements
         DeleteFieldDialogFragment.Contact,
         CreateFieldDialogFragment.Contact,
         ExportFieldsDialogFragment.Contact,
-        ImportFromWhatDialogFragment.Contact
-        {
+        ImportFromWhatDialogFragment.Contact {
     public static final String MID_NIGHT_SERVICE_PENDINGINTENT_REQUEST = "mid_night_service_pendingintent_request";
     public static final String SCREEN_NAME = "MainActivity";
     private static final String RUN_FIRST_TIME = "run_first_time";
@@ -318,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements
             int request = (int) System.currentTimeMillis();
             intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             PendingIntent pintent = PendingIntent.getBroadcast(this, request, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_MUTABLE);
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
             AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
             Log.i("time of service", calendar.getTimeInMillis() + "");
@@ -410,42 +409,19 @@ public class MainActivity extends AppCompatActivity implements
         switch (position) {
             case EXPORT_FIELD:
                 if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                                == PackageManager.PERMISSION_GRANTED) {
-                            if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
-                                    && !Emulation.isAnyThreadRunning()) {
-                                new AlertDialog.Builder(this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
-                                        exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
-                                    }
-                                }).create().show();
-                            } else {
-                                Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP, 0, 400);
-                                toast.show();
+                    if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                            && !Emulation.isAnyThreadRunning()) {
+                        new AlertDialog.Builder(this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
+                                exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
                             }
-                        } else {
-                            ActivityCompat.requestPermissions(this,
-                                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION);
-                        }
+                        }).create().show();
                     } else {
-                        if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
-                                && !Emulation.isAnyThreadRunning()) {
-                            new AlertDialog.Builder(this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    ExportFieldsDialogFragment exportFieldsDialogFragment = new ExportFieldsDialogFragment();
-                                    exportFieldsDialogFragment.show(getSupportFragmentManager(), ExportFieldsDialogFragment.EXPORT_FIELD_DIALOG_FRAGMENT);
-                                }
-                            }).create().show();
-                        } else {
-                            Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
-                        }
+                        Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                     }
                 } else {
                     Toast toast = Toast.makeText(this, R.string.external_storage_not_ready, Toast.LENGTH_SHORT);
@@ -804,7 +780,7 @@ public class MainActivity extends AppCompatActivity implements
                 toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
-        } else if (requestCode == REQUEST_READ_EXTERNAL_STORAGE_PERMISSION){
+        } else if (requestCode == REQUEST_READ_EXTERNAL_STORAGE_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
                         && !Emulation.isAnyThreadRunning()) {
