@@ -118,8 +118,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int EXPORT_FIELD = 0;
     private static final int IMPORT_FIELD = 1;
     public static final int IMPORT_PROVIDED_FIELD = 2;
-    private static final int SUBSCRIBE = 3;
-    public static final int ABOUT = 4;
+    public static final int ABOUT = 3;
     private static final int MY_DATA_CHECK_CODE = 1234;
     private static final String TO_EXPORT_FIELDS = "to_export_fields";
     private static final String TO_EXPORT_FILE_NAME = "to_export_file_name";
@@ -430,27 +429,20 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 break;
             case IMPORT_FIELD:
-                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY) ||
-                        Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
-                                && !Emulation.isAnyThreadRunning()) {
-                            new AlertDialog.Builder(MainActivity.this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    ImportFromWhatDialogFragment importFromWhatDialogFragment = new ImportFromWhatDialogFragment();
-                                    importFromWhatDialogFragment.show(getSupportFragmentManager(), importFromWhatDialogFragment.IMPORT_FROM_WHAT_DIALOG_FRAGMENT);
-                                }
-                            }).create().show();
-                        } else {
-                            Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.TOP, 0, 400);
-                            toast.show();
-                        }
+                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                    if (!ExportImportDatabase.isAnyThreadRunning() && !ImportTextFile.isThreadRunning()
+                            && !Emulation.isAnyThreadRunning()) {
+                        new AlertDialog.Builder(MainActivity.this).setMessage(R.string.intellectual_property).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ImportFromWhatDialogFragment importFromWhatDialogFragment = new ImportFromWhatDialogFragment();
+                                importFromWhatDialogFragment.show(getSupportFragmentManager(), importFromWhatDialogFragment.IMPORT_FROM_WHAT_DIALOG_FRAGMENT);
+                            }
+                        }).create().show();
                     } else {
-                        ActivityCompat.requestPermissions(this,
-                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_PERMISSION);
+                        Toast toast = Toast.makeText(this, R.string.wait_until_current_export_import_emulation_finish, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 400);
+                        toast.show();
                     }
                 } else {
                     Toast toast = Toast.makeText(this, R.string.external_storage_not_ready, Toast.LENGTH_SHORT);
