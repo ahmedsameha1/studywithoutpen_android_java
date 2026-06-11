@@ -8,8 +8,8 @@ android {
         compileSdk = 36
         minSdkVersion 30
         targetSdkVersion 36
-        versionCode 116
-        versionName "3.66"
+        versionCode 118
+        versionName "3.67"
         multiDexEnabled true
     }
 
