@@ -8,11 +8,19 @@ android {
         compileSdk = 36
         minSdkVersion 30
         targetSdkVersion 36
-        versionCode 118
-        versionName "3.67"
+        versionCode 127
+        versionName "3.69"
         multiDexEnabled true
     }
 
+    signingConfigs {
+        create("customDebug") {
+            storeFile = file("/home/ahmed/Documents/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
 
     buildTypes {
         release {
@@ -20,7 +28,9 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        debug {
+
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("customDebug")
             shrinkResources false
             minifyEnabled false
         }
@@ -32,7 +42,6 @@ android {
     buildFeatures {
         aidl true
     }
-
 }
 
 repositories {
